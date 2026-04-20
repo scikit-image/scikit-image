@@ -6,7 +6,7 @@ from _skimage2.morphology._footprints import _default_footprint
 from .footprints import mirror_footprint, pad_footprint
 
 import _skimage2 as ski2
-from _skimage2.util._migration import ski2_migration_dec
+from skimage._migration import ski2_migration_dec
 
 
 __all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat', 'black_tophat']

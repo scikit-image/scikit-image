@@ -29,7 +29,9 @@ class TrackerDict(dict):
 
 def write_migration(in_tpl, doc_dict, out_path=None):
     in_tpl = Path(in_tpl)
-    out_path = Path(out_path) if out_path else in_tpl.with_suffix('.rst')
+    if out_path is None:
+        out_path = in_tpl.with_name(in_tpl.name.replace('.tpl', ''))
+    out_path = Path(out_path)
     tpl = Template(in_tpl.read_text())
     render_dict = TrackerDict(doc_dict)
     out_str = tpl.render(d=render_dict)
@@ -86,7 +88,7 @@ def get_parser():
 def get_doc_dicts():
     environ['EAGER_IMPORT'] = "true"  # Turn off lazy-loading
     import skimage as ski  # noqa: F401
-    from _skimage2.util._migration import ski2_migration_dec as sk2md
+    from skimage._migration import ski2_migration_dec as sk2md
 
     return sk2md.migration_docs, sk2md.extra_params
 

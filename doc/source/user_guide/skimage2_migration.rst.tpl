@@ -1,3 +1,6 @@
+.. -*- mode: rst -*-
+.. vi: filetype=rst
+
 .. _skimage2-migration:
 
 *****************************************

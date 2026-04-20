@@ -1,5 +1,5 @@
 import _skimage2 as ski2
-from _skimage2.util._migration import ski2_migration_dec
+from skimage._migration import ski2_migration_dec
 
 
 @ski2_migration_dec(

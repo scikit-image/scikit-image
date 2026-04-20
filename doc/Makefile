@@ -14,7 +14,7 @@ PAPEROPT_letter = -D latex_paper_size=letter
 ALLSPHINXOPTS   = -d $(SPHINXCACHE) $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) source
 DEST            = build
 
-MIGRATION_TPL = source/user_guide/skimage2_migration.tpl
+MIGRATION_TPL = source/user_guide/skimage2_migration.rst.tpl
 
 .PHONY: all help clean html dirhtml pickle json htmlhelp qthelp latex changes linkcheck doctest gitwash release_notes
 

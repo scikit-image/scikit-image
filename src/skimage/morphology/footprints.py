@@ -9,11 +9,10 @@ from _skimage2.morphology._footprints import (
     pad_footprint as sk2_pad_footprint,
 )
 from _skimage2._shared.utils import deprecate_func
-from _skimage2.util._migration import ski2_migration_dec
+from skimage._migration import ski2_migration_dec
 
 from .. import draw, morphology
 
-import _skimage2 as ski2
 
 # Precomputed ball and disk decompositions were saved as 2D arrays where the
 # radius of the desired decomposition is used to index into the first axis of

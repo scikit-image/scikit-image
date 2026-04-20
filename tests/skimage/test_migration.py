@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from _skimage2.util._migration import Skimage2Migration, ski2_migration_dec
+from skimage._migration import Skimage2Migration, ski2_migration_dec
 
 import pytest
 
@@ -177,3 +177,12 @@ def test_peak_local_max():
         match=('`skimage.feature.peak_local_max` ' 'is deprecated in favor of'),
     ):
         peak_local_max(img)
+
+
+def test_comment_check(md_dfunc):
+    migration_dec, _ = md_dfunc
+    doc = EXAMPLE_INPUT + '\n\nA <!-- marker'
+    with pytest.raises(
+        ValueError, match=r"Remaining <!-- marker in warning of `foo\.bar`;"
+    ):
+        migration_dec._parse_migration_doc(doc, 'foo.bar')

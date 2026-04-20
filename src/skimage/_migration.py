@@ -10,6 +10,7 @@ MIGRATION_URL = (
     'https://scikit-image.org/docs/stable/user_guide/skimage2_migration.html'
 )
 
+COMMENT_MARKER = "<!--"
 
 # Identify sections specific to warning or doc.
 _PARTS_RE = re.compile(
@@ -118,10 +119,10 @@ class Skimage2Migration:
         self.doctests = {}
 
     def _filled_docs(self, migration_doc, params):
-        w_str, m_str = self._parse_migration_doc(migration_doc)
+        w_str, m_str = self._parse_migration_doc(migration_doc, params['qname_old'])
         return (s % params for s in (w_str, m_str))
 
-    def _parse_migration_doc(self, doc):
+    def _parse_migration_doc(self, doc, func_uri=None):
         """Parse Markdown migration string to give warning and doc fragment"""
         warn_rep, doc_rep = (
             partial(self._context_rep, ctx) for ctx in ('warning', 'doc')
@@ -140,7 +141,14 @@ class Skimage2Migration:
         ).strip()
         if warn_msg:
             warn_msg += '\n\nSee %(migration_url)s#%(qname_old_anchor)s'
-        return warn_msg, dedent(_PARTS_RE.sub(doc_rep, doc)).strip()
+        doc_rep = dedent(_PARTS_RE.sub(doc_rep, doc)).strip()
+        for msg, msg_type in ((warn_msg, 'warning'), (doc_rep, 'docstring')):
+            if COMMENT_MARKER in msg:
+                raise ValueError(
+                    f"Remaining {COMMENT_MARKER} marker in {msg_type} "
+                    f"of `{func_uri}`; check markup:\n{msg}"
+                )
+        return warn_msg, doc_rep
 
     def _for_anchor(self, name):
         return name.replace('.', '-').replace('_', '-')
