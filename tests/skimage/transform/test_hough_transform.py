@@ -238,12 +238,14 @@ def precision_recall(lines, shape, threshold, rng=None):
 
 
 def test_gen_lines():
-    shape = (256, 256)
+    sq_size = 256
+    shape = (sq_size, sq_size)
     line_length = 20
     n_lines = 100
+    margins = 1
     # lines, start_end, xy
-    lines = _gen_lines(shape, n_lines, line_length, margins=1)
-    within = (lines[:, :, 0] >= 1) & (lines[:, :, 1] <= 254)
+    lines = _gen_lines(shape, n_lines, line_length, margins=margins)
+    within = (lines >= margins) & (lines <= (sq_size - margins))
     # Rounding may push rare points beyond margins.
     assert np.sum(within) >= (n_lines - 2)
     line_vecs = lines[:, 1, :] - lines[:, 0, :]  # Gives lines, x-y distances.
