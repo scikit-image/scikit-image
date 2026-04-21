@@ -87,26 +87,53 @@ def test_probabilistic_hough_bad_input():
 
 
 def _sort_lines(lines):
-    # Sort each line by x, y, sort lines by contents.
+    """ Sort each line by x, y, sort lines by contents.
+
+    This outputs lines as a list in a predictable order, given line contents.
+    """
     sorted_lines = []
     for ln in lines:
         sorted_lines.append(sorted(ln, key=lambda x: (x[0], x[1])))
     return sorted(sorted_lines)
 
 
-def _sorted_ph(*args, **kwargs):
+def _sorted_phl(*args, **kwargs):
+    """ Utility that calls PHL, then returns sort of output lines.
+    """
     return _sort_lines(transform.probabilistic_hough_line(*args, **kwargs))
 
 
-def _check_seeded_lines(seed, size, expected, img, **kwargs):
+def _check_seeded_lines(seed, n_batches, expected, img, **kwargs):
+    r""" Check that seeded random lines are equivalent to those in `expected`
+
+    Create multiple (`n_batches`), but predictable, batches of random lines and
+    check that each matches the lines in `expected`.
+
+    Parameters
+    ----------
+    seed : int
+        Initial seed for to generate seed RNG
+    n_batches : int
+        Number of calls to `_sorted_phl` (and therefore
+        `probablistic_hough_line`), to generate a new set of lines.
+    expected : list
+        Expected (and sorted) lines from each call to `_sorted_phl`.
+    img : array
+        Image as input to `_sorted_phl` (and therefore
+        `probablistic_hough_line`),
+    \*\*kwargs : dict
+        Keyword arguments passed to `_sorted_phl` (and therefore
+        `probablistic_hough_line`),
+    """
     # Seed because of occasional errors from shorter lines. These happen
     # because of the random order of point selection that sometimes leads
     # to identification of part-lines (where the identified line is close to,
     # but not exactly matching the real line).
-    seed_gen = np.random.default_rng(seed)
-    for rng_seed in seed_gen.integers(np.iinfo(int).max, size=size):
+    seed_gen = np.random.default_rng(seed)  # RNG for generating seeds.
+    for rng_seed in seed_gen.integers(np.iinfo(int).max, size=n_batches):
+        # Start new RNG at (randomly generated) seed.
         # Enforce shorter gap
-        assert _sorted_ph(img, rng=rng_seed, **kwargs) == expected
+        assert _sorted_phl(img, rng=rng_seed, **kwargs) == expected
 
 
 def test_probabilistic_hough_examples():
@@ -116,17 +143,17 @@ def test_probabilistic_hough_examples():
     img[5, 10 : (10 + L)] = 1
     x_line = [(10, 5), (9 + L, 5)]
     y_line = [(5, 10), (5, 9 + L)]
-    lines = _sorted_ph(img, line_length=L - 1)
+    lines = _sorted_phl(img, line_length=L - 1)
     assert lines == [x_line]
     # Line length too short.  Note line length is pixel distance between end
     # points - line from [0, 0] through [0, 3] is length 3.
-    assert _sorted_ph(img, line_length=L) == []
+    assert _sorted_phl(img, line_length=L) == []
     # Single line in UD (y)
-    lines = _sorted_ph(img.T, line_length=L - 1)
+    lines = _sorted_phl(img.T, line_length=L - 1)
     assert lines == [y_line]
     # Two lines (x, y)
     both = img + img.T
-    lines = _sorted_ph(both, line_length=L - 1)
+    lines = _sorted_phl(both, line_length=L - 1)
     assert lines == [y_line, x_line]
     # Add diagonal lines.
     more = both.copy()
@@ -146,16 +173,16 @@ def test_probabilistic_hough_examples():
     )
     # Filter by length of diagonals.  Get only the diagonals back.
     len_diag = int(np.floor(np.sqrt(2 * (n - 1) ** 2)))
-    assert _sorted_ph(more, line_gap=2, line_length=len_diag) == diags
+    assert _sorted_phl(more, line_gap=2, line_length=len_diag) == diags
     # Check gap behaves as expected.
-    assert _sorted_ph(img, line_gap=0, line_length=L - 1) == [x_line]
+    assert _sorted_phl(img, line_gap=0, line_length=L - 1) == [x_line]
     gappy = img.copy()
     gappy[5, 12] = 0
-    assert _sorted_ph(gappy, line_gap=0, line_length=L - 1) == []
-    assert _sorted_ph(gappy, line_gap=1, line_length=L - 1) == [x_line]
+    assert _sorted_phl(gappy, line_gap=0, line_length=L - 1) == []
+    assert _sorted_phl(gappy, line_gap=1, line_length=L - 1) == [x_line]
     gappy[5, 13:15] = 0
-    assert _sorted_ph(gappy, line_gap=2, line_length=L - 1) == []
-    assert _sorted_ph(gappy, line_gap=3, line_length=L - 1) == [x_line]
+    assert _sorted_phl(gappy, line_gap=2, line_length=L - 1) == []
+    assert _sorted_phl(gappy, line_gap=3, line_length=L - 1) == [x_line]
 
 
 @pytest.mark.parametrize('n_lines', range(2, 21, 4))
