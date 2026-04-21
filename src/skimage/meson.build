@@ -11,7 +11,6 @@ py3.install_sources(
   subdir: 'skimage'
 )
 
-subdir('_shared')
 subdir('_vendored')
 subdir('color')
 subdir('data')

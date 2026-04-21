@@ -6,8 +6,9 @@ Reference: Canny, J., A Computational Approach To Edge Detection, IEEE Trans.
 """
 
 import _skimage2 as ski2
+from _skimage2._shared._warnings import warn_external
+
 from ..util import PendingSkimage2Change
-from .._shared._warnings import warn_external
 
 
 def canny(

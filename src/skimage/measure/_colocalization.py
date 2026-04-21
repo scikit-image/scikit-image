@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.stats import pearsonr
 
-from .._shared.utils import check_shape_equality, as_binary_ndarray
+from _skimage2._shared.utils import check_shape_equality, as_binary_ndarray
 
 __all__ = [
     'pearson_corr_coeff',

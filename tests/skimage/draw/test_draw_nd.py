@@ -1,5 +1,5 @@
 from skimage.draw import line_nd
-from skimage._shared.testing import assert_equal
+from _skimage2._shared.testing import assert_equal
 
 
 def test_empty_line():

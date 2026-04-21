@@ -10,9 +10,13 @@ from skimage.morphology import (
     label,
 )
 
-from skimage._shared import testing
-from skimage._shared.testing import assert_array_equal, assert_equal, assert_stacklevel
-from skimage._shared._warnings import expected_warnings
+from _skimage2._shared import testing
+from _skimage2._shared.testing import (
+    assert_array_equal,
+    assert_equal,
+    assert_stacklevel,
+)
+from _skimage2._shared._warnings import expected_warnings
 
 
 test_object_image = np.array([[0, 0, 0, 1, 0], [1, 1, 1, 0, 0], [1, 1, 1, 0, 1]], bool)
