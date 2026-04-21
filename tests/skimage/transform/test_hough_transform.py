@@ -278,8 +278,6 @@ def good_rand_lines(size, shape, margins, line_length, rng):
     st_lims, end_lims = lims.T
     n_iters = size * 100
     for i in range(n_iters):
-        if len(out) >= size:
-            break
         raw_lines = _raw_rand_lines(size, lims, line_length, rng)
         within = np.all(
             (raw_lines >= st_lims[None, None, :])
@@ -287,6 +285,8 @@ def good_rand_lines(size, shape, margins, line_length, rng):
             axis=(1, 2),
         )
         out = np.concatenate((out, raw_lines[within]), axis=0)
+        if len(out) >= size:
+            break
     else:
         raise ValueError('Too many iterations finding lines')
     return out[:size]
