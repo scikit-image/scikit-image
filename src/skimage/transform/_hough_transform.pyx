@@ -402,8 +402,16 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
 
     .. _hough.cpp: https://github.com/opencv/opencv/blob/4.x/modules/imgproc/src/hough.cpp#L490
     """
-    # mask defines pixels still to be considered in the algorithm.
-    # It starts by including all non-zero pixels.
+    # Mask defines pixels still to be considered in the algorithm.
+    # 1 for still-to-be-processed.
+    cdef int PENDING = 1
+    # 2 for processed, but not yet included in discovered line.  In this case
+    # it has voted in the accumulator, and will need to be unvoted, if it
+    # becomes part of a discovered line.  See STEP 7 above.
+    cdef int VOTED = 2
+    # 0 for absent, or fully-processed.
+    cdef int CLEARED = 0
+    # Allocate mask array.
     cdef Py_ssize_t height = img.shape[0]
     cdef Py_ssize_t width = img.shape[1]
     cdef cnp.ndarray[ndim=2, dtype=cnp.uint8_t] mask = \
@@ -455,9 +463,10 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     if n_pts == 0:
         return []
 
-    # mask all non-zero indexes
-    mask[y_idxs, x_idxs] = 1
+    # Label all non-zero indexes as not-processed in mask.
+    mask[y_idxs, x_idxs] = PENDING
 
+    # Specify random order in which points will be processed.
     rng = np.random.default_rng(rng)
     rand_idxs = np.arange(n_pts, dtype=np.intp)
     rng.shuffle(rand_idxs)
@@ -469,9 +478,8 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
             x = x_idxs[idx]
             y = y_idxs[idx]
 
-            # Skip if previously eliminated by detection in earlier line
-            # search.
-            if not mask[y, x]:
+            # Skip if eliminated by detection in earlier line search.
+            if mask[y, x] == CLEARED:
                 continue
 
             value = 0
@@ -488,8 +496,8 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
                     max_value = value
                     max_theta_idx = j
 
-            # STEP 3 is implicit; we iterate through points, and thus do not
-            # return to the same point twice.
+            # STEP 3.  Note that this point has been processed, and voted on.
+            mask[y, x] = VOTED
 
             if max_value < threshold:  # STEP 4.
                 continue
@@ -534,7 +542,8 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
                     if px < 0 or px >= width or py < 0 or py >= height:
                         break
                     gap += 1
-                    if mask[py, px]:  # Hit remaining pixel, continue line.
+                    if mask[py, px] != CLEARED:
+                        # Hit remaining pixel, continue line.
                         gap = 0
                         line_ends[reverse, 0] = px
                         line_ends[reverse, 1] = py
@@ -556,14 +565,15 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
             for i in range(n_line_pixels):
                 x1 = line_pixels[i, 0]
                 y1 = line_pixels[i, 1]
-                # STEP 6: remove pixel from further consideration.
-                mask[y1, x1] = 0
                 # STEP 7: remove any votes in accumulator from pixel in line
-                # that we have already seen.
-                for j in range(nthetas):  # Remove accumulator votes.
-                    rho = ctheta[j] * x1 + stheta[j] * y1
-                    rho_idx = <int>round(rho) + rho_idx_offset
-                    accum[rho_idx, j] -= 1
+                # that we have collected votes for.
+                if mask[y1, x1] == VOTED:
+                    for j in range(nthetas):  # Remove accumulator votes.
+                        rho = ctheta[j] * x1 + stheta[j] * y1
+                        rho_idx = <int>round(rho) + rho_idx_offset
+                        accum[rho_idx, j] -= 1
+                # STEP 6: remove pixel from further consideration.
+                mask[y1, x1] = CLEARED
 
             # STEP 8: Add line to the result.
             lines[nlines] = line_ends
