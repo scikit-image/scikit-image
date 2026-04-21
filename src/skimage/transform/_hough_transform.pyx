@@ -406,7 +406,7 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     # It starts by including all non-zero pixels.
     cdef Py_ssize_t height = img.shape[0]
     cdef Py_ssize_t width = img.shape[1]
-    cdef cnp.ndarray[:, ::-1] mask = \
+    cdef cnp.ndarray[ndim=2, dtype=cnp.uint8_t] mask = \
         np.zeros((height, width), dtype=np.uint8)
 
     # Order in which we will consider pixels (will be random).
