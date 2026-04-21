@@ -416,7 +416,7 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     cdef Py_ssize_t reverse, gap, x_len, y_len, n_pts
     cdef cnp.float64_t line_sin, line_cos, rho, slope
     cdef cnp.int64_t value, max_value
-    cdef int x_delta_1, delta, offset, slope_delta
+    cdef int dx_is_1, delta, offset, slope_delta
     # Starting and ending x and y coordinates of current discovered line.
     cdef cnp.intp_t[:, ::1] line_ends = np.zeros((2, 2), dtype=np.intp)
     # Number of found pixels in current discovered line (not including gaps).
@@ -451,10 +451,12 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     cdef cnp.intp_t[:] y_idxs, x_idxs
     y_idxs, x_idxs = np.nonzero(img)
 
+    n_pts = len(x_idxs)
+    if n_pts == 0:
+        return []
+
     # mask all non-zero indexes
     mask[y_idxs, x_idxs] = 1
-
-    n_pts = len(x_idxs)
 
     rng = np.random.default_rng(rng)
     rand_idxs = np.arange(n_pts, dtype=np.intp)
@@ -492,14 +494,16 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
             # find line beginning and end (step 5 above).
             line_sin = stheta[max_theta_idx]
             line_cos = ctheta[max_theta_idx]
-            # Line equation is r = cos theta x + sin theta y.  Rearranging:
-            # y = r / sin theta  - cos theta x / sin theta, and slope
-            # is -cos theta / sin theta.
-            # If line_sin is 0, set to marker value of 99, otherwise value
-            # will be between -1 and 1.
-            slope = -line_cos / line_sin if line_sin else 99
-            x_delta_1 = fabs(slope) < 1  # Does x advance in steps of 1?
-            if not x_delta_1:  # abs(line_sin) <= abs(line_cos)
+            # Line equation is rho = cos(theta) x + sin(theta) y.  Rearranging:
+            # y = rho / sin(theta) - cos(theta) x / sin(theta), and slope
+            # is -cos(theta) / sin(theta).
+            # An abs slope of < 1 means that x increases more slowly than
+            # y, and we should proceed in steps of 1 in x.  Otherwise
+            # y increases more slowly than x, and we proceed in steps of
+            # 1 in y.
+            slope = -line_cos / line_sin if line_sin != 0 else np.inf
+            dx_is_1 = fabs(slope) < 1  # Does x advance in steps of 1?
+            if not dx_is_1:  # abs(line_sin) <= abs(line_cos)
                 slope = line_sin / -line_cos  # y advances in steps of 1.
             # Pass 1: walk the line, merging lines less than specified gap
             # length (step 5 continued).
@@ -516,10 +520,10 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
                 offset = delta
                 while True:
                     slope_delta = round(offset * slope)
-                    if x_delta_1:
+                    if dx_is_1:
                         px = x + offset
                         py = y + slope_delta
-                    else:
+                    else:  # Delta y is 1.
                         py = y + offset
                         px = x + slope_delta
                     # check when line exits image boundary
