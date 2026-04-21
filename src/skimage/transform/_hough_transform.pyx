@@ -447,7 +447,7 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     cdef cnp.float64_t[::1] ctheta = np.cos(theta)
     cdef cnp.float64_t[::1] stheta = np.sin(theta)
 
-    # find the nonzero indexes
+    # Find the nonzero indices.
     cdef cnp.intp_t[:] y_idxs, x_idxs
     y_idxs, x_idxs = np.nonzero(img)
 
@@ -478,7 +478,7 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
             max_value = -1  # Max value in accumulator, start value.
             max_theta_idx = -1  # Index into {c,s}theta arrays, start value.
 
-            # Apply Hough transform on point (step 2 above).
+            # STEP 2: Apply Hough transform on point.
             for j in range(nthetas):
                 rho = ctheta[j] * x + stheta[j] * y
                 rho_idx = round(rho) + rho_idx_offset
@@ -487,11 +487,15 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
                 if value > max_value:
                     max_value = value
                     max_theta_idx = j
-            if max_value < threshold:  # Step 4 above.
+
+            # STEP 3 is implicit; we iterate through points, and thus do not
+            # return to the same point twice.
+
+            if max_value < threshold:  # STEP 4.
                 continue
 
-            # From the random point (x, y), walk in opposite directions and
-            # find line beginning and end (step 5 above).
+            # STEP 5: From the random point (x, y), walk in opposite
+            # directions and find line beginning and end.
             line_sin = stheta[max_theta_idx]
             line_cos = ctheta[max_theta_idx]
             # Line equation is rho = cos(theta) x + sin(theta) y.  Rearranging:
@@ -501,12 +505,12 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
             # y, and we should proceed in steps of 1 in x.  Otherwise
             # y increases more slowly than x, and we proceed in steps of
             # 1 in y.
-            slope = -line_cos / line_sin if line_sin != 0 else INFINITY
-            dx_is_1 = fabs(slope) < 1  # Does x advance in steps of 1?
+            slope = INFINITY if line_sin == 0 else -line_cos / line_sin
+            dx_is_1 = fabs(slope) < 1  # Should x advance in steps of 1?
             if not dx_is_1:  # abs(line_sin) <= abs(line_cos)
                 slope = line_sin / -line_cos  # y advances in steps of 1.
-            # Pass 1: walk the line, merging lines less than specified gap
-            # length (step 5 continued).
+            # Pass 1 through the line: walk the line, merging
+            # lines less than specified gap length.
             line_pixels[0, 0] = x  # Insert current point into pixel store.
             line_pixels[0, 1] = y
             line_ends[:, 0] = x
@@ -548,18 +552,20 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
             if sqrt(x_len * x_len + y_len * y_len) < line_length:
                 continue
 
-            # Pass 2: reset accumulator and mask for points on line (steps 6
-            # and 7 above).
+            # Pass 2 through the line.
             for i in range(n_line_pixels):
                 x1 = line_pixels[i, 0]
                 y1 = line_pixels[i, 1]
-                mask[y1, x1] = 0  # Remove point.
+                # STEP 6: remove pixel from further consideration.
+                mask[y1, x1] = 0
+                # STEP 7: remove any votes in accumulator from pixel in line
+                # that we have already seen.
                 for j in range(nthetas):  # Remove accumulator votes.
                     rho = ctheta[j] * x1 + stheta[j] * y1
                     rho_idx = <int>round(rho) + rho_idx_offset
                     accum[rho_idx, j] -= 1
 
-            # Add line to the result (step 8 above).
+            # STEP 8: Add line to the result.
             lines[nlines] = line_ends
             nlines += 1
             if nlines >= lines_max:
