@@ -402,35 +402,46 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
 
     .. _hough.cpp: https://github.com/opencv/opencv/blob/4.x/modules/imgproc/src/hough.cpp#L490
     """
+    # mask defines pixels still to be considered in the algorithm.
+    # It starts by including all non-zero pixels.
     cdef Py_ssize_t height = img.shape[0]
     cdef Py_ssize_t width = img.shape[1]
-
-    # compute the bins and allocate the accumulator array
     cdef cnp.ndarray[ndim=2, dtype=cnp.uint8_t] mask = \
         np.zeros((height, width), dtype=np.uint8)
-    cdef cnp.intp_t[:, ::1] line_ends = np.zeros((2, 2), dtype=np.intp)
+
+    # Order in which we will consider pixels (will be random).
+    cdef cnp.intp_t[::1] rand_idxs
     cdef Py_ssize_t max_distance, rho_idx_offset, idx
-    cdef cnp.float64_t line_sin, line_cos, rho, slope
     cdef Py_ssize_t j, x, y, x1, y1, px, py, rho_idx, max_theta_idx
     cdef Py_ssize_t reverse, gap, x_len, y_len, n_pts
+    cdef cnp.float64_t line_sin, line_cos, rho, slope
     cdef cnp.int64_t value, max_value
     cdef int x_delta_1, delta, offset, slope_delta
-    cdef Py_ssize_t nlines = 0
-    cdef Py_ssize_t lines_max = 2 ** 15  # maximum line number cutoff.
+    # Starting and ending x and y coordinates of current discovered line.
+    cdef cnp.intp_t[:, ::1] line_ends = np.zeros((2, 2), dtype=np.intp)
+    # Number of found pixels in current discovered line (not including gaps).
+    cdef int n_line_pixels
+    cdef Py_ssize_t nlines = 0  # The number of currently discovered lines.
+    cdef Py_ssize_t lines_max = 2 ** 15  # Maximum line number cutoff.
+    # Currently discovered lines.
     cdef cnp.intp_t[:, :, ::1] lines = np.zeros((lines_max, 2, 2),
                                                 dtype=np.intp)
-    cdef cnp.intp_t[::1] rand_idxs
-    # Assemble n_rhos by n_thetas accumulator array.
+    # max_distance is maximum possible rho (distance) from the origin to the
+    # closest point on a candidate line.  It cannot be greater than the
+    # diagonal from the origin to the bottom left of the image.
     max_distance = <Py_ssize_t>ceil((sqrt(img.shape[0] * img.shape[0] +
                                           img.shape[1] * img.shape[1])))
+    # Assemble n_rhos by n_thetas accumulator array.
     cdef cnp.int64_t[:, ::1] accum = np.zeros((max_distance * 2,
                                                theta.shape[0]),
                                               dtype=np.int64)
+    # Distance (rho) can be positive or negative.  Central index of the rho
+    # axis corresponds to 0 distance.
     rho_idx_offset = max_distance
+
     cdef Py_ssize_t nthetas = theta.shape[0]
 
     cdef cnp.intp_t[:, ::1] line_pixels = np.zeros((max_distance, 2), dtype=np.intp)
-    cdef int n_line_pixels
 
     # compute sine and cosine of angles
     cdef cnp.float64_t[::1] ctheta = np.cos(theta)
