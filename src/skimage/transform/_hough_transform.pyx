@@ -462,7 +462,7 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
 
     with nogil:
         for p_i in range(n_pts):
-            # Select random non-zero point (step 1 above).
+            # STEP 1: Select random non-zero point (see Notes).
             idx = rand_idxs[p_i]
             x = x_idxs[idx]
             y = y_idxs[idx]
