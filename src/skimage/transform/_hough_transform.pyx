@@ -6,7 +6,7 @@
 import numpy as np
 cimport numpy as cnp
 
-from libc.math cimport fabs, sqrt, ceil, atan2, M_PI
+from libc.math cimport fabs, sqrt, ceil, atan2, M_PI, INFINITY
 
 from ..draw import circle_perimeter
 
@@ -501,7 +501,7 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
             # y, and we should proceed in steps of 1 in x.  Otherwise
             # y increases more slowly than x, and we proceed in steps of
             # 1 in y.
-            slope = -line_cos / line_sin if line_sin != 0 else np.inf
+            slope = -line_cos / line_sin if line_sin != 0 else INFINITY
             dx_is_1 = fabs(slope) < 1  # Does x advance in steps of 1?
             if not dx_is_1:  # abs(line_sin) <= abs(line_cos)
                 slope = line_sin / -line_cos  # y advances in steps of 1.
