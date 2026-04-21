@@ -114,7 +114,8 @@ def canny(
         "        ...,\n"
         "        mode='constant',\n"
         "    )\n\n"
-        "Other parameters can be left unchanged.",
+        "Other parameters can be left unchanged, but note that parameters after `image` "
+        "are now keyword-only.",
         category=PendingSkimage2Change,
     )
 

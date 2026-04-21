@@ -180,7 +180,7 @@ ski2.feature.canny(
 )
 ```
 
-Other parameters can be left unchanged.
+Other parameters can be left unchanged, but note that parameters after `image` are now keyword-only.
 
 ## Deprecations prior to skimage2
 
