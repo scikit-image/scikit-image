@@ -246,8 +246,9 @@ def test_gen_lines():
     # lines, start_end, xy
     lines = _gen_lines(shape, n_lines, line_length, margins=margins)
     within = (lines >= margins) & (lines <= (sq_size - margins))
+    within_per_line = np.all(within, axis=(1, 2))
     # Rounding may push rare points beyond margins.
-    assert np.sum(within) >= (n_lines - 2)
+    assert np.sum(within_per_line) >= (n_lines - 2)
     line_vecs = lines[:, 1, :] - lines[:, 0, :]  # Gives lines, x-y distances.
     lengths = np.sqrt(np.sum(line_vecs**2, axis=1))
     assert np.all(np.abs(lengths - line_length) < 0.75)
