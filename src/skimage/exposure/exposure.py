@@ -824,12 +824,12 @@ def is_low_contrast(
     --------
     >>> image = np.linspace(0, 0.04, 100)
     >>> is_low_contrast(image)
-    np.True_
+    True
     >>> image[-1] = 1
     >>> is_low_contrast(image)
-    np.True_
+    True
     >>> is_low_contrast(image, upper_percentile=100)
-    np.False_
+    False
     """
     image = np.asanyarray(image)
 
@@ -848,4 +848,4 @@ def is_low_contrast(
     limits = np.percentile(image, [lower_percentile, upper_percentile])
     ratio = (limits[1] - limits[0]) / (dlimits[1] - dlimits[0])
 
-    return ratio < fraction_threshold
+    return bool(ratio < fraction_threshold)
