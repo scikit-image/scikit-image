@@ -333,7 +333,8 @@ def _hough_line(cnp.ndarray img,
 def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
                               Py_ssize_t line_length, Py_ssize_t line_gap,
                               cnp.ndarray[ndim=1, dtype=cnp.float64_t] theta,
-                              rng=None):
+                              rng=None,
+                              Py_ssize_t lines_max=2 ** 15):
     """Return lines from a progressive probabilistic line Hough transform.
 
     Parameters
@@ -354,6 +355,9 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
         Pseudo-random number generator.
         By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
         If `rng` is an int, it is used to seed the generator.
+    lines_max : int, optional
+        Maximum number of detectable lines.  Once this threshold is reached,
+        further lines are discarded.
 
     Returns
     -------
@@ -411,11 +415,12 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     cdef int VOTED = 2
     # 0 for absent, or fully-processed.
     cdef int CLEARED = 0
-    # Allocate mask array.
     cdef Py_ssize_t height = img.shape[0]
     cdef Py_ssize_t width = img.shape[1]
-    cdef cnp.ndarray[ndim=2, dtype=cnp.uint8_t] mask = \
-        np.zeros((height, width), dtype=np.uint8)
+    # Allocate mask array.
+    cdef cnp.uint8_t[:, ::1] mask = np.array(img != 0,
+                                             dtype=np.uint8,
+                                             order='C')
 
     # Order in which we will consider pixels (will be random).
     cdef cnp.intp_t[::1] rand_idxs
@@ -430,7 +435,6 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     # Number of found pixels in current discovered line (not including gaps).
     cdef int n_line_pixels
     cdef Py_ssize_t nlines = 0  # The number of currently discovered lines.
-    cdef Py_ssize_t lines_max = 2 ** 15  # Maximum line number cutoff.
     # Currently discovered lines.
     cdef cnp.intp_t[:, :, ::1] lines = np.zeros((lines_max, 2, 2),
                                                 dtype=np.intp)
@@ -463,8 +467,6 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     if n_pts == 0:
         return []
 
-    # Label all non-zero indexes as not-processed in mask.
-    mask[y_idxs, x_idxs] = PENDING
 
     # Specify random order in which points will be processed.
     rng = np.random.default_rng(rng)
@@ -517,8 +519,8 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
             dx_is_1 = fabs(slope) < 1  # Should x advance in steps of 1?
             if not dx_is_1:  # abs(line_sin) <= abs(line_cos)
                 slope = line_sin / -line_cos  # y advances in steps of 1.
-            # Pass 1 through the line: walk the line, merging
-            # lines less than specified gap length.
+            # Pass 1: identify pixels in line.  We walk through the line,
+            # merging lines less than specified gap length.
             line_pixels[0, 0] = x  # Insert current point into pixel store.
             line_pixels[0, 1] = y
             line_ends[:, 0] = x
@@ -561,7 +563,7 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
             if sqrt(x_len * x_len + y_len * y_len) < line_length:
                 continue
 
-            # Pass 2 through the line.
+            # Pass 2: process detected pixels.
             for i in range(n_line_pixels):
                 x1 = line_pixels[i, 0]
                 y1 = line_pixels[i, 1]
