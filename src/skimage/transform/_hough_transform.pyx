@@ -299,14 +299,20 @@ def _hough_line(cnp.ndarray img,
     # compute the bins and allocate the accumulator array
     cdef cnp.ndarray[ndim=2, dtype=cnp.uint64_t] accum
     cdef cnp.ndarray[ndim=1, dtype=cnp.float64_t] bins
-    cdef Py_ssize_t max_distance, offset
+    cdef Py_ssize_t diag_len, rho0_idx, n_rhos
 
-    offset = <Py_ssize_t>ceil(sqrt(img.shape[0] * img.shape[0] +
-                                   img.shape[1] * img.shape[1]))
-    max_distance = 2 * offset + 1  # Length of d axis of accumulator.
-    accum = np.zeros((max_distance, theta.shape[0]), dtype=np.uint64)
+    # Length of diagonal from origin to bottom left of image.
+    diag_len = <Py_ssize_t>ceil(sqrt(img.shape[0] * img.shape[0] +
+                                     img.shape[1] * img.shape[1]))
+
+    # Distance (rho) can be positive or negative.  Central index of the rho
+    # axis corresponds to 0 rho (distance).
+    rho0_idx = diag_len
+
+    n_rhos = 2 * diag_len + 1  # Length of d axis of accumulator.
+    accum = np.zeros((n_rhos, theta.shape[0]), dtype=np.uint64)
     # Distances corresponding to each element of d axis.
-    bins = np.linspace(-offset, offset, max_distance)
+    bins = np.linspace(-diag_len, diag_len, n_rhos)
 
     # compute the nonzero indexes
     cdef cnp.ndarray[ndim=1, dtype=cnp.npy_intp] x_idxs, y_idxs
@@ -324,7 +330,7 @@ def _hough_line(cnp.ndarray img,
             for j in range(nthetas):  # For every theta.
                 # Determine corresponding distance index for line going through
                 # point.
-                accum_idx = round((ctheta[j] * x + stheta[j] * y)) + offset
+                accum_idx = round((ctheta[j] * x + stheta[j] * y)) + rho0_idx
                 accum[accum_idx, j] += 1
 
     return accum, theta, bins
@@ -424,7 +430,7 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
 
     # Order in which we will consider pixels (will be random).
     cdef cnp.intp_t[::1] rand_idxs
-    cdef Py_ssize_t max_distance, rho_idx_offset, idx
+    cdef Py_ssize_t diag_len, rho0_idx, idx
     cdef Py_ssize_t j, x, y, x1, y1, px, py, rho_idx, max_theta_idx
     cdef Py_ssize_t reverse, gap, x_len, y_len, n_pts
     cdef cnp.float64_t line_sin, line_cos, rho, slope
@@ -438,22 +444,24 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     # Currently discovered lines.
     cdef cnp.intp_t[:, :, ::1] lines = np.zeros((lines_max, 2, 2),
                                                 dtype=np.intp)
-    # max_distance is maximum possible rho (distance) from the origin to the
-    # closest point on a candidate line.  It cannot be greater than the
-    # diagonal from the origin to the bottom left of the image.
-    max_distance = <Py_ssize_t>ceil((sqrt(img.shape[0] * img.shape[0] +
-                                          img.shape[1] * img.shape[1])))
+    diag_len = <Py_ssize_t>ceil((sqrt(img.shape[0] * img.shape[0] +
+                                      img.shape[1] * img.shape[1])))
     # Assemble n_rhos by n_thetas accumulator array.
-    cdef cnp.int64_t[:, ::1] accum = np.zeros((max_distance * 2,
+    # maximum rho is maximum possible rho (distance) from the origin to the
+    # closest point on a candidate line.  It cannot be greater than the length
+    # of the diagonal from the origin to the bottom left of the image.
+    cdef cnp.int64_t[:, ::1] accum = np.zeros((diag_len * 2,
                                                theta.shape[0]),
                                               dtype=np.int64)
     # Distance (rho) can be positive or negative.  Central index of the rho
-    # axis corresponds to 0 distance.
-    rho_idx_offset = max_distance
+    # axis corresponds to 0 rho (distance).
+    rho0_idx = diag_len
 
     cdef Py_ssize_t nthetas = theta.shape[0]
 
-    cdef cnp.intp_t[:, ::1] line_pixels = np.zeros((max_distance, 2), dtype=np.intp)
+    # Diagonal length is also the longest possible line in the image.
+    cdef cnp.intp_t[:, ::1] line_pixels = np.zeros((diag_len, 2),
+                                                   dtype=np.intp)
 
     # compute sine and cosine of angles
     cdef cnp.float64_t[::1] ctheta = np.cos(theta)
@@ -491,7 +499,7 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
             # STEP 2: Apply Hough transform on point.
             for j in range(nthetas):
                 rho = ctheta[j] * x + stheta[j] * y
-                rho_idx = round(rho) + rho_idx_offset
+                rho_idx = round(rho) + rho0_idx
                 accum[rho_idx, j] += 1
                 value = accum[rho_idx, j]
                 if value > max_value:
@@ -572,7 +580,7 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
                 if mask[y1, x1] == VOTED:
                     for j in range(nthetas):  # Remove accumulator votes.
                         rho = ctheta[j] * x1 + stheta[j] * y1
-                        rho_idx = <int>round(rho) + rho_idx_offset
+                        rho_idx = <int>round(rho) + rho0_idx
                         accum[rho_idx, j] -= 1
                 # STEP 6: remove pixel from further consideration.
                 mask[y1, x1] = CLEARED
