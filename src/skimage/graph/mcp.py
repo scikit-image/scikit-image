@@ -47,14 +47,14 @@ def route_through_array(array, start, end, fully_connected=True, geometric=True)
            [10, 12]])
     >>> # Forbid diagonal steps
     >>> route_through_array(image, [0, 0], [1, 1], fully_connected=False)
-    ([(0, 0), (0, 1), (1, 1)], np.float64(9.5))
+    ([(0, 0), (0, 1), (1, 1)], 9.5)
     >>> # Now allow diagonal steps: the path goes directly from start to end
     >>> route_through_array(image, [0, 0], [1, 1])
-    ([(0, 0), (1, 1)], np.float64(9.19238815542512))
+    ([(0, 0), (1, 1)], 9.19238815542512)
     >>> # Cost is the sum of array values along the path (16 = 1 + 3 + 12)
     >>> route_through_array(image, [0, 0], [1, 1], fully_connected=False,
     ... geometric=False)
-    ([(0, 0), (0, 1), (1, 1)], np.float64(16.0))
+    ([(0, 0), (0, 1), (1, 1)], 16.0)
     >>> # Larger array where we display the path that is selected
     >>> image = np.arange((36)).reshape((6, 6))
     >>> image
@@ -85,4 +85,4 @@ def route_through_array(array, start, end, fully_connected=True, geometric=True)
         mcp_class = MCP
     m = mcp_class(array, fully_connected=fully_connected)
     costs, traceback_array = m.find_costs([start], [end])
-    return m.traceback(end), costs[end]
+    return m.traceback(end), float(costs[end])

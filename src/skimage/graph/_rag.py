@@ -37,7 +37,7 @@ def _edge_generator_from_csr(csr_array):
     >>> csr = sparse.csr_array(dense)
     >>> edges = _edge_generator_from_csr(csr)
     >>> list(edges)
-    [(0, np.int32(0), np.float64(1.0)), (1, np.int32(1), np.float64(1.0))]
+    [(0, 0, 1.0), (1, 1, 1.0)]
     """
     nrows = csr_array.shape[0]
     values = csr_array.data
@@ -45,7 +45,7 @@ def _edge_generator_from_csr(csr_array):
     col_indices = csr_array.indices
     for i in range(nrows):
         for j in range(indptr[i], indptr[i + 1]):
-            yield i, col_indices[j], values[j]
+            yield i, int(col_indices[j]), float(values[j])
 
 
 def min_weight(graph, src, dst, n):
