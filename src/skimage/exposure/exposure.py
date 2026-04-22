@@ -668,7 +668,7 @@ def adjust_gamma(image, gamma=1, gain=1):
     >>> gamma_corrected = ski.exposure.adjust_gamma(image, 2)
     >>> # Output is darker for gamma > 1
     >>> image.mean() > gamma_corrected.mean()
-    True
+    np.True_
     """
     if gamma < 0:
         raise ValueError("Gamma should be a non-negative real number.")
@@ -824,12 +824,12 @@ def is_low_contrast(
     --------
     >>> image = np.linspace(0, 0.04, 100)
     >>> is_low_contrast(image)
-    True
+    np.True_
     >>> image[-1] = 1
     >>> is_low_contrast(image)
-    True
+    np.True_
     >>> is_low_contrast(image, upper_percentile=100)
-    False
+    np.False_
     """
     image = np.asanyarray(image)
 

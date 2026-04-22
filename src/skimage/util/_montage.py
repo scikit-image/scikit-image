@@ -87,7 +87,7 @@ def montage(
            [ 8,  9,  5,  5],
            [10, 11,  5,  5]])
     >>> arr_in.mean()
-    5.5
+    np.float64(5.5)
     >>> arr_out_nonsquare = montage(arr_in, grid_shape=(1, 3))
     >>> arr_out_nonsquare
     array([[ 0,  1,  4,  5,  8,  9],

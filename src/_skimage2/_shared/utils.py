@@ -815,7 +815,7 @@ def safe_as_int(val, atol=1e-3):
     Examples
     --------
     >>> safe_as_int(7.0)
-    7
+    np.int64(7)
 
     >>> safe_as_int([9, 4, 2.9999999999])
     array([9, 4, 3])
@@ -826,7 +826,7 @@ def safe_as_int(val, atol=1e-3):
     ValueError: Integer argument required but received 53.1, check inputs.
 
     >>> safe_as_int(53.01, atol=0.01)
-    53
+    np.int64(53)
 
     """
     mod = np.asarray(val) % 1  # Extract mantissa

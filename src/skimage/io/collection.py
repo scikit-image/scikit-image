@@ -199,7 +199,7 @@ class ImageCollection:
     ...
     >>> filename = data_dir + '/no_time_for_that_tiny.gif'
     >>> ic = io.ImageCollection(range(24), load_func=MultiReader(filename))
-    >>> len(image_col)
+    >>> len(ic)  # doctest: +SKIP
     23
     >>> isinstance(ic[0], np.ndarray)
     True

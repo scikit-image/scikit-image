@@ -498,7 +498,7 @@ class CircleModel(_BaseModel):
     >>> model.center
     array([2., 3.])
     >>> model.radius
-    4.0
+    np.float64(4.0)
     >>> res = model.residuals(xy)
     >>> np.abs(np.round(res, 9))
     array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
@@ -747,7 +747,7 @@ class EllipseModel(_BaseModel):
     >>> ellipse.axis_lengths
     array([8., 4.])
     >>> round(ellipse.theta, 2)
-    0.52
+    np.float64(0.52)
     >>> np.round(abs(ellipse.residuals(xy)), 5)
     array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
            0., 0., 0., 0., 0., 0., 0., 0.])
@@ -1326,7 +1326,7 @@ def ransac(
     >>> np.round(model.axis_lengths)
     array([77., 13.])
     >>> np.round(model.theta)
-    1.0
+    np.float64(1.0)
 
     Next we estimate an ellipse model using RANSAC.
 
@@ -1349,7 +1349,7 @@ def ransac(
             True,  True,  True,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True], dtype=bool)
     >>> sum(inliers) > 40
-    True
+    np.True_
 
     RANSAC can be used to robustly estimate a geometric
     transformation. In this section, we also show how to use a

@@ -54,7 +54,7 @@ def unwrap_phase(image, wrap_around=False, rng=None):
     >>> image_wrapped = np.angle(np.exp(1j * image))
     >>> image_unwrapped = unwrap_phase(image_wrapped)
     >>> np.std(image_unwrapped - image) < 1e-6   # A constant offset is normal
-    True
+    np.True_
 
     References
     ----------
