@@ -87,7 +87,7 @@ def test_probabilistic_hough_bad_input():
 
 
 def _sort_lines(lines):
-    """ Sort each line by x, y, sort lines by contents.
+    """Sort each line by x, y, sort lines by contents.
 
     This outputs lines as a list in a predictable order, given line contents.
     """
@@ -98,13 +98,12 @@ def _sort_lines(lines):
 
 
 def _sorted_phl(*args, **kwargs):
-    """ Utility that calls PHL, then returns sort of output lines.
-    """
+    """Utility that calls PHL, then returns sort of output lines."""
     return _sort_lines(transform.probabilistic_hough_line(*args, **kwargs))
 
 
 def _check_seeded_lines(seed, n_batches, expected, img, **kwargs):
-    r""" Check that seeded random lines are equivalent to those in `expected`
+    r"""Check that seeded random lines are equivalent to those in `expected`
 
     Create multiple (`n_batches`), but predictable, batches of random lines and
     check that each matches the lines in `expected`.
