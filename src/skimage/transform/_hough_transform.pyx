@@ -451,9 +451,9 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     # of the diagonal from the origin to the bottom left of the image.
     n_rhos = diag_len * 2 + 1
     # Assemble n_rhos by n_thetas accumulator array.
-    cdef cnp.int64_t[:, ::1] accum = np.zeros((n_rhos,
+    cdef cnp.uint64_t[:, ::1] accum = np.zeros((n_rhos,
                                                theta.shape[0]),
-                                              dtype=np.int64)
+                                               dtype=np.uint64)
     # Distance (rho) can be positive or negative.  Central index of the rho
     # axis corresponds to 0 rho (distance).
     rho0_idx = diag_len
@@ -475,7 +475,6 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     n_pts = len(x_idxs)
     if n_pts == 0:
         return []
-
 
     # Specify random order in which points will be processed.
     rng = np.random.default_rng(rng)
