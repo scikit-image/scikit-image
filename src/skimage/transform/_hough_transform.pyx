@@ -412,6 +412,9 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
 
     .. _hough.cpp: https://github.com/opencv/opencv/blob/4.x/modules/imgproc/src/hough.cpp#L490
     """
+    if lines_max == 0:
+        return []
+
     # Mask defines pixels still to be considered in the algorithm.
     # 1 for still-to-be-processed.
     cdef int PENDING = 1
