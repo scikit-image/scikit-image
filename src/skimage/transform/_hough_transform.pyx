@@ -430,7 +430,7 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
 
     # Order in which we will consider pixels (will be random).
     cdef cnp.intp_t[::1] rand_idxs
-    cdef Py_ssize_t diag_len, rho0_idx, idx
+    cdef Py_ssize_t diag_len, n_rhos, rho0_idx, idx
     cdef Py_ssize_t j, x, y, x1, y1, px, py, rho_idx, max_theta_idx
     cdef Py_ssize_t reverse, gap, x_len, y_len, n_pts
     cdef cnp.float64_t line_sin, line_cos, rho, slope
@@ -446,11 +446,12 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
                                                 dtype=np.intp)
     diag_len = <Py_ssize_t>ceil((sqrt(img.shape[0] * img.shape[0] +
                                       img.shape[1] * img.shape[1])))
-    # Assemble n_rhos by n_thetas accumulator array.
-    # maximum rho is maximum possible rho (distance) from the origin to the
+    # Maximum rho is maximum possible rho (distance) from the origin to the
     # closest point on a candidate line.  It cannot be greater than the length
     # of the diagonal from the origin to the bottom left of the image.
-    cdef cnp.int64_t[:, ::1] accum = np.zeros((diag_len * 2,
+    n_rhos = diag_len * 2 + 1
+    # Assemble n_rhos by n_thetas accumulator array.
+    cdef cnp.int64_t[:, ::1] accum = np.zeros((n_rhos,
                                                theta.shape[0]),
                                               dtype=np.int64)
     # Distance (rho) can be positive or negative.  Central index of the rho
