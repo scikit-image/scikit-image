@@ -350,8 +350,8 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     threshold : int
         Threshold in the accumulator to detect lines against noise.
     line_length : int
-        Minimum accepted length of detected lines.
-        Increase the parameter to extract longer lines.
+        Minimum accepted Euclidean length of detected lines. Increase the
+        parameter to limit extraction to longer lines.
     line_gap : int
         Maximum gap between pixels to still form a line.
         Increase the parameter to merge broken lines more aggressively.
