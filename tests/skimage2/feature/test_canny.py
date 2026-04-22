@@ -22,7 +22,8 @@ class TestCanny:
 
     def test_00_01_zeros_mask(self):
         '''Test that the Canny filter finds no points in a masked image'''
-        image = np.random.uniform(size=(20, 20))
+        rng = np.random.default_rng(20260422)
+        image = rng.uniform(size=(20, 20))
         result = canny(
             image,
             sigma=4,
@@ -64,10 +65,10 @@ class TestCanny:
     def test_01_02_circle_with_noise(self):
         '''Test that the Canny filter finds the circle outlines
         in a noisy image'''
-        np.random.seed(0)
+        rng = np.random.default_rng(0)
         i, j = np.mgrid[-200:200, -200:200].astype(float) / 200
         c = np.abs(np.sqrt(i * i + j * j) - 0.5) < 0.02
-        cf = c.astype(float) * 0.5 + np.random.uniform(size=c.shape) * 0.5
+        cf = c.astype(float) * 0.5 + rng.uniform(size=c.shape) * 0.5
         result = canny(
             cf,
             sigma=4,
