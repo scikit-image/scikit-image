@@ -5,7 +5,7 @@ import pytest
 from ...dependency_checks import uses_matplotlib
 from skimage import io
 from skimage.io import manage_plugins
-from skimage._shared.testing import fetch, assert_stacklevel
+from _skimage2._shared.testing import fetch, assert_stacklevel
 
 
 priority_plugin = 'pil'

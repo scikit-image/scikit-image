@@ -8,7 +8,7 @@ import pytest
 from scipy import ndimage as ndi
 
 import skimage.measure
-from skimage._shared.filters import gaussian
+from _skimage2._shared.filters import gaussian
 from skimage.feature import peak_local_max
 from skimage.measure import label
 

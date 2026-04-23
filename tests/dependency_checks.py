@@ -1,6 +1,6 @@
 import sys
 import pytest
-from skimage._shared.version_requirements import is_installed
+from _skimage2._shared.version_requirements import is_installed
 
 # pyodide maintainers suggest not running tests that use matplotlib,
 # https://github.com/pyodide/pyodide-recipes/issues/475#issuecomment-4020982042

@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from skimage.util._map_array import map_array, ArrayMap
 
-from skimage._shared import testing
+from _skimage2._shared import testing
 
 
 _map_array_dtypes_in = [

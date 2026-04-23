@@ -3,8 +3,8 @@ import copy
 import numpy as np
 from packaging.version import Version
 
-from .._shared.filters import gaussian
-from .._shared.utils import check_nD
+from _skimage2._shared.filters import gaussian
+from _skimage2._shared.utils import check_nD
 from .brief_cy import _brief_loop
 from .util import (
     DescriptorExtractor,

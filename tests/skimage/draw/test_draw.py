@@ -2,7 +2,7 @@ import numpy as np
 from numpy.testing import assert_array_equal, assert_equal, assert_almost_equal
 import pytest
 
-from skimage._shared.testing import run_in_parallel
+from _skimage2._shared.testing import run_in_parallel
 from ...dependency_checks import uses_matplotlib
 
 from skimage.draw import (

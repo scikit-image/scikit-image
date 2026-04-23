@@ -1,10 +1,11 @@
 import unittest
 import numpy as np
 import pytest
-from skimage._shared.testing import assert_equal
+from _skimage2._shared.testing import assert_equal
 from scipy.ndimage import binary_dilation, binary_erosion
-from skimage import data, feature
+from skimage import data
 from skimage.util import img_as_float
+from skimage import feature
 
 
 class TestCanny(unittest.TestCase):

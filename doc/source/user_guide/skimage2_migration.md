@@ -11,7 +11,7 @@ Alongside skimage2, we will release version 1.0.0. Versions 1.x will be using th
 Versions 1.1.x will throw a `FutureWarning` upon import, as a means to notify users that
 they should either upgrade to skimage2 or pin to version 1.0.x.
 
-We have undertaken this to make some long-outstanding, backward-incomptible changes to the scikit-image API.
+We have undertaken this to make some long-outstanding, backward-incompatible changes to the scikit-image API.
 Most changes were difficult or impossible to make using deprecations alone.
 To honor the Hinsen principle (that is, never change results silently unless to fix a bug), we introduce a new package, which gives users an explicit way of upgrading.
 Users also have the option to use the two versions side-by-side while they do so.
@@ -116,17 +116,71 @@ ski2.morphology.peak_local_max(
 )
 ```
 
-### Grayscale morphological operators
+### Grayscale morphological operators in `skimage.morphology`
 
-Functions `skimage.morphology.{operator}` are replaced by
-`skimage2.morphology.{operator}` where {operator} is in this list:
-[`erosion`, `dilation`, `opening`, `closing`, `white_tophat`, `black_tophat`].
-The new functions use 'ignore' as the default value for parameter `mode` (as
-opposed to 'reflect' in v1.x).
-To keep the old (`skimage`, v1.x) behavior, set this parameter explicitly.
+The following functions are deprecated in favor of counterparts in `skimage2.morphology`:
 
-TODO: Update doctests in `src/skimage2/morphology/_grayscale_operators.py` to
-import `footprint_rectangle` from skimage2 once available.
+- `skimage.morphology.erosion`
+- `skimage.morphology.dilation`
+- `skimage.morphology.opening`
+- `skimage.morphology.closing`
+- `skimage.morphology.white_tophat`
+- `skimage.morphology.black_tophat`
+
+The new counterparts behave differently in the following ways:
+
+- All functions now default to `mode='ignore'` (was `mode='reflect'`).
+- Additionally, `skimage2.morphology.dilation`, `skimage2.morphology.closing`, and `skimage2.morphology.black_tophat` now also mirror the footprint (invert its order in each dimension).
+  Note this only impacts behavior for asymmetric footprints.
+
+:::{admonition} Background for changes
+:class: note dropdown
+
+The new behavior ensures that, with default parameters, `closing` and `opening` are [_extensive_ and _anti-extensive_](https://en.wikipedia.org/wiki/Mathematical_morphology#Properties_of_the_basic_operators) respectively.
+This change also aligns the behavior for asymmetric footprints with SciPy's `scipy.ndimage.grey_*` functions.
+
+Refer to [gh-6665](https://github.com/scikit-image/scikit-image/issues/6665), [gh-6676](https://github.com/scikit-image/scikit-image/issues/6676), [gh-8046](https://github.com/scikit-image/scikit-image/pull/8046), and [gh-8060](https://github.com/scikit-image/scikit-image/pull/8060) for more details.
+:::
+
+To keep the old (`skimage`, v1.x) behavior:
+
+- Set `mode='reflect'` explicitly.
+  If you set it explicitly before, the behavior is unchanged.
+
+- If you currently use an asymmetric `footprint` with `dilation`, `closing` or `black_tophat`, you can retain existing results by modifying the footprint as follows, before passing it to the `skimage2` counterparts:
+  ```python
+  footprint = ski2.morphology.pad_footprint(footprint, pad_end=False)
+  footprint = ski2.morphology.mirror_footprint(footprint)
+  ```
+
+For example:
+
+```python
+ski.morphology.dilation(image, footprint=asymmetric)
+
+# Replace above with
+asymmetric = ski2.morphology.pad_footprint(asymmetric, pad_end=False)
+asymmetric = ski2.morphology.mirror_footprint(asymmetric)
+ski2.morphology.dilation(image, footprint=asymmetric, mode="reflect")
+```
+
+### `skimage.feature.canny`
+
+This function is replaced by `skimage2.feature.canny` with a new default for the optional parameter `mode` which changes from 'constant' to 'nearest'.
+
+If you set this parameter explicitly, you only need to update the import.
+Otherwise, to keep the old (`skimage`, v1.x) behavior, use
+
+```python
+import skimage2 as ski2
+
+ski2.feature.canny(
+    ...,
+    mode='constant',
+)
+```
+
+Other parameters can be left unchanged, but note that parameters after `image` are now keyword-only.
 
 ## Deprecations prior to skimage2
 

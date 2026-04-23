@@ -12,8 +12,8 @@ from scipy import ndimage as ndi
 
 from skimage import data, util
 from ...dependency_checks import uses_matplotlib
-from skimage._shared._warnings import expected_warnings
-from skimage._shared.utils import _supported_float_type
+from _skimage2._shared._warnings import expected_warnings
+from _skimage2._shared.utils import _supported_float_type
 from skimage.color import rgb2gray
 from skimage.draw import disk
 from skimage.exposure import histogram
