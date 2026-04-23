@@ -141,10 +141,6 @@ class Skimage2Migration:
                 )
         return warn_msg, doc_rep
 
-    def _for_anchor(self, name):
-        """Rewrite function URI `name` to be valid as ReST link"""
-        return name.replace('.', '-').replace('_', '-')
-
     def _get_func_params(self, func, qname_old=None, qname_new=None):
         """Compile dictionary of parameters from input `func`
 
@@ -162,17 +158,19 @@ class Skimage2Migration:
             Dictionary of parameters.
         """
         qualname, modname = func.__qualname__, func.__module__
-        qname_old = f'{modname}.{qualname}' if qname_old is None else qname_old
-        qname_new = (
-            _SKI1PREFIX_RE.sub(r'skimage2.', qname_old)
-            if qname_new is None
-            else qname_new
-        )
+
+        if qname_old is None:
+            qname_old = f'{modname}.{qualname}'
+        if qname_new is None:
+            qname_new = _SKI1PREFIX_RE.sub(r'skimage2.', qname_old)
+
+        qname_old_anchor = qname_old.replace('.', '-').replace('_', '-')
+
         return dict(
             qual=qualname,
             mod=modname,
             qname_old=qname_old,
-            qname_old_anchor=self._for_anchor(qname_old),
+            qname_old_anchor=qname_old_anchor,
             qname_new=qname_new,
             migration_url=self.migration_url,
         )
