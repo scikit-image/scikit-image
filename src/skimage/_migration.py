@@ -53,36 +53,6 @@ _DIRECTIVE_RE = re.compile(
     flags=re.DOTALL | re.MULTILINE | re.VERBOSE,
 )
 
-# Regex to find Python blocks within start-end markers.
-_PYTHON_RE = re.compile(
-    r'''
-    ^(?P<indent>[ \t]*)
-    (?P<ticks>```+)\ *
-    (?P<ocurl>{)?  # Optional opening curlies
-    \ *[Pp]ython\ *
-    (?(ocurl)})  # Match close curlies only if opening curlies found
-    \ *\n
-    (?P<content>.*?)\n  # Code between start-end markers.
-    (?P=indent)(?P=ticks)\ *(\n|$)  # Match indentation and backtick lengths.
-    ''',
-    flags=re.DOTALL | re.MULTILINE | re.VERBOSE,
-)
-
-# Regex to find Python code-blocks within code-block markers.
-# This allows us to identify code that should be executed.
-_PYTHON_CB_RE = re.compile(
-    r'''
-    ^(?P<indent>[ \t]*)
-    (?P<ticks>```+)\ *
-    {\ *code-block\ *}
-    \ *[Pp]ython\ *
-    \ *\n
-    (?P<content>.*?)\n  # Code between start-end markers.
-    (?P=indent)(?P=ticks)\ *(\n|$)  # Match indentation and backtick lengths.
-    ''',
-    flags=re.DOTALL | re.MULTILINE | re.VERBOSE,
-)
-
 
 _SKI1PREFIX_RE = re.compile(r'^skimage\.')
 
