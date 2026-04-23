@@ -172,7 +172,7 @@ def test_peak_local_max():
 
     with pytest.warns(
         PendingSkimage2Change,
-        match=('`skimage.feature.peak_local_max` ' 'is deprecated in favor of'),
+        match=('`skimage.feature.peak_local_max` is deprecated in favor of'),
     ):
         peak_local_max(img)
 
