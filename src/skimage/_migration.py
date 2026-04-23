@@ -10,19 +10,20 @@ MIGRATION_URL = (
     'https://scikit-image.org/docs/stable/user_guide/skimage2_migration.html'
 )
 
-COMMENT_MARKER = "<!--"
-
-# Identify sections specific to warning or doc.
-_PARTS_RE = re.compile(
+# Match blocks specific to the "warning" or "doc" context.
+# These are enclosed with "context markers".
+_CONTEXT_BLOCK_RE = re.compile(
     r'''
-    ^[ \t]*<!--+\ *cond-start\ *:\ *(?P<doctypes>[a-z,]+)\ *--+>\ *\n
+    ^[ \t]*<!--+\ *cond-start\ *:\ *(?P<context>[a-z,]+)\ *--+>\ *\n
     (?P<content>.*?)\n
     [ \t]*<!--+\ *cond-end\ *--+>\ *(\n|$)
     ''',
     flags=re.DOTALL | re.MULTILINE | re.VERBOSE,
 )
 
-_TWO_BT_RE = re.compile(
+# Matches any (multiline) content enclosed in double backticks.
+# Content is captured in `<tickstuff>` group without backticks
+_RST_LITERAL_RE = re.compile(
     r'''
     (?<!`) # Not `
     ``     # Two ``
@@ -35,7 +36,9 @@ _TWO_BT_RE = re.compile(
     flags=re.DOTALL | re.MULTILINE | re.VERBOSE,
 )
 
-_DIRECTIVE_RE = re.compile(
+
+# Match restructuredText directive and its content.
+_RST_DIRECTIVE_RE = re.compile(
     r'''
     ^(?P<indent>[ \t]*)   # Indent
     \.\.[ \t]+            # Up to directive name.
@@ -112,25 +115,28 @@ class Skimage2Migration:
     def _parse_migration_doc(self, doc, func_uri=None):
         """Parse Markdown migration string to give warning and doc fragment"""
         warn_rep, doc_rep = (self._context_rep(ctx) for ctx in ('warning', 'doc'))
-        warn_msg = dedent(
-            _DIRECTIVE_RE.sub(
-                r'\g<content_indent>',  # Clear any directives, restore indent.
-                _TWO_BT_RE.sub(
-                    r'`\g<tickstuff>`',  # Double to single backticks.
-                    _PARTS_RE.sub(
-                        warn_rep,  # Remove not-matching context.
-                        doc,
-                    ),
-                ),
-            )
-        ).strip()
+
+        # Select blocks for "warning" context
+        warn_msg = _CONTEXT_BLOCK_RE.sub(warn_rep, doc)
+        # Double to single backticks
+        warn_msg = _RST_LITERAL_RE.sub(r'`\g<tickstuff>`', warn_msg)
+        # Clear any directives
+        warn_msg = _RST_DIRECTIVE_RE.sub(r'\g<content_indent>', warn_msg)
+        warn_msg = dedent(warn_msg).strip()
+
         if warn_msg:
             warn_msg += '\n\nSee %(migration_url)s#%(qname_old_anchor)s'
-        doc_rep = dedent(_PARTS_RE.sub(doc_rep, doc)).strip()
+
+        # Select blocks for "doc" context, restore indent
+        doc_rep = _CONTEXT_BLOCK_RE.sub(doc_rep, doc)
+        doc_rep = dedent(doc_rep).strip()
+
+        # Make sure that no context marker was missed
+        CONTEXT_MARKER = "<!--"
         for msg, msg_type in ((warn_msg, 'warning'), (doc_rep, 'docstring')):
-            if COMMENT_MARKER in msg:
+            if CONTEXT_MARKER in msg:
                 raise ValueError(
-                    f"Remaining {COMMENT_MARKER} marker in {msg_type} "
+                    f"Remaining {CONTEXT_MARKER} marker in {msg_type} "
                     f"of `{func_uri}`; check markup:\n{msg}"
                 )
         return warn_msg, doc_rep
@@ -186,9 +192,9 @@ class Skimage2Migration:
         returned replacer function should select.
 
         The returned replacer function assumes the ``match`` has a group
-        "doctypes" that is a comma-separated set of "contexts" corresponding to
+        "context" that is a comma-separated set of *contexts* corresponding to
         this "block".  The replacer discards the block (returns ``''``) for any
-        blocks where `context` is not in the "doctypes" set of contexts, and
+        blocks where `context` is not in the "context" set of contexts, and
         returns the "content" group of the match otherwise.
 
         Parameters
@@ -203,7 +209,7 @@ class Skimage2Migration:
         """
 
         def rep_func(match):
-            doc_types = [t.strip() for t in match.group('doctypes').split(',')]
+            doc_types = [t.strip() for t in match.group('context').split(',')]
             return '' if context not in doc_types else match.group('content') + '\n'
 
         return rep_func
