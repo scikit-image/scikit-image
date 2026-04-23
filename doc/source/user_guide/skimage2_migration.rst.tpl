@@ -72,6 +72,8 @@ When switching to the new ``skimage2`` namespace, some code will need to be upda
 
 {{ func_heading('skimage.feature.peak_local_max') }}
 
+{{ func_heading('skimage.feature.canny') }}
+
 Grayscale morphological operators in `skimage.morphology`
 ---------------------------------------------------------
 
