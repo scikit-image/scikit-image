@@ -10,7 +10,7 @@ from numpy.testing import (
 from scipy.ndimage import fourier_shift, shift as real_shift
 import scipy.fft as fft
 
-from skimage._shared.utils import _supported_float_type
+from _skimage2._shared.utils import _supported_float_type
 from skimage.data import camera, brain
 
 

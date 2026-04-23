@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from skimage._shared.testing import expected_warnings, run_in_parallel
+from _skimage2._shared.testing import expected_warnings, run_in_parallel
 from skimage.feature import (
     graycomatrix,
     graycoprops,

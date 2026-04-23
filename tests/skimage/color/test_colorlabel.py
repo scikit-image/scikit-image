@@ -8,7 +8,7 @@ from numpy.testing import (
     assert_no_warnings,
 )
 
-from skimage._shared.testing import expected_warnings
+from _skimage2._shared.testing import expected_warnings
 from skimage.color.colorconv import hsv2rgb, rgb2hsv
 from skimage.color.colorlabel import label2rgb
 

@@ -4,8 +4,8 @@ import importlib.util
 import numpy as np
 import pytest
 
-from skimage._shared.testing import assert_
-from skimage._shared.utils import _supported_float_type
+from _skimage2._shared.testing import assert_
+from _skimage2._shared.utils import _supported_float_type
 from skimage.data import binary_blobs
 from skimage.data import camera, chelsea
 from skimage.metrics import mean_squared_error as mse

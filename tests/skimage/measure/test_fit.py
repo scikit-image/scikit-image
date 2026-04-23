@@ -1,9 +1,9 @@
 import numpy as np
 import pytest
 
-from skimage._shared import testing
-from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import (
+from _skimage2._shared import testing
+from _skimage2._shared._warnings import expected_warnings
+from _skimage2._shared.testing import (
     arch32,
     is_wasm,
     assert_almost_equal,

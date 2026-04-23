@@ -32,7 +32,7 @@ from .noise import random_noise
 from .shape import view_as_blocks, view_as_windows
 from .unique import unique_rows
 from .lookfor import lookfor
-from .._shared.utils import FailedEstimationAccessError
+from _skimage2._shared.utils import FailedEstimationAccessError
 
 
 __all__ = [

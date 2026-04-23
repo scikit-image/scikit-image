@@ -5,7 +5,7 @@ import pytest
 from numpy.testing import assert_array_almost_equal, assert_array_equal, assert_equal
 from scipy import ndimage as ndi
 
-from skimage._shared.testing import assert_stacklevel
+from _skimage2._shared.testing import assert_stacklevel
 from skimage.feature import peak
 from skimage.util import PendingSkimage2Change
 

@@ -5,8 +5,8 @@ import warnings
 import numpy as np
 import pytest
 
-from skimage._shared import testing
-from skimage._shared.utils import (
+from _skimage2._shared import testing
+from _skimage2._shared.utils import (
     _supported_float_type,
     _validate_interpolation_order,
     change_default_value,

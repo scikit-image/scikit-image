@@ -2,10 +2,10 @@ import numpy as np
 import pytest
 
 from skimage.util.dtype import img_as_float
-from skimage._shared._dependency_checks import is_wasm
-from skimage._shared.testing import assert_stacklevel
-from skimage._shared.utils import _supported_float_type
-from skimage._shared.dtype import numeric_dtype_min_max
+from _skimage2._shared._dependency_checks import is_wasm
+from _skimage2._shared.testing import assert_stacklevel
+from _skimage2._shared.utils import _supported_float_type
+from _skimage2._shared.dtype import numeric_dtype_min_max
 
 from _skimage2.util._value_rescaling import rescale_minmax, _prescale_value_range
 

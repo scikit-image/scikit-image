@@ -2,7 +2,7 @@ import itertools
 
 import numpy as np
 
-from .._shared.utils import _supported_float_type, check_nD
+from _skimage2._shared.utils import _supported_float_type, check_nD
 from . import _moments_cy
 from ._moments_analytical import moments_raw_to_central
 

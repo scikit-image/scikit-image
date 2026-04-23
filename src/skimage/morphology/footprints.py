@@ -8,11 +8,10 @@ from _skimage2.morphology._footprints import (
     mirror_footprint as sk2_mirror_footprint,
     pad_footprint as sk2_pad_footprint,
 )
+from _skimage2._shared.utils import deprecate_func
+from _skimage2._shared._warnings import warn_external
 
-from .. import draw
-from skimage import morphology
-from .._shared.utils import deprecate_func
-from .._shared._warnings import warn_external
+from .. import draw, morphology
 from ..util import PendingSkimage2Change
 
 

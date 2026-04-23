@@ -7,7 +7,7 @@ import numpy as np
 cimport numpy as cnp
 cimport cython
 from libc.math cimport cos, sin, floor, ceil, sqrt, M_PI
-from .._shared.fused_numerics cimport np_floats
+from _skimage2._shared.fused_numerics cimport np_floats
 
 cnp.import_array()
 

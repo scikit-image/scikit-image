@@ -1,10 +1,10 @@
 import numpy as np
-from skimage._shared.testing import assert_almost_equal, assert_equal
+from _skimage2._shared.testing import assert_almost_equal, assert_equal
 
 from skimage import data, img_as_float
 from skimage.morphology import diamond
 from skimage.feature import match_template, peak_local_max
-from skimage._shared import testing
+from _skimage2._shared import testing
 
 
 @testing.parametrize('dtype', [np.float32, np.float64])

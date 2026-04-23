@@ -3,9 +3,9 @@ import pytest
 from numpy.testing import assert_almost_equal, assert_array_equal, assert_equal
 
 from skimage import data, draw, img_as_float
-from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import run_in_parallel
-from skimage._shared.utils import _supported_float_type
+from _skimage2._shared._warnings import expected_warnings
+from _skimage2._shared.testing import run_in_parallel
+from _skimage2._shared.utils import _supported_float_type
 from skimage.color import rgb2gray
 from skimage.feature import (
     corner_fast,

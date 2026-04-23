@@ -1,9 +1,9 @@
 import numpy as np
 
 from skimage import data, img_as_float
-from skimage._shared import testing
-from skimage._shared.testing import assert_allclose
-from skimage._shared.utils import _supported_float_type
+from _skimage2._shared import testing
+from _skimage2._shared.testing import assert_allclose
+from _skimage2._shared.utils import _supported_float_type
 from skimage.color import rgb2gray
 from skimage.metrics import mean_squared_error, normalized_root_mse
 from skimage.morphology import dilation, disk

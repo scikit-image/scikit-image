@@ -1,5 +1,5 @@
-from skimage._shared.interpolation import coord_map_py
-from skimage._shared.testing import assert_array_equal
+from _skimage2._shared.interpolation import coord_map_py
+from _skimage2._shared.testing import assert_array_equal
 
 
 def test_coord_map():
