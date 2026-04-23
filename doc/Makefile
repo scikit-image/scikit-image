@@ -46,7 +46,9 @@ api:
 	@echo "Build API docs...done."
 
 
-html: api
+html: api html-only
+
+html-only:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(DEST)/html
 	@echo
 	@echo "Build finished. The HTML pages are in build/html."
