@@ -97,14 +97,8 @@ def func(a, b):
     return a * b
 
 
-@pytest.fixture
-def md_dfunc():
+def test_parsing():
     migration_dec = Skimage2Migration(MIGRATION_URL)
-    return migration_dec, migration_dec(EXAMPLE_INPUT)(func)
-
-
-def test_parsing(md_dfunc):
-    migration_dec, _ = md_dfunc
     warn_msg, doc = migration_dec._parse_migration_doc(EXAMPLE_INPUT)
     assert warn_msg == EXAMPLE_WARN
     assert doc == EXAMPLE_DOC
@@ -123,8 +117,9 @@ warn_msg, doc = Skimage2Migration(MIGRATION_URL)._filled_docs(
 )
 
 
-def test_decoration_interpolation(md_dfunc):
-    migration_dec, dfunc = md_dfunc
+def test_decoration_interpolation():
+    migration_dec = Skimage2Migration(MIGRATION_URL)
+    dfunc = migration_dec(EXAMPLE_INPUT)(func)
 
     docs = migration_dec.migration_docs
     assert docs == {_func_qname_old: doc}
@@ -149,9 +144,10 @@ def test_decoration_interpolation(md_dfunc):
     )
 
 
-def test_dedent(md_dfunc):
+def test_dedent():
     # Test text dedented.
-    migration_dec, dfunc = md_dfunc
+    migration_dec = Skimage2Migration(MIGRATION_URL)
+    dfunc = migration_dec(EXAMPLE_INPUT)(func)
 
     from skimage.util import PendingSkimage2Change
 
@@ -179,8 +175,9 @@ def test_peak_local_max():
         peak_local_max(img)
 
 
-def test_comment_check(md_dfunc):
-    migration_dec, _ = md_dfunc
+def test_comment_check():
+    migration_dec = Skimage2Migration(MIGRATION_URL)
+
     doc = EXAMPLE_INPUT + '\n\nA <!-- marker'
     with pytest.raises(
         ValueError, match=r"Remaining <!-- marker in warning of `foo\.bar`;"
