@@ -709,9 +709,8 @@ def test_ransac_shape():
     data0[outliers[2], :] = (-100, -10)
 
     # estimate parameters of corrupted data
-    seed = 4201799844
-    model_est, inliers = ransac(data0, CircleModel, 3, 5, rng=seed)
-    ransac(data0, CircleModel, 3, 5, rng=seed)
+    model_est, inliers = ransac(data0, CircleModel, 3, 5, rng=4201799844)
+    ransac(data0, CircleModel, 3, 5, rng=280464689)
 
     # test whether estimated parameters equal original parameters
     assert_almost_equal(model0.center, model_est.center)
