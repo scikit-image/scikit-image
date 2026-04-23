@@ -28,7 +28,7 @@ To keep the old (``skimage``, v1.x) behavior, use:
 ...                               rng=default_rng(1939))
 >>> assert np.all(res1 == res2)
 """,
-    'skimage.data.binary_blobs',
+    qname_old='skimage.data.binary_blobs',
 )
 def binary_blobs(
     length=512,

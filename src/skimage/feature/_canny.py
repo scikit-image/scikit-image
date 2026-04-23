@@ -27,7 +27,7 @@ the old (``skimage``, v1.x) behavior, add an explicit ``mode='constant'``:
 >>> res2 = ski2.feature.canny(img, mode='constant')
 >>> assert np.all(res1 == res2)
 """,
-    'skimage.feature.canny',
+    qname_old='skimage.feature.canny',
 )
 def canny(
     image,

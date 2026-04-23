@@ -133,12 +133,14 @@ def test_decoration_interpolation():
     assert record[0].message.args[0] == warn_msg
 
     # Specify canonical location.
-    migration_dec(EXAMPLE_INPUT, 'skimage.bar.baz')(func)
+    migration_dec(EXAMPLE_INPUT, qname_old='skimage.bar.baz')(func)
     assert docs['skimage.bar.baz'].startswith(
         'Replace all calls to ``skimage.bar.baz`` with ``skimage2.bar.baz``.'
     )
     # And skimage2 location.
-    migration_dec(EXAMPLE_INPUT, 'skimage.bar.boo', 'skimage2.bun.biz')(func)
+    migration_dec(
+        EXAMPLE_INPUT, qname_old='skimage.bar.boo', qname_new='skimage2.bun.biz'
+    )(func)
     assert docs['skimage.bar.boo'].startswith(
         'Replace all calls to ``skimage.bar.boo`` with ``skimage2.bun.biz``.'
     )

@@ -214,8 +214,10 @@ class Skimage2Migration:
 
         return rep_func
 
-    def __call__(self, migration_doc, qname_old=None, qname_new=None, warning_cls=None):
-        """Use `migration_doc` to specify warning and migration doc section
+    def __call__(
+        self, migration_doc, *, qname_old=None, qname_new=None, warning_cls=None
+    ):
+        """Use `migration_doc` to specify warning and migration doc section.
 
         Parameters
         ----------
@@ -233,6 +235,11 @@ class Skimage2Migration:
         warning_cls : type[Warning], optional
             The warning class to use. Defaults to
             :obj:`~.PendingSkimage2Change` if not given.
+
+        Returns
+        -------
+        decorator : Callable
+            A decorator to apply to callables.
         """
 
         def decorator(func):

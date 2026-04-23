@@ -1030,7 +1030,7 @@ def star(a, dtype=np.uint8):
 behavior.
 <!--- cond-end -->
 ''',
-    'skimage.morphology.mirror_footprint',
+    qname_old='skimage.morphology.mirror_footprint',
 )
 def mirror_footprint(footprint):
     """Mirror each dimension in the footprint.
@@ -1065,7 +1065,7 @@ def mirror_footprint(footprint):
 `%(qname_old)s` is deprecated in favor of `%(qname_new)s` with identical behavior
 <!--- cond-end -->
 ''',
-    'skimage.morphology.pad_footprint',
+    qname_old='skimage.morphology.pad_footprint',
 )
 def pad_footprint(footprint, *, pad_end=True):
     """Pad the footprint to an odd size along each dimension.

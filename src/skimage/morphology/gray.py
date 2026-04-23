@@ -141,7 +141,7 @@ def _patch_footprint_mirroring(footprint):
 
 
 @ski2_migration_decorator(
-    _PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR, 'skimage.morphology.erosion'
+    _PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR, qname_old='skimage.morphology.erosion'
 )
 @_default_footprint
 def erosion(
@@ -235,7 +235,7 @@ def erosion(
 
 
 @ski2_migration_decorator(
-    _PENDING_SKIMAGE2_TEMPLATE_MIRROR, 'skimage.morphology.dilation'
+    _PENDING_SKIMAGE2_TEMPLATE_MIRROR, qname_old='skimage.morphology.dilation'
 )
 @_default_footprint
 def dilation(
@@ -331,7 +331,7 @@ def dilation(
 
 
 @ski2_migration_decorator(
-    _PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR, 'skimage.morphology.opening'
+    _PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR, qname_old='skimage.morphology.opening'
 )
 @_default_footprint
 def opening(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
@@ -411,7 +411,7 @@ def opening(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
 
 
 @ski2_migration_decorator(
-    _PENDING_SKIMAGE2_TEMPLATE_MIRROR, 'skimage.morphology.closing'
+    _PENDING_SKIMAGE2_TEMPLATE_MIRROR, qname_old='skimage.morphology.closing'
 )
 @_default_footprint
 def closing(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
@@ -492,7 +492,7 @@ def closing(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
 
 
 @ski2_migration_decorator(
-    _PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR, 'skimage.morphology.white_tophat'
+    _PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR, qname_old='skimage.morphology.white_tophat'
 )
 @_default_footprint
 def white_tophat(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
@@ -576,7 +576,7 @@ def white_tophat(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
 
 
 @ski2_migration_decorator(
-    _PENDING_SKIMAGE2_TEMPLATE_MIRROR, 'skimage.morphology.black_tophat'
+    _PENDING_SKIMAGE2_TEMPLATE_MIRROR, qname_old='skimage.morphology.black_tophat'
 )
 @_default_footprint
 def black_tophat(image, footprint=None, out=None, *, mode="reflect", cval=0.0):

@@ -79,7 +79,7 @@ Other keyword parameters can be left unchanged.
 
 <!--- cond-end -->
 """,
-    'skimage.feature.peak_local_max',
+    qname_old='skimage.feature.peak_local_max',
 )
 def peak_local_max(
     image,
