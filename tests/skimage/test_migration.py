@@ -1,10 +1,47 @@
 """Test migration module"""
 
+from textwrap import dedent
+
 import numpy as np
-
-from skimage._migration import Skimage2Migration, ski2_migration_decorator
-
 import pytest
+
+from skimage._migration import (
+    Skimage2Migration,
+    ski2_migration_decorator,
+    _select_blocks,
+)
+
+
+def test_select_blocks_simple():
+    doc = dedent("""\
+    Always.
+    <!--- cond-start: a -->
+    a content
+    <!--- cond-end -->
+    <!--- cond-start: b -->
+    b content
+    <!--- cond-end -->
+    <!--- cond-start: a -->
+    a content 2
+    <!--- cond-end -->
+    """)
+
+    result = _select_blocks(doc, context_name="a")
+    assert result == dedent("""\
+    Always.
+    a content
+    a content 2
+    """)
+
+    result = _select_blocks(doc, context_name="b")
+    assert result == dedent("""\
+    Always.
+    b content
+    """)
+
+    result = _select_blocks(doc, context_name="x")
+    assert result == "Always.\n"
+
 
 EXAMPLE_INPUT = """\
 Replace all calls to ``%(qname_old)s`` with ``%(qname_new)s``.
@@ -97,7 +134,7 @@ def func(a, b):
     return a * b
 
 
-def test_parsing():
+def test_skimage2migration_parsing():
     migration_dec = Skimage2Migration(MIGRATION_URL)
     warn_msg, doc = migration_dec._parse_migration_doc(EXAMPLE_INPUT)
     assert warn_msg == EXAMPLE_WARN
@@ -117,7 +154,7 @@ warn_msg, doc = Skimage2Migration(MIGRATION_URL)._filled_docs(
 )
 
 
-def test_decoration_interpolation():
+def test_skimage2migration_decoration_interpolation():
     migration_dec = Skimage2Migration(MIGRATION_URL)
     dfunc = migration_dec(EXAMPLE_INPUT)(func)
 
@@ -146,7 +183,7 @@ def test_decoration_interpolation():
     )
 
 
-def test_dedent():
+def test_skimage2migration_dedent():
     # Test text dedented.
     migration_dec = Skimage2Migration(MIGRATION_URL)
     dfunc = migration_dec(EXAMPLE_INPUT)(func)
@@ -172,12 +209,12 @@ def test_peak_local_max():
 
     with pytest.warns(
         PendingSkimage2Change,
-        match=('`skimage.feature.peak_local_max` is deprecated in favor of'),
+        match=r'`skimage.feature.peak_local_max` is deprecated in favor of',
     ):
         peak_local_max(img)
 
 
-def test_comment_check():
+def test_skimage2migration_comment_check():
     migration_dec = Skimage2Migration(MIGRATION_URL)
 
     doc = EXAMPLE_INPUT + '\n\nA <!-- marker'

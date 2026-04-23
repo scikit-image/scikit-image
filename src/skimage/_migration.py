@@ -60,6 +60,34 @@ _RST_DIRECTIVE_RE = re.compile(
 _SKI1PREFIX_RE = re.compile(r'^skimage\.')
 
 
+def _select_blocks(doc, *, context_name):
+    """Select subset of `doc` that matches a desired context.
+
+    Parameters
+    ----------
+    doc : str
+        A multiline string with *context blocks*.
+    context_name : str
+        The name of the context block to keep. All other context blocks are
+        removed.
+
+    Returns
+    -------
+    context : str
+        The subset of `doc` that matches the desired *context*.
+    """
+
+    def repl(match):
+        doc_types = [t.strip() for t in match.group('context').split(',')]
+        replace_with = ""
+        if context_name in doc_types:
+            replace_with = match.group('content') + '\n'
+        return replace_with
+
+    context = _CONTEXT_BLOCK_RE.sub(repl, doc)
+    return context
+
+
 class Skimage2Migration:
     """Class to decorate ``skimage`` routines with migration messages
 
@@ -114,10 +142,9 @@ class Skimage2Migration:
 
     def _parse_migration_doc(self, doc, func_uri=None):
         """Parse Markdown migration string to give warning and doc fragment"""
-        warn_rep, doc_rep = (self._context_rep(ctx) for ctx in ('warning', 'doc'))
 
         # Select blocks for "warning" context
-        warn_msg = _CONTEXT_BLOCK_RE.sub(warn_rep, doc)
+        warn_msg = _select_blocks(doc, context_name="warning")
         # Double to single backticks
         warn_msg = _RST_LITERAL_RE.sub(r'`\g<tickstuff>`', warn_msg)
         # Clear any directives
@@ -128,7 +155,7 @@ class Skimage2Migration:
             warn_msg += '\n\nSee %(migration_url)s#%(qname_old_anchor)s'
 
         # Select blocks for "doc" context, restore indent
-        doc_rep = _CONTEXT_BLOCK_RE.sub(doc_rep, doc)
+        doc_rep = _select_blocks(doc, context_name="doc")
         doc_rep = dedent(doc_rep).strip()
 
         # Make sure that no context marker was missed
@@ -174,43 +201,6 @@ class Skimage2Migration:
             qname_new=qname_new,
             migration_url=self.migration_url,
         )
-
-    def _context_rep(self, context):
-        """Make replacer function to select blocks based on `context`.
-
-        Returns replacer function for use with e.g ``re.sub``.
-
-        Replacer functions return strings given an input :class:`re.Match`
-        instance.
-
-        In this case, each ``match`` corresponds to what we will call a
-        "block".
-
-        `context` is a string that specifies which types of content blocks the
-        returned replacer function should select.
-
-        The returned replacer function assumes the ``match`` has a group
-        "context" that is a comma-separated set of *contexts* corresponding to
-        this "block".  The replacer discards the block (returns ``''``) for any
-        blocks where `context` is not in the "context" set of contexts, and
-        returns the "content" group of the match otherwise.
-
-        Parameters
-        ----------
-        context : str
-            `context` specifies the replacement context.
-
-        Returns
-        -------
-        replacer_func : function
-            Replacer function for use with ``re.sub`` etc.
-        """
-
-        def rep_func(match):
-            doc_types = [t.strip() for t in match.group('context').split(',')]
-            return '' if context not in doc_types else match.group('content') + '\n'
-
-        return rep_func
 
     def __call__(
         self, migration_doc, *, qname_old=None, qname_new=None, warning_cls=None
