@@ -214,7 +214,7 @@ class Skimage2Migration:
 
         return rep_func
 
-    def __call__(self, migration_doc, qname_old=None, qname_new=None):
+    def __call__(self, migration_doc, qname_old=None, qname_new=None, warning_cls=None):
         """Use `migration_doc` to specify warning and migration doc section
 
         Parameters
@@ -222,14 +222,17 @@ class Skimage2Migration:
         migration_doc : str
             Markdown document that may have contain conditional inclusion start
             and end markers.
-        qname_old : None or str
+        qname_old : None or str, optional
             The canonical full (qualified) name in the ``skimage`` namespace,
             including the ``skimage`` prefix. If None, use the functions full
             qualified name.
-        qname_new : None or str
+        qname_new : None or str, optional
             The matching canonical full (qualified) name in the ``skimage2``
             namespace, and including the ``skimage2`` prefix. If None, derive
             from `qname_old`, replacing initial ``skimage.`` with ``skimage2.``.
+        warning_cls : type[Warning], optional
+            The warning class to use. Defaults to
+            :obj:`~.PendingSkimage2Change` if not given.
         """
 
         def decorator(func):
@@ -245,7 +248,9 @@ class Skimage2Migration:
                 from skimage.util import PendingSkimage2Change
 
                 if warn_msg:
-                    warn_external(warn_msg, category=PendingSkimage2Change)
+                    warn_external(
+                        warn_msg, category=warning_cls or PendingSkimage2Change
+                    )
 
                 return func(*args, **kwargs)
 
