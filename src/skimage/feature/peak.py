@@ -65,16 +65,13 @@ Other keyword parameters can be left unchanged.
 >>> import skimage2 as ski2
 >>> image = ski1.data.camera()
 >>> res1 = ski1.feature.peak_local_max(image)
->>> res2 = ski2.feature.peak_local_max(image,
-...                                    exclude_border=1,
-...                                    p_norm=np.inf)
+>>> res2 = ski2.feature.peak_local_max(image, exclude_border=1, p_norm=np.inf)
 >>> assert np.all(res1 == res2)
 >>>
 >>> res1 = ski1.feature.peak_local_max(image, min_distance=10)
->>> res2 = ski2.feature.peak_local_max(image,
-...                                    min_distance=10,
-...                                    exclude_border=10,
-...                                    p_norm=np.inf)
+>>> res2 = ski2.feature.peak_local_max(
+...     image, min_distance=10, exclude_border=10, p_norm=np.inf
+... )
 >>> assert np.all(res1 == res2)
 
 <!--- cond-end -->

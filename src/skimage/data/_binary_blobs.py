@@ -22,10 +22,12 @@ To keep the old (``skimage``, v1.x) behavior, use:
 >>>
 >>> length, n_dim, blob_size_fraction = 512, 2, 0.1  # Default ski1 values.
 >>> res1 = ski1.data.binary_blobs(rng=default_rng(1939))  # Make reproducible.
->>> res2 = ski2.data.binary_blobs(shape=(length,) * n_dim,
-...                               blob_size=blob_size_fraction * length,
-...                               boundary_mode='nearest',
-...                               rng=default_rng(1939))
+>>> res2 = ski2.data.binary_blobs(
+...     shape=(length,) * n_dim,
+...     blob_size=blob_size_fraction * length,
+...     boundary_mode='nearest',
+...     rng=default_rng(1939)
+... )
 >>> assert np.all(res1 == res2)
 """,
     qname_old='skimage.data.binary_blobs',
