@@ -172,13 +172,13 @@ Two new namespaces and Python packages, ``src/_skimage2`` and ``src/skimage2``, 
 With the new namespaces available, we will start building the new API while preserving the existing ``skimage`` namespace and functionality.
 This process orients itself around the following principles:
 
-Only one implementation
+One implementation
   If possible, only one implementation should exist, and one API should be a *simple* wrapper around the other.
-  Implementations should preferably live in ``_skimage2``.
 
 Import hierarchy
   ``skimage`` and ``skimage2`` may only import from ``_skimage2``, and ``_skimage2`` should be self-contained.
   Exceptions (for example, importing from ``skimage`` in ``_skimage2``) are temporary and should be realized using inlined imports.
+  By the end of this phase, implementations in ``_skimage2`` should no longer rely on code in ``skimage``.
 
 Test coverage of both APIs
   The ``skimage`` test suite should be duplicated for ``_skimage2`` functions.
