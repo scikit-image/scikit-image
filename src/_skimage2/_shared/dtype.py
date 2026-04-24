@@ -50,7 +50,7 @@ def numeric_dtype_min_max(dtype):
     >>> numeric_dtype_min_max(np.uint8)
     (np.uint8(0), np.uint8(255))
     >>> numeric_dtype_min_max(bool)
-    (False, True)
+    (np.False_, np.True_)
     >>> numeric_dtype_min_max(np.float64)
     (np.float64(-1.7976931348623157e+308), np.float64(1.7976931348623157e+308))
     >>> numeric_dtype_min_max(int)
@@ -66,7 +66,8 @@ def numeric_dtype_min_max(dtype):
         min_ = info.min
         max_ = info.max
     elif np.issubdtype(dtype, np.dtype(bool)):
-        return False, True
+        min_ = dtype.type(False)
+        max_ = dtype.type(True)
     else:
         raise ValueError(f"unsupported dtype {dtype!r}")
     return min_, max_

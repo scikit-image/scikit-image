@@ -834,7 +834,7 @@ def is_low_contrast(
     image = np.asanyarray(image)
 
     if image.dtype == bool:
-        return not ((image.max() == 1) and (image.min() == 0))
+        return bool(not ((image.max() == 1) and (image.min() == 0)))
 
     if image.ndim == 3:
         from ..color import rgb2gray, rgba2rgb  # avoid circular import
