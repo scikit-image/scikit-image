@@ -1,7 +1,6 @@
 python_sources = [
   '__init__.py',
   '__init__.pyi',
-  'conftest.py',
   'py.typed'
 ]
 
