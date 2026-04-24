@@ -223,7 +223,6 @@ It should link to the migration guide and should explain how to enable :ref:`mor
 
 .. note::
    At this stage ``skimage2`` should no longer need to import from ``skimage`` to avoid triggering this new warning.
-   If this isn't the case, ``skimage`` needs to be split into a public and a private Python package that ``skimage2`` can (lazily) import from without triggering the new deprecation warning.
 
 This state will be published in a full release as ``scikit-image==2.0.0``.
 
