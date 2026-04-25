@@ -1,13 +1,8 @@
 python_sources = [
   '__init__.py',
   '__init__.pyi',
-<<<<<<< np2-doctest-fixes
-  'py.typed'
-=======
-  'conftest.py',
   'py.typed',
   '_migration.py'
->>>>>>> main
 ]
 
 py3.install_sources(
