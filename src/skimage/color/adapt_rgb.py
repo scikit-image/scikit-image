@@ -54,8 +54,18 @@ def hsv_value(image_filter, image, *args, **kwargs):
     ----------
     image_filter : function
         Function that filters a gray-scale image.
-    image : array
-        Input image. Note that RGBA images are treated as RGB.
+    image : array_like of shape (M, N, 3) or (M, N, 4)
+        Input RGB(A) image. Alpha channels are stripped before filtering.
+    *args : tuple
+        Additional positional arguments passed to `image_filter`.
+    **kwargs : dict
+        Additional keyword arguments passed to `image_filter`.
+
+    Returns
+    -------
+    out : ndarray of shape (M, N, 3)
+        RGB image obtained by applying `image_filter` to the value channel
+        of `image` in HSV space.
     """
     # Slice the first three channels so that we remove any alpha channels.
     hsv = color.rgb2hsv(image[:, :, :3])
@@ -74,8 +84,17 @@ def each_channel(image_filter, image, *args, **kwargs):
     ----------
     image_filter : function
         Function that filters a gray-scale image.
-    image : array
-        Input image.
+    image : array_like of shape (M, N, C)
+        Input RGB(A) image with `C` channels along the last axis.
+    *args : tuple
+        Additional positional arguments passed to `image_filter`.
+    **kwargs : dict
+        Additional keyword arguments passed to `image_filter`.
+
+    Returns
+    -------
+    out : ndarray of shape (M, N, C)
+        Color image obtained by stacking the filtered channels.
     """
     c_new = [image_filter(c, *args, **kwargs) for c in np.moveaxis(image, -1, 0)]
     return np.stack(c_new, axis=-1)
