@@ -6,11 +6,29 @@ Reference: Canny, J., A Computational Approach To Edge Detection, IEEE Trans.
 """
 
 import _skimage2 as ski2
-from _skimage2._shared._warnings import warn_external
-
-from ..util import PendingSkimage2Change
+from skimage._migration import ski2_migration_decorator
 
 
+@ski2_migration_decorator(
+    """\
+``%(qname_old)s`` is deprecated in favor of
+``%(qname_new)s`` with new behavior.
+
+The default of the optional parameter `mode` has changed from 'constant'
+to 'nearest'. If you did not set this parameter explicitly, and you want
+the old (``skimage``, v1.x) behavior, add an explicit ``mode='constant'``:
+
+>>> import numpy as np
+>>> import skimage as ski1
+>>> import skimage2 as ski2
+>>>
+>>> img = ski1.data.checkerboard()
+>>> res1 = ski1.feature.canny(img)  # ski1 default is mode='constant'
+>>> res2 = ski2.feature.canny(img, mode='constant')
+>>> assert np.all(res1 == res2)
+""",
+    qname_old='skimage.feature.canny',
+)
 def canny(
     image,
     sigma=1.0,
@@ -104,21 +122,6 @@ def canny(
     >>> edges2 = ski.feature.canny(im, sigma=3)
 
     """
-    warn_external(
-        "`skimage.feature.canny` is deprecated in favor of `skimage2.feature.canny`. "
-        "The default of the optional parameter `mode` has been changed from 'constant' "
-        "to 'nearest'. If you set this parameter explicitly, you only need to update the import. "
-        "Otherwise, to keep the old (`skimage`, v1.x) behavior, use:\n\n"
-        "    import skimage2 as ski2\n"
-        "    ski2.feature.canny(\n"
-        "        ...,\n"
-        "        mode='constant',\n"
-        "    )\n\n"
-        "Other parameters can be left unchanged, but note that parameters after `image` "
-        "are now keyword-only.",
-        category=PendingSkimage2Change,
-    )
-
     return ski2.feature.canny(
         image,
         sigma=sigma,

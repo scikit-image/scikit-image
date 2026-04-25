@@ -124,6 +124,7 @@ jobs:
         env:
           # A lazy loader configuration parameter
           EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
+          PYTHONOPTIMIZE: ${{ matrix.PYTHONOPTIMIZE }}
         run: |
           $PYTEST --doctest-plus --showlocals --pyargs skimage ./tests
 
