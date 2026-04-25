@@ -85,7 +85,7 @@ def each_channel(image_filter, image, *args, **kwargs):
     image_filter : function
         Function that filters a gray-scale image.
     image : array_like of shape (M, N, C)
-        Input RGB(A) image with `C` channels along the last axis.
+        Input image with `C` channels along the last axis.
     *args : tuple
         Additional positional arguments passed to `image_filter`.
     **kwargs : dict
