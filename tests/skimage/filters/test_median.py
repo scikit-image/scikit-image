@@ -4,7 +4,7 @@ from numpy.testing import assert_allclose
 from scipy import ndimage
 
 from skimage.filters import median, rank
-from skimage._shared.testing import assert_stacklevel
+from _skimage2._shared.testing import assert_stacklevel
 
 
 @pytest.fixture
@@ -57,18 +57,21 @@ def test_median_preserve_dtype(image, dtype):
 
 
 def test_median_error_ndim():
-    img = np.random.randint(0, 10, size=(5, 5, 5, 5), dtype=np.uint8)
+    rng = np.random.RandomState(4014147376)
+    img = rng.randint(0, 10, size=(5, 5, 5, 5), dtype=np.uint8)
     with pytest.raises(ValueError):
         median(img, behavior='rank')
 
 
 @pytest.mark.parametrize(
-    "img, behavior",
+    "size, behavior, seed",
     [
-        (np.random.randint(0, 10, size=(3, 3), dtype=np.uint8), 'rank'),
-        (np.random.randint(0, 10, size=(3, 3), dtype=np.uint8), 'ndimage'),
-        (np.random.randint(0, 10, size=(3, 3, 3), dtype=np.uint8), 'ndimage'),
+        ((3, 3), 'rank', 2461803925),
+        ((3, 3), 'ndimage', 1445049995),
+        ((3, 3, 3), 'ndimage', 1825616044),
     ],
 )
-def test_median(img, behavior):
+def test_median(size, behavior, seed):
+    rng = np.random.RandomState(seed)
+    img = rng.randint(0, 10, size=size, dtype=np.uint8)
     median(img, behavior=behavior)

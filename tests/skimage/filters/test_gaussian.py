@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from numpy.testing import assert_array_equal
 
-from skimage._shared.utils import _supported_float_type
+from _skimage2._shared.utils import _supported_float_type
 from skimage.filters import difference_of_gaussians, gaussian
 
 
@@ -126,7 +126,7 @@ def test_output_error():
 @pytest.mark.parametrize("s2", [4, (5, 6)])
 @pytest.mark.parametrize("channel_axis", [None, 0, 1, -1])
 def test_difference_of_gaussians(s, s2, channel_axis):
-    image = np.random.rand(10, 10)
+    image = np.random.RandomState(660029026).rand(10, 10)
     if channel_axis is not None:
         n_channels = 5
         image = np.stack((image,) * n_channels, channel_axis)
@@ -139,7 +139,7 @@ def test_difference_of_gaussians(s, s2, channel_axis):
 
 @pytest.mark.parametrize("s", [1, (1, 2)])
 def test_auto_sigma2(s):
-    image = np.random.rand(10, 10)
+    image = np.random.RandomState(2627489853).rand(10, 10)
     im1 = gaussian(image, sigma=s, preserve_range=True)
     s2 = 1.6 * np.array(s)
     im2 = gaussian(image, sigma=s2, preserve_range=True)

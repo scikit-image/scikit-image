@@ -3,9 +3,9 @@ import pytest
 from numpy.testing import assert_almost_equal, assert_array_equal, assert_equal
 
 from skimage import data, draw, img_as_float
-from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import run_in_parallel
-from skimage._shared.utils import _supported_float_type
+from _skimage2._shared._warnings import expected_warnings
+from _skimage2._shared.testing import run_in_parallel
+from _skimage2._shared.utils import _supported_float_type
 from skimage.color import rgb2gray
 from skimage.feature import (
     corner_fast,
@@ -506,7 +506,7 @@ def test_corner_foerstner_dtype(dtype):
 def test_noisy_square_image():
     im = np.zeros((50, 50)).astype(float)
     im[:25, :25] = 1.0
-    rng = np.random.default_rng(1234)
+    rng = np.random.RandomState(3250725926)
     im = im + rng.uniform(size=im.shape) * 0.2
 
     # Moravec
@@ -639,9 +639,10 @@ def test_num_peaks():
     """
 
     img_corners = corner_harris(rgb2gray(data.astronaut()))
+    rng = np.random.RandomState(3095879451)
 
     for i in range(20):
-        n = np.random.randint(1, 21)
+        n = rng.randint(1, 21)
         results = peak_local_max(
             img_corners, min_distance=10, threshold_rel=0, num_peaks=n
         )

@@ -6,8 +6,8 @@ import numpy as np
 import pytest
 
 from skimage import io
-from skimage._shared.testing import assert_array_equal, fetch, assert_stacklevel
-from skimage._shared._dependency_checks import is_wasm
+from _skimage2._shared.testing import assert_array_equal, fetch, assert_stacklevel
+from _skimage2._shared._dependency_checks import is_wasm
 from skimage.data import data_dir
 
 

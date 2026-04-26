@@ -3,7 +3,7 @@ cimport cython
 from cython.operator import dereference
 from cython.parallel import prange
 
-from .._shared.fused_numerics cimport np_numeric, np_anyint
+from _skimage2._shared.fused_numerics cimport np_numeric, np_anyint
 
 @cython.boundscheck(False)  # Deactivate bounds checking
 @cython.wraparound(False)   # Deactivate negative indexing

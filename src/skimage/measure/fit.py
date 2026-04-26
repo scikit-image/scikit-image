@@ -7,7 +7,7 @@ import numpy as np
 from numpy.linalg import inv
 from scipy import optimize, spatial
 
-from .._shared.utils import (
+from _skimage2._shared.utils import (
     _deprecate_estimate,
     FailedEstimation,
     deprecate_parameter,
@@ -158,7 +158,9 @@ def _deprecate_model_params(func):
         stop_version=_PARAMS_DEP_STOP,
         modify_docstring=False,
     )(func)
-    func.__doc__ = func.__doc__.replace('{{ start_version }}', _PARAMS_DEP_START)
+    # `if` necessary in optimized mode, where docstrings may be missing
+    if func.__doc__:
+        func.__doc__ = func.__doc__.replace('{{ start_version }}', _PARAMS_DEP_START)
     return func
 
 

@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from skimage.io import imread, imsave, use_plugin, reset_plugins, plugin_order
-from skimage._shared import testing
+from _skimage2._shared import testing
 
 
 pytest.importorskip('SimpleITK')
