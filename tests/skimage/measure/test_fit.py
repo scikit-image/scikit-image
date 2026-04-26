@@ -104,7 +104,7 @@ def test_line_model_nd_estimate():
     )
 
     # add gaussian noise to data
-    rng = np.random.default_rng(1234)
+    rng = np.random.RandomState(1530999031)
     data = data0 + rng.normal(size=data0.shape)
 
     # estimate parameters of noisy data
@@ -202,7 +202,7 @@ def test_circle_model_estimate():
     data0 = model0.predict_xy(t)
 
     # add gaussian noise to data
-    rng = np.random.default_rng(1234)
+    rng = np.random.RandomState(3581253341)
     data = data0 + rng.normal(size=data0.shape)
 
     # estimate parameters of noisy data (from_estimate method).
@@ -393,7 +393,7 @@ def test_ellipse_model_estimate(angle):
     data0 = model0.predict_xy(t)
 
     # add gaussian noise to data
-    rng = np.random.default_rng(1234)
+    rng = np.random.RandomState(3320627576)
     data = data0 + rng.normal(size=data0.shape)
 
     # estimate parameters of noisy data
@@ -709,8 +709,8 @@ def test_ransac_shape():
     data0[outliers[2], :] = (-100, -10)
 
     # estimate parameters of corrupted data
-    model_est, inliers = ransac(data0, CircleModel, 3, 5, rng=1)
-    ransac(data0, CircleModel, 3, 5, rng=1)
+    model_est, inliers = ransac(data0, CircleModel, 3, 5, rng=4201799844)
+    ransac(data0, CircleModel, 3, 5, rng=280464689)
 
     # test whether estimated parameters equal original parameters
     assert_almost_equal(model0.center, model_est.center)
@@ -721,7 +721,8 @@ def test_ransac_shape():
 
 @pytest.fixture
 def ransac_params():
-    rng = np.random.default_rng(12373240)
+    seed = 12373240
+    rng = np.random.RandomState(seed)
 
     # generate original data without noise
     src = 100 * rng.random((50, 2))
@@ -733,13 +734,13 @@ def ransac_params():
     dst[outliers[0]] = (10000, 10000)
     dst[outliers[1]] = (-100, 100)
     dst[outliers[2]] = (50, 50)
-    return src, dst, model, outliers, rng
+    return src, dst, model, outliers, rng, seed
 
 
 def test_ransac_geometric(ransac_params):
-    src, dst, model0, outliers, rng = ransac_params
+    src, dst, model0, outliers, rng, seed = ransac_params
     # estimate parameters of corrupted data
-    model_est, inliers = ransac((src, dst), AffineTransform, 2, 20, rng=rng)
+    model_est, inliers = ransac((src, dst), AffineTransform, 2, 20, rng=seed)
 
     # test whether estimated parameters equal original parameters
     assert_almost_equal(model0.params, model_est.params)
@@ -748,7 +749,7 @@ def test_ransac_geometric(ransac_params):
 
 def test_custom_estimate_warning(ransac_params):
     # Test that custom estimate class raises warning.
-    src, dst, model0, outliers, rng = ransac_params
+    src, dst, model0, outliers, rng, seed = ransac_params
 
     class C:
         """Custom class"""
@@ -774,7 +775,7 @@ def test_custom_estimate_warning(ransac_params):
         "warning."
     )
     with pytest.warns(FutureWarning, match=msg) as record:
-        model_est, inliers = ransac((src, dst), C, 2, 20, rng=rng)
+        model_est, inliers = ransac((src, dst), C, 2, 20, rng=seed)
     assert_stacklevel(record)
     assert len(record) == 1
 
@@ -793,7 +794,7 @@ def test_custom_estimate_warning(ransac_params):
 
 def test_ransac_model_class_protocol(ransac_params):
     # Test custom classes that don't match protocol.
-    src, dst, model0, outliers, rng = ransac_params
+    src, dst, model0, outliers, rng, seed = ransac_params
 
     class D:
         """Class without `residuals` method."""
@@ -803,7 +804,7 @@ def test_ransac_model_class_protocol(ransac_params):
             return cls()
 
     with pytest.raises(TypeError, match='`model_class` '):
-        ransac((src, dst), D, 2, 20, rng=rng)
+        ransac((src, dst), D, 2, 20, rng=seed)
 
     class E:
         """Class without `from_estimate` or `estimate`"""
@@ -812,12 +813,12 @@ def test_ransac_model_class_protocol(ransac_params):
             return data
 
     with pytest.raises(TypeError, match='Class .* must have `from_estimate` '):
-        ransac((src, dst), E, 2, 20, rng=rng)
+        ransac((src, dst), E, 2, 20, rng=seed)
 
 
 def test_custom_from_estimate_classmethod(ransac_params):
     # Test assertion that custom class `from_estimate` is class method.
-    src, dst, model0, outliers, rng = ransac_params
+    src, dst, model0, outliers, rng, seed = ransac_params
 
     class F:
         """Class without `from_estimate` or `estimate`"""
@@ -829,7 +830,7 @@ def test_custom_from_estimate_classmethod(ransac_params):
             return data
 
     with pytest.raises(TypeError, match='`from_estimate` must be a class method'):
-        ransac((src, dst), F, 2, 20, rng=rng)
+        ransac((src, dst), F, 2, 20, rng=seed)
 
 
 def test_ransac_is_data_valid():
@@ -982,7 +983,8 @@ def test_ransac_sample_duplicates():
 
 
 def test_ransac_with_no_final_inliers():
-    data = np.random.rand(5, 2)
+    rng = np.random.RandomState(1062223919)
+    data = rng.rand(5, 2)
     with pytest.warns(UserWarning, match='No inliers found. Model not fitted'):
         model, inliers = ransac(
             data,
@@ -1003,6 +1005,7 @@ def test_ransac_non_valid_best_model():
         tilt = abs(np.arccos(np.dot(model.direction, [0, 0, 1])))
         return tilt <= (10 / 180 * np.pi)
 
+    # test result depends on this RNG seed
     rng = np.random.RandomState(1)
     data = np.linspace([0, 0, 0], [0.3, 0, 1], 1000) + rng.rand(1000, 3) - 0.5
     with pytest.warns(UserWarning, match="Estimated model is not valid"):
@@ -1019,10 +1022,12 @@ def test_ransac_non_valid_best_model():
 
 def test_ransac_model_kwargs():
     n_points = 100
+    seed = 1152243585
+    rng = np.random.RandomState(1152243585)
 
     # Source points (grid-like pattern)
-    x = np.random.uniform(-2, 2, n_points)
-    y = np.random.uniform(-2, 2, n_points)
+    x = rng.uniform(-2, 2, n_points)
+    y = rng.uniform(-2, 2, n_points)
     src = np.column_stack([x, y])
 
     # Apply a polynomial transformation (quadratic)
@@ -1038,6 +1043,7 @@ def test_ransac_model_kwargs():
             residual_threshold=1.0,
             max_trials=1000,
             model_kwargs={'order': order},
+            rng=seed,
         )
         assert model.params.shape == (2, (order + 1) * (order + 2) // 2)
         assert all(inliers)
@@ -1045,7 +1051,7 @@ def test_ransac_model_kwargs():
 
 @pytest.mark.parametrize('tf_class', MODEL_CLASSES)
 def test_init_estimate_deprecations(tf_class):
-    rng = np.random.default_rng()
+    rng = np.random.RandomState(249087867)
     data = rng.normal(100, 40, size=(10, 2))
     assert tf_class.from_estimate(data)
     class_name = tf_class.__name__

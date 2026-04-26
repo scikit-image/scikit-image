@@ -30,6 +30,7 @@ skimage/version.py
 .coverage
 doc/source/auto_examples/**/*
 doc/source/_static/random.js
+doc/source/user_guide/skimage2_migration.rst
 sg_execution_times.rst
 .idea/
 *.log

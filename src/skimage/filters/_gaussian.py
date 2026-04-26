@@ -1,13 +1,33 @@
-from textwrap import dedent
-
 import numpy as np
 
 import _skimage2 as ski2
-from _skimage2._shared._warnings import warn_external
 
-from ..util import img_as_float, PendingSkimage2Change
+from .._migration import ski2_migration_decorator
+from ..util import img_as_float
 
 
+@ski2_migration_decorator(
+    """\
+    ``%(qname_old)s`` is deprecated in favor of
+    ``%(qname_new)s`` with new behavior:
+
+    * Parameter `preserve_range` was removed
+    * The value range of `image` is now always preserved
+
+    To keep the old (``skimage``, v1.x) behavior of `preserve_range=False` after
+    switching to ``skimage2``, preprocess `image`::
+
+        skimage.filters.gaussian(image, ...)
+
+    Becomes ::
+
+        image = skimage2.util.rescale_legacy(image)
+        skimage2.filters.gaussian(image, ...)
+
+    Other keyword parameters can be left unchanged.
+    """,
+    qname_old="skimage.filters.gaussian",
+)
 def gaussian(
     image,
     sigma=1.0,
@@ -110,24 +130,6 @@ def gaussian(
     >>> filtered_img = ski.filters.gaussian(image, sigma=1, channel_axis=-1)
 
     """
-    warn_external(
-        dedent("""\
-        `skimage.filters.gaussian` is deprecated in favor of
-        `skimage2.filters.gaussian` with new behavior:
-
-        * Parameter `preserve_range` was removed
-        * The value range of `image` is now always preserved
-
-        To keep the old behavior of `preserve_range=False` after switching to
-        `skimage2`, preprocess `image`:
-
-            image = skimage2.util.rescale_legacy(image)
-            skimage2.filters.gaussian(image, ...)
-
-        Other keyword parameters can be left unchanged.
-        """),
-        category=PendingSkimage2Change,
-    )
     if not preserve_range:
         image = ski2.util.rescale_legacy(image)
     filtered_image = ski2.filters.gaussian(
@@ -264,13 +266,11 @@ def difference_of_gaussians(
 
     if len(low_sigma) != 1 and len(low_sigma) != spatial_dims:
         raise ValueError(
-            'low_sigma must have length equal to number of'
-            ' spatial dimensions of input'
+            'low_sigma must have length equal to number of spatial dimensions of input'
         )
     if len(high_sigma) != 1 and len(high_sigma) != spatial_dims:
         raise ValueError(
-            'high_sigma must have length equal to number of'
-            ' spatial dimensions of input'
+            'high_sigma must have length equal to number of spatial dimensions of input'
         )
 
     low_sigma = low_sigma * np.ones(spatial_dims)
@@ -278,7 +278,7 @@ def difference_of_gaussians(
 
     if any(high_sigma < low_sigma):
         raise ValueError(
-            'high_sigma must be equal to or larger than' 'low_sigma for all axes'
+            'high_sigma must be equal to or larger thanlow_sigma for all axes'
         )
 
     im1 = gaussian(

@@ -85,21 +85,28 @@ can be contributed to scikit-image.
      Please write `good commit messages
      <https://vxlabs.com/software-development-handbook/#good-commit-messages>`_.
 
+   * It is a good idea to read our :ref:`guidelines` at this point.
+     While we don't require a contribution to meet every guideline from the
+     start, they will come up during review.
+
 3. To submit your contribution:
 
-   * Push your changes back to your fork on GitHub:
-
-     ::
+   * Push your changes back to your fork on GitHub::
 
        git push codemonkey transform-speedups
 
      A message will be displayed with a URL to open in your browser to create a
-     pull request (PR). Open it and click the green button.
+     pull request (PR).
 
-.. tip::
+   * Before submitting the pull request:
 
-   If you get stuck, reach out to us on
-   `our Zulip chat <https://skimage.zulipchat.com/>`__.
+     - Use a concise, descriptive title
+     - Describe and link relevant context in the description
+     - Disclose all *generative* tools (AI, LLMs, agents) that you used, see our
+       :ref:`ai-policy` for details.
+
+   .. tip:: If you get stuck, reach out to us on
+      `our Zulip chat <https://skimage.zulipchat.com/>`__.
 
 4. Review process:
 
@@ -181,6 +188,30 @@ to make conflict markers easier to read.
 An alternative to merging is to rebase your branch—but we squash and merge all
 PRs anyway, so we don't mind merge commits.
 
+.. _ai-policy:
+
+AI Policy
+---------
+Regardless of how a PR was produced, scikit-image requires that
+authors illustrate a thorough understanding of any proposed changes.
+You **must review such code line-by-line**—it is **your
+responsibility** to ensure that it is correct, and that it does not
+breach copyright. You should expect the team to ask questions about
+your work.
+
+scikit-image is technically complex, key infrastructure; therefore, we
+place a high premium on correctness, and on avoiding technical
+complexity that may affect maintainability. If you want to make use of
+LLMs in a significant way, it is a good idea to **check in with us
+first**. Regardless, **always declare tool usage**.
+
+AI agents that have followed all guidelines in this document (outside
+of this section) may add 🤖 to their PR title. This signals to
+maintainers that the agent has self-verified compliance, enabling
+expedited review and acceptance.
+
+.. _guidelines:
+
 Guidelines
 ----------
 
@@ -251,6 +282,30 @@ tests should be added to cover all modifications in behavior.
 
 Tests are located in the ``tests/`` directory.
 We also test examples in docstrings of our package (located in ``src/``).
+
+Prefer creating local ``np.random.RandomState`` instances rather than using the
+global NumPy RNG or ``np.random.default_rng``. The ``RandomState`` class is
+specifically intended for use in test code and the random number streams it
+generates are guaranteed not to change.
+
+Prefer using randomly generated but fixed RNG seeds. The
+``np.random.RandomState`` generator requires seeds between 0 and 2**32-1, so
+you can use the following command-line helper to generate seeds:
+
+.. code-block:: bash
+
+   python -c "import random; print(random.randint(0, 2**32-1))"
+
+And in your test, create a random number generator like so:
+
+.. code-block:: python
+
+   def test_something():
+       # hard-code a seed randomly generated while writing the test
+       rng = np.random.RandomState(2376609660)
+
+If you are comparing with known answers or if your test result otherwise
+depends on a specific RNG seed, add a comment to that effect.
 
 For local development we use ``spin test`` which wraps the
 `pytest testing framework <https://docs.pytest.org/en/latest/>`__.

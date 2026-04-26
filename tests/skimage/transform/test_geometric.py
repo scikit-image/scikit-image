@@ -74,6 +74,8 @@ HMAT_TFORMS_ND = (
     SimilarityTransform,
 )
 
+MODULE_RNG = np.random.RandomState(3122886800)
+
 
 def test_estimate_transform():
     for tform in ('euclidean', 'similarity', 'affine', 'projective', 'polynomial'):
@@ -114,15 +116,16 @@ def test_euclidean_estimation():
     'tform_class, has_scale', ((EuclideanTransform, False), (SimilarityTransform, True))
 )
 def test_3d_euclidean_similarity_estimation(tform_class, has_scale):
-    src_points = np.random.rand(1000, 3)
+    rng = np.random.RandomState(1832148575)
+    src_points = rng.rand(1000, 3)
 
     # Random transformation for testing
-    angles = np.random.random((3,)) * 2 * np.pi - np.pi
+    angles = rng.random((3,)) * 2 * np.pi - np.pi
     rotation_matrix = _euler_rotation_matrix(angles)
     if has_scale:
-        scale = np.random.randint(0, 20)
+        scale = rng.randint(0, 20)
         rotation_matrix *= scale
-    translation_vector = np.random.random((3,))
+    translation_vector = rng.random((3,))
     dst_points = []
     for pt in src_points:
         pt_r = pt.reshape(3, 1)
@@ -953,7 +956,7 @@ def test_union_differing_types():
 @pytest.mark.parametrize(
     "tform",
     [
-        ProjectiveTransform(matrix=np.random.rand(3, 3)),
+        ProjectiveTransform(matrix=MODULE_RNG.rand(3, 3)),
         AffineTransform(scale=(0.1, 0.1), rotation=0.3),
         EuclideanTransform(rotation=0.9, translation=(5, 5)),
         SimilarityTransform(scale=0.1, rotation=0.9),
@@ -992,10 +995,10 @@ def test_inverse_all_transforms(tform):
 def test_identity(tform_class):
     if tform_class is PiecewiseAffineTransform:
         return  # Identity transform unusable.
-    rng = np.random.default_rng()
+    rng = np.random.RandomState(3083558688)
     allows_nd = tform_class in HMAT_TFORMS_ND
     for ndim in (2, 3, 4, 5) if allows_nd else (2,):
-        src = rng.normal(size=(10, ndim))
+        src = rng.randn(10, ndim)
         t = tform_class.identity(ndim)
         if isinstance(t, FundamentalMatrixTransform):
             out = np.hstack((src, np.ones((len(src), 1))))
@@ -1008,10 +1011,12 @@ def test_geometric_tform():
     with pytest.raises(TypeError, match="Can't instantiate abstract class"):
         _GeometricTransform()
 
+    rng = np.random.RandomState(3177590800)
+
     # See gh-3926 for discussion details
     for i in range(20):
         # Generate random Homography
-        H = np.random.rand(3, 3) * 100
+        H = rng.rand(3, 3) * 100
         H[2, H[2] == 0] += np.finfo(float).eps
         H /= H[2, 2]
 
@@ -1070,13 +1075,14 @@ def test_degenerate(tform_class, msg):
 def test_degenerate_2():
     # See gh-3926 for discussion details
     tform = ProjectiveTransform()
+    rng = np.random.RandomState(1286963959)
     for i in range(20):
         # Some random coordinates
-        src = np.random.rand(4, 2) * 100
-        dst = np.random.rand(4, 2) * 100
+        src = rng.rand(4, 2) * 100
+        dst = rng.rand(4, 2) * 100
 
         # Degenerate the case by arranging points on a single line
-        src[:, 1] = np.random.rand()
+        src[:, 1] = rng.rand()
         # Prior to gh-3926, under the above circumstances,
         # a transform could be returned with nan values.
         tf = ProjectiveTransform.from_estimate(src, dst)
@@ -1231,7 +1237,8 @@ def _assert_least_squares(tf, src, dst):
 @pytest.mark.parametrize('array_like_input', [False, True])
 def test_estimate_affine_3d(array_like_input):
     ndim = 3
-    src = np.random.random((25, ndim)) * 2 ** np.arange(7, 7 + ndim)
+    rng = np.random.RandomState(4284506661)
+    src = rng.random((25, ndim)) * 2 ** np.arange(7, 7 + ndim)
     matrix = np.array(
         [
             [4.8, 0.1, 0.2, 25],
@@ -1248,7 +1255,7 @@ def test_estimate_affine_3d(array_like_input):
 
     tf = AffineTransform(matrix=matrix)
     dst = tf(src)
-    dst_noisy = dst + np.random.random((25, ndim))
+    dst_noisy = dst + rng.random((25, ndim))
     if array_like_input:
         # list of lists for destination coords
         dst = [list(c) for c in dst]
@@ -1280,7 +1287,8 @@ def test_array_protocol():
 
 
 def test_affine_transform_from_linearized_parameters():
-    mat = np.concatenate((np.random.random((3, 4)), np.eye(4)[-1:]), axis=0)
+    rng = np.random.RandomState(3902925913)
+    mat = np.concatenate((rng.random((3, 4)), np.eye(4)[-1:]), axis=0)
     v = mat[:-1].ravel()
     mat_from_v = _affine_matrix_from_vector(v)
     tf = AffineTransform(matrix=mat_from_v)
@@ -1376,7 +1384,8 @@ def test_euclidean_param_defaults(tform_class):
 
 
 def test_euler_angle_consistency():
-    angles = np.random.random((3,)) * 2 * np.pi - np.pi
+    rng = np.random.RandomState(4219443245)
+    angles = rng.random((3,)) * 2 * np.pi - np.pi
     euclid = EuclideanTransform(rotation=angles, dimensionality=3)
     similar = SimilarityTransform(rotation=angles, dimensionality=3)
     assert_array_almost_equal(euclid, similar)

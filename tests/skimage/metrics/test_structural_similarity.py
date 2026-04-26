@@ -6,19 +6,19 @@ from skimage import data
 from _skimage2._shared.utils import _supported_float_type
 from skimage.metrics import structural_similarity
 
-np.random.seed(5)
+# test results depend on this seed
+MODULE_RNG = np.random.RandomState(5)
 cam = data.camera()
 sigma = 20.0
-cam_noisy = np.clip(cam + sigma * np.random.randn(*cam.shape), 0, 255)
+cam_noisy = np.clip(cam + sigma * MODULE_RNG.randn(*cam.shape), 0, 255)
 cam_noisy = cam_noisy.astype(cam.dtype)
-
-np.random.seed(1234)
 
 
 def test_structural_similarity_patch_range():
     N = 51
-    X = (np.random.rand(N, N) * 255).astype(np.uint8)
-    Y = (np.random.rand(N, N) * 255).astype(np.uint8)
+    rng = np.random.RandomState(1974147632)
+    X = (rng.rand(N, N) * 255).astype(np.uint8)
+    Y = (rng.rand(N, N) * 255).astype(np.uint8)
 
     assert structural_similarity(X, Y, win_size=N) < 0.1
     assert_equal(structural_similarity(X, X, win_size=N), 1)
@@ -26,8 +26,9 @@ def test_structural_similarity_patch_range():
 
 def test_structural_similarity_image():
     N = 100
-    X = (np.random.rand(N, N) * 255).astype(np.uint8)
-    Y = (np.random.rand(N, N) * 255).astype(np.uint8)
+    rng = np.random.RandomState(3782407563)
+    X = (rng.rand(N, N) * 255).astype(np.uint8)
+    Y = (rng.rand(N, N) * 255).astype(np.uint8)
 
     S0 = structural_similarity(X, X, win_size=3)
     assert_equal(S0, 1)
@@ -84,8 +85,9 @@ def test_structural_similarity_grad(seed, dtype):
 )
 def test_structural_similarity_dtype(dtype):
     N = 30
-    X = np.random.rand(N, N)
-    Y = np.random.rand(N, N)
+    rng = np.random.RandomState(2249242827)
+    X = rng.rand(N, N)
+    Y = rng.rand(N, N)
     if np.dtype(dtype).kind in 'iub':
         data_range = 255.0
         X = (X * 255).astype(np.uint8)
@@ -104,8 +106,9 @@ def test_structural_similarity_dtype(dtype):
 @pytest.mark.parametrize('channel_axis', [0, 1, 2, -1])
 def test_structural_similarity_multichannel(channel_axis):
     N = 100
-    X = (np.random.rand(N, N) * 255).astype(np.uint8)
-    Y = (np.random.rand(N, N) * 255).astype(np.uint8)
+    rng = np.random.RandomState(3501932312)
+    X = (rng.rand(N, N) * 255).astype(np.uint8)
+    Y = (rng.rand(N, N) * 255).astype(np.uint8)
 
     S1 = structural_similarity(X, Y, win_size=3)
 
@@ -143,12 +146,13 @@ def test_structural_similarity_multichannel(channel_axis):
 def test_structural_similarity_nD(dtype):
     # test 1D through 4D on small random arrays
     N = 10
+    rng = np.random.RandomState(978242013)
     for ndim in range(1, 5):
         xsize = [
             N,
         ] * 5
-        X = (np.random.rand(*xsize) * 255).astype(dtype)
-        Y = (np.random.rand(*xsize) * 255).astype(dtype)
+        X = (rng.rand(*xsize) * 255).astype(dtype)
+        Y = (rng.rand(*xsize) * 255).astype(dtype)
 
         mssim = structural_similarity(X, Y, win_size=3, data_range=255.0)
         assert mssim.dtype == np.float64
@@ -159,7 +163,8 @@ def test_structural_similarity_multichannel_chelsea():
     # color image example
     Xc = data.chelsea()
     sigma = 15.0
-    Yc = np.clip(Xc + sigma * np.random.randn(*Xc.shape), 0, 255)
+    rng = np.random.RandomState(2064892105)
+    Yc = np.clip(Xc + sigma * rng.randn(*Xc.shape), 0, 255)
     Yc = Yc.astype(Xc.dtype)
 
     # multichannel result should be mean of the individual channel results

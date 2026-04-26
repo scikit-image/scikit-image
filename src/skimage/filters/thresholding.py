@@ -15,7 +15,7 @@ from ..filters._multiotsu import (
     _get_multiotsu_thresh_indices,
     _get_multiotsu_thresh_indices_lut,
 )
-from ..transform import integral_image
+from ..transform.integral import integral_image
 from ..util import dtype_limits
 from ._sparse import _correlate_sparse, _validate_window_size
 

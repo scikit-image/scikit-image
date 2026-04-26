@@ -229,6 +229,8 @@ filterwarnings = [
     "ignore:.*(parseString|resetCache|enablePackrat|oneOf).*:DeprecationWarning:matplotlib",
     # tifffile (v2025.12.20) uses deprecated NumPy API
     "ignore:Setting the shape on a NumPy array:DeprecationWarning:tifffile",
+    # pytest warning when running under PYTHONOPTIMIZE=2 (assertions are stripped)
+    "ignore:assertions not in test modules or plugins:pytest.PytestConfigWarning",
 ]
 norecursedirs = ["io/_plugins"]
 
@@ -265,7 +267,6 @@ test-sources = ["tests", "pyproject.toml"]
 environment = {PIP_PREFER_BINARY=1}
 environment-pass = ["SKIMAGE_LINK_FLAGS", "PIP_EXTRA_INDEX_URL", "COLUMNS"]
 build-verbosity = 0
-enable="cpython-freethreading"
 
 [tool.cibuildwheel.config-settings]
 # Could be overwritten using CIBW_CONFIG_SETTINGS environment variable

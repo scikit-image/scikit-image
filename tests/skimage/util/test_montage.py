@@ -166,18 +166,20 @@ def test_montage_simple_padding_gray():
 
 
 def test_error_ndim():
-    arr_error = np.random.randn(1, 2)
+    rng = np.random.RandomState(4139463714)
+
+    arr_error = rng.randn(1, 2)
     with testing.raises(ValueError):
         montage(arr_error)
 
-    arr_error = np.random.randn(1, 2, 3, 4)
+    arr_error = rng.randn(1, 2, 3, 4)
     with testing.raises(ValueError):
         montage(arr_error)
 
-    arr_error = np.random.randn(1, 2, 3)
+    arr_error = rng.randn(1, 2, 3)
     with testing.raises(ValueError):
         montage(arr_error, channel_axis=-1)
 
-    arr_error = np.random.randn(1, 2, 3, 4, 5)
+    arr_error = rng.randn(1, 2, 3, 4, 5)
     with testing.raises(ValueError):
         montage(arr_error, channel_axis=-1)

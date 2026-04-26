@@ -3,7 +3,7 @@ import itertools
 import numpy as np
 import pytest
 
-from _skimage2._shared._dependency_checks import has_mpl
+from ...dependency_checks import has_mpl
 from _skimage2._shared._warnings import expected_warnings
 from _skimage2._shared.testing import run_in_parallel
 from _skimage2._shared.utils import _supported_float_type, convert_to_float
@@ -268,8 +268,8 @@ def test_reconstruct_with_wrong_angles():
 
 def _random_circle(shape):
     # Synthetic random data, zero outside reconstruction circle
-    np.random.seed(98312871)
-    image = np.random.rand(*shape)
+    rng = np.random.RandomState(98312871)
+    image = rng.rand(*shape)
     c0, c1 = np.ogrid[0 : shape[0], 0 : shape[1]]
     r = np.sqrt((c0 - shape[0] // 2) ** 2 + (c1 - shape[1] // 2) ** 2)
     radius = min(shape) // 2
@@ -382,11 +382,11 @@ def test_radon_iradon_circle(shape, interpolation, output_size):
 def test_order_angles_golden_ratio():
     from skimage.transform.radon_transform import order_angles_golden_ratio
 
-    np.random.seed(1231)
+    rng = np.random.RandomState(1817052179)
     lengths = [1, 4, 10, 180]
     for l in lengths:
         theta_ordered = np.linspace(0, 180, l, endpoint=False)
-        theta_random = np.random.uniform(0, 180, l)
+        theta_random = rng.uniform(0, 180, l)
         for theta in (theta_random, theta_ordered):
             indices = [x for x in order_angles_golden_ratio(theta)]
             # no duplicate indices allowed
@@ -432,8 +432,8 @@ def test_iradon_sart():
         print('delta (1 iteration, clip) =', delta)
         assert delta < 0.018 * error_factor
 
-        np.random.seed(1239867)
-        shifts = np.random.uniform(-3, 3, sinogram.shape[1])
+        rng = np.random.RandomState(126960598)
+        shifts = rng.uniform(-3, 3, sinogram.shape[1])
         x = np.arange(sinogram.shape[0])
         sinogram_shifted = np.vstack(
             [
