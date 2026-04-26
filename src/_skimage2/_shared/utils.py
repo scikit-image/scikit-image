@@ -709,7 +709,11 @@ class deprecate_func:
         note = "\n".join(textwrap.wrap(message))
         note = textwrap.indent(note, prefix="   ")
         note = f".. deprecated:: {self.deprecated_version}\n{note}"
-        if wrapped.__doc__ is None:
+
+        docstrings_optimized_away = sys.flags.optimize >= 2
+        if wrapped.__doc__ is None and not docstrings_optimized_away:
+            # Respect `-OO` flag (PYTHONOPTIMIZE) which discards docstrings,
+            # only insert note if docstrings aren't optimized away
             wrapped.__doc__ = note
         else:
             # Insert after first line

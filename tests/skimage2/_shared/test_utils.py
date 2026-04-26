@@ -200,6 +200,9 @@ def _deprecated_func():
     """
 
 
+@pytest.mark.skipif(
+    sys.flags.optimize >= 2, reason="docstrings unavailable with PYTHONOPTIMIZE=2"
+)
 def test_deprecate_func():
     with pytest.warns(FutureWarning) as record:
         _deprecated_func()
