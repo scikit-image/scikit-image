@@ -219,6 +219,7 @@ xfail_strict = true
 filterwarnings = [
     "error",
     "ignore::skimage.util.PendingSkimage2Change",
+    "ignore::_skimage2.ExperimentalAPIWarning",
     "ignore:.*use `imageio` or other I/O packages directly.*:FutureWarning",
     # warn by pyamg in ruge_stuben_solver
     "ignore:Implicit conversion of A to CSR:scipy.sparse.SparseEfficiencyWarning",
