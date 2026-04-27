@@ -316,8 +316,8 @@ Examples of running ``spin test``:
     # All tests
     spin test
 
-    # Doctests only (tests in docstrings)
-    spin test --doctest -- src
+    # Doctests only — requires an editable install
+    spin test --doctest -- src/skimage src/_skimage2
 
     # Tests inside directory(s)
     spin test -- tests/skimage/morphology
