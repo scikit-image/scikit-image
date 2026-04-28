@@ -1,6 +1,7 @@
 import re
 import sys
 import warnings
+import inspect
 
 import numpy as np
 import pytest
@@ -199,6 +200,9 @@ def _deprecated_func():
     """
 
 
+@pytest.mark.skipif(
+    sys.flags.optimize >= 2, reason="docstrings unavailable with PYTHONOPTIMIZE=2"
+)
 def test_deprecate_func():
     with pytest.warns(FutureWarning) as record:
         _deprecated_func()
@@ -209,6 +213,21 @@ def test_deprecate_func():
         "`_deprecated_func` is deprecated since version x and will be removed in "
         "version y. You are on your own."
     )
+
+    expected_doc = """\
+Dummy function used in `test_deprecate_func`.
+
+    .. deprecated:: x
+       `_deprecated_func` is deprecated since version x and will be removed
+       in version y. You are on your own.
+
+    The decorated function must be outside the test function, otherwise it
+    seems that the warning does not point at the calling location.
+    """
+    if sys.version_info[:2] >= (3, 13):
+        expected_doc = inspect.cleandoc(expected_doc) + "\n"
+
+    assert _deprecated_func.__doc__ == expected_doc
 
 
 @deprecate_parameter("old1", start_version="0.10", stop_version="0.12")
