@@ -11,7 +11,7 @@ from numpy.testing import (
 from scipy import ndimage as ndi
 
 from skimage import data, util
-from _skimage2._shared._dependency_checks import has_mpl
+from ...dependency_checks import uses_matplotlib
 from _skimage2._shared._warnings import expected_warnings
 from _skimage2._shared.utils import _supported_float_type
 from skimage.color import rgb2gray
@@ -56,7 +56,7 @@ class TestSimpleImage:
         with pytest.raises(RuntimeError):
             threshold_minimum(self.image)
 
-    @pytest.mark.skipif(not has_mpl, reason="matplotlib not installed")
+    @uses_matplotlib
     def test_try_all_threshold(self):
         fig, ax = try_all_threshold(self.image)
         all_texts = [axis.texts for axis in ax if axis.texts != []]
@@ -134,8 +134,8 @@ class TestSimpleImage:
         )
 
     def test_isodata_16bit(self):
-        np.random.seed(0)
-        imfloat = np.random.rand(256, 256)
+        rng = np.random.RandomState(1795262963)
+        imfloat = rng.rand(256, 256)
         assert 0.49 < threshold_isodata(imfloat, nbins=1024) < 0.51
         assert all(0.49 < threshold_isodata(imfloat, nbins=1024, return_all=True))
 
@@ -674,17 +674,17 @@ def test_triangle_flip():
 
 
 @pytest.mark.parametrize(
-    "window_size, mean_kernel",
+    "window_size, mean_kernel, seed",
     [
-        (11, np.full((11,) * 2, 1 / 11**2)),
-        ((11, 11), np.full((11, 11), 1 / 11**2)),
-        ((9, 13), np.full((9, 13), 1 / math.prod((9, 13)))),
-        ((13, 9), np.full((13, 9), 1 / math.prod((13, 9)))),
-        ((1, 9), np.full((1, 9), 1 / math.prod((1, 9)))),
+        (11, np.full((11,) * 2, 1 / 11**2), 317310117),
+        ((11, 11), np.full((11, 11), 1 / 11**2), 1663953107),
+        ((9, 13), np.full((9, 13), 1 / math.prod((9, 13))), 2452187392),
+        ((13, 9), np.full((13, 9), 1 / math.prod((13, 9))), 1114245815),
+        ((1, 9), np.full((1, 9), 1 / math.prod((1, 9))), 3827170363),
     ],
 )
-def test_mean_std_2d(window_size, mean_kernel):
-    image = np.random.rand(256, 256)
+def test_mean_std_2d(window_size, mean_kernel, seed):
+    image = np.random.RandomState(seed).rand(256, 256)
     m, s = _mean_std(image, w=window_size)
     expected_m = ndi.convolve(image, mean_kernel, mode='mirror')
     assert_allclose(m, expected_m)
@@ -693,16 +693,16 @@ def test_mean_std_2d(window_size, mean_kernel):
 
 
 @pytest.mark.parametrize(
-    "window_size, mean_kernel",
+    "window_size, mean_kernel, seed",
     [
-        (5, np.full((5,) * 3, 1 / 5) ** 3),
-        ((5, 5, 5), np.full((5, 5, 5), 1 / 5**3)),
-        ((1, 5, 5), np.full((1, 5, 5), 1 / 5**2)),
-        ((3, 5, 7), np.full((3, 5, 7), 1 / math.prod((3, 5, 7)))),
+        (5, np.full((5,) * 3, 1 / 5) ** 3, 1965237310),
+        ((5, 5, 5), np.full((5, 5, 5), 1 / 5**3), 2773814026),
+        ((1, 5, 5), np.full((1, 5, 5), 1 / 5**2), 3037394623),
+        ((3, 5, 7), np.full((3, 5, 7), 1 / math.prod((3, 5, 7))), 978791146),
     ],
 )
-def test_mean_std_3d(window_size, mean_kernel):
-    image = np.random.rand(40, 40, 40)
+def test_mean_std_3d(window_size, mean_kernel, seed):
+    image = np.random.RandomState(seed).rand(40, 40, 40)
     m, s = _mean_std(image, w=window_size)
     expected_m = ndi.convolve(image, mean_kernel, mode='mirror')
     assert_allclose(m, expected_m)
@@ -711,12 +711,16 @@ def test_mean_std_3d(window_size, mean_kernel):
 
 
 @pytest.mark.parametrize(
-    "threshold_func",
-    [threshold_local, threshold_niblack, threshold_sauvola],
+    "threshold_func, seed",
+    [
+        (threshold_local, 1049675590),
+        (threshold_niblack, 3775716978),
+        (threshold_sauvola, 2105970747),
+    ],
 )
 @pytest.mark.parametrize("dtype", [np.uint8, np.int16, np.float16, np.float32])
-def test_variable_dtypes(threshold_func, dtype):
-    r = 255 * np.random.rand(32, 16)
+def test_variable_dtypes(threshold_func, seed, dtype):
+    r = 255 * np.random.RandomState(seed).rand(32, 16)
     r = r.astype(dtype, copy=False)
 
     kwargs = {}

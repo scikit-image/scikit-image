@@ -31,9 +31,6 @@ from skimage.transform._geometric import (
 from skimage.util.dtype import img_as_float, _convert
 
 
-np.random.seed(0)
-
-
 def test_stackcopy():
     layers = 4
     x = np.empty((3, 3, layers))
@@ -491,7 +488,8 @@ def test_swirl(dtype):
 
 
 def test_const_cval_out_of_range():
-    img = np.random.randn(100, 100)
+    rng = np.random.RandomState(3986604183)
+    img = rng.randn(100, 100)
     cval = -10
     warped = warp(img, AffineTransform(translation=(10, 10)), cval=cval)
     assert np.sum(warped == cval) == (2 * 100 * 10 - 10 * 10)
@@ -660,7 +658,8 @@ def test_downscale_anti_aliasing():
 
 
 def test_downscale_to_the_limit():
-    img = np.random.rand(3, 4)
+    rng = np.random.RandomState(2617748681)
+    img = rng.rand(3, 4)
     out = rescale(img, 1e-3)
 
     assert out.size == 1
@@ -699,7 +698,8 @@ def test_inverse():
 
 
 def test_slow_warp_nonint_oshape():
-    image = np.random.rand(5, 5)
+    rng = np.random.RandomState(2127960812)
+    image = rng.rand(5, 5)
 
     with pytest.raises(ValueError):
         warp(image, lambda xy: xy, output_shape=(13.1, 19.5))
@@ -1055,7 +1055,8 @@ def test_nn_resize_int_img():
 
 @pytest.mark.parametrize("_type", [tuple, np.asarray, list])
 def test_output_shape_arg_type(_type):
-    img = np.random.rand(3, 3)
+    rng = np.random.RandomState(1838506389)
+    img = rng.rand(3, 3)
     output_shape = _type([5, 5])
 
     assert resize(img, output_shape).shape == tuple(output_shape)

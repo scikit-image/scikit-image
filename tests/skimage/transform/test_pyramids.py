@@ -45,8 +45,9 @@ def test_pyramid_reduce_gray_defaults():
 
 
 def test_pyramid_reduce_nd():
+    rng = np.random.RandomState(3878751090)
     for ndim in [1, 2, 3, 4]:
-        img = np.random.randn(*((8,) * ndim))
+        img = rng.randn(*((8,) * ndim))
         out = pyramids.pyramid_reduce(img, downscale=2, channel_axis=None)
         expected_shape = np.asarray(img.shape) / 2
         assert_array_equal(out.shape, expected_shape)
@@ -70,8 +71,9 @@ def test_pyramid_expand_gray():
 
 
 def test_pyramid_expand_nd():
+    rng = np.random.RandomState(1688411015)
     for ndim in [1, 2, 3, 4]:
-        img = np.random.randn(*((4,) * ndim))
+        img = rng.randn(*((4,) * ndim))
         out = pyramids.pyramid_expand(img, upscale=2, channel_axis=None)
         expected_shape = np.asarray(img.shape) * 2
         assert_array_equal(out.shape, expected_shape)
@@ -106,8 +108,9 @@ def test_build_gaussian_pyramid_gray_defaults():
 
 
 def test_build_gaussian_pyramid_nd():
+    rng = np.random.RandomState(2389286732)
     for ndim in [1, 2, 3, 4]:
-        img = np.random.randn(*((8,) * ndim))
+        img = rng.randn(*((8,) * ndim))
         original_shape = np.asarray(img.shape)
         pyramid = pyramids.pyramid_gaussian(img, downscale=2, channel_axis=None)
         for layer, out in enumerate(pyramid):
@@ -136,8 +139,9 @@ def test_build_laplacian_pyramid_defaults():
 
 
 def test_build_laplacian_pyramid_nd():
+    rng = np.random.RandomState(1225614083)
     for ndim in [1, 2, 3, 4]:
-        img = np.random.randn(*(16,) * ndim)
+        img = rng.randn(*(16,) * ndim)
         original_shape = np.asarray(img.shape)
         pyramid = pyramids.pyramid_laplacian(img, downscale=2, channel_axis=None)
         for layer, out in enumerate(pyramid):
@@ -195,6 +199,7 @@ def test_check_factor():
     'pyramid_func', [pyramids.pyramid_gaussian, pyramids.pyramid_laplacian]
 )
 def test_pyramid_dtype_support(pyramid_func, dtype):
+    rng = np.random.RandomState(3846286850)
     with warnings.catch_warnings():
         # Ignore arch specific warning on arm64, armhf, ppc64el, riscv64, s390x
         # https://github.com/scikit-image/scikit-image/issues/7391
@@ -203,7 +208,7 @@ def test_pyramid_dtype_support(pyramid_func, dtype):
             category=RuntimeWarning,
             message="invalid value encountered in cast",
         )
-        img = np.random.randn(32, 8).astype(dtype)
+        img = rng.randn(32, 8).astype(dtype)
 
     pyramid = pyramid_func(img)
     float_dtype = _supported_float_type(dtype)

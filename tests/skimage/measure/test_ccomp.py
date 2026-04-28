@@ -54,7 +54,8 @@ class TestConnectedComponents:
         assert_array_equal(label(self.x, background=9), self.labels_bg_9)
 
     def test_random(self):
-        x = (np.random.rand(20, 30) * 5).astype(int)
+        rng = np.random.RandomState(1110520038)
+        x = (rng.rand(20, 30) * 5).astype(int)
         labels = label(x)
 
         n = labels.max()
@@ -136,7 +137,8 @@ class TestConnectedComponents3d:
         assert self.x[0, 0, 2] == 2, "Data was modified!"
 
     def test_random(self):
-        x = (np.random.rand(20, 30) * 5).astype(int)
+        rng = np.random.RandomState(3281859548)
+        x = (rng.rand(20, 30) * 5).astype(int)
         labels = label(x)
 
         n = labels.max()
@@ -236,10 +238,11 @@ class TestConnectedComponents3d:
 class TestSupport:
     def test_reshape(self):
         shapes_in = ((3, 1, 2), (1, 4, 5), (3, 1, 1), (2, 1), (1,))
+        rng = np.random.RandomState(150384111)
         for shape in shapes_in:
             shape = np.array(shape)
             numones = sum(shape == 1)
-            inp = np.random.random(shape)
+            inp = rng.random(shape)
 
             fixed, swaps = ccomp.reshape_array(inp)
             shape2 = fixed.shape
