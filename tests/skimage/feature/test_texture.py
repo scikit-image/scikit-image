@@ -151,7 +151,8 @@ class TestGLCM:
         np.testing.assert_almost_equal(dissimilarity, 0.665, decimal=3)
 
     def test_non_normalized_glcm(self):
-        img = (np.random.random((100, 100)) * 8).astype(np.uint8)
+        rng = np.random.RandomState(997746073)
+        img = (rng.random((100, 100)) * 8).astype(np.uint8)
         p = graycomatrix(img, [1, 2, 4, 5], [0, 0.25, 1, 1.5], levels=8)
         np.testing.assert_(np.max(graycoprops(p, 'correlation')) < 1.0)
 
@@ -311,10 +312,10 @@ class TestLBP:
         # Test idea: mean of variance is estimate of overall variance.
 
         # Fix random seed for test stability.
-        np.random.seed(13141516)
+        rng = np.random.RandomState(13141516)
 
         # Create random image with known variance.
-        image = np.random.rand(500, 500)
+        image = rng.rand(500, 500)
         target_std = 0.3
         image = image / image.std() * target_std
 

@@ -39,6 +39,7 @@ class ApiDocWriter:
         rst_extension='.rst',
         package_skip_patterns=None,
         module_skip_patterns=None,
+        display_package_name=None,
     ):
         r"""Initialize package for parsing
 
@@ -49,6 +50,11 @@ class ApiDocWriter:
             name of an importable package.
         rst_extension : str, optional
             Extension for reST files, default '.rst'.
+        display_package_name : str, optional
+            Name to use in rendered titles and navigation instead of
+            *package_name*. Useful when the importable name (e.g.
+            ``_skimage2``) differs from the public-facing name
+            (e.g. ``skimage2``). Defaults to *package_name*.
         package_skip_patterns : None or sequence of {strings, regexps}
             Sequence of strings giving URIs of packages to be excluded
             Operates on the package path, starting at (including) the
@@ -69,9 +75,11 @@ class ApiDocWriter:
         if module_skip_patterns is None:
             module_skip_patterns = ['\\.setup$', '\\._']
         self.package_name = package_name
+        self.display_package_name = display_package_name or package_name
         self.rst_extension = rst_extension
         self.package_skip_patterns = package_skip_patterns
         self.module_skip_patterns = module_skip_patterns
+        self.module_preamble = None
 
     def get_package_name(self):
         return self._package_name
@@ -232,7 +240,10 @@ class ApiDocWriter:
             # figure out if obj is a function or class
             if isinstance(obj, (FunctionType, BuiltinFunctionType)):
                 functions.append(obj_str)
-            elif isinstance(obj, ModuleType) and 'skimage' in mod.__name__:
+            elif (
+                isinstance(obj, ModuleType)
+                and self.package_name.split('.')[0] in mod.__name__
+            ):
                 submodules.append(obj_str)
             else:
                 try:
@@ -290,11 +301,15 @@ class ApiDocWriter:
 
         # Set the chapter title to read 'module' for all modules except for the
         # main packages
-        title = ':mod:`' + uri + '`'
+        display_uri = uri.replace(self.package_name, self.display_package_name, 1)
+        title = ':mod:`' + display_uri + '`'
         ad += title + '\n' + self.rst_section_levels[1] * len(title) + '\n\n'
 
-        ad += '.. automodule:: ' + uri + '\n\n'
-        ad += '.. currentmodule:: ' + uri + '\n\n'
+        if self.module_preamble is not None:
+            ad += self.module_preamble + '\n\n'
+
+        ad += '.. automodule:: ' + display_uri + '\n\n'
+        ad += '.. currentmodule:: ' + display_uri + '\n\n'
         ad += '.. autosummary::\n   :nosignatures:\n\n'
         for f in functions:
             ad += '   ' + f + '\n'
@@ -310,7 +325,7 @@ class ApiDocWriter:
             ad += "------------\n\n"
             # must NOT exclude from index to keep cross-refs working
             ad += '\n.. autofunction:: ' + f + '\n\n'
-            ad += f'    .. minigallery:: {uri}.{f}\n\n'
+            ad += f'    .. minigallery:: {display_uri}.{f}\n\n'
         for c in classes:
             ad += '\n.. autoclass:: ' + c + '\n'
             # must NOT exclude from index to keep cross-refs working
@@ -322,7 +337,7 @@ class ApiDocWriter:
                 '\n'
                 '  .. automethod:: __init__\n\n'
             )
-            ad += f'    .. minigallery:: {uri}.{c}\n\n'
+            ad += f'    .. minigallery:: {display_uri}.{c}\n\n'
         return ad
 
     def _survives_exclude(self, matchstr, match_type):
@@ -407,11 +422,12 @@ class ApiDocWriter:
             api_str = self.generate_api_doc(m)
             if not api_str:
                 continue
-            # write out to file
-            outfile = os.path.join(outdir, m + self.rst_extension)
+            # write out to file using display name so URLs omit leading underscores
+            display_m = m.replace(self.package_name, self.display_package_name, 1)
+            outfile = os.path.join(outdir, display_m + self.rst_extension)
             with open(outfile, 'w') as fileobj:
                 fileobj.write(api_str)
-            written_modules.append(m)
+            written_modules.append(display_m)
         self.written_modules = written_modules
 
     def write_api_docs(self, outdir):
@@ -433,7 +449,15 @@ class ApiDocWriter:
         modules = self.discover_modules()
         self.write_modules_api(modules, outdir)
 
-    def write_index(self, outdir, froot='gen', relative_to=None):
+    def write_index(
+        self,
+        outdir,
+        froot='gen',
+        relative_to=None,
+        title="API reference",
+        include_license=True,
+        preamble=None,
+    ):
         """Make a reST API index file from the written files.
 
         Parameters
@@ -448,6 +472,9 @@ class ApiDocWriter:
             component of the written file path will be removed from
             outdir, in the generated index. Default is None, meaning,
             leave path as it is.
+        preamble : str, optional
+            Optional reStructuredText to insert between the page title and
+            the toctree.  Useful for adding warnings or notices.
         """
         if self.written_modules is None:
             raise ValueError('No modules written')
@@ -468,16 +495,26 @@ class ApiDocWriter:
             # if `skimage.submodule`, only show `submodule`,
             # if it is `skimage.submodule.subsubmodule`, ignore.
 
-            title = "API reference"
             w(title + "\n")
             w("=" * len(title) + "\n\n")
+
+            if preamble is not None:
+                w(preamble + "\n\n")
 
             w('.. toctree::\n')
             w('   :maxdepth: 1\n\n')
             for f in self.written_modules:
-                w(f'   {os.path.join(relpath, f)}\n\n')
+                path_entry = os.path.join(relpath, f)
+                if self.display_package_name != self.package_name:
+                    display_f = f.replace(
+                        self.package_name, self.display_package_name, 1
+                    )
+                    w(f'   {display_f} <{path_entry}>\n\n')
+                else:
+                    w(f'   {path_entry}\n\n')
 
-            w('----------------------\n\n')
-            w('.. toctree::\n')
-            w('   :maxdepth: 1\n\n')
-            w('   ../license\n')
+            if include_license:
+                w('----------------------\n\n')
+                w('.. toctree::\n')
+                w('   :maxdepth: 1\n\n')
+                w('   ../license\n')

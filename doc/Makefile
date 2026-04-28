@@ -14,6 +14,8 @@ PAPEROPT_letter = -D latex_paper_size=letter
 ALLSPHINXOPTS   = -d $(SPHINXCACHE) $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) source
 DEST            = build
 
+MIGRATION_TPL = source/user_guide/skimage2_migration.rst.tpl
+
 .PHONY: all help clean html dirhtml pickle json htmlhelp qthelp latex changes linkcheck doctest gitwash release_notes
 
 all: html
@@ -45,8 +47,11 @@ api:
 	$(PYTHON) tools/build_modref_templates.py
 	@echo "Build API docs...done."
 
+migration-doc:
+	$(PYTHON) tools/build_migration.py $(MIGRATION_TPL) --doctest
+	@echo "Build migration template...done."
 
-html: api
+html: migration-doc api
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(DEST)/html
 	@echo
 	@echo "Build finished. The HTML pages are in build/html."

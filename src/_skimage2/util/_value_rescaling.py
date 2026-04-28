@@ -32,7 +32,7 @@ def rescale_minmax(image):
 
     References
     ----------
-    .. [1]: https://en.wikipedia.org/wiki/Feature_scaling#Rescaling_(min-max_normalization)
+    .. [1] https://en.wikipedia.org/wiki/Feature_scaling#Rescaling_(min-max_normalization)
 
     Examples
     --------
