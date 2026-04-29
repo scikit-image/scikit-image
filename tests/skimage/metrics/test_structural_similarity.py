@@ -144,20 +144,17 @@ def test_structural_similarity_multichannel(channel_axis):
 
 
 @pytest.mark.parametrize('dtype', [np.uint8, np.float32, np.float64])
-def test_structural_similarity_nD(dtype):
+@pytest.mark.parametrize('ndim', [1, 2, 3, 4])
+def test_structural_similarity_nD(dtype, ndim):
     # test 1D through 4D on small random arrays
-    N = 10
-    rng = np.random.RandomState(978242013)
-    for ndim in range(1, 5):
-        xsize = [
-            N,
-        ] * 5
-        X = (rng.rand(*xsize) * 255).astype(dtype)
-        Y = (rng.rand(*xsize) * 255).astype(dtype)
+    rng = np.random.default_rng(20260429)
+    shape = (24 // ndim,) * ndim
+    X = (rng.random(shape) * 255).astype(dtype)
+    Y = (rng.random(shape) * 255).astype(dtype)
 
-        mssim = structural_similarity(X, Y, win_size=3, data_range=255.0)
-        assert mssim.dtype == np.float64
-        assert mssim < 0.05
+    mssim = structural_similarity(X, Y, win_size=3, data_range=255.0)
+    assert mssim.dtype == np.float64
+    assert mssim < 0.05
 
 
 def test_structural_similarity_multichannel_chelsea():
