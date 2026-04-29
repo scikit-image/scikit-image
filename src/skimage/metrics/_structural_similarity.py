@@ -1,16 +1,48 @@
-from textwrap import dedent
-
 import numpy as np
 
 import _skimage2 as ski2
 from _skimage2._shared._warnings import warn_external
 
-from ..util import PendingSkimage2Change
+from .._migration import ski2_migration_decorator
 from ..util.dtype import dtype_range
+
 
 __all__ = ['structural_similarity']
 
 
+@ski2_migration_decorator(
+    r"""
+``%(qname_old)s`` is deprecated in favor of
+``%(qname_new)s``, which has a new signature.
+The parameter `data_range` is now a required parameter.
+
+If you didn't provide `data_range` explicitly before and relied on its
+default behavior, you can keep the old (``skimage``, v1.x) behavior by
+setting the parameter explicitly.
+
+<!--- cond-start: doc -->
+For example:
+
+>>> import numpy as np
+>>> import skimage as ski
+>>> import skimage2 as ski2
+...
+>>> im1 = np.arange(20)
+>>> im2 = im1 // 2
+...
+>>> result1 = ski.metrics.structural_similarity(im1, im2)
+...
+>>> data_range = np.iinfo(im1.dtype).max - np.iinfo(im1.dtype).min
+>>> result2 = ski2.metrics.structural_similarity(im1, im2, data_range=data_range)
+...
+>>> np.testing.assert_equal(result1, result2)
+
+<!--- cond-end -->
+For floating dtypes, setting `data_range` was already required in
+``skimage``/v1.x.
+""",
+    qname_old='skimage.metrics.structural_similarity',
+)
 def structural_similarity(
     im1,
     im2,
@@ -114,28 +146,6 @@ def structural_similarity(
        :DOI:`10.1007/s10043-009-0119-z`
 
     """
-    warn_external(
-        dedent("""\
-        `skimage.metrics.structural_similarity` is deprecated in favor of
-        `skimage2.metrics.structural_similarity` which has a new signature.
-        The parameter `data_range` is now a required parameter.
-
-        If you didn't provide `data_range` explicitly before and relied on its
-        default behavior, you can keep the old (`skimage`, v1.x) behavior with:
-
-            import numpy as np
-            import skimage2 as ski2
-            data_range = np.iinfo(im1.dtype).max - np.iinfo(im1.dtype).min
-            ski2.metrics.structural_similarity(
-                im1, im2, data_range=data_range, ...
-            )
-
-        For floating dtypes, setting `data_range` was already required in
-        `skimage`/v1.x.
-        """),
-        category=PendingSkimage2Change,
-    )
-
     if data_range is None:
         if np.issubdtype(im1.dtype, np.floating) or np.issubdtype(
             im2.dtype, np.floating
