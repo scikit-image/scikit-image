@@ -21,7 +21,10 @@ def structural_similarity(
     channel_axis=None,
     gaussian_weights=False,
     full=False,
-    **kwargs,
+    use_sample_covariance=True,
+    K1=0.01,
+    K2=0.03,
+    sigma=1.5,
 ):
     """Compute the mean structural similarity index between two images.
 
@@ -47,17 +50,14 @@ def structural_similarity(
         normalized Gaussian kernel of width sigma=1.5.
     full : bool, optional
         If True, also return the full structural similarity image.
-
-    Other Parameters
-    ----------------
-    use_sample_covariance : bool
+    use_sample_covariance : bool, optional
         If True, normalize covariances by N-1 rather than, N where N is the
         number of pixels within the sliding window.
-    K1 : float
+    K1 : float, optional
         Algorithm parameter, K1 (small constant, see [1]_).
-    K2 : float
+    K2 : float, optional
         Algorithm parameter, K2 (small constant, see [1]_).
-    sigma : float
+    sigma : float, optional
         Standard deviation for the Gaussian when `gaussian_weights` is True.
 
     Returns
@@ -117,15 +117,18 @@ def structural_similarity(
 
     if channel_axis is not None:
         # loop over channels
-        args = dict(
+        kwargs = dict(
             win_size=win_size,
             gradient=gradient,
             data_range=data_range,
             channel_axis=None,
             gaussian_weights=gaussian_weights,
             full=full,
+            use_sample_covariance=use_sample_covariance,
+            K1=K1,
+            K2=K2,
+            sigma=sigma,
         )
-        args.update(kwargs)
         nch = im1.shape[channel_axis]
         mssim = np.empty(nch, dtype=float_type)
 
@@ -136,7 +139,7 @@ def structural_similarity(
         channel_axis = channel_axis % im1.ndim
         _at = functools.partial(utils.slice_at_axis, axis=channel_axis)
         for ch in range(nch):
-            ch_result = structural_similarity(im1[_at(ch)], im2[_at(ch)], **args)
+            ch_result = structural_similarity(im1[_at(ch)], im2[_at(ch)], **kwargs)
             if gradient and full:
                 mssim[ch], G[_at(ch)], S[_at(ch)] = ch_result
             elif gradient:
@@ -155,16 +158,12 @@ def structural_similarity(
         else:
             return mssim
 
-    K1 = kwargs.pop('K1', 0.01)
-    K2 = kwargs.pop('K2', 0.03)
-    sigma = kwargs.pop('sigma', 1.5)
     if K1 < 0:
         raise ValueError("K1 must be positive")
     if K2 < 0:
         raise ValueError("K2 must be positive")
     if sigma < 0:
         raise ValueError("sigma must be positive")
-    use_sample_covariance = kwargs.pop('use_sample_covariance', True)
 
     if gaussian_weights:
         # Set to give an 11-tap filter with the default sigma of 1.5 to match
