@@ -1,7 +1,6 @@
 import functools
 import math
 from itertools import combinations_with_replacement
-from textwrap import dedent
 
 import numpy as np
 from scipy import ndimage as ndi
@@ -11,10 +10,11 @@ from _skimage2._shared.filters import gaussian
 from _skimage2._shared.utils import _supported_float_type, safe_as_int
 from _skimage2._shared._warnings import warn_external
 from ..transform import integral_image
-from ..util import img_as_float, PendingSkimage2Change
+from ..util import img_as_float
 from ._hessian_det_appx import _hessian_matrix_det
 from .corner_cy import _corner_fast, _corner_moravec, _corner_orientations
 from .util import _prepare_grayscale_input_2D, _prepare_grayscale_input_nD
+from .._migration import ski2_migration_decorator
 
 
 def _compute_derivatives(image, mode='constant', cval=0):
@@ -1123,6 +1123,114 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
     return corners_subpix
 
 
+@ski2_migration_decorator(
+    r"""
+    ``%(qname_old)s`` is deprecated in favor of
+    ``%(qname_new)s`` with new behavior:
+
+    * Peaks are removed when `< min_distance`, was `<= min_distance`
+    * Parameter `indices` is removed
+    * Parameter `p_norm` defaults to 2 (Euclidean distance),
+      was `numpy.inf` (Chebyshev distance)
+    * Parameter `exclude_border` defaults to 1, was ``True``
+    * Parameter `exclude_border` no longer accepts `False` and `True`,
+      pass 0 instead of `False`, or the value of `min_distance` instead of `True`
+    * Parameters after `image` are keyword-only
+
+    To keep the old behavior when switching to `skimage2`, update your call
+    according to the following cases:
+
+    <!--- cond-start: warning -->
+    * `min_distance` not passed, use `min_distance=np.nextafter(1, np.inf)
+    * `min_distance=<number>`, use `min_distance=np.nextafter(<number>, np.inf)
+    * `exclude_border` not passed, use `exclude_border=<value_of_min_distance>`
+    * `exclude_border=True`, same as above
+    * `exclude_border=False`, use `exclude_border=0`
+    * `exclude_border=<int>`, no change necessary
+    * `p_norm` not passed, use `p_norm=numpy.inf`
+    * `p_norm=<float>`, no change necessary
+    * `indices=True` or not passed, no change necessary
+    * `indices=False`, boolean mask with:
+          coords = ski2.feature.peak_local_max(...)
+          peaks = np.zeros_like(image, dtype=bool)
+          peaks[tuple(coords.T)] = True
+    <!--- cond-end -->
+    <!--- cond-start: doc -->
+    .. list-table::
+        :header-rows: 1
+
+        - - In `skimage`
+          - In `skimage2`
+
+        - - `min_distance` not passed (default)
+          - Use ``min_distance=numpy.nextafter(1, numpy.inf)``
+
+        - - ``min_distance=<number>``
+          - Use ``min_distance=numpy.nextafter(<number>, numpy.inf)``
+
+        - - `exclude_border` not passed (default)
+          - Assign it the same value as `min_distance` which may be its default
+            value ``1``. If `min_distance` is a float,
+            use ``int(np.floor(min_distance))``
+
+        - - ``exclude_border=True``
+          - Same as above in the default case.
+
+        - - ``exclude_border=False``
+          - Use ``min_distance=0``.
+
+        - - ``exclude_border=<int>``
+          - No change necessary.
+
+        - - ``p_norm`` not passed (default)
+          - Pass the Skimage 1 default explicitly with ``p_norm=numpy.inf``.
+
+        - - ``p_norm=<float>``
+          - No change necessary.
+
+        - - ``indices=True`` or not passed (default)
+          - No change necessary.
+
+        - - ``indices=False``
+          - Reconstruct peak mask with::
+
+               coords = ski2.feature.peak_local_max(...)
+               peaks = np.zeros_like(image, dtype=bool)
+               peaks[tuple(coords.T)] = True
+
+    Other keyword parameters can be left unchanged.
+
+    >>> import numpy as np
+    >>> import skimage as ski1
+    >>> import skimage2 as ski2
+    ...
+    >>> image = ski1.data.camera()
+    ...
+    >>> res1 = ski1.feature.corner_peaks(image)
+    >>> res2 = ski2.feature.peak_local_max(
+    ...     image,
+    ...     min_distance=np.nextafter(1, np.inf),
+    ...     exclude_border=1,
+    ...     p_norm=np.inf,
+    ... )
+    >>> np.testing.assert_equal(res1, res2)
+    ...
+    >>> res1 = ski1.feature.corner_peaks(image, min_distance=10, indices=False)
+    >>> coords2 = ski2.feature.peak_local_max(
+    ...     image,
+    ...     min_distance=np.nextafter(10, np.inf),
+    ...     exclude_border=10,
+    ...     p_norm=np.inf
+    ... )
+    >>> res2 = np.zeros_like(image, dtype=bool)
+    >>> res2[tuple(coords2.T)] = True
+    >>> np.testing.assert_equal(res1, res2)
+
+    <!--- cond-end -->
+    """,
+    qname_old='skimage.feature.corner_peaks',
+    qname_new='skimage2.feature.peak_local_max',
+)
 def corner_peaks(
     image,
     min_distance=1,
@@ -1244,49 +1352,6 @@ def corner_peaks(
     array([[2, 2]])
 
     """
-    warn_external(
-        dedent("""\
-        `skimage.feature.corner_peaks` is deprecated in favor of
-        `skimage2.feature.peak_local_max` with new behavior:
-
-        * Peaks are removed when `< min_distance`, was `<= min_distance`
-        * Parameter `p_norm` defaults to 2 (Euclidean distance),
-          was `numpy.inf` (Chebyshev distance)
-        * Parameter `exclude_border` defaults to 1, was `True`
-        * Parameter `exclude_border` no longer accepts `False` and `True`,
-          pass 0 instead of `False`,
-          or the value of `min_distance` instead of `True`
-        * Parameters after `image` are keyword-only
-        * Parameter `indices` is removed.
-
-        To keep the old behavior when switching to `skimage2`, use
-
-            new_min_distance = np.nextafter(old_min_distance, np.inf)
-            coords = ski2.feature.peak_local_max(
-                image, min_distance=new_min_distance, ...
-            )
-
-        Regarding `exclude_border` and `p_norm`, update according to the following
-        cases:
-
-        * `exclude_border` not passed, use `exclude_border=old_min_distance`
-        * `exclude_border=True`, same as above
-        * `exclude_border=False`, use `exclude_border=0`
-        * `exclude_border=<int>`, no change necessary
-        * `p_norm` not passed, use `p_norm=numpy.inf`
-        * `p_norm=<float>`, no change necessary
-
-        If you used `indices=False` to return boolean mask of peaks, you can derive it from `coords` with:
-
-            coords = ski2.feature.peak_local_max(...)
-            peaks = np.zeros_like(image, dtype=bool)
-            peaks[tuple(coords.T)] = True
-
-        Other keyword parameters can be left unchanged.
-        """),
-        category=PendingSkimage2Change,
-    )
-
     # Deprecate passing `np.inf` to `num_peaks` and `num_peaks_per_label`
     if num_peaks is not None and np.isinf(num_peaks):
         num_peaks = None
