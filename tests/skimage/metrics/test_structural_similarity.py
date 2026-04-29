@@ -176,6 +176,27 @@ def test_structural_similarity_multichannel_chelsea():
     assert_equal(structural_similarity(Xc, Xc, channel_axis=-1), 1.0)
 
 
+@pytest.mark.parametrize('gaussian_weights', [True, False])
+def test_structural_similarity_dtype_insensitivity(gaussian_weights):
+    # Result of `structural_similarity` should be insensitive to the input dtype
+    image_int = np.arange(100, dtype=np.int64)
+    mssim_int = structural_similarity(
+        image_int[1:],
+        image_int[:-1],
+        data_range=image_int.max(),
+        gaussian_weights=gaussian_weights,
+    )
+    image_float = image_int.astype(np.float64)
+    mssim_float = structural_similarity(
+        image_float[1:],
+        image_float[:-1],
+        data_range=image_float.max(),
+        gaussian_weights=gaussian_weights,
+    )
+    assert mssim_float == mssim_int
+    assert mssim_float < 1.0
+
+
 def test_gaussian_structural_similarity_vs_IPOL():
     """Tests vs. imdiff result from the following IPOL article and code:
     https://www.ipol.im/pub/art/2011/g_lmii/.
