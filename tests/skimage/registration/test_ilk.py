@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from skimage._shared.utils import _supported_float_type
+from _skimage2._shared.utils import _supported_float_type
 from skimage.registration import optical_flow_ilk
 from skimage.transform import warp
 
@@ -40,8 +40,8 @@ def _sin_flow_gen(image0, max_motion=4.5, npics=5):
 @pytest.mark.parametrize('prefilter', [True, False])
 def test_2d_motion(dtype, gaussian, prefilter):
     # Generate synthetic data
-    rng = np.random.default_rng(0)
-    image0 = rng.normal(size=(256, 256))
+    rng = np.random.RandomState(3125274530)
+    image0 = rng.randn(256, 256)
     gt_flow, image1 = _sin_flow_gen(image0)
     image1 = image1.astype(dtype, copy=False)
     float_dtype = _supported_float_type(dtype)
@@ -64,6 +64,7 @@ def test_2d_motion(dtype, gaussian, prefilter):
 @pytest.mark.parametrize('prefilter', [True, False])
 def test_3d_motion(gaussian, prefilter):
     # Generate synthetic data
+    # test results depend on the seed value and RNG
     rng = np.random.default_rng(123)
     image0 = rng.normal(size=(50, 55, 60))
     gt_flow, image1 = _sin_flow_gen(image0, npics=3)
@@ -77,8 +78,8 @@ def test_3d_motion(gaussian, prefilter):
 
 
 def test_no_motion_2d():
-    rng = np.random.default_rng(0)
-    img = rng.normal(size=(256, 256))
+    rng = np.random.RandomState(1856033849)
+    img = rng.randn(256, 256)
 
     flow = optical_flow_ilk(img, img)
 
@@ -86,8 +87,8 @@ def test_no_motion_2d():
 
 
 def test_no_motion_3d():
-    rng = np.random.default_rng(0)
-    img = rng.normal(size=(64, 64, 64))
+    rng = np.random.RandomState(523949697)
+    img = rng.randn(64, 64, 64)
 
     flow = optical_flow_ilk(img, img)
 
@@ -96,8 +97,8 @@ def test_no_motion_3d():
 
 def test_optical_flow_dtype():
     # Generate synthetic data
-    rng = np.random.default_rng(0)
-    image0 = rng.normal(size=(256, 256))
+    rng = np.random.RandomState(3458508791)
+    image0 = rng.randn(256, 256)
     gt_flow, image1 = _sin_flow_gen(image0)
     # Estimate the flow at double precision
     flow_f64 = optical_flow_ilk(image0, image1, dtype='float64')
@@ -116,15 +117,15 @@ def test_optical_flow_dtype():
 
 
 def test_incompatible_shapes():
-    rng = np.random.default_rng(0)
-    I0 = rng.normal(size=(256, 256))
-    I1 = rng.normal(size=(255, 256))
+    rng = np.random.RandomState(811850096)
+    I0 = rng.randn(256, 256)
+    I1 = rng.randn(255, 256)
     with pytest.raises(ValueError):
         u, v = optical_flow_ilk(I0, I1)
 
 
 def test_wrong_dtype():
-    rng = np.random.default_rng(0)
-    img = rng.normal(size=(256, 256))
+    rng = np.random.RandomState(87830699)
+    img = rng.randn(256, 256)
     with pytest.raises(ValueError):
         u, v = optical_flow_ilk(img, img, dtype='int')

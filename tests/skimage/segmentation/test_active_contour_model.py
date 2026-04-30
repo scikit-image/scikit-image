@@ -3,7 +3,7 @@ import pytest
 from numpy.testing import assert_equal, assert_allclose
 
 from skimage import data
-from skimage._shared.utils import _supported_float_type
+from _skimage2._shared.utils import _supported_float_type
 from skimage.color import rgb2gray
 from skimage.filters import gaussian
 from skimage.segmentation import active_contour

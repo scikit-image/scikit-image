@@ -2,7 +2,7 @@ import networkx as nx
 import numpy as np
 from scipy.sparse import linalg
 
-from skimage._shared.compat import SCIPY_GE_1_17_0_DEV0
+from _skimage2._shared.compat import SCIPY_GE_1_17_0_DEV0
 from . import _ncut, _ncut_cy
 
 

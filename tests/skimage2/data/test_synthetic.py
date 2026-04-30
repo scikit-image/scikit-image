@@ -3,7 +3,7 @@ import pytest
 from numpy.testing import assert_almost_equal
 
 from _skimage2.data import binary_blobs
-from skimage._shared.testing import assert_stacklevel
+from _skimage2._shared.testing import assert_stacklevel
 
 
 SEED = 3  # Pin randomness of tests

@@ -9,7 +9,7 @@ import numpy as np
 import pytest
 from numpy.testing import assert_equal
 
-from skimage._shared.testing import fetch, assert_stacklevel
+from _skimage2._shared.testing import fetch, assert_stacklevel
 from skimage.morphology import footprints
 from skimage.morphology import footprint_rectangle, footprint_from_sequence
 

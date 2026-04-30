@@ -2,20 +2,18 @@
 
 import inspect
 import re
-import warnings
+from warnings import warn
 
 import pytest
 from numpy.testing import assert_equal
-from skimage._shared.testing import (
+from _skimage2._shared.testing import (
     doctest_skip_parser,
     run_in_parallel,
     assert_stacklevel,
 )
-from skimage._shared import testing
-from skimage._shared._dependency_checks import is_wasm
-
-from skimage._shared._warnings import expected_warnings
-from warnings import warn
+from _skimage2._shared import testing
+from _skimage2._shared._dependency_checks import is_wasm
+from _skimage2._shared._warnings import expected_warnings
 
 
 def test_skipper():
@@ -134,7 +132,7 @@ def test_expected_warnings_noop():
 
 class Test_assert_stacklevel:
     def raise_warning(self, *args, **kwargs):
-        warnings.warn(*args, **kwargs)
+        warn(*args, **kwargs)
 
     def test_correct_stacklevel(self):
         # Should pass if stacklevel is set correctly
