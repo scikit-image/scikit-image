@@ -20,9 +20,6 @@ IMG_COMPARE_PRECISION = 4 if IS_MACOS_ARM else 6
 i, j = np.meshgrid(np.linspace(1, 4, 4), np.linspace(1, 4, 4))
 x = 100 / np.pi * np.exp(-(i**2 / 2 + j**2 / 2))  # test data
 map_overlap_def = x + x.mean()
-map_overlap_res = np.array(
-    [[16, 17, 18, 19], [20, 21, 22, 23], [24, 25, 26, 27], [28, 29, 30, 31]]
-)
 
 
 def test_apply_parallel():
@@ -131,15 +128,23 @@ def test_apply_parallel_nearest():
     # Test that NumPy mode 'edge' gets converted to the Dask boundary value
     # 'nearest'.
     def func(arr):
-        return arr + arr.size
+        return arr + arr.mean()
 
     chunks = (2, 2)
-    depth = 1
+    depth = 2
     # import dask.array as da
     # d = da.from_array(x, chunks=(2, 2))
-    # map_overlap_res = d.map_overlap(func, depth=1, boundary='nearest').compute()
+    # map_overlap_res = d.map_overlap(func, depth=depth, boundary='nearest').compute()
+    res = np.array(
+        [
+            [15.12880701, 6.03168737, 1.52538841, 1.3173895],
+            [6.03168737, 4.0018456, 1.35876886, 1.31235802],
+            [1.52538841, 1.35876886, 0.50658187, 0.50277223],
+            [1.3173895, 1.31235802, 0.50277223, 0.50265719],
+        ]
+    )
     edge = apply_parallel(func, x, chunks=chunks, depth=depth, mode='edge')
-    assert_array_almost_equal(edge, map_overlap_res)
+    assert_array_almost_equal(edge, res)
 
 
 def test_apply_parallel_symmetric():
@@ -148,15 +153,23 @@ def test_apply_parallel_symmetric():
     """
 
     def func(arr):
-        return arr + arr.size
+        return arr + arr.mean()
 
     chunks = (2, 2)
-    depth = 1
+    depth = 2
     # import dask.array as da
     # d = da.from_array(x, chunks=(2, 2))
-    # map_overlap_res = d.map_overlap(func, depth=1, boundary='reflect').compute()
+    # map_overlap_res = d.map_overlap(func, depth=depth, boundary='reflect').compute()
+    res = np.array(
+        [
+            [13.68662852, 4.58950888, 1.22550144, 1.01750252],
+            [4.58950888, 2.55966711, 1.05888188, 1.01247105],
+            [1.22550144, 1.05888188, 0.52104919, 0.51723956],
+            [1.01750252, 1.01247105, 0.51723956, 0.51712452],
+        ]
+    )
     symm = apply_parallel(func, x, chunks=chunks, depth=depth, mode='symmetric')
-    assert_array_almost_equal(symm, map_overlap_res)
+    assert_array_almost_equal(symm, res)
 
 
 @pytest.mark.parametrize('dtype', (np.float32, np.float64))
