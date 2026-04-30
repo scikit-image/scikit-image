@@ -20,7 +20,7 @@ References
 
 import numpy as np
 
-from .._shared.utils import _supported_float_type
+from _skimage2._shared.utils import _supported_float_type
 from .colorconv import lab2lch, _cart2polar_2pi
 
 

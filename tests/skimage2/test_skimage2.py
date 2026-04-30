@@ -4,7 +4,7 @@ import subprocess
 
 import pytest
 
-from skimage._shared._dependency_checks import is_wasm
+from _skimage2._shared._dependency_checks import is_wasm
 
 
 @pytest.mark.skipif(is_wasm, reason="emscripten does not support processes")

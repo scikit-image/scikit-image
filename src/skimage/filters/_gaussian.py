@@ -1,6 +1,6 @@
 import numpy as np
 
-from .._shared.filters import gaussian
+from _skimage2._shared.filters import gaussian
 from ..util import img_as_float
 
 __all__ = ['gaussian', 'difference_of_gaussians']

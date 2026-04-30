@@ -22,7 +22,7 @@ from configparser import ConfigParser
 from glob import glob
 from contextlib import contextmanager
 
-from .._shared.utils import deprecate_func
+from _skimage2._shared.utils import deprecate_func
 from .collection import imread_collection_wrapper
 
 __all__ = [

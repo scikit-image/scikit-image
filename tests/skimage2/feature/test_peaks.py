@@ -12,15 +12,17 @@ from _skimage2.feature import peak_local_max
 @pytest.mark.parametrize("p", [1, 2, np.inf])
 @pytest.mark.parametrize("size", [30, 50, None])
 def test_ensure_spacing_trivial(p, size):
+    rng = np.random.RandomState(2744269591)
+
     # --- Empty input
     assert_equal(_ensure_spacing([], p_norm=p), [])
 
     # --- A unique point
-    coord = np.random.randn(1, 2)
+    coord = rng.randn(1, 2)
     assert_equal(coord, _ensure_spacing(coord, p_norm=p, min_split_size=size))
 
     # --- Verified spacing
-    coord = np.random.randn(100, 2)
+    coord = rng.randn(100, 2)
 
     # --- 0 spacing
     assert_equal(
@@ -48,7 +50,8 @@ def test_ensure_spacing_nD(ndim, size):
 @pytest.mark.parametrize("p", [1, 2, np.inf])
 @pytest.mark.parametrize("size", [50, 100, None])
 def test_ensure_spacing_batch_processing(p, size):
-    coord = np.random.randn(100, 2)
+    rng = np.random.RandomState(307271047)
+    coord = rng.randn(100, 2)
 
     # --- Consider the average distance between the point as spacing
     spacing = np.median(pdist(coord, metric=minkowski, p=p))
@@ -65,7 +68,8 @@ def test_ensure_spacing_max_batch_size():
 
     https://github.com/scikit-image/scikit-image/pull/6035#discussion_r751518691
     """
-    coords = np.random.randint(low=0, high=1848, size=(40000, 2))
+    rng = np.random.RandomState(4215035982)
+    coords = rng.randint(low=0, high=1848, size=(40000, 2))
     tstart = time.time()
     _ensure_spacing(coords, spacing=100, min_split_size=50, max_split_size=2000)
     dur1 = time.time() - tstart
@@ -84,7 +88,8 @@ def test_ensure_spacing_max_batch_size():
 @pytest.mark.parametrize("p", [1, 2, np.inf])
 @pytest.mark.parametrize("size", [30, 50, None])
 def test_ensure_spacing_p_norm(p, size):
-    coord = np.random.randn(100, 2)
+    rng = np.random.RandomState(584676969)
+    coord = rng.randn(100, 2)
 
     # --- Consider the average distance between the point as spacing
     spacing = np.median(pdist(coord, metric=minkowski, p=p))

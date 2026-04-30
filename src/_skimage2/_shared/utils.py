@@ -2,6 +2,7 @@ import functools
 import inspect
 import sys
 import warnings
+import textwrap
 from contextlib import contextmanager
 
 import numpy as np
@@ -268,7 +269,7 @@ class deprecate_parameter:
 
     Examples
     --------
-    >>> from skimage._shared.utils import deprecate_parameter, DEPRECATED
+    >>> from _skimage2._shared.utils import deprecate_parameter, DEPRECATED
     >>> @deprecate_parameter(
     ...     "b", new_name="c", start_version="0.1", stop_version="0.3"
     ... )
@@ -671,11 +672,9 @@ class deprecate_func:
     ... )
     ... def foo():
     ...     pass
-
-    Calling ``foo`` will warn with::
-
-        FutureWarning: `foo` is deprecated since version 1.0.0
-        and will be removed in version 1.2.0. Use `bar` instead.
+    >>> foo()  # doctest: +SHOW_WARNINGS
+    FutureWarning: `foo` is deprecated since version 1.0.0
+    and will be removed in version 1.2.0. Use `bar` instead.
     """
 
     def __init__(
@@ -707,11 +706,24 @@ class deprecate_func:
             return func(*args, **kwargs)
 
         # modify docstring to display deprecation warning
-        doc = f'**Deprecated:** {message}'
-        if wrapped.__doc__ is None:
-            wrapped.__doc__ = doc
+        note = "\n".join(textwrap.wrap(message))
+        note = textwrap.indent(note, prefix="   ")
+        note = f".. deprecated:: {self.deprecated_version}\n{note}"
+
+        if sys.flags.optimize >= 2:
+            # `-OO` flag (PYTHONOPTIMIZE) discards docstrings,
+            # don't insert note at all
+            pass
+        elif wrapped.__doc__ is None:
+            wrapped.__doc__ = note
         else:
-            wrapped.__doc__ = doc + '\n\n    ' + wrapped.__doc__
+            # Insert after first line
+            short, _, remaining = wrapped.__doc__.partition("\n\n")
+            if sys.version_info[:2] < (3, 13):
+                # Reproduce unstripped docstrings prior to Python 3.13
+                note = textwrap.indent(note, prefix="    ")
+            new_doc = f"{short}\n\n{note}\n\n{remaining}"
+            wrapped.__doc__ = new_doc
 
         return wrapped
 
@@ -766,9 +778,11 @@ def _update_from_estimate_docstring(cls):
 
     inherited_class_name = inherited_cmeth.__qualname__.split('.')[-2]
 
-    from_estimate.__doc__ = inherited_cmeth.__doc__.replace(
-        inherited_class_name, cls.__name__
-    )
+    # `if` necessary in optimized mode, where docstrings may be missing.
+    if inherited_cmeth.__doc__:
+        from_estimate.__doc__ = inherited_cmeth.__doc__.replace(
+            inherited_class_name, cls.__name__
+        )
     from_estimate.__signature__ = inspect.signature(inherited_cmeth)
 
     cls.from_estimate = classmethod(from_estimate)
@@ -970,7 +984,7 @@ def convert_to_float(image, preserve_range):
             image = image.astype(float)
     else:
         # Avoid circular import
-        from ..util.dtype import img_as_float
+        from skimage.util.dtype import img_as_float
 
         image = img_as_float(image)
     return image

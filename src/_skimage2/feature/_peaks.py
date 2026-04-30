@@ -2,6 +2,8 @@ import numpy as np
 import scipy.ndimage as ndi
 from scipy.spatial import cKDTree, distance
 
+from .._shared._warnings import warn_external
+
 
 def _batched_ensure_spacing(coord_batch, spacing, p_norm, max_out):
     """Ensure minimum spacing in a single batch.
@@ -338,23 +340,23 @@ def peak_local_max(
     ... )
 
     Find all peaks
+
     >>> ski2.feature.peak_local_max(image)
     array([[3, 2],
            [3, 4]])
 
     Ensure peaks are at least 2 pixels apart
+
     >>> ski2.feature.peak_local_max(image, min_distance=2)
     array([[3, 2]])
 
     Allow peaks on the image border
+
     >>> ski2.feature.peak_local_max(image, exclude_border=0)
     array([[3, 2],
            [3, 4],
            [0, 0]])
     """
-    # TODO Undo inlined imports once available in _skimage2 namespace
-    from skimage._shared._warnings import warn_external
-
     if (footprint is None or footprint.size == 1) and min_distance < 1:
         warn_external(
             "When `min_distance < 1`, `peak_local_max` acts as finding "

@@ -50,6 +50,12 @@ Post Python 3.11
 * Remove or simplify `skimage._shared._warnings::warn_external` to use only
   `skip_file_prefixes`. Remove corresponding license code in LICENSE.txt (if possible).
 
+Post Python 3.12
+----------------
+* Remove `sys.version_info` checks in
+  `src/_skimage2/_shared/utils.py::deprecate_func.__call__`
+  `scikit-image/tests/skimage2/_shared/test_utils.py::test_deprecate_func`
+
 Post numpy 2
 ------------
 - Remove try except blocks following comment starting

@@ -8,7 +8,7 @@ import pytest
 from scipy import ndimage as ndi
 
 import skimage.measure
-from skimage._shared.filters import gaussian
+from _skimage2._shared.filters import gaussian
 from skimage.feature import peak_local_max
 from skimage.measure import label
 
@@ -407,7 +407,8 @@ class TestWatershed(unittest.TestCase):
         ensure that the memory constraints are reasonable
         """
         image = np.zeros((1000, 1000))
-        coords = np.random.uniform(0, 1000, (100, 2)).astype(int)
+        rng = np.random.RandomState(107513663)
+        coords = rng.uniform(0, 1000, (100, 2)).astype(int)
         markers = np.zeros((1000, 1000), int)
         idx = 1
         for x, y in coords:
@@ -761,7 +762,7 @@ class TestWatershed(unittest.TestCase):
 
     def test_watershed_input_not_modified(self):
         """Test to ensure input markers are not modified."""
-        image = np.random.default_rng().random(size=(21, 21))
+        image = np.random.RandomState(309901518).random(size=(21, 21))
         markers = np.zeros((21, 21), dtype=np.uint8)
         markers[[5, 5, 15, 15], [5, 15, 5, 15]] = [1, 2, 3, 4]
         original_markers = np.copy(markers)
