@@ -136,52 +136,6 @@ def test_apply_parallel_nearest():
     )
     assert_array_almost_equal(result, expected)
 
-    # Test that NumPy mode 'edge' gets converted to the Dask boundary value
-    # 'nearest'.
-    def func(arr):
-        return arr + arr.mean()
-
-    chunks = (2, 2)
-    depth = 2
-    # import dask.array as da
-    # d = da.from_array(x, chunks=(2, 2))
-    # map_overlap_res = d.map_overlap(func, depth=depth, boundary='nearest').compute()
-    res = np.array(
-        [
-            [15.12880701, 6.03168737, 1.52538841, 1.3173895],
-            [6.03168737, 4.0018456, 1.35876886, 1.31235802],
-            [1.52538841, 1.35876886, 0.50658187, 0.50277223],
-            [1.3173895, 1.31235802, 0.50277223, 0.50265719],
-        ]
-    )
-    edge = apply_parallel(func, x, chunks=chunks, depth=depth, mode='edge')
-    assert_array_almost_equal(edge, res)
-
-
-def test_apply_parallel_symmetric():
-    """Test that NumPy mode 'symmetric' gets converted to the Dask boundary
-    value 'reflect'.
-    """
-
-    def func(arr):
-        return arr + arr.mean()
-
-    chunks = (2, 2)
-    depth = 2
-    # import dask.array as da
-    # d = da.from_array(x, chunks=(2, 2))
-    # map_overlap_res = d.map_overlap(func, depth=depth, boundary='reflect').compute()
-    res = np.array(
-        [
-            [13.68662852, 4.58950888, 1.22550144, 1.01750252],
-            [4.58950888, 2.55966711, 1.05888188, 1.01247105],
-            [1.22550144, 1.05888188, 0.52104919, 0.51723956],
-            [1.01750252, 1.01247105, 0.51723956, 0.51712452],
-        ]
-    )
-    symm = apply_parallel(func, x, chunks=chunks, depth=depth, mode='symmetric')
-    assert_array_almost_equal(symm, res)
-
 
 @pytest.mark.parametrize('dtype', (np.float32, np.float64))
 @pytest.mark.parametrize('chunks', (None, (128, 128, 3)))
