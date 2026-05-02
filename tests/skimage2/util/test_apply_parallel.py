@@ -114,15 +114,31 @@ def test_no_chunks():
     assert_array_almost_equal(result, expected)
 
 
-def test_apply_parallel_wrap():
+@pytest.mark.parametrize('mode', ('wrap', 'periodic'))
+def test_apply_parallel_wrap(mode):
     def wrapped(arr):
         return gaussian(arr, sigma=1, mode='wrap')
 
     a = np.arange(144).reshape(12, 12).astype(float)
     expected = gaussian(a, sigma=1, mode='wrap')
-    result = apply_parallel(wrapped, a, chunks=(6, 6), depth=5, mode='wrap')
-
+    result = apply_parallel(wrapped, a, chunks=(6, 6), depth=5, mode=mode)
     assert_array_almost_equal(result, expected)
+
+    # overlap of size 1 (with wrap padding each chunk)
+    res = apply_parallel(func, x, chunks=chunks, depth=1, mode=mode)
+    assert_array_almost_equal(res, gt)
+
+    # overlap of size 2 (with wrap padding each chunk)
+    res = apply_parallel(func, x, chunks=chunks, depth=2, mode=mode)
+    expected = np.array(
+        [
+            [6.33333333, 3.33333333, 0.66666667, 0.66666667],
+            [3.33333333, 0.33333333, 0.66666667, 0.66666667],
+            [0.66666667, 0.66666667, 1.33333333, 1.33333333],
+            [0.66666667, 0.66666667, 1.33333333, 1.33333333],
+        ]
+    )
+    assert_array_almost_equal(res, expected)
 
 
 def test_apply_parallel_nearest():
@@ -272,7 +288,7 @@ def test_depth_parameter_constant_padding():
     )
     assert_array_almost_equal(res, expected)
 
-    # overlap of size 1 (with zeroes around each chunk)
+    # overlap of size 1 (with zeroes padding each chunk)
     res = apply_parallel(func, x, chunks=chunks, depth=1, mode=0)
     expected = np.array(
         [
@@ -313,7 +329,7 @@ def test_depth_parameter_constant_padding():
 def test_apply_parallel_edge(mode):
     """Test 'edge' padding mode."""
 
-    # overlap of size 1 (with edge values around each chunk)
+    # overlap of size 1 (with edge values padding each chunk)
     res = apply_parallel(func, x, chunks=chunks, depth=1, mode=mode)
     expected = np.array(
         [
@@ -325,7 +341,7 @@ def test_apply_parallel_edge(mode):
     )
     assert_array_almost_equal(res, expected)
 
-    # overlap of size 2 (with edge values around each chunk)
+    # overlap of size 2 (with edge values padding each chunk)
     res = apply_parallel(func, x, chunks=chunks, depth=2, mode=mode)
     expected = np.array(
         [
