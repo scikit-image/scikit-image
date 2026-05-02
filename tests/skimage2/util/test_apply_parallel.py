@@ -307,3 +307,32 @@ def test_depth_parameter_constant_padding():
         ]
     )
     assert_array_almost_equal(res, expected)
+
+
+@pytest.mark.parametrize('mode', ('edge', 'nearest'))
+def test_apply_parallel_edge(mode):
+    """Test 'edge' padding mode."""
+
+    # overlap of size 1 (with edge values around each chunk)
+    res = apply_parallel(func, x, chunks=chunks, depth=1, mode=mode)
+    expected = np.array(
+        [
+            [8.25, 5.25, 0.375, 0.375],
+            [5.25, 2.25, 0.375, 0.375],
+            [0.375, 0.375, 0.0, 0.0],
+            [0.375, 0.375, 0.0, 0.0],
+        ]
+    )
+    assert_array_almost_equal(res, expected)
+
+    # overlap of size 2 (with edge values around each chunk)
+    res = apply_parallel(func, x, chunks=chunks, depth=2, mode=mode)
+    expected = np.array(
+        [
+            [8.0, 5.0, 0.83333333, 0.83333333],
+            [5.0, 2.0, 0.83333333, 0.83333333],
+            [0.83333333, 0.83333333, 0.33333333, 0.33333333],
+            [0.83333333, 0.83333333, 0.33333333, 0.33333333],
+        ]
+    )
+    assert_array_almost_equal(res, expected)
