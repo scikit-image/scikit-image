@@ -17,9 +17,22 @@ IMG_COMPARE_PRECISION = 4 if IS_MACOS_ARM else 6
 # on macOS arm64 the result is slightly different from other platforms,
 # so we need to lower the decimal precision
 
-i, j = np.meshgrid(np.linspace(1, 4, 4), np.linspace(1, 4, 4))
-x = 100 / np.pi * np.exp(-(i**2 / 2 + j**2 / 2))  # test data
-map_overlap_def = x + x.mean()
+# test data
+x = np.zeros((4, 4))
+x[0, 0] = 6
+x[0, 1] = 3
+x[1, 0] = 3
+
+
+# test function
+def func(arr):
+    return arr + arr.mean()
+
+
+# ground truth in this case
+gt = x + x.mean()
+chunks = (2, 2)
+d = da.from_array(x, chunks=chunks)
 
 
 def test_apply_parallel():
@@ -83,11 +96,9 @@ def test_apply_parallel_lazy():
     )
 
     assert isinstance(result1, da.Array)
-
     assert_array_almost_equal(result1.compute(), expected1)
 
     assert isinstance(result2, da.Array)
-
     assert_array_almost_equal(result2.compute(), expected1)
 
 
@@ -235,15 +246,9 @@ def test_apply_parallel_rgb_channel_axis(depth, chunks, channel_axis):
 def test_apply_parallel_default_mode():
     """Test that apply_parallel does not add boundary padding by default."""
 
-    def func(arr):
-        return arr + arr.mean()
-
-    chunks = (2, 2)
     depth = 2
-    # import dask.array as da
-    # d = da.from_array(x, chunks=(2, 2))
-    # map_overlap_def = d.map_overlap(func, depth=depth).compute()
     defa = apply_parallel(func, x, chunks=chunks, depth=depth)
-    assert_array_almost_equal(defa, map_overlap_def)
+    # runs `d.map_overlap(func, depth=depth).compute()` under the hood
+    assert_array_almost_equal(defa, gt)
     none_c = apply_parallel(func, x, chunks=chunks, depth=depth, mode=None)
-    assert_array_almost_equal(none_c, map_overlap_def)
+    assert_array_almost_equal(none_c, gt)
