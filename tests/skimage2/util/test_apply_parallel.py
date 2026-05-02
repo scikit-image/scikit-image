@@ -253,3 +253,57 @@ def test_depth_parameter_no_padding():
     # (minimum depth giving the same result as the function applied 'plainly')
     res = apply_parallel(func, x, chunks=chunks, depth=2)
     assert_array_almost_equal(res, gt)
+
+
+def test_depth_parameter_constant_padding():
+    """Test the depth parameter (overlap size) with constant (zero) padding."""
+
+    # no overlap between chunks
+    # Note: `depth=0` overwrites any boundary mode; de facto there is no
+    # padding if `depth=0`.
+    res = apply_parallel(func, x, chunks=chunks, depth=0, mode=0)
+    expected = np.array(
+        [
+            [9.0, 6.0, 0.0, 0.0],
+            [6.0, 3.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 0.0],
+        ]
+    )
+    assert_array_almost_equal(res, expected)
+
+    # overlap of size 1 (with zeroes around each chunk)
+    res = apply_parallel(func, x, chunks=chunks, depth=1, mode=0)
+    expected = np.array(
+        [
+            [6.75, 3.75, 0.1875, 0.1875],
+            [3.75, 0.75, 0.1875, 0.1875],
+            [0.1875, 0.1875, 0.0, 0.0],
+            [0.1875, 0.1875, 0.0, 0.0],
+        ]
+    )
+    assert_array_almost_equal(res, expected)
+
+    # overlap of size 0 (resp. 1) along the first (resp. second) axis
+    res = apply_parallel(func, x, chunks=chunks, depth=(0, 1), mode=0)
+    expected = np.array(
+        [
+            [7.5, 4.5, 0.375, 0.375],
+            [4.5, 1.5, 0.375, 0.375],
+            [0.0, 0.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 0.0],
+        ]
+    )
+    assert_array_almost_equal(res, expected)
+
+    # overlap of size 2
+    res = apply_parallel(func, x, chunks=chunks, depth=2, mode=0)
+    expected = np.array(
+        [
+            [6.33333333, 3.33333333, 0.33333333, 0.33333333],
+            [3.33333333, 0.33333333, 0.33333333, 0.33333333],
+            [0.33333333, 0.33333333, 0.33333333, 0.33333333],
+            [0.33333333, 0.33333333, 0.33333333, 0.33333333],
+        ]
+    )
+    assert_array_almost_equal(res, expected)
