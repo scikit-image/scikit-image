@@ -212,6 +212,8 @@ def test_depth_parameter_no_padding():
     """Test the depth parameter (overlap size) in case of no padding."""
 
     # no overlap between chunks
+    # Note: `depth=0` overwrites any boundary mode; de facto there is no
+    # padding if `depth=0`.
     res = apply_parallel(func, x, chunks=chunks, depth=0)
     expected = np.array(
         [
