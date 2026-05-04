@@ -3,41 +3,9 @@
 import doctest
 from functools import partial
 from os import environ
-from pathlib import Path
-
-from jinja2 import Template
 
 PARSER = doctest.DocTestParser()
 RUNNER = doctest.DocTestRunner()
-
-
-class TrackerDict(dict):
-    """Dict that keeps check on keys that have been accessed."""
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.not_accessed_keys = set(self)
-
-    def __getitem__(self, key):
-        self.not_accessed_keys.discard(key)
-        return super().__getitem__(key)
-
-
-def write_migration(in_tpl, doc_dict, out_path=None):
-    in_tpl = Path(in_tpl)
-    if out_path is None:
-        out_path = in_tpl.with_name(in_tpl.name.replace('.tpl', ''))
-    out_path = Path(out_path)
-    tpl = Template(in_tpl.read_text())
-    render_dict = TrackerDict(doc_dict)
-    out_str = tpl.render(d=render_dict)
-    # Check all keys have been consumed.
-    if render_dict.not_accessed_keys:
-        raise RuntimeError(
-            'These keys not used in template:'
-            + ', '.join(render_dict.not_accessed_keys)
-        )
-    Path(out_path).write_text(out_str)
 
 
 def _append_msgs(msg_str, messages=[]):
