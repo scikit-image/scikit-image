@@ -352,3 +352,20 @@ def test_apply_parallel_edge(mode):
         ]
     )
     assert_array_almost_equal(res, expected)
+
+
+@pytest.mark.parametrize('mode', ('reflect', 'symmetric'))
+def test_apply_parallel_symmetric(mode):
+    """Test 'symmetric' padding mode."""
+
+    # overlap of size 2 (with reflection of the vector padding each chunk)
+    res = apply_parallel(func, x, chunks=chunks, depth=2, mode=mode)
+    expected = np.array(
+        [
+            [7.33333333, 4.33333333, 0.66666667, 0.66666667],
+            [4.33333333, 1.33333333, 0.66666667, 0.66666667],
+            [0.66666667, 0.66666667, 0.33333333, 0.33333333],
+            [0.66666667, 0.66666667, 0.33333333, 0.33333333],
+        ]
+    )
+    assert_array_almost_equal(res, expected)
