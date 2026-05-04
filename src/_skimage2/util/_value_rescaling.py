@@ -1,5 +1,8 @@
 import numpy as np
 
+from .._shared.utils import _supported_float_type
+from .._shared._warnings import warn_external
+
 
 def rescale_minmax(image):
     """Min-max normalize image values to the range [0., 1.].
@@ -29,7 +32,7 @@ def rescale_minmax(image):
 
     References
     ----------
-    .. [1]: https://en.wikipedia.org/wiki/Feature_scaling#Rescaling_(min-max_normalization)
+    .. [1] https://en.wikipedia.org/wiki/Feature_scaling#Rescaling_(min-max_normalization)
 
     Examples
     --------
@@ -38,10 +41,6 @@ def rescale_minmax(image):
     >>> rescale_minmax(image)
     array([0. , 0.5, 1. ])
     """
-    # TODO Undo inlined imports once available in _skimage2 namespace
-    from skimage._shared.utils import _supported_float_type
-    from skimage._shared._warnings import warn_external
-
     # Prepare `out` array, `lower` and `higher` with exact dtype to avoid
     # unexpected promotion and / or precision problems during normalization
     dtype = _supported_float_type(image.dtype, allow_complex=False)

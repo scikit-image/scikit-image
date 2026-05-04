@@ -2,10 +2,10 @@ from contextlib import contextmanager
 import numpy as np
 import pytest
 
-from skimage._shared._dependency_checks import has_mpl
+from ...dependency_checks import uses_matplotlib
 from skimage import io
 from skimage.io import manage_plugins
-from skimage._shared.testing import fetch, assert_stacklevel
+from _skimage2._shared.testing import fetch, assert_stacklevel
 
 
 priority_plugin = 'pil'
@@ -33,7 +33,7 @@ def test_failed_use():
         manage_plugins.use_plugin('asd')
 
 
-@pytest.mark.skipif(not has_mpl, reason="matplotlib not installed")
+@uses_matplotlib
 def test_use_priority():
     manage_plugins.use_plugin(priority_plugin)
     plug, func = manage_plugins.plugin_store['imread'][0]
@@ -44,7 +44,7 @@ def test_use_priority():
     np.testing.assert_equal(plug, 'matplotlib')
 
 
-@pytest.mark.skipif(not has_mpl, reason="matplotlib not installed")
+@uses_matplotlib
 def test_load_preferred_plugins_all():
     from skimage.io._plugins import pil_plugin, matplotlib_plugin
 
@@ -59,7 +59,7 @@ def test_load_preferred_plugins_all():
         assert func == getattr(matplotlib_plugin, 'imshow')
 
 
-@pytest.mark.skipif(not has_mpl, reason="matplotlib not installed")
+@uses_matplotlib
 def test_load_preferred_plugins_imread():
     from skimage.io._plugins import pil_plugin, matplotlib_plugin
 

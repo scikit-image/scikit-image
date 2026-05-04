@@ -1,8 +1,8 @@
 import numpy as np
 
-from .._shared._geometry import polygon_clip
-from .._shared.version_requirements import require
-from .._shared.compat import NP_COPY_IF_NEEDED
+from _skimage2._shared._geometry import polygon_clip
+from _skimage2._shared.version_requirements import require
+from _skimage2._shared.compat import NP_COPY_IF_NEEDED
 from ._draw import (
     _coords_inside_image,
     _line,

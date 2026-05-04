@@ -3,7 +3,7 @@ from itertools import cycle
 import numpy as np
 from scipy import ndimage as ndi
 
-from .._shared.utils import check_nD
+from _skimage2._shared.utils import check_nD
 
 __all__ = [
     'morphological_chan_vese',
