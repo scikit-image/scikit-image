@@ -14,8 +14,8 @@ cdef extern from "unwrap_3d_ljmu.h":
             cnp.float64_t *wrapped_volume,
             cnp.float64_t *unwrapped_volume,
             unsigned char *input_mask,
-            int volume_width, int volume_height, int volume_depth,
-            int wrap_around_x, int wrap_around_y, int wrap_around_z,
+            int n_k, int n_j, int n_i,
+            int wrap_around_i, int wrap_around_j, int wrap_around_k,
             bitgen_t* bitgen_state
             ) noexcept nogil
 
@@ -26,15 +26,15 @@ def unwrap_3d(cnp.float64_t[:, :, ::1] image,
               wrap_around,
               rng):
     cdef:
-        int wrap_around_x
-        int wrap_around_y
-        int wrap_around_z
+        int wrap_around_i
+        int wrap_around_j
+        int wrap_around_k
         object bitgen, capsule
         const char* capsule_name
         bitgen_t* bitgen_state
 
     # Convert from python types to C types so we can release the GIL
-    wrap_around_z, wrap_around_y, wrap_around_x = wrap_around
+    wrap_around_i, wrap_around_j, wrap_around_k = wrap_around
     bitgen = getattr(rng, 'bit_generator', rng)
     capsule = bitgen.capsule
     capsule_name = "BitGenerator"
@@ -47,6 +47,6 @@ def unwrap_3d(cnp.float64_t[:, :, ::1] image,
         unwrap3D(&image[0, 0, 0],
                  &unwrapped_image[0, 0, 0],
                  &mask[0, 0, 0],
-                 image.shape[2], image.shape[1], image.shape[0], #TODO: check!!!
-                 wrap_around_x, wrap_around_y, wrap_around_z,
+                 image.shape[2], image.shape[1], image.shape[0],
+                 wrap_around_k, wrap_around_j, wrap_around_i,
                  bitgen_state)

@@ -4,7 +4,7 @@ void unwrap3D(
         double *wrapped_volume,
         double *unwrapped_volume,
         unsigned char *input_mask,
-        int volume_width, int volume_height, int volume_depth,
-        int wrap_around_x, int wrap_around_y, int wrap_around_z,
+        int n_k, int n_j, int n_i,
+        int wrap_around_k, int wrap_around_j, int wrap_around_i,
         bitgen_t* bitgen_state
         );
