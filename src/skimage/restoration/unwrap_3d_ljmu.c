@@ -163,16 +163,14 @@ void quicker_sort(EDGE *left, EDGE *right) {
 void initialiseVOXELs(double *WrappedVolume, unsigned char *input_mask,
                       unsigned char *extended_mask, VOXELM *voxel,
                       int volume_width, int volume_height, int volume_depth,
-                      char use_seed, unsigned int seed) {
+                      unsigned int seed) {
   VOXELM *voxel_pointer = voxel;
   double *wrapped_volume_pointer = WrappedVolume;
   unsigned char *input_mask_pointer = input_mask;
   unsigned char *extended_mask_pointer = extended_mask;
   int n, i, j;
 
-  if (use_seed) {
-    srand(seed);
-  }
+  srand(seed);
 
   for (n = 0; n < volume_depth; n++) {
     for (i = 0; i < volume_height; i++) {
@@ -1108,7 +1106,7 @@ void returnVolume(VOXELM *voxel, double *unwrappedVolume, int volume_width,
 void unwrap3D(double *wrapped_volume, double *unwrapped_volume,
               unsigned char *input_mask, int volume_width, int volume_height,
               int volume_depth, int wrap_around_x, int wrap_around_y,
-              int wrap_around_z, char use_seed, unsigned int seed) {
+              int wrap_around_z, unsigned int seed) {
   params_t params = {TWOPI, wrap_around_x, wrap_around_y, wrap_around_z, 0};
   unsigned char *extended_mask;
   VOXELM *voxel;
@@ -1124,7 +1122,7 @@ void unwrap3D(double *wrapped_volume, double *unwrapped_volume,
   extend_mask(input_mask, extended_mask, volume_width, volume_height,
               volume_depth, &params);
   initialiseVOXELs(wrapped_volume, input_mask, extended_mask, voxel,
-                   volume_width, volume_height, volume_depth, use_seed, seed);
+                   volume_width, volume_height, volume_depth, seed);
   calculate_reliability(wrapped_volume, voxel, volume_width, volume_height,
                         volume_depth, &params);
   horizontalEDGEs(voxel, edge, volume_width, volume_height, volume_depth,

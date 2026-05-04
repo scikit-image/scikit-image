@@ -13,7 +13,7 @@ cdef extern from "unwrap_3d_ljmu.h":
             unsigned char *input_mask,
             int volume_width, int volume_height, int volume_depth,
             int wrap_around_x, int wrap_around_y, int wrap_around_z,
-            char use_seed, unsigned int seed
+            unsigned int seed
             ) noexcept nogil
 
 
@@ -22,17 +22,14 @@ def unwrap_3d(cnp.float64_t[:, :, ::1] image,
               unsigned char[:, :, ::1] mask,
               cnp.float64_t[:, :, ::1] unwrapped_image,
               wrap_around,
-              seed):
+              unsigned int seed):
     cdef:
         unsigned int cseed
-        char use_seed
         int wrap_around_x
         int wrap_around_y
         int wrap_around_z
 
-    # convert from python types to C types so we can release the GIL
-    use_seed = seed is not None
-    cseed = 0 if seed is None else seed
+    # Convert from python types to C types so we can release the GIL
     wrap_around_z, wrap_around_y, wrap_around_x = wrap_around
 
     with nogil:
@@ -41,4 +38,4 @@ def unwrap_3d(cnp.float64_t[:, :, ::1] image,
                  &mask[0, 0, 0],
                  image.shape[2], image.shape[1], image.shape[0], #TODO: check!!!
                  wrap_around_x, wrap_around_y, wrap_around_z,
-                 use_seed, cseed)
+                 seed)

@@ -157,16 +157,14 @@ void quicker_sort(EDGE *left, EDGE *right) {
 void initialisePIXELs(double *wrapped_image, unsigned char *input_mask,
                       unsigned char *extended_mask, PIXELM *pixel,
                       int image_width, int image_height,
-                      char use_seed, unsigned int seed) {
+                      unsigned int seed) {
   PIXELM *pixel_pointer = pixel;
   double *wrapped_image_pointer = wrapped_image;
   unsigned char *input_mask_pointer = input_mask;
   unsigned char *extended_mask_pointer = extended_mask;
   int i, j;
 
-  if (use_seed) {
-    srand(seed);
-  }
+  srand(seed);
 
   for (i = 0; i < image_height; i++) {
     for (j = 0; j < image_width; j++) {
@@ -694,7 +692,7 @@ void returnImage(PIXELM *pixel, double *unwrapped_image, int image_width,
 void unwrap2D(double *wrapped_image, double *UnwrappedImage,
               unsigned char *input_mask, int image_width, int image_height,
               int wrap_around_x, int wrap_around_y,
-              char use_seed, unsigned int seed) {
+              unsigned int seed) {
   params_t params = {TWOPI, wrap_around_x, wrap_around_y, 0};
   unsigned char *extended_mask;
   PIXELM *pixel;
@@ -708,7 +706,7 @@ void unwrap2D(double *wrapped_image, double *UnwrappedImage,
 
   extend_mask(input_mask, extended_mask, image_width, image_height, &params);
   initialisePIXELs(wrapped_image, input_mask, extended_mask, pixel, image_width,
-                   image_height, use_seed, seed);
+                   image_height, seed);
   calculate_reliability(wrapped_image, pixel, image_width, image_height,
                         &params);
   horizontalEDGEs(pixel, edge, image_width, image_height, &params);
