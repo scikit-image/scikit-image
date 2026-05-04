@@ -166,17 +166,23 @@ def test_mask():
         assert_array_almost_equal_nulp(image_unwrapped_3d[:, :, -1], image[i, -1])
 
 
+def _wrapped_ramp(n_pi, n):
+    ramp = np.linspace(0, n_pi * np.pi, n)
+    ramp[-1] = ramp[0]
+    return np.angle(np.exp(1j * ramp.reshape(n, 1)))
+
+
 def test_rng():
     # Use a (100, 1) image with wrap_around: all pixel reliabilities come from
-    # rand() (no interior pixels), so the result is sensitive to the seed.
-    ramp = np.linspace(0, 12 * np.pi, 100)
-    ramp[-1] = ramp[0]
-    image_wrapped = np.angle(np.exp(1j * ramp.reshape(100, 1)))
+    # the random number generation (no interior pixels), so the result is
+    # sensitive to the seed.
+    image_wrapped = _wrapped_ramp(12, 100)
 
     def unwrap(rng):
         with expected_warnings(['length 1 dimension']):
             return unwrap_phase(image_wrapped, wrap_around=[True, False], rng=rng)
 
+    # Assert that two identically seeded unwraps are about the same.
     for seed in range(50):
         assert_(np.allclose(unwrap(seed), unwrap(seed)))
         assert_(
@@ -184,8 +190,13 @@ def test_rng():
                 unwrap(np.random.default_rng(seed)), unwrap(np.random.default_rng(seed))
             )
         )
-    # For `None` the behavior is not deterministic.
-    out0, out1 = unwrap(None), unwrap(None)
+
+    # Check that `None` is also a valid seed value, and that, with a much
+    # larger image, it always differs.
+    big_wrap = _wrapped_ramp(1028, 10000)
+    with expected_warnings(['length 1 dimension']):
+        out0 = unwrap_phase(big_wrap, wrap_around=[True, False], rng=None)
+        out1 = unwrap_phase(big_wrap, wrap_around=[True, False], rng=None)
     assert not np.allclose(out0, out1)
 
 
