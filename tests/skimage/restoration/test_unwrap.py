@@ -184,9 +184,9 @@ def test_rng():
                 unwrap(np.random.default_rng(seed)), unwrap(np.random.default_rng(seed))
             )
         )
-    # For `None` the behavior is not deterministic, so it does not make sense to check
-    # for equality. At least call it to see that `None` is an accepted value.
-    unwrap(None)
+    # For `None` the behavior is not deterministic.
+    out0, out1 = unwrap(None), unwrap(None)
+    assert not np.allclose(out0, out1)
 
 
 def test_invalid_input():

@@ -28,13 +28,10 @@ def unwrap_phase(image, wrap_around=False, rng=None):
         process. If only a single boolean is given, it will apply to all axes.
         Wrap around is not supported for 1D arrays.
     rng : {`numpy.random.Generator`, int}, optional
-        Unwrapping relies on a random initialization.  `rng` supplies the
-        source of a seed for the C-level random number generator used during
-        unwrapping. If an int, it is used directly as the seed; in that case,
-        it should be in the range of a C unsigned integer. If a
-        `numpy.random.Generator`, we draw a suitable integer from the generator
-        to use as the seed. If ``None``, create a new (unseeded)
-        `numpy.random.Generator` from which to draw the seed.
+        Unwrapping relies on a random per-pixel initialization.  If a Numpy
+        random number generator (N-RNG), then use that to generate the
+        initialization.  If ``None``, create a new N-RNG.  If an int, seed a
+        new N-RNG with this passed integer.
 
     Returns
     -------
@@ -96,20 +93,8 @@ def unwrap_phase(image, wrap_around=False, rng=None):
             'algorithm'
         )
 
-    if rng is None:  # Use new generator to make seed.
-        rng = np.random.default_rng()
-    # Algorithms use C `srand(seed)` to initialize random stream from
-    # subsequent calls to `rand()`.  `srand` expects an unsigned C int.
-    uintc_max = np.iinfo(np.uintc).max
-    if isinstance(rng, np.random.Generator):
-        seed = rng.integers(uintc_max, endpoint=True)
-    else:
-        try:
-            seed = np.uintc(rng)
-        except OverflowError:
-            raise ValueError(
-                f"Integer seed must be in [0, {uintc_max}], got {rng}"
-            )
+    if not isinstance(rng, np.random.Generator):
+        rng = np.random.default_rng(rng)
 
     if np.ma.isMaskedArray(image):
         mask = np.require(np.ma.getmaskarray(image), np.uint8, ['C'])
@@ -122,9 +107,9 @@ def unwrap_phase(image, wrap_around=False, rng=None):
     if image.ndim == 1:
         unwrap_1d(image_not_masked, image_unwrapped)
     elif image.ndim == 2:
-        unwrap_2d(image_not_masked, mask, image_unwrapped, wrap_around, seed)
+        unwrap_2d(image_not_masked, mask, image_unwrapped, wrap_around, rng)
     elif image.ndim == 3:
-        unwrap_3d(image_not_masked, mask, image_unwrapped, wrap_around, seed)
+        unwrap_3d(image_not_masked, mask, image_unwrapped, wrap_around, rng)
 
     if np.ma.isMaskedArray(image):
         return np.ma.array(image_unwrapped, mask=mask, fill_value=image.fill_value)
