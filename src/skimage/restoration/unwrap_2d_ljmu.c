@@ -46,13 +46,13 @@ typedef struct {
   double mod;
   int x_connectivity;
   int y_connectivity;
-  int no_of_edges;
+  intptr_t no_of_edges;
 } params_t;
 
 // PIXELM information
 struct PIXELM {
   int increment;  // No. of 2*pi to add to the pixel to unwrap it
-  int number_of_pixels_in_group;  // No. of pixel in the pixel group
+  intptr_t number_of_pixels_in_group;  // No. of pixel in the pixel group
   double value;  // value of the pixel
   double reliability;
   unsigned char input_mask;  // 0 pixel is masked. NOMASK pixel is not masked
@@ -158,13 +158,13 @@ void quicker_sort(EDGE *left, EDGE *right) {
 // itself
 void initialisePIXELs(double *wrapped_image, unsigned char *input_mask,
                       unsigned char *extended_mask, PIXELM *pixel,
-                      int n_j, int n_i,
+                      intptr_t n_j, intptr_t n_i,
                       bitgen_t* bitgen_state) {
   PIXELM *pixel_pointer = pixel;
   double *wrapped_image_pointer = wrapped_image;
   unsigned char *input_mask_pointer = input_mask;
   unsigned char *extended_mask_pointer = extended_mask;
-  int i, j;
+  intptr_t i, j;
 
   for (i = 0; i < n_i; i++) {
     for (j = 0; j < n_j; j++) {
@@ -217,10 +217,10 @@ int find_wrap(double pixelL_value, double pixelR_value) {
 }
 
 void extend_mask(unsigned char *input_mask, unsigned char *extended_mask,
-                 int n_j, int n_i, params_t *params) {
-  int i, j;
-  int n_j_plus_one = n_j + 1;
-  int n_j_minus_one = n_j - 1;
+                 intptr_t n_j, intptr_t n_i, params_t *params) {
+  intptr_t i, j;
+  intptr_t n_j_plus_one = n_j + 1;
+  intptr_t n_j_minus_one = n_j - 1;
   unsigned char *IMP = input_mask + n_j + 1;  // input mask pointer
   unsigned char *EMP = extended_mask + n_j + 1;  // extended mask
                                                          // pointer
@@ -317,15 +317,15 @@ void extend_mask(unsigned char *input_mask, unsigned char *extended_mask,
   }
 }
 
-void calculate_reliability(double *wrappedImage, PIXELM *pixel, int n_j,
-                           int n_i, params_t *params) {
-  int n_j_plus_one = n_j + 1;
-  int n_j_minus_one = n_j - 1;
+void calculate_reliability(double *wrappedImage, PIXELM *pixel, intptr_t n_j,
+                           intptr_t n_i, params_t *params) {
+  intptr_t n_j_plus_one = n_j + 1;
+  intptr_t n_j_minus_one = n_j - 1;
   PIXELM *pixel_pointer = pixel + n_j_plus_one;
   double *WIP =
       wrappedImage + n_j_plus_one;  // WIP is the wrapped image pointer
   double H, V, D1, D2;
-  int i, j;
+  intptr_t i, j;
 
   for (i = 1; i < n_i - 1; ++i) {
     for (j = 1; j < n_j - 1; ++j) {
@@ -432,12 +432,12 @@ void calculate_reliability(double *wrappedImage, PIXELM *pixel, int n_j,
 // it is calculated by adding the reliability of pixel and the relibility of
 // its right-hand neighbour
 // edge is calculated between a pixel and its next neighbour
-void horizontalEDGEs(PIXELM *pixel, EDGE *edge, int n_j,
-                     int n_i, params_t *params) {
-  int i, j;
+void horizontalEDGEs(PIXELM *pixel, EDGE *edge, intptr_t n_j,
+                     intptr_t n_i, params_t *params) {
+  intptr_t i, j;
   EDGE *edge_pointer = edge;
   PIXELM *pixel_pointer = pixel;
-  int no_of_edges = params->no_of_edges;
+  intptr_t no_of_edges = params->no_of_edges;
 
   for (i = 0; i < n_i; i++) {
     for (j = 0; j < n_j - 1; j++) {
@@ -480,10 +480,10 @@ void horizontalEDGEs(PIXELM *pixel, EDGE *edge, int n_j,
 // calculate the reliability of the vertical edges of the image
 // it is calculated by adding the reliability of pixel and the relibility of
 // its lower neighbour in the image.
-void verticalEDGEs(PIXELM *pixel, EDGE *edge, int n_j, int n_i,
+void verticalEDGEs(PIXELM *pixel, EDGE *edge, intptr_t n_j, intptr_t n_i,
                    params_t *params) {
-  int i, j;
-  int no_of_edges = params->no_of_edges;
+  intptr_t i, j;
+  intptr_t no_of_edges = params->no_of_edges;
   PIXELM *pixel_pointer = pixel;
   EDGE *edge_pointer = edge + no_of_edges;
 
@@ -531,7 +531,7 @@ void verticalEDGEs(PIXELM *pixel, EDGE *edge, int n_j, int n_i,
 
 // gather the pixels of the image into groups
 void gatherPIXELs(EDGE *edge, params_t *params) {
-  int k;
+  intptr_t k;
   PIXELM *PIXEL1;
   PIXELM *PIXEL2;
   PIXELM *group1;
@@ -628,9 +628,9 @@ void gatherPIXELs(EDGE *edge, params_t *params) {
 }
 
 // unwrap the image
-void unwrapImage(PIXELM *pixel, int n_j, int n_i) {
-  int i;
-  int image_size = n_j * n_i;
+void unwrapImage(PIXELM *pixel, intptr_t n_j, intptr_t n_i) {
+  intptr_t i;
+  intptr_t image_size = n_j * n_i;
   PIXELM *pixel_pointer = pixel;
 
   for (i = 0; i < image_size; i++) {
@@ -640,13 +640,13 @@ void unwrapImage(PIXELM *pixel, int n_j, int n_i) {
 }
 
 // set the masked pixels (mask = 0) to the minimum of the unwrapper phase
-void maskImage(PIXELM *pixel, unsigned char *input_mask, int n_j,
-               int n_i) {
+void maskImage(PIXELM *pixel, unsigned char *input_mask, intptr_t n_j,
+               intptr_t n_i) {
   PIXELM *pointer_pixel = pixel;
   unsigned char *IMP = input_mask;  // input mask pointer
   double min = DBL_MAX;
-  int i;
-  int image_size = n_j * n_i;
+  intptr_t i;
+  intptr_t image_size = n_j * n_i;
 
   // find the minimum of the unwrapped phase
   for (i = 0; i < image_size; i++) {
@@ -674,10 +674,10 @@ void maskImage(PIXELM *pixel, unsigned char *input_mask, int n_j,
 // phase map.  copy the image on the buffer passed to this unwrapper to
 // over-write the unwrapped phase map on the buffer of the wrapped
 // phase map.
-void returnImage(PIXELM *pixel, double *unwrapped_image, int n_j,
-                 int n_i) {
-  int i;
-  int image_size = n_j * n_i;
+void returnImage(PIXELM *pixel, double *unwrapped_image, intptr_t n_j,
+                 intptr_t n_i) {
+  intptr_t i;
+  intptr_t image_size = n_j * n_i;
   double *unwrapped_image_pointer = unwrapped_image;
   PIXELM *pixel_pointer = pixel;
 
@@ -690,15 +690,15 @@ void returnImage(PIXELM *pixel, double *unwrapped_image, int n_j,
 
 // the main function of the unwrapper
 void unwrap2D(double *wrapped_image, double *UnwrappedImage,
-              unsigned char *input_mask, int n_j, int n_i,
+              unsigned char *input_mask, intptr_t n_j, intptr_t n_i,
               int wrap_around_j, int wrap_around_i,
               bitgen_t* bitgen_state) {
   params_t params = {TWOPI, wrap_around_j, wrap_around_i, 0};
   unsigned char *extended_mask;
   PIXELM *pixel;
   EDGE *edge;
-  int image_size = n_i * n_j;
-  int No_of_Edges_initially = 2 * n_j * n_i;
+  intptr_t image_size = n_i * n_j;
+  intptr_t No_of_Edges_initially = 2 * n_j * n_i;
 
   extended_mask = (unsigned char *)calloc(image_size, sizeof(unsigned char));
   pixel = (PIXELM *)calloc(image_size, sizeof(PIXELM));

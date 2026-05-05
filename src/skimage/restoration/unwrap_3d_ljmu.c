@@ -43,19 +43,18 @@
 #define MASK 1
 
 
-
 typedef struct {
   double mod;
   int x_connectivity;
   int y_connectivity;
   int z_connectivity;
-  int no_of_edges;
+  intptr_t no_of_edges;
 } params_t;
 
 // VOXELM information
 struct VOXELM {
   int increment;  // No. of 2*pi to add to the voxel to unwrap it
-  int number_of_voxels_in_group;  // No. of voxel in the voxel group
+  intptr_t number_of_voxels_in_group;  // No. of voxel in the voxel group
   double value;  // value of the voxel
   double reliability;
   unsigned char input_mask;  // MASK voxel is masked. NOMASK voxel is not masked
@@ -164,13 +163,13 @@ void quicker_sort(EDGE *left, EDGE *right) {
 // itself
 void initialiseVOXELs(double *WrappedVolume, unsigned char *input_mask,
                       unsigned char *extended_mask, VOXELM *voxel,
-                      int n_k, int n_j, int n_i,
+                      intptr_t n_k, intptr_t n_j, intptr_t n_i,
                       bitgen_t* bitgen_state) {
   VOXELM *voxel_pointer = voxel;
   double *wrapped_volume_pointer = WrappedVolume;
   unsigned char *input_mask_pointer = input_mask;
   unsigned char *extended_mask_pointer = extended_mask;
-  int n, i, j;
+  intptr_t n, i, j;
 
   for (n = 0; n < n_i; n++) {
     for (i = 0; i < n_j; i++) {
@@ -225,14 +224,14 @@ int find_wrap(double voxelL_value, double voxelR_value) {
 }
 
 void extend_mask(unsigned char *input_mask, unsigned char *extended_mask,
-                 int n_k, int n_j, int n_i,
+                 intptr_t n_k, intptr_t n_j, intptr_t n_i,
                  params_t *params) {
-  int n, i, j;
-  int vw = n_k;
-  int fs = n_k * n_j;  // frame size
-  int frame_size = n_k * n_j;
-  int volume_size = n_k * n_j * n_i;  // volume size
-  int vs = volume_size;
+  intptr_t n, i, j;
+  intptr_t vw = n_k;
+  intptr_t fs = n_k * n_j;  // frame size
+  intptr_t frame_size = n_k * n_j;
+  intptr_t volume_size = n_k * n_j * n_i;  // volume size
+  intptr_t vs = volume_size;
   unsigned char *IMP =
       input_mask + frame_size + n_k + 1;  // input mask pointer
   unsigned char *EMP =
@@ -459,14 +458,14 @@ void extend_mask(unsigned char *input_mask, unsigned char *extended_mask,
 }
 
 void calculate_reliability(double *wrappedVolume, VOXELM *voxel,
-                           int n_k, int n_j,
-                           int n_i, params_t *params) {
-  int frame_size = n_k * n_j;
-  int volume_size = n_k * n_j * n_i;
+                           intptr_t n_k, intptr_t n_j,
+                           intptr_t n_i, params_t *params) {
+  intptr_t frame_size = n_k * n_j;
+  intptr_t volume_size = n_k * n_j * n_i;
   VOXELM *voxel_pointer;
   double H, V, N, D1, D2, D3, D4, D5, D6, D7, D8, D9, D10;
   double *WVP;
-  int n, i, j;
+  intptr_t n, i, j;
 
   WVP = wrappedVolume + frame_size + n_k + 1;
   voxel_pointer = voxel + frame_size + n_k + 1;
@@ -788,12 +787,12 @@ void calculate_reliability(double *wrappedVolume, VOXELM *voxel,
 // is calculated by adding the reliability of voxel and the relibility
 // of its right neighbour. edge is calculated between a voxel and its
 // next neighbour
-void horizontalEDGEs(VOXELM *voxel, EDGE *edge, int n_k,
-                     int n_j, int n_i, params_t *params) {
-  int n, i, j;
+void horizontalEDGEs(VOXELM *voxel, EDGE *edge, intptr_t n_k,
+                     intptr_t n_j, intptr_t n_i, params_t *params) {
+  intptr_t n, i, j;
   EDGE *edge_pointer = edge;
   VOXELM *voxel_pointer = voxel;
-  int no_of_edges = params->no_of_edges;
+  intptr_t no_of_edges = params->no_of_edges;
 
   for (n = 0; n < n_i; n++) {
     for (i = 0; i < n_j; i++) {
@@ -837,14 +836,14 @@ void horizontalEDGEs(VOXELM *voxel, EDGE *edge, int n_k,
   params->no_of_edges = no_of_edges;
 }
 
-void verticalEDGEs(VOXELM *voxel, EDGE *edge, int n_k,
-                   int n_j, int n_i, params_t *params) {
-  int n, i, j;
-  int no_of_edges = params->no_of_edges;
+void verticalEDGEs(VOXELM *voxel, EDGE *edge, intptr_t n_k,
+                   intptr_t n_j, intptr_t n_i, params_t *params) {
+  intptr_t n, i, j;
+  intptr_t no_of_edges = params->no_of_edges;
   VOXELM *voxel_pointer = voxel;
   EDGE *edge_pointer = edge + no_of_edges;
-  int frame_size = n_k * n_j;
-  int next_voxel = frame_size - n_k;
+  intptr_t frame_size = n_k * n_j;
+  intptr_t next_voxel = frame_size - n_k;
 
   for (n = 0; n < n_i; n++) {
     for (i = 0; i < n_j - 1; i++) {
@@ -889,15 +888,15 @@ void verticalEDGEs(VOXELM *voxel, EDGE *edge, int n_k,
   params->no_of_edges = no_of_edges;
 }
 
-void normalEDGEs(VOXELM *voxel, EDGE *edge, int n_k, int n_j,
-                 int n_i, params_t *params) {
-  int n, i, j;
-  int no_of_edges = params->no_of_edges;
-  int frame_size = n_k * n_j;
-  int volume_size = n_k * n_j * n_i;
+void normalEDGEs(VOXELM *voxel, EDGE *edge, intptr_t n_k, intptr_t n_j,
+                 intptr_t n_i, params_t *params) {
+  intptr_t n, i, j;
+  intptr_t no_of_edges = params->no_of_edges;
+  intptr_t frame_size = n_k * n_j;
+  intptr_t volume_size = n_k * n_j * n_i;
   VOXELM *voxel_pointer = voxel;
   EDGE *edge_pointer = edge + no_of_edges;
-  int next_voxel = volume_size - frame_size;
+  intptr_t next_voxel = volume_size - frame_size;
 
   for (n = 0; n < n_i - 1; n++) {
     for (i = 0; i < n_j; i++) {
@@ -942,7 +941,7 @@ void normalEDGEs(VOXELM *voxel, EDGE *edge, int n_k, int n_j,
 
 // gather the voxels of the volume into groups
 void gatherVOXELs(EDGE *edge, params_t *params) {
-  int k;
+  intptr_t k;
   VOXELM *VOXEL1;
   VOXELM *VOXEL2;
   VOXELM *group1;
@@ -1041,10 +1040,10 @@ void gatherVOXELs(EDGE *edge, params_t *params) {
 }
 
 // unwrap the volume
-void unwrapVolume(VOXELM *voxel, int n_k, int n_j,
-                  int n_i) {
-  int i;
-  int volume_size = n_k * n_j * n_i;
+void unwrapVolume(VOXELM *voxel, intptr_t n_k, intptr_t n_j,
+                  intptr_t n_i) {
+  intptr_t i;
+  intptr_t volume_size = n_k * n_j * n_i;
   VOXELM *voxel_pointer = voxel;
 
   for (i = 0; i < volume_size; i++) {
@@ -1054,13 +1053,13 @@ void unwrapVolume(VOXELM *voxel, int n_k, int n_j,
 }
 
 // set the masked voxels (mask = 0) to the minimum of the unwrapper phase
-void maskVolume(VOXELM *voxel, unsigned char *input_mask, int n_k,
-                int n_j, int n_i) {
+void maskVolume(VOXELM *voxel, unsigned char *input_mask, intptr_t n_k,
+                intptr_t n_j, intptr_t n_i) {
   VOXELM *pointer_voxel = voxel;
   unsigned char *IMP = input_mask;  // input mask pointer
   double min = DBL_MAX;
-  int i;
-  int volume_size = n_k * n_j * n_i;
+  intptr_t i;
+  intptr_t volume_size = n_k * n_j * n_i;
 
   // find the minimum of the unwrapped phase
   for (i = 0; i < volume_size; i++) {
@@ -1088,10 +1087,10 @@ void maskVolume(VOXELM *voxel, unsigned char *input_mask, int n_k,
 // phase map.  copy the volume on the buffer passed to this unwrapper
 // to over-write the unwrapped phase map on the buffer of the wrapped
 // phase map.
-void returnVolume(VOXELM *voxel, double *unwrappedVolume, int n_k,
-                  int n_j, int n_i) {
-  int i;
-  int volume_size = n_k * n_j * n_i;
+void returnVolume(VOXELM *voxel, double *unwrappedVolume, intptr_t n_k,
+                  intptr_t n_j, intptr_t n_i) {
+  intptr_t i;
+  intptr_t volume_size = n_k * n_j * n_i;
   double *unwrappedVolume_pointer = unwrappedVolume;
   VOXELM *voxel_pointer = voxel;
 
@@ -1104,15 +1103,15 @@ void returnVolume(VOXELM *voxel, double *unwrappedVolume, int n_k,
 
 // the main function of the unwrapper
 void unwrap3D(double *wrapped_volume, double *unwrapped_volume,
-              unsigned char *input_mask, int n_k, int n_j,
-              int n_i, int wrap_around_k, int wrap_around_j,
+              unsigned char *input_mask, intptr_t n_k, intptr_t n_j,
+              intptr_t n_i, int wrap_around_k, int wrap_around_j,
               int wrap_around_i, bitgen_t* bitgen_state) {
   params_t params = {TWOPI, wrap_around_k, wrap_around_j, wrap_around_i, 0};
   unsigned char *extended_mask;
   VOXELM *voxel;
   EDGE *edge;
-  int volume_size = n_j * n_k * n_i;
-  int No_of_Edges_initially = 3 * n_k * n_j * n_i;
+  intptr_t volume_size = n_j * n_k * n_i;
+  intptr_t No_of_Edges_initially = 3 * n_k * n_j * n_i;
 
   extended_mask = (unsigned char *)calloc(volume_size, sizeof(unsigned char));
   voxel = (VOXELM *)calloc(volume_size, sizeof(VOXELM));
