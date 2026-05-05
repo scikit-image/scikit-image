@@ -165,13 +165,16 @@ void initialisePIXELs(double *wrapped_image, unsigned char *input_mask,
   unsigned char *input_mask_pointer = input_mask;
   unsigned char *extended_mask_pointer = extended_mask;
   intptr_t i, j;
+  double outlier_reliability = 1000;
 
   for (i = 0; i < n_i; i++) {
     for (j = 0; j < n_j; j++) {
       pixel_pointer->increment = 0;
       pixel_pointer->number_of_pixels_in_group = 1;
       pixel_pointer->value = *wrapped_image_pointer;
-      pixel_pointer->reliability = bitgen_state->next_uint32(bitgen_state->state);
+      pixel_pointer->reliability =
+          (1 + bitgen_state->next_double(bitgen_state->state))
+          * outlier_reliability;
       pixel_pointer->input_mask = *input_mask_pointer;
       pixel_pointer->extended_mask = *extended_mask_pointer;
       pixel_pointer->head = pixel_pointer;
@@ -191,12 +194,13 @@ void initialisePIXELs(double *wrapped_image, unsigned char *input_mask,
 // gamma function in the paper
 double wrap(double pixel_value) {
   double wrapped_pixel_value;
-  if (pixel_value > PI)
-    wrapped_pixel_value = pixel_value - TWOPI;
-  else if (pixel_value < -PI)
-    wrapped_pixel_value = pixel_value + TWOPI;
+  double mod_value = fmod(pixel_value, TWOPI);
+  if (mod_value > PI)
+    wrapped_pixel_value = mod_value - TWOPI;
+  else if (mod_value < -PI)
+    wrapped_pixel_value = mod_value + TWOPI;
   else
-    wrapped_pixel_value = pixel_value;
+    wrapped_pixel_value = mod_value;
   return wrapped_pixel_value;
 }
 

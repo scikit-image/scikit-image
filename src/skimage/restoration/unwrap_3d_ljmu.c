@@ -170,6 +170,7 @@ void initialiseVOXELs(double *WrappedVolume, unsigned char *input_mask,
   unsigned char *input_mask_pointer = input_mask;
   unsigned char *extended_mask_pointer = extended_mask;
   intptr_t n, i, j;
+  double outlier_reliability = 1000;
 
   for (n = 0; n < n_i; n++) {
     for (i = 0; i < n_j; i++) {
@@ -177,7 +178,9 @@ void initialiseVOXELs(double *WrappedVolume, unsigned char *input_mask,
         voxel_pointer->increment = 0;
         voxel_pointer->number_of_voxels_in_group = 1;
         voxel_pointer->value = *wrapped_volume_pointer;
-        voxel_pointer->reliability = bitgen_state->next_uint32(bitgen_state->state);
+        voxel_pointer->reliability =
+          (1 + bitgen_state->next_double(bitgen_state->state))
+          * outlier_reliability;
         voxel_pointer->input_mask = *input_mask_pointer;
         voxel_pointer->extended_mask = *extended_mask_pointer;
         voxel_pointer->head = voxel_pointer;
@@ -196,15 +199,16 @@ void initialiseVOXELs(double *WrappedVolume, unsigned char *input_mask,
 //-------------------end initialize voxels -----------
 
 // gamma function in the paper
-double wrap(double voxel_value) {
-  double wrapped_voxel_value;
-  if (voxel_value > PI)
-    wrapped_voxel_value = voxel_value - TWOPI;
-  else if (voxel_value < -PI)
-    wrapped_voxel_value = voxel_value + TWOPI;
+double wrap(double pixel_value) {
+  double wrapped_pixel_value;
+  double mod_value = fmod(pixel_value, TWOPI);
+  if (mod_value > PI)
+    wrapped_pixel_value = mod_value - TWOPI;
+  else if (mod_value < -PI)
+    wrapped_pixel_value = mod_value + TWOPI;
   else
-    wrapped_voxel_value = voxel_value;
-  return wrapped_voxel_value;
+    wrapped_pixel_value = mod_value;
+  return wrapped_pixel_value;
 }
 
 // voxelL_value is the left voxel,  voxelR_value is the right voxel
