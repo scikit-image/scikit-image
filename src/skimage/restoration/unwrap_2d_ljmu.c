@@ -165,7 +165,7 @@ void initialisePIXELs(double *wrapped_image, unsigned char *input_mask,
   unsigned char *input_mask_pointer = input_mask;
   unsigned char *extended_mask_pointer = extended_mask;
   intptr_t i, j;
-  double outlier_reliability = 1000;
+  double outlier_reliability = 9999999.f;
 
   for (i = 0; i < n_i; i++) {
     for (j = 0; j < n_j; j++) {
@@ -194,13 +194,12 @@ void initialisePIXELs(double *wrapped_image, unsigned char *input_mask,
 // gamma function in the paper
 double wrap(double pixel_value) {
   double wrapped_pixel_value;
-  double mod_value = fmod(pixel_value, TWOPI);
-  if (mod_value > PI)
-    wrapped_pixel_value = mod_value - TWOPI;
-  else if (mod_value < -PI)
-    wrapped_pixel_value = mod_value + TWOPI;
+  if (pixel_value > PI)
+    wrapped_pixel_value = pixel_value - TWOPI;
+  else if (pixel_value < -PI)
+    wrapped_pixel_value = pixel_value + TWOPI;
   else
-    wrapped_pixel_value = mod_value;
+    wrapped_pixel_value = pixel_value;
   return wrapped_pixel_value;
 }
 
