@@ -95,8 +95,8 @@ Use an editable install (`spin install`) which supports this or avoid passing
 """
 
 
-def _get_skimage_modules(build_dir):
-    """Return the set of all skimage/skimage2/_skimage2 submodule names."""
+def _get_skimage_subpackages(build_dir):
+    """Return the set of all skimage/skimage2/_skimage2 subpackage names."""
     import importlib
 
     p = spin.cmds.meson._set_pythonpath(build_dir, quiet=True)
@@ -112,8 +112,8 @@ def _get_skimage_modules(build_dir):
     return pkg_mods
 
 
-def _get_changed_modules(base_ref, pkg_mods):
-    """Return the set of changed modules relative to *base_ref*, with cross-package expansion."""
+def _get_changed_subpackages(base_ref, pkg_mods):
+    """Return the set of changed subpackages relative to *base_ref*, with cross-package expansion."""
     base_ref = base_ref or os.environ.get('GITHUB_BASE_REF') or 'main'
     # In CI, the base branch is only available as origin/<base_ref> after fetch
     p = spin.util.run(
@@ -134,7 +134,7 @@ def _get_changed_modules(base_ref, pkg_mods):
         raise click.ClickException(f'Could not git-diff against {base_ref!r}')
 
     git_diff = p.stdout.decode('utf-8')
-    changed_modules = {mod for mod in pkg_mods if mod.replace('.', '/') in git_diff}
+    changed_subpackages = {mod for mod in pkg_mods if mod.replace('.', '/') in git_diff}
 
     # Cross-package expansion:
     # - skimage.X or _skimage2.X changed → also test skimage2.X
@@ -144,8 +144,8 @@ def _get_changed_modules(base_ref, pkg_mods):
         'skimage2.': ['skimage.'],
         '_skimage2.': ['skimage.', 'skimage2.'],
     }
-    expanded = set(changed_modules)
-    for mod in changed_modules:
+    expanded = set(changed_subpackages)
+    for mod in changed_subpackages:
         for prefix, targets in companions.items():
             if mod.startswith(prefix):
                 base = mod[len(prefix) :]
@@ -154,7 +154,7 @@ def _get_changed_modules(base_ref, pkg_mods):
     return expanded
 
 
-def _get_test_paths(changed_modules, doctest):
+def _get_test_paths(changed_subpackages, doctest):
     """Map module names to their test and (optionally) source directories.
 
     src-layout: tests live outside src/, doctests live inside src/.
@@ -163,7 +163,7 @@ def _get_test_paths(changed_modules, doctest):
     """
     test_paths = []
     seen = set()
-    for mod in sorted(changed_modules):
+    for mod in sorted(changed_subpackages):
         mod_path = mod.replace('.', '/')
         test_path = mod_path.replace('_skimage2/', 'skimage2/', 1)
         test_dir = os.path.join('tests', test_path)
@@ -183,14 +183,14 @@ def _get_test_paths(changed_modules, doctest):
     "--test-modified",
     is_flag=True,
     default=False,
-    help="Test only modified submodules",
+    help="Test only modified subpackages",
 )
 @click.option("--doctest/--no-doctest", default=True, help="Whether to run doctests.")
 @click.option(
     "--base-ref",
     default=None,
     help=(
-        "Base ref for detecting modified modules (default: $GITHUB_BASE_REF or 'main')"
+        "Base ref for detecting modified subpackages (default: $GITHUB_BASE_REF or 'main')"
     ),
 )
 @spin.util.extend_command(spin.cmds.meson.test)
@@ -204,19 +204,19 @@ def test(
             raise RuntimeError("--test-modified will override --pyargs")
 
         build_dir = kwargs.get('build_dir', 'build')
-        pkg_mods = _get_skimage_modules(build_dir)
-        changed_modules = _get_changed_modules(base_ref, pkg_mods)
+        pkg_mods = _get_skimage_subpackages(build_dir)
+        changed_subpackages = _get_changed_subpackages(base_ref, pkg_mods)
 
-        if not changed_modules:
-            click.secho("No modified skimage modules detected.", fg="yellow")
+        if not changed_subpackages:
+            click.secho("No modified skimage subpackages detected.", fg="yellow")
             return
 
         click.secho(
-            f"Testing modified modules: {', '.join(sorted(changed_modules))}",
+            f"Testing modified subpackages: {', '.join(sorted(changed_subpackages))}",
             fg="green",
         )
 
-        test_paths = _get_test_paths(changed_modules, doctest)
+        test_paths = _get_test_paths(changed_subpackages, doctest)
         pytest_args = pytest_args + tuple(test_paths)
 
     is_out_of_tree_build = not _is_editable_install_of_same_source("scikit-image")
