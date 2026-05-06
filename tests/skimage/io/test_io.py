@@ -1,6 +1,7 @@
 import os
 import pathlib
 import tempfile
+import warnings
 
 import numpy as np
 import pytest
@@ -130,8 +131,20 @@ def test_failed_temporary_file(monkeypatch, error_class):
 def test_plugin_deprecation_on_imread(kwarg):
     path = fetch("data/multipage.tif")
     regex = ".*use `imageio` or other I/O packages directly.*"
+    # tifffile raises "DeprecationWarning: Setting the shape on a NumPy array
+    # has been deprecated in NumPy 2.5" on NumPy >= 2.5 — suppress until fixed
+    # upstream. TODO: remove once tifffile > 2026.4.11 is released.
     with pytest.warns(FutureWarning, match=regex) as record:
-        io.imread(path, **kwarg)
+        # tifffile raises "DeprecationWarning: Setting the shape on a NumPy array
+        # has been deprecated in NumPy 2.5" — suppress until fixed upstream.
+        # TODO: remove once tifffile > 2026.4.11 is released.
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore",
+                message="Setting the shape on a NumPy array",
+                category=DeprecationWarning,
+            )
+            io.imread(path, **kwarg)
     assert len(record) == 1
     assert_stacklevel(record, offset=-2)
 
