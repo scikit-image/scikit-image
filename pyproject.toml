@@ -302,4 +302,5 @@ before-all = [
 ]
 
 [tool.cibuildwheel.pyodide]
-test-command = "pytest --pyargs skimage tests"
+test-command = "pytest ./tests"
+test-extras = ["test"]
