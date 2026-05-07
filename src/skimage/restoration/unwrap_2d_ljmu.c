@@ -165,7 +165,6 @@ void initialisePIXELs(double *wrapped_image, unsigned char *input_mask,
   unsigned char *input_mask_pointer = input_mask;
   unsigned char *extended_mask_pointer = extended_mask;
   intptr_t i, j;
-  double outlier_reliability = 9999999.f;
 
   for (i = 0; i < n_i; i++) {
     for (j = 0; j < n_j; j++) {
@@ -173,8 +172,7 @@ void initialisePIXELs(double *wrapped_image, unsigned char *input_mask,
       pixel_pointer->number_of_pixels_in_group = 1;
       pixel_pointer->value = *wrapped_image_pointer;
       pixel_pointer->reliability =
-          (1 + bitgen_state->next_double(bitgen_state->state))
-          * outlier_reliability;
+          bitgen_state->next_uint32(bitgen_state->state);
       pixel_pointer->input_mask = *input_mask_pointer;
       pixel_pointer->extended_mask = *extended_mask_pointer;
       pixel_pointer->head = pixel_pointer;

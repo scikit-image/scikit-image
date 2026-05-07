@@ -170,7 +170,6 @@ void initialiseVOXELs(double *WrappedVolume, unsigned char *input_mask,
   unsigned char *input_mask_pointer = input_mask;
   unsigned char *extended_mask_pointer = extended_mask;
   intptr_t n, i, j;
-  double outlier_reliability = 9999999.f;
 
   for (n = 0; n < n_i; n++) {
     for (i = 0; i < n_j; i++) {
@@ -179,8 +178,7 @@ void initialiseVOXELs(double *WrappedVolume, unsigned char *input_mask,
         voxel_pointer->number_of_voxels_in_group = 1;
         voxel_pointer->value = *wrapped_volume_pointer;
         voxel_pointer->reliability =
-          (1 + bitgen_state->next_double(bitgen_state->state))
-          * outlier_reliability;
+            bitgen_state->next_uint32(bitgen_state->state);
         voxel_pointer->input_mask = *input_mask_pointer;
         voxel_pointer->extended_mask = *extended_mask_pointer;
         voxel_pointer->head = voxel_pointer;
