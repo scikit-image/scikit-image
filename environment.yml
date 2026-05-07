@@ -5,7 +5,12 @@ dependencies:
   # base
   - numpy>=2.1
   - scipy>=1.15
-  - scipy>=1.14
+  - networkx>=3.0
+  - pillow>=10.1
+  - imageio>=2.33,!=2.35.0
+  - tifffile>=2025.1.10
+  - packaging>=24
+  - lazy-loader>=0.5
   # build
   - meson-python>=0.16
   - ninja>=1.11.1.1

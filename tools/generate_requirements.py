@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Generate requirements/*.txt files from pyproject.toml.
 
-Also builda a conda environment.yml
+Also builds a conda environment.yml
 """
 
 import sys
@@ -72,8 +72,9 @@ def generate_environment_yml(req_sections: dict[str, list[str]]) -> None:
             lines.append(tab + f"  - {dep}")
 
             # Strip duplicates
-            if re.split('[>=]', lines[-2])[0] == re.split('[>=]', lines[-1])[0]:
-                lines = lines[:-1]
+            if len(lines) > 1 and lines[-2].startswith(tab + "  - "):
+                if re.split('[>=]', lines[-2])[0] == re.split('[>=]', lines[-1])[0]:
+                    lines.pop()
 
     for section in req_sections:
         _section_to_lst(section, req_sections, lines)
