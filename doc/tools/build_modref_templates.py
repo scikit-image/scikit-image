@@ -75,7 +75,9 @@ if __name__ == '__main__':
         abort("Can not import skimage2")
 
     outdir2 = 'source/api2'
-    docwriter2 = ApiDocWriter(package2, display_package_name='skimage2')
+    docwriter2 = ApiDocWriter(
+        package2, display_package_name='skimage2', per_function_pages=True
+    )
     docwriter2.package_skip_patterns += [r'\.tests$']
     docwriter2.module_preamble = (
         ".. warning::\n\n"

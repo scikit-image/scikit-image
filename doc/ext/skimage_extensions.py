@@ -132,7 +132,22 @@ def write_random_js(app, exception):
     )
 
 
+def check_examples_section(app, what, name, obj, options, lines):
+    """Warn when a public function or class is missing an Examples docstring section."""
+    if what not in ('function', 'class'):
+        return
+    if name.split('.')[-1].startswith('_'):
+        return
+    if not name.startswith('skimage2.'):
+        return
+    if not any('rubric:: Examples' in line for line in lines):
+        logger.warning(
+            '%s has no Examples section in its docstring', name, type='skimage2'
+        )
+
+
 def setup(app):
     app.add_directive('naturalsortedtoctree', NaturalSortedTocTree)
+    app.connect('autodoc-process-docstring', check_examples_section)
     app.connect('build-finished', write_random_js)
     return {'parallel_read_safe': True}
