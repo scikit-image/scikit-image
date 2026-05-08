@@ -287,7 +287,7 @@ The new API v2 can be gradually fleshed out in its own independent namespace and
 Separating ``_skimage2`` and ``skimage2`` simplifies the requirement that users are warned about the experimental status of the API v2.
 Ported implementations that live in ``_skimage2`` can be reused by wrappers in ``skimage`` without triggering the import warning in ``skimage2``.
 
-An alternative would have been to raise this warning not on import of ``skimage2`` but when any of its attributes is used with a custom ``__getattr__``.
+An alternative would have been to raise this warning not on import of ``skimage2`` but when any of its attributes are used, with a custom ``__getattr__``.
 However, we preferred to trigger this warning as early as possible.
 
 Why restrict imports between namespaces?
