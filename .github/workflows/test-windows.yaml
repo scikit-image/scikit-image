@@ -30,14 +30,14 @@ jobs:
             MINIMUM_REQUIREMENTS: 0
             OPTIONAL_DEPS: 0
             OPTIONS_NAME: "default"
-          - python-version: "3.14"
+          - python-version: "3.12"
             MINIMUM_REQUIREMENTS: 0
             OPTIONAL_DEPS: 1
             OPTIONS_NAME: "optional-deps"
-          - python-version: "3.12"
+          - python-version: "3.13"
             PIP_FLAGS: "--pre"
             OPTIONS_NAME: "pre"
-          - python-version: "3.13"
+          - python-version: "3.14"
             MINIMUM_REQUIREMENTS: 0
             OPTIONAL_DEPS: 0
             OPTIONS_NAME: "default"
