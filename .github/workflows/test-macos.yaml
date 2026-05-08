@@ -87,7 +87,7 @@ jobs:
 
       - name: Check benchmarks
         run: |
-          spin run -- asv check -v -E existing
+          spin asv -- check -v -E existing
 
       - name: "Job has failed: reporting"
         if: ${{ failure() && github.ref == 'refs/heads/main' }}
