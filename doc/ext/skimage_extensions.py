@@ -140,6 +140,9 @@ def check_examples_section(app, what, name, obj, options, lines):
         return
     if not name.startswith('skimage2.'):
         return
+    # numpydoc processes docstrings before this handler runs, converting the
+    # raw "Examples\n--------" section header into ".. rubric:: Examples" in
+    # `lines`.
     if not any('rubric:: Examples' in line for line in lines):
         logger.warning(
             '%s has no Examples section in its docstring', name, type='skimage2'
