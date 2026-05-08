@@ -133,8 +133,8 @@ def write_random_js(app, exception):
 
 
 def check_examples_section(app, what, name, obj, options, lines):
-    """Warn when a public function is missing an Examples docstring section."""
-    if what != 'function':
+    """Warn when a public function or class is missing an Examples docstring section."""
+    if what not in ('function', 'class'):
         return
     if name.split('.')[-1].startswith('_'):
         return

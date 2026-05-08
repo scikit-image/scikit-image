@@ -319,18 +319,33 @@ class ApiDocWriter:
         ad += '.. automodule:: ' + display_uri + '\n\n'
         ad += '.. currentmodule:: ' + display_uri + '\n\n'
         if self.per_function_pages:
+            # Functions and classes get :toctree: . so autosummary generates
+            # one page per member. Submodules are listed in a separate block
+            # without :toctree: to avoid conflicting with the module-level
+            # pages that ApiDocWriter already writes for them.
             ad += '.. autosummary::\n   :nosignatures:\n   :toctree: .\n\n'
+            for f in functions:
+                ad += '   ' + f + '\n'
+            ad += '\n'
+            for c in classes:
+                ad += '   ' + c + '\n'
+            ad += '\n'
+            if submodules:
+                ad += '.. autosummary::\n   :nosignatures:\n\n'
+                for m in submodules:
+                    ad += '   ' + m + '\n'
+                ad += '\n'
         else:
             ad += '.. autosummary::\n   :nosignatures:\n\n'
-        for f in functions:
-            ad += '   ' + f + '\n'
-        ad += '\n'
-        for c in classes:
-            ad += '   ' + c + '\n'
-        ad += '\n'
-        for m in submodules:
-            ad += '   ' + m + '\n'
-        ad += '\n'
+            for f in functions:
+                ad += '   ' + f + '\n'
+            ad += '\n'
+            for c in classes:
+                ad += '   ' + c + '\n'
+            ad += '\n'
+            for m in submodules:
+                ad += '   ' + m + '\n'
+            ad += '\n'
 
         if not self.per_function_pages:
             for f in functions:
