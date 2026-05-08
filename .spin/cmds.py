@@ -95,12 +95,17 @@ Use an editable install (`spin install`) which supports this or avoid passing
 """
 
 
-def _get_skimage_subpackages(build_dir):
-    """Return the set of all skimage/skimage2/_skimage2 subpackage names."""
+def _get_skimage_subpackages(build_dir=None):
+    """Return the set of all skimage/skimage2/_skimage2 subpackage names.
+
+    If *build_dir* is None, skimage is expected to already be importable
+    (e.g. installed from a wheel via pip).
+    """
     import importlib
 
-    p = spin.cmds.meson._set_pythonpath(build_dir, quiet=True)
-    sys.path.insert(0, p)
+    if build_dir is not None:
+        p = spin.cmds.meson._set_pythonpath(build_dir, quiet=True)
+        sys.path.insert(0, p)
 
     pkg = importlib.import_module('skimage')
     pkg_mods = {f'skimage.{attr}' for attr in dir(pkg) if not attr.startswith('_')}
@@ -180,6 +185,16 @@ def _get_test_paths(changed_subpackages, doctest):
 
 
 @click.option(
+    "--no-build",
+    is_flag=True,
+    default=False,
+    help=(
+        "Run tests against an installed package (e.g. a pip-installed wheel) "
+        "instead of a spin/meson build directory. "
+        "Pytest is invoked directly without any spin build-environment setup."
+    ),
+)
+@click.option(
     "--test-modified",
     is_flag=True,
     default=False,
@@ -195,7 +210,13 @@ def _get_test_paths(changed_subpackages, doctest):
 )
 @spin.util.extend_command(spin.cmds.meson.test)
 def test(
-    *, parent_callback, test_modified=False, doctest=False, base_ref=None, **kwargs
+    *,
+    parent_callback,
+    no_build=False,
+    test_modified=False,
+    doctest=False,
+    base_ref=None,
+    **kwargs,
 ):
     pytest_args = kwargs.get('pytest_args', ())
 
@@ -203,7 +224,7 @@ def test(
         if "--pyargs" in pytest_args:
             raise RuntimeError("--test-modified will override --pyargs")
 
-        build_dir = kwargs.get('build_dir', 'build')
+        build_dir = None if no_build else kwargs.get('build_dir', 'build')
         pkg_mods = _get_skimage_subpackages(build_dir)
         changed_subpackages = _get_changed_subpackages(base_ref, pkg_mods)
 
@@ -219,13 +240,17 @@ def test(
         test_paths = _get_test_paths(changed_subpackages, doctest)
         pytest_args = pytest_args + tuple(test_paths)
 
-    is_out_of_tree_build = not _is_editable_install_of_same_source("scikit-image")
-    if is_out_of_tree_build and "src" in str(pytest_args):
-        click.secho(_SRC_IN_TEST_ARGS_WARNING_MESSAGE, fg="yellow", bold=True)
+    if not no_build:
+        is_out_of_tree_build = not _is_editable_install_of_same_source("scikit-image")
+        if is_out_of_tree_build and "src" in str(pytest_args):
+            click.secho(_SRC_IN_TEST_ARGS_WARNING_MESSAGE, fg="yellow", bold=True)
 
     if doctest:
         if '--doctest-plus' not in pytest_args:
             pytest_args = ('--doctest-plus',) + pytest_args
 
-    kwargs["pytest_args"] = pytest_args
-    parent_callback(**kwargs)
+    if no_build:
+        spin.util.run(['pytest'] + list(pytest_args))
+    else:
+        kwargs["pytest_args"] = pytest_args
+        parent_callback(**kwargs)

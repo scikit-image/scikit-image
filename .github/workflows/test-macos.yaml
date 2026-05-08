@@ -11,9 +11,6 @@ permissions:
   contents: read
   issues: write
 
-env:
-  PYTEST: "pytest --config-file ${{ github.workspace }}/pyproject.toml"
-
 jobs:
   test_skimage_macos:
     name: ${{ matrix.os }}-cp${{ matrix.python-version }}
@@ -45,6 +42,7 @@ jobs:
       - name: Checkout scikit-image
         uses: actions/checkout@v5
         with:
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Setup Python
@@ -64,9 +62,9 @@ jobs:
         run: |
           source .github/scripts/setup-build-env.sh
 
-      - name: Build and install
+      - name: Build skimage
         run: |
-          pip install -v --no-build-isolation .
+          spin build
 
       - name: Install test dependencies
         env:
@@ -75,12 +73,20 @@ jobs:
           source .github/scripts/setup-test-env.sh
 
       - name: Run tests
+        env:
+          IS_PR: ${{ github.event_name == 'pull_request' }}
+          HAS_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'run-all-tests') }}
         run: |
-          $PYTEST --showlocals ./tests
+          if [[ "$IS_PR" == "true" && "$HAS_LABEL" == "false" ]]; then
+            MODIFIED_FLAG="--test-modified"
+          else
+            MODIFIED_FLAG=""
+          fi
+          spin test --no-doctest $MODIFIED_FLAG
 
       - name: Check benchmarks
         run: |
-          asv check -v -E existing
+          spin run -- asv check -v -E existing
 
       - name: "Job has failed: reporting"
         if: ${{ failure() && github.ref == 'refs/heads/main' }}

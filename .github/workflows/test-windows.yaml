@@ -14,7 +14,6 @@ permissions:
 env:
   CC: clang
   CXX: clang
-  PYTEST: "pytest --config-file ${{ github.workspace }}/pyproject.toml"
 
 jobs:
   test_skimage_windows:
@@ -46,6 +45,7 @@ jobs:
       - name: Checkout scikit-image
         uses: actions/checkout@v5
         with:
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Setup Python
@@ -74,10 +74,10 @@ jobs:
           Start-Process -FilePath .\llvm.exe -ArgumentList "/S", "/D=C:\LLVM" -Wait
           echo "C:\LLVM\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
-      - name: Build and install from source
+      - name: Build skimage
         shell: bash
         run: |
-          pip install -v --no-build-isolation .
+          spin build
 
       - name: Install test dependencies
         env:
@@ -91,8 +91,16 @@ jobs:
 
       - name: Run tests
         shell: bash
+        env:
+          IS_PR: ${{ github.event_name == 'pull_request' }}
+          HAS_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'run-all-tests') }}
         run: |
-          $PYTEST --doctest-plus --showlocals --pyargs skimage ./tests
+          if [[ "$IS_PR" == "true" && "$HAS_LABEL" == "false" ]]; then
+            MODIFIED_FLAG="--test-modified"
+          else
+            MODIFIED_FLAG=""
+          fi
+          spin test --doctest $MODIFIED_FLAG
 
       - name: "Job has failed: reporting"
         if: ${{ failure() && github.ref == 'refs/heads/main' }}

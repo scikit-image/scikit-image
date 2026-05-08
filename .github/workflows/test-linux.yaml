@@ -11,6 +11,22 @@ permissions:
   contents: read
 
 jobs:
+  check-labels:
+    runs-on: ubuntu-latest
+    outputs:
+      test_modified: ${{ steps.check.outputs.test_modified }}
+    steps:
+      - id: check
+        env:
+          IS_PR: ${{ github.event_name == 'pull_request' }}
+          HAS_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'run-all-tests') }}
+        run: |
+          if [[ "$IS_PR" == "true" && "$HAS_LABEL" == "false" ]]; then
+            echo "test_modified=true" >> $GITHUB_OUTPUT
+          else
+            echo "test_modified=false" >> $GITHUB_OUTPUT
+          fi
+
   # GH does not support creating separate jobs out of a matrix,
   # so this is a workaround
   build-linux-311:
@@ -40,7 +56,7 @@ jobs:
 
   test-linux-311:
     name: test-linux-cp3.11-${{ matrix.OPTIONS_NAME }}
-    needs: [build-linux-311]
+    needs: [build-linux-311, check-labels]
     strategy:
       fail-fast: false
       matrix:
@@ -62,10 +78,12 @@ jobs:
       MINIMUM_REQUIREMENTS: ${{ matrix.MINIMUM_REQUIREMENTS }}
       OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
       EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
+      test_modified: ${{ needs.check-labels.outputs.test_modified }}
+      base_ref: ${{ github.base_ref }}
 
   test-linux-312:
     name: test-linux-cp3.12-${{ matrix.OPTIONS_NAME }}
-    needs: [build-linux-312]
+    needs: [build-linux-312, check-labels]
     strategy:
       fail-fast: false
       matrix:
@@ -92,30 +110,38 @@ jobs:
       PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
       PYTHONOPTIMIZE: ${{ matrix.PYTHONOPTIMIZE }}
       INSTALL_FROM_SDIST: ${{ matrix.INSTALL_FROM_SDIST }}
+      test_modified: ${{ needs.check-labels.outputs.test_modified }}
+      base_ref: ${{ github.base_ref }}
 
   test-linux-313:
     name: test-linux-cp3.13-main
-    needs: [build-linux-313]
+    needs: [build-linux-313, check-labels]
     uses: ./.github/workflows/_test_linux_for_python_x.yaml
     with:
       python-version: 3.13
       OPTIONS_NAME: "main"
+      test_modified: ${{ needs.check-labels.outputs.test_modified }}
+      base_ref: ${{ github.base_ref }}
 
   test-linux-314:
     name: test-linux-cp3.14-main
-    needs: [build-linux-314]
+    needs: [build-linux-314, check-labels]
     uses: ./.github/workflows/_test_linux_for_python_x.yaml
     with:
       python-version: 3.14
       OPTIONS_NAME: "main"
+      test_modified: ${{ needs.check-labels.outputs.test_modified }}
+      base_ref: ${{ github.base_ref }}
 
   test-linux-314t:
     name: test-linux-cp3.14t-main
-    needs: [build-linux-314t]
+    needs: [build-linux-314t, check-labels]
     uses: ./.github/workflows/_test_linux_for_python_x.yaml
     with:
       python-version: 3.14t
       OPTIONS_NAME: "main"
+      test_modified: ${{ needs.check-labels.outputs.test_modified }}
+      base_ref: ${{ github.base_ref }}
 
   report-failures:
     runs-on: ubuntu-latest
