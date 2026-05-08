@@ -1,4 +1,5 @@
 import os
+import subprocess
 import sys
 
 import click
@@ -121,20 +122,16 @@ def _get_changed_subpackages(base_ref, pkg_mods):
     """Return the set of changed subpackages relative to *base_ref*, with cross-package expansion."""
     base_ref = base_ref or os.environ.get('GITHUB_BASE_REF') or 'main'
     # In CI, the base branch is only available as origin/<base_ref> after fetch
-    p = spin.util.run(
-        ['git', 'rev-parse', '--verify', base_ref], output=False, echo=False
-    )
+    p = subprocess.run(['git', 'rev-parse', '--verify', base_ref], capture_output=True)
     if p.returncode != 0:
         base_ref = f'origin/{base_ref}'
 
-    p = spin.util.run(['git', 'merge-base', base_ref, 'HEAD'], output=False, echo=False)
+    p = subprocess.run(['git', 'merge-base', base_ref, 'HEAD'], capture_output=True)
     if p.returncode != 0:
         raise click.ClickException(f'Could not find merge base with {base_ref!r}')
     merge_base = p.stdout.decode('utf-8').strip()
 
-    p = spin.util.run(
-        ['git', 'diff', merge_base, '--name-only'], output=False, echo=False
-    )
+    p = subprocess.run(['git', 'diff', merge_base, '--name-only'], capture_output=True)
     if p.returncode != 0:
         raise click.ClickException(f'Could not git-diff against {base_ref!r}')
 
