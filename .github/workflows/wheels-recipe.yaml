@@ -22,7 +22,7 @@ jobs:
             macos-15-intel,
             macos-latest, # ARM-version of MacOS
           ]
-        build: ["cp31{1,2}*", "cp313*", "cp314*"]
+        build: ["cp312*", "cp313*", "cp314*"]
 
     steps:
       - uses: actions/checkout@v5
@@ -45,7 +45,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest, windows-11-arm]
-        build: ["cp31{1,2}*", "cp313*", "cp314*"]
+        build: ["cp312*", "cp313*", "cp314*"]
 
     steps:
       - uses: actions/checkout@v5
@@ -77,10 +77,10 @@ jobs:
         os: [ubuntu-latest, ubuntu-22.04-arm]
         build:
           [
-            "cp31{1,2}*manylinux*",
+            "cp312*manylinux*",
             "cp313*manylinux*",
             "cp314*manylinux*",
-            "cp31{1,2}*musllinux*",
+            "cp312*musllinux*",
             "cp313*musllinux*",
             "cp314*musllinux*",
           ]
