@@ -175,6 +175,8 @@ This process orients itself around the following principles:
 One implementation
   If possible, only one implementation should exist, and one API should be a *simple* wrapper around the other.
 
+.. _sk2-import-hierarchy:
+
 Import hierarchy
   ``skimage`` and ``skimage2`` may only import from ``_skimage2``, and ``_skimage2`` should be self-contained.
   Exceptions (for example, importing from ``skimage`` in ``_skimage2``) are temporary and should be realized using inlined imports.
@@ -293,10 +295,10 @@ However, we preferred to trigger this warning as early as possible.
 Why restrict imports between namespaces?
 ........................................
 
-Ported implementations in ``_skimage2`` may rely on functionality in ``skimage2`` that hasn't been ported yet.
-At the same time, wrappers in ``skimage`` may import from ``_skimage2``.
-An explicit import hierarchy avoids circular imports errors.
-
+While we are gradually porting implementations and API from ``skimage`` to ``_skimage2``, code in one namespace may require functionality from the other one – and vice versa.
+This can easily lead to confusing circular import errors.
+To minimize the likelihood of these errors, we define an explicit :ref:`sk2-import-hierarchy`.
+Since we want ``skimage2`` to be independent of ``skimage`` by the end of the first phase, we only allow temporary inlined imports from ``skimage``.
 
 Alternatives
 ------------
