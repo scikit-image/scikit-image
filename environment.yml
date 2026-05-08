@@ -57,7 +57,7 @@ dependencies:
   # optional_free_threaded
   - astropy-base>=6.1
   - dask>=2025.1.0
-  - matplotlib-base>=3.8
+  - matplotlib-base>=3.10
   - pooch>=1.6.0
   - PyWavelets>=1.7
   # test

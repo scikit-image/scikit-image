@@ -99,8 +99,7 @@ optional = [
 optional_free_threaded = [
     'astropy>=6.1',
     'dask[array]>=2025.1.0',
-    'matplotlib>=3.8; sys_platform == "emscripten"',  # in Pyodide 0.29.3, the available matplotlib is 3.8.4
-    'matplotlib>=3.10; sys_platform != "emscripten"',
+    'matplotlib>=3.10; sys_platform != "emscripten"',  # the pyodide maintainers recommend not testing with matplotlib
     'pooch>=1.6.0; sys_platform != "emscripten"',  # requires stack switching with alternative pytest runner
     'PyWavelets>=1.7',
 ]
@@ -297,6 +296,7 @@ environment = {PIP_PREFER_BINARY=1, SKIMAGE_LINK_FLAGS="-Wl,--strip-debug"}
 archs = ["auto"]
 
 [tool.cibuildwheel.macos]
+test-command = "pytest"
 before-all = [
     "bash {project}/tools/build_libomp.sh",
 ]
