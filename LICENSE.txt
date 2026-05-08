@@ -82,6 +82,11 @@ File: skimage/transform/_thin_plate_splines.py
 Copyright: 2007 Zachary Pincus
 License: BSD-3-Clause
 
+File: skimage/filters/ridges.py
+Copyright: 2009, Dirk-Jan Kroon
+           2017, Tim Jerman
+License: BSD-3-Clause
+
 Function: skimage/_shared/_warnings.py:warn_external
 Copyright: 2012-2025 Matplotlib Development Team
 License: PSF-2.0
