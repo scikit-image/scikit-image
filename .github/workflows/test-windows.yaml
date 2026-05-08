@@ -97,6 +97,7 @@ jobs:
         run: |
           if [[ "$IS_PR" == "true" && "$HAS_LABEL" == "false" ]]; then
             MODIFIED_FLAG="--test-modified"
+            git fetch origin "$GITHUB_BASE_REF"
           else
             MODIFIED_FLAG=""
           fi

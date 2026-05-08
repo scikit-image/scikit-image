@@ -114,10 +114,11 @@ jobs:
         run: |
           if [[ "$TEST_MODIFIED" == "true" ]]; then
             MODIFIED_FLAG="--test-modified"
+            git fetch origin "$GITHUB_BASE_REF"
           else
             MODIFIED_FLAG=""
           fi
-          spin test --no-build --doctest $MODIFIED_FLAG
+          spin test --installed --doctest $MODIFIED_FLAG
 
       - name: Check benchmarks
         run: |

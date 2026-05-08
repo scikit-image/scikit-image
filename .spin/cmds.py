@@ -185,7 +185,7 @@ def _get_test_paths(changed_subpackages, doctest):
 
 
 @click.option(
-    "--no-build",
+    "--installed",
     is_flag=True,
     default=False,
     help=(
@@ -212,7 +212,7 @@ def _get_test_paths(changed_subpackages, doctest):
 def test(
     *,
     parent_callback,
-    no_build=False,
+    installed=False,
     test_modified=False,
     doctest=False,
     base_ref=None,
@@ -224,7 +224,7 @@ def test(
         if "--pyargs" in pytest_args:
             raise RuntimeError("--test-modified will override --pyargs")
 
-        build_dir = None if no_build else kwargs.get('build_dir', 'build')
+        build_dir = None if installed else kwargs.get('build_dir', 'build')
         pkg_mods = _get_skimage_subpackages(build_dir)
         changed_subpackages = _get_changed_subpackages(base_ref, pkg_mods)
 
@@ -240,7 +240,7 @@ def test(
         test_paths = _get_test_paths(changed_subpackages, doctest)
         pytest_args = pytest_args + tuple(test_paths)
 
-    if not no_build:
+    if not installed:
         is_out_of_tree_build = not _is_editable_install_of_same_source("scikit-image")
         if is_out_of_tree_build and "src" in str(pytest_args):
             click.secho(_SRC_IN_TEST_ARGS_WARNING_MESSAGE, fg="yellow", bold=True)
@@ -249,7 +249,7 @@ def test(
         if '--doctest-plus' not in pytest_args:
             pytest_args = ('--doctest-plus',) + pytest_args
 
-    if no_build:
+    if installed:
         spin.util.run(['pytest'] + list(pytest_args))
     else:
         kwargs["pytest_args"] = pytest_args
