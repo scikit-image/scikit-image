@@ -187,8 +187,8 @@ Test coverage of both APIs
   using dependency analysis (see `#7749 <https://github.com/scikit-image/scikit-image/pull/7749>`__).
 
 Minimize API difference
-  Keep the differences between the old and new API small to make the eventual transition easier for users.
-  Prefer conventional deprecations in the ``skimage`` namespace if possible.
+  Minimize the differences between the old and new API to make the eventual transition easier for users.
+  Conventional deprecation can still be introduced in ``skimage``, but deferring them to the ``_skimage2`` namespace is the preferred option.
 
 Backwards compatible
   It should be possible to achieve the old behavior of the ``skimage`` API by some call or set of calls with the ``skimage2`` API.
