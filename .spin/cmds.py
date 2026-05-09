@@ -6,6 +6,8 @@ import click
 import spin
 from spin.cmds.meson import _is_editable_install_of_same_source
 
+_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 
 @click.option(
     "--install-deps/--no-install-deps",
@@ -122,16 +124,32 @@ def _get_changed_subpackages(base_ref, pkg_mods):
     """Return the set of changed subpackages relative to *base_ref*, with cross-package expansion."""
     base_ref = base_ref or os.environ.get('GITHUB_BASE_REF') or 'main'
     # In CI, the base branch is only available as origin/<base_ref> after fetch
-    p = subprocess.run(['git', 'rev-parse', '--verify', base_ref], capture_output=True)
+    p = subprocess.run(
+        ['git', 'rev-parse', '--verify', base_ref],
+        capture_output=True,
+        cwd=_REPO_ROOT,
+    )
     if p.returncode != 0:
         base_ref = f'origin/{base_ref}'
 
-    p = subprocess.run(['git', 'merge-base', base_ref, 'HEAD'], capture_output=True)
+    p = subprocess.run(
+        ['git', 'merge-base', base_ref, 'HEAD'],
+        capture_output=True,
+        cwd=_REPO_ROOT,
+    )
     if p.returncode != 0:
-        raise click.ClickException(f'Could not find merge base with {base_ref!r}')
-    merge_base = p.stdout.decode('utf-8').strip()
+        # Shallow clone: fall back to diffing directly against the base ref.
+        # For GitHub PR merge commits, base_ref is a direct parent of HEAD so
+        # this is equivalent to the merge-base diff.
+        merge_base = base_ref
+    else:
+        merge_base = p.stdout.decode('utf-8').strip()
 
-    p = subprocess.run(['git', 'diff', merge_base, '--name-only'], capture_output=True)
+    p = subprocess.run(
+        ['git', 'diff', merge_base, '--name-only'],
+        capture_output=True,
+        cwd=_REPO_ROOT,
+    )
     if p.returncode != 0:
         raise click.ClickException(f'Could not git-diff against {base_ref!r}')
 
@@ -168,13 +186,13 @@ def _get_test_paths(changed_subpackages, doctest):
     for mod in sorted(changed_subpackages):
         mod_path = mod.replace('.', '/')
         test_path = mod_path.replace('_skimage2/', 'skimage2/', 1)
-        test_dir = os.path.join('tests', test_path)
+        test_dir = os.path.join(_REPO_ROOT, 'tests', test_path)
         if test_dir not in seen and os.path.isdir(test_dir):
             test_paths.append(test_dir)
             seen.add(test_dir)
         if doctest:
             src_path = mod_path.replace('skimage2/', '_skimage2/', 1)
-            src_dir = os.path.join('src', src_path)
+            src_dir = os.path.join(_REPO_ROOT, 'src', src_path)
             if src_dir not in seen and os.path.isdir(src_dir):
                 test_paths.append(src_dir)
                 seen.add(src_dir)
