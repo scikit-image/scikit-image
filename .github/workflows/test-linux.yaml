@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 jobs:
-  check-labels:
+  process-labels:
     runs-on: ubuntu-latest
     outputs:
       test_modified: ${{ steps.check.outputs.test_modified }}
