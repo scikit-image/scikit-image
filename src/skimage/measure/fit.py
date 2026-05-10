@@ -5,7 +5,7 @@ from warnings import warn, catch_warnings
 
 import numpy as np
 from numpy.linalg import inv
-from scipy import optimize, spatial
+from scipy import optimize
 
 from _skimage2._shared.utils import (
     _deprecate_estimate,
@@ -623,7 +623,7 @@ class CircleModel(_BaseModel):
             )
 
         center = C[0:2]
-        distances = spatial.minkowski_distance(center, data)
+        distances = np.linalg.norm(data - center, axis=-1)
         r = np.sqrt(np.mean(distances**2))
 
         # Revert normalization and set init params.
