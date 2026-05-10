@@ -622,7 +622,7 @@ class CircleModel(_BaseModel):
                 warn_only=warn_only,
             )
 
-        # Compute the Eculidean distances from the center.
+        # Compute the Euclidean distances from the center.
         center = C[0:2]
         distances = np.linalg.norm(data - center, axis=-1)
         r = np.sqrt(np.mean(distances**2))
