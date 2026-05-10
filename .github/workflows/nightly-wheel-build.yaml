@@ -10,8 +10,9 @@ on:
     branches:
       - maintenance/**
   pull_request:
-    paths:
-      - ".github/workflows/nightly-wheel-build.yaml"
+    # TODO: remove before merging.
+    # paths:
+    #   - ".github/workflows/nightly-wheel-build.yaml"
 
 concurrency:
   # Cancel previous workflows on the same branch
