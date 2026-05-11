@@ -623,7 +623,11 @@ class CircleModel(_BaseModel):
             )
 
         center = C[0:2]
-        distances = spatial.minkowski_distance(center, data)
+        # Can remove once SciPy 1.18 is the default
+        if hasattr(spatial, 'distance') and hasattr(spatial.distance, 'minkowski'):
+            distances = spatial.distance.minkowski(center, data)
+        else:
+            distances = spatial.minkowski_distance(center, data)
         r = np.sqrt(np.mean(distances**2))
 
         # Revert normalization and set init params.
