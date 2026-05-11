@@ -24,7 +24,8 @@ def test_ellipsoid_const(dtype):
     assert background.dtype == img.dtype
 
 
-def test_nan_const():
+@pytest.mark.parametrize("downscale", ['none', '2d'])
+def test_nan_const(downscale):
     img = 123 * np.ones((100, 100), dtype=float)
     img[20, 20] = np.nan
     img[50, 53] = np.nan
@@ -36,15 +37,27 @@ def test_nan_const():
     expected_img[y + 20, x + 20] = np.nan
     expected_img[y + 50, x + 53] = np.nan
     kernel = ellipsoid_kernel(kernel_shape, 100)
-    background = rolling_ball(img, kernel=kernel, nansafe=True)
+    background = rolling_ball(img, kernel=kernel, nansafe=True, downscale=downscale)
     assert np.allclose(img - background, expected_img, equal_nan=True)
 
 
-@pytest.mark.parametrize("radius", [1, 2.5, 10.346, 50])
-def test_const_image(radius):
+@pytest.mark.parametrize(
+    "radius, downscale",
+    [
+        (1, 'none'),
+        (2.5, 'none'),
+        (10.346, 'none'),
+        (50, 'none'),
+        (1, '2d'),
+        (2.5, '2d'),
+        (10.346, '2d'),
+        (50, '2d'),
+    ],
+)
+def test_const_image(radius, downscale):
     # infinite plane light source at top left corner
     img = 23 * np.ones((100, 100), dtype=np.uint8)
-    background = rolling_ball(img, radius=radius)
+    background = rolling_ball(img, radius=radius, downscale=downscale)
     assert np.allclose(img - background, np.zeros_like(img))
 
 
@@ -70,8 +83,20 @@ def test_linear_gradient():
     assert np.allclose(img - background, expected_img)
 
 
-@pytest.mark.parametrize("radius", [2, 10, 12.5, 50])
-def test_preserve_peaks(radius):
+@pytest.mark.parametrize(
+    "radius, downscale",
+    [
+        (2, 'none'),
+        (10, 'none'),
+        (12.5, 'none'),
+        (50, 'none'),
+        (2, '2d'),
+        (10, '2d'),
+        (12.5, '2d'),
+        (50, '2d'),
+    ],
+)
+def test_preserve_peaks(radius, downscale):
     x, y = np.meshgrid(range(100), range(100))
     img = 0 * x + 0 * y + 10
     img[10, 10] = 20
@@ -79,7 +104,7 @@ def test_preserve_peaks(radius):
     img[45, 26] = 156
 
     expected_img = img - 10
-    background = rolling_ball(img, radius=radius)
+    background = rolling_ball(img, radius=radius, downscale=downscale)
     assert np.allclose(img - background, expected_img)
 
 
