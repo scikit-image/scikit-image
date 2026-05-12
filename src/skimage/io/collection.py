@@ -346,6 +346,8 @@ class ImageCollection:
                 new_ic._files = [self._files[i] for i in fidx]
 
             new_ic._numframes = len(fidx)
+            # new lock needed otherwise new_ic and self share a data_lock
+            new_ic.data_lock = threading.Lock()
 
             with self.data_lock:
                 if self.conserve_memory:
