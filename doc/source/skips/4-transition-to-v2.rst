@@ -233,16 +233,8 @@ Development of new features should only happen in ``skimage2``.
 Bugs in ``skimage`` may still be addressed and will be included in releases with version >= 2.0.0.
 If we see fit, bug fixes may be backported to a maintenance branch and made available as releases with versions <2.0.0.
 
-No earlier than two years after the release of 2.0.0, we may start removing ``skimage`` – gradually in parts, or as a whole.
-Implementations and internal code that still live in ``skimage`` will be moved to ``skimage2``.
-
-Before completely removing parts of the API, relevant :ref:`warnings from the first phase <sk2-local-warning>` should be made visible to users.
-They should be visible for 2 releases before API is actually removed (or whatever our existing `deprecation policy <dep_pol>`_ recommends).
-This helps users who want to transition slowly.
-
-Once the ``skimage`` namespace is empty, it will be removed.
-
-.. _dep_pol: https://scikit-image.org/docs/dev/development/contribute.html#deprecation-cycle
+No earlier than two years after the ``skimage2`` namespace becomes public, we will remove the ``skimage`` namespace.
+We will provide at least 2 releases or 2 years (whichever is longer) of visible warnings.
 
 
 Code translation helper
