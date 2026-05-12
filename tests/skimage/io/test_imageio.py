@@ -1,7 +1,6 @@
 from tempfile import NamedTemporaryFile
 
 import numpy as np
-import threading
 from skimage.io import imread, imsave, plugin_order
 
 from _skimage2._shared import testing

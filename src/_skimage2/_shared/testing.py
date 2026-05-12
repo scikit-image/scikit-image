@@ -257,8 +257,6 @@ def run_in_parallel(workers=2, warnings_matching=None):
             # Threading isn't supported on WASM, return early
             return func
 
-        import threading
-
         @functools.wraps(func)
         def inner(*args, **kwargs):
             with expected_warnings(warnings_matching):
