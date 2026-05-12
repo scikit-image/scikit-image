@@ -416,8 +416,8 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
         return []
 
     # Mask defines pixels still to be considered in the algorithm.
-    # 1 for still-to-be-processed.
-    cdef int PENDING = 1
+    # 1 for still-to-be-processed (we don't use this in code).
+    cdef int _PENDING = 1
     # 2 for processed, but not yet included in discovered line.  In this case
     # it has voted in the accumulator, and will need to be unvoted, if it
     # becomes part of a discovered line.  See STEP 7 above.
@@ -426,7 +426,7 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     cdef int CLEARED = 0
     cdef Py_ssize_t height = img.shape[0]
     cdef Py_ssize_t width = img.shape[1]
-    # Allocate mask array.
+    # Allocate mask array.  Sets to PENDING (1) value for in-mask pixels.
     cdef cnp.uint8_t[:, ::1] mask = np.array(img != 0,
                                              dtype=np.uint8,
                                              order='C')
