@@ -4,8 +4,8 @@ import numpy as np
 import threading
 from skimage.io import imread, imsave, plugin_order
 
-from skimage._shared import testing
-from skimage._shared.testing import fetch, assert_stacklevel
+from _skimage2._shared import testing
+from _skimage2._shared.testing import fetch, assert_stacklevel
 
 import pytest
 

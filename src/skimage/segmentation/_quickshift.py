@@ -1,7 +1,7 @@
 import numpy as np
 
-from .._shared.filters import gaussian
-from .._shared.utils import _supported_float_type
+from _skimage2._shared.filters import gaussian
+from _skimage2._shared.utils import _supported_float_type
 from ..color import rgb2lab
 from ..util import img_as_float
 from ._quickshift_cy import _quickshift_cython

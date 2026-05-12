@@ -6,7 +6,7 @@ from scipy import ndimage as ndi
 from skimage import data, color, morphology
 from skimage.util import img_as_bool
 from skimage.morphology import binary, footprints, gray, footprint_rectangle
-from skimage._shared.testing import assert_stacklevel
+from _skimage2._shared.testing import assert_stacklevel
 
 
 img = color.rgb2gray(data.astronaut())

@@ -6,8 +6,8 @@ from itertools import combinations_with_replacement
 import numpy as np
 from scipy import ndimage as ndi
 
-from .._shared.filters import gaussian as gaussian_filter
-from .._shared.utils import _supported_float_type
+from _skimage2._shared.filters import gaussian as gaussian_filter
+from _skimage2._shared.utils import _supported_float_type
 from ..transform import warp
 from ._optical_flow_utils import _coarse_to_fine, _get_warp_points
 

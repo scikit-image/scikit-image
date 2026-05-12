@@ -2,7 +2,7 @@ import numpy as np
 from scipy import ndimage as ndi
 from scipy.ndimage import binary_erosion, convolve
 
-from .._shared.utils import _supported_float_type, check_nD
+from _skimage2._shared.utils import _supported_float_type, check_nD
 from ..restoration.uft import laplacian
 from ..util.dtype import img_as_float
 

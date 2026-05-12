@@ -1,9 +1,9 @@
 import numpy as np
 import pytest
 
-from skimage._shared import testing
-from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import xfail, arch32, is_wasm
+from _skimage2._shared import testing
+from _skimage2._shared._warnings import expected_warnings
+from _skimage2._shared.testing import xfail, arch32, is_wasm
 from skimage.segmentation import random_walker
 from skimage.transform import resize
 
@@ -12,6 +12,7 @@ def make_2d_syntheticdata(lx, ly=None, rng=None):
     if ly is None:
         ly = lx
     if rng is None:
+        # test results depend on this seed value
         rng = np.random.RandomState(1234)
     data = np.zeros((lx, ly)) + 0.1 * rng.randn(lx, ly)
     small_l = int(lx // 5)
@@ -35,6 +36,7 @@ def make_3d_syntheticdata(lx, ly=None, lz=None, rng=None):
     if lz is None:
         lz = lx
     if rng is None:
+        # test results depend on this seed value
         rng = np.random.RandomState(1234)
     data = np.zeros((lx, ly, lz)) + 0.1 * rng.randn(lx, ly, lz)
     small_l = int(lx // 5)
@@ -436,7 +438,7 @@ def test_trivial_cases():
 def test_length2_spacing():
     # If this passes without raising an exception (warnings OK), the new
     #   spacing code is working properly.
-    rng = np.random.RandomState(42)
+    rng = np.random.RandomState(3601210831)
     img = np.ones((10, 10)) + 0.2 * rng.normal(size=(10, 10))
     labels = np.zeros((10, 10), dtype=np.uint8)
     labels[2, 4] = 1
@@ -454,7 +456,7 @@ def test_bad_inputs():
         random_walker(img, labels, channel_axis=-1)
 
     # Too many dimensions
-    rng = np.random.RandomState(42)
+    rng = np.random.RandomState(1589678365)
     img = rng.normal(size=(3, 3, 3, 3, 3))
     labels = np.arange(3**5).reshape(img.shape)
     with testing.raises(ValueError):
@@ -478,6 +480,7 @@ def test_bad_inputs():
 
 
 def test_isolated_seeds():
+    # test results depend on this seed value
     rng = np.random.RandomState(0)
     a = rng.random((7, 7))
     mask = -np.ones(a.shape)
@@ -508,6 +511,7 @@ def test_isolated_seeds():
 
 
 def test_isolated_area():
+    # test results depend on this seed value
     rng = np.random.RandomState(0)
     a = rng.random((7, 7))
     mask = -np.ones(a.shape)
@@ -541,6 +545,7 @@ def test_isolated_area():
     'ignore:Changing the sparsity structure of a csr_matrix is expensive:scipy.sparse.SparseEfficiencyWarning'
 )
 def test_prob_tol():
+    # test result depends on this seed value
     rng = np.random.RandomState(0)
     a = rng.random((7, 7))
     mask = -np.ones(a.shape)
@@ -592,6 +597,7 @@ def test_umfpack_import():
     'ignore:Changing the sparsity structure of a csr_matrix is expensive:scipy.sparse.SparseEfficiencyWarning'
 )
 def test_empty_labels():
+    # test result depends on this seed value
     rng = np.random.RandomState(0)
     image = rng.random((5, 5))
     labels = np.zeros((5, 5), dtype=int)

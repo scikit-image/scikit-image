@@ -3,7 +3,7 @@ import functools
 import numpy as np
 from scipy.signal import get_window
 
-from .._shared.utils import safe_as_int
+from _skimage2._shared.utils import safe_as_int
 from ..transform import warp
 
 

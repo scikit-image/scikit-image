@@ -7,9 +7,9 @@ import pytest
 from numpy.testing import assert_array_almost_equal, assert_array_equal
 
 from skimage import color, data, img_as_float, restoration
-from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import assert_stacklevel
-from skimage._shared.utils import _supported_float_type, slice_at_axis
+from _skimage2._shared._warnings import expected_warnings
+from _skimage2._shared.testing import assert_stacklevel
+from _skimage2._shared.utils import _supported_float_type, slice_at_axis
 from skimage.metrics import peak_signal_noise_ratio, structural_similarity
 from skimage.restoration._denoise import _wavelet_threshold
 
@@ -28,9 +28,6 @@ except ImportError:
     DASK_NOT_INSTALLED_WARNING = 'The optional dask dependency is not installed'
 else:
     DASK_NOT_INSTALLED_WARNING = None
-
-
-np.random.seed(1234)
 
 
 astro = img_as_float(data.astronaut()[:128, :128])
@@ -59,7 +56,7 @@ def test_denoise_tv_chambolle_2d(dtype):
     # astronaut image
     img = astro_gray.astype(dtype, copy=True)
     # add noise to astronaut
-    img += 0.5 * img.std() * np.random.rand(*img.shape)
+    img += 0.5 * img.std() * np.random.RandomState(1761885602).rand(*img.shape)
     # clip noise so that it does not exceed allowed range for float images.
     img = np.clip(img, 0, 1)
     # denoise
@@ -122,7 +119,7 @@ def test_denoise_tv_chambolle_3d():
     mask = (x - 22) ** 2 + (y - 20) ** 2 + (z - 17) ** 2 < 8**2
     mask = 100 * mask.astype(float)
     mask += 60
-    mask += 20 * np.random.rand(*mask.shape)
+    mask += 20 * np.random.RandomState(1019759086).rand(*mask.shape)
     mask[mask < 0] = 0
     mask[mask > 255] = 255
     res = restoration.denoise_tv_chambolle(mask.astype(np.uint8), weight=0.1)
@@ -133,7 +130,7 @@ def test_denoise_tv_chambolle_3d():
 def test_denoise_tv_chambolle_1d():
     """Apply the TV denoising algorithm on a 1D sinusoid."""
     x = 125 + 100 * np.sin(np.linspace(0, 8 * np.pi, 1000))
-    x += 20 * np.random.rand(x.size)
+    x += 20 * np.random.RandomState(2040341793).rand(x.size)
     x = np.clip(x, 0, 255)
     res = restoration.denoise_tv_chambolle(x.astype(np.uint8), weight=0.1)
     assert res.dtype == float
@@ -142,7 +139,7 @@ def test_denoise_tv_chambolle_1d():
 
 def test_denoise_tv_chambolle_4d():
     """TV denoising for a 4D input."""
-    im = 255 * np.random.rand(8, 8, 8, 8)
+    im = 255 * np.random.RandomState(3532082437).rand(8, 8, 8, 8)
     res = restoration.denoise_tv_chambolle(im.astype(np.uint8), weight=0.1)
     assert res.dtype == float
     assert res.std() * 255 < im.std()
@@ -151,7 +148,7 @@ def test_denoise_tv_chambolle_4d():
 def test_denoise_tv_chambolle_weighting():
     # make sure a specified weight gives consistent results regardless of
     # the number of input image dimensions
-    rstate = np.random.default_rng(1234)
+    rstate = np.random.RandomState(375384571)
     img2d = astro_gray.copy()
     img2d += 0.15 * rstate.standard_normal(img2d.shape)
     img2d = np.clip(img2d, 0, 1)
@@ -175,7 +172,7 @@ def test_denoise_tv_chambolle_weighting():
 def test_denoise_tv_bregman_2d():
     img = checkerboard_gray.copy()
     # add some random noise
-    img += 0.5 * img.std() * np.random.rand(*img.shape)
+    img += 0.5 * img.std() * np.random.RandomState(1888825597).rand(*img.shape)
     img = np.clip(img, 0, 1)
 
     out1 = restoration.denoise_tv_bregman(img, weight=10)
@@ -201,7 +198,7 @@ def test_denoise_tv_bregman_float_result_range():
 def test_denoise_tv_bregman_3d():
     img = checkerboard.copy()
     # add some random noise
-    img += 0.5 * img.std() * np.random.rand(*img.shape)
+    img += 0.5 * img.std() * np.random.RandomState(2922768653).rand(*img.shape)
     img = np.clip(img, 0, 1)
 
     out1 = restoration.denoise_tv_bregman(img, weight=10)
@@ -227,7 +224,7 @@ def test_denoise_tv_bregman_3d_multichannel(channel_axis):
 def test_denoise_tv_bregman_multichannel():
     img = checkerboard_gray.copy()[:50, :50]
     # add some random noise
-    img += 0.5 * img.std() * np.random.rand(*img.shape)
+    img += 0.5 * img.std() * np.random.RandomState(20877753).rand(*img.shape)
     img = np.clip(img, 0, 1)
 
     out1 = restoration.denoise_tv_bregman(img, weight=60.0)
@@ -267,7 +264,7 @@ def test_denoise_bilateral_negative2():
 def test_denoise_bilateral_2d():
     img = checkerboard_gray.copy()[:50, :50]
     # add some random noise
-    img += 0.5 * img.std() * np.random.rand(*img.shape)
+    img += 0.5 * img.std() * np.random.RandomState(3805790903).rand(*img.shape)
     img = np.clip(img, 0, 1)
 
     out1 = restoration.denoise_bilateral(
@@ -297,7 +294,7 @@ def test_denoise_bilateral_pad():
 def test_denoise_bilateral_types(dtype):
     img = checkerboard_gray.copy()[:50, :50]
     # add some random noise
-    img += 0.5 * img.std() * np.random.rand(*img.shape)
+    img += 0.5 * img.std() * np.random.RandomState(3229052738).rand(*img.shape)
     img = np.clip(img, 0, 1).astype(dtype)
 
     # check that we can process multiple float types
@@ -310,7 +307,7 @@ def test_denoise_bilateral_types(dtype):
 def test_denoise_bregman_types(dtype):
     img = checkerboard_gray.copy()[:50, :50]
     # add some random noise
-    img += 0.5 * img.std() * np.random.rand(*img.shape)
+    img += 0.5 * img.std() * np.random.RandomState(2979901806).rand(*img.shape)
     img = np.clip(img, 0, 1).astype(dtype)
 
     # check that we can process multiple float types
@@ -331,7 +328,7 @@ def test_denoise_bilateral_constant():
 def test_denoise_bilateral_color(channel_axis):
     img = checkerboard.copy()[:50, :50]
     # add some random noise
-    img += 0.5 * img.std() * np.random.rand(*img.shape)
+    img += 0.5 * img.std() * np.random.RandomState(390506747).rand(*img.shape)
     img = np.clip(img, 0, 1)
 
     img = np.moveaxis(img, -1, channel_axis)
@@ -386,7 +383,7 @@ def test_denoise_nl_means_2d(fast_mode):
     img = np.zeros((40, 40))
     img[10:-10, 10:-10] = 1.0
     sigma = 0.3
-    img += sigma * np.random.standard_normal(img.shape)
+    img += sigma * np.random.RandomState(2657472497).standard_normal(img.shape)
     img_f32 = img.astype('float32')
     for s in [sigma, 0]:
         denoised = restoration.denoise_nl_means(
@@ -418,7 +415,7 @@ def test_denoise_nl_means_2d_multichannel(fast_mode, n_channels, dtype):
 
     # add some random noise
     sigma = 0.1
-    imgn = img + sigma * np.random.standard_normal(img.shape)
+    imgn = img + sigma * np.random.RandomState(1129635084).standard_normal(img.shape)
     imgn = np.clip(imgn, 0, 1)
     imgn = imgn.astype(dtype)
 
@@ -449,7 +446,7 @@ def test_denoise_nl_means_3d(fast_mode, dtype):
     img = np.zeros((12, 12, 8), dtype=dtype)
     img[5:-5, 5:-5, 2:-2] = 1.0
     sigma = 0.3
-    imgn = img + sigma * np.random.standard_normal(img.shape)
+    imgn = img + sigma * np.random.RandomState(4003450789).standard_normal(img.shape)
     imgn = imgn.astype(dtype)
     psnr_noisy = peak_signal_noise_ratio(img, imgn)
     for s in [sigma, 0]:
@@ -471,7 +468,7 @@ def test_denoise_nl_means_multichannel(fast_mode, dtype, channel_axis):
     img = img[:, :24, :16].astype(dtype, copy=False)
 
     sigma = 0.2
-    rng = np.random.default_rng(5)
+    rng = np.random.RandomState(300662035)
     imgn = img + sigma * rng.standard_normal(img.shape)
     imgn = imgn.astype(dtype)
 
@@ -508,7 +505,7 @@ def test_denoise_nl_means_multichannel(fast_mode, dtype, channel_axis):
 
 
 def test_denoise_nl_means_4d():
-    rng = np.random.default_rng(5)
+    rng = np.random.RandomState(180448405)
     img = np.zeros((10, 10, 8, 5))
     img[2:-2, 2:-2, 2:-2, :2] = 0.5
     img[2:-2, 2:-2, 2:-2, 2:] = 1.0
@@ -549,7 +546,7 @@ def test_denoise_nl_means_4d_multichannel():
     img = np.zeros((8, 8, 8, 4, 4))
     img[2:-2, 2:-2, 2:-2, 1:-1, :] = 1.0
     sigma = 0.3
-    imgn = img + sigma * np.random.randn(*img.shape)
+    imgn = img + sigma * np.random.RandomState(1606123203).randn(*img.shape)
 
     psnr_noisy = peak_signal_noise_ratio(img, imgn, data_range=1.0)
 
@@ -596,7 +593,7 @@ def test_denoise_nl_means_wrong_dimension():
 def test_no_denoising_for_small_h(fast_mode, dtype):
     img = np.zeros((40, 40))
     img[10:-10, 10:-10] = 1.0
-    img += 0.3 * np.random.standard_normal(img.shape)
+    img += 0.3 * np.random.RandomState(3774114196).standard_normal(img.shape)
     img = img.astype(dtype)
     # very small h should result in no averaging with other patches
     denoised = restoration.denoise_nl_means(
@@ -665,7 +662,7 @@ def test_denoise_nl_means_3d_dtype(fast_mode):
     ],
 )
 def test_wavelet_denoising(img, channel_axis, convert2ycbcr):
-    rstate = np.random.default_rng(1234)
+    rstate = np.random.RandomState(1264870801)
     sigma = 0.1
     noisy = img + sigma * rstate.standard_normal(img.shape)
     noisy = np.clip(noisy, 0, 1)
@@ -719,7 +716,7 @@ def test_wavelet_denoising(img, channel_axis, convert2ycbcr):
 @pytest.mark.parametrize('channel_axis', [0, 1, 2, -1])
 @pytest.mark.parametrize('convert2ycbcr', [False, True])
 def test_wavelet_denoising_channel_axis(channel_axis, convert2ycbcr):
-    rstate = np.random.default_rng(1234)
+    rstate = np.random.RandomState(3929167176)
     sigma = 0.1
     img = astro_odd
     noisy = img + sigma * rstate.standard_normal(img.shape)
@@ -756,7 +753,7 @@ def test_wavelet_denoising_channel_axis(channel_axis, convert2ycbcr):
 )
 def test_wavelet_denoising_scaling(case, dtype, convert2ycbcr, estimate_sigma):
     """Test cases for images without prescaling via img_as_float."""
-    rstate = np.random.default_rng(1234)
+    rstate = np.random.RandomState(3482689697)
 
     if case == '1d':
         # 1D single-channel in range [0, 255]
@@ -830,7 +827,7 @@ def test_wavelet_denoising_scaling(case, dtype, convert2ycbcr, estimate_sigma):
 
 @xfail_without_pywt
 def test_wavelet_threshold():
-    rstate = np.random.default_rng(1234)
+    rstate = np.random.RandomState(1276875558)
 
     img = astro_gray
     sigma = 0.1
@@ -858,7 +855,7 @@ def test_wavelet_threshold():
     itertools.product([True, False], ['VisuShrink', 'BayesShrink'], range(1, 5)),
 )
 def test_wavelet_denoising_nd(rescale_sigma, method, ndim):
-    rstate = np.random.default_rng(1234)
+    rstate = np.random.RandomState(2098169547)
     # Generate a very simple test image
     if ndim < 3:
         img = 0.2 * np.ones((128,) * ndim)
@@ -897,7 +894,7 @@ def test_wavelet_invalid_method():
 def test_wavelet_denoising_levels(rescale_sigma):
     import pywt
 
-    rstate = np.random.default_rng(1234)
+    rstate = np.random.RandomState(3587816213)
     ndim = 2
     N = 256
     wavelet = 'db1'
@@ -941,7 +938,7 @@ def test_wavelet_denoising_levels(rescale_sigma):
 
 @xfail_without_pywt
 def test_estimate_sigma_gray():
-    rstate = np.random.default_rng(1234)
+    rstate = np.random.RandomState(450201703)
     # astronaut image
     img = astro_gray.copy()
     sigma = 0.1
@@ -957,7 +954,7 @@ def test_estimate_sigma_masked_image():
     # Verify computation on an image with a large, noise-free border.
     # (zero regions will be masked out by _sigma_est_dwt to avoid returning
     #  sigma = 0)
-    rstate = np.random.default_rng(1234)
+    rstate = np.random.RandomState(3968593363)
     # uniform image
     img = np.zeros((128, 128))
     center_roi = (slice(32, 96), slice(32, 96))
@@ -973,7 +970,7 @@ def test_estimate_sigma_masked_image():
 @xfail_without_pywt
 @pytest.mark.parametrize('channel_axis', [0, 1, 2, -1])
 def test_estimate_sigma_color(channel_axis):
-    rstate = np.random.default_rng(1234)
+    rstate = np.random.RandomState(1591076970)
     # astronaut image
     img = astro.copy()
     sigma = 0.1
@@ -1010,7 +1007,8 @@ def test_wavelet_denoising_args(rescale_sigma):
     arguments can be passed.
     """
     img = astro
-    noisy = img.copy() + 0.1 * np.random.standard_normal(img.shape)
+    rng = np.random.RandomState(2692858596)
+    noisy = img.copy() + 0.1 * rng.standard_normal(img.shape)
 
     for convert2ycbcr in [True, False]:
         for multichannel in [True, False]:
@@ -1066,7 +1064,7 @@ def test_denoise_wavelet_biorthogonal(rescale_sigma):
 @pytest.mark.parametrize('rescale_sigma', [True, False])
 def test_cycle_spinning_multichannel(rescale_sigma, channel_axis):
     sigma = 0.1
-    rstate = np.random.default_rng(1234)
+    rstate = np.random.RandomState(2512453809)
 
     if channel_axis is not None:
         img = astro
@@ -1155,7 +1153,7 @@ def test_cycle_spinning_multichannel(rescale_sigma, channel_axis):
 def test_cycle_spinning_workers():
     img = astro_gray
     sigma = 0.1
-    rstate = np.random.default_rng(1234)
+    rstate = np.random.RandomState(3791601711)
     noisy = img.copy() + 0.1 * rstate.standard_normal(img.shape)
 
     denoise_func = restoration.denoise_wavelet
@@ -1205,7 +1203,7 @@ def test_cycle_spinning_workers():
 def test_cycle_spinner_deprecate_num_workers(num_workers):
     img = astro_gray
     sigma = 0.1
-    rstate = np.random.default_rng(1234)
+    rstate = np.random.RandomState(860004639)
     noisy = img.copy() + 0.1 * rstate.standard_normal(img.shape)
 
     denoise_func = restoration.denoise_wavelet
