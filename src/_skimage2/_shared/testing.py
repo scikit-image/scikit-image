@@ -223,6 +223,7 @@ def fetch(data_filename, prefix=None):
 
     """
     from skimage.data._fetchers import _fetch
+
     with _FETCH_LOCK:
         try:
             return _fetch(data_filename, prefix=prefix)
