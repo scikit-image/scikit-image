@@ -305,8 +305,8 @@ class ImageCollection:
             raise TypeError('slicing must be with an int or slice object')
 
         if isinstance(n, int):
-            n = self._check_imgnum(n)
             with self.data_lock:
+                n = self._check_imgnum(n)
                 idx = n % len(self.data)
 
                 if (self.conserve_memory and n != self._cached) or (
@@ -322,7 +322,7 @@ class ImageCollection:
                         # Account for functions that do not accept an img_num kwarg
                         except TypeError as e:
                             if "unexpected keyword argument 'img_num'" in str(e):
-                                del kwargs['img_num']
+                                kwargs.pop('img_num', None)
                                 self.data[idx] = self.load_func(fname, **kwargs)
                             else:
                                 raise
