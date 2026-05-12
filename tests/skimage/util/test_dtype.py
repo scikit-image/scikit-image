@@ -140,9 +140,10 @@ def test_bool():
 
 def test_clobber():
     # The `img_as_*` functions should never modify input arrays.
+    rng = np.random.RandomState(2406839692)
     for func_input_type in img_funcs:
         for func_output_type in img_funcs:
-            img = np.random.rand(5, 5)
+            img = rng.rand(5, 5)
 
             img_in = func_input_type(img)
             img_in_before = img_in.copy()

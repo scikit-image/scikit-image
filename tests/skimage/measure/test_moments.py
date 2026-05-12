@@ -232,11 +232,11 @@ def test_analytical_moments_calculation(dtype, order, ndim):
         shape = (64, 64, 64)
     else:
         shape = (16,) * ndim
-    rng = np.random.default_rng(1234)
+    rng = np.random.RandomState(786654189)
     if np.dtype(dtype).kind in 'iu':
-        x = rng.integers(0, 256, shape, dtype=dtype)
+        x = rng.randint(0, 256, shape, dtype=dtype)
     else:
-        x = rng.standard_normal(shape, dtype=dtype)
+        x = rng.randn(*shape).astype(dtype)
     # setting center=None will use the analytical expressions
     m1 = moments_central(x, center=None, order=order)
     # providing explicit centroid will bypass the analytical code path

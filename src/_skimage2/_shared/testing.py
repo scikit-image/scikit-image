@@ -332,4 +332,5 @@ def assert_stacklevel(warnings, *, offset=-1):
             f"  Actual: {actual}\n"
             f"  {warning.category.__name__}: {warning.message}"
         )
-        assert actual == expected, msg
+        if actual != expected:
+            raise AssertionError(msg)

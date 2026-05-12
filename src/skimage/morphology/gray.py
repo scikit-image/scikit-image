@@ -3,12 +3,10 @@ Grayscale morphological operations
 """
 
 from _skimage2.morphology._footprints import _default_footprint
-
-from ..util import PendingSkimage2Change
-from _skimage2._shared._warnings import warn_external
 from .footprints import mirror_footprint, pad_footprint
 
 import _skimage2 as ski2
+from skimage._migration import ski2_migration_decorator
 
 
 __all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat', 'black_tophat']
@@ -25,33 +23,77 @@ _SUPPORTED_MODES = {
     "ignore",
 }
 
+# For migration doc build.
+ski2_migration_decorator.extra_params['gray_funcs'] = (
+    'erosion',
+    'dilation',
+    'opening',
+    'closing',
+    'white_tophat',
+    'black_tophat',
+)
 
 _PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR = """\
-`skimage.morphology.{name}` is deprecated in favor of
-`skimage2.morphology.{name}`, which changes the default value
-for parameter `mode` to 'ignore' (was 'reflect').
+``skimage.morphology.%(qual)s`` is deprecated in favor of
+``skimage2.morphology.%(qual)s``, which changes the default value
+for parameter `mode` to ``'ignore'`` (was ``'reflect'``).
 
-To keep the old (`skimage`, v1.x) behavior, set that parameter explicitly.
-If you set it explicitly before, the behavior is unchanged.
+To keep the old (``skimage``, v1.x) behavior, set ``mode='reflect'``
+explicitly. If you set it explicitly before, the behavior is unchanged.
+
+<!-- cond-start: doc -->
+>>> import numpy as np
+>>>
+>>> import skimage as ski1
+>>> import skimage2 as ski2
+>>>
+>>> image = ski1.data.camera()
+>>> res1 = ski1.morphology.%(qual)s(image)  # skimage default is mode='reflect'
+>>> res2 = ski2.morphology.%(qual)s(image, mode='reflect')
+>>> assert np.all(res1 == res2)
+
+<!--- cond-end -->
 """
 
 # `dilation`, `closing`, `black_tophat` need a more specific warning.
 # See `_patch_footprint_mirroring`
 _PENDING_SKIMAGE2_TEMPLATE_MIRROR = """\
-`skimage.morphology.{name}` is deprecated in favor of
-`skimage2.morphology.{name}` which changes the default value for parameter
-`mode` to 'ignore' (was 'reflect'). It also mirrors the `footprint`
-(inverts its order in each dimension) which aligns its behavior with SciPy's
+``skimage.morphology.%(qual)s`` is deprecated in favor of
+``skimage2.morphology.%(qual)s`` which changes the default value for parameter
+`mode` to ``'ignore'`` (was ``'reflect'``). It also mirrors the `footprint`
+(inverts its order in each dimension), which aligns its behavior with SciPy's
 conventions.
 
-To keep the old (`skimage`, v1.x) behavior:
-- Set `mode='reflect'` explicitly. If you set it explicitly before,
-  the behavior is unchanged.
-- If you use an asymmetric `footprint`, modify it like this before passing it
-  to `skimage2.morphology.{name}`:
+To keep the old (``skimage``, v1.x) behavior:
 
-      footprint = ski2.morphology.pad_footprint(footprint, pad_end=False)
-      footprint = ski2.morphology.mirror_footprint(footprint)
+- Set ``mode='reflect'`` explicitly. If you set it explicitly before, the
+  behavior is unchanged.
+- If you currently use an asymmetric `footprint`, modify it like this before
+  passing it to ``skimage2.morphology.%(qual)s``:
+
+  .. code-block:: python
+
+    footprint = ski2.morphology.pad_footprint(footprint, pad_end=False)
+    footprint = ski2.morphology.mirror_footprint(footprint)
+
+<!--- cond-start: doc -->
+For example:
+
+>>> import numpy as np
+>>>
+>>> import skimage as ski1
+>>> import skimage2 as ski2
+>>>
+>>> image = ski1.data.camera()
+>>> asym_foot = np.zeros((4, 4))
+>>> asym_foot[2:, 2:] = 1
+>>> res1 = ski1.morphology.%(qual)s(image, footprint=asym_foot)
+>>> pad_asym = ski2.morphology.pad_footprint(asym_foot, pad_end=False)
+>>> mirror_asym = ski2.morphology.mirror_footprint(pad_asym)
+>>> res2 = ski2.morphology.%(qual)s(image, footprint=mirror_asym, mode='reflect')
+>>> assert np.all(res1 == res2)
+
+<!--- cond-end -->
 """
 
 
@@ -98,6 +140,9 @@ def _patch_footprint_mirroring(footprint):
     return footprint
 
 
+@ski2_migration_decorator(
+    _PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR, qname_old='skimage.morphology.erosion'
+)
 @_default_footprint
 def erosion(
     image,
@@ -183,17 +228,15 @@ def erosion(
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    warn_external(
-        _PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR.format(name=erosion.__name__),
-        category=PendingSkimage2Change,
-    )
-    # Note: No need to patch `footprint` here, see `_patch_footprint_mirroring`
     out = ski2.morphology.erosion(
         image, footprint=footprint, out=out, mode=mode, cval=cval
     )
     return out
 
 
+@ski2_migration_decorator(
+    _PENDING_SKIMAGE2_TEMPLATE_MIRROR, qname_old='skimage.morphology.dilation'
+)
 @_default_footprint
 def dilation(
     image,
@@ -280,10 +323,6 @@ def dilation(
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    warn_external(
-        _PENDING_SKIMAGE2_TEMPLATE_MIRROR.format(name=dilation.__name__),
-        category=PendingSkimage2Change,
-    )
     footprint = _patch_footprint_mirroring(footprint)
     out = ski2.morphology.dilation(
         image, footprint=footprint, out=out, mode=mode, cval=cval
@@ -291,6 +330,9 @@ def dilation(
     return out
 
 
+@ski2_migration_decorator(
+    _PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR, qname_old='skimage.morphology.opening'
+)
 @_default_footprint
 def opening(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     """Return grayscale morphological opening of an image.
@@ -362,17 +404,15 @@ def opening(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    warn_external(
-        _PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR.format(name=opening.__name__),
-        category=PendingSkimage2Change,
-    )
-    # Note: No need to patch `footprint` here, see `_patch_footprint_mirroring`
     out = ski2.morphology.opening(
         image, footprint=footprint, out=out, mode=mode, cval=cval
     )
     return out
 
 
+@ski2_migration_decorator(
+    _PENDING_SKIMAGE2_TEMPLATE_MIRROR, qname_old='skimage.morphology.closing'
+)
 @_default_footprint
 def closing(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     """Return grayscale morphological closing of an image.
@@ -444,10 +484,6 @@ def closing(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    warn_external(
-        _PENDING_SKIMAGE2_TEMPLATE_MIRROR.format(name=closing.__name__),
-        category=PendingSkimage2Change,
-    )
     footprint = _patch_footprint_mirroring(footprint)
     out = ski2.morphology.closing(
         image, footprint=footprint, out=out, mode=mode, cval=cval
@@ -455,6 +491,9 @@ def closing(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     return out
 
 
+@ski2_migration_decorator(
+    _PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR, qname_old='skimage.morphology.white_tophat'
+)
 @_default_footprint
 def white_tophat(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     """Return white top hat of an image.
@@ -530,17 +569,15 @@ def white_tophat(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    warn_external(
-        _PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR.format(name=white_tophat.__name__),
-        category=PendingSkimage2Change,
-    )
-    # Note: No need to patch `footprint` here, see `_patch_footprint_mirroring`
     out = ski2.morphology.white_tophat(
         image, footprint=footprint, out=out, mode=mode, cval=cval
     )
     return out
 
 
+@ski2_migration_decorator(
+    _PENDING_SKIMAGE2_TEMPLATE_MIRROR, qname_old='skimage.morphology.black_tophat'
+)
 @_default_footprint
 def black_tophat(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     """Return black top hat of an image.
@@ -617,10 +654,6 @@ def black_tophat(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    warn_external(
-        _PENDING_SKIMAGE2_TEMPLATE_MIRROR.format(name=black_tophat.__name__),
-        category=PendingSkimage2Change,
-    )
     footprint = _patch_footprint_mirroring(footprint)
     out = ski2.morphology.black_tophat(
         image, footprint=footprint, out=out, mode=mode, cval=cval

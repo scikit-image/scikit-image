@@ -3,7 +3,7 @@ from numpy.testing import assert_array_equal, assert_equal, assert_almost_equal
 import pytest
 
 from _skimage2._shared.testing import run_in_parallel
-from _skimage2._shared._dependency_checks import has_mpl
+from ...dependency_checks import uses_matplotlib
 
 from skimage.draw import (
     set_color,
@@ -922,7 +922,7 @@ def test_bezier_curve_shape():
     assert_array_equal(img, img_[shift:-shift, :])
 
 
-@pytest.mark.skipif(not has_mpl, reason="matplotlib not installed")
+@uses_matplotlib
 def test_polygon_perimeter():
     expected = np.array([[1, 1, 1, 1], [1, 0, 0, 1], [1, 1, 1, 1]])
     out = np.zeros_like(expected)
@@ -943,7 +943,7 @@ def test_polygon_perimeter():
         polygon_perimeter([0], [1], clip=True)
 
 
-@pytest.mark.skipif(not has_mpl, reason="matplotlib not installed")
+@uses_matplotlib
 def test_polygon_perimeter_outside_image():
     rr, cc = polygon_perimeter([-1, -1, 3, 3], [-1, 4, 4, -1], shape=(3, 4))
     assert_equal(len(rr), 0)
@@ -1048,7 +1048,7 @@ def test_rectangle_extent():
     assert_array_equal(img, expected_2)
 
 
-@pytest.mark.skipif(not has_mpl, reason="matplotlib not installed")
+@uses_matplotlib
 def test_rectangle_extent_negative():
     # These two tests should be done together.
     expected = np.array(
@@ -1082,7 +1082,7 @@ def test_rectangle_extent_negative():
     assert_array_equal(img, expected)
 
 
-@pytest.mark.skipif(not has_mpl, reason="matplotlib not installed")
+@uses_matplotlib
 def test_rectangle_perimiter():
     expected = np.array(
         [
@@ -1116,7 +1116,7 @@ def test_rectangle_perimiter():
     assert_array_equal(img, expected)
 
 
-@pytest.mark.skipif(not has_mpl, reason="matplotlib not installed")
+@uses_matplotlib
 def test_rectangle_perimiter_clip_bottom_right():
     # clip=False
     expected = np.array(
@@ -1153,7 +1153,7 @@ def test_rectangle_perimiter_clip_bottom_right():
     assert_array_equal(img, expected)
 
 
-@pytest.mark.skipif(not has_mpl, reason="matplotlib not installed")
+@uses_matplotlib
 def test_rectangle_perimiter_clip_top_left():
     # clip=False
     expected = np.array(
@@ -1190,7 +1190,7 @@ def test_rectangle_perimiter_clip_top_left():
     assert_array_equal(img, expected)
 
 
-@pytest.mark.skipif(not has_mpl, reason="matplotlib not installed")
+@uses_matplotlib
 def test_rectangle_perimiter_clip_top_right():
     expected = np.array(
         [
@@ -1225,7 +1225,7 @@ def test_rectangle_perimiter_clip_top_right():
     assert_array_equal(img, expected)
 
 
-@pytest.mark.skipif(not has_mpl, reason="matplotlib not installed")
+@uses_matplotlib
 def test_rectangle_perimiter_clip_bottom_left():
     expected = np.array(
         [

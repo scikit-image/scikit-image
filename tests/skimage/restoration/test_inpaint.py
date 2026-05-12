@@ -151,7 +151,7 @@ def test_inpaint_nrmse(dtype, order, channel_axis, split_into_regions):
     mask[365:368, 60:130] = 1
 
     # add randomly positioned small point-like defects
-    rstate = np.random.default_rng(0)
+    rstate = np.random.RandomState(3534647791)
     for radius in [0, 2, 4]:
         # larger defects are less common
         thresh = 3.25 + 0.25 * radius  # larger defects less common

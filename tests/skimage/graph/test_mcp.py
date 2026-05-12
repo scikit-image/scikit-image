@@ -12,7 +12,6 @@ from _skimage2._shared.testing import (
 from _skimage2._shared._warnings import expected_warnings
 
 
-np.random.seed(0)
 a = np.ones((8, 8), dtype=np.float32)
 a[1:-1, 1] = 0
 a[1, 1:-1] = 0
@@ -171,22 +170,26 @@ def test_offsets():
 
 @parametrize("shape", [(100, 100), (5, 8, 13, 17)] * 5)
 def test_crashing(shape):
-    _test_random(shape)
+    # want random data but at least use per-test RNGs
+    rng = np.random.RandomState(429142004)
+    seed = rng.randint(2**32 - 1, dtype=np.int64)
+    _test_random(shape, seed)
 
 
-def _test_random(shape):
+def _test_random(shape, seed):
     # Just tests for crashing -- not for correctness.
-    a = np.random.rand(*shape).astype(np.float32)
+    rng = np.random.RandomState(seed)
+    a = rng.rand(*shape).astype(np.float32)
     starts = [
         [0] * len(shape),
         [-1] * len(shape),
-        (np.random.rand(len(shape)) * shape).astype(int),
+        (rng.rand(len(shape)) * shape).astype(int),
     ]
-    ends = [(np.random.rand(len(shape)) * shape).astype(int) for i in range(4)]
+    ends = [(rng.rand(len(shape)) * shape).astype(int) for i in range(4)]
     with expected_warnings(['Upgrading NumPy' + warning_optional]):
         m = mcp.MCP(a, fully_connected=True)
     costs, offsets = m.find_costs(starts)
-    for point in [(np.random.rand(len(shape)) * shape).astype(int) for i in range(4)]:
+    for point in [(rng.rand(len(shape)) * shape).astype(int) for i in range(4)]:
         m.traceback(point)
     m._reset()
     m.find_costs(starts, ends)

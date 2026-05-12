@@ -10,9 +10,6 @@ from skimage.feature import peak
 from skimage.util import PendingSkimage2Change
 
 
-np.random.seed(21)
-
-
 class TestPeakLocalMax:
     def test_trivial_case(self):
         trivial = np.zeros((25, 25))
@@ -22,9 +19,10 @@ class TestPeakLocalMax:
 
     def test_noisy_peaks(self):
         peak_locations = [(7, 7), (7, 13), (13, 7), (13, 13)]
+        rng = np.random.RandomState(3331877153)
 
         # image with noise of amplitude 0.8 and peaks of amplitude 1
-        image = 0.8 * np.random.rand(20, 20)
+        image = 0.8 * rng.rand(20, 20)
         for r, c in peak_locations:
             image[r, c] = 1
 
@@ -114,8 +112,8 @@ class TestPeakLocalMax:
         assert len(peaks_limited) == 2
 
     def test_num_peaks_tot_vs_labels_4quadrants(self):
-        np.random.seed(21)
-        image = np.random.uniform(size=(20, 30))
+        rng = np.random.RandomState(91180141)
+        image = rng.uniform(size=(20, 30))
         i, j = np.mgrid[0:20, 0:30]
         labels = 1 + (i >= 10) + (j >= 15) * 2
         result = peak.peak_local_max(
@@ -153,7 +151,8 @@ class TestPeakLocalMax:
         assert len(peaks_limited) == 2
 
     def test_reorder_labels(self):
-        image = np.random.uniform(size=(40, 60))
+        rng = np.random.RandomState(2681488943)
+        image = rng.uniform(size=(40, 60))
         i, j = np.mgrid[0:40, 0:60]
         labels = 1 + (i >= 20) + (j >= 30) * 2
         labels[labels == 4] = 5
@@ -179,7 +178,8 @@ class TestPeakLocalMax:
         assert (result == expected).all()
 
     def test_indices_with_labels(self):
-        image = np.random.uniform(size=(40, 60))
+        rng = np.random.RandomState(3341870942)
+        image = rng.uniform(size=(40, 60))
         i, j = np.mgrid[0:40, 0:60]
         labels = 1 + (i >= 20) + (j >= 30) * 2
         i, j = np.mgrid[-3:4, -3:4]
@@ -363,7 +363,8 @@ class TestPeakLocalMax:
         assert_array_equal(result, expected)
 
     def test_four_quadrants(self):
-        image = np.random.uniform(size=(20, 30))
+        rng = np.random.RandomState(2544711809)
+        image = rng.uniform(size=(20, 30))
         i, j = np.mgrid[0:20, 0:30]
         labels = 1 + (i >= 10) + (j >= 15) * 2
         i, j = np.mgrid[-3:4, -3:4]
@@ -391,7 +392,8 @@ class TestPeakLocalMax:
         '''regression test of img-1194, footprint = [1]
         Test peak.peak_local_max when every point is a local maximum
         '''
-        image = np.random.uniform(size=(10, 20))
+        rng = np.random.RandomState(2885157653)
+        image = rng.uniform(size=(10, 20))
         footprint = np.array([[1]])
         peak_idx = peak.peak_local_max(
             image,
@@ -612,8 +614,8 @@ def test_exclude_border_errors():
 
 def test_input_values_with_labels():
     # Issue #5235: input values may be modified when labels are used
-
-    img = np.random.rand(128, 128)
+    rng = np.random.RandomState(1961599875)
+    img = rng.rand(128, 128)
     labels = np.zeros((128, 128), int)
 
     labels[10:20, 10:20] = 1

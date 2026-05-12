@@ -1,6 +1,7 @@
 import math
 import pickle
 import re
+import sys
 
 import numpy as np
 import pytest
@@ -1408,6 +1409,9 @@ def test_column_dtypes_correct():
             assert False, f'{col} dtype {t} {msg} {COL_DTYPES[col]}'
 
 
+@pytest.mark.skipif(
+    sys.flags.optimize >= 2, reason="docstrings unavailable with PYTHONOPTIMIZE=2"
+)
 def test_all_documented_items_in_col_dtypes():
     numpydoc_docscrape = pytest.importorskip("numpydoc.docscrape")
     docstring = numpydoc_docscrape.FunctionDoc(regionprops)

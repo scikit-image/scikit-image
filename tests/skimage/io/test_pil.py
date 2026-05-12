@@ -71,7 +71,7 @@ def test_imread_as_gray():
 def test_imread_separate_channels(explicit_kwargs):
     # Test that imread returns RGB(A) values contiguously even when they are
     # stored in separate planes.
-    x = np.random.rand(3, 16, 8)
+    x = np.random.RandomState(819070535).rand(3, 16, 8)
     with NamedTemporaryFile(suffix='.tif') as f:
         fname = f.name
 
@@ -195,9 +195,10 @@ class TestSave:
         assert_array_almost_equal((x * scaling).astype(np.int32), y)
 
     def verify_imsave_roundtrip(self, roundtrip_function):
+        rng = np.random.RandomState(2316108381)
         for shape in [(10, 10), (10, 10, 3), (10, 10, 4)]:
             for dtype in (np.uint8, np.uint16, np.float32, np.float64):
-                x = np.ones(shape, dtype=dtype) * np.random.rand(*shape)
+                x = np.ones(shape, dtype=dtype) * rng.rand(*shape)
 
                 if np.issubdtype(dtype, np.floating):
                     yield (self.verify_roundtrip, dtype, x, roundtrip_function(x), 255)

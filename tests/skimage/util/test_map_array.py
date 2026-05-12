@@ -74,46 +74,51 @@ def test_map_array_read_only(writeable_flags, dtype):
 
 
 def test_map_array_incorrect_output_shape():
-    labels = np.random.randint(0, 5, size=(24, 25))
+    rng = np.random.RandomState(3664431605)
+    labels = rng.randint(0, 5, size=(24, 25))
     out = np.empty((24, 24))
     in_values = np.unique(labels)
-    out_values = np.random.random(in_values.shape).astype(out.dtype)
+    out_values = rng.random(in_values.shape).astype(out.dtype)
     with testing.raises(ValueError):
         map_array(labels, in_values, out_values, out=out)
 
 
 def test_map_array_non_contiguous_output_array():
-    labels = np.random.randint(0, 5, size=(24, 25))
+    rng = np.random.RandomState(1754157630)
+    labels = rng.randint(0, 5, size=(24, 25))
     out = np.empty((24 * 3, 25 * 2))[::3, ::2]
     in_values = np.unique(labels)
-    out_values = np.random.random(in_values.shape).astype(out.dtype)
+    out_values = rng.random(in_values.shape).astype(out.dtype)
     with testing.raises(ValueError):
         map_array(labels, in_values, out_values, out=out)
 
 
 def test_arraymap_long_str():
-    labels = np.random.randint(0, 40, size=(24, 25))
+    rng = np.random.RandomState(3621851877)
+    labels = rng.randint(0, 40, size=(24, 25))
     in_values = np.unique(labels)
-    out_values = np.random.random(in_values.shape)
+    out_values = rng.random(in_values.shape)
     m = ArrayMap(in_values, out_values)
     assert len(str(m).split('\n')) == m._max_str_lines + 2
 
 
 def test_arraymap_update():
-    in_values = np.unique(np.random.randint(0, 200, size=5))
-    out_values = np.random.random(len(in_values))
+    rng = np.random.RandomState(1125684548)
+    in_values = np.unique(rng.randint(0, 200, size=5))
+    out_values = rng.random(len(in_values))
     m = ArrayMap(in_values, out_values)
-    image = np.random.randint(1, len(m), size=(512, 512))
+    image = rng.randint(1, len(m), size=(512, 512))
     assert np.all(m[image] < 1)  # missing values map to 0.
     m[1:] += 1
     assert np.all(m[image] >= 1)
 
 
 def test_arraymap_bool_index():
-    in_values = np.unique(np.random.randint(0, 200, size=5))
-    out_values = np.random.random(len(in_values))
+    rng = np.random.RandomState(1597648091)
+    in_values = np.unique(rng.randint(0, 200, size=5))
+    out_values = rng.random(len(in_values))
     m = ArrayMap(in_values, out_values)
-    image = np.random.randint(1, len(in_values), size=(512, 512))
+    image = rng.randint(1, len(in_values), size=(512, 512))
     assert np.all(m[image] < 1)  # missing values map to 0.
     positive = np.ones(len(m), dtype=bool)
     positive[0] = False

@@ -99,8 +99,8 @@ def test_calibrate_denoiser():
 @xfail_without_pywt
 def test_input_image_not_modified():
     input_image = noisy_img.copy()
-
-    parameter_ranges = {'sigma': np.random.random(5) / 2}
+    rng = np.random.RandomState(903329136)
+    parameter_ranges = {'sigma': rng.random(5) / 2}
     calibrate_denoiser(
         input_image, _denoise_wavelet, denoise_parameters=parameter_ranges
     )

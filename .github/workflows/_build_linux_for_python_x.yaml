@@ -1,0 +1,78 @@
+name: Build on Linux for a given Python version
+# Also use ccache as much as possible.
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        required: true
+        type: string
+      PIP_FLAGS:
+        required: false
+        type: string
+        default: ""
+
+jobs:
+  build-skimage-spin:
+    name: linux-cp${{ inputs.python-version }}
+    runs-on: ubuntu-latest
+
+    env:
+      CCACHE_BASEDIR: "${{ github.workspace }}"
+      CCACHE_DIR: "${{ github.workspace }}/.ccache"
+      CCACHE_COMPRESS: true
+      CCACHE_COMPRESSLEVEL: 6
+      CCACHE_MAXSIZE: 400M
+      CCACHE_SLOPPINESS: "pch_defines,time_macros"
+
+    steps:
+      - name: Checkout scikit-image
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ inputs.python-version }}
+          allow-prereleases: true
+          cache: "pip"
+          cache-dependency-path: "requirements/*.txt"
+
+      - name: Install build dependencies
+        env:
+          PIP_FLAGS: ${{ inputs.PIP_FLAGS }}
+        run: |
+          source .github/scripts/setup-build-env.sh
+
+      - name: Install and configure ccache
+        run: |
+          sudo apt-get install -y ccache
+          sudo /usr/sbin/update-ccache-symlinks
+          echo "/usr/lib/ccache" >> $GITHUB_PATH
+          ccache --zero-stats
+
+      - name: Restore/save ccache
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.ccache
+          key: ccache-${{ runner.os }}-py${{ inputs.python-version }}-${{ github.sha }}
+          restore-keys: |
+            ccache-${{ runner.os }}-py${{ inputs.python-version }}-
+
+      - name: Build wheel
+        run: |
+          python -m build --no-isolation --skip-dependency-check -Csetup-args="-Doptimization=2"
+
+      - name: ccache statistics
+        if: always()
+        run: ccache --show-stats
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: skimage-linux-${{ inputs.python-version }}
+          path: |
+            ./dist/*.whl
+            ./dist/*.tar.gz
+          if-no-files-found: error
+          overwrite: true
