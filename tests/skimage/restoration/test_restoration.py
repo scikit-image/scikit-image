@@ -3,11 +3,10 @@ import pytest
 from scipy import ndimage as ndi
 from scipy.signal import convolve2d, convolve
 
-import _skimage2 as ski2
 from _skimage2._shared.testing import fetch
 from _skimage2._shared.utils import _supported_float_type
 
-from skimage import restoration, util
+from skimage import restoration, util, filters
 from skimage.color import rgb2gray
 from skimage.data import astronaut, camera
 from skimage.restoration import uft
@@ -130,7 +129,7 @@ def test_image_shape():
     """
     point = np.zeros((5, 5), float)
     point[2, 2] = 1.0
-    psf = ski2.filters.gaussian(point, sigma=1.0, mode='reflect')
+    psf = filters.gaussian(point, sigma=1.0, mode='reflect')
     # image shape: (45, 45), as reported in #1172
     image = util.img_as_float(camera()[65:165, 215:315])  # just the face
     image_conv = ndi.convolve(image, psf)

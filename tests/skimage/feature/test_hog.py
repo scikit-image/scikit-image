@@ -2,9 +2,8 @@ import numpy as np
 import pytest
 from numpy.testing import assert_almost_equal
 
-from skimage import color, data, draw, feature, img_as_float
+from skimage import color, data, draw, feature, img_as_float, filters
 
-import _skimage2 as ski2
 from _skimage2._shared.testing import fetch
 from _skimage2._shared.utils import _supported_float_type
 
@@ -225,7 +224,7 @@ def test_hog_orientations_circle():
     image = np.zeros((height, width))
     rr, cc = draw.disk((int(height / 2), int(width / 2)), int(width / 3))
     image[rr, cc] = 100
-    image = ski2.filters.gaussian(image, sigma=2, mode='reflect')
+    image = filters.gaussian(image, sigma=2, mode='reflect')
 
     for orientations in range(2, 15):
         (hog, hog_img) = feature.hog(
