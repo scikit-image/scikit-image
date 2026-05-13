@@ -190,7 +190,8 @@ Test coverage of both APIs
 
 Minimize API difference
   Minimize the differences between the old and new API to make the eventual transition easier for users.
-  Conventional deprecation can still be introduced in ``skimage``, but deferring them to the ``_skimage2`` namespace is the preferred option.
+  Generally, new changes should be introduced in ``_skimage2`` only.
+  But we may opt for :ref:`conventional deprecations <deprecation-cycle>` within ``skimage``, if strong arguments can be made.
 
 Backwards compatible
   It should be possible to achieve the old behavior of the ``skimage`` API by some call or set of calls with the ``skimage2`` API.
@@ -231,10 +232,10 @@ This state will be published in a full release as ``scikit-image==2.0.0``.
 From that point onward, importing ``skimage2`` is encouraged.
 Development of new features should only happen in ``skimage2``.
 Bugs in ``skimage`` may still be addressed and will be included in releases with version >= 2.0.0.
-If we see fit, bug fixes may be backported to a maintenance branch and made available as releases with versions <2.0.0.
 
-No earlier than two years after the ``skimage2`` namespace becomes public, we will remove the ``skimage`` namespace.
-We will provide at least 2 releases or 2 years (whichever is longer) of visible warnings.
+As for conventional deprecations, we will provide users with a grace period of visible warnings for every change necessary for porting from ``skimage`` to ``skimage2``.
+This grace period should be at least 2 releases or 2 years long (whichever is longer) before user's code is broken.
+After this process is complete, we will remove the ``skimage`` namespace entirely.
 
 
 Code translation helper
