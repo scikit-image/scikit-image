@@ -8,5 +8,6 @@ py3.install_sources(
 subdir('_shared')
 subdir('data')
 subdir('feature')
+subdir('metrics')
 subdir('morphology')
 subdir('util')
