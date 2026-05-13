@@ -22,7 +22,7 @@
 #define MASK 1
 
 // Starting reliability value for otherwise uninitialized pixels.
-// High value forces initial low reliability.
+// The high value forces initial low reliability.  See Note in unwrap.py.
 #define RELIABILITY_SENTINEL 9999999.f
 
 // PIXELM information
