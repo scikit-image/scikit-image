@@ -2,6 +2,7 @@ _submodules = [
     "data",
     "feature",
     "filters",
+    "metrics",
     "morphology",
     "util",
 ]
@@ -12,6 +13,7 @@ from . import (
     data,
     feature,
     filters,
+    metrics,
     morphology,
     util,
 )
