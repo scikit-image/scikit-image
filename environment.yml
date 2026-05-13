@@ -17,7 +17,7 @@ dependencies:
   - Cython>=3.0.10,!=3.2.0b1
   - pythran>=0.16
   - numpy>=2.0
-  - spin==0.13
+  - spin>=0.13
   - python-build>=1.2.1
   # data
   - pooch>=1.6.0
