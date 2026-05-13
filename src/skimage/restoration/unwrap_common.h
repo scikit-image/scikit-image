@@ -18,11 +18,12 @@
 #define PI M_PI
 #define TWOPI (2 * M_PI)
 
-// TODO: remove global variables
-// TODO: make thresholds independent
-
 #define NOMASK 0
 #define MASK 1
+
+// Starting reliability value for otherwise uninitialized pixels.
+// High value forces initial low reliability.
+#define RELIABILITY_SENTINEL 9999999.f
 
 // PIXELM information
 struct PIXELM {

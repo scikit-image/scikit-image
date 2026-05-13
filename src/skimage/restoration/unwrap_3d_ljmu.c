@@ -56,7 +56,7 @@ void initialiseVOXELs(double *WrappedVolume, unsigned char *input_mask,
         voxel_pointer->increment = 0;
         voxel_pointer->number_of_pixels_in_group = 1;
         voxel_pointer->value = *wrapped_volume_pointer;
-        voxel_pointer->reliability =
+        voxel_pointer->reliability = RELIABILITY_SENTINEL +
             bitgen_state->next_uint32(bitgen_state->state);
         voxel_pointer->input_mask = *input_mask_pointer;
         voxel_pointer->extended_mask = *extended_mask_pointer;

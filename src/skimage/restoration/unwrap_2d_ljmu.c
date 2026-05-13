@@ -48,7 +48,7 @@ void initialisePIXELs(double *wrapped_image, unsigned char *input_mask,
       pixel_pointer->increment = 0;
       pixel_pointer->number_of_pixels_in_group = 1;
       pixel_pointer->value = *wrapped_image_pointer;
-      pixel_pointer->reliability =
+      pixel_pointer->reliability = RELIABILITY_SENTINEL +
           bitgen_state->next_uint32(bitgen_state->state);
       pixel_pointer->input_mask = *input_mask_pointer;
       pixel_pointer->extended_mask = *extended_mask_pointer;
