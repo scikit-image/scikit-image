@@ -1,4 +1,4 @@
-#include <numpy/random/bitgen.h>
+#include "unwrap_common.h"
 
 void unwrap3D(
         double *wrapped_volume,

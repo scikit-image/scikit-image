@@ -24,24 +24,9 @@
 // This program takes into consideration the image wrap around problem
 // encountered in MRI imaging.
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <float.h>
+#include "unwrap_3d_ljmu.h"
 
-#include <numpy/random/bitgen.h>
-
-#ifndef M_PI
-#define M_PI 3.1415926535897932384626433832795
-#endif
-
-#define PI M_PI
-#define TWOPI (2 * M_PI)
-
-#define NOMASK 0
-#define MASK 1
-
+typedef struct PIXELM VOXELM;
 
 typedef struct {
   double mod;
@@ -51,116 +36,10 @@ typedef struct {
   intptr_t no_of_edges;
 } params_t;
 
-// VOXELM information
-struct VOXELM {
-  int increment;  // No. of 2*pi to add to the voxel to unwrap it
-  intptr_t number_of_voxels_in_group;  // No. of voxel in the voxel group
-  double value;  // value of the voxel
-  double reliability;
-  unsigned char input_mask;  // MASK voxel is masked. NOMASK voxel is not masked
-  unsigned char extended_mask;  // MASK voxel is masked. NOMASK voxel is not
-                                // masked
-  int group;  // group No.
-  int new_group;
-  struct VOXELM *head;  // pointer to the first voxel in the group in the linked
-                        // list
-  struct VOXELM *last;  // pointer to the last voxel in the group
-  struct VOXELM *next;  // pointer to the next voxel in the group
-};
-
-typedef struct VOXELM VOXELM;
-
-// the EDGE is the line that connects two voxels.
-// if we have S voxels, then we have S horizontal edges and S vertical edges
-struct EDGE {
-  double reliab;  // reliabilty of the edge and it depends on the two voxels
-  VOXELM *pointer_1;  // pointer to the first voxel
-  VOXELM *pointer_2;  // pointer to the second voxel
-  int increment;  // No. of 2*pi to add to one of the
-  // voxels to unwrap it with respect to
-  // the second
-};
-
-typedef struct EDGE EDGE;
-
-//---------------start quicker_sort algorithm --------------------------------
-#define swap(x, y) \
-  {                \
-    EDGE t;        \
-    t = x;         \
-    x = y;         \
-    y = t;         \
-  }
-#define order(x, y) \
-  if (x.reliab > y.reliab) swap(x, y)
-#define o2(x, y) order(x, y)
-#define o3(x, y, z) \
-  o2(x, y);         \
-  o2(x, z);         \
-  o2(y, z)
-
-typedef enum {
-  yes,
-  no
-} yes_no;
-
-yes_no find_pivot(EDGE *left, EDGE *right, double *pivot_ptr) {
-  EDGE a, b, c, *p;
-
-  a = *left;
-  b = *(left + (right - left) / 2);
-  c = *right;
-  o3(a, b, c);
-
-  if (a.reliab < b.reliab) {
-    *pivot_ptr = b.reliab;
-    return yes;
-  }
-
-  if (b.reliab < c.reliab) {
-    *pivot_ptr = c.reliab;
-    return yes;
-  }
-
-  for (p = left + 1; p <= right; ++p) {
-    if (p->reliab != left->reliab) {
-      *pivot_ptr = (p->reliab < left->reliab) ? left->reliab : p->reliab;
-      return yes;
-    }
-  }
-  return no;
-}
-
-EDGE *partition(EDGE *left, EDGE *right, double pivot) {
-  while (left <= right) {
-    while (left->reliab < pivot) ++left;
-    while (right->reliab >= pivot) --right;
-    if (left < right) {
-      swap(*left, *right);
-      ++left;
-      --right;
-    }
-  }
-  return left;
-}
-
-void quicker_sort(EDGE *left, EDGE *right) {
-  EDGE *p;
-  double pivot;
-
-  if (find_pivot(left, right, &pivot) == yes) {
-    p = partition(left, right, pivot);
-    quicker_sort(left, p - 1);
-    quicker_sort(p, right);
-  }
-}
-
-//--------------end quicker_sort algorithm -----------------------------------
-
 //--------------------start initialize voxels ----------------------------------
-// initiale voxels. See the explanation of the voxel class above.
-// initially every voxel is assumed to belong to a group consisting of only
-// itself
+// initialize voxels. See the explanation of the voxel class in header above.
+// Initially every voxel is assumed to belong to a group consisting of only
+// itself.
 void initialiseVOXELs(double *WrappedVolume, unsigned char *input_mask,
                       unsigned char *extended_mask, VOXELM *voxel,
                       intptr_t n_k, intptr_t n_j, intptr_t n_i,
@@ -175,7 +54,7 @@ void initialiseVOXELs(double *WrappedVolume, unsigned char *input_mask,
     for (i = 0; i < n_j; i++) {
       for (j = 0; j < n_k; j++) {
         voxel_pointer->increment = 0;
-        voxel_pointer->number_of_voxels_in_group = 1;
+        voxel_pointer->number_of_pixels_in_group = 1;
         voxel_pointer->value = *wrapped_volume_pointer;
         voxel_pointer->reliability =
             bitgen_state->next_uint32(bitgen_state->state);
@@ -195,34 +74,6 @@ void initialiseVOXELs(double *WrappedVolume, unsigned char *input_mask,
   }
 }
 //-------------------end initialize voxels -----------
-
-// gamma function in the paper
-double wrap(double pixel_value) {
-  double wrapped_pixel_value;
-  if (pixel_value > PI)
-    wrapped_pixel_value = pixel_value - TWOPI;
-  else if (pixel_value < -PI)
-    wrapped_pixel_value = pixel_value + TWOPI;
-  else
-    wrapped_pixel_value = pixel_value;
-  return wrapped_pixel_value;
-}
-
-// voxelL_value is the left voxel,  voxelR_value is the right voxel
-int find_wrap(double voxelL_value, double voxelR_value) {
-  double difference;
-  int wrap_value;
-  difference = voxelL_value - voxelR_value;
-
-  if (difference > PI)
-    wrap_value = -1;
-  else if (difference < -PI)
-    wrap_value = 1;
-  else
-    wrap_value = 0;
-
-  return wrap_value;
-}
 
 void extend_mask(unsigned char *input_mask, unsigned char *extended_mask,
                  intptr_t n_k, intptr_t n_j, intptr_t n_i,
@@ -965,7 +816,7 @@ void gatherVOXELs(EDGE *edge, params_t *params) {
       if ((VOXEL2->next == NULL) && (VOXEL2->head == VOXEL2)) {
         VOXEL1->head->last->next = VOXEL2;
         VOXEL1->head->last = VOXEL2;
-        (VOXEL1->head->number_of_voxels_in_group)++;
+        (VOXEL1->head->number_of_pixels_in_group)++;
         VOXEL2->head = VOXEL1->head;
         VOXEL2->increment = VOXEL1->increment - pointer_edge->increment;
       }
@@ -976,7 +827,7 @@ void gatherVOXELs(EDGE *edge, params_t *params) {
       else if ((VOXEL1->next == NULL) && (VOXEL1->head == VOXEL1)) {
         VOXEL2->head->last->next = VOXEL1;
         VOXEL2->head->last = VOXEL1;
-        (VOXEL2->head->number_of_voxels_in_group)++;
+        (VOXEL2->head->number_of_pixels_in_group)++;
         VOXEL1->head = VOXEL2->head;
         VOXEL1->increment = VOXEL2->increment + pointer_edge->increment;
       }
@@ -992,14 +843,14 @@ void gatherVOXELs(EDGE *edge, params_t *params) {
         // group
         // to unwrap VOXELM 2 group with respect to VOXELM 1 group.
         // the no. of wraps will be added to VOXELM 2 grop in the future
-        if (group1->number_of_voxels_in_group >
-            group2->number_of_voxels_in_group) {
+        if (group1->number_of_pixels_in_group >
+            group2->number_of_pixels_in_group) {
           // merge VOXELM 2 with VOXELM 1 group
           group1->last->next = group2;
           group1->last = group2->last;
-          group1->number_of_voxels_in_group =
-              group1->number_of_voxels_in_group +
-              group2->number_of_voxels_in_group;
+          group1->number_of_pixels_in_group =
+              group1->number_of_pixels_in_group +
+              group2->number_of_pixels_in_group;
           incremento =
               VOXEL1->increment - pointer_edge->increment - VOXEL2->increment;
           // merge the other voxels in VOXELM 2 group to VOXELM 1 group
@@ -1021,9 +872,9 @@ void gatherVOXELs(EDGE *edge, params_t *params) {
           // merge VOXELM 1 with VOXELM 2 group
           group2->last->next = group1;
           group2->last = group1->last;
-          group2->number_of_voxels_in_group =
-              group2->number_of_voxels_in_group +
-              group1->number_of_voxels_in_group;
+          group2->number_of_pixels_in_group =
+              group2->number_of_pixels_in_group +
+              group1->number_of_pixels_in_group;
           incremento =
               VOXEL2->increment + pointer_edge->increment - VOXEL1->increment;
           // merge the other voxels in VOXELM 2 group to VOXELM 1 group
