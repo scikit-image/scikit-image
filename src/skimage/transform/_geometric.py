@@ -8,14 +8,14 @@ import warnings
 import numpy as np
 from scipy import spatial
 
-from .._shared.utils import (
+from _skimage2._shared.utils import (
     safe_as_int,
     _deprecate_estimate,
     _update_from_estimate_docstring,
     _deprecate_inherited_estimate,
     FailedEstimation,
 )
-from .._shared.compat import NP_COPY_IF_NEEDED
+from _skimage2._shared.compat import NP_COPY_IF_NEEDED
 
 
 def _affine_matrix_from_vector(v):

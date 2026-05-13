@@ -5,7 +5,7 @@ from scipy import sparse
 import math
 
 from .. import measure, segmentation, util, color
-from .._shared.version_requirements import require
+from _skimage2._shared.version_requirements import require
 
 
 __doctest_requires__ = {("show_rag",): ["matplotlib"]}

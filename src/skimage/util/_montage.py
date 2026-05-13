@@ -1,6 +1,6 @@
 import numpy as np
 
-from .._shared import utils
+from _skimage2._shared import utils
 from .. import exposure
 
 __all__ = ['montage']

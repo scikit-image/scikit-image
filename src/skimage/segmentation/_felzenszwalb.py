@@ -1,7 +1,7 @@
 import numpy as np
 
 from ._felzenszwalb_cy import _felzenszwalb_cython
-from .._shared import utils
+from _skimage2._shared import utils
 
 
 @utils.channel_as_last_axis(multichannel_output=False)

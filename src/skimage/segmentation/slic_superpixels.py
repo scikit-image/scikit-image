@@ -7,8 +7,8 @@ from numpy import random
 from scipy.cluster.vq import kmeans2
 from scipy.spatial.distance import pdist, squareform
 
-from .._shared import utils
-from .._shared.filters import gaussian
+from _skimage2._shared import utils
+from _skimage2._shared.filters import gaussian
 from ..color import rgb2lab
 from ..util import img_as_float, regular_grid
 from ._slic import _enforce_label_connectivity_cython, _slic_cython

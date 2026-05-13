@@ -4,7 +4,7 @@ cimport cython
 from libc.math cimport isnan, INFINITY
 from cython.parallel cimport prange
 
-from .._shared.fused_numerics cimport np_floats
+from _skimage2._shared.fused_numerics cimport np_floats
 
 ctypedef np_floats DTYPE_FLOAT
 

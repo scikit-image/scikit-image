@@ -6,8 +6,8 @@ import numpy as np
 from skimage import measure
 from skimage.segmentation._expand_labels import expand_labels
 
-from skimage._shared import testing
-from skimage._shared.testing import assert_array_equal
+from _skimage2._shared import testing
+from _skimage2._shared.testing import assert_array_equal
 
 SAMPLE1D = np.array([0, 0, 4, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0])
 SAMPLE1D_EXPANDED_3 = np.array([4, 4, 4, 4, 4, 4, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0])

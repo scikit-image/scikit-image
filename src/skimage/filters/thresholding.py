@@ -7,9 +7,9 @@ from collections.abc import Iterable
 import numpy as np
 from scipy import ndimage as ndi
 
-from .._shared.filters import gaussian
-from .._shared.utils import _supported_float_type, warn
-from .._shared.version_requirements import require
+from _skimage2._shared.filters import gaussian
+from _skimage2._shared.utils import _supported_float_type, warn
+from _skimage2._shared.version_requirements import require
 from ..exposure import histogram
 from ..filters._multiotsu import (
     _get_multiotsu_thresh_indices,

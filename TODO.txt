@@ -45,10 +45,11 @@ Other
   `skimage/graph/_graph_cut.py::_ncut_relabel` and the `xfail` mark in
   `tests/skimage/graph/test_rag.py::test_reproducibility`.
 
-Post Python 3.11
+Post Python 3.12
 ----------------
-* Remove or simplify `skimage._shared._warnings::warn_external` to use only
-  `skip_file_prefixes`. Remove corresponding license code in LICENSE.txt (if possible).
+* Remove `sys.version_info` checks in
+  `src/_skimage2/_shared/utils.py::deprecate_func.__call__`
+  `scikit-image/tests/skimage2/_shared/test_utils.py::test_deprecate_func`
 
 Post numpy 2
 ------------

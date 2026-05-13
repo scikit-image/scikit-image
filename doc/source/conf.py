@@ -9,6 +9,9 @@ import os
 import sys
 from warnings import filterwarnings
 
+import importlib
+import pkgutil
+
 import plotly.io as pio
 import skimage
 from intersphinx_registry import get_intersphinx_mapping
@@ -16,6 +19,19 @@ from packaging.version import parse
 from plotly.io._sg_scraper import plotly_sg_scraper
 from sphinx_gallery.sorting import ExplicitOrder
 from sphinx_gallery.utils import _has_optipng
+
+import _skimage2 as _skimage2_mod
+
+# Register skimage2.* aliases in sys.modules so autodoc resolves them as
+# "skimage2.submodule" rather than "_skimage2.submodule" in rendered signatures.
+sys.modules.setdefault('skimage2', _skimage2_mod)
+for _pkg_info in pkgutil.walk_packages(_skimage2_mod.__path__, prefix='_skimage2.'):
+    # Skip private submodules (any component starting with '_')
+    if any(p.startswith('_') for p in _pkg_info.name.split('.')[1:]):
+        continue
+    importlib.import_module(_pkg_info.name)
+    _display = _pkg_info.name.replace('_skimage2', 'skimage2', 1)
+    sys.modules.setdefault(_display, sys.modules[_pkg_info.name])
 
 filterwarnings(
     "ignore", message="Matplotlib is currently using agg", category=UserWarning

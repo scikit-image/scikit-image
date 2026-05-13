@@ -3,7 +3,7 @@ from typing import Self
 import numpy as np
 from scipy.spatial import distance_matrix
 
-from .._shared.utils import check_nD, _deprecate_estimate, FailedEstimation
+from _skimage2._shared.utils import check_nD, _deprecate_estimate, FailedEstimation
 
 
 class ThinPlateSplineTransform:

@@ -1,7 +1,7 @@
 import numpy as np
 
 from ..util import img_as_float
-from .._shared.utils import (
+from _skimage2._shared.utils import (
     _supported_float_type,
     check_nD,
 )

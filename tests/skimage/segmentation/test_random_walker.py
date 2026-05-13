@@ -1,9 +1,9 @@
 import numpy as np
 import pytest
 
-from skimage._shared import testing
-from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import xfail, arch32, is_wasm
+from _skimage2._shared import testing
+from _skimage2._shared._warnings import expected_warnings
+from _skimage2._shared.testing import xfail, arch32, is_wasm
 from skimage.segmentation import random_walker
 from skimage.transform import resize
 
@@ -11,8 +11,9 @@ from skimage.transform import resize
 def make_2d_syntheticdata(lx, ly=None):
     if ly is None:
         ly = lx
-    np.random.seed(1234)
-    data = np.zeros((lx, ly)) + 0.1 * np.random.randn(lx, ly)
+    # test results depend on this seed value
+    rng = np.random.RandomState(1234)
+    data = np.zeros((lx, ly)) + 0.1 * rng.randn(lx, ly)
     small_l = int(lx // 5)
     data[
         lx // 2 - small_l : lx // 2 + small_l, ly // 2 - small_l : ly // 2 + small_l
@@ -20,7 +21,7 @@ def make_2d_syntheticdata(lx, ly=None):
     data[
         lx // 2 - small_l + 1 : lx // 2 + small_l - 1,
         ly // 2 - small_l + 1 : ly // 2 + small_l - 1,
-    ] = 0.1 * np.random.randn(2 * small_l - 2, 2 * small_l - 2)
+    ] = 0.1 * rng.randn(2 * small_l - 2, 2 * small_l - 2)
     data[lx // 2 - small_l, ly // 2 - small_l // 8 : ly // 2 + small_l // 8] = 0
     seeds = np.zeros_like(data)
     seeds[lx // 5, ly // 5] = 1
@@ -33,8 +34,9 @@ def make_3d_syntheticdata(lx, ly=None, lz=None):
         ly = lx
     if lz is None:
         lz = lx
-    np.random.seed(1234)
-    data = np.zeros((lx, ly, lz)) + 0.1 * np.random.randn(lx, ly, lz)
+    # test results depend on this seed value
+    rng = np.random.RandomState(1234)
+    data = np.zeros((lx, ly, lz)) + 0.1 * rng.randn(lx, ly, lz)
     small_l = int(lx // 5)
     data[
         lx // 2 - small_l : lx // 2 + small_l,
@@ -434,8 +436,8 @@ def test_trivial_cases():
 def test_length2_spacing():
     # If this passes without raising an exception (warnings OK), the new
     #   spacing code is working properly.
-    np.random.seed(42)
-    img = np.ones((10, 10)) + 0.2 * np.random.normal(size=(10, 10))
+    rng = np.random.RandomState(3601210831)
+    img = np.ones((10, 10)) + 0.2 * rng.normal(size=(10, 10))
     labels = np.zeros((10, 10), dtype=np.uint8)
     labels[2, 4] = 1
     labels[6, 8] = 4
@@ -452,8 +454,8 @@ def test_bad_inputs():
         random_walker(img, labels, channel_axis=-1)
 
     # Too many dimensions
-    np.random.seed(42)
-    img = np.random.normal(size=(3, 3, 3, 3, 3))
+    rng = np.random.RandomState(1589678365)
+    img = rng.normal(size=(3, 3, 3, 3, 3))
     labels = np.arange(3**5).reshape(img.shape)
     with testing.raises(ValueError):
         random_walker(img, labels)
@@ -461,7 +463,7 @@ def test_bad_inputs():
         random_walker(img, labels, channel_axis=-1)
 
     # Spacing incorrect length
-    img = np.random.normal(size=(10, 10))
+    img = rng.normal(size=(10, 10))
     labels = np.zeros((10, 10))
     labels[2, 4] = 2
     labels[6, 8] = 5
@@ -469,15 +471,16 @@ def test_bad_inputs():
         random_walker(img, labels, spacing=(1,))
 
     # Invalid mode
-    img = np.random.normal(size=(10, 10))
+    img = rng.normal(size=(10, 10))
     labels = np.zeros((10, 10))
     with testing.raises(ValueError):
         random_walker(img, labels, mode='bad')
 
 
 def test_isolated_seeds():
-    np.random.seed(0)
-    a = np.random.random((7, 7))
+    # test results depend on this seed value
+    rng = np.random.RandomState(0)
+    a = rng.random((7, 7))
     mask = -np.ones(a.shape)
     # This pixel is an isolated seed
     mask[1, 1] = 1
@@ -506,8 +509,9 @@ def test_isolated_seeds():
 
 
 def test_isolated_area():
-    np.random.seed(0)
-    a = np.random.random((7, 7))
+    # test results depend on this seed value
+    rng = np.random.RandomState(0)
+    a = rng.random((7, 7))
     mask = -np.ones(a.shape)
     # This pixel is an isolated seed
     mask[1, 1] = 0
@@ -539,8 +543,9 @@ def test_isolated_area():
     'ignore:Changing the sparsity structure of a csr_matrix is expensive:scipy.sparse.SparseEfficiencyWarning'
 )
 def test_prob_tol():
-    np.random.seed(0)
-    a = np.random.random((7, 7))
+    # test result depends on this seed value
+    rng = np.random.RandomState(0)
+    a = rng.random((7, 7))
     mask = -np.ones(a.shape)
     # This pixel is an isolated seed
     mask[1, 1] = 1
@@ -590,7 +595,9 @@ def test_umfpack_import():
     'ignore:Changing the sparsity structure of a csr_matrix is expensive:scipy.sparse.SparseEfficiencyWarning'
 )
 def test_empty_labels():
-    image = np.random.random((5, 5))
+    # test result depends on this seed value
+    rng = np.random.RandomState(0)
+    image = rng.random((5, 5))
     labels = np.zeros((5, 5), dtype=int)
 
     with testing.raises(ValueError, match="No seeds provided"):
