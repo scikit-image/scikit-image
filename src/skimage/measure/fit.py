@@ -623,6 +623,7 @@ class CircleModel(_BaseModel):
                 warn_only=warn_only,
             )
 
+        # Compute the Euclidean distances from the center.
         center = C[0:2]
         # Can remove once SciPy 1.18 is the default
         if version.parse(scipy.__version__) >= version.parse('1.18.0dev0'):
