@@ -141,7 +141,5 @@ def test_nmi_random_3d():
     rng = np.random.RandomState(3521998880)
     random1, random2 = rng.random((2, 10, 100, 100))
     assert_almost_equal(
-        normalized_mutual_information(random1, random2, bins=10),
-        1,
-        decimal=2,
+        normalized_mutual_information(random1, random2, bins=10), 1, decimal=2
     )
