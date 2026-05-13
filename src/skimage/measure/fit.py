@@ -5,7 +5,8 @@ from warnings import warn, catch_warnings
 
 import numpy as np
 from numpy.linalg import inv
-from scipy import optimize, spatial
+from packaging import version
+import scipy
 
 from _skimage2._shared.utils import (
     _deprecate_estimate,
@@ -623,7 +624,11 @@ class CircleModel(_BaseModel):
             )
 
         center = C[0:2]
-        distances = spatial.minkowski_distance(center, data)
+        # Can remove once SciPy 1.18 is the default
+        if version.parse(scipy.__version__) >= version.parse('1.18.0dev0'):
+            distances = scipy.spatial.distance.minkowski(center, data)
+        else:
+            distances = scipy.spatial.minkowski_distance(center, data)
         r = np.sqrt(np.mean(distances**2))
 
         # Revert normalization and set init params.
@@ -1035,7 +1040,7 @@ class EllipseModel(_BaseModel):
             xi = x[i]
             yi = y[i]
             # faster without Dfun, because of the python overhead
-            t, _ = optimize.leastsq(fun, t0[i], args=(xi, yi))
+            t, _ = scipy.optimize.leastsq(fun, t0[i], args=(xi, yi))
             residuals[i] = np.sqrt(fun(t, xi, yi))
 
         return residuals
