@@ -36,9 +36,10 @@ def structural_similarity(
         The data range of the input image (difference between maximum and
         minimum possible values).
     win_size : int or None, optional
-        The side-length of the sliding window used in comparison. Must be an
-        odd value. If `gaussian_weights` is True, `win_size` cannot be
-        specified since the window size is then determined by `sigma`.
+        The side-length of the sliding window used in comparisons
+        (default: 7). Must be an odd value. If `gaussian_weights` is
+        True, `win_size` cannot be specified since the window size is
+        then determined by `sigma`.
     gradient : bool, optional
         If True, also return the gradient with respect to im2.
     channel_axis : int or None, optional
