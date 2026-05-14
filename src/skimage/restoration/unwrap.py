@@ -47,7 +47,7 @@ def unwrap_phase(image, wrap_around=False, rng=None):
 
     Notes
     -----
-    The algorithm proceeds by calculating a *unreliability* score for each image
+    The algorithm proceeds by calculating an *unreliability* score for each image
     location, and unwrapping first through areas with the lowest scores
     (lowest unreliability).  For some locations, such as corner pixels, border
     pixels where `wrap_around` is ``False`` for the relevant edge, and pixels
