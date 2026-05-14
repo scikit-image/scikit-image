@@ -173,8 +173,8 @@ def _wrapped_ramp(n_pi, n):
 
 
 def test_rng():
-    # Use a (100, 1) image with wrap_around: all pixel reliabilities come from
-    # the random number generation (no interior pixels), so the result is
+    # Use a (100, 1) image with wrap_around: all pixel unreliabilities come
+    # from the random number generation (no interior pixels), so the result is
     # sensitive to the seed.
     image_wrapped = _wrapped_ramp(12, 100)
 
