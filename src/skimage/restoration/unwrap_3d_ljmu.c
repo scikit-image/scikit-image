@@ -2,15 +2,13 @@
 // Original file name: Hussein_3D_unwrapper_with_mask_and_wrap_around_option.c
 
 // This program was written by Hussein Abdul-Rahman and Munther Gdeisat to
-// program the three-dimensional phase unwrapper
-// entitled "Fast three-dimensional phase-unwrapping algorithm based on sorting
-// by
-// reliability following a noncontinuous path"
-// by  Hussein Abdul-Rahman, Munther A. Gdeisat, David R. Burton, and Michael J.
-// Lalor,
-// published in the Proceedings of SPIE -
-// The International Society for Optical Engineering, Vol. 5856, No. 1, 2005,
-// pp. 32-40
+// program the three-dimensional phase unwrapper entitled "Fast
+// three-dimensional phase-unwrapping algorithm based on sorting by reliability
+// following a noncontinuous path" by  Hussein Abdul-Rahman, Munther A.
+// Gdeisat, David R. Burton, and Michael J. Lalor, published in the Proceedings
+// of SPIE - The International Society for Optical Engineering, Vol. 5856, No.
+// 1, 2005, pp. 32-40
+//
 // This program was written by Munther Gdeisat, Liverpool John Moores
 // University, United Kingdom.
 // Date 31st August 2007
@@ -57,7 +55,7 @@ void initialiseVOXELs(double *WrappedVolume, unsigned char *input_mask,
         voxel_pointer->number_of_pixels_in_group = 1;
         voxel_pointer->value = *wrapped_volume_pointer;
         // See Note in unwrap.py.
-        voxel_pointer->reliability = RELIABILITY_SENTINEL +
+        voxel_pointer->unreliability = UNRELIABILITY_SENTINEL +
             bitgen_state->next_uint32(bitgen_state->state);
         voxel_pointer->input_mask = *input_mask_pointer;
         voxel_pointer->extended_mask = *extended_mask_pointer;
@@ -310,7 +308,7 @@ void extend_mask(unsigned char *input_mask, unsigned char *extended_mask,
   }
 }
 
-void calculate_reliability(double *wrappedVolume, VOXELM *voxel,
+void calculate_unreliability(double *wrappedVolume, VOXELM *voxel,
                            intptr_t n_k, intptr_t n_j,
                            intptr_t n_i, params_t *params) {
   intptr_t frame_size = n_k * n_j;
@@ -351,7 +349,7 @@ void calculate_reliability(double *wrappedVolume, VOXELM *voxel,
                wrap(*WVP - *(WVP + frame_size - n_k));
           D10 = wrap(*(WVP - frame_size + n_k + 1) - *WVP) -
                 wrap(*WVP - *(WVP + frame_size - n_k - 1));
-          voxel_pointer->reliability =
+          voxel_pointer->unreliability =
               H * H + V * V + N * N + D1 * D1 + D2 * D2 + D3 * D3 + D4 * D4 +
               D5 * D5 + D6 * D6 + D7 * D7 + D8 * D8 + D9 * D9 + D10 * D10;
         }
@@ -366,7 +364,7 @@ void calculate_reliability(double *wrappedVolume, VOXELM *voxel,
   }
 
   if (params->x_connectivity == 1) {
-    // calculating reliability for the front side of the phase volume...add
+    // calculating unreliability for the front side of the phase volume...add
     // n_k
     WVP = wrappedVolume + frame_size + n_k;
     voxel_pointer = voxel + frame_size + n_k;
@@ -397,7 +395,7 @@ void calculate_reliability(double *wrappedVolume, VOXELM *voxel,
                wrap(*WVP - *(WVP + frame_size - n_k));
           D10 = wrap(*(WVP - frame_size + n_k + 1) - *WVP) -
                 wrap(*WVP - *(WVP + frame_size - 1));
-          voxel_pointer->reliability =
+          voxel_pointer->unreliability =
               H * H + V * V + N * N + D1 * D1 + D2 * D2 + D3 * D3 + D4 * D4 +
               D5 * D5 + D6 * D6 + D7 * D7 + D8 * D8 + D9 * D9 + D10 * D10;
         }
@@ -408,7 +406,7 @@ void calculate_reliability(double *wrappedVolume, VOXELM *voxel,
       WVP += 2 * n_k;
     }
 
-    // calculating reliability for the rear side of the phase volume.....
+    // calculating unreliability for the rear side of the phase volume.....
     // subtract n_k
     WVP = wrappedVolume + frame_size + 2 * n_k - 1;
     voxel_pointer = voxel + frame_size + 2 * n_k - 1;
@@ -439,7 +437,7 @@ void calculate_reliability(double *wrappedVolume, VOXELM *voxel,
                wrap(*WVP - *(WVP + frame_size - n_k));
           D10 = wrap(*(WVP - frame_size + 1) - *WVP) -
                 wrap(*WVP - *(WVP + frame_size - n_k - 1));
-          voxel_pointer->reliability =
+          voxel_pointer->unreliability =
               H * H + V * V + N * N + D1 * D1 + D2 * D2 + D3 * D3 + D4 * D4 +
               D5 * D5 + D6 * D6 + D7 * D7 + D8 * D8 + D9 * D9 + D10 * D10;
         }
@@ -452,7 +450,7 @@ void calculate_reliability(double *wrappedVolume, VOXELM *voxel,
   }
 
   if (params->y_connectivity == 1) {
-    // calculating reliability for the left side of the phase volume...add
+    // calculating unreliability for the left side of the phase volume...add
     // frame_size
     WVP = wrappedVolume + frame_size + 1;
     voxel_pointer = voxel + frame_size + 1;
@@ -484,7 +482,7 @@ void calculate_reliability(double *wrappedVolume, VOXELM *voxel,
                wrap(*WVP - *(WVP + 2 * frame_size - n_k));
           D10 = wrap(*(WVP - frame_size + n_k + 1) - *WVP) -
                 wrap(*WVP - *(WVP + 2 * frame_size - n_k - 1));
-          voxel_pointer->reliability =
+          voxel_pointer->unreliability =
               H * H + V * V + N * N + D1 * D1 + D2 * D2 + D3 * D3 + D4 * D4 +
               D5 * D5 + D6 * D6 + D7 * D7 + D8 * D8 + D9 * D9 + D10 * D10;
         }
@@ -495,7 +493,7 @@ void calculate_reliability(double *wrappedVolume, VOXELM *voxel,
       WVP += frame_size - n_k + 2;
     }
 
-    // calculating reliability for the right side of the phase volume...subtract
+    // calculating unreliability for the right side of the phase volume...subtract
     // frame_size
     WVP = wrappedVolume + 2 * frame_size - n_k + 1;
     voxel_pointer = voxel + 2 * frame_size - n_k + 1;
@@ -527,7 +525,7 @@ void calculate_reliability(double *wrappedVolume, VOXELM *voxel,
                wrap(*WVP - *(WVP + frame_size - n_k));
           D10 = wrap(*(WVP - 2 * frame_size + n_k + 1) - *WVP) -
                 wrap(*WVP - *(WVP + frame_size - n_k - 1));
-          voxel_pointer->reliability =
+          voxel_pointer->unreliability =
               H * H + V * V + N * N + D1 * D1 + D2 * D2 + D3 * D3 + D4 * D4 +
               D5 * D5 + D6 * D6 + D7 * D7 + D8 * D8 + D9 * D9 + D10 * D10;
         }
@@ -540,7 +538,7 @@ void calculate_reliability(double *wrappedVolume, VOXELM *voxel,
   }
 
   if (params->z_connectivity == 1) {
-    // calculating reliability for the bottom side of the phase volume...add
+    // calculating unreliability for the bottom side of the phase volume...add
     // volume_size
     WVP = wrappedVolume + n_k + 1;
     voxel_pointer = voxel + n_k + 1;
@@ -576,7 +574,7 @@ void calculate_reliability(double *wrappedVolume, VOXELM *voxel,
           D10 = wrap(*(WVP + volume_size - frame_size + n_k + 1) -
                      *WVP) -
                 wrap(*WVP - *(WVP + frame_size - n_k - 1));
-          voxel_pointer->reliability =
+          voxel_pointer->unreliability =
               H * H + V * V + N * N + D1 * D1 + D2 * D2 + D3 * D3 + D4 * D4 +
               D5 * D5 + D6 * D6 + D7 * D7 + D8 * D8 + D9 * D9 + D10 * D10;
         }
@@ -587,7 +585,7 @@ void calculate_reliability(double *wrappedVolume, VOXELM *voxel,
       WVP += 2;
     }
 
-    // calculating reliability for the top side of the phase volume...subtract
+    // calculating unreliability for the top side of the phase volume...subtract
     // volume_size
     WVP = wrappedVolume + volume_size - frame_size + n_k + 1;
     voxel_pointer = voxel + volume_size - frame_size + n_k + 1;
@@ -623,7 +621,7 @@ void calculate_reliability(double *wrappedVolume, VOXELM *voxel,
           D10 =
               wrap(*(WVP - frame_size + n_k + 1) - *WVP) -
               wrap(*WVP - *(WVP - volume_size + frame_size - n_k - 1));
-          voxel_pointer->reliability =
+          voxel_pointer->unreliability =
               H * H + V * V + N * N + D1 * D1 + D2 * D2 + D3 * D3 + D4 * D4 +
               D5 * D5 + D6 * D6 + D7 * D7 + D8 * D8 + D9 * D9 + D10 * D10;
         }
@@ -636,8 +634,8 @@ void calculate_reliability(double *wrappedVolume, VOXELM *voxel,
   }
 }
 
-// calculate the reliability of the horizontal edges of the volume.  it
-// is calculated by adding the reliability of voxel and the relibility
+// calculate the unreliability of the horizontal edges of the volume.  it
+// is calculated by adding the unreliability of voxel and the relibility
 // of its right neighbour. edge is calculated between a voxel and its
 // next neighbour
 void horizontalEDGEs(VOXELM *voxel, EDGE *edge, intptr_t n_k,
@@ -655,7 +653,7 @@ void horizontalEDGEs(VOXELM *voxel, EDGE *edge, intptr_t n_k,
           edge_pointer->pointer_1 = voxel_pointer;
           edge_pointer->pointer_2 = (voxel_pointer + 1);
           edge_pointer->reliab =
-              voxel_pointer->reliability + (voxel_pointer + 1)->reliability;
+              voxel_pointer->unreliability + (voxel_pointer + 1)->unreliability;
           edge_pointer->increment =
               find_wrap(voxel_pointer->value, (voxel_pointer + 1)->value);
           edge_pointer++;
@@ -675,8 +673,8 @@ void horizontalEDGEs(VOXELM *voxel, EDGE *edge, intptr_t n_k,
           edge_pointer->pointer_1 = voxel_pointer;
           edge_pointer->pointer_2 = (voxel_pointer - n_k + 1);
           edge_pointer->reliab =
-              voxel_pointer->reliability +
-              (voxel_pointer - n_k + 1)->reliability;
+              voxel_pointer->unreliability +
+              (voxel_pointer - n_k + 1)->unreliability;
           edge_pointer->increment = find_wrap(
               voxel_pointer->value, (voxel_pointer - n_k + 1)->value);
           edge_pointer++;
@@ -705,8 +703,8 @@ void verticalEDGEs(VOXELM *voxel, EDGE *edge, intptr_t n_k,
             (voxel_pointer + n_k)->input_mask == NOMASK) {
           edge_pointer->pointer_1 = voxel_pointer;
           edge_pointer->pointer_2 = (voxel_pointer + n_k);
-          edge_pointer->reliab = voxel_pointer->reliability +
-                                 (voxel_pointer + n_k)->reliability;
+          edge_pointer->reliab = voxel_pointer->unreliability +
+                                 (voxel_pointer + n_k)->unreliability;
           edge_pointer->increment = find_wrap(
               voxel_pointer->value, (voxel_pointer + n_k)->value);
           edge_pointer++;
@@ -726,8 +724,8 @@ void verticalEDGEs(VOXELM *voxel, EDGE *edge, intptr_t n_k,
             (voxel_pointer - next_voxel)->input_mask == NOMASK) {
           edge_pointer->pointer_1 = voxel_pointer;
           edge_pointer->pointer_2 = (voxel_pointer - next_voxel);
-          edge_pointer->reliab = voxel_pointer->reliability +
-                                 (voxel_pointer - next_voxel)->reliability;
+          edge_pointer->reliab = voxel_pointer->unreliability +
+                                 (voxel_pointer - next_voxel)->unreliability;
           edge_pointer->increment = find_wrap(
               voxel_pointer->value, (voxel_pointer - next_voxel)->value);
           edge_pointer++;
@@ -758,8 +756,8 @@ void normalEDGEs(VOXELM *voxel, EDGE *edge, intptr_t n_k, intptr_t n_j,
             (voxel_pointer + frame_size)->input_mask == NOMASK) {
           edge_pointer->pointer_1 = voxel_pointer;
           edge_pointer->pointer_2 = (voxel_pointer + frame_size);
-          edge_pointer->reliab = voxel_pointer->reliability +
-                                 (voxel_pointer + frame_size)->reliability;
+          edge_pointer->reliab = voxel_pointer->unreliability +
+                                 (voxel_pointer + frame_size)->unreliability;
           edge_pointer->increment = find_wrap(
               voxel_pointer->value, (voxel_pointer + frame_size)->value);
           edge_pointer++;
@@ -778,8 +776,8 @@ void normalEDGEs(VOXELM *voxel, EDGE *edge, intptr_t n_k, intptr_t n_j,
             (voxel_pointer - next_voxel)->input_mask == NOMASK) {
           edge_pointer->pointer_1 = voxel_pointer;
           edge_pointer->pointer_2 = (voxel_pointer - next_voxel);
-          edge_pointer->reliab = voxel_pointer->reliability +
-                                 (voxel_pointer - next_voxel)->reliability;
+          edge_pointer->reliab = voxel_pointer->unreliability +
+                                 (voxel_pointer - next_voxel)->unreliability;
           edge_pointer->increment = find_wrap(
               voxel_pointer->value, (voxel_pointer - next_voxel)->value);
           edge_pointer++;
@@ -986,7 +984,7 @@ int unwrap3D(double *wrapped_volume, double *unwrapped_volume,
               n_i, &params);
   initialiseVOXELs(wrapped_volume, input_mask, extended_mask, voxel,
                    n_k, n_j, n_i, bitgen_state);
-  calculate_reliability(wrapped_volume, voxel, n_k, n_j,
+  calculate_unreliability(wrapped_volume, voxel, n_k, n_j,
                         n_i, &params);
   horizontalEDGEs(voxel, edge, n_k, n_j, n_i,
                   &params);

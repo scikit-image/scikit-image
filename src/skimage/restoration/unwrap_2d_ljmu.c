@@ -2,12 +2,12 @@
 // Original file name: Miguel_2D_unwrapper_with_mask_and_wrap_around_option.c
 
 // This program was written by Munther Gdeisat and Miguel Arevallilo Herraez to
-// program the two-dimensional unwrapper
-// entitled "Fast two-dimensional phase-unwrapping algorithm based on sorting by
-// reliability following a noncontinuous path"
-// by  Miguel Arevallilo Herraez, David R. Burton, Michael J. Lalor, and Munther
-// A. Gdeisat
-// published in the Journal Applied Optics, Vol. 41, No. 35, pp. 7437, 2002.
+// program the two-dimensional unwrapper entitled "Fast two-dimensional
+// phase-unwrapping algorithm based on sorting by reliability following a
+// noncontinuous path" by  Miguel Arevallilo Herraez, David R. Burton, Michael
+// J. Lalor, and Munther A. Gdeisat published in the Journal Applied Optics,
+// Vol. 41, No. 35, pp. 7437, 2002.
+//
 // This program was written by Munther Gdeisat, Liverpool John Moores
 // University, United Kingdom.
 // Date 26th August 2007
@@ -49,7 +49,7 @@ void initialisePIXELs(double *wrapped_image, unsigned char *input_mask,
       pixel_pointer->number_of_pixels_in_group = 1;
       pixel_pointer->value = *wrapped_image_pointer;
       // See Note in unwrap.py.
-      pixel_pointer->reliability = RELIABILITY_SENTINEL +
+      pixel_pointer->unreliability = UNRELIABILITY_SENTINEL +
           bitgen_state->next_uint32(bitgen_state->state);
       pixel_pointer->input_mask = *input_mask_pointer;
       pixel_pointer->extended_mask = *extended_mask_pointer;
@@ -169,7 +169,7 @@ void extend_mask(unsigned char *input_mask, unsigned char *extended_mask,
   }
 }
 
-void calculate_reliability(double *wrappedImage, PIXELM *pixel, intptr_t n_j,
+void calculate_unreliability(double *wrappedImage, PIXELM *pixel, intptr_t n_j,
                            intptr_t n_i, params_t *params) {
   intptr_t n_j_plus_one = n_j + 1;
   intptr_t n_j_minus_one = n_j - 1;
@@ -189,7 +189,7 @@ void calculate_reliability(double *wrappedImage, PIXELM *pixel, intptr_t n_j,
              wrap(*WIP - *(WIP + n_j_plus_one));
         D2 = wrap(*(WIP - n_j_minus_one) - *WIP) -
              wrap(*WIP - *(WIP + n_j_minus_one));
-        pixel_pointer->reliability = H * H + V * V + D1 * D1 + D2 * D2;
+        pixel_pointer->unreliability = H * H + V * V + D1 * D1 + D2 * D2;
       }
       pixel_pointer++;
       WIP++;
@@ -199,7 +199,7 @@ void calculate_reliability(double *wrappedImage, PIXELM *pixel, intptr_t n_j,
   }
 
   if (params->x_connectivity == 1) {
-    // calculating the reliability for the left border of the image
+    // calculating the unreliability for the left border of the image
     PIXELM *pixel_pointer = pixel + n_j;
     double *WIP = wrappedImage + n_j;
 
@@ -212,13 +212,13 @@ void calculate_reliability(double *wrappedImage, PIXELM *pixel, intptr_t n_j,
              wrap(*WIP - *(WIP + n_j_plus_one));
         D2 = wrap(*(WIP - n_j_minus_one) - *WIP) -
              wrap(*WIP - *(WIP + 2 * n_j - 1));
-        pixel_pointer->reliability = H * H + V * V + D1 * D1 + D2 * D2;
+        pixel_pointer->unreliability = H * H + V * V + D1 * D1 + D2 * D2;
       }
       pixel_pointer += n_j;
       WIP += n_j;
     }
 
-    // calculating the reliability for the right border of the image
+    // calculating the unreliability for the right border of the image
     pixel_pointer = pixel + 2 * n_j - 1;
     WIP = wrappedImage + 2 * n_j - 1;
 
@@ -232,7 +232,7 @@ void calculate_reliability(double *wrappedImage, PIXELM *pixel, intptr_t n_j,
              wrap(*WIP - *(WIP + 1));
         D2 = wrap(*(WIP - 2 * n_j - 1) - *WIP) -
              wrap(*WIP - *(WIP + n_j_minus_one));
-        pixel_pointer->reliability = H * H + V * V + D1 * D1 + D2 * D2;
+        pixel_pointer->unreliability = H * H + V * V + D1 * D1 + D2 * D2;
       }
       pixel_pointer += n_j;
       WIP += n_j;
@@ -240,7 +240,7 @@ void calculate_reliability(double *wrappedImage, PIXELM *pixel, intptr_t n_j,
   }
 
   if (params->y_connectivity == 1) {
-    // calculating the reliability for the top border of the image
+    // calculating the unreliability for the top border of the image
     PIXELM *pixel_pointer = pixel + 1;
     double *WIP = wrappedImage + 1;
 
@@ -253,13 +253,13 @@ void calculate_reliability(double *wrappedImage, PIXELM *pixel, intptr_t n_j,
              wrap(*WIP - *(WIP + n_j_plus_one));
         D2 = wrap(*(WIP + n_j * (n_i - 1) + 1) - *WIP) -
              wrap(*WIP - *(WIP + n_j_minus_one));
-        pixel_pointer->reliability = H * H + V * V + D1 * D1 + D2 * D2;
+        pixel_pointer->unreliability = H * H + V * V + D1 * D1 + D2 * D2;
       }
       pixel_pointer++;
       WIP++;
     }
 
-    // calculating the reliability for the bottom border of the image
+    // calculating the unreliability for the bottom border of the image
     pixel_pointer = pixel + (n_i - 1) * n_j + 1;
     WIP = wrappedImage + (n_i - 1) * n_j + 1;
 
@@ -272,7 +272,7 @@ void calculate_reliability(double *wrappedImage, PIXELM *pixel, intptr_t n_j,
              wrap(*WIP - *(WIP - (n_i - 1) * (n_j) + 1));
         D2 = wrap(*(WIP - n_j_minus_one) - *WIP) -
              wrap(*WIP - *(WIP - (n_i - 1) * (n_j) - 1));
-        pixel_pointer->reliability = H * H + V * V + D1 * D1 + D2 * D2;
+        pixel_pointer->unreliability = H * H + V * V + D1 * D1 + D2 * D2;
       }
       pixel_pointer++;
       WIP++;
@@ -280,8 +280,8 @@ void calculate_reliability(double *wrappedImage, PIXELM *pixel, intptr_t n_j,
   }
 }
 
-// calculate the reliability of the horizontal edges of the image
-// it is calculated by adding the reliability of pixel and the relibility of
+// calculate the unreliability of the horizontal edges of the image
+// it is calculated by adding the unreliability of pixel and the relibility of
 // its right-hand neighbour
 // edge is calculated between a pixel and its next neighbour
 void horizontalEDGEs(PIXELM *pixel, EDGE *edge, intptr_t n_j,
@@ -298,7 +298,7 @@ void horizontalEDGEs(PIXELM *pixel, EDGE *edge, intptr_t n_j,
         edge_pointer->pointer_1 = pixel_pointer;
         edge_pointer->pointer_2 = (pixel_pointer + 1);
         edge_pointer->reliab =
-            pixel_pointer->reliability + (pixel_pointer + 1)->reliability;
+            pixel_pointer->unreliability + (pixel_pointer + 1)->unreliability;
         edge_pointer->increment =
             find_wrap(pixel_pointer->value, (pixel_pointer + 1)->value);
         edge_pointer++;
@@ -316,8 +316,8 @@ void horizontalEDGEs(PIXELM *pixel, EDGE *edge, intptr_t n_j,
           (pixel_pointer - n_j + 1)->input_mask == NOMASK) {
         edge_pointer->pointer_1 = pixel_pointer;
         edge_pointer->pointer_2 = (pixel_pointer - n_j + 1);
-        edge_pointer->reliab = pixel_pointer->reliability +
-                               (pixel_pointer - n_j + 1)->reliability;
+        edge_pointer->reliab = pixel_pointer->unreliability +
+                               (pixel_pointer - n_j + 1)->unreliability;
         edge_pointer->increment = find_wrap(
             pixel_pointer->value, (pixel_pointer - n_j + 1)->value);
         edge_pointer++;
@@ -329,8 +329,8 @@ void horizontalEDGEs(PIXELM *pixel, EDGE *edge, intptr_t n_j,
   params->no_of_edges = no_of_edges;
 }
 
-// calculate the reliability of the vertical edges of the image
-// it is calculated by adding the reliability of pixel and the relibility of
+// calculate the unreliability of the vertical edges of the image
+// it is calculated by adding the unreliability of pixel and the relibility of
 // its lower neighbour in the image.
 void verticalEDGEs(PIXELM *pixel, EDGE *edge, intptr_t n_j, intptr_t n_i,
                    params_t *params) {
@@ -345,8 +345,8 @@ void verticalEDGEs(PIXELM *pixel, EDGE *edge, intptr_t n_j, intptr_t n_i,
           (pixel_pointer + n_j)->input_mask == NOMASK) {
         edge_pointer->pointer_1 = pixel_pointer;
         edge_pointer->pointer_2 = (pixel_pointer + n_j);
-        edge_pointer->reliab = pixel_pointer->reliability +
-                               (pixel_pointer + n_j)->reliability;
+        edge_pointer->reliab = pixel_pointer->unreliability +
+                               (pixel_pointer + n_j)->unreliability;
         edge_pointer->increment = find_wrap(
             pixel_pointer->value, (pixel_pointer + n_j)->value);
         edge_pointer++;
@@ -367,8 +367,8 @@ void verticalEDGEs(PIXELM *pixel, EDGE *edge, intptr_t n_j, intptr_t n_i,
         edge_pointer->pointer_2 =
             (pixel_pointer - n_j * (n_i - 1));
         edge_pointer->reliab =
-            pixel_pointer->reliability +
-            (pixel_pointer - n_j * (n_i - 1))->reliability;
+            pixel_pointer->unreliability +
+            (pixel_pointer - n_j * (n_i - 1))->unreliability;
         edge_pointer->increment = find_wrap(
             pixel_pointer->value,
             (pixel_pointer - n_j * (n_i - 1))->value);
@@ -571,7 +571,7 @@ int unwrap2D(double *wrapped_image, double *UnwrappedImage,
   extend_mask(input_mask, extended_mask, n_j, n_i, &params);
   initialisePIXELs(wrapped_image, input_mask, extended_mask, pixel, n_j,
                    n_i, bitgen_state);
-  calculate_reliability(wrapped_image, pixel, n_j, n_i,
+  calculate_unreliability(wrapped_image, pixel, n_j, n_i,
                         &params);
   horizontalEDGEs(pixel, edge, n_j, n_i, &params);
   verticalEDGEs(pixel, edge, n_j, n_i, &params);

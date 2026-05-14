@@ -21,16 +21,16 @@
 #define NOMASK 0
 #define MASK 1
 
-// Starting reliability value for otherwise uninitialized pixels.
+// Starting unreliability value for otherwise uninitialized pixels.
 // The high value forces initial low reliability.  See Note in unwrap.py.
-#define RELIABILITY_SENTINEL 9999999.f
+#define UNRELIABILITY_SENTINEL 9999999.f
 
 // PIXELM information
 struct PIXELM {
   int increment;  // No. of 2*pi to add to the pixel to unwrap it
   intptr_t number_of_pixels_in_group;  // No. of pixel in the pixel group
   double value;  // value of the pixel
-  double reliability;
+  double unreliability;
   unsigned char input_mask;  // 0 pixel is masked. NOMASK pixel is not masked
   unsigned char extended_mask;  // 0 pixel is masked. NOMASK pixel is not masked
   int group;  // group No.
