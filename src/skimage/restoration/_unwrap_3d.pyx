@@ -16,7 +16,7 @@ cdef extern from "unwrap_3d_ljmu.h":
             cnp.float64_t *unwrapped_volume,
             unsigned char *input_mask,
             intptr_t n_k, intptr_t n_j, intptr_t n_i,
-            int wrap_around_i, int wrap_around_j, int wrap_around_k,
+            int wrap_around_k, int wrap_around_j, int wrap_around_i,
             bitgen_t* bitgen_state
             ) noexcept nogil
 
