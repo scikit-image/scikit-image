@@ -28,7 +28,7 @@ def unwrap_phase(image, wrap_around=False, rng=None):
         process. If only a single boolean is given, it will apply to all axes.
         Wrap around is not supported for 1D arrays.
     rng : {`numpy.random.Generator`, int}, optional
-        Unwrapping relies on a random per-pixel initialization.  If a Numpy
+        Unwrapping relies on a random per-pixel initialization.  If a ``numpy``
         random number generator (RNG), then use that to generate the
         initialization.  If ``None``, create a new RNG.  If an int, seed a new
         RNG with this passed integer.
