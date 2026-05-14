@@ -297,8 +297,10 @@ def test_gaussian_weights_win_size_error():
     X = (np.random.rand(N, N) * 255).astype(np.uint8)
     Y = (np.random.rand(N, N) * 255).astype(np.uint8)
 
-    with pytest.raises(ValueError, match="win_size.*gaussian_weights"):
-        structural_similarity(X, Y, data_range=255, gaussian_weights=True, win_size=101)
+    with pytest.raises(
+        ValueError, match="win_size cannot be specified when gaussian_weights"
+    ):
+        structural_similarity(X, Y, data_range=255, gaussian_weights=True, win_size=7)
 
 
 def test_invalid_input():

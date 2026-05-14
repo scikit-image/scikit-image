@@ -314,8 +314,8 @@ def test_gaussian_weights_win_size_future_warning():
     X = (np.random.rand(N, N) * 255).astype(np.uint8)
     Y = (np.random.rand(N, N) * 255).astype(np.uint8)
 
-    with pytest.warns(FutureWarning, match="win_size.*gaussian_weights"):
-        structural_similarity(X, Y, gaussian_weights=True, win_size=101)
+    with pytest.warns(FutureWarning, match="Passing win_size with gaussian_weights"):
+        structural_similarity(X, Y, gaussian_weights=True, win_size=7)
 
 
 def test_invalid_input():
