@@ -47,13 +47,13 @@ def unwrap_phase(image, wrap_around=False, rng=None):
 
     Notes
     -----
-    The algorithm proceeds by calculating a *unreliability* score for each image
+    The algorithm proceeds by calculating an *unreliability* score for each image
     location, and unwrapping first through areas with the lowest scores
     (lowest unreliability).  For some locations, such as corner pixels, border
     pixels where `wrap_around` is ``False`` for the relevant edge, and pixels
     that are neighbors to masked pixels, we cannot calculate unreliability due
     to missing data in some neighbors. In this case we set unreliability to
-    some high value plus some random component, where the random component
+    a high value plus some random component, where the random component
     prevents memory location bias in the order of unwrapping.  The random
     component means there can be slight differences from run to run in the
     corner pixels, border pixels (depending on `wrap_around`), or pixels next
