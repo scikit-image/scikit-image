@@ -1,6 +1,6 @@
 #include "unwrap_common.h"
 
-void unwrap2D(
+int unwrap2D(
         double *wrapped_image,
         double *UnwrappedImage,
         unsigned char *input_mask,

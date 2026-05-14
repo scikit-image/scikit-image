@@ -541,10 +541,10 @@ void returnImage(PIXELM *pixel, double *unwrapped_image, intptr_t n_j,
 }
 
 // the main function of the unwrapper
-void unwrap2D(double *wrapped_image, double *UnwrappedImage,
-              unsigned char *input_mask, intptr_t n_j, intptr_t n_i,
-              int wrap_around_j, int wrap_around_i,
-              bitgen_t* bitgen_state) {
+int unwrap2D(double *wrapped_image, double *UnwrappedImage,
+        unsigned char *input_mask, intptr_t n_j, intptr_t n_i,
+        int wrap_around_j, int wrap_around_i,
+        bitgen_t* bitgen_state) {
   params_t params = {TWOPI, wrap_around_j, wrap_around_i, 0};
   unsigned char *extended_mask;
   PIXELM *pixel;
@@ -552,9 +552,21 @@ void unwrap2D(double *wrapped_image, double *UnwrappedImage,
   intptr_t image_size = n_i * n_j;
   intptr_t No_of_Edges_initially = 2 * n_j * n_i;
 
-  extended_mask = (unsigned char *)calloc(image_size, sizeof(unsigned char));
   pixel = (PIXELM *)calloc(image_size, sizeof(PIXELM));
+  if (pixel == NULL) {
+      return 1;
+  }
+  extended_mask = (unsigned char *)calloc(image_size, sizeof(unsigned char));
+  if (extended_mask == NULL) {
+      free(pixel);
+      return 1;
+  }
   edge = (EDGE *)calloc(No_of_Edges_initially, sizeof(EDGE));
+  if (edge == NULL) {
+      free(pixel);
+      free(extended_mask);
+      return 1;
+  }
 
   extend_mask(input_mask, extended_mask, n_j, n_i, &params);
   initialisePIXELs(wrapped_image, input_mask, extended_mask, pixel, n_j,
@@ -583,4 +595,6 @@ void unwrap2D(double *wrapped_image, double *UnwrappedImage,
   free(edge);
   free(pixel);
   free(extended_mask);
+
+  return 0;
 }

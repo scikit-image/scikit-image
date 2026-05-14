@@ -1,6 +1,6 @@
 #include "unwrap_common.h"
 
-void unwrap3D(
+int unwrap3D(
         double *wrapped_volume,
         double *unwrapped_volume,
         unsigned char *input_mask,

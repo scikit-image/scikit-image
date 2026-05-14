@@ -11,14 +11,14 @@ from numpy.random cimport bitgen_t
 
 
 cdef extern from "unwrap_3d_ljmu.h":
-    void unwrap3D(
-            cnp.float64_t *wrapped_volume,
-            cnp.float64_t *unwrapped_volume,
-            unsigned char *input_mask,
-            intptr_t n_k, intptr_t n_j, intptr_t n_i,
-            int wrap_around_k, int wrap_around_j, int wrap_around_i,
-            bitgen_t* bitgen_state
-            ) noexcept nogil
+    int unwrap3D(
+        cnp.float64_t *wrapped_volume,
+        cnp.float64_t *unwrapped_volume,
+        unsigned char *input_mask,
+        intptr_t n_k, intptr_t n_j, intptr_t n_i,
+        int wrap_around_k, int wrap_around_j, int wrap_around_i,
+        bitgen_t* bitgen_state
+    ) noexcept nogil
 
 
 def unwrap_3d(cnp.float64_t[:, :, ::1] image,
@@ -45,9 +45,12 @@ def unwrap_3d(cnp.float64_t[:, :, ::1] image,
     bitgen_state = <bitgen_t *>PyCapsule_GetPointer(capsule, capsule_name)
 
     with bitgen.lock, nogil:
-        unwrap3D(&image[0, 0, 0],
-                 &unwrapped_image[0, 0, 0],
-                 &mask[0, 0, 0],
-                 image.shape[2], image.shape[1], image.shape[0],
-                 wrap_around_k, wrap_around_j, wrap_around_i,
-                 bitgen_state)
+        ret = unwrap3D(&image[0, 0, 0],
+                       &unwrapped_image[0, 0, 0],
+                       &mask[0, 0, 0],
+                       image.shape[2], image.shape[1], image.shape[0],
+                       wrap_around_k, wrap_around_j, wrap_around_i,
+                       bitgen_state
+                      )
+    if ret != 0:
+        raise MemoryError('Could not allocate memory for temporary arrays')

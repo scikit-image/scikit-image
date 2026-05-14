@@ -955,10 +955,10 @@ void returnVolume(VOXELM *voxel, double *unwrappedVolume, intptr_t n_k,
 }
 
 // the main function of the unwrapper
-void unwrap3D(double *wrapped_volume, double *unwrapped_volume,
-              unsigned char *input_mask, intptr_t n_k, intptr_t n_j,
-              intptr_t n_i, int wrap_around_k, int wrap_around_j,
-              int wrap_around_i, bitgen_t* bitgen_state) {
+int unwrap3D(double *wrapped_volume, double *unwrapped_volume,
+        unsigned char *input_mask, intptr_t n_k, intptr_t n_j,
+        intptr_t n_i, int wrap_around_k, int wrap_around_j,
+        int wrap_around_i, bitgen_t* bitgen_state) {
   params_t params = {TWOPI, wrap_around_k, wrap_around_j, wrap_around_i, 0};
   unsigned char *extended_mask;
   VOXELM *voxel;
@@ -966,10 +966,21 @@ void unwrap3D(double *wrapped_volume, double *unwrapped_volume,
   intptr_t volume_size = n_j * n_k * n_i;
   intptr_t No_of_Edges_initially = 3 * n_k * n_j * n_i;
 
-  extended_mask = (unsigned char *)calloc(volume_size, sizeof(unsigned char));
   voxel = (VOXELM *)calloc(volume_size, sizeof(VOXELM));
+  if (voxel == NULL) {
+      return 1;
+  }
+  extended_mask = (unsigned char *)calloc(volume_size, sizeof(unsigned char));
+  if (extended_mask == NULL) {
+      free(voxel);
+      return 1;
+  }
   edge = (EDGE *)calloc(No_of_Edges_initially, sizeof(EDGE));
-  ;
+  if (edge == NULL) {
+      free(voxel);
+      free(extended_mask);
+      return 1;
+  }
 
   extend_mask(input_mask, extended_mask, n_k, n_j,
               n_i, &params);
@@ -999,7 +1010,9 @@ void unwrap3D(double *wrapped_volume, double *unwrapped_volume,
   // to this function
   returnVolume(voxel, unwrapped_volume, n_k, n_j, n_i);
 
-  free(edge);
   free(voxel);
   free(extended_mask);
+  free(edge);
+
+  return 0;
 }
