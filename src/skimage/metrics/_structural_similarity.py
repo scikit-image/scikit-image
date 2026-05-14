@@ -172,15 +172,12 @@ def structural_similarity(
             )
 
     if gaussian_weights and win_size is not None:
-        import warnings
-
-        warnings.warn(
+        warn_external(
             "Passing win_size with gaussian_weights=True is deprecated "
             "and will raise an error in a future version. The window "
             "size is determined by sigma; use sigma to control the "
             "effective window size.",
-            FutureWarning,
-            stacklevel=2,
+            category=FutureWarning,
         )
         win_size = None  # let _skimage2 derive it from sigma
 
