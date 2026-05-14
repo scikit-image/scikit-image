@@ -291,6 +291,16 @@ def test_structural_similarity_errors_without_data_range():
         structural_similarity(X, X)
 
 
+def test_gaussian_weights_win_size_error():
+    """win_size with gaussian_weights=True should raise ValueError (#7231)."""
+    N = 100
+    X = (np.random.rand(N, N) * 255).astype(np.uint8)
+    Y = (np.random.rand(N, N) * 255).astype(np.uint8)
+
+    with pytest.raises(ValueError, match="win_size.*gaussian_weights"):
+        structural_similarity(X, Y, data_range=255, gaussian_weights=True, win_size=101)
+
+
 def test_invalid_input():
     X = np.zeros((9, 9), dtype=np.float64)
     Y = np.zeros((8, 8), dtype=np.float64)

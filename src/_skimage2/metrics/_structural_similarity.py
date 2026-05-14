@@ -37,8 +37,8 @@ def structural_similarity(
         minimum possible values).
     win_size : int or None, optional
         The side-length of the sliding window used in comparison. Must be an
-        odd value. If `gaussian_weights` is True, this is ignored and the
-        window size will depend on `sigma`.
+        odd value. If `gaussian_weights` is True, `win_size` cannot be
+        specified since the window size is then determined by `sigma`.
     gradient : bool, optional
         If True, also return the gradient with respect to im2.
     channel_axis : int or None, optional
@@ -46,8 +46,8 @@ def structural_similarity(
         Otherwise, this parameter indicates which axis of the array corresponds
         to channels.
     gaussian_weights : bool, optional
-        If True, each patch has its mean and variance spatially weighted by a
-        normalized Gaussian kernel of width sigma=1.5.
+        If True, the local mean and variance are computed using a normalized
+        Gaussian kernel of width `sigma` rather than a uniform window.
     full : bool, optional
         If True, also return the full structural similarity image.
     use_sample_covariance : bool, optional
@@ -59,6 +59,7 @@ def structural_similarity(
         Algorithm parameter, K2 (small constant, see [1]_).
     sigma : float, optional
         Standard deviation for the Gaussian when `gaussian_weights` is True.
+        Default is 1.5.
 
     Returns
     -------
@@ -169,14 +170,17 @@ def structural_similarity(
         # Set to give an 11-tap filter with the default sigma of 1.5 to match
         # Wang et. al. 2004.
         truncate = 3.5
-
-    if win_size is None:
-        if gaussian_weights:
-            # set win_size used by crop to match the filter size
-            r = int(truncate * sigma + 0.5)  # radius as in ndimage
-            win_size = 2 * r + 1
-        else:
-            win_size = 7  # backwards compatibility
+        if win_size is not None:
+            raise ValueError(
+                "win_size cannot be specified when gaussian_weights is True; "
+                "the window size is determined by sigma. "
+                "Use sigma to control the effective window size."
+            )
+        # derive win_size from sigma for padding and normalization
+        r = int(truncate * sigma + 0.5)  # radius as in ndimage
+        win_size = 2 * r + 1
+    elif win_size is None:
+        win_size = 7  # backwards compatibility
 
     if np.any((np.asarray(im1.shape) - win_size) < 0):
         raise ValueError(

@@ -308,6 +308,16 @@ def test_structural_similarity_estimate_data_range(dtype):
     assert result_explicit == result_estimated
 
 
+def test_gaussian_weights_win_size_future_warning():
+    """Passing win_size with gaussian_weights=True is deprecated (#7231)."""
+    N = 100
+    X = (np.random.rand(N, N) * 255).astype(np.uint8)
+    Y = (np.random.rand(N, N) * 255).astype(np.uint8)
+
+    with pytest.warns(FutureWarning, match="win_size.*gaussian_weights"):
+        structural_similarity(X, Y, gaussian_weights=True, win_size=101)
+
+
 def test_invalid_input():
     # size mismatch
     X = np.zeros((9, 9), dtype=np.float64)
