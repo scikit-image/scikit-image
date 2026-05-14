@@ -336,6 +336,17 @@ Examples of running ``spin test``:
 
 Testing requirements are listed in ``requirements/test.txt``.
 
+.. note:: CI runs only modified tests on pull requests
+
+    To keep feedback fast, CI workflows run ``spin test --test-modified`` on
+    pull requests, which limits the test run to subpackages that were changed
+    relative to the base branch. The full test suite still runs on pushes to
+    ``main`` and on merge-queue entries.
+
+    To force the full suite on a pull request — for example when changes
+    affect test infrastructure rather than a specific subpackage — add the
+    **run-all-tests** label to the PR.
+
 
 Warnings during testing phase
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
