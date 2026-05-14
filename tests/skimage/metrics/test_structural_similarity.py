@@ -37,7 +37,7 @@ def test_structural_similarity_image():
     S1 = structural_similarity(X, Y, win_size=3)
     assert S1 < 0.3
 
-    S2 = structural_similarity(X, Y, win_size=11, gaussian_weights=True)
+    S2 = structural_similarity(X, Y, gaussian_weights=True)
     assert S2 < 0.3
 
     mssim0, S3 = structural_similarity(X, Y, full=True)
