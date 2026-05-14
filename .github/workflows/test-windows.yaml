@@ -92,7 +92,7 @@ jobs:
         shell: bash
         env:
           IS_PR: ${{ github.event_name == 'pull_request' }}
-          HAS_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'run-all-tests') }}
+          HAS_LABEL: ${{ contains(join(github.event.pull_request.labels.*.name, ','), 'run-all-tests') }}
         run: |
           if [[ "$IS_PR" == "true" && "$HAS_LABEL" == "false" ]]; then
             MODIFIED_FLAG="--test-modified"
