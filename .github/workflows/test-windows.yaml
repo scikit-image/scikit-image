@@ -12,8 +12,9 @@ permissions:
   issues: write
 
 env:
-  CC: clang
-  CXX: clang
+  CC: ccache clang
+  CXX: ccache clang
+  CCACHE_DIR: C:\ccache
 
 jobs:
   test_skimage_windows:
@@ -62,21 +63,27 @@ jobs:
         run: |
           source .github/scripts/setup-build-env.sh
 
-      # Please review frequently to see if it is still necessary.
-      # MSVC STL requires later clang than default on image.
-      # https://github.com/actions/runner-images/issues/12435#issuecomment-2997654523
-      - name: Install LLVM Clang 19 on Windows
-        shell: powershell
-        run: |
-          $ErrorActionPreference = "Stop"
-          Invoke-WebRequest -Uri "https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.7/LLVM-19.1.7-win64.exe" -OutFile "llvm.exe"
-          Start-Process -FilePath .\llvm.exe -ArgumentList "/S", "/D=C:\LLVM" -Wait
-          echo "C:\LLVM\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Install ccache
+        shell: bash
+        run: choco install ccache --no-progress
+
+      - name: Cache ccache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.OPTIONS_NAME }}-${{ github.sha }}
+          restore-keys: |
+            ccache-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.OPTIONS_NAME }}-
+            ccache-${{ runner.os }}-
 
       - name: Build skimage
         shell: bash
         run: |
           spin build
+
+      - name: Show ccache stats
+        shell: bash
+        run: ccache --show-stats
 
       - name: Install test dependencies
         env:
