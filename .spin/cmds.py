@@ -235,6 +235,13 @@ def test(
 ):
     pytest_args = kwargs.get('pytest_args', ())
 
+    # For out-of-tree builds, src/ paths don't work as doctest collection paths.
+    # Short-circuits when installed=True so _is_editable_install_of_same_source is
+    # never called in that mode.
+    is_out_of_tree_build = not installed and not _is_editable_install_of_same_source(
+        "scikit-image"
+    )
+
     if test_modified:
         if "--pyargs" in pytest_args:
             raise RuntimeError("--test-modified will override --pyargs")
@@ -252,13 +259,15 @@ def test(
             fg="green",
         )
 
-        test_paths = _get_test_paths(changed_subpackages, doctest)
+        # src/ paths are only valid for doctests in installed/editable mode;
+        # out-of-tree builds must skip them to avoid silent collection failures.
+        test_paths = _get_test_paths(
+            changed_subpackages, doctest and not is_out_of_tree_build
+        )
         pytest_args = pytest_args + tuple(test_paths)
 
-    if not installed:
-        is_out_of_tree_build = not _is_editable_install_of_same_source("scikit-image")
-        if is_out_of_tree_build and "src" in str(pytest_args):
-            click.secho(_SRC_IN_TEST_ARGS_WARNING_MESSAGE, fg="yellow", bold=True)
+    if is_out_of_tree_build and "src" in str(pytest_args):
+        click.secho(_SRC_IN_TEST_ARGS_WARNING_MESSAGE, fg="yellow", bold=True)
 
     if doctest:
         if '--doctest-plus' not in pytest_args:

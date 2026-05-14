@@ -121,6 +121,7 @@ def _try_append_commit_info(version):
             ['git', 'log', '-1', '--format="%h %aI"'],
             cwd=Path(__file__).parent,
             text=True,
+            stderr=subprocess.DEVNULL,
         )
         if output:
             git_hash, git_date = (
