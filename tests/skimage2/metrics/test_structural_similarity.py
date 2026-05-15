@@ -36,7 +36,7 @@ def test_structural_similarity_image():
     S1 = structural_similarity(X, Y, data_range=255, win_size=3)
     assert S1 < 0.3
 
-    S2 = structural_similarity(X, Y, data_range=255, win_size=11, gaussian_weights=True)
+    S2 = structural_similarity(X, Y, data_range=255, gaussian_weights=True)
     assert S2 < 0.3
 
     mssim0, S3 = structural_similarity(X, Y, data_range=255, full=True)
@@ -289,6 +289,18 @@ def test_structural_similarity_errors_without_data_range():
     X = np.zeros((64, 64))
     with pytest.raises(TypeError):
         structural_similarity(X, X)
+
+
+def test_gaussian_weights_win_size_error():
+    """win_size with gaussian_weights=True should raise ValueError (#7231)."""
+    N = 100
+    X = (np.random.rand(N, N) * 255).astype(np.uint8)
+    Y = (np.random.rand(N, N) * 255).astype(np.uint8)
+
+    with pytest.raises(
+        ValueError, match="win_size cannot be specified when gaussian_weights"
+    ):
+        structural_similarity(X, Y, data_range=255, gaussian_weights=True, win_size=7)
 
 
 def test_invalid_input():

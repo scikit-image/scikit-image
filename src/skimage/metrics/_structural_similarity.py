@@ -64,9 +64,10 @@ def structural_similarity(
     im1, im2 : ndarray
         Images. Any dimensionality with same shape.
     win_size : int or None, optional
-        The side-length of the sliding window used in comparison. Must be an
-        odd value. If `gaussian_weights` is True, this is ignored and the
-        window size will depend on `sigma`.
+        The side-length of the sliding window used in comparisons
+        (default: 7). Must be an odd value. If `gaussian_weights` is
+        True, `win_size` cannot be specified since the window size is
+        determined by `sigma`.
     gradient : bool, optional
         If True, also return the gradient with respect to im2.
     data_range : float, optional
@@ -83,8 +84,8 @@ def structural_similarity(
         .. versionadded:: 0.19
            ``channel_axis`` was added in 0.19.
     gaussian_weights : bool, optional
-        If True, each patch has its mean and variance spatially weighted by a
-        normalized Gaussian kernel of width sigma=1.5.
+        If True, the local mean and variance are computed using a normalized
+        Gaussian kernel of width `sigma` rather than a uniform window.
     full : bool, optional
         If True, also return the full structural similarity image.
 
@@ -99,6 +100,7 @@ def structural_similarity(
         Algorithm parameter, K2 (small constant, see [1]_).
     sigma : float
         Standard deviation for the Gaussian when `gaussian_weights` is True.
+        Default is 1.5.
 
     Returns
     -------
@@ -168,6 +170,16 @@ def structural_similarity(
                 + f"data_range = {data_range:.0f}. "
                 + "Please specify data_range explicitly to avoid mistakes.",
             )
+
+    if gaussian_weights and win_size is not None:
+        warn_external(
+            "Passing win_size with gaussian_weights=True is deprecated "
+            "and will raise an error in a future version. The window "
+            "size is determined by sigma; use sigma to control the "
+            "effective window size.",
+            category=FutureWarning,
+        )
+        win_size = None  # let _skimage2 derive it from sigma
 
     return ski2.metrics.structural_similarity(
         im1,
