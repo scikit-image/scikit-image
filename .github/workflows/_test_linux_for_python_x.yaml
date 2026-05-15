@@ -36,14 +36,19 @@ on:
         required: false
         type: string
         default: 0
+      test_modified:
+        required: false
+        type: string
+        default: "false"
+      base_ref:
+        required: false
+        type: string
+        default: ""
 
 jobs:
   test-linux:
     name: linux-cp${{ inputs.python-version }}-${{ inputs.OPTIONS_NAME }}
     runs-on: ubuntu-latest
-
-    env:
-      PYTEST: "pytest --config-file ${{ github.workspace }}/pyproject.toml"
 
     steps:
       - name: Checkout scikit-image
@@ -79,6 +84,9 @@ jobs:
         run: |
           pip install dist/*.tar.gz
 
+      - name: Install spin
+        run: pip install spin
+
       - name: Install test dependencies
         env:
           MINIMUM_REQUIREMENTS: ${{ inputs.MINIMUM_REQUIREMENTS }}
@@ -96,12 +104,20 @@ jobs:
 
       - name: Run tests
         env:
+          GITHUB_BASE_REF: ${{ inputs.base_ref }}
+          TEST_MODIFIED: ${{ inputs.test_modified }}
           # A lazy loader configuration parameter
           EAGER_IMPORT: ${{ inputs.EAGER_IMPORT }}
           MINIMUM_REQUIREMENTS: ${{ inputs.MINIMUM_REQUIREMENTS }}
           PYTHONOPTIMIZE: ${{ inputs.PYTHONOPTIMIZE }}
         run: |
-          $PYTEST --doctest-plus --showlocals --pyargs skimage ./tests
+          if [[ "$TEST_MODIFIED" == "true" ]]; then
+            MODIFIED_FLAG="--test-modified"
+            git fetch origin "$GITHUB_BASE_REF"
+          else
+            MODIFIED_FLAG=""
+          fi
+          spin test --installed --doctest $MODIFIED_FLAG
 
       - name: Check benchmarks
         run: |
