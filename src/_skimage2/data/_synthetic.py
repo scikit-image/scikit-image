@@ -2,9 +2,8 @@
 
 import numpy as np
 
-from _skimage2._shared._warnings import warn_external
-
 from ..filters._gaussian import gaussian
+from .._shared._warnings import warn_external
 
 
 def binary_blobs(
