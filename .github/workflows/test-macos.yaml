@@ -31,12 +31,18 @@ jobs:
             OPTIONAL_DEPS: 1
             OPTIONS_NAME: "default"
     env:
-      CC: /usr/bin/clang
-      CXX: /usr/bin/clang++
+      CC: ccache /usr/bin/clang
+      CXX: ccache /usr/bin/clang++
       CPPFLAGS: "-Xpreprocessor -fopenmp"
       CFLAGS: "-Wno-implicit-function-declaration -I/usr/local/opt/libomp/include -I/opt/homebrew/opt/libomp/include"
       CXXFLAGS: "-I/usr/local/opt/libomp/include -I/opt/homebrew/opt/libomp/include"
       LDFLAGS: "-Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -L/opt/homebrew/opt/libomp/lib -lomp"
+      CCACHE_BASEDIR: "${{ github.workspace }}"
+      CCACHE_DIR: "${{ github.workspace }}/.ccache"
+      CCACHE_COMPRESS: true
+      CCACHE_COMPRESSLEVEL: 6
+      CCACHE_MAXSIZE: 400M
+      CCACHE_SLOPPINESS: "pch_defines,time_macros"
 
     steps:
       - name: Checkout scikit-image
@@ -55,7 +61,20 @@ jobs:
       - name: OSX configuration
         run: |
           # OpenMP is not present on macOS by default
-          brew install libomp
+          brew install libomp ccache
+
+      - name: Install and configure ccache
+        run: |
+          echo "$(brew --prefix)/opt/ccache/libexec" >> $GITHUB_PATH
+          ccache --zero-stats
+
+      - name: Restore/save ccache
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.ccache
+          key: ccache-${{ runner.os }}-py${{ matrix.python-version }}-${{ github.sha }}
+          restore-keys: |
+            ccache-${{ runner.os }}-py${{ matrix.python-version }}-
 
       - name: Install build dependencies
         run: |
@@ -64,6 +83,10 @@ jobs:
       - name: Build skimage
         run: |
           spin build
+
+      - name: ccache statistics
+        if: always()
+        run: ccache --show-stats
 
       - name: Install test dependencies
         env:
