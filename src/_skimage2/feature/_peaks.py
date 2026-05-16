@@ -1,6 +1,6 @@
 import numpy as np
 import scipy.ndimage as ndi
-from scipy.spatial import cKDTree, distance
+from scipy.spatial import cKDTree
 
 from .._shared._warnings import warn_external
 
@@ -32,27 +32,25 @@ def _batched_ensure_spacing(coord_batch, spacing, p_norm, max_out):
     tree = cKDTree(coord_batch)
 
     indices = tree.query_ball_point(coord_batch, r=spacing, p=p_norm)
-    rejected_peaks_indices = set()
+    rejected = np.zeros(len(coord_batch), dtype=bool)
     naccepted = 0
     for idx, candidates in enumerate(indices):
-        if idx not in rejected_peaks_indices:
-            # keep current point and the points at exactly spacing from it
-            candidates.remove(idx)
-            dist = distance.cdist(
-                [coord_batch[idx]], coord_batch[candidates], "minkowski", p=p_norm
-            ).reshape(-1)
-            candidates = [
-                c for c, d in zip(candidates, dist, strict=True) if d < spacing
-            ]
+        if not rejected[idx]:
+            # `query_ball_point` is inclusive (``d <= spacing``); re-filter
+            # to strict ``d < spacing`` so points exactly `spacing` apart
+            # are kept.
+            cand = np.array(candidates)
+            cand = cand[cand != idx]
+            if len(cand):
+                diff = coord_batch[cand] - coord_batch[idx]
+                dist = np.linalg.norm(diff, ord=p_norm, axis=1)
+                rejected[cand[dist < spacing]] = True
 
-            # candidates.remove(keep)
-            rejected_peaks_indices.update(candidates)
             naccepted += 1
             if max_out is not None and naccepted >= max_out:
                 break
 
-    # Remove the peaks that are too close to each other
-    output = np.delete(coord_batch, tuple(rejected_peaks_indices), axis=0)
+    output = coord_batch[~rejected]
     if max_out is not None:
         output = output[:max_out]
 
