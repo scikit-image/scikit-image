@@ -421,8 +421,7 @@ def peak_local_max(
             )
 
             # transform coordinates in global image indices space
-            for idx, s in enumerate(roi):
-                coordinates[:, idx] += s.start
+            coordinates += [s.start for s in roi]
 
             labels_peak_coord.append(coordinates)
 
