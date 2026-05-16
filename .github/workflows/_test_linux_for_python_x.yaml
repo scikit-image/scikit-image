@@ -117,7 +117,7 @@ jobs:
           else
             MODIFIED_FLAG=""
           fi
-          spin test --installed --doctest $MODIFIED_FLAG
+          spin test --doctest $MODIFIED_FLAG
 
       - name: Check benchmarks
         run: |
