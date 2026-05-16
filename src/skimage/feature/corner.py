@@ -1231,7 +1231,15 @@ def corner_peaks(
                 rejected_peaks_indices.update(candidates)
 
         # Remove the peaks that are too close to each other
-        coords = np.delete(coords, tuple(rejected_peaks_indices), axis=0)[:num_peaks]
+        coords = np.delete(coords, tuple(rejected_peaks_indices), axis=0)
+
+        if num_peaks is not None and len(coords) > num_peaks:
+            # Sort by intensity (highest first) before applying the `num_peaks` limit. Without labels,
+            # `peak_local_max` already returns peaks in intensity order, but with labels the peaks
+            # are grouped per label, so taking the first `num_peaks` would bias toward the lowest label IDs.
+            intensities = image[tuple(coords.T)]
+            order = np.argsort(-intensities, stable=True)[:num_peaks]
+            coords = coords[order]
 
     if indices:
         return coords
