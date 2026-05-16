@@ -129,3 +129,36 @@ class TestPeakLocalMax:
     def test_num_peak_float_error(self):
         image = np.zeros((10, 10))
         peak_local_max(image, num_peaks=1.5)
+
+    @pytest.mark.parametrize("use_labels", [False, True])
+    @pytest.mark.parametrize("num_peaks", [None, 2, 100])
+    @pytest.mark.parametrize("num_peaks_per_label", [None, 1])
+    @pytest.mark.parametrize("min_distance", [1, 2])
+    def test_output_sorted_by_intensity(
+        self, use_labels, num_peaks, num_peaks_per_label, min_distance
+    ):
+        image = np.zeros((8, 8))
+        image[1, 1] = 1.0
+        image[2, 4] = 5.0
+        image[5, 2] = 3.0
+        image[6, 6] = 2.0
+        image[3, 7] = 4.0
+
+        if use_labels:
+            from skimage.measure import label
+
+            labels = label(image > 0)
+        else:
+            labels = None
+
+        peaks = peak_local_max(
+            image,
+            min_distance=min_distance,
+            num_peaks=num_peaks,
+            labels=labels,
+            num_peaks_per_label=num_peaks_per_label,
+        )
+        intensities = image[tuple(peaks.T)]
+        assert np.all(
+            intensities[:-1] >= intensities[1:]
+        ), f"output not intensity-sorted: {intensities.tolist()}"
