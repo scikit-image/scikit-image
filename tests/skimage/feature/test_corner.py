@@ -686,7 +686,7 @@ def test_corner_peaks_num_peaks_with_labels():
 
     corners = corner_peaks(img, num_peaks=2, labels=labels, num_peaks_per_label=1)
     expected = np.array([[4, 4], [2, 3]])
-    assert_array_equal(corners, expected)
+    assert_equal(corners, expected)
 
 
 def test_blank_image_nans():
