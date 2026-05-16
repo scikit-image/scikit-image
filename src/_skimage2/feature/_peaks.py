@@ -142,26 +142,33 @@ def _ensure_spacing(
     return output
 
 
+def _filter_peaks(coords, intensities, num_peaks, min_distance, p_norm):
+    """Sort `coords` by descending `intensities`, enforce `min_distance`
+    spacing, and truncate to `num_peaks`.
+    """
+    if len(coords) == 0:
+        return coords
+    coords = coords[np.argsort(-intensities, stable=True)]
+
+    if min_distance > 1:
+        coords = _ensure_spacing(
+            coords, spacing=min_distance, p_norm=p_norm, max_out=num_peaks
+        )
+
+    if num_peaks is not None and len(coords) > num_peaks:
+        coords = coords[:num_peaks]
+
+    return coords
+
+
 def _get_high_intensity_peaks(image, mask, num_peaks, min_distance, p_norm):
     """
     Return the highest intensity peak coordinates.
     """
-    # get coordinates of peaks
-    coord = np.nonzero(mask)
-    intensities = image[coord]
-    # Highest peak first
-    idx_maxsort = np.argsort(-intensities, kind="stable")
-    coord = np.transpose(coord)[idx_maxsort]
-
-    if min_distance > 1:
-        coord = _ensure_spacing(
-            coord, spacing=min_distance, p_norm=p_norm, max_out=num_peaks
-        )
-
-    if num_peaks is not None and len(coord) > num_peaks:
-        coord = coord[:num_peaks]
-
-    return coord
+    coords = np.nonzero(mask)
+    intensities = image[coords]
+    coords = np.transpose(coords)
+    return _filter_peaks(coords, intensities, num_peaks, min_distance, p_norm)
 
 
 def _get_peak_mask(image, footprint, threshold, mask=None):
@@ -426,11 +433,12 @@ def peak_local_max(
         else:
             coordinates = np.empty((0, image.ndim), dtype=int)
 
-        if num_peaks is not None and len(coordinates) > num_peaks:
-            out = np.zeros_like(image, dtype=bool)
-            out[tuple(coordinates.T)] = True
-            coordinates = _get_high_intensity_peaks(
-                image, out, num_peaks, min_distance, p_norm
+        if len(coordinates):
+            # Globally sort by descending intensity so the labels path
+            # returns peaks in the same order as the labels=None path.
+            intensities = image[tuple(coordinates.T)]
+            coordinates = _filter_peaks(
+                coordinates, intensities, num_peaks, min_distance, p_norm
             )
 
     return coordinates
