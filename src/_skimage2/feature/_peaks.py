@@ -317,8 +317,9 @@ def peak_local_max(
     Returns
     -------
     output : ndarray of shape (N, D)
-        The coordinates of the peaks. ``N`` denotes the number of peaks and
-        ``D`` corresponds to the number of dimensions in `image`.
+        The coordinates of the peaks, sorted by descending peak intensity.
+        ``N`` denotes the number of peaks and ``D`` corresponds to the
+        number of dimensions in `image`.
 
     Notes
     -----

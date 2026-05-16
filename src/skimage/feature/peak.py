@@ -152,7 +152,7 @@ def peak_local_max(
     Returns
     -------
     output : ndarray
-        The coordinates of the peaks.
+        The coordinates of the peaks, sorted by descending peak intensity.
 
     Notes
     -----
