@@ -16,19 +16,25 @@ cam_noisy = cam_noisy.astype(cam.dtype)
 np.random.seed(1234)
 
 
-def test_structural_similarity_patch_range():
+def test_structural_similarity_patch_range(xp):
     N = 51
     X = (np.random.rand(N, N) * 255).astype(np.uint8)
     Y = (np.random.rand(N, N) * 255).astype(np.uint8)
+
+    X = xp.asarray(X)
+    Y = xp.asarray(Y)
 
     assert structural_similarity(X, Y, data_range=255, win_size=N) < 0.1
     xp_assert_equal(structural_similarity(X, X, data_range=255, win_size=N), 1.0)
 
 
-def test_structural_similarity_image():
+def test_structural_similarity_image(xp):
     N = 100
     X = (np.random.rand(N, N) * 255).astype(np.uint8)
     Y = (np.random.rand(N, N) * 255).astype(np.uint8)
+
+    X = xp.asarray(X)
+    Y = xp.asarray(Y)
 
     S0 = structural_similarity(X, X, data_range=255, win_size=3)
     xp_assert_equal(S0, 1.0)
@@ -52,7 +58,7 @@ def test_structural_similarity_image():
 #        against a few seeds in case on seed gives a particularly bad example
 @pytest.mark.parametrize('seed', [1, 2, 3, 5, 8, 13])
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
-def test_structural_similarity_grad(seed, dtype):
+def test_structural_similarity_grad(seed, dtype, xp):
     N = 60
     # FIXME: This test is known to randomly fail on some systems (Mac OS X 10.6)
     #        And when testing tests in parallel. Therefore, we choose a few
@@ -63,6 +69,9 @@ def test_structural_similarity_grad(seed, dtype):
     rng = np.random.default_rng(seed)
     X = rng.random((N, N)).astype(dtype, copy=False) * 255
     Y = rng.random((N, N)).astype(dtype, copy=False) * 255
+
+    X = xp.asarray(X)
+    Y = xp.asarray(Y)
 
     f = structural_similarity(X, Y, data_range=255)
     g = structural_similarity(X, Y, data_range=255, gradient=True)
@@ -81,42 +90,50 @@ def test_structural_similarity_grad(seed, dtype):
 
 
 @pytest.mark.parametrize(
-    'dtype', [np.uint8, np.int32, np.float16, np.float32, np.float64]
+    'dtype_str', ['uint8', 'int32', 'float16', 'float32', 'float64']
 )
-def test_structural_similarity_dtype(dtype):
+def test_structural_similarity_dtype(dtype_str, xp):
     N = 30
     X = np.random.rand(N, N)
     Y = np.random.rand(N, N)
-    if np.dtype(dtype).kind in 'iub':
+
+    X = xp.asarray(X)
+    Y = xp.asarray(Y)
+    dtype = getattr(xp, dtype_str)
+
+    if xp.isdtype(dtype, ('integral', 'bool')):
+#    if np.dtype(dtype).kind in 'iub':
         data_range = 255.0
-        X = (X * 255).astype(dtype)
-        Y = (Y * 255).astype(dtype)
+        X = xp.astype(X * 255, dtype)
+        Y = xp.astype(Y * 255, dtype)
     else:
         data_range = 1.0
-        X = X.astype(dtype, copy=False)
-        Y = Y.astype(dtype, copy=False)
+        X = xp.astype(X, dtype, copy=False)
+        Y = xp.astype(Y, dtype, copy=False)
 
     S1 = structural_similarity(X, Y, data_range=data_range)
-    assert S1.dtype == np.float64
+    assert S1.dtype == xp.float64
 
     assert S1 < 0.1
 
 
 @pytest.mark.parametrize('channel_axis', [0, 1, 2, -1])
-def test_structural_similarity_multichannel(channel_axis):
+def test_structural_similarity_multichannel(channel_axis, xp):
     N = 100
     X = (np.random.rand(N, N) * 255).astype(np.uint8)
     Y = (np.random.rand(N, N) * 255).astype(np.uint8)
-    data_range = np.iinfo(np.uint8).max
+
+    X, Y = map(xp.asarray, (X, Y))
+    data_range = xp.iinfo(xp.uint8).max
 
     S1 = structural_similarity(X, Y, data_range=data_range, win_size=3)
 
     # replicate across three channels.  should get identical value
-    Xc = np.tile(X[..., np.newaxis], (1, 1, 3))
-    Yc = np.tile(Y[..., np.newaxis], (1, 1, 3))
+    Xc = xp.tile(X[..., xp.newaxis], (1, 1, 3))
+    Yc = xp.tile(Y[..., xp.newaxis], (1, 1, 3))
 
     # move channels from last position to specified channel_axis
-    Xc, Yc = (np.moveaxis(_arr, -1, channel_axis) for _arr in (Xc, Yc))
+    Xc, Yc = (xp.moveaxis(_arr, -1, channel_axis) for _arr in (Xc, Yc))
 
     S2 = structural_similarity(
         Xc, Yc, data_range=data_range, channel_axis=channel_axis, win_size=3
@@ -156,24 +173,26 @@ def test_structural_similarity_multichannel(channel_axis):
 
 @pytest.mark.parametrize('dtype', [np.uint8, np.float32, np.float64])
 @pytest.mark.parametrize('ndim', [1, 2, 3, 4])
-def test_structural_similarity_nD(dtype, ndim):
+def test_structural_similarity_nD(dtype, ndim, xp):
     # test 1D through 4D on small random arrays
     rng = np.random.default_rng(20260429)
     shape = (24 // ndim,) * ndim
     X = (rng.random(shape) * 255).astype(dtype)
     Y = (rng.random(shape) * 255).astype(dtype)
 
+    X, Y = map(xp.asarray, (X, Y))
+
     mssim = structural_similarity(X, Y, win_size=3, data_range=255.0)
-    assert mssim.dtype == np.float64
+    assert mssim.dtype == xp.float64
     assert mssim < 0.05
 
 
-def test_structural_similarity_multichannel_chelsea():
+def test_structural_similarity_multichannel_chelsea(xp):
     # color image example
     Xc = data.chelsea()
     sigma = 15.0
-    Yc = np.clip(Xc + sigma * np.random.randn(*Xc.shape), 0, 255)
-    Yc = Yc.astype(Xc.dtype)
+    Yc = xp.clip(xp.asarray(Xc + sigma * np.random.randn(*Xc.shape)), 0, 255)
+    Yc = xp.astype(Yc, Xc.dtype)
 
     # multichannel result should be mean of the individual channel results
     mssim = structural_similarity(Xc, Yc, data_range=255, channel_axis=-1)
@@ -188,16 +207,16 @@ def test_structural_similarity_multichannel_chelsea():
 
 
 @pytest.mark.parametrize('gaussian_weights', [True, False])
-def test_structural_similarity_dtype_insensitivity(gaussian_weights):
+def test_structural_similarity_dtype_insensitivity(gaussian_weights, xp):
     # Result of `structural_similarity` should be insensitive to the input dtype
-    image_int = np.arange(100, dtype=np.int64)
+    image_int = xp.arange(100, dtype=xp.int64)
     mssim_int = structural_similarity(
         image_int[1:],
         image_int[:-1],
         data_range=image_int.max(),
         gaussian_weights=gaussian_weights,
     )
-    image_float = image_int.astype(np.float64)
+    image_float = xp.astype(image_int, xp.float64)
     mssim_float = structural_similarity(
         image_float[1:],
         image_float[:-1],
@@ -208,7 +227,7 @@ def test_structural_similarity_dtype_insensitivity(gaussian_weights):
     assert mssim_float < 1.0
 
 
-def test_gaussian_structural_similarity_vs_IPOL():
+def test_gaussian_structural_similarity_vs_IPOL(xp):
     """Tests vs. imdiff result from the following IPOL article and code:
     https://www.ipol.im/pub/art/2011/g_lmii/.
 
@@ -230,9 +249,9 @@ def test_gaussian_structural_similarity_vs_IPOL():
     assert cam.dtype == np.uint8
     assert cam_noisy.dtype == np.uint8
     mssim = structural_similarity(
-        cam,
-        cam_noisy,
-        data_range=np.iinfo(np.uint8).max,
+        xp.asarray(cam),
+        xp.asarray(cam_noisy),
+        data_range=xp.iinfo(xp.uint8).max,
         gaussian_weights=True,
         use_sample_covariance=False,
     )
@@ -242,13 +261,15 @@ def test_gaussian_structural_similarity_vs_IPOL():
 @pytest.mark.parametrize(
     'dtype', [np.uint8, np.int32, np.float16, np.float32, np.float64]
 )
-def test_mssim_vs_legacy(dtype):
+def test_mssim_vs_legacy(dtype, xp):
     # check that ssim with default options matches skimage 0.17 result
     mssim_skimage_0pt17 = 0.3674518327910367
     assert cam.dtype == np.uint8
     assert cam_noisy.dtype == np.uint8
     mssim = structural_similarity(
-        cam.astype(dtype), cam_noisy.astype(dtype), data_range=255
+        xp.asarray(cam.astype(dtype)),
+        xp.asarray(cam_noisy.astype(dtype)),
+        data_range=255
     )
     assert_almost_equal(mssim, mssim_skimage_0pt17)
 
@@ -272,9 +293,10 @@ def test_ssim_warns_about_data_range():
     assert_almost_equal(mssim, mssim_mixed)
 
 
-@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
-def test_structural_similarity_small_image(dtype):
-    X = np.zeros((5, 5), dtype=dtype)
+@pytest.mark.parametrize('dtype_str', ['float16', 'float32', 'float64'])
+def test_structural_similarity_small_image(dtype_str, xp):
+    dtype = getattr(xp, dtype_str)
+    X = xp.zeros((5, 5), dtype=dtype)
     # structural_similarity can be computed for small images if win_size is
     # a) odd and b) less than or equal to the images' smaller side
     xp_assert_equal(structural_similarity(X, X, win_size=3, data_range=1.0), 1.0)
