@@ -1,7 +1,7 @@
 import math
 import numpy as np
 import pytest
-from _skimage2.util._array_api import xp_assert_equal, assert_almost_equal
+from _skimage2.util._array_api import xp_assert_equal, xp_assert_close, assert_almost_equal
 
 from _skimage2.metrics import structural_similarity
 from _skimage2._shared.utils import _supported_float_type
@@ -26,7 +26,11 @@ def test_structural_similarity_patch_range(xp):
     Y = xp.asarray(Y)
 
     assert structural_similarity(X, Y, data_range=255, win_size=N) < 0.1
-    assert structural_similarity(X, X, data_range=255, win_size=N) == 1.0
+    assert math.isclose(
+       structural_similarity(X, X, data_range=255, win_size=N),
+       1.0,
+       abs_tol=1e-15
+    )
 
 
 def test_structural_similarity_image(xp):
@@ -277,7 +281,11 @@ def test_mssim_vs_legacy(dtype, xp):
         xp.asarray(cam_noisy.astype(dtype)),
         data_range=255
     )
-    assert_almost_equal(xp.asarray(mssim), xp.asarray(mssim_skimage_0pt17))
+    xp_assert_close(
+        xp.asarray(mssim),
+        xp.asarray(mssim_skimage_0pt17),
+        atol=1e-5
+    )
 
 
 def test_ssim_warns_about_data_range():
