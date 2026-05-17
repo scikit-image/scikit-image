@@ -10,6 +10,7 @@ set -e
 
 if [[ -z "$PR_NUMBER" ]]; then
   # Not a pull request — run all tests
+  echo "Not a pull request, run all tests"
   echo "test_modified=false" >> "$GITHUB_OUTPUT"
   exit 0
 fi
@@ -18,7 +19,9 @@ HAS_LABEL=$(gh pr view "$PR_NUMBER" --json labels --jq '.labels[].name' \
   | grep -c '^run-all-tests$' || true)
 
 if [[ "$HAS_LABEL" -eq 0 ]]; then
+  echo "Run only modified tests"
   echo "test_modified=true" >> "$GITHUB_OUTPUT"
 else
+  echo "Run all tests"
   echo "test_modified=false" >> "$GITHUB_OUTPUT"
 fi
