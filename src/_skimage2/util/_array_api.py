@@ -8,6 +8,7 @@ from scipy._lib._array_api import (
 
     array_namespace,
     xp_swapaxes,
+    xp_size,
 
     default_xp,
     _xp_copy_to_numpy,

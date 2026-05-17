@@ -7,7 +7,7 @@ from _skimage2._shared import utils
 from _skimage2._shared._warnings import warn_external
 from _skimage2._shared.filters import gaussian
 from _skimage2._shared.utils import _supported_float_type, check_shape_equality
-from _skimage2.util._array_api import array_namespace
+from _skimage2.util._array_api import array_namespace, xp_size
 
 __all__ = ['structural_similarity']
 
@@ -258,7 +258,7 @@ def structural_similarity(
         grad = filter_func(A1 / D, **filter_args) * im1
         grad += filter_func(-S / B2, **filter_args) * im2
         grad += filter_func((ux * (A2 - A1) - uy * (B2 - B1) * S) / D, **filter_args)
-        grad *= 2 / im1.size
+        grad *= 2 / xp_size(im1)
 
         if full:
             return mssim, grad, S

@@ -131,7 +131,7 @@ def gaussian(
             sigma.insert(channel_axis % image.ndim, 0)
     image = convert_to_float(image, preserve_range)
     float_dtype = _supported_float_type(image.dtype, xp=xp)
-    image = image.astype(float_dtype, copy=False)
+    image = xp.astype(image, float_dtype, copy=False)
     if (out is not None) and (not np.issubdtype(out.dtype, np.floating)):
         raise ValueError(f"dtype of `out` must be float; got {out.dtype!r}.")
     return ndi.gaussian_filter(
