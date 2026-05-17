@@ -14,6 +14,7 @@ from scipy._lib._array_api import (
 
     is_torch,
     is_numpy,
+    is_cupy,
 )
 
 

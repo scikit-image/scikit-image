@@ -8,7 +8,7 @@ from contextlib import contextmanager
 import numpy as np
 
 from ._warnings import all_warnings, warn
-from ..util._array_api import is_numpy
+from ..util._array_api import is_numpy, array_namespace
 
 
 __all__ = [
@@ -976,13 +976,14 @@ def convert_to_float(image, preserve_range):
         Transformed version of the input.
 
     """
-    if image.dtype == np.float16:
-        return image.astype(np.float32)
+    xp = array_namespace(image)
+    if is_numpy(xp) and image.dtype == np.float16:
+        return xp.astype(image, xp.float32)
     if preserve_range:
         # Convert image to double only if it is not single or double
         # precision float
-        if image.dtype.char not in 'df':
-            image = image.astype(float)
+        if not xp.isdtype(image.dtype, "real floating"):
+            image = xp.astype(image, xp.float64)
     else:
         # Avoid circular import
         from skimage.util.dtype import img_as_float

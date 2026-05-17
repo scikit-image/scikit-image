@@ -14,6 +14,7 @@ from .utils import (
     _supported_float_type,
     convert_to_float,
 )
+from _skimage2.util._array_api import array_namespace
 
 
 def gaussian(
@@ -117,7 +118,9 @@ def gaussian(
     >>> filtered_img = ski.filters.gaussian(image, sigma=1, channel_axis=-1)
 
     """
-    if np.any(np.asarray(sigma) < 0.0):
+    xp = array_namespace(image)
+
+    if xp.any(xp.asarray(sigma) < 0.0):
         raise ValueError("Sigma values less than zero are not valid")
     if channel_axis is not None:
         # do not filter across channels
@@ -127,7 +130,7 @@ def gaussian(
             sigma = list(sigma)
             sigma.insert(channel_axis % image.ndim, 0)
     image = convert_to_float(image, preserve_range)
-    float_dtype = _supported_float_type(image.dtype)
+    float_dtype = _supported_float_type(image.dtype, xp=xp)
     image = image.astype(float_dtype, copy=False)
     if (out is not None) and (not np.issubdtype(out.dtype, np.floating)):
         raise ValueError(f"dtype of `out` must be float; got {out.dtype!r}.")

@@ -25,7 +25,7 @@ def test_structural_similarity_patch_range(xp):
     Y = xp.asarray(Y)
 
     assert structural_similarity(X, Y, data_range=255, win_size=N) < 0.1
-    xp_assert_equal(structural_similarity(X, X, data_range=255, win_size=N), 1.0)
+    assert structural_similarity(X, X, data_range=255, win_size=N) == 1.0
 
 
 def test_structural_similarity_image(xp):
@@ -37,7 +37,7 @@ def test_structural_similarity_image(xp):
     Y = xp.asarray(Y)
 
     S0 = structural_similarity(X, X, data_range=255, win_size=3)
-    xp_assert_equal(S0, 1.0)
+    assert S0 == 1.0
 
     S1 = structural_similarity(X, Y, data_range=255, win_size=3)
     assert S1 < 0.3
@@ -48,10 +48,10 @@ def test_structural_similarity_image(xp):
     mssim0, S3 = structural_similarity(X, Y, data_range=255, full=True)
     assert S3.shape == X.shape
     mssim = structural_similarity(X, Y, data_range=255)
-    xp_assert_equal(mssim0, mssim)
+    assert mssim0 == mssim
 
     # structural_similarity of image with itself should be 1.0
-    xp_assert_equal(structural_similarity(X, X, data_range=255), 1.0)
+    assert structural_similarity(X, X, data_range=255) == 1.0
 
 
 # FIXME: Because we are forcing a random seed state, it is probably good to test
