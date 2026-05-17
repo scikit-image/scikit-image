@@ -16,16 +16,15 @@ jobs:
     outputs:
       test_modified: ${{ steps.check.outputs.test_modified }}
     steps:
+      - name: Checkout scikit-image
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
       - id: check
         env:
-          IS_PR: ${{ github.event_name == 'pull_request' }}
-          HAS_LABEL: ${{ contains(join(github.event.pull_request.labels.*.name, ','), 'run-all-tests') }}
-        run: |
-          if [[ "$IS_PR" == "true" && "$HAS_LABEL" == "false" ]]; then
-            echo "test_modified=true" >> $GITHUB_OUTPUT
-          else
-            echo "test_modified=false" >> $GITHUB_OUTPUT
-          fi
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: bash .github/scripts/check-labels.sh
 
   # GH does not support creating separate jobs out of a matrix,
   # so this is a workaround
