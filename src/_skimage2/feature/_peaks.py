@@ -140,33 +140,26 @@ def _ensure_spacing(
     return output
 
 
-def _filter_peaks(coords, intensities, num_peaks, min_distance, p_norm):
-    """Sort `coords` by descending `intensities`, enforce `min_distance`
-    spacing, and truncate to `num_peaks`.
-    """
-    if len(coords) == 0:
-        return coords
-    coords = coords[np.argsort(-intensities, stable=True)]
-
-    if min_distance > 1:
-        coords = _ensure_spacing(
-            coords, spacing=min_distance, p_norm=p_norm, max_out=num_peaks
-        )
-
-    if num_peaks is not None and len(coords) > num_peaks:
-        coords = coords[:num_peaks]
-
-    return coords
-
-
 def _get_high_intensity_peaks(image, mask, num_peaks, min_distance, p_norm):
     """
     Return the highest intensity peak coordinates.
     """
-    coords = np.nonzero(mask)
-    intensities = image[coords]
-    coords = np.transpose(coords)
-    return _filter_peaks(coords, intensities, num_peaks, min_distance, p_norm)
+    # get coordinates of peaks
+    coord = np.nonzero(mask)
+    intensities = image[coord]
+    # Highest peak first
+    idx_maxsort = np.argsort(-intensities, kind="stable")
+    coord = np.transpose(coord)[idx_maxsort]
+
+    if min_distance > 1:
+        coord = _ensure_spacing(
+            coord, spacing=min_distance, p_norm=p_norm, max_out=num_peaks
+        )
+
+    if num_peaks is not None and len(coord) > num_peaks:
+        coord = coord[:num_peaks]
+
+    return coord
 
 
 def _get_peak_mask(image, footprint, threshold, mask=None):
@@ -276,6 +269,9 @@ def peak_local_max(
     min_distance : float, optional
         The minimal allowed distance separating peaks. To find the
         maximum number of peaks, use `min_distance=1`. See also `p_norm`.
+        When `labels` is provided, `min_distance` is enforced within
+        each label region only; peaks in different label regions are
+        not suppressed by their spatial distance.
     threshold_abs : float, optional
         Minimum intensity of peaks. By default, the absolute threshold is
         the minimum intensity of the image.
@@ -432,11 +428,12 @@ def peak_local_max(
             coordinates = np.empty((0, image.ndim), dtype=int)
 
         if len(coordinates):
-            # Globally sort by descending intensity so the labels path
-            # returns peaks in the same order as the labels=None path.
+            # Globally sort by descending intensity. When `labels` is given,
+            # `min_distance` is enforced per label (above) but not across
+            # labels — `labels` define independent search regions.
             intensities = image[tuple(coordinates.T)]
-            coordinates = _filter_peaks(
-                coordinates, intensities, num_peaks, min_distance, p_norm
-            )
+            coordinates = coordinates[np.argsort(-intensities, stable=True)]
+            if num_peaks is not None and len(coordinates) > num_peaks:
+                coordinates = coordinates[:num_peaks]
 
     return coordinates
