@@ -13,6 +13,7 @@ from scipy._lib._array_api import (
     _xp_copy_to_numpy,
 
     is_torch,
+    is_numpy,
 )
 
 

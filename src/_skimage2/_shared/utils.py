@@ -8,6 +8,7 @@ from contextlib import contextmanager
 import numpy as np
 
 from ._warnings import all_warnings, warn
+from ..util._array_api import is_numpy
 
 
 __all__ = [
@@ -1075,7 +1076,9 @@ new_float_type = {
 }
 
 
-def _supported_float_type(input_dtype, allow_complex=False):
+# XXX: xp=np is *temporary*; it is a bad idiom, and should be removed once
+# all call sites use an explicit xp argument
+def _supported_float_type(input_dtype, allow_complex=False, xp=np):
     """Return an appropriate floating-point dtype for a given dtype.
 
     float32, float64, complex64, complex128 are preserved.
@@ -1099,12 +1102,25 @@ def _supported_float_type(input_dtype, allow_complex=False):
         Floating-point dtype for the image.
     """
     if isinstance(input_dtype, tuple):
-        return np.result_type(*(_supported_float_type(d) for d in input_dtype))
-    input_dtype = np.dtype(input_dtype)
-    if not allow_complex and input_dtype.kind == 'c':
+        return xp.result_type(*(_supported_float_type(d, xp=xp) for d in input_dtype))
+    if is_numpy(xp):
+        input_dtype = np.dtype(input_dtype)
+    if not allow_complex and xp.isdtype(input_dtype, 'complex floating'):
         raise ValueError("complex valued input is not supported")
-    return new_float_type.get(input_dtype.char, np.float64)
 
+    # long and short dtypes: may or may not exist, depending on the array library
+    if getattr(xp, "float16", None) and input_dtype == xp.float16:
+        return xp.float32
+    if getattr(xp, "longdouble", None) and input_dtype == xp.longdouble:
+        return xp.float64
+    if getattr(xp, "clongdouble", None) and input_dtype == xp.clongdouble:
+        return xp.complex128
+
+    if input_dtype in (xp.float32, xp.float64, xp.complex64, xp.complex128):
+        return input_dtype
+
+    # nothing worked; default to float64
+    return xp.float64
 
 def identity(image, *args, **kwargs):
     """Returns the first argument unmodified."""
