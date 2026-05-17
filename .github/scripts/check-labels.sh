@@ -14,8 +14,8 @@ if [[ -z "$PR_NUMBER" ]]; then
   exit 0
 fi
 
-HAS_LABEL=$(gh pr view "$PR_NUMBER" --json labels --jq '.labels[].name' \
-  | grep -c '^run-all-tests$' || true)
+LABELS=$(gh pr view "$PR_NUMBER" --json labels --jq '.labels[].name')
+HAS_LABEL=$(echo "$LABELS" | grep -c '^run-all-tests$' || true)
 
 if [[ "$HAS_LABEL" -eq 0 ]]; then
   echo "test_modified=true" >> "$GITHUB_OUTPUT"
