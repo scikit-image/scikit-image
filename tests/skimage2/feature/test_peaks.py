@@ -3,6 +3,7 @@ import pytest
 
 import numpy as np
 from numpy.testing import assert_equal
+from scipy import ndimage as ndi
 from scipy.spatial.distance import pdist, minkowski
 
 from _skimage2.feature._peaks import _ensure_spacing
@@ -144,12 +145,7 @@ class TestPeakLocalMax:
         image[6, 6] = 2.0
         image[3, 7] = 4.0
 
-        if use_labels:
-            from skimage.measure import label
-
-            labels = label(image > 0)
-        else:
-            labels = None
+        labels = ndi.label(image > 0)[0] if use_labels else None
 
         peaks = peak_local_max(
             image,
