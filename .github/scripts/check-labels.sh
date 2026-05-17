@@ -16,7 +16,7 @@ if [[ -z "$PR_NUMBER" ]]; then
 fi
 
 LABELS=$(gh pr view "$PR_NUMBER" --json labels --jq '.labels[].name')
-HAS_LABEL=$(echo "$LABELS" | grep -c '^run-all-tests$' || true)
+HAS_LABEL=$(echo "$LABELS" | grep -c 'run-all-tests$' || true)
 
 if [[ "$HAS_LABEL" -eq 0 ]]; then
   echo "Run only modified tests"
