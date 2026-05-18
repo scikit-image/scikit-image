@@ -191,6 +191,7 @@ convention = 'numpy'
 
 [tool.pytest.ini_options]
 minversion = "6.0"
+pythonpath = ["."]
 addopts = [
     "-ra",
     "--strict-config",

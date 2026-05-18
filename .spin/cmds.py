@@ -174,12 +174,19 @@ def _get_changed_subpackages(base_ref, pkg_mods):
     return expanded
 
 
-def _get_test_paths(changed_subpackages, doctest):
+def _get_test_paths(changed_subpackages, doctest, installed=False):
     """Map module names to their test and (optionally) source directories.
 
     src-layout: tests live outside src/, doctests live inside src/.
     _skimage2 tests live in tests/skimage2/ (not tests/_skimage2/)
     skimage2 doctests live in src/_skimage2/ (not src/skimage2/)
+
+    When *installed* is True, doctest paths are returned as module names
+    (e.g. ``skimage.metrics``) rather than ``src/`` filesystem paths, so
+    that pytest with ``--pyargs`` collects doctests from the installed
+    package in site-packages.  This avoids a ``warn_external`` mismatch
+    where ``skip_file_prefixes`` points to site-packages paths but the
+    call-stack frames point to the source tree.
     """
     test_paths = []
     seen = set()
@@ -191,11 +198,24 @@ def _get_test_paths(changed_subpackages, doctest):
             test_paths.append(test_dir)
             seen.add(test_dir)
         if doctest:
-            src_path = mod_path.replace('skimage2/', '_skimage2/', 1)
-            src_dir = os.path.join(_REPO_ROOT, 'src', src_path)
-            if src_dir not in seen and os.path.isdir(src_dir):
-                test_paths.append(src_dir)
-                seen.add(src_dir)
+            if installed:
+                # Use the installed module name so --pyargs finds doctests in
+                # site-packages.  skimage2.X is re-exported from _skimage2.X,
+                # which is the actual installed package (see pyproject.toml).
+                installed_mod = (
+                    '_skimage2' + mod[len('skimage2') :]
+                    if mod.startswith('skimage2.')
+                    else mod
+                )
+                if installed_mod not in seen:
+                    test_paths.append(installed_mod)
+                    seen.add(installed_mod)
+            else:
+                src_path = mod_path.replace('skimage2/', '_skimage2/', 1)
+                src_dir = os.path.join(_REPO_ROOT, 'src', src_path)
+                if src_dir not in seen and os.path.isdir(src_dir):
+                    test_paths.append(src_dir)
+                    seen.add(src_dir)
     return test_paths
 
 
@@ -262,7 +282,7 @@ def test(
         # src/ paths are only valid for doctests in installed/editable mode;
         # out-of-tree builds must skip them to avoid silent collection failures.
         test_paths = _get_test_paths(
-            changed_subpackages, doctest and not is_out_of_tree_build
+            changed_subpackages, doctest and not is_out_of_tree_build, installed
         )
         pytest_args = pytest_args + tuple(test_paths)
 
