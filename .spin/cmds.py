@@ -122,7 +122,18 @@ def _get_skimage_subpackages(build_dir=None):
 
 def _get_changed_subpackages(base_ref, pkg_mods):
     """Return the set of changed subpackages relative to *base_ref*, with cross-package expansion."""
-    base_ref = base_ref or os.environ.get('GITHUB_BASE_REF') or 'main'
+    if not base_ref:
+        base_ref = os.environ.get('GITHUB_BASE_REF')
+    if not base_ref and not os.environ.get('GITHUB_ACTIONS'):
+        # Locally, use the tracking branch of the current branch (e.g. origin/main).
+        p = subprocess.run(
+            ['git', 'rev-parse', '--abbrev-ref', '--symbolic-full-name', '@{upstream}'],
+            capture_output=True,
+            cwd=_REPO_ROOT,
+        )
+        base_ref = p.stdout.decode().strip() if p.returncode == 0 else 'main'
+    if not base_ref:
+        base_ref = 'main'
     # In CI, the base branch is only available as origin/<base_ref> after fetch
     p = subprocess.run(
         ['git', 'rev-parse', '--verify', base_ref],
