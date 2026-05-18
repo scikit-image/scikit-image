@@ -188,6 +188,8 @@ def _get_test_paths(changed_subpackages, doctest, installed=False):
     where ``skip_file_prefixes`` points to site-packages paths but the
     call-stack frames point to the source tree.
     """
+    import importlib.util
+
     test_paths = []
     seen = set()
     for mod in sorted(changed_subpackages):
@@ -202,12 +204,19 @@ def _get_test_paths(changed_subpackages, doctest, installed=False):
                 # Use the installed module name so --pyargs finds doctests in
                 # site-packages.  skimage2.X is re-exported from _skimage2.X,
                 # which is the actual installed package (see pyproject.toml).
+                # Guard with find_spec: some entries in pkg_mods (e.g.
+                # skimage._shared) may not exist as importable packages in the
+                # installed wheel.
                 installed_mod = (
                     '_skimage2' + mod[len('skimage2') :]
                     if mod.startswith('skimage2.')
                     else mod
                 )
-                if installed_mod not in seen:
+                try:
+                    spec = importlib.util.find_spec(installed_mod)
+                except (ModuleNotFoundError, ValueError):
+                    spec = None
+                if spec is not None and installed_mod not in seen:
                     test_paths.append(installed_mod)
                     seen.add(installed_mod)
             else:
