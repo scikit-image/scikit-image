@@ -439,8 +439,8 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     cdef cnp.float64_t line_sin, line_cos, rho, slope
     cdef cnp.int64_t value, max_value
     cdef int dx_is_1, delta, offset, slope_delta
-    # Starting and ending of current discovered line.
-    # Shape: (start & stop, x & y), 
+    # Starting (forward tracking) and ending (backward tracking) of current
+    # discovered line: shape (start & stop, x & y).
     cdef cnp.intp_t[:, ::1] line_ends = np.zeros((2, 2), dtype=np.intp)
     # Number of found pixels in current discovered line (not including gaps).
     cdef int n_line_pixels
