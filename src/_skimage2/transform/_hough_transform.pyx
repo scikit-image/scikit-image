@@ -10,7 +10,7 @@ from cpython.mem cimport PyMem_Malloc, PyMem_Free
 from libc.stdlib cimport labs
 from libc.math cimport fabs, sqrt, ceil, atan2, M_PI
 
-from ..draw import circle_perimeter
+# from ..draw import circle_perimeter
 
 from _skimage2._shared.interpolation cimport round
 
@@ -70,6 +70,8 @@ def _hough_circle(cnp.ndarray img,
          np.zeros((radius.size,
                    img.shape[0] + 2 * offset,
                    img.shape[1] + 2 * offset), dtype=np.float64)
+
+    from skimage.draw import circle_perimeter
 
     for i, rad in enumerate(radius):
         # Store in memory the circle of given radius

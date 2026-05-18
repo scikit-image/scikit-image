@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 from numpy.testing import assert_almost_equal, assert_array_almost_equal, assert_equal
 
-from skimage.transform import (
+from _skimage2.transform import (
     AffineTransform,
     EssentialMatrixTransform,
     EuclideanTransform,
@@ -18,7 +18,6 @@ from skimage.transform import (
     estimate_transform,
     matrix_transform,
 )
-# These are hidden, and need to be imported directly from source.
 from _skimage2.transform._geometric import (
     _GeometricTransform,
     _affine_matrix_from_vector,
@@ -27,9 +26,8 @@ from _skimage2.transform._geometric import (
     _apply_homogeneous,
     _euler_rotation_matrix,
     _append_homogeneous_dim,
+    TRANSFORMS,
 )
-from skimage.transform._geometric import TRANSFORMS
-from skimage import data
 
 from _skimage2._shared.utils import FailedEstimationAccessError
 
@@ -1454,6 +1452,7 @@ def test_init_contract_dims(tform_class):
 
 def test_astronaut_piecewise():
     # From doc/examples/transforms/plot_piecewise_affine.py
+    from skimage import data
     image = data.astronaut()
     rows, cols = image.shape[0], image.shape[1]
 

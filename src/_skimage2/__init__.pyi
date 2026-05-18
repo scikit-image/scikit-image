@@ -4,6 +4,7 @@ _submodules = [
     "metrics",
     "morphology",
     "util",
+    "transform"
 ]
 
 __all__ = _submodules + ["__version__", "ExperimentalAPIWarning"]  # noqa: F822
@@ -14,4 +15,5 @@ from . import (
     metrics,
     morphology,
     util,
+    transform
 )
