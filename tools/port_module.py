@@ -79,6 +79,8 @@ def args2dirs(args):
             raise ValueError(f'`{PORTED_SDIR}` not in path parts')
         output_dir = Path(*[UNPORTED_SDIR if p == PORTED_SDIR else
                             p for p in parts])
+    else:
+        output_dir = Path(args.output_dir)
     if not output_dir.exists():
         output_dir.mkdir(parents=True, exist_ok=True)
     return input_dir, output_dir
