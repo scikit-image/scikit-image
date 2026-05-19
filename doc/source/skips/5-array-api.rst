@@ -15,8 +15,6 @@ SKIP 5 — Initial Array API adoption
 Abstract
 --------
 
-The abstract should be a short description of what the SKIP will achieve.
-
 The Array API standard [3]_ aims to standardize a common subset of functionality
 of the majority of array libraries, such as NumPy, PyTorch, CuPy and JAX, with
 a view to remedy the fragmentation of the array computing ecosystem caused by the
@@ -46,7 +44,7 @@ hardware-specific implementations "hidden" in the array libraries.
 
 Ongoing work on adopting the Array API standard in SciPy [5, 6] and scikit-learn [7] has
 shown performance improvements of up to 50x or more from using CuPy or PyTorch GPU
-for the array compute layer (see [4] for an partial overview).
+for the array compute layer (see [4] for a partial overview).
 Note that these performance gains for end users are essentially "free" (end users simply
 feed the right array types to scipy/scikit-learn functions), and the work for enabling
 them is borne by the library authors and maintainers.
@@ -153,7 +151,7 @@ discussion.
 Using **functions from upstream libraries which have already adopted the Array API standard**
 does not need any changes. For example, ``scipy.ndimage.sobel`` supports NumPy arrays,
 CuPy arrays and pytorch CPU tensors, and adheres to the *namespace out = namespace in*
-design rule. This is, in fact, the behavior of the the majority of the
+design rule. This is, in fact, the behavior of the majority of the
 ``scipy.ndimage`` API. [10]
 
 **Compiled code** written in C or Cython becomes *CPU only* in the Array API jargon via
@@ -175,7 +173,7 @@ matrices, SciPy allows an optimization, ``scipy.linalg.solve(a, b, assume_a="sym
 but 1) the additional ``assume_a`` argument is not available in Array API compatible
 libraries, and 2) the SciPy version is numpy-specific and does not handle non-numpy
 arrays. One can either use the "sandwich" and settle on CPU-only code, or branch
-explicitly with the the ``is_numpy`` function from array-api-compat::
+explicitly with the ``is_numpy`` function from array-api-compat::
 
     xp = array_namespace(a, b)
     # ...
@@ -208,7 +206,7 @@ relatively straightforward if laborious. Following the established SciPy practic
     # ...
     def test_foo(xp):
         x = xp.arange(12)
-        xp_assert_close(x[-2:], xp.asarray([10, 11], atol=1e-15)
+        xp_assert_close(x[-2:], xp.asarray([10, 11]), atol=1e-15)
 
   These assertions gracefully handle GPU arrays, and by default check for common errors
   (returning an array from a wrong namespace, wrong shapes/dtypes).
@@ -245,14 +243,6 @@ Briefly:
 
 
 
-This section lists the major steps required to implement the SKIP. Where
-possible, it should be noted where one step is dependent on another, and which
-steps may be optionally omitted. Where it makes sense, each step should
-include a link related pull requests as the implementation progresses.
-
-Any pull requests or development branches containing work on this SKIP should
-be linked to from here. (A SKIP does not need to be implemented in a single
-pull request if it makes sense to implement it in discrete phases).
 
 
 Backward compatibility
@@ -304,9 +294,9 @@ license [1]_, as in `Copyright`, below, with attribution encouraged with CC0+BY
    https://data-apis.org/array-api/draft/tutorial_basic.html
 .. [10] Under the hood, `scipy.ndimage` functions *delegate* to eponymous
    ``cupyx.scipy.ndimage`` functions if their inputs are CuPy arrays. Since this
-   delegation internal to ``scipy.ndimage``, ``scikit-learn`` developers automatically
+   delegation is internal to ``scipy.ndimage``, ``scikit-image`` developers automatically
    benefit.
-.. [11] This is exactly the way ``scipy.ndimage`` support PyTorch CPU tensors.
+.. [11] This is exactly the way ``scipy.ndimage`` supports PyTorch CPU tensors.
 .. [12] Benchmarks for RBFInterpolator "alternative backends",
    https://github.com/scipy/scipy/pull/23447#issuecomment-3224201868
 .. [13] Pythran "dual mode" enhancement:
