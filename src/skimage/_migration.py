@@ -244,6 +244,9 @@ class Skimage2Migration:
                 msg = f"could not determine `old_qname` for {func!r}, set explicitly"
                 raise RuntimeError(msg)
 
+        assert func.__qualname__ in qname_old, (func.__qualname__, qname_old)
+        assert "._" not in qname_old, qname_old
+
         if qname_new is None:
             qname_new = _SKI1PREFIX_RE.sub(r'skimage2.', qname_old)
 
