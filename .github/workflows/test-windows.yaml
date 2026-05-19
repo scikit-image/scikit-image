@@ -111,7 +111,7 @@ jobs:
 
       - name: Doctest skimage2 migration
         run: |
-          python doc/tools/doctest_migration.py
+          spin run -- python doc/tools/doctest_migration.py
 
       - name: "Job has failed: reporting"
         if: ${{ failure() && github.ref == 'refs/heads/main' }}
