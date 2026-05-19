@@ -541,6 +541,9 @@ Examples of running ``spin test``:
     # All tests
     spin test
 
+    # Doctests only — requires an editable install
+    spin test --doctest -- src/skimage src/_skimage2
+
     # Tests inside directory(s)
     spin test -- tests/skimage/morphology
     spin test -- src/skimage/morphology tests/skimage/morphology
