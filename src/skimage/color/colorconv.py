@@ -1959,8 +1959,8 @@ def lch2lab(lch, *, channel_axis=-1):
 def _prepare_lab_array(arr, force_copy=True):
     """Ensure input for lab2lch and lch2lab is well-formed.
 
-    Input array must be in floating point and have at least 3 elements in the
-    last dimension. Returns a new array by default.
+    The input must have at least 3 elements in the last dimension and will be
+    returned as a floating-point array. Returns a new array by default.
 
     Integer inputs are cast to float without any rescaling.  LAB values have
     a well-defined numeric range (L*: 0–100, a*/b*: −128–127) and must not be
