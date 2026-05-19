@@ -15,6 +15,13 @@ from _pytest.pathlib import bestrelpath
 FREE_THREADED_BUILD = bool(sysconfig.get_config_var("Py_GIL_DISABLED"))
 GIL_ENABLED_AT_START = getattr(sys, "_is_gil_enabled", lambda: True)()
 
+try:
+    import pytest_run_parallel  # noqa:F401
+
+    PARALLEL_RUN_AVAILABLE = True
+except ImportError:
+    PARALLEL_RUN_AVAILABLE = False
+
 
 class SKTerminalReporter(CustomTerminalReporter):
     """Custom terminal reporter to display test runtimes.
@@ -64,6 +71,11 @@ def pytest_configure(config: pytest.Config) -> None:
         custom_reporter._session = standard_reporter._session
     config.pluginmanager.unregister(standard_reporter)
     config.pluginmanager.register(custom_reporter, 'terminalreporter')
+    if not PARALLEL_RUN_AVAILABLE:
+        config.addinivalue_line(
+            "markers",
+            "thread_unsafe: mark the test function as single-threaded",
+        )
 
 
 def pytest_terminal_summary(terminalreporter, exitstatus, config):

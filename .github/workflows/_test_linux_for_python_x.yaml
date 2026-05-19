@@ -103,6 +103,7 @@ jobs:
           pip install --dry-run --ignore-installed $(ls requirements/*.txt | sed 's/^/-r /')
 
       - name: Run tests
+        if: ${{ inputs.python-version != '3.14t' }}
         env:
           GITHUB_BASE_REF: ${{ inputs.base_ref }}
           TEST_MODIFIED: ${{ inputs.test_modified }}
@@ -118,6 +119,17 @@ jobs:
             MODIFIED_FLAG=""
           fi
           spin test --installed --doctest $MODIFIED_FLAG
+
+      - name: Run multithreaded tests (3.14t only)
+        if: ${{ inputs.python-version == '3.14t' }}
+        env:
+          # A lazy loader configuration parameter
+          EAGER_IMPORT: ${{ inputs.EAGER_IMPORT }}
+          MINIMUM_REQUIREMENTS: ${{ inputs.MINIMUM_REQUIREMENTS }}
+          PYTHONOPTIMIZE: ${{ inputs.PYTHONOPTIMIZE }}
+        run: |
+          pip install pytest-run-parallel
+          $PYTEST --doctest-plus --showlocals --pyargs skimage --parallel-threads=4 ./tests
 
       - name: Check benchmarks
         run: |
