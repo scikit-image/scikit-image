@@ -106,7 +106,7 @@ optional_free_threaded = [
 test = [
     'numpydoc>=1.7',
     'pooch>=1.6.0; sys_platform != "emscripten"',
-    'pytest>=9.3',
+    'pytest>=9',
     'pytest-cov>=2.11.0',
     'pytest-pretty',
     'pytest-localserver',
