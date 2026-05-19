@@ -546,6 +546,29 @@ class TestColorconv:
         assert lab2rgb(img).dtype == img.dtype
         assert lab2rgb(img32).dtype == img32.dtype
 
+    def test_lab2rgb_integer_input(self):
+        """Integer LAB values must not be rescaled before conversion.
+
+        Regression test for gh-6381: lab2rgb used img_as_float internally,
+        which rescaled int64 values like 75 to near-zero floats, yielding
+        [0., 0., 0.] instead of the correct sRGB result.
+        """
+        # Exact float result for reference
+        lab_float = np.array([[[75.0, 16.0, -12.0]]])
+        expected = lab2rgb(lab_float)
+        # Integer input must give the same result (within float64 rounding)
+        lab_int = np.array([[[75, 16, -12]]])  # dtype int64 on most platforms
+        result = lab2rgb(lab_int)
+        assert_array_almost_equal(result, expected, decimal=5)
+        # Ensure the result is not [0, 0, 0] (the pre-fix wrong answer)
+        assert not np.allclose(result, 0)
+
+    def test_lab2xyz_integer_input(self):
+        """Integer LAB arrays must be converted to float without rescaling."""
+        lab_float = np.array([[[50.0, 0.0, 0.0]]])
+        lab_int = np.array([[[50, 0, 0]]])
+        assert_array_almost_equal(lab2xyz(lab_int), lab2xyz(lab_float), decimal=5)
+
     # test matrices for xyz2luv and luv2xyz generated using
     # http://www.easyrgb.com/index.php?X=CALC
     # Note: easyrgb website displays xyz*100
