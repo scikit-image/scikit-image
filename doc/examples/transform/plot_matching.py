@@ -29,7 +29,7 @@ from skimage.util import img_as_float
 from skimage.feature import (
     corner_harris,
     corner_subpix,
-    corner_peaks,
+    peak_local_max,
     plot_matched_features,
 )
 from skimage.transform import warp, AffineTransform
@@ -56,11 +56,11 @@ img_warped = warp(img_orig, tform.inverse, output_shape=(200, 200))
 img_warped_gray = rgb2gray(img_warped)
 
 # extract corners using Harris' corner measure
-coords_orig = corner_peaks(
-    corner_harris(img_orig_gray), threshold_rel=0.001, min_distance=5
+coords_orig = peak_local_max(
+    corner_harris(img_orig_gray), threshold_rel=0.001, min_distance=5.1
 )
-coords_warped = corner_peaks(
-    corner_harris(img_warped_gray), threshold_rel=0.001, min_distance=5
+coords_warped = peak_local_max(
+    corner_harris(img_warped_gray), threshold_rel=0.001, min_distance=5.1
 )
 
 # determine sub-pixel corner position
