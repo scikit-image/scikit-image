@@ -3,10 +3,10 @@ import functools
 import numpy as np
 from scipy.ndimage import uniform_filter
 
-from _skimage2._shared import utils
-from _skimage2._shared._warnings import warn_external
-from _skimage2._shared.filters import gaussian
-from _skimage2._shared.utils import _supported_float_type, check_shape_equality
+from ..filters._gaussian import gaussian
+from .._shared import utils
+from .._shared._warnings import warn_external
+from .._shared.utils import _supported_float_type, check_shape_equality
 
 __all__ = ['structural_similarity']
 

@@ -1,6 +1,6 @@
 import numpy as np
 
-from _skimage2._shared.filters import gaussian
+from ..filters._gaussian import gaussian
 from _skimage2._shared.utils import _supported_float_type
 from ..color import rgb2lab
 from ..util import img_as_float
