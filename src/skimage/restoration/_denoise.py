@@ -650,7 +650,8 @@ def _sigma_est_dwt(detail_coeffs, distribution='Gaussian'):
     if distribution.lower() == 'gaussian':
         # 75th quantile of the underlying, symmetric noise distribution
         denom = scipy.stats.norm.ppf(0.75)
-        sigma = np.median(np.abs(detail_coeffs)) / denom
+        # Median Absolute Deviation (MAD) as described in section 4.2 of [1].
+        sigma = np.median(np.abs(detail_coeffs - np.median(detail_coeffs))) / denom
     else:
         raise ValueError("Only Gaussian noise estimation is currently " "supported")
     return sigma
