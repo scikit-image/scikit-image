@@ -572,6 +572,32 @@ Testing requirements are listed in ``requirements/test.txt``.
     affect test infrastructure rather than a specific subpackage — add the
     **run-all-tests** label to the PR.
 
+You can also use ``--test-modified`` locally to replicate this CI behaviour:
+
+.. code-block:: shell
+
+    # Run tests only for subpackages you have changed relative to your
+    # upstream tracking branch (e.g. origin/main)
+    spin test --test-modified
+
+    # Specify the base branch explicitly
+    spin test --test-modified --base-ref main
+
+    # Include doctests for modified subpackages
+    spin test --test-modified --doctest
+
+If you are testing against a pip-installed wheel (rather than a spin/meson
+build), pass ``--installed`` so that pytest is invoked directly without
+the spin build-environment wrapper:
+
+.. code-block:: shell
+
+    spin install
+    spin test --installed -- tests/skimage/morphology
+
+    # Combine with --test-modified to run only changed subpackages
+    spin test --installed --test-modified
+
 
 Warnings during testing phase
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
