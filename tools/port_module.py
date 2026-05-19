@@ -24,7 +24,7 @@ def _parts_past_src(path):
     src_parts_i = [i for i, p in enumerate(parts) if p == 'src']
     if not src_parts_i:
         raise ValueError(f'No `src` string in parts: {path}')
-    return parts[src_parts_i[-1]:]
+    return parts[src_parts_i[-1] + 1:]
 
 
 def fname2mod_name(path):
