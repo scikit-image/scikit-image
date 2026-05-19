@@ -2,7 +2,9 @@
 
 from functools import wraps
 import re
+import sys
 from textwrap import dedent
+from itertools import accumulate
 
 
 # URL to migration page.
@@ -86,6 +88,53 @@ def _select_blocks(doc, *, context_name):
 
     context = _CONTEXT_BLOCK_RE.sub(repl, doc)
     return context
+
+
+def _public_api_names(obj):
+    """Find the public name(s) of an object as advertised by ``__all__``.
+
+    scikit-image advertises its public API with the help of ``__all__`` in its
+    modules. This function tries to match the ``__module__`` and the
+    ``__qualname__`` of the given `obj` to this structure.
+
+    Parameters
+    ----------
+    obj : Any
+
+    Returns
+    -------
+    public_matches : str
+        "Paths" to the given `obj` that are adverties and reachable through
+        ``__all__``
+
+    Examples
+    --------
+    >>> from skimage.data._binary_blobs import binary_blobs
+    >>> _public_api_names(binary_blobs)
+    ['skimage.data.binary_blobs']
+
+    >>> from skimage.filters.rank import autolevel
+    >>> _public_api_names(autolevel)
+    ['skimage.filters.rank.autolevel', 'skimage.filters.rank.generic.autolevel']
+    """
+    qualname = obj.__qualname__
+    name_in_module, *_ = qualname.partition(".")
+    all_parents = obj.__module__.split(".")
+
+    matches = []
+    for module_name in accumulate(all_parents, lambda x, y: f"{x}.{y}"):
+        # `obj` is passed, so its parents should be loaded
+        module = sys.modules[module_name]
+
+        if not hasattr(module, "__all__"):
+            # Module doesn't advertise any public API, abort
+            break
+
+        if name_in_module in module.__all__:
+            public_name = f"{module.__name__}.{qualname}"
+            matches.append(public_name)
+
+    return matches
 
 
 class Skimage2Migration:
@@ -187,7 +236,14 @@ class Skimage2Migration:
         qualname, modname = func.__qualname__, func.__module__
 
         if qname_old is None:
-            qname_old = f'{modname}.{qualname}'
+            qname_old, *other = _public_api_names(func)
+            if other:
+                msg = f"multiple matches for `old_qname` for {func!r}, set explicitly"
+                raise RuntimeError(msg)
+            if not qname_old:
+                msg = f"could not determine `old_qname` for {func!r}, set explicitly"
+                raise RuntimeError(msg)
+
         if qname_new is None:
             qname_new = _SKI1PREFIX_RE.sub(r'skimage2.', qname_old)
 
