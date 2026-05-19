@@ -125,7 +125,7 @@ def _get_changed_subpackages(base_ref, pkg_mods):
     if not base_ref:
         base_ref = os.environ.get('GITHUB_BASE_REF')
     if not base_ref and not os.environ.get('GITHUB_ACTIONS'):
-        # Locally, use the tracking branch of the current branch (e.g. origin/main).
+        # Locally, use the upstream branch tracked by the current branch (e.g. origin/main).
         p = subprocess.run(
             ['git', 'rev-parse', '--abbrev-ref', '--symbolic-full-name', '@{upstream}'],
             capture_output=True,
@@ -195,9 +195,7 @@ def _get_test_paths(changed_subpackages, doctest, installed=False):
     When *installed* is True, doctest paths are returned as module names
     (e.g. ``skimage.metrics``) rather than ``src/`` filesystem paths, so
     that pytest with ``--pyargs`` collects doctests from the installed
-    package in site-packages.  This avoids a ``warn_external`` mismatch
-    where ``skip_file_prefixes`` points to site-packages paths but the
-    call-stack frames point to the source tree.
+    package in site-packages rather than the source tree.
     """
     import importlib.util
 
@@ -219,13 +217,15 @@ def _get_test_paths(changed_subpackages, doctest, installed=False):
                 # skimage._shared) may not exist as importable packages in the
                 # installed wheel.
                 installed_mod = (
-                    '_skimage2' + mod[len('skimage2') :]
+                    mod.replace('skimage2.', '_skimage2.', 1)
                     if mod.startswith('skimage2.')
                     else mod
                 )
                 try:
                     spec = importlib.util.find_spec(installed_mod)
                 except (ModuleNotFoundError, ValueError):
+                    # ModuleNotFoundError: parent package not installed.
+                    # ValueError: find_spec rejects relative or invalid names.
                     spec = None
                 if spec is not None and installed_mod not in seen:
                     test_paths.append(installed_mod)

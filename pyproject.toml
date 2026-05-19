@@ -190,7 +190,12 @@ ignore = [
 convention = 'numpy'
 
 [tool.pytest.ini_options]
-minversion = "6.0"
+# pythonpath requires pytest >= 7.0; --strict-config (in addopts) would error
+# on startup with older versions anyway.
+minversion = "7.0"
+# Add the repo root so that `import skimage2` resolves to src/skimage2 during
+# in-tree test runs (spin/editable installs).  Without this, skimage2 is only
+# importable if the package is installed.
 pythonpath = ["."]
 addopts = [
     "-ra",
