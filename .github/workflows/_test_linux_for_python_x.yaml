@@ -94,16 +94,16 @@ jobs:
           # Attempt to resolve all requirements simultaneously
           pip install --dry-run --ignore-installed $(ls requirements/*.txt | sed 's/^/-r /')
 
-      - name: Check labels
-        id: check-labels
+      - name: Check for run-all-tests label
+        id: check-run-all-tests-label
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: bash .github/scripts/check-labels.sh
+        run: bash .github/scripts/check-run-all-tests-label.sh
 
       - name: Run tests
         env:
-          TEST_MODIFIED: ${{ steps.check-labels.outputs.test_modified }}
+          TEST_MODIFIED: ${{ steps.check-run-all-tests-label.outputs.test_modified }}
           GITHUB_BASE_REF: ${{ github.base_ref }}
           # A lazy loader configuration parameter
           EAGER_IMPORT: ${{ inputs.EAGER_IMPORT }}

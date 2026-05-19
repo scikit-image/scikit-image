@@ -95,18 +95,18 @@ jobs:
         run: |
           source .github/scripts/setup-test-env.sh
 
-      - name: Check labels
-        id: check-labels
+      - name: Check for run-all-tests label
+        id: check-run-all-tests-label
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: bash .github/scripts/check-labels.sh
+        run: bash .github/scripts/check-run-all-tests-label.sh
 
       - name: Run tests
         shell: bash
         env:
-          TEST_MODIFIED: ${{ steps.check-labels.outputs.test_modified }}
+          TEST_MODIFIED: ${{ steps.check-run-all-tests-label.outputs.test_modified }}
         run: |
           if [[ "$TEST_MODIFIED" == "true" ]]; then
             MODIFIED_FLAG="--test-modified"
