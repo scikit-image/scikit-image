@@ -20,10 +20,11 @@ py3.install_sources(
 '''
 
 def _parts_past_src(path):
-    parts = path.with_suffix('').parts
-    if not 'src' in parts:
-        raise ValueError('No `src` string in parts')
-    return parts[parts.index('src') + 1:]
+    parts = path.parts
+    src_parts_i = [i for i, p in enumerate(parts) if p == 'src']
+    if not src_parts_i:
+        raise ValueError(f'No `src` string in parts: {path}')
+    return parts[src_parts_i[-1]:]
 
 
 def fname2mod_name(path):
