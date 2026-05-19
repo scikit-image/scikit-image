@@ -48,7 +48,7 @@ def shadow_imports(input_dir, output_dir):
         else:
             out_fname.write_text(f'''\
 from {mod_in} import *
-from {mod_in} import __doc__
+from {mod_in} import __doc__  # noqa: F401
 ''')
     for parent in directories:
         mod_list = '  ' + '\n  '.join(f"  '{str(p.name)}',"
