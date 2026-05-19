@@ -2,6 +2,7 @@ python_sources = [
   '__init__.py',
   '__init__.pyi',
   '_value_rescaling.py',
+  '_array_api.py',
 ]
 
 py3.install_sources(

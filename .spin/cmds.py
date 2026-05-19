@@ -1,6 +1,7 @@
 import os
 import subprocess
 import sys
+import json
 
 import click
 import spin
@@ -200,6 +201,14 @@ def _get_test_paths(changed_subpackages, doctest):
 
 
 @click.option(
+    '--array-api-backend', '-b', default=None, metavar='ARRAY_BACKEND',
+    multiple=True,
+    help=(
+        "Array API backend "
+        "('all', 'numpy', 'torch', 'cupy', 'array_api_strict', " "'jax.numpy')."
+    )
+)
+@click.option(
     "--installed",
     is_flag=True,
     default=False,
@@ -231,6 +240,7 @@ def test(
     test_modified=False,
     doctest=False,
     base_ref=None,
+    array_api_backend,
     **kwargs,
 ):
     pytest_args = kwargs.get('pytest_args', ())
@@ -272,6 +282,9 @@ def test(
     if doctest:
         if '--doctest-plus' not in pytest_args:
             pytest_args = ('--doctest-plus',) + pytest_args
+
+    if len(array_api_backend) != 0:
+        os.environ['SCIPY_ARRAY_API'] = json.dumps(list(array_api_backend))
 
     if installed:
         spin.util.run(['pytest'] + list(pytest_args))

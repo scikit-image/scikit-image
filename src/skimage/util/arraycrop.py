@@ -5,6 +5,7 @@ n-dimensional array.
 
 import numpy as np
 from numbers import Integral
+from _skimage2.util._array_api import array_namespace
 
 __all__ = ['crop']
 
@@ -38,7 +39,8 @@ def crop(ar, crop_width, copy=False, order='K'):
         The cropped array. If ``copy=False`` (default), this is a sliced
         view of the input array.
     """
-    ar = np.array(ar, copy=False)
+    xp = array_namespace(ar)
+    ar = xp.asarray(ar, copy=False)
 
     if isinstance(crop_width, Integral):
         crops = [[crop_width, crop_width]] * ar.ndim
@@ -66,7 +68,7 @@ def crop(ar, crop_width, copy=False, order='K'):
 
     slices = tuple(slice(a, ar.shape[i] - b) for i, (a, b) in enumerate(crops))
     if copy:
-        cropped = np.array(ar[slices], order=order, copy=True)
+        cropped = xp.asarray(ar[slices], order=order, copy=True)
     else:
         cropped = ar[slices]
     return cropped

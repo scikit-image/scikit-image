@@ -2,7 +2,7 @@ import warnings
 from warnings import warn
 
 import numpy as np
-
+from _skimage2.util._array_api import array_namespace, is_numpy, is_cupy
 
 __all__ = [
     'img_as_float32',
@@ -207,6 +207,20 @@ def _scale(a, n, m, copy=True):
 
 
 def _convert(image, dtype, force_copy=False, uniform=False):
+    # Here we (ab)use the fact that CuPy dtypes are in fact numpy dtypes.
+    # _convert_internal only deals with numpy dtypes and numpy or cupy arrays.
+    #
+    # pytorch etc CPU tensors go through numpy; can in principle make
+    # pytorch GPU tensors go through cupy (not done here)
+    xp = array_namespace(image)
+    xp_internal = xp if (is_numpy(xp) or is_cupy(xp)) else np
+
+    image = xp_internal.asarray(image)
+    result = _convert_internal(image, dtype, force_copy, uniform)
+    return xp.asarray(result)
+
+
+def _convert_internal(image, dtype, force_copy=False, uniform=False):
     """
     Convert an image to the requested data-type.
 
@@ -256,7 +270,6 @@ def _convert(image, dtype, force_copy=False, uniform=False):
            pp 47-57. Morgan Kaufmann, 1998.
 
     """
-    image = np.asarray(image)
     dtypeobj_in = image.dtype
     if dtype is np.floating:
         dtypeobj_out = np.dtype('float64')
