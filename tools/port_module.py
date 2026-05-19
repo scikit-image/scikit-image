@@ -34,7 +34,7 @@ def fname2mod_name(path):
 
 def shadow_imports(input_dir, output_dir):
     directories = set()
-    for mod_fname in input_dir.glob('**/*.py*'):
+    for mod_fname in input_dir.glob('**/*.py', '**/*.pyx', '**/*.pyi'):
         rel_in = mod_fname.relative_to(input_dir)
         mod_in = fname2mod_name(mod_fname)
         in_suffix = rel_in.suffix
