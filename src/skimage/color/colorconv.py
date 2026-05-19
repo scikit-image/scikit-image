@@ -1203,7 +1203,17 @@ def _lab2xyz(lab, illuminant, observer):
     n_invalid : int
         Number of invalid pixels in the Z channel after conversion.
     """
-    arr = _prepare_colorarray(lab, channel_axis=-1).copy()
+    lab = np.asanyarray(lab)
+    if lab.shape[-1] != 3:
+        msg = (
+            f'the input array must have size 3 along `channel_axis`, '
+            f'got {lab.shape}'
+        )
+        raise ValueError(msg)
+    # Cast to float without rescaling — LAB values (L: 0–100, a/b: −128–127)
+    # must not be normalised to [0, 1] the way img_as_float does for images.
+    float_dtype = _supported_float_type(lab.dtype)
+    arr = lab.astype(float_dtype, copy=True)
 
     L, a, b = arr[..., 0], arr[..., 1], arr[..., 2]
     y = (L + 16.0) / 116.0
@@ -1949,19 +1959,18 @@ def lch2lab(lch, *, channel_axis=-1):
 def _prepare_lab_array(arr, force_copy=True):
     """Ensure input for lab2lch and lch2lab is well-formed.
 
-    Input array must be in floating point and have at least 3 elements in the
-    last dimension. Returns a new array by default.
+    The input must have at least 3 elements in the last dimension and will be
+    returned as a floating-point array. Returns a new array by default.
+
+    Integer inputs are cast to float without any rescaling.  LAB values have
+    a well-defined numeric range (L*: 0–100, a*/b*: −128–127) and must not be
+    normalised to [0, 1] the way ``img_as_float`` does for image data.
     """
     arr = np.asarray(arr)
-    shape = arr.shape
-    if shape[-1] < 3:
+    if arr.shape[-1] < 3:
         raise ValueError('Input image has less than 3 channels.')
     float_dtype = _supported_float_type(arr.dtype)
-    if float_dtype == np.float32:
-        _func = dtype.img_as_float32
-    else:
-        _func = dtype.img_as_float64
-    return _func(arr, force_copy=force_copy)
+    return arr.astype(float_dtype, copy=force_copy)
 
 
 @channel_as_last_axis()
