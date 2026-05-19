@@ -113,8 +113,9 @@ def hough_circle(image, radius, normalize=True, full_output=False):
     >>> try_radii = np.arange(5, 50)
     >>> res = hough_circle(img, try_radii)
     >>> ridx, r, c = np.unravel_index(np.argmax(res), res.shape)
-    >>> r, c, try_radii[ridx]
-    (25, 35, 23)
+    >>> # This doctest can be fixed after merge of PR #8128
+    >>> (r, c, try_radii[ridx]) == (25, 35, 23)
+    True
 
     """
     radius = np.atleast_1d(np.asarray(radius))
