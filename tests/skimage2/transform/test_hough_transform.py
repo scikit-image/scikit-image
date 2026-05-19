@@ -5,21 +5,25 @@ from numpy.testing import assert_almost_equal, assert_equal
 from _skimage2 import transform
 from _skimage2._shared.testing import run_in_parallel
 
+
 @pytest.fixture
 def circle_perimeter():
     from skimage.draw import circle_perimeter
+
     return circle_perimeter
 
 
 @pytest.fixture
 def ellipse_perimeter():
     from skimage.draw import ellipse_perimeter
+
     return ellipse_perimeter
 
 
 @run_in_parallel()
 def test_hough_line():
     from skimage.draw import line
+
     # Generate a test image
     img = np.zeros((100, 150), dtype=int)
     rr, cc = line(60, 130, 80, 10)
@@ -83,6 +87,7 @@ def test_probabilistic_hough():
 def test_probabilistic_hough_seed():
     # Load image that is likely to give a randomly varying number of lines
     from skimage import data, feature
+
     image = data.checkerboard()
     edges = feature.canny(image, 2, 1, 25)
     # Use constant seed to ensure a deterministic output
@@ -106,6 +111,7 @@ def test_probabilistic_hough_bad_input():
 
 def test_hough_line_peaks():
     from skimage.draw import line
+
     img = np.zeros((100, 150), dtype=int)
     rr, cc = line(60, 130, 80, 10)
     img[rr, cc] = 1

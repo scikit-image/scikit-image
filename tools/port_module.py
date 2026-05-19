@@ -19,12 +19,13 @@ py3.install_sources(
 )
 '''
 
+
 def _parts_past_src(path):
     parts = path.parts
     src_parts_i = [i for i, p in enumerate(parts) if p == 'src']
     if not src_parts_i:
         raise ValueError(f'No `src` string in parts: {path}')
-    return parts[src_parts_i[-1] + 1:]
+    return parts[src_parts_i[-1] + 1 :]
 
 
 def fname2mod_name(path):
@@ -38,7 +39,8 @@ def shadow_imports(input_dir, output_dir):
         mod_in = fname2mod_name(mod_fname)
         in_suffix = rel_in.suffix
         out_fname = output_dir / rel_in.with_suffix(
-            '.py' if in_suffix == '.pyx' else in_suffix)
+            '.py' if in_suffix == '.pyx' else in_suffix
+        )
         parent = out_fname.parent
         directories.add(parent)
         if not parent.exists():
@@ -51,36 +53,33 @@ from {mod_in} import *
 from {mod_in} import __doc__  # noqa: F401
 ''')
     for parent in directories:
-        mod_list = '  ' + '\n  '.join(f"  '{str(p.name)}',"
-                                      for p in parent.glob('*.py*'))
+        mod_list = '  ' + '\n  '.join(
+            f"  '{str(p.name)}'," for p in parent.glob('*.py*')
+        )
         mod_path = '/'.join(_parts_past_src(parent))
-        meson_build = MESON_TEMPLATE.format(
-            mod_list=mod_list,
-            mod_path=mod_path)
+        meson_build = MESON_TEMPLATE.format(mod_list=mod_list, mod_path=mod_path)
         (parent / 'meson.build').write_text(meson_build)
 
 
 def get_parser():
-    parser = ArgumentParser(description=__doc__,  # Usage from docstring
-                            formatter_class=RawDescriptionHelpFormatter)
-    parser.add_argument('input_dir',
-                        help='input directory')
-    parser.add_argument('--output-dir',
-                        help='output directory')
+    parser = ArgumentParser(
+        description=__doc__,  # Usage from docstring
+        formatter_class=RawDescriptionHelpFormatter,
+    )
+    parser.add_argument('input_dir', help='input directory')
+    parser.add_argument('--output-dir', help='output directory')
     return parser
 
 
 def args2dirs(args):
     input_dir = Path(args.input_dir).resolve()
     if not input_dir.is_dir():
-        raise ValueError(
-            f'Input directory {str(input_dir)} is not a directory')
+        raise ValueError(f'Input directory {str(input_dir)} is not a directory')
     if args.output_dir is None:
         parts = list(input_dir.parts)
-        if not PORTED_SDIR in parts:
+        if PORTED_SDIR not in parts:
             raise ValueError(f'`{PORTED_SDIR}` not in path parts')
-        output_dir = Path(*[UNPORTED_SDIR if p == PORTED_SDIR else
-                            p for p in parts])
+        output_dir = Path(*[UNPORTED_SDIR if p == PORTED_SDIR else p for p in parts])
     else:
         output_dir = Path(args.output_dir)
     if not output_dir.exists():

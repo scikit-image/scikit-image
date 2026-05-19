@@ -513,6 +513,7 @@ def downscale_local_mean(image, factors, cval=0, clip=True):
 
     """
     from skimage.measure import block_reduce
+
     return block_reduce(image, factors, np.mean, cval)
 
 

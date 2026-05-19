@@ -9,11 +9,12 @@ from skimage.color.colorconv import rgb2gray
 from skimage.data import checkerboard, astronaut
 from skimage.draw.draw import circle_perimeter_aa
 from skimage.feature.peak import peak_local_max
+
 # These are hidden, and need to be imported directly from source.
 from _skimage2.transform._warps import (
     _stackcopy,
     _linear_polar_mapping,
-    _log_polar_mapping
+    _log_polar_mapping,
 )
 from skimage.transform._warps import (
     warp,

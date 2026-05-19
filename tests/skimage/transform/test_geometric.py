@@ -18,6 +18,7 @@ from skimage.transform import (
     estimate_transform,
     matrix_transform,
 )
+
 # These are hidden, and need to be imported directly from source.
 from _skimage2.transform._geometric import (
     _GeometricTransform,

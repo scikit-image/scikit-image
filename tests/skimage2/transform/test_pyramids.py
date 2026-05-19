@@ -12,6 +12,7 @@ from _skimage2.transform import pyramids
 @pytest.fixture
 def image_gray():
     from skimage import data
+
     image = data.astronaut()
     return image[..., 0]
 
@@ -19,6 +20,7 @@ def image_gray():
 @pytest.mark.parametrize('channel_axis', [0, 1, -1])
 def test_pyramid_reduce_rgb(channel_axis):
     from skimage import data
+
     image = data.astronaut()
     rows, cols, dim = image.shape
     image = np.moveaxis(image, source=-1, destination=channel_axis)
@@ -59,6 +61,7 @@ def test_pyramid_reduce_nd():
 @pytest.mark.parametrize('channel_axis', [0, 1, 2, -1, -2, -3])
 def test_pyramid_expand_rgb(channel_axis):
     from skimage import data
+
     image = data.astronaut()
     rows, cols, dim = image.shape
     image = np.moveaxis(image, source=-1, destination=channel_axis)
@@ -86,6 +89,7 @@ def test_pyramid_expand_nd():
 @pytest.mark.parametrize('channel_axis', [0, 1, 2, -1, -2, -3])
 def test_build_gaussian_pyramid_rgb(channel_axis):
     from skimage import data
+
     image = data.astronaut()
     rows, cols, dim = image.shape
     image = np.moveaxis(image, source=-1, destination=channel_axis)
@@ -126,6 +130,7 @@ def test_build_gaussian_pyramid_nd():
 @pytest.mark.parametrize('channel_axis', [0, 1, 2, -1, -2, -3])
 def test_build_laplacian_pyramid_rgb(channel_axis):
     from skimage import data
+
     image = data.astronaut()
     rows, cols, dim = image.shape
     image = np.moveaxis(image, source=-1, destination=channel_axis)

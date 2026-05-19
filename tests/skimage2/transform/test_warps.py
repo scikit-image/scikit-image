@@ -462,6 +462,7 @@ def test_resize_clip(order, preserve_range, anti_aliasing, dtype):
 def test_swirl(dtype):
     from skimage.data import checkerboard
     from skimage.util.dtype import img_as_float
+
     image = img_as_float(checkerboard()).astype(dtype, copy=False)
     float_dtype = _supported_float_type(dtype)
 
@@ -496,6 +497,7 @@ def test_warp_identity():
     from skimage.data import astronaut
     from skimage.color.colorconv import rgb2gray
     from skimage.util.dtype import img_as_float
+
     img = img_as_float(rgb2gray(astronaut()))
     assert len(img.shape) == 2
     assert np.allclose(img, warp(img, AffineTransform(rotation=0)))
@@ -510,6 +512,7 @@ def test_warp_identity():
 
 def test_warp_coords_example():
     from skimage.data import astronaut
+
     image = astronaut().astype(np.float32)
     assert 3 == image.shape[2]
     tform = SimilarityTransform(translation=(0, -10))
@@ -912,6 +915,7 @@ def test_bool_nonzero_order_errors(order):
 def test_order_0_warp_dtype(dtype):
     from skimage.data import astronaut
     from skimage.util.dtype import _convert
+
     img = _convert(astronaut()[:10, :10, 0], dtype)
 
     assert resize(img, (12, 12), order=0).dtype == dtype
@@ -926,6 +930,7 @@ def test_order_0_warp_dtype(dtype):
 def test_nonzero_order_warp_dtype(dtype, order):
     from skimage.data import astronaut
     from skimage.util.dtype import _convert
+
     img = _convert(astronaut()[:10, :10, 0], dtype)
 
     float_dtype = _supported_float_type(dtype)

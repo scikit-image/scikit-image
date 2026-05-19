@@ -69,6 +69,7 @@ class TestThinPlateSplineTransform:
 
     def test_rotate(self):
         import skimage as ski
+
         image = ski.data.astronaut()
 
         desired = ski2.transform.rotate(image, angle=90)

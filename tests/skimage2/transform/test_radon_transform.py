@@ -13,6 +13,7 @@ from _skimage2.transform import radon, iradon, iradon_sart, rescale
 @pytest.fixture
 def _phantom():
     from skimage.data import shepp_logan_phantom
+
     phantom = shepp_logan_phantom()[::2, ::2]
     return rescale(
         phantom, 0.5, order=1, mode='constant', anti_aliasing=False, channel_axis=None

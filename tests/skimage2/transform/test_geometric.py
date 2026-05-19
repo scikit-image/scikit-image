@@ -1453,6 +1453,7 @@ def test_init_contract_dims(tform_class):
 def test_astronaut_piecewise():
     # From doc/examples/transforms/plot_piecewise_affine.py
     from skimage import data
+
     image = data.astronaut()
     rows, cols = image.shape[0], image.shape[1]
 
