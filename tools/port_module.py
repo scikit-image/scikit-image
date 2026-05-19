@@ -47,6 +47,7 @@ def shadow_imports(input_dir, output_dir):
         else:
             out_fname.write_text(f'''\
 from {mod_in} import *
+from {mod_in} import __doc__
 ''')
     for parent in directories:
         mod_list = '  ' + '\n  '.join(f"  '{str(p.name)}',"
@@ -98,8 +99,6 @@ def main():
     #   __init__.pyi
     # * Replacing `skimage` imports in docstrings.
     shadow_imports(input_dir, output_dir)
-
-
 
 
 if __name__ == '__main__':
