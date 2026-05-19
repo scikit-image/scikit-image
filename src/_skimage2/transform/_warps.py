@@ -3,7 +3,6 @@ from scipy import ndimage as ndi
 
 from ._geometric import SimilarityTransform, AffineTransform, ProjectiveTransform
 from ._warps_cy import _warp_fast
-from skimage.measure import block_reduce
 
 from _skimage2._shared.utils import (
     get_bound_method_class,
@@ -513,6 +512,7 @@ def downscale_local_mean(image, factors, cval=0, clip=True):
            [5.5, 4.5]])
 
     """
+    from skimage.measure import block_reduce
     return block_reduce(image, factors, np.mean, cval)
 
 
