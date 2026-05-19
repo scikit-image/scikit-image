@@ -11,9 +11,6 @@ permissions:
   contents: read
   issues: write
 
-env:
-  PYTEST: "pytest --config-file ${{ github.workspace }}/pyproject.toml"
-
 jobs:
   test_skimage_macos:
     name: ${{ matrix.os }}-cp${{ matrix.python-version }}
@@ -23,7 +20,7 @@ jobs:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.13"]
+        python-version: ["3.12", "3.14"]
         os: [macos-latest]
         OPTIONAL_DEPS: [1]
         OPTIONS_NAME: ["default"]
@@ -64,9 +61,9 @@ jobs:
         run: |
           source .github/scripts/setup-build-env.sh
 
-      - name: Build and install
+      - name: Build skimage
         run: |
-          pip install -v --no-build-isolation .
+          spin build
 
       - name: Install test dependencies
         env:
@@ -75,8 +72,17 @@ jobs:
           source .github/scripts/setup-test-env.sh
 
       - name: Run tests
+        env:
+          IS_PR: ${{ github.event_name == 'pull_request' }}
+          HAS_LABEL: ${{ contains(join(github.event.pull_request.labels.*.name, ','), 'run-all-tests') }}
         run: |
-          $PYTEST --showlocals ./tests
+          if [[ "$IS_PR" == "true" && "$HAS_LABEL" == "false" ]]; then
+            MODIFIED_FLAG="--test-modified"
+            git fetch origin "$GITHUB_BASE_REF"
+          else
+            MODIFIED_FLAG=""
+          fi
+          spin test --no-doctest $MODIFIED_FLAG
 
       - name: Doctest skimage2 migration
         run: |
@@ -84,7 +90,7 @@ jobs:
 
       - name: Check benchmarks
         run: |
-          asv check -v -E existing
+          spin asv -- check -v -E existing
 
       - name: "Job has failed: reporting"
         if: ${{ failure() && github.ref == 'refs/heads/main' }}

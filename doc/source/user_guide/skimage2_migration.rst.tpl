@@ -74,6 +74,8 @@ When switching to the new ``skimage2`` namespace, some code will need to be upda
 
 {{ func_heading('skimage.feature.canny') }}
 
+{{ func_heading('skimage.metrics.structural_similarity') }}
+
 Grayscale morphological operators in `skimage.morphology`
 ---------------------------------------------------------
 
