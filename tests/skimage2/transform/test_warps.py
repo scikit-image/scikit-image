@@ -5,18 +5,10 @@ from scipy.ndimage import map_coordinates
 
 from _skimage2._shared.testing import expected_warnings, run_in_parallel
 from _skimage2._shared.utils import _supported_float_type
-from skimage.color.colorconv import rgb2gray
-from skimage.data import checkerboard, astronaut
-from skimage.draw.draw import circle_perimeter_aa
-from skimage.feature.peak import peak_local_max
-
-# These are hidden, and need to be imported directly from source.
 from _skimage2.transform._warps import (
     _stackcopy,
     _linear_polar_mapping,
     _log_polar_mapping,
-)
-from skimage.transform._warps import (
     warp,
     warp_coords,
     rotate,
@@ -27,12 +19,11 @@ from skimage.transform._warps import (
     downscale_local_mean,
     resize_local_mean,
 )
-from skimage.transform._geometric import (
+from _skimage2.transform._geometric import (
     AffineTransform,
     ProjectiveTransform,
     SimilarityTransform,
 )
-from skimage.util.dtype import img_as_float, _convert
 
 
 def test_stackcopy():
@@ -469,6 +460,9 @@ def test_resize_clip(order, preserve_range, anti_aliasing, dtype):
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_swirl(dtype):
+    from skimage.data import checkerboard
+    from skimage.util.dtype import img_as_float
+
     image = img_as_float(checkerboard()).astype(dtype, copy=False)
     float_dtype = _supported_float_type(dtype)
 
@@ -500,6 +494,10 @@ def test_const_cval_out_of_range():
 
 
 def test_warp_identity():
+    from skimage.data import astronaut
+    from skimage.color.colorconv import rgb2gray
+    from skimage.util.dtype import img_as_float
+
     img = img_as_float(rgb2gray(astronaut()))
     assert len(img.shape) == 2
     assert np.allclose(img, warp(img, AffineTransform(rotation=0)))
@@ -513,6 +511,8 @@ def test_warp_identity():
 
 
 def test_warp_coords_example():
+    from skimage.data import astronaut
+
     image = astronaut().astype(np.float32)
     assert 3 == image.shape[2]
     tform = SimilarityTransform(translation=(0, -10))
@@ -812,6 +812,9 @@ def test_log_polar_mapping():
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_linear_warp_polar(dtype):
+    from skimage.feature.peak import peak_local_max
+    from skimage.draw.draw import circle_perimeter_aa
+
     radii = [5, 10, 15, 20]
     image = np.zeros([51, 51])
     for rad in radii:
@@ -827,6 +830,9 @@ def test_linear_warp_polar(dtype):
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_log_warp_polar(dtype):
+    from skimage.feature.peak import peak_local_max
+    from skimage.draw.draw import circle_perimeter_aa
+
     radii = [np.exp(2), np.exp(3), np.exp(4), np.exp(5), np.exp(5) - 1, np.exp(5) + 1]
     radii = [int(x) for x in radii]
     image = np.zeros([301, 301])
@@ -907,6 +913,9 @@ def test_bool_nonzero_order_errors(order):
 
 @pytest.mark.parametrize('dtype', [np.uint8, bool, np.float32, np.float64])
 def test_order_0_warp_dtype(dtype):
+    from skimage.data import astronaut
+    from skimage.util.dtype import _convert
+
     img = _convert(astronaut()[:10, :10, 0], dtype)
 
     assert resize(img, (12, 12), order=0).dtype == dtype
@@ -919,6 +928,9 @@ def test_order_0_warp_dtype(dtype):
 @pytest.mark.parametrize('dtype', [np.uint8, np.float16, np.float32, np.float64])
 @pytest.mark.parametrize('order', [1, 3, 5])
 def test_nonzero_order_warp_dtype(dtype, order):
+    from skimage.data import astronaut
+    from skimage.util.dtype import _convert
+
     img = _convert(astronaut()[:10, :10, 0], dtype)
 
     float_dtype = _supported_float_type(dtype)
