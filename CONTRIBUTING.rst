@@ -336,6 +336,17 @@ Examples of running ``spin test``:
 
 Testing requirements are listed in ``requirements/test.txt``.
 
+.. note:: CI runs only modified tests on pull requests
+
+    To keep feedback fast, CI workflows run ``spin test --test-modified`` on
+    pull requests, which limits the test run to subpackages that were changed
+    relative to the base branch. The full test suite still runs on pushes to
+    ``main`` and on merge-queue entries.
+
+    To force the full suite on a pull request — for example when changes
+    affect test infrastructure rather than a specific subpackage — add the
+    **run-all-tests** label to the PR.
+
 
 Warnings during testing phase
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -521,31 +532,14 @@ API, e.g.:
 
 .. code-block:: python
 
-   from warnings import warn
-   warn(
+   from skimage._shared._warnings import warn_external
+   warn_external(
        "Automatic detection of the color channel was deprecated in "
        "v0.19, and `channel_axis=None` will be the new default in "
        "v0.22. Set `channel_axis=-1` explicitly to silence this "
        "warning.",
-       FutureWarning,
-       stacklevel=2,
+       category=FutureWarning,
    )
-
-The `stacklevel
-<https://docs.python.org/3/library/warnings.html#warnings.warn>`_ is
-a bit of a technicality, but ensures that the warning points to the
-user-called function, and not to a utility function within.
-
-In most cases, set the ``stacklevel`` to ``2``.
-When warnings originate from helper routines internal to the
-scikit-image library, set it to ``3``.
-
-To test if your warning is being emitted correctly, try calling the function
-from an IPython console. It should point you to the console input itself
-instead of being emitted by files in the scikit-image library:
-
-* **Good**: ``ipython:1: UserWarning: ...``
-* **Bad**: ``scikit-image/skimage/measure/_structural_similarity.py:155: UserWarning:``
 
 Deprecating Keywords and Functions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
