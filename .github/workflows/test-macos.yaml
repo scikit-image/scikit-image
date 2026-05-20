@@ -71,12 +71,18 @@ jobs:
         run: |
           source .github/scripts/setup-test-env.sh
 
+      - name: Check for run-all-tests label
+        id: check-run-all-tests-label
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: bash .github/scripts/check-run-all-tests-label.sh
+
       - name: Run tests
         env:
-          IS_PR: ${{ github.event_name == 'pull_request' }}
-          HAS_LABEL: ${{ contains(join(github.event.pull_request.labels.*.name, ','), 'run-all-tests') }}
+          TEST_MODIFIED: ${{ steps.check-run-all-tests-label.outputs.test_modified }}
         run: |
-          if [[ "$IS_PR" == "true" && "$HAS_LABEL" == "false" ]]; then
+          if [[ "$TEST_MODIFIED" == "true" ]]; then
             MODIFIED_FLAG="--test-modified"
             git fetch origin "$GITHUB_BASE_REF"
           else
