@@ -1,6 +1,6 @@
 import numpy as np
 import scipy.ndimage as ndi
-from scipy.spatial import cKDTree, distance
+from scipy.spatial import cKDTree
 
 from .._shared._warnings import warn_external
 
@@ -32,27 +32,25 @@ def _batched_ensure_spacing(coord_batch, spacing, p_norm, max_out):
     tree = cKDTree(coord_batch)
 
     indices = tree.query_ball_point(coord_batch, r=spacing, p=p_norm)
-    rejected_peaks_indices = set()
+    rejected = np.zeros(len(coord_batch), dtype=bool)
     naccepted = 0
     for idx, candidates in enumerate(indices):
-        if idx not in rejected_peaks_indices:
-            # keep current point and the points at exactly spacing from it
-            candidates.remove(idx)
-            dist = distance.cdist(
-                [coord_batch[idx]], coord_batch[candidates], "minkowski", p=p_norm
-            ).reshape(-1)
-            candidates = [
-                c for c, d in zip(candidates, dist, strict=True) if d < spacing
-            ]
+        if not rejected[idx]:
+            # `query_ball_point` is inclusive (``d <= spacing``); re-filter
+            # to strict ``d < spacing`` so points exactly `spacing` apart
+            # are kept.
+            cand = np.array(candidates)
+            cand = cand[cand != idx]
+            if len(cand):
+                diff = coord_batch[cand] - coord_batch[idx]
+                dist = np.linalg.norm(diff, ord=p_norm, axis=1)
+                rejected[cand[dist < spacing]] = True
 
-            # candidates.remove(keep)
-            rejected_peaks_indices.update(candidates)
             naccepted += 1
             if max_out is not None and naccepted >= max_out:
                 break
 
-    # Remove the peaks that are too close to each other
-    output = np.delete(coord_batch, tuple(rejected_peaks_indices), axis=0)
+    output = coord_batch[~rejected]
     if max_out is not None:
         output = output[:max_out]
 
@@ -271,6 +269,9 @@ def peak_local_max(
     min_distance : float, optional
         The minimal allowed distance separating peaks. To find the
         maximum number of peaks, use `min_distance=1`. See also `p_norm`.
+        When `labels` is provided, `min_distance` is enforced within
+        each label region only; peaks in different label regions are
+        not suppressed by their spatial distance.
     threshold_abs : float, optional
         Minimum intensity of peaks. By default, the absolute threshold is
         the minimum intensity of the image.
@@ -312,8 +313,9 @@ def peak_local_max(
     Returns
     -------
     output : ndarray of shape (N, D)
-        The coordinates of the peaks. ``N`` denotes the number of peaks and
-        ``D`` corresponds to the number of dimensions in `image`.
+        The coordinates of the peaks, sorted by descending peak intensity.
+        ``N`` denotes the number of peaks and ``D`` corresponds to the
+        number of dimensions in `image`.
 
     Notes
     -----
@@ -416,8 +418,7 @@ def peak_local_max(
             )
 
             # transform coordinates in global image indices space
-            for idx, s in enumerate(roi):
-                coordinates[:, idx] += s.start
+            coordinates += [s.start for s in roi]
 
             labels_peak_coord.append(coordinates)
 
@@ -426,11 +427,13 @@ def peak_local_max(
         else:
             coordinates = np.empty((0, image.ndim), dtype=int)
 
-        if num_peaks is not None and len(coordinates) > num_peaks:
-            out = np.zeros_like(image, dtype=bool)
-            out[tuple(coordinates.T)] = True
-            coordinates = _get_high_intensity_peaks(
-                image, out, num_peaks, min_distance, p_norm
-            )
+        if len(coordinates):
+            # Globally sort by descending intensity. When `labels` is given,
+            # `min_distance` is enforced per label (above) but not across
+            # labels — `labels` define independent search regions.
+            intensities = image[tuple(coordinates.T)]
+            coordinates = coordinates[np.argsort(-intensities, stable=True)]
+            if num_peaks is not None and len(coordinates) > num_peaks:
+                coordinates = coordinates[:num_peaks]
 
     return coordinates

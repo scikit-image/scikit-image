@@ -111,6 +111,9 @@ def peak_local_max(
     min_distance : float, optional
         The minimal allowed distance separating peaks. To find the
         maximum number of peaks, use `min_distance=1`.
+        When `labels` is provided, `min_distance` is enforced within
+        each label region only; peaks in different label regions are
+        not suppressed by their spatial distance.
     threshold_abs : float or None, optional
         Minimum intensity of peaks. By default, the absolute threshold is
         the minimum intensity of the image.
@@ -152,7 +155,7 @@ def peak_local_max(
     Returns
     -------
     output : ndarray
-        The coordinates of the peaks.
+        The coordinates of the peaks, sorted by descending peak intensity.
 
     Notes
     -----
