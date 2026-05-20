@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Script to build migration guide from docstrings
 
-The script harvests the migration docstrings from the Scikit-image source, and
+The script harvests the migration docstrings from the scikit-image source, and
 writes the migration guide ReST page, using the given Jinja2 template.
 """
 
