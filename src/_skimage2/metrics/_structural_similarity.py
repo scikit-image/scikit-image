@@ -7,6 +7,7 @@ from _skimage2._shared import utils
 from _skimage2._shared._warnings import warn_external
 from _skimage2._shared.filters import gaussian
 from _skimage2._shared.utils import _supported_float_type, check_shape_equality
+from _skimage2.util._array_api import array_namespace, xp_size
 
 __all__ = ['structural_similarity']
 
@@ -111,11 +112,13 @@ def structural_similarity(
     # TODO Undo inlined imports once available in _skimage2 namespace
     from skimage.util.arraycrop import crop
 
+    xp = array_namespace(im1, im2)
+
     if im1.dtype != im2.dtype:
         warn_external("Inputs have mismatched dtypes")
 
     check_shape_equality(im1, im2)
-    float_type = _supported_float_type(im1.dtype)
+    float_type = _supported_float_type(im1.dtype, xp=xp)
 
     if channel_axis is not None:
         # loop over channels
@@ -132,12 +135,12 @@ def structural_similarity(
             sigma=sigma,
         )
         nch = im1.shape[channel_axis]
-        mssim = np.empty(nch, dtype=float_type)
+        mssim = xp.empty(nch, dtype=float_type)
 
         if gradient:
-            G = np.empty(im1.shape, dtype=float_type)
+            G = xp.empty(im1.shape, dtype=float_type)
         if full:
-            S = np.empty(im1.shape, dtype=float_type)
+            S = xp.empty(im1.shape, dtype=float_type)
         channel_axis = channel_axis % im1.ndim
         _at = functools.partial(utils.slice_at_axis, axis=channel_axis)
         for ch in range(nch):
@@ -183,7 +186,7 @@ def structural_similarity(
     elif win_size is None:
         win_size = 7  # backwards compatibility
 
-    if np.any((np.asarray(im1.shape) - win_size) < 0):
+    if xp.any((xp.asarray(im1.shape) - win_size) < 0):
         raise ValueError(
             'win_size exceeds image extent. '
             'Either ensure that your images are '
@@ -208,8 +211,8 @@ def structural_similarity(
         filter_args = {'size': win_size}
 
     # ndimage filters need floating point data
-    im1 = im1.astype(float_type, copy=False)
-    im2 = im2.astype(float_type, copy=False)
+    im1 = xp.astype(im1, float_type, copy=False)
+    im2 = xp.astype(im2, float_type, copy=False)
 
     NP = win_size**ndim
 
@@ -248,14 +251,14 @@ def structural_similarity(
     pad = (win_size - 1) // 2
 
     # compute (weighted) mean of ssim. Use float64 for accuracy.
-    mssim = crop(S, pad).mean(dtype=np.float64)
+    mssim = xp.mean(crop(S, pad), dtype=xp.float64)
 
     if gradient:
         # The following is Eqs. 7-8 of Avanaki 2009.
         grad = filter_func(A1 / D, **filter_args) * im1
         grad += filter_func(-S / B2, **filter_args) * im2
         grad += filter_func((ux * (A2 - A1) - uy * (B2 - B1) * S) / D, **filter_args)
-        grad *= 2 / im1.size
+        grad *= 2 / xp_size(im1)
 
         if full:
             return mssim, grad, S
