@@ -1,5 +1,4 @@
 # Makefile for Sphinx documentation
-#
 
 # You can set these variables from the command line.
 PYTHON        ?= python
@@ -52,7 +51,7 @@ api:
 
 migration-doc: $(MIGRATION_TPL)
 	@echo -n "Build migration doc..."
-	$(PYTHON) tools/build_migration.py $<
+	$(PYTHON) tools/write_migration_guide.py $<
 	@echo "done."
 
 migration-test:
