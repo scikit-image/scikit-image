@@ -100,19 +100,21 @@ Use an editable install (`spin install`) which supports this or avoid passing
 
 
 def _is_wheel_install():
-    """Return True if skimage is installed as a wheel outside the repo tree.
+    """Return True if skimage is installed as a (non-editable) wheel.
 
-    Imports skimage and checks whether its location is outside the repo root.
-    Returns False if skimage is not yet importable (meson build dir not set up),
-    or if it lives inside the repo (editable install or meson build output).
+    Checks whether skimage lives in a ``site-packages`` directory, which is
+    always true for wheel installs regardless of where the venv is located
+    (including venvs inside the repo tree such as ``.venv/``).
+    Returns False if skimage is not yet importable (meson build dir not set up)
+    or if it is an editable install pointing at this source tree.
     """
+    if _is_editable_install_of_same_source("scikit-image"):
+        return False
     try:
         import skimage
     except ImportError:
         return False
-    repo_root = Path(_REPO_ROOT).resolve()
-    skimage_path = Path(skimage.__path__[0]).resolve()
-    return repo_root not in skimage_path.parents
+    return 'site-packages' in Path(skimage.__path__[0]).parts
 
 
 def _get_skimage_subpackages(build_dir=None):
