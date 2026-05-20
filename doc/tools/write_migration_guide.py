@@ -1,5 +1,9 @@
 #!/usr/bin/env python
-"""Script to build migration guide from docstrings"""
+"""Script to build migration guide from docstrings
+
+The script harvests the migration docstrings from the Scikit-image source, and
+writes the migration guide ReST page, using the given Jinja2 template.
+"""
 
 import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
@@ -7,19 +11,7 @@ from pathlib import Path
 
 from jinja2 import Template
 
-from migration_utils import get_doc_dicts, run_doctests
-
-
-class TrackerDict(dict):
-    """Dict that keeps check on keys that have been accessed."""
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.not_accessed_keys = set(self)
-
-    def __getitem__(self, key):
-        self.not_accessed_keys.discard(key)
-        return super().__getitem__(key)
+from migration_utils import TrackerDict, get_doc_dicts, run_doctests
 
 
 def write_migration(in_tpl, doc_dict, out_path=None):

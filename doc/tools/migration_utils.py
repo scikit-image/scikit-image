@@ -1,4 +1,10 @@
-"""Utilities for migration CLI tools"""
+"""Utilities for migration command line tools
+
+Routines to service tools for:
+
+* Filling migration guide from migration docstrings, and
+* Executing examples in migration docstrings.
+"""
 
 import doctest
 from functools import partial
@@ -10,6 +16,18 @@ RUNNER = doctest.DocTestRunner()
 
 def _append_msgs(msg_str, messages=[]):
     messages.append(msg_str)
+
+
+class TrackerDict(dict):
+    """Dict that keeps check on keys that have been accessed."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.not_accessed_keys = set(self)
+
+    def __getitem__(self, key):
+        self.not_accessed_keys.discard(key)
+        return super().__getitem__(key)
 
 
 def run_doctest(func_name, doc):
