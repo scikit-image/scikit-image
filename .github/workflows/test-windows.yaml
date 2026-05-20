@@ -109,6 +109,10 @@ jobs:
           fi
           spin test --doctest $MODIFIED_FLAG
 
+      - name: Doctest skimage2 migration
+        run: |
+          spin run -- python doc/tools/run_migration_doctests.py
+
       - name: "Job has failed: reporting"
         if: ${{ failure() && github.ref == 'refs/heads/main' }}
         uses: JasonEtco/create-an-issue@1b14a70e4d8dc185e5cc76d3bec9eab20257b2c5 # v2.9.2

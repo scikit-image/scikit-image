@@ -84,6 +84,10 @@ jobs:
           fi
           spin test --no-doctest $MODIFIED_FLAG
 
+      - name: Doctest skimage2 migration
+        run: |
+          spin run -- python doc/tools/run_migration_doctests.py
+
       - name: Check benchmarks
         run: |
           spin asv -- check -v -E existing
