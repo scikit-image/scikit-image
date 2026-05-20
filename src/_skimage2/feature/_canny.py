@@ -5,8 +5,6 @@ Reference: Canny, J., A Computational Approach To Edge Detection, IEEE Trans.
     Pattern Analysis and Machine Intelligence, 8:679-714, 1986
 """
 
-# TEMP: trigger a partial test
-
 import numpy as np
 import scipy.ndimage as ndi
 
