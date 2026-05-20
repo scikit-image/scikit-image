@@ -361,17 +361,18 @@ You can also use ``--test-modified`` locally to replicate this CI behaviour:
     # Include doctests for modified subpackages
     spin test --test-modified --doctest
 
-If you are testing against a pip-installed wheel (rather than a spin/meson
-build), pass ``--installed`` so that pytest is invoked directly without
-the spin build-environment wrapper:
+``spin test`` automatically detects whether scikit-image is installed as a
+wheel (e.g. via ``spin install``) or being tested from a meson build
+directory.  To test a pip-installed wheel, install it first and then run
+``spin test`` as usual:
 
 .. code-block:: shell
 
     spin install
-    spin test --installed -- tests/skimage/morphology
+    spin test -- tests/skimage/morphology
 
     # Combine with --test-modified to run only changed subpackages
-    spin test --installed --test-modified
+    spin test --test-modified
 
 
 Warnings during testing phase

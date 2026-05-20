@@ -1,6 +1,7 @@
 import os
 import subprocess
 import sys
+from pathlib import Path
 
 import click
 import spin
@@ -96,6 +97,22 @@ Use an editable install (`spin install`) which supports this or avoid passing
     spin test -- src/skimage/io  # NO!
     spin test -- skimage.io      # YES!
 """
+
+
+def _is_wheel_install():
+    """Return True if skimage is installed as a wheel outside the repo tree.
+
+    Imports skimage and checks whether its location is outside the repo root.
+    Returns False if skimage is not yet importable (meson build dir not set up),
+    or if it lives inside the repo (editable install or meson build output).
+    """
+    try:
+        import skimage
+    except ImportError:
+        return False
+    repo_root = Path(_REPO_ROOT).resolve()
+    skimage_path = Path(skimage.__path__[0]).resolve()
+    return repo_root not in skimage_path.parents
 
 
 def _get_skimage_subpackages(build_dir=None):
@@ -240,16 +257,6 @@ def _get_test_paths(changed_subpackages, doctest, installed=False):
 
 
 @click.option(
-    "--installed",
-    is_flag=True,
-    default=False,
-    help=(
-        "Run tests against an installed package (e.g. a pip-installed wheel) "
-        "instead of a spin/meson build directory. "
-        "Pytest is invoked directly without any spin build-environment setup."
-    ),
-)
-@click.option(
     "--test-modified",
     is_flag=True,
     default=False,
@@ -267,7 +274,6 @@ def _get_test_paths(changed_subpackages, doctest, installed=False):
 def test(
     *,
     parent_callback,
-    installed=False,
     test_modified=False,
     doctest=False,
     base_ref=None,
@@ -275,9 +281,13 @@ def test(
 ):
     pytest_args = kwargs.get('pytest_args', ())
 
+    # Detect whether we're running against a pip-installed wheel by checking
+    # whether skimage's location is outside the repo tree.  If skimage is not
+    # yet importable (meson build dir not on sys.path) this returns False and
+    # spin will set up PYTHONPATH via parent_callback as usual.
+    installed = _is_wheel_install()
+
     # For out-of-tree builds, src/ paths don't work as doctest collection paths.
-    # Short-circuits when installed=True so _is_editable_install_of_same_source is
-    # never called in that mode.
     is_out_of_tree_build = not installed and not _is_editable_install_of_same_source(
         "scikit-image"
     )

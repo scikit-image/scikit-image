@@ -193,9 +193,10 @@ convention = 'numpy'
 # pythonpath requires pytest >= 7.0; --strict-config (in addopts) would error
 # on startup with older versions anyway.
 minversion = "7.0"
-# Add the repo root so that `import skimage2` resolves to src/skimage2 during
-# in-tree test runs (spin/editable installs).  Without this, skimage2 is only
-# importable if the package is installed.
+# Add the repo root to sys.path so pytest can import from the ``tests/``
+# directory without requiring ``__init__.py`` files in every subdirectory.
+# It does not affect ``src/``; packages there are found via the installed
+# wheel or the meson build directory (set up by spin).
 pythonpath = ["."]
 addopts = [
     "-ra",
