@@ -121,7 +121,7 @@ jobs:
 
       - name: Doctest skimage2 migration
         run: |
-          python doc/tools/doctest_migration.py
+          python doc/tools/run_migration_doctests.py
 
       - name: Check benchmarks
         run: |
