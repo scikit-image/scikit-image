@@ -106,7 +106,7 @@ optional_free_threaded = [
 test = [
     'numpydoc>=1.7',
     'pooch>=1.6.0; sys_platform != "emscripten"',
-    'pytest>=8.3',
+    'pytest>=9',
     'pytest-cov>=2.11.0',
     'pytest-pretty',
     'pytest-localserver',
@@ -202,7 +202,6 @@ addopts = [
     "-ra",
     "--strict-config",
     "--strict-markers",
-    "--maxfail=5",
     "--showlocals",
     # Necessary for doctest collection with editable installations and
     # non-unique test module names (skimage/skimage2 duplicates those)

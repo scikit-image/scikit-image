@@ -57,7 +57,7 @@ migration-doc: $(MIGRATION_TPL)
 
 migration-test:
 	@echo -n "Run migration tests..."
-	$(PYTHON) tools/doctest_migration.py
+	$(PYTHON) tools/run_migration_doctests.py
 	@echo "done."
 
 html: migration-doc api
