@@ -1,9 +1,10 @@
 """Utilities for migration command line tools
 
-Routines to service tools for:
+Routines that support tools for:
 
-* Filling migration guide from migration docstrings, and
-* Executing examples in migration docstrings.
+* Collecting migration docstrings from scikit-image source, and
+* Filling the migration guide from collected docstrings, and
+* Executing examples from collected docstrings.
 """
 
 import doctest
