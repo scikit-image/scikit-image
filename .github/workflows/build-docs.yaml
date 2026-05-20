@@ -16,11 +16,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
         with:
           persist-credentials: false
       - name: Install Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
         with:
           python-version: "3.12"
           cache: "pip"
@@ -59,7 +59,7 @@ jobs:
           DEPLOY_KEY: ${{ secrets.DOC_DEPLOY_KEY_PRIVATE }}
           GIT_SSH_COMMAND: "ssh -o StrictHostKeyChecking=no"
       - name: Store docs as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: docs
           path: doc/build/html
