@@ -123,7 +123,7 @@ def _is_wheel_install():
     except Exception:
         pass
 
-    return any("WHEEL" in str(f) for f in dist.files)
+    return any("WHEEL" in str(f) for f in (dist.files or []))
 
 
 def _get_skimage_subpackages(build_dir=None):
