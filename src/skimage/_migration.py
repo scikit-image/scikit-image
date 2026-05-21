@@ -239,10 +239,10 @@ class Skimage2Migration:
             # Not given, try to guess if not ambiguous
             candidates = _public_api_names(func)
             if not candidates:
-                msg = f"could not determine `old_qname` for {func!r}, set explicitly"
+                msg = f"could not determine `qname_old` for {func!r}, set explicitly"
                 raise RuntimeError(msg)
             if len(candidates) > 1:
-                msg = f"multiple matches for `old_qname` for {func!r}, set explicitly"
+                msg = f"multiple matches for `qname_old` for {func!r}, set explicitly"
                 raise RuntimeError(msg)
             qname_old = candidates[0]
 
