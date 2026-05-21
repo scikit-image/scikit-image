@@ -960,24 +960,37 @@ class ProjectiveTransform(_HMatrixTransform):
     In what follows, ``x`` refers to coordinates from the first coordinate
     axis, and ``y`` refers to coordinates from the second coordinate axis.
 
-    For each homogeneous coordinate :math:`\mathbf{{x}} = [x, y, 1]^T`, its
-    target position is calculated by multiplying with the given matrix,
-    :math:`H`, to give :math:`H \mathbf{{x}}`::
+    For each homogeneous coordinate vector :math:`\mathbf{{v}} = [x, y, 1]^T`,
+    its target position is calculated by multiplying with the given matrix,
+    :math:`H`::
 
       [[a0 a1 a2]
        [b0 b1 b2]
-       [c0 c1 1 ]].
+       [c0 c1 1 ]]
 
-    E.g., to rotate by theta degrees, the matrix should be::
+    to give the output vector :math:`H \mathbf{{v}}`::
+
+      [[x * a0 + y * a1 + a2]
+       [x * b0 + y * b1 + b2]
+       [x * c0 + y * c1 + 1]]
+
+    For example, to rotate by theta degrees, the matrix :math:`\mathbf:{{H}}`
+    should be::
 
       [[cos(theta) -sin(theta) 0]
        [sin(theta)  cos(theta) 0]
-       [0            0         1]]
+       [0            0         1]].
 
-    Whether this will appear as a clockwise or counterclockwise rotation will
-    depend on which coordinate convention is used; see the Notes section.
+    Whether this will appear as a counter-clockwise or clockwise rotation in
+    terms of an image array, will depend on your input coordinates; if the
+    first column in your coordinate array has coordinates in terms of the
+    first image (array) axis, then the ``x`` coordinates above correspond to
+    the first (row, ``i``) axis in the image array. In that case the rotation
+    applied to the coordinates is *counter-clockwise*. If the first column has
+    coordinates from the second image array axis, then the rotation is
+    *clockwise*.
 
-    To translate ``x`` by 10 and ``y`` by 20::
+    To translate ``x`` (first coordinate axis) by 10 and ``y`` by 20::
 
       [[1 0 10]
        [0 1 20]
