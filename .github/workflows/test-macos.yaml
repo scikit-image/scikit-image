@@ -66,7 +66,6 @@ jobs:
       - name: Install and configure ccache
         run: |
           echo "$(brew --prefix)/opt/ccache/libexec" >> $GITHUB_PATH
-          ccache --zero-stats
 
       - name: Restore/save ccache
         uses: actions/cache@v4
@@ -75,6 +74,9 @@ jobs:
           key: ccache-${{ runner.os }}-py${{ matrix.python-version }}-${{ github.sha }}
           restore-keys: |
             ccache-${{ runner.os }}-py${{ matrix.python-version }}-
+
+      - name: Zero ccache stats
+        run: ccache --zero-stats
 
       - name: Install build dependencies
         run: |
