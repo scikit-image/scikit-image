@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from .._shared.filters import gaussian
+from ..filters._gaussian import gaussian
 from .._shared._warnings import warn_external
 
 
@@ -101,10 +101,7 @@ def binary_blobs(
 
     mask[tuple(points)] = 1
     mask = gaussian(
-        mask,
-        sigma=0.25 * min_length * blob_size_fraction,
-        preserve_range=False,
-        mode=boundary_mode,
+        mask, sigma=0.25 * min_length * blob_size_fraction, mode=boundary_mode
     )
     threshold = np.quantile(mask, 1 - volume_fraction)
     blobs = mask >= threshold
