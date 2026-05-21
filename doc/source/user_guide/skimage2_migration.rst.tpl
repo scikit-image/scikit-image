@@ -115,7 +115,6 @@ The new counterparts behave differently in the following ways:
 {{ format_advice(title) }}
 {% endfor %}
 
-
 Deprecations prior to skimage2
 ==============================
 
