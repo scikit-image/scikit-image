@@ -241,17 +241,21 @@ class Skimage2Migration:
             # Not given, try to guess if not ambiguous
             candidates = _public_api_names(func)
             if not candidates:
-                msg = f"could not determine `qname_old` for {func!r}, set explicitly"
+                msg = f"could not determine for {func!r}, set `qname_old` explicitly"
                 raise RuntimeError(msg)
             if len(candidates) > 1:
-                msg = f"multiple matches for `qname_old` for {func!r}, set explicitly"
+                msg = (
+                    f"multiple candidates for {func!r},"
+                    f"set `qname_old` explicitly: {candidates=}"
+                )
                 raise RuntimeError(msg)
             qname_old = candidates[0]
 
-        # At this point `qname_old` should contain the name of the given `func`
-        # and no private prefixes
+        # At this point `qname_old` should contain the name of the given `func`,
+        # no private prefixes, and no references to local scopes
         assert func.__qualname__ in qname_old, (func.__qualname__, qname_old)
         assert "._" not in qname_old, qname_old
+        assert "<locals>" not in qname_old, qname_old
 
         if qname_new is None:
             qname_new = _SKI1PREFIX_RE.sub(r'skimage2.', qname_old)
