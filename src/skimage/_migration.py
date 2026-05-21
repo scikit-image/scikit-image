@@ -94,8 +94,10 @@ def _public_api_names(obj):
     """Find the public name(s) of an object as advertised by ``__all__``.
 
     scikit-image advertises its public API with the help of ``__all__`` in its
-    modules. This function tries to match the ``__module__`` and the
-    ``__qualname__`` of the given `obj` to this structure.
+    modules. At the point at which any given module is being instantiated, its
+    parent modules will have already defined their ``__all__`` attributes. This
+    function looks for its own ``__qualname__`` in the ``__all__`` entries of
+    its parent modules.
 
     Parameters
     ----------
@@ -104,8 +106,8 @@ def _public_api_names(obj):
     Returns
     -------
     public_matches : list of str
-        "Paths" to the given `obj` that are advertised and reachable through
-        ``__all__``
+        Full dotted paths to the given `obj` that are advertised and reachable
+        through ``__all__`` in parent modules.
 
     Examples
     --------
@@ -118,7 +120,7 @@ def _public_api_names(obj):
     ['skimage.filters.rank.autolevel', 'skimage.filters.rank.generic.autolevel']
     """
     qualname = obj.__qualname__
-    name_in_module, *_ = qualname.partition(".")
+    base_name_in_module, *_ = qualname.partition(".")
     all_parents = obj.__module__.split(".")
 
     matches = []
@@ -130,7 +132,7 @@ def _public_api_names(obj):
             # Module doesn't advertise any public API, abort
             break
 
-        if name_in_module in module.__all__:
+        if base_name_in_module in module.__all__:
             public_name = f"{module.__name__}.{qualname}"
             matches.append(public_name)
 
