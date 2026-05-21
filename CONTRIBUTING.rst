@@ -36,26 +36,33 @@ can be contributed to scikit-image.
      <https://github.com/scikit-image/scikit-image>`_ and click the
      "fork" button to create your own copy of the project.
 
+   * `Set up GitHub SSH authentication <https://help.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh>`__.
+
    * Clone (download) the repository with the project source on your local computer::
 
-      git clone https://github.com/your-username/scikit-image.git
+      git clone --origin upstream git@github.com:scikit-image/scikit-image
 
    * Change into the root directory of the cloned repository::
 
       cd scikit-image
 
-   * Add the upstream repository::
+   * Add your fork as a
+     `remote repository <https://git-scm.com/book/en/v2/Git-Basics-Working-with-Remotes>`__
+     that you will interact with.
 
-      git remote add upstream https://github.com/scikit-image/scikit-image.git
+     Assuming a GitHub username of `codemonkey`::
 
-   * Now, you have remote repositories named:
+        git remote add codemonkey git@github.com:codemonkey/scikit-image
+        git fetch codemonkey
 
-     - ``upstream``, which refers to the ``scikit-image`` repository, and
-     - ``origin``, which refers to your personal fork.
+   * You now have two remote repositories:
+
+     - ``upstream``, which refers to the ``scikit-image`` project repository, and
+     - ``codemonkey``, which refers to your personal fork.
 
    * Next, :ref:`set up your build environment <build-env-setup>`.
 
-   * Finally, we recommend that you use a pre-commit hook, which runs code
+   * Finally, we recommend that you use our pre-commit hook, which runs code
      checkers and formatters each time you do a ``git commit``::
 
        pip install pre-commit
@@ -63,39 +70,43 @@ can be contributed to scikit-image.
 
 2. Develop your contribution:
 
-   * Pull the latest changes from upstream::
+   * Pull the latest changes from the project::
 
-      git checkout main
-      git pull upstream main
+      git switch main
+      git fetch upstream main
+      git merge upstream/main
 
    * Create a branch for the feature you want to work on. Use a sensible name,
      such as 'transform-speedups'::
 
-      git checkout -b transform-speedups
+      git switch -c transform-speedups
 
    * Commit locally as you progress (with ``git add`` and ``git commit``).
      Please write `good commit messages
      <https://vxlabs.com/software-development-handbook/#good-commit-messages>`_.
 
+   * It is a good idea to read our :ref:`guidelines` at this point.
+     While we don't require a contribution to meet every guideline from the
+     start, they will come up during review.
+
 3. To submit your contribution:
 
    * Push your changes back to your fork on GitHub::
 
-      git push origin transform-speedups
+       git push codemonkey transform-speedups
 
-   * Enter your GitHub username and password (repeat contributors or advanced
-     users can remove this step by `connecting to GitHub with SSH
-     <https://help.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh>`_).
+     A message will be displayed with a URL to open in your browser to create a
+     pull request (PR).
 
-   * Go to GitHub. The new branch will show up with a green "pull request"
-     button -- click it.
+   * Before submitting the pull request:
 
-   * If you want, post on the `developer forum
-     <https://discuss.scientific-python.org/c/contributor/skimage>`_ to explain your changes or
-     to ask for review.
+     - Use a concise, descriptive title
+     - Describe and link relevant context in the description
+     - Disclose all *generative* tools (AI, LLMs, agents) that you used, see our
+       :ref:`ai-policy` for details.
 
-For a more detailed discussion, read these :doc:`detailed documents
-<../gitwash/index>` on how to use Git with ``scikit-image`` (:ref:`using-git`).
+   .. tip:: If you get stuck, reach out to us on
+      `our Zulip chat <https://skimage.zulipchat.com/>`__.
 
 4. Review process:
 
@@ -107,18 +118,23 @@ For a more detailed discussion, read these :doc:`detailed documents
      overall code quality benefits.  Therefore, please don't let the review
      discourage you from contributing: its only aim is to improve the quality
      of the project, not to criticize (we are, after all, very grateful for the
-     time you're donating!).
+     time you're putting in!).
 
    * To update your pull request, make your changes on your local repository
      and commit. As soon as those changes are pushed up (to the same branch as
      before) the pull request will update automatically.
 
-   * Continuous integration (CI) services are triggered after each pull request
-     submission to build the package, run unit tests, measure code coverage,
-     and check the coding style (PEP8) of your branch. The tests must pass
-     before your PR can be merged. If CI fails, you can find out why by
-     clicking on the "failed" icon (red cross) and inspecting the build and
-     test logs.
+   * Continuous integration (CI) services are triggered after each
+     pull request submission to build the package, run unit tests, and
+     check the coding style and formatting of your branch. The tests
+     must pass before your PR can be merged. If CI fails, you can find
+     out why by clicking on the "failed" icon (red cross) and
+     inspecting the build and test logs.
+
+     .. note:: PR labeling
+
+        CI will always fail on new PRs, until a maintainer adds a
+        suitable category label.
 
    * A pull request must be approved by two core team members before merging.
 
@@ -160,40 +176,41 @@ be merged automatically, merge the main branch into yours::
    git fetch upstream main
    git merge upstream/main
 
-If any conflicts occur, they need to be fixed before continuing.  See
-which files are in conflict using::
+If any conflicts occur, they need to be `fixed before continuing
+<https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/addressing-merge-conflicts/resolving-a-merge-conflict-using-the-command-line>`__.
 
-   git status
+`We recommend <https://github.com/stefanv/git-tools?tab=readme-ov-file#conflict-diff-display>`__ setting::
 
-Which displays a message like::
+  git config --global merge.conflictstyle zdiff3
 
-   Unmerged paths:
-     (use "git add <file>..." to mark resolution)
+to make conflict markers easier to read.
 
-     both modified:   file_with_conflict.txt
+An alternative to merging is to rebase your branch—but we squash and merge all
+PRs anyway, so we don't mind merge commits.
 
-Inside the conflicted file, you'll find sections like these::
+.. _ai-policy:
 
-   The way the text looks in your branch
+AI Policy
+---------
+Regardless of how a PR was produced, scikit-image requires that
+authors illustrate a thorough understanding of any proposed changes.
+You **must review such code line-by-line**—it is **your
+responsibility** to ensure that it is correct, and that it does not
+breach copyright. You should expect the team to ask questions about
+your work.
 
-Choose one version of the text that should be kept, and delete the
-rest::
+scikit-image is technically complex, key infrastructure; therefore, we
+place a high premium on correctness, and on avoiding technical
+complexity that may affect maintainability. If you want to make use of
+LLMs in a significant way, it is a good idea to **check in with us
+first**. Regardless, **always declare tool usage**.
 
-   The way the text looks in your branch
+AI agents that have followed all guidelines in this document (outside
+of this section) may add 🤖 to their PR title. This signals to
+maintainers that the agent has self-verified compliance, enabling
+expedited review and acceptance.
 
-Now, add the fixed file::
-
-   git add file_with_conflict.txt
-
-Once you've fixed all merge conflicts, do::
-
-   git commit
-
-.. note::
-
-   Advanced Git users are encouraged to `rebase instead of merge
-   <https://scikit-image.org/docs/dev/gitwash/development_workflow.html#rebasing-on-trunk>`__,
-   but we squash and merge most PRs either way.
+.. _guidelines:
 
 Guidelines
 ----------
@@ -217,12 +234,6 @@ Guidelines
 Stylistic Guidelines
 --------------------
 
-* Set up your editor to remove trailing whitespace.  Follow `PEP08
-  <https://www.python.org/dev/peps/pep-0008/>`__.
-
-* Use numpy data types instead of strings (``np.uint8`` instead of
-  ``"uint8"``).
-
 * Use the following import conventions::
 
    import numpy as np
@@ -233,11 +244,10 @@ Stylistic Guidelines
    sp.ndimage.label(...)
    ski.measure.label(...)
 
-   # only in Cython code
-   cimport numpy as cnp
-   cnp.import_array()
+* Use numpy data types instead of strings (``np.uint8`` instead of
+  ``"uint8"``).
 
-* When documenting array parameters, use ``image : (M, N) ndarray``
+* When documenting array parameters, use ``image : ndarray of shape (M, N)``
   and then refer to ``M`` and ``N`` in the docstring, if necessary.
 
 * Refer to array dimensions as (plane), row, column, not as x, y, z. See
@@ -251,18 +261,243 @@ Stylistic Guidelines
 
    hough(canny(my_image))
 
-* Use ``Py_ssize_t`` as data type for all indexing, shape and size variables
-  in C/C++ and Cython code.
-
 * Use relative module imports, i.e. ``from .._shared import xyz`` rather than
   ``from skimage._shared import xyz``.
 
-* Wrap Cython code in a pure Python function, which defines the API. This
-  improves compatibility with code introspection tools, which are often not
-  aware of Cython code.
+* For Cython functions:
 
-* For Cython functions, release the GIL whenever possible, using
-  ``with nogil:``.
+  - Release the GIL whenever possible, using  ``with nogil:``.
+  - Wrap Cython code in a pure Python function, which defines the
+    API. This improves compatibility with code introspection tools,
+    which are often not aware of Cython code.
+
+* Use ``Py_ssize_t`` as data type for all indexing, shape and size variables
+  in C/C++ and Cython code.
+
+Installation
+------------
+
+Your system needs a:
+
+- C compiler,
+- C++ compiler, and
+- a version of Python supported by ``scikit-image`` (see
+  `pyproject.toml <https://github.com/scikit-image/scikit-image/blob/main/pyproject.toml#L14>`_).
+
+First, `fork the scikit-image repository on GitHub <https://github.com/scikit-image/scikit-image/fork>`_.
+Then clone your fork locally and set an ``upstream`` remote to point to the original scikit-image repository:
+
+.. note::
+
+    We use ``git@github.com`` below; if you don't have SSH keys setup, use
+    ``https://github.com`` instead.
+
+.. code-block:: sh
+
+   git clone git@github.com:YOURUSERNAME/scikit-image
+   cd scikit-image
+   git remote add upstream git@github.com:scikit-image/scikit-image
+
+All commands below are run from within the cloned ``scikit-image`` directory.
+
+.. _build-env-setup:
+
+Build environment setup
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Set up a Python development environment tailored for scikit-image.
+Here we provide instructions for two popular environment managers:
+``venv`` (pip) and ``conda`` (miniforge).
+
+venv
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+.. code-block:: sh
+
+  # Create a virtualenv named ``skimage-dev`` that lives outside of the repository.
+  # One common convention is to place it inside an ``envs`` directory under your home directory:
+  mkdir ~/envs
+  python -m venv ~/envs/skimage-dev
+
+  # Activate it
+  # (On Windows, use ``skimage-dev\Scripts\activate``)
+  source ~/envs/skimage-dev/bin/activate
+
+  # Install development dependencies
+  pip install -r requirements.txt
+
+  # Install scikit-image in editable mode. In editable mode,
+  # scikit-image will be recompiled, as necessary, on import.
+  spin install -v
+
+.. tip::
+
+    The above installs scikit-image into your environment, which makes
+    it accessible to IDEs, IPython, etc.
+    This is not strictly necessary; you can also build with:
+
+    .. code-block:: sh
+
+        spin build
+
+    In that case, the library is not installed, but is accessible via
+    ``spin`` commands, such as ``spin test``, ``spin ipython``, ``spin run``,
+    etc.
+
+conda
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+We recommend installing conda using
+`miniforge <https://github.com/conda-forge/miniforge>`_,
+an alternative to Anaconda without licensing costs.
+
+After installing miniforge:
+
+.. code-block:: sh
+
+  # Create a conda environment with required dependencies
+  conda env create -f environment.yml
+
+  # Activate it
+  conda activate skimage-dev
+
+  # Install scikit-image in editable mode. In editable mode,
+  # scikit-image will be recompiled, as necessary, on import.
+  spin install -v
+
+.. tip::
+
+    The above installs scikit-image into your environment, which makes
+    it accessible to IDEs, IPython, etc.
+    This is not strictly necessary; you can also build with:
+
+    .. code-block:: sh
+
+        spin build
+
+    In that case, the library is not installed, but is accessible via
+    ``spin`` commands, such as ``spin test``, ``spin ipython``, ``spin run``,
+    etc.
+
+Adding a feature branch
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+When contributing a new feature, do so via a feature branch.
+
+First, fetch the latest source:
+
+.. code-block:: sh
+
+   git switch main
+   git pull upstream main
+
+Create your feature branch:
+
+.. code-block:: sh
+
+   git switch --create my-feature-name
+
+Using an editable install, ``scikit-image`` will rebuild itself as
+necessary.
+If you are building manually, rebuild with::
+
+.. code-block:: sh
+
+   spin build
+
+Repeated, incremental builds usually work just fine, but if you notice build
+problems, rebuild from scratch using:
+
+.. code-block:: sh
+
+   spin build --clean
+
+Platform-specific notes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Windows**
+
+Building ``scikit-image`` on Windows is done as part of our continuous
+integration testing; the steps are shown in this `Azure Pipeline`_.
+
+.. _Azure Pipeline: https://github.com/scikit-image/scikit-image/blob/main/azure-pipelines.yml
+
+**Debian and Ubuntu**
+
+Install suitable compilers prior to library compilation:
+
+.. code-block:: sh
+
+  sudo apt-get install build-essential
+
+
+Full requirements list
+^^^^^^^^^^^^^^^^^^^^^^
+**Build Requirements**
+
+.. include:: ../../../requirements/build.txt
+   :literal:
+
+**Runtime Requirements**
+
+.. include:: ../../../requirements/default.txt
+   :literal:
+
+**Test Requirements**
+
+.. include:: ../../../requirements/test.txt
+   :literal:
+
+**Documentation Requirements**
+
+.. include:: ../../../requirements/docs.txt
+   :literal:
+
+**Developer Requirements**
+
+.. include:: ../../../requirements/developer.txt
+   :literal:
+
+**Data Requirements**
+
+The full selection of demo datasets is only available with the
+following installed:
+
+.. include:: ../../../requirements/data.txt
+   :literal:
+
+**Optional Requirements**
+
+You can use ``scikit-image`` with the basic requirements listed above, but some
+functionality is only available with the following installed:
+
+* `Matplotlib <https://matplotlib.org>`__
+  Used in various functions, e.g., for drawing, segmenting, reading images.
+
+* `Dask <https://dask.org/>`__
+  The ``dask`` module is used to parallelize certain functions.
+
+More rarely, you may also need:
+
+* `PyAMG <https://pyamg.org/>`__
+  The ``pyamg`` module is used for the fast ``cg_mg`` mode of random
+  walker segmentation.
+
+* `Astropy <https://www.astropy.org>`__
+  Provides FITS I/O capability.
+
+* `SimpleITK <http://www.simpleitk.org/>`__
+  Optional I/O plugin providing a wide variety of `formats <https://itk.org/Wiki/ITK_File_Formats>`__.
+  including specialized formats used in biomedical imaging.
+
+.. include:: ../../../requirements/optional.txt
+  :literal:
+
+Help with contributor installation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+See :ref:`additional-help`.
+
 
 Testing
 -------
@@ -270,24 +505,72 @@ Testing
 The test suite must pass before a pull request can be merged, and
 tests should be added to cover all modifications in behavior.
 
-We use the `pytest <https://docs.pytest.org/en/latest/>`__ testing
-framework, with tests located in the various
-``skimage/submodule/tests`` folders.
+Tests are located in the ``tests/`` directory.
+We also test examples in docstrings of our package (located in ``src/``).
 
-Testing requirements are listed in `requirements/test.txt`.
-Run:
+Prefer creating local ``np.random.RandomState`` instances rather than using the
+global NumPy RNG or ``np.random.default_rng``. The ``RandomState`` class is
+specifically intended for use in test code and the random number streams it
+generates are guaranteed not to change.
 
-- **All tests**: ``spin test``
-- Tests for a **submodule**: ``spin test skimage/morphology``
-- Run tests from a **specific file**: ``spin test skimage/morphology/tests/test_gray.py``
-- Run **a test inside a file**:
-  ``spin test skimage/morphology/tests/test_gray.py::test_3d_fallback_black_tophat``
-- Run tests with **arbitrary ``pytest`` options**:
-  ``spin test -- any pytest args you want``.
-- Run tests **matching** a specific expression:
-  ``spin test -- -k threshold``
-- Run all tests and **doctests**:
-  ``spin test --with-doctest``
+Prefer using randomly generated but fixed RNG seeds. The
+``np.random.RandomState`` generator requires seeds between 0 and 2**32-1, so
+you can use the following command-line helper to generate seeds:
+
+.. code-block:: bash
+
+   python -c "import random; print(random.randint(0, 2**32-1))"
+
+And in your test, create a random number generator like so:
+
+.. code-block:: python
+
+   def test_something():
+       # hard-code a seed randomly generated while writing the test
+       rng = np.random.RandomState(2376609660)
+
+If you are comparing with known answers or if your test result otherwise
+depends on a specific RNG seed, add a comment to that effect.
+
+For local development we use ``spin test`` which wraps the
+`pytest testing framework <https://docs.pytest.org/en/latest/>`__.
+Examples of running ``spin test``:
+
+.. code-block:: shell
+
+    # All tests
+    spin test
+
+    # Tests inside directory(s)
+    spin test -- tests/skimage/morphology
+    spin test -- src/skimage/morphology tests/skimage/morphology
+
+    # Tests matching an expression
+    spin test -- -k threshold
+
+    # Combine above with test path to reduce test collection time
+    spin test -- tests/skimage/filters -k threshold
+
+    # Specific test
+    spin test -- tests/skimage/morphology/test_gray.py::test_3d_fallback_black_tophat
+
+.. tip::
+
+    Arguments specified after the ``--`` are forwarded as
+    `options to pytest <https://docs.pytest.org/en/stable/reference/reference.html#command-line-flags>`__.
+
+Testing requirements are listed in ``requirements/test.txt``.
+
+.. note:: CI runs only modified tests on pull requests
+
+    To keep feedback fast, CI workflows run ``spin test --test-modified`` on
+    pull requests, which limits the test run to subpackages that were changed
+    relative to the base branch. The full test suite still runs on pushes to
+    ``main`` and on merge-queue entries.
+
+    To force the full suite on a pull request — for example when changes
+    affect test infrastructure rather than a specific subpackage — add the
+    **run-all-tests** label to the PR.
 
 
 Warnings during testing phase
@@ -355,8 +638,10 @@ Fixing Warnings
 -  Make sure to use pre-sphinxification paths to images (not the
    \_images directory)
 
-Deprecation cycle
------------------
+.. _deprecation-cycle:
+
+Deprecation cycle (advanced)
+----------------------------
 
 If the way a function is called has to be changed, a deprecation cycle
 must be followed to warn users.
@@ -474,31 +759,14 @@ API, e.g.:
 
 .. code-block:: python
 
-   from warnings import warn
-   warn(
+   from skimage._shared._warnings import warn_external
+   warn_external(
        "Automatic detection of the color channel was deprecated in "
        "v0.19, and `channel_axis=None` will be the new default in "
        "v0.22. Set `channel_axis=-1` explicitly to silence this "
        "warning.",
-       FutureWarning,
-       stacklevel=2,
+       category=FutureWarning,
    )
-
-The `stacklevel
-<https://docs.python.org/3/library/warnings.html#warnings.warn>`_ is
-a bit of a technicality, but ensures that the warning points to the
-user-called function, and not to a utility function within.
-
-In most cases, set the ``stacklevel`` to ``2``.
-When warnings originate from helper routines internal to the
-scikit-image library, set it to ``3``.
-
-To test if your warning is being emitted correctly, try calling the function
-from an IPython console. It should point you to the console input itself
-instead of being emitted by files in the scikit-image library:
-
-* **Good**: ``ipython:1: UserWarning: ...``
-* **Bad**: ``scikit-image/skimage/measure/_structural_similarity.py:155: UserWarning:``
 
 Deprecating Keywords and Functions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -510,21 +778,20 @@ to perform the above procedure.
 
 Adding Data
 -----------
-While code is hosted on `github <https://github.com/scikit-image/>`_,
-example datasets are on `gitlab <https://gitlab.com/scikit-image/data>`_.
+While code is hosted on `GitHub <https://github.com/scikit-image/>`_,
+example datasets are on `GitLab <https://gitlab.com/scikit-image/data>`_.
 These are fetched with `pooch <https://github.com/fatiando/pooch>`_
-when accessing `skimage.data.*`.
+when accessing ``skimage.data.*``.
 
-New datasets are submitted on gitlab and, once merged, the data
+New datasets are submitted on GitLab and, once merged, the data
 registry ``skimage/data/_registry.py`` in the main GitHub repository
 can be updated.
 
 Benchmarks
 ----------
-While not mandatory for most pull requests, we ask that performance related
-PRs include a benchmark in order to clearly depict the use-case that is being
-optimized for. A historical view of our snapshots can be found on
-at the following `website <https://pandas.pydata.org/speed/scikit-image/>`_.
+While not mandatory for most pull requests, we ask that performance-related
+PRs include a benchmark in order to clearly depict the use case that is being
+optimized for.
 
 In this section we will review how to setup the benchmarks,
 and three commands ``spin asv -- dev``, ``spin asv -- run`` and

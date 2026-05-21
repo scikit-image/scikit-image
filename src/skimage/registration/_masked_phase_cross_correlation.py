@@ -15,7 +15,7 @@ import numpy as np
 import scipy.fft as fftmodule
 from scipy.fft import next_fast_len
 
-from .._shared.utils import _supported_float_type
+from _skimage2._shared.utils import _supported_float_type
 
 
 def _masked_phase_cross_correlation(
@@ -125,7 +125,7 @@ def cross_correlate_masked(
         'same':
             The output is the same size as `arr1`, centered with respect
             to the `‘full’` output. Boundary effects are less prominent.
-    axes : tuple of ints, optional
+    axes : tuple of (int, ...), optional
         Axes along which to compute the cross-correlation.
     overlap_ratio : float, optional
         Minimum allowed overlap ratio between images. The correlation for

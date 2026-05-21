@@ -47,6 +47,10 @@ def pil_to_ndarray(image, dtype=None, img_num=None):
     Refer to ``imread``.
 
     """
+    # PIL 12.1.0 renames getdata
+    if hasattr(image, "get_flattened_data"):
+        image.getdata = image.get_flattened_data
+
     try:
         # this will raise an IOError if the file is not readable
         image.getdata()[0]
@@ -105,7 +109,7 @@ def pil_to_ndarray(image, dtype=None, img_num=None):
             if 'S' in image.mode:
                 dtype = dtype.replace('u', 'i')
             frame = np.frombuffer(frame.tobytes(), dtype)
-            frame.shape = shape[::-1]
+            frame = np.reshape(frame, shape[::-1], copy=False)
 
         else:
             frame = np.array(frame, dtype=dtype)

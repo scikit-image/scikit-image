@@ -21,7 +21,7 @@ def grid_points_in_poly(shape, verts, binarize=True):
     binarize : bool
         If `True`, the output of the function is a boolean mask.
         Otherwise, it is a labeled array. The labels are:
-        O - outside, 1 - inside, 2 - vertex, 3 - edge.
+        0 - outside, 1 - inside, 2 - vertex, 3 - edge.
 
     See Also
     --------
@@ -29,12 +29,12 @@ def grid_points_in_poly(shape, verts, binarize=True):
 
     Returns
     -------
-    mask : (M, N) ndarray
+    mask : ndarray of shape (M, N)
         If `binarize` is True, the output is a boolean mask. True means the
         corresponding pixel falls inside the polygon.
         If `binarize` is False, the output is a labeled array, with pixels
         having a label between 0 and 3. The meaning of the values is:
-        O - outside, 1 - inside, 2 - vertex, 3 - edge.
+        0 - outside, 1 - inside, 2 - vertex, 3 - edge.
 
     """
     output = _grid_points_in_poly(shape, verts)
@@ -48,9 +48,9 @@ def points_in_poly(points, verts):
 
     Parameters
     ----------
-    points : (K, 2) array
+    points : array_like of shape (K, 2)
         Input points, ``(x, y)``.
-    verts : (L, 2) array
+    verts : array_like of shape (L, 2)
         Vertices of the polygon, sorted either clockwise or anti-clockwise.
         The first point may (but does not need to be) duplicated.
 
@@ -60,7 +60,7 @@ def points_in_poly(points, verts):
 
     Returns
     -------
-    mask : (K,) array of bool
+    mask : ndarray of shape (K,) and dtype bool
         True if corresponding point is inside the polygon.
 
     """

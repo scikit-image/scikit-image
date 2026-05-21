@@ -3,6 +3,9 @@ import sys
 from .._vendored.numpy_lookfor import lookfor as _lookfor
 
 
+__doctest_requires__ = {("lookfor",): ["SimpleITK"]}
+
+
 def lookfor(what):
     """Do a keyword search on scikit-image docstrings and print results.
 
@@ -18,9 +21,6 @@ def lookfor(what):
 
     Examples
     --------
-    .. testsetup::
-        >>> import pytest; _ = pytest.importorskip('SimpleITK')
-
     >>> import skimage as ski
     >>> ski.util.lookfor('regular_grid')
     Search results for 'regular_grid'

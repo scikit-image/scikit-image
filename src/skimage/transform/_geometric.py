@@ -8,14 +8,14 @@ import warnings
 import numpy as np
 from scipy import spatial
 
-from .._shared.utils import (
+from _skimage2._shared.utils import (
     safe_as_int,
     _deprecate_estimate,
     _update_from_estimate_docstring,
     _deprecate_inherited_estimate,
     FailedEstimation,
 )
-from .._shared.compat import NP_COPY_IF_NEEDED
+from _skimage2._shared.compat import NP_COPY_IF_NEEDED
 
 
 def _affine_matrix_from_vector(v):
@@ -262,12 +262,12 @@ class _GeometricTransform(ABC):
 
         Parameters
         ----------
-        coords : (N, 2) array_like
+        coords : array_like of shape (N, 2)
             Source coordinates.
 
         Returns
         -------
-        coords : (N, 2) array
+        coords : ndarray of shape (N, 2)
             Destination coordinates.
 
         """
@@ -285,14 +285,14 @@ class _GeometricTransform(ABC):
 
         Parameters
         ----------
-        src : (N, 2) array
+        src : ndarray of shape (N, 2)
             Source coordinates.
-        dst : (N, 2) array
+        dst : ndarray of shape (N, 2)
             Destination coordinates.
 
         Returns
         -------
-        residuals : (N,) array
+        residuals : ndarray of shape (N,)
             Residual for coordinate.
 
         """
@@ -333,14 +333,14 @@ class _GeometricTransform(ABC):
             Source coordinates.
         dst : (N, M) array_like
             Destination coordinates.
-        \*args : sequence
+        \*args : Sequence
             Any other positional arguments.
         \*\*kwargs : dict
             Any other keyword arguments.
 
         Returns
         -------
-        tf : Self or ``FailedEstimation``
+        tf : Self or :class:`~.FailedEstimation`
             An instance of the transformation if the estimation succeeded.
             Otherwise, we return a special ``FailedEstimation`` object to
             signal a failed estimation. Testing the truth value of the failed
@@ -543,12 +543,12 @@ class FundamentalMatrixTransform(_HMatrixTransform):
 
         Parameters
         ----------
-        coords : (N, 2) array_like
+        coords : array_like of shape (N, 2)
             Source coordinates.
 
         Returns
         -------
-        coords : (N, 3) array
+        coords : ndarray of shape (N, 3)
             Epipolar lines in the destination image.
 
         """
@@ -571,20 +571,20 @@ class FundamentalMatrixTransform(_HMatrixTransform):
 
         Parameters
         ----------
-        src : (N, 2) array_like
+        src : array_like of shape (N, 2)
             Source coordinates.
-        dst : (N, 2) array_like
+        dst : array_like of shape (N, 2)
             Destination coordinates.
 
         Returns
         -------
-        F_normalized : (3, 3) array
+        F_normalized : ndarray of shape (3, 3)
             The normalized solution to the homogeneous system. If the system
             is not well-conditioned, this matrix contains NaNs.
-        src_matrix : (3, 3) array
+        src_matrix : ndarray of shape (3, 3)
             The transformation matrix to obtain the normalized source
             coordinates.
-        dst_matrix : (3, 3) array
+        dst_matrix : ndarray of shape (3, 3)
             The transformation matrix to obtain the normalized destination
             coordinates.
 
@@ -626,14 +626,14 @@ class FundamentalMatrixTransform(_HMatrixTransform):
 
         Parameters
         ----------
-        src : (N, 2) array_like
+        src : array_like of shape (N, 2)
             Source coordinates.
-        dst : (N, 2) array_like
+        dst : array_like of shape (N, 2)
             Destination coordinates.
 
         Returns
         -------
-        tf : Self or ``FailedEstimation``
+        tf : Self or :class:`~.FailedEstimation`
             An instance of the transformation if the estimation succeeded.
             Otherwise, we return a special ``FailedEstimation`` object to
             signal a failed estimation. Testing the truth value of the failed
@@ -674,14 +674,14 @@ class FundamentalMatrixTransform(_HMatrixTransform):
 
         Parameters
         ----------
-        src : (N, 2) array
+        src : ndarray of shape (N, 2)
             Source coordinates.
-        dst : (N, 2) array
+        dst : ndarray of shape (N, 2)
             Destination coordinates.
 
         Returns
         -------
-        residuals : (N,) array
+        residuals : ndarray of shape (N,)
             Sampson distance.
 
         """
@@ -707,9 +707,9 @@ class FundamentalMatrixTransform(_HMatrixTransform):
 
         Parameters
         ----------
-        src : (N, 2) array_like
+        src : array_like of shape (N, 2)
             Source coordinates.
-        dst : (N, 2) array_like
+        dst : array_like of shape (N, 2)
             Destination coordinates.
 
         Returns
@@ -866,14 +866,14 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
 
         Parameters
         ----------
-        src : (N, 2) array_like
+        src : array_like of shape (N, 2)
             Source coordinates.
-        dst : (N, 2) array_like
+        dst : array_like of shape (N, 2)
             Destination coordinates.
 
         Returns
         -------
-        tf : Self or ``FailedEstimation``
+        tf : Self or :class:`~.FailedEstimation`
             An instance of the transformation if the estimation succeeded.
             Otherwise, we return a special ``FailedEstimation`` object to
             signal a failed estimation. Testing the truth value of the failed
@@ -920,9 +920,9 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
 
         Parameters
         ----------
-        src : (N, 2) array_like
+        src : array_like of shape (N, 2)
             Source coordinates.
-        dst : (N, 2) array_like
+        dst : array_like of shape (N, 2)
             Destination coordinates.
 
         Returns
@@ -1154,16 +1154,16 @@ class ProjectiveTransform(_HMatrixTransform):
 
         Parameters
         ----------
-        src : (N, 2) array_like
+        src : array_like of shape (N, 2)
             Source coordinates.
-        dst : (N, 2) array_like
+        dst : array_like of shape (N, 2)
             Destination coordinates.
-        weights : (N,) array_like, optional
+        weights : array_like of shape (N,), optional
             Relative weight values for each pair of points.
 
         Returns
         -------
-        tf : Self or ``FailedEstimation``
+        tf : Self or :class:`~.FailedEstimation`
             An instance of the transformation if the estimation succeeded.
             Otherwise, we return a special ``FailedEstimation`` object to
             signal a failed estimation. Testing the truth value of the failed
@@ -1340,11 +1340,11 @@ class ProjectiveTransform(_HMatrixTransform):
 
         Parameters
         ----------
-        src : (N, 2) array_like
+        src : array_like of shape (N, 2)
             Source coordinates.
-        dst : (N, 2) array_like
+        dst : array_like of shape (N, 2)
             Destination coordinates.
-        weights : (N,) array_like, optional
+        weights : array_like of shape (N,), optional
             Relative weight values for each pair of points.
 
         Returns
@@ -1688,7 +1688,7 @@ class PiecewiseAffineTransform(_GeometricTransform):
 
         Returns
         -------
-        tf : Self or ``FailedEstimation``
+        tf : Self or :class:`~.FailedEstimation`
             An instance of the transformation if the estimation succeeded.
             Otherwise, we return a special ``FailedEstimation`` object to
             signal a failed estimation. Testing the truth value of the failed
@@ -1745,12 +1745,12 @@ class PiecewiseAffineTransform(_GeometricTransform):
 
         Parameters
         ----------
-        coords : (N, D) array_like
+        coords : array_like of shape (N, D)
             Source coordinates.
 
         Returns
         -------
-        coords : (N, 2) array
+        coords : array of shape (N, 2)
             Transformed coordinates.
 
         """
@@ -1810,9 +1810,9 @@ class PiecewiseAffineTransform(_GeometricTransform):
 
         Parameters
         ----------
-        src : (N, D) array_like
+        src : array_like of shape (N, D)
             Source coordinates.
-        dst : (N, D) array_like
+        dst : array_like of shape (N, D)
             Destination coordinates.
 
         Returns
@@ -1830,14 +1830,14 @@ def _euler_rotation_matrix(angles, degrees=False):
 
     Parameters
     ----------
-    angles : array of float, shape (3,)
+    angles : array of shape (3,) and dtype float
         The transformation angles in radians.
     degrees : bool, optional
         If True, then the given angles are assumed to be in degrees. Default is False.
 
     Returns
     -------
-    R : array of float, shape (3, 3)
+    R : array of shape (3, 3) and dtype float
         The Euler rotation matrix.
 
     """
@@ -1884,7 +1884,7 @@ class EuclideanTransform(ProjectiveTransform):
 
     Parameters
     ----------
-    matrix : (D+1, D+1) array_like, optional
+    matrix : array_like of shape (K, K), with K=D+1 (D being the dimensionality), optional
         Homogeneous transformation matrix.
     rotation : float or sequence of float, optional
         Rotation angle, in radians. See Notes for discussion of clockwise vs
@@ -1902,7 +1902,7 @@ class EuclideanTransform(ProjectiveTransform):
 
     Attributes
     ----------
-    params : (D+1, D+1) array
+    params : ndarray of shape (K, K), with K=D+1 (D being the dimensionality)
         Homogeneous transformation matrix.
 
     Examples
@@ -2037,14 +2037,14 @@ class EuclideanTransform(ProjectiveTransform):
 
         Parameters
         ----------
-        src : (N, 2) array_like
+        src : array_like of shape (N, 2)
             Source coordinates.
-        dst : (N, 2) array_like
+        dst : array_like of shape (N, 2)
             Destination coordinates.
 
         Returns
         -------
-        tf : Self or ``FailedEstimation``
+        tf : Self or :class:`~.FailedEstimation`
             An instance of the transformation if the estimation succeeded.
             Otherwise, we return a special ``FailedEstimation`` object to
             signal a failed estimation. Testing the truth value of the failed
@@ -2098,9 +2098,9 @@ class EuclideanTransform(ProjectiveTransform):
 
         Parameters
         ----------
-        src : (N, 2) array_like
+        src : array_like of shape (N, 2)
             Source coordinates.
-        dst : (N, 2) array_like
+        dst : array_like of shape (N, 2)
             Destination coordinates.
 
         Returns
@@ -2146,7 +2146,7 @@ class SimilarityTransform(EuclideanTransform):
 
     Parameters
     ----------
-    matrix : (dim+1, dim+1) array_like, optional
+    matrix : array_like of shape (K, K), with K=D+1 (D being the dimensionality), optional
         Homogeneous transformation matrix.
     scale : float, optional
         Scale factor. Implemented only for 2D and 3D.
@@ -2156,16 +2156,16 @@ class SimilarityTransform(EuclideanTransform):
 
         Implemented only for 2D and 3D. For 3D, this is given in ZYX Euler
         angles.
-    translation : (dim,) array_like, optional
+    translation : array_like of shape (D,), optional
         x, y[, z] translation parameters. Implemented only for 2D and 3D.
     dimensionality : int, optional
-        The dimensionality of the transform, corresponding to ``dim`` above.
+        The dimensionality of the transform, corresponding to ``D`` above.
         Ignored if `matrix` is not None, and set to ``matrix.shape[0] - 1``.
         Otherwise, must be one of 2 or 3.
 
     Attributes
     ----------
-    params : (dim+1, dim+1) array
+    params : ndarray of shape (K, K), with K=D+1 (D being the dimensionality)
         Homogeneous transformation matrix.
 
     Examples
@@ -2318,7 +2318,7 @@ class PolynomialTransform(_GeometricTransform):
 
     Parameters
     ----------
-    params : (2, N) array_like, optional
+    params : array_like of shape (2, N), optional
         Polynomial coefficients where `N * 2 = (order + 1) * (order + 2)`. So,
         a_ji is defined in `params[0, :]` and b_ji in `params[1, :]`.
     dimensionality : int, optional
@@ -2326,7 +2326,7 @@ class PolynomialTransform(_GeometricTransform):
 
     Attributes
     ----------
-    params : (2, N) array
+    params : ndarray of shape (2, N)
         Polynomial coefficients where `N * 2 = (order + 1) * (order + 2)`. So,
         a_ji is defined in `params[0, :]` and b_ji in `params[1, :]`.
 
@@ -2427,18 +2427,18 @@ class PolynomialTransform(_GeometricTransform):
 
         Parameters
         ----------
-        src : (N, 2) array_like
+        src : array_like of shape (N, 2)
             Source coordinates.
-        dst : (N, 2) array_like
+        dst : array_like of shape (N, 2)
             Destination coordinates.
         order : int, optional
             Polynomial order (number of coefficients is order + 1).
-        weights : (N,) array_like, optional
+        weights : array_like of shape (N,), optional
             Relative weight values for each pair of points.
 
         Returns
         -------
-        tf : Self or ``FailedEstimation``
+        tf : Self or :class:`~.FailedEstimation`
             An instance of the transformation if the estimation succeeded.
             Otherwise, we return a special ``FailedEstimation`` object to
             signal a failed estimation. Testing the truth value of the failed
@@ -2499,12 +2499,12 @@ class PolynomialTransform(_GeometricTransform):
 
         Parameters
         ----------
-        coords : (N, 2) array_like
-            source coordinates
+        coords : array_like of shape (N, 2)
+            Source coordinates.
 
         Returns
         -------
-        coords : (N, 2) array
+        coords : ndarray of shape (N, 2)
             Transformed coordinates.
 
         """
@@ -2658,7 +2658,7 @@ def estimate_transform(ttype, src, dst, *args, **kwargs):
 
     Returns
     -------
-    tf : :class:`_GeometricTransform` or ``FailedEstimation``
+    tf : :class:`_GeometricTransform` or :class:`FailedEstimation`
         An instance of the requested transformation if the estimation
         Otherwise, we return a special ``FailedEstimation`` object to signal a
         failed estimation. Testing the truth value of the failed estimation
@@ -2736,14 +2736,14 @@ def matrix_transform(coords, matrix):
 
     Parameters
     ----------
-    coords : (N, 2) array_like
+    coords : array_like of shape (N, 2)
         x, y coordinates to transform
-    matrix : (3, 3) array_like
+    matrix : array_like of shape (3, 3)
         Homogeneous transformation matrix.
 
     Returns
     -------
-    coords : (N, 2) array
+    coords : ndarray of shape (N, 2)
         Transformed coordinates.
 
     """

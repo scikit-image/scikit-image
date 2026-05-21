@@ -11,9 +11,9 @@ significantly the performance.
 import numpy as np
 from scipy import sparse, ndimage as ndi
 
-from .._shared import utils
-from .._shared.utils import warn
-from .._shared.compat import SCIPY_CG_TOL_PARAM_NAME
+from _skimage2._shared import utils
+from _skimage2._shared.utils import warn
+from _skimage2._shared.compat import SCIPY_CG_TOL_PARAM_NAME
 
 # executive summary for next code block: try to import umfpack from
 # scipy, but make sure not to raise a fuss if it fails since it's only
@@ -352,7 +352,7 @@ def random_walker(
     beta : float, optional
         Penalization coefficient for the random walker motion
         (the greater `beta`, the more difficult the diffusion).
-    mode : string, available options {'cg', 'cg_j', 'cg_mg', 'bf'}
+    mode : {'cg', 'cg_j', 'cg_mg', 'bf'}, optional
         Mode for solving the linear system in the random walker algorithm.
 
         - 'bf' (brute force): an LU factorization of the Laplacian is

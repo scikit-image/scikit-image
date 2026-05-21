@@ -1,6 +1,10 @@
 import numpy as np
 
-from .._shared.utils import _supported_float_type, deprecate_parameter, DEPRECATED
+from _skimage2._shared.utils import (
+    _supported_float_type,
+    deprecate_parameter,
+    DEPRECATED,
+)
 from ._rolling_ball_cy import apply_kernel, apply_kernel_nan
 
 

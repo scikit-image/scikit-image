@@ -1,12 +1,10 @@
 """Miscellaneous morphology functions."""
 
 import numpy as np
-import functools
-import warnings
 from scipy import ndimage as ndi
 from scipy.spatial import cKDTree
 
-from .._shared.utils import warn, deprecate_parameter, DEPRECATED
+from _skimage2._shared.utils import warn, deprecate_parameter, DEPRECATED
 from ._misc_cy import _remove_objects_by_distance
 
 
@@ -21,32 +19,6 @@ funcs = (
     'white_tophat',
 )
 skimage2ndimage.update({x: x for x in funcs})
-
-
-def default_footprint(func):
-    """Decorator to add a default footprint to morphology functions.
-
-    Parameters
-    ----------
-    func : function
-        A morphology function such as erosion, dilation, opening, closing,
-        white_tophat, or black_tophat.
-
-    Returns
-    -------
-    func_out : function
-        The function, using a default footprint of same dimension
-        as the input image with connectivity 1.
-
-    """
-
-    @functools.wraps(func)
-    def func_out(image, footprint=None, *args, **kwargs):
-        if footprint is None:
-            footprint = ndi.generate_binary_structure(image.ndim, 1)
-        return func(image, footprint=footprint, *args, **kwargs)
-
-    return func_out
 
 
 def _check_dtype_supported(ar):
@@ -67,7 +39,7 @@ def _check_dtype_supported(ar):
     "its value, while the previous parameter only removed smaller ones.",
 )
 def remove_small_objects(
-    ar, min_size=DEPRECATED, connectivity=1, *, max_size=64, out=None
+    ar, min_size=DEPRECATED, connectivity=1, *, max_size=63, out=None
 ):
     """Remove objects smaller than the specified size.
 
@@ -81,7 +53,7 @@ def remove_small_objects(
     ar : ndarray (arbitrary shape, int or bool type)
         The array containing the objects of interest. If the array type is
         int, the ints must be non-negative.
-    max_size : int, optional (default: 64)
+    max_size : int, optional
         Remove objects whose contiguous area (or volume, in N-D) contains this
         number of pixels or fewer.
 
@@ -167,12 +139,12 @@ def remove_small_objects(
             "Did you mean to use a boolean array?"
         )
 
-    if min_size is not DEPRECATED:
-        # Exclusive threshold is deprecated behavior
-        too_small = component_sizes < min_size
-    else:
-        # New behavior uses inclusive threshold
-        too_small = component_sizes <= max_size
+    if min_size is deprecate_parameter.DEPRECATED_GOT_VALUE:
+        # Old parameter with exclusive threshold (< instead of <=) was used and
+        # forwarded to `max_size`, correct for this
+        max_size -= 1
+
+    too_small = component_sizes <= max_size
     too_small_mask = too_small[ccs]
     out[too_small_mask] = 0
 
@@ -189,7 +161,7 @@ def remove_small_objects(
     "its value, while the previous parameter only removed smaller ones.",
 )
 def remove_small_holes(
-    ar, area_threshold=DEPRECATED, connectivity=1, *, max_size=64, out=None
+    ar, area_threshold=DEPRECATED, connectivity=1, *, max_size=63, out=None
 ):
     """Remove contiguous holes smaller than the specified size.
 
@@ -197,7 +169,7 @@ def remove_small_holes(
     ----------
     ar : ndarray (arbitrary shape, int or bool type)
         The array containing the connected components of interest.
-    max_size : int, optional (default: 64)
+    max_size : int, optional
         Remove holes whose contiguous area (or volume, in N-D) contains this
         number of pixels or fewer.
 
@@ -278,20 +250,18 @@ def remove_small_holes(
     # Creating the inverse of ar
     np.logical_not(ar, out=out)
 
+    if area_threshold is deprecate_parameter.DEPRECATED_GOT_VALUE:
+        # Old parameter with exclusive threshold (< instead of <=) was used and
+        # forwarded to `max_size`, correct for this
+        max_size -= 1
+
     # removing small objects from the inverse of ar
-    with warnings.catch_warnings():
-        warnings.filterwarnings(
-            "ignore",
-            message="Parameter `min_size` is deprecated",
-            category=FutureWarning,
-        )
-        out = remove_small_objects(
-            out,
-            min_size=area_threshold,
-            max_size=max_size,
-            connectivity=connectivity,
-            out=out,
-        )
+    out = remove_small_objects(
+        out,
+        max_size=max_size,
+        connectivity=connectivity,
+        out=out,
+    )
 
     np.logical_not(out, out=out)
 

@@ -4,9 +4,9 @@ from scipy import ndimage as ndi
 from scipy.signal import convolve2d, convolve
 
 from skimage import restoration, util
-from skimage._shared import filters
-from skimage._shared.testing import fetch
-from skimage._shared.utils import _supported_float_type
+from _skimage2._shared import filters
+from _skimage2._shared.testing import fetch
+from _skimage2._shared.utils import _supported_float_type
 from skimage.color import rgb2gray
 from skimage.data import astronaut, camera
 from skimage.restoration import uft
@@ -28,12 +28,13 @@ def _get_rtol_atol(dtype):
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 @pytest.mark.parametrize('ndim', [1, 2, 3])
-def test_wiener(dtype, ndim):
+def test_wiener(dtype, ndim, test_root_dir):
     """
     currently only performs pixelwise comparison to
     precomputed result in 2d case.
     """
 
+    # fails with other seeds?
     rng = np.random.RandomState(0)
     psf = np.ones([5] * ndim, dtype=dtype) / 5**ndim
 
@@ -51,7 +52,7 @@ def test_wiener(dtype, ndim):
 
     if ndim == 2:
         rtol, atol = _get_rtol_atol(dtype)
-        path = fetch('restoration/camera_wiener.npy', prefix='tests')
+        path = test_root_dir / 'restoration/camera_wiener.npy'
         np.testing.assert_allclose(deconvolved, np.load(path), rtol=rtol, atol=atol)
 
     _, laplacian = uft.laplacian(ndim, data.shape)
@@ -66,7 +67,7 @@ def test_wiener(dtype, ndim):
 
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
-def test_unsupervised_wiener(dtype):
+def test_unsupervised_wiener(dtype, test_root_dir):
     psf = np.ones((5, 5), dtype=dtype) / 25
     data = convolve2d(test_img, psf, 'same')
     seed = 16829302
@@ -81,7 +82,7 @@ def test_unsupervised_wiener(dtype):
     assert deconvolved.dtype == float_type
 
     rtol, atol = _get_rtol_atol(dtype)
-    path = fetch('restoration/camera_unsup.npy', prefix='tests')
+    path = test_root_dir / 'restoration/camera_unsup.npy'
     np.testing.assert_allclose(deconvolved, np.load(path), rtol=rtol, atol=atol)
 
     _, laplacian = uft.laplacian(2, data.shape)
@@ -100,7 +101,7 @@ def test_unsupervised_wiener(dtype):
         rng=seed,
     )[0]
     assert deconvolved2.real.dtype == float_type
-    path = fetch('restoration/camera_unsup2.npy', prefix='tests')
+    path = test_root_dir / 'restoration/camera_unsup2.npy'
     np.testing.assert_allclose(
         np.real(deconvolved2), np.load(path), rtol=rtol, atol=atol
     )
@@ -145,26 +146,27 @@ def test_image_shape():
 
 
 @pytest.mark.parametrize('ndim', [1, 2, 3])
-def test_richardson_lucy(ndim):
+def test_richardson_lucy(ndim, test_root_dir):
     psf = np.ones([5] * ndim, dtype=float) / 5**ndim
+    # fails with different seeds?
+    rng = np.random.RandomState(0)
     if ndim != 2:
-        test_img = np.random.randint(0, 100, [30] * ndim)
+        test_img = rng.randint(0, 100, [30] * ndim)
     else:
         test_img = util.img_as_float(camera())
     data = convolve(test_img, psf, 'same')
 
-    rng = np.random.RandomState(0)
     data += 0.1 * data.std() * rng.standard_normal(data.shape)
     deconvolved = restoration.richardson_lucy(data, psf, num_iter=5)
 
     if ndim == 2:
-        path = fetch('restoration/camera_rl.npy', prefix='tests')
+        path = test_root_dir / 'restoration/camera_rl.npy'
         np.testing.assert_allclose(deconvolved, np.load(path), rtol=1e-3)
 
 
 @pytest.mark.parametrize('dtype_image', [np.float16, np.float32, np.float64])
 @pytest.mark.parametrize('dtype_psf', [np.float32, np.float64])
-def test_richardson_lucy_filtered(dtype_image, dtype_psf):
+def test_richardson_lucy_filtered(dtype_image, dtype_psf, test_root_dir):
     if dtype_image == np.float64:
         atol = 1e-8
     else:

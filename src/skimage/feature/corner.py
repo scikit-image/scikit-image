@@ -6,13 +6,12 @@ import numpy as np
 from scipy import ndimage as ndi
 from scipy import spatial, stats
 
-from .._shared.filters import gaussian
-from .._shared.utils import _supported_float_type, safe_as_int, warn
+from _skimage2._shared.filters import gaussian
+from _skimage2._shared.utils import _supported_float_type, safe_as_int, warn
 from ..transform import integral_image
 from ..util import img_as_float
 from ._hessian_det_appx import _hessian_matrix_det
 from .corner_cy import _corner_fast, _corner_moravec, _corner_orientations
-from .peak import peak_local_max
 from .util import _prepare_grayscale_input_2D, _prepare_grayscale_input_nD
 
 
@@ -548,7 +547,7 @@ def shape_index(image, sigma=1, mode='constant', cval=0):
 
     Parameters
     ----------
-    image : (M, N) ndarray
+    image : ndarray of shape (M, N)
         Input image.
     sigma : float, optional
         Standard deviation used for the Gaussian kernel, which is used for
@@ -613,7 +612,7 @@ def corner_kitchen_rosenfeld(image, mode='constant', cval=0):
 
     Parameters
     ----------
-    image : (M, N) ndarray
+    image : ndarray of shape (M, N)
         Input image.
     mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
         How to handle values outside the image borders.
@@ -670,7 +669,7 @@ def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
 
     Parameters
     ----------
-    image : (M, N) ndarray
+    image : ndarray of shape (M, N)
         Input image.
     method : {'k', 'eps'}, optional
         Method to compute the response image from the auto-correlation matrix.
@@ -746,7 +745,7 @@ def corner_shi_tomasi(image, sigma=1):
 
     Parameters
     ----------
-    image : (M, N) ndarray
+    image : ndarray of shape (M, N)
         Input image.
     sigma : float, optional
         Standard deviation used for the Gaussian kernel, which is used as
@@ -809,7 +808,7 @@ def corner_foerstner(image, sigma=1):
 
     Parameters
     ----------
-    image : (M, N) ndarray
+    image : ndarray of shape (M, N)
         Input image.
     sigma : float, optional
         Standard deviation used for the Gaussian kernel, which is used as
@@ -882,7 +881,7 @@ def corner_fast(image, n=12, threshold=0.15):
 
     Parameters
     ----------
-    image : (M, N) ndarray
+    image : ndarray of shape (M, N)
         Input image.
     n : int, optional
         Minimum number of consecutive pixels out of 16 pixels on the circle
@@ -954,7 +953,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
 
     Parameters
     ----------
-    image : (M, N) ndarray
+    image : ndarray of shape (M, N)
         Input image.
     corners : (K, 2) ndarray
         Corner coordinates `(row, col)`.
@@ -1144,7 +1143,7 @@ def corner_peaks(
 
     Parameters
     ----------
-    image : (M, N) ndarray
+    image : ndarray of shape (M, N)
         Input image.
     min_distance : int, optional
         The minimal allowed distance separating peaks.
@@ -1201,6 +1200,11 @@ def corner_peaks(
     """
     if np.isinf(num_peaks):
         num_peaks = None
+    if np.isinf(num_peaks_per_label):
+        num_peaks_per_label = None
+
+    # Avoid circular import
+    from .peak import peak_local_max
 
     # Get the coordinates of the detected peaks
     coords = peak_local_max(
@@ -1209,7 +1213,7 @@ def corner_peaks(
         threshold_abs=threshold_abs,
         threshold_rel=threshold_rel,
         exclude_border=exclude_border,
-        num_peaks=np.inf,
+        num_peaks=None,  # Limiting to `num_peaks` is done in this function
         footprint=footprint,
         labels=labels,
         num_peaks_per_label=num_peaks_per_label,
@@ -1246,7 +1250,7 @@ def corner_moravec(image, window_size=1):
 
     Parameters
     ----------
-    image : (M, N) ndarray
+    image : ndarray of shape (M, N)
         Input image.
     window_size : int, optional
         Window size.

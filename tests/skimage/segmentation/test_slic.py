@@ -5,13 +5,13 @@ import pytest
 from numpy.testing import assert_equal
 
 from skimage import data, filters, img_as_float
-from skimage._shared.testing import run_in_parallel, expected_warnings
+from _skimage2._shared.testing import run_in_parallel, expected_warnings
 from skimage.segmentation import slic
 
 
 @run_in_parallel()
 def test_color_2d():
-    rng = np.random.default_rng(0)
+    rng = np.random.RandomState(126402278)
     img = np.zeros((20, 21, 3))
     img[:10, :10, 0] = 1
     img[10:, :10, 1] = 1
@@ -31,7 +31,7 @@ def test_color_2d():
 
 
 def test_multichannel_2d():
-    rng = np.random.default_rng(0)
+    rng = np.random.RandomState(2703318940)
     img = np.zeros((20, 20, 8))
     img[:10, :10, 0:2] = 1
     img[:10, 10:, 2:4] = 1
@@ -51,7 +51,7 @@ def test_multichannel_2d():
 
 
 def test_gray_2d():
-    rng = np.random.default_rng(0)
+    rng = np.random.RandomState(616301052)
     img = np.zeros((20, 21))
     img[:10, :10] = 0.33
     img[10:, :10] = 0.67
@@ -120,7 +120,7 @@ def test_slic_consistency_across_image_magnitude():
 
 
 def test_color_3d():
-    rng = np.random.default_rng(0)
+    rng = np.random.RandomState(3785302730)
     img = np.zeros((20, 21, 22, 3))
     slices = []
     for dim_size in img.shape[:-1]:
@@ -141,7 +141,7 @@ def test_color_3d():
 
 
 def test_gray_3d():
-    rng = np.random.default_rng(0)
+    rng = np.random.RandomState(2660574059)
     img = np.zeros((20, 21, 22))
     slices = []
     for dim_size in img.shape:
@@ -170,7 +170,7 @@ def test_gray_3d():
 
 
 def test_list_sigma():
-    rng = np.random.default_rng(0)
+    rng = np.random.RandomState(3058889493)
     img = np.array([[1, 1, 1, 0, 0, 0], [0, 0, 0, 1, 1, 1]], float)
     img += 0.1 * rng.normal(size=img.shape)
     result_sigma = np.array([[0, 0, 0, 1, 1, 1], [0, 0, 0, 1, 1, 1]], int)
@@ -184,7 +184,7 @@ def test_list_sigma():
 
 
 def test_spacing():
-    rng = np.random.default_rng(0)
+    rng = np.random.RandomState(984941720)
     img = np.array([[1, 1, 1, 0, 0], [1, 1, 0, 0, 0]], float)
     result_non_spaced = np.array([[0, 0, 0, 1, 1], [0, 0, 1, 1, 1]], int)
     result_spaced = np.array([[0, 0, 0, 0, 0], [1, 1, 1, 1, 1]], int)
@@ -261,7 +261,7 @@ def test_enforce_connectivity():
 
 def test_slic_zero():
     # Same as test_color_2d but with slic_zero=True
-    rng = np.random.default_rng(0)
+    rng = np.random.RandomState(3952143965)
     img = np.zeros((20, 21, 3))
     img[:10, :10, 0] = 1
     img[10:, :10, 1] = 1
@@ -281,7 +281,7 @@ def test_slic_zero():
 
 
 def test_more_segments_than_pixels():
-    rng = np.random.default_rng(0)
+    rng = np.random.RandomState(3086985977)
     img = np.zeros((20, 21))
     img[:10, :10] = 0.33
     img[10:, :10] = 0.67
@@ -302,7 +302,7 @@ def test_more_segments_than_pixels():
 
 
 def test_color_2d_mask():
-    rng = np.random.default_rng(0)
+    rng = np.random.RandomState(224113544)
     msk = np.zeros((20, 21))
     msk[2:-2, 2:-2] = 1
     img = np.zeros((20, 21, 3))
@@ -329,7 +329,7 @@ def test_color_2d_mask():
 
 
 def test_multichannel_2d_mask():
-    rng = np.random.default_rng(0)
+    rng = np.random.RandomState(224113544)
     msk = np.zeros((20, 20))
     msk[2:-2, 2:-2] = 1
     img = np.zeros((20, 20, 8))
@@ -357,7 +357,7 @@ def test_multichannel_2d_mask():
 
 
 def test_gray_2d_mask():
-    rng = np.random.default_rng(0)
+    rng = np.random.RandomState(2359008598)
     msk = np.zeros((20, 21))
     msk[2:-2, 2:-2] = 1
     img = np.zeros((20, 21))
@@ -391,7 +391,7 @@ def test_gray_2d_mask():
 
 
 def test_list_sigma_mask():
-    rng = np.random.default_rng(0)
+    rng = np.random.RandomState(1430310843)
     msk = np.zeros((2, 6))
     msk[:, 1:-1] = 1
     img = np.array([[1, 1, 1, 0, 0, 0], [0, 0, 0, 1, 1, 1]], float)
@@ -402,7 +402,8 @@ def test_list_sigma_mask():
 
 
 def test_spacing_mask():
-    rng = np.random.default_rng(0)
+    # test result depends on this seed
+    rng = np.random.RandomState(0)
     msk = np.zeros((2, 5))
     msk[:, 1:-1] = 1
     img = np.array([[1, 1, 1, 0, 0], [1, 1, 0, 0, 0]], float)
@@ -476,7 +477,7 @@ def test_enforce_connectivity_mask():
 
 
 def test_slic_zero_mask():
-    rng = np.random.default_rng(0)
+    rng = np.random.RandomState(285590892)
     msk = np.zeros((20, 21))
     msk[2:-2, 2:-2] = 1
     img = np.zeros((20, 21, 3))
@@ -503,7 +504,7 @@ def test_slic_zero_mask():
 
 
 def test_more_segments_than_pixels_mask():
-    rng = np.random.default_rng(0)
+    rng = np.random.RandomState(260753013)
     msk = np.zeros((20, 21))
     msk[2:-2, 2:-2] = 1
     img = np.zeros((20, 21))
@@ -530,7 +531,7 @@ def test_color_3d_mask():
     msk = np.zeros((20, 21, 22))
     msk[2:-2, 2:-2, 2:-2] = 1
 
-    rng = np.random.default_rng(0)
+    rng = np.random.RandomState(1837503946)
     img = np.zeros((20, 21, 22, 3))
     slices = []
     for dim_size in msk.shape:
@@ -555,7 +556,7 @@ def test_gray_3d_mask():
     msk = np.zeros((20, 21, 22))
     msk[2:-2, 2:-2, 2:-2] = 1
 
-    rng = np.random.default_rng(0)
+    rng = np.random.RandomState(3280447084)
     img = np.zeros((20, 21, 22))
     slices = []
     for dim_size in img.shape:
@@ -579,7 +580,8 @@ def test_gray_3d_mask():
 
 @pytest.mark.parametrize("dtype", ['float16', 'float32', 'float64', 'uint8', 'int'])
 def test_dtype_support(dtype):
-    img = np.random.rand(28, 28).astype(dtype)
+    rng = np.random.RandomState(1927994406)
+    img = rng.rand(28, 28).astype(dtype)
 
     # Simply run the function to assert that it runs without error
     slic(img, start_label=1, channel_axis=None)

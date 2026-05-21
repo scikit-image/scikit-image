@@ -1,7 +1,8 @@
 import math
 import pickle
-
 import re
+import sys
+
 import numpy as np
 import pytest
 import scipy.ndimage as ndi
@@ -14,7 +15,7 @@ from numpy.testing import (
 )
 
 from skimage import data, draw, transform
-from skimage._shared import testing
+from _skimage2._shared import testing
 from skimage.measure._regionprops import (
     COL_DTYPES,
     OBJECT_COLUMNS,
@@ -745,6 +746,28 @@ def test_axis_minor_length():
     length = regionprops(img[::2], spacing=(2, 1))[0].axis_minor_length
     assert_almost_equal(length, target_length, decimal=1)
 
+    # this input can produce small value that can be negative due to numerical errors
+    img_negative_length = np.array(
+        [
+            [
+                [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+                [0, 0, 0, 0, 1, 1, 1, 1, 0, 0],
+                [0, 0, 0, 0, 1, 1, 1, 1, 1, 0],
+                [0, 0, 1, 1, 1, 1, 1, 1, 1, 0],
+                [0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 0, 1, 1, 1, 1, 1, 0],
+                [0, 1, 1, 0, 0, 1, 1, 1, 0, 0],
+                [0, 1, 1, 0, 1, 1, 1, 1, 0, 0],
+                [0, 0, 1, 1, 1, 1, 0, 0, 0, 0],
+            ]
+        ],
+        dtype=np.uint8,
+    )
+
+    length = regionprops(img_negative_length)[0].axis_minor_length
+    target_length = 0.0
+    assert_almost_equal(length, target_length)
+
 
 def test_moments():
     m = regionprops(SAMPLE)[0].moments
@@ -1386,6 +1409,9 @@ def test_column_dtypes_correct():
             assert False, f'{col} dtype {t} {msg} {COL_DTYPES[col]}'
 
 
+@pytest.mark.skipif(
+    sys.flags.optimize >= 2, reason="docstrings unavailable with PYTHONOPTIMIZE=2"
+)
 def test_all_documented_items_in_col_dtypes():
     numpydoc_docscrape = pytest.importorskip("numpydoc.docscrape")
     docstring = numpydoc_docscrape.FunctionDoc(regionprops)
@@ -1490,7 +1516,8 @@ def test_extra_properties_table():
 
 
 @pytest.mark.filterwarnings("ignore:`RegionProperties.* is deprecated:FutureWarning")
-def test_multichannel():
+@pytest.mark.parametrize("prop_name", [*PROPS.keys(), "custom_intensity_median"])
+def test_multichannel(prop_name):
     """Test that computing multichannel properties works."""
     astro = data.astronaut()[::4, ::4]
     astro_green = astro[..., 1]
@@ -1504,16 +1531,15 @@ def test_multichannel():
         labels, astro, extra_properties=[custom_intensity_median]
     )[segment_idx]
 
-    for prop in list(PROPS.keys()) + ["custom_intensity_median"]:
-        p = region[prop]
-        p_multi = region_multi[prop]
-        if np.shape(p) == np.shape(p_multi):
-            # property does not depend on multiple channels
-            assert_array_equal(p, p_multi)
-        else:
-            # property uses multiple channels, returns props stacked along
-            # final axis
-            assert_allclose(p, np.asarray(p_multi)[..., 1], rtol=1e-12, atol=1e-12)
+    p = region[prop_name]
+    p_multi = region_multi[prop_name]
+    if np.shape(p) == np.shape(p_multi):
+        # property does not depend on multiple channels
+        assert_array_equal(p, p_multi)
+        return
+    # property uses multiple channels, returns props stacked along
+    # final axis
+    assert_allclose(p, np.asarray(p_multi)[..., 1], rtol=1e-15, atol=1e-15)
 
 
 def test_3d_ellipsoid_axis_lengths():

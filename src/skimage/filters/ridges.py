@@ -13,7 +13,7 @@ from warnings import warn
 import numpy as np
 from scipy import linalg
 
-from .._shared.utils import _supported_float_type, check_nD
+from _skimage2._shared.utils import _supported_float_type, check_nD
 from ..feature.corner import hessian_matrix, hessian_matrix_eigvals
 
 

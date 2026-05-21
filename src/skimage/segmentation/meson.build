@@ -9,7 +9,7 @@ foreach ext: extensions
   py3.extension_module(ext,
     cython_gen.process(ext + '.pyx'),
     c_args: cython_c_args,
-    include_directories: ['../_shared'],
+    include_directories: ['../../_skimage2/_shared'],
     dependencies: [np_dep],
     install: true,
     subdir: 'skimage/segmentation'
@@ -18,6 +18,7 @@ endforeach
 
 python_sources = [
   '__init__.py',
+  '__init__.pyi',
   '_chan_vese.py',
   '_clear_border.py',
   '_expand_labels.py',

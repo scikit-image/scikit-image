@@ -14,9 +14,9 @@ import pytest
 from numpy.testing import assert_almost_equal, assert_array_almost_equal, assert_equal
 
 from skimage import data
-from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import fetch, assert_stacklevel
-from skimage._shared.utils import _supported_float_type, slice_at_axis
+from _skimage2._shared._warnings import expected_warnings
+from _skimage2._shared.testing import assert_stacklevel
+from _skimage2._shared.utils import _supported_float_type, slice_at_axis
 from skimage.color import (
     rgb2hsv,
     hsv2rgb,
@@ -397,7 +397,8 @@ class TestColorconv:
         assert_equal(g.shape, (1, 1))
 
     def test_rgb2gray_contiguous(self):
-        x = np.random.rand(10, 10, 3)
+        rng = np.random.RandomState(3303781891)
+        x = rng.rand(10, 10, 3)
         assert rgb2gray(x).flags["C_CONTIGUOUS"]
         assert rgb2gray(x[:5, :5]).flags["C_CONTIGUOUS"]
 
@@ -411,7 +412,8 @@ class TestColorconv:
             rgb2gray(np.empty((5, 5)))
 
     def test_rgb2gray_dtype(self):
-        img = np.random.rand(10, 10, 3).astype('float64')
+        rng = np.random.RandomState(3091499684)
+        img = rng.rand(10, 10, 3).astype('float64')
         img32 = img.astype('float32')
 
         assert rgb2gray(img).dtype == img.dtype
@@ -420,7 +422,7 @@ class TestColorconv:
     # test matrices for xyz2lab and lab2xyz generated using
     # http://www.easyrgb.com/index.php?X=CALC
     # Note: easyrgb website displays xyz*100
-    def test_xyz2lab(self):
+    def test_xyz2lab(self, test_root_dir):
         assert_array_almost_equal(xyz2lab(self.xyz_array), self.lab_array, decimal=3)
 
         # Test the conversion with the rest of the illuminants.
@@ -429,13 +431,13 @@ class TestColorconv:
             for obs in ["2", "10", "R"]:
                 obs = obs.lower()
                 fname = f'color/data/lab_array_{I}_{obs}.npy'
-                lab_array_I_obs = np.load(fetch(fname, prefix="tests"))
+                lab_array_I_obs = np.load(test_root_dir / fname)
                 assert_array_almost_equal(
                     lab_array_I_obs, xyz2lab(self.xyz_array, I, obs), decimal=2
                 )
         for I in ["d75", "e"]:
             fname = f'color/data/lab_array_{I}_2.npy'
-            lab_array_I_obs = np.load(fetch(fname, prefix="tests"))
+            lab_array_I_obs = np.load(test_root_dir / fname)
             assert_array_almost_equal(
                 lab_array_I_obs, xyz2lab(self.xyz_array, I, "2"), decimal=2
             )
@@ -455,7 +457,7 @@ class TestColorconv:
         assert xyz2lab(img).dtype == img.dtype
         assert xyz2lab(img32).dtype == img32.dtype
 
-    def test_lab2xyz(self):
+    def test_lab2xyz(self, test_root_dir):
         assert_array_almost_equal(lab2xyz(self.lab_array), self.xyz_array, decimal=3)
 
         # Test the conversion with the rest of the illuminants.
@@ -464,13 +466,13 @@ class TestColorconv:
             for obs in ["2", "10", "R"]:
                 obs = obs.lower()
                 fname = f'color/data/lab_array_{I}_{obs}.npy'
-                lab_array_I_obs = np.load(fetch(fname, prefix="tests"))
+                lab_array_I_obs = np.load(test_root_dir / fname)
                 assert_array_almost_equal(
                     lab2xyz(lab_array_I_obs, I, obs), self.xyz_array, decimal=3
                 )
         for I in ["d75", "e"]:
             fname = f'color/data/lab_array_{I}_2.npy'
-            lab_array_I_obs = np.load(fetch(fname, prefix="tests"))
+            lab_array_I_obs = np.load(test_root_dir / fname)
             assert_array_almost_equal(
                 lab2xyz(lab_array_I_obs, I, "2"), self.xyz_array, decimal=3
             )
@@ -547,7 +549,7 @@ class TestColorconv:
     # test matrices for xyz2luv and luv2xyz generated using
     # http://www.easyrgb.com/index.php?X=CALC
     # Note: easyrgb website displays xyz*100
-    def test_xyz2luv(self):
+    def test_xyz2luv(self, test_root_dir):
         assert_array_almost_equal(xyz2luv(self.xyz_array), self.luv_array, decimal=3)
 
         # Test the conversion with the rest of the illuminants.
@@ -556,13 +558,13 @@ class TestColorconv:
             for obs in ["2", "10", "R"]:
                 obs = obs.lower()
                 fname = f'color/data/luv_array_{I}_{obs}.npy'
-                luv_array_I_obs = np.load(fetch(fname, prefix="tests"))
+                luv_array_I_obs = np.load(test_root_dir / fname)
                 assert_array_almost_equal(
                     luv_array_I_obs, xyz2luv(self.xyz_array, I, obs), decimal=2
                 )
         for I in ["d75", "e"]:
             fname = f'color/data/luv_array_{I}_2.npy'
-            luv_array_I_obs = np.load(fetch(fname, prefix="tests"))
+            luv_array_I_obs = np.load(test_root_dir / fname)
             assert_array_almost_equal(
                 luv_array_I_obs, xyz2luv(self.xyz_array, I, "2"), decimal=2
             )
@@ -582,7 +584,7 @@ class TestColorconv:
         assert xyz2luv(img).dtype == img.dtype
         assert xyz2luv(img32).dtype == img32.dtype
 
-    def test_luv2xyz(self):
+    def test_luv2xyz(self, test_root_dir):
         assert_array_almost_equal(luv2xyz(self.luv_array), self.xyz_array, decimal=3)
 
         # Test the conversion with the rest of the illuminants.
@@ -591,13 +593,13 @@ class TestColorconv:
             for obs in ["2", "10", "R"]:
                 obs = obs.lower()
                 fname = f'color/data/luv_array_{I}_{obs}.npy'
-                luv_array_I_obs = np.load(fetch(fname, prefix="tests"))
+                luv_array_I_obs = np.load(test_root_dir / fname)
                 assert_array_almost_equal(
                     luv2xyz(luv_array_I_obs, I, obs), self.xyz_array, decimal=3
                 )
         for I in ["d75", "e"]:
             fname = f'color/data/luv_array_{I}_2.npy'
-            luv_array_I_obs = np.load(fetch(fname, prefix="tests"))
+            luv_array_I_obs = np.load(test_root_dir / fname)
             assert_array_almost_equal(
                 luv2xyz(luv_array_I_obs, I, "2"), self.xyz_array, decimal=3
             )
@@ -859,7 +861,8 @@ def test_gray2rgb():
 
 
 def test_gray2rgb_rgb():
-    x = np.random.rand(5, 5, 4)
+    rng = np.random.RandomState(3564265650)
+    x = rng.rand(5, 5, 4)
     y = gray2rgb(x)
     assert y.shape == (x.shape + (3,))
     for i in range(3):
@@ -870,7 +873,8 @@ def test_gray2rgb_rgb():
 @pytest.mark.parametrize("channel_axis", [0, 1, -1, -2])
 def test_gray2rgba(shape, channel_axis):
     # nD case
-    img = np.random.random(shape)
+    rng = np.random.RandomState(144170579)
+    img = rng.random(shape)
     rgba = gray2rgba(img, channel_axis=channel_axis)
     assert rgba.ndim == img.ndim + 1
 
@@ -893,7 +897,8 @@ def test_gray2rgba(shape, channel_axis):
 @pytest.mark.parametrize("channel_axis", [0, 1, -1, -2])
 def test_gray2rgb_channel_axis(shape, channel_axis):
     # nD case
-    img = np.random.random(shape)
+    rng = np.random.RandomState(1497347430)
+    img = rng.random(shape)
     rgb = gray2rgb(img, channel_axis=channel_axis)
     assert rgb.ndim == img.ndim + 1
 
@@ -906,7 +911,8 @@ def test_gray2rgb_channel_axis(shape, channel_axis):
 
 
 def test_gray2rgba_dtype():
-    img_f64 = np.random.random((5, 5))
+    rng = np.random.RandomState(1905446730)
+    img_f64 = rng.random((5, 5))
     img_f32 = img_f64.astype('float32')
     img_u8 = img_as_ubyte(img_f64)
     img_int = img_u8.astype(int)
@@ -916,7 +922,8 @@ def test_gray2rgba_dtype():
 
 
 def test_gray2rgba_alpha():
-    img = np.random.random((5, 5))
+    rng = np.random.RandomState(2932260772)
+    img = rng.random((5, 5))
     img_u8 = img_as_ubyte(img)
 
     # Default
@@ -934,7 +941,7 @@ def test_gray2rgba_alpha():
     assert_equal(rgba[..., 3], alpha)
 
     # Array
-    alpha = np.random.random((5, 5))
+    alpha = rng.random((5, 5))
     rgba = gray2rgba(img, alpha)
 
     assert_equal(rgba[..., :3], gray2rgb(img))
@@ -947,7 +954,7 @@ def test_gray2rgba_alpha():
         assert_equal(rgba[..., :3], gray2rgb(img_u8))
 
     # Invalid shape
-    alpha = np.random.random((5, 5, 1))
+    alpha = rng.random((5, 5, 1))
     expected_err_msg = "alpha.shape must match image.shape"
 
     with pytest.raises(ValueError) as err:
@@ -976,7 +983,8 @@ def test_gray2rgba_alpha_fail_cast(alpha, dtype):
     "shape", ([(3,), (2, 3), (4, 5, 3), (5, 4, 5, 3), (4, 5, 4, 5, 3)])
 )
 def test_nD_gray_conversion(func, shape):
-    img = np.random.rand(*shape)
+    rng = np.random.RandomState(1405555033)
+    img = rng.rand(*shape)
     out = func(img)
     common_ndim = min(out.ndim, len(shape))
     assert out.shape[:common_ndim] == shape[:common_ndim]
@@ -1019,7 +1027,8 @@ def test_nD_gray_conversion(func, shape):
     "shape", ([(3,), (2, 3), (4, 5, 3), (5, 4, 5, 3), (4, 5, 4, 5, 3)])
 )
 def test_nD_color_conversion(func, shape):
-    img = np.random.rand(*shape)
+    rng = np.random.RandomState(2613468644)
+    img = rng.rand(*shape)
     out = func(img)
 
     assert out.shape == img.shape
@@ -1029,7 +1038,8 @@ def test_nD_color_conversion(func, shape):
     "shape", ([(4,), (2, 4), (4, 5, 4), (5, 4, 5, 4), (4, 5, 4, 5, 4)])
 )
 def test_rgba2rgb_nD(shape):
-    img = np.random.rand(*shape)
+    rng = np.random.RandomState(444548061)
+    img = rng.rand(*shape)
     out = rgba2rgb(img)
 
     expected_shape = shape[:-1] + (3,)

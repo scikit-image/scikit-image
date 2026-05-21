@@ -1,5 +1,13 @@
 /* Additional styling for the PyData Sphinx theme. */
 
+/* Avoid "slow" animated scroll when navigating to anchors
+May be removed if this is addressed upstream
+https://github.com/pydata/pydata-sphinx-theme/issues/2260
+*/
+:root {
+    scroll-behavior: auto;
+}
+
 /* Use hyperlink color for grid-item-cards.
 TODO find a way to only apply this to grid-item-cards that link somewhere */
 .sd-card-title {

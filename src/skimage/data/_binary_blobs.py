@@ -1,10 +1,45 @@
-import numpy as np
+import _skimage2 as ski2
+from skimage._migration import ski2_migration_decorator
 
-from .._shared.filters import gaussian
 
+@ski2_migration_decorator(
+    r"""
+``%(qname_old)s`` is deprecated in favor of
+``%(qname_new)s``, which has a new signature. Parameters `length`
+and `n_dim` have been replaced with a new parameter `shape`. Optional
+`blob_size_fraction` has been replaced with a required parameter
+`blob_size`, whose behavior is independent of the output image size. The
+default value of `boundary_mode` has been changed from ``'nearest'`` to
+``'wrap'``.
 
+To keep the old (``skimage``, v1.x) behavior, use:
+
+>>> import numpy as np
+>>> from numpy.random import default_rng
+>>>
+>>> import skimage as ski1
+>>> import skimage2 as ski2
+>>>
+>>> length, n_dim, blob_size_fraction = 512, 2, 0.1  # Default ski1 values.
+>>> res1 = ski1.data.binary_blobs(rng=default_rng(1939))  # Make reproducible.
+>>> res2 = ski2.data.binary_blobs(
+...     shape=(length,) * n_dim,
+...     blob_size=blob_size_fraction * length,
+...     boundary_mode='nearest',
+...     rng=default_rng(1939)
+... )
+>>> assert np.all(res1 == res2)
+""",
+    qname_old='skimage.data.binary_blobs',
+)
 def binary_blobs(
-    length=512, blob_size_fraction=0.1, n_dim=2, volume_fraction=0.5, rng=None
+    length=512,
+    blob_size_fraction=0.1,
+    n_dim=2,
+    volume_fraction=0.5,
+    rng=None,
+    *,
+    boundary_mode='nearest',
 ):
     """
     Generate synthetic binary image with several rounded blob-like objects.
@@ -19,17 +54,31 @@ def binary_blobs(
     n_dim : int, optional
         Number of dimensions of output image.
     volume_fraction : float, default 0.5
-        Fraction of image pixels covered by the blobs (where the output is 1).
-        Should be in [0, 1].
+        Fraction of image pixels covered by the blobs. Should be in [0, 1].
     rng : {`numpy.random.Generator`, int}, optional
         Pseudo-random number generator.
         By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
         If `rng` is an int, it is used to seed the generator.
+    boundary_mode : {'nearest', 'wrap'}, optional
+        The blobs are created by smoothing and then thresholding an array
+        consisting of ones at seed positions. This mode determines which
+        values are filled in when the smoothing kernel overlaps the seed array's
+        boundary.
+
+        'nearest' (`a a a a | a b c d | d d d d`)
+            By default, when applying the Gaussian filter, the seed array is
+            extended by replicating the last boundary value. This will increase
+            the size of blobs whose seed or center lies exactly on the edge.
+
+        'wrap' (`a b c d | a b c d | a b c d`)
+            The seed array is extended by wrapping around to the opposite edge.
+            The resulting blob array can be tiled and blobs will be contiguous
+            and have smooth edges across tile boundaries.
 
     Returns
     -------
     blobs : ndarray of bools
-        Output binary image
+        Output binary image.
 
     Examples
     --------
@@ -45,17 +94,12 @@ def binary_blobs(
     >>> blobs = data.binary_blobs(length=256, blob_size_fraction=0.05)
     >>> # Blobs cover a smaller volume fraction of the image
     >>> blobs = data.binary_blobs(length=256, volume_fraction=0.3)
-
     """
-
-    rs = np.random.default_rng(rng)
-    shape = tuple([length] * n_dim)
-    mask = np.zeros(shape)
-    n_pts = max(int(1.0 / blob_size_fraction) ** n_dim, 1)
-    points = (length * rs.random((n_dim, n_pts))).astype(int)
-    mask[tuple(indices for indices in points)] = 1
-    mask = gaussian(
-        mask, sigma=0.25 * length * blob_size_fraction, preserve_range=False
+    blob_size = blob_size_fraction * length
+    return ski2.data.binary_blobs(
+        shape=(length,) * n_dim,
+        blob_size=blob_size,
+        volume_fraction=volume_fraction,
+        rng=rng,
+        boundary_mode=boundary_mode,
     )
-    threshold = np.percentile(mask, 100 * (1 - volume_fraction))
-    return np.logical_not(mask < threshold)

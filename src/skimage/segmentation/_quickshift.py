@@ -1,7 +1,7 @@
 import numpy as np
 
-from .._shared.filters import gaussian
-from .._shared.utils import _supported_float_type
+from _skimage2._shared.filters import gaussian
+from _skimage2._shared.utils import _supported_float_type
 from ..color import rgb2lab
 from ..util import img_as_float
 from ._quickshift_cy import _quickshift_cython
@@ -26,7 +26,7 @@ def quickshift(
 
     Parameters
     ----------
-    image : (M, N, C) ndarray
+    image : ndarray of shape (M, N, C)
         Input image. The axis corresponding to color channels can be specified
         via the `channel_axis` argument.
     ratio : float, optional, between 0 and 1
@@ -57,7 +57,7 @@ def quickshift(
 
     Returns
     -------
-    segment_mask : (M, N) ndarray
+    segment_mask : ndarray of shape (M, N) and dtype int
         Integer mask indicating segment labels.
 
     Notes
