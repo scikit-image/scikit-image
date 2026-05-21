@@ -942,7 +942,7 @@ _WARP_NOTES = '''Notes
     in the ``skimage2`` namespace, we use the NumPy or "ij" convention, where
     the first and second axis of the image correspond to the first and second
     axis of the array (row, column). Correspondingly, a positive rotation is
-    counter-clockwise. In scikit-image 1 (the `skimage` namespace`), we used
+    counter-clockwise. In scikit-image 1 (the ``skimage`` namespace), we used
     the "xy" convention, where the first axis is columns and the second rows.
     Correspondingly, positive rotation is clockwise.
 
@@ -974,7 +974,7 @@ class ProjectiveTransform(_HMatrixTransform):
        [x * b0 + y * b1 + b2]
        [x * c0 + y * c1 + 1]]
 
-    For example, to rotate by theta degrees, the matrix :math:`\mathbf:{{H}}`
+    For example, to rotate by theta degrees, the matrix :math:`\mathbf{{H}}`
     should be::
 
       [[cos(theta) -sin(theta) 0]
@@ -1865,7 +1865,7 @@ class EuclideanTransform(ProjectiveTransform):
     In what follows, ``x`` refers to coordinates from the first coordinate
     axis, and ``y`` refers to coordinates from the second coordinate axis.
 
-    The transform the following form::
+    The transform has the following form::
 
         X = a0 * x - b0 * y + a1 =
           = x * cos(rotation) - y * sin(rotation) + a1
