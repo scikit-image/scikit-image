@@ -110,7 +110,7 @@ def _is_wheel_install():
 
     try:
         dist = importlib.metadata.distribution("scikit-image")
-        return any("WHEEL" in str(f) for f in dist.files)
+        return any("WHEEL" in str(f) for f in (dist.files or []))
     except importlib.metadata.PackageNotFoundError:
         return False
 
