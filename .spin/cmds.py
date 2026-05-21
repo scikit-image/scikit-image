@@ -102,17 +102,28 @@ def _is_wheel_install():
     """Return True if skimage is installed as a (non-editable) wheel.
 
     Uses ``importlib.metadata`` to look for the ``WHEEL`` metadata file that
-    pip/wheel installers always write.  Returns False if scikit-image is not
-    registered with the metadata system (e.g. a plain meson build with only
-    PYTHONPATH set, or an editable install).
+    pip/wheel installers always write, and cross-checks ``direct_url.json``
+    (PEP 610) to exclude editable installs, which also carry a ``WHEEL`` file.
+    Returns False if scikit-image is not registered with the metadata system
+    (e.g. a plain meson build with only PYTHONPATH set).
     """
     import importlib.metadata
+    import json
 
     try:
         dist = importlib.metadata.distribution("scikit-image")
-        return any("WHEEL" in str(f) for f in dist.files)
     except importlib.metadata.PackageNotFoundError:
         return False
+
+    # Editable installs also have a WHEEL file; exclude them per PEP 610.
+    try:
+        direct_url = json.loads(dist.read_text("direct_url.json") or "{}")
+        if direct_url.get("dir_info", {}).get("editable"):
+            return False
+    except Exception:
+        pass
+
+    return any("WHEEL" in str(f) for f in dist.files)
 
 
 def _get_skimage_subpackages(build_dir=None):
