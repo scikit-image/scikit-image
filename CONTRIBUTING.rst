@@ -373,7 +373,7 @@ detailing the test coverage::
 Multithreaded Testing
 ---------------------
 
-Scikit-image supports the free-threaded build and we endeavor to ensure the
+scikit-image supports the free-threaded build and we endeavor to ensure the
 implementation is thread-safe.
 
 ``pytest-run-parallel``
