@@ -638,6 +638,8 @@ Fixing Warnings
 -  Make sure to use pre-sphinxification paths to images (not the
    \_images directory)
 
+.. _deprecation-cycle:
+
 Deprecation cycle (advanced)
 ----------------------------
 
