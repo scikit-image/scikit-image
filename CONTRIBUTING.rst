@@ -572,6 +572,33 @@ Testing requirements are listed in ``requirements/test.txt``.
     affect test infrastructure rather than a specific subpackage — add the
     **run-all-tests** label to the PR.
 
+You can also use ``--test-modified`` locally to replicate this CI behaviour:
+
+.. code-block:: shell
+
+    # Run tests only for subpackages you have changed relative to your
+    # upstream tracking branch (e.g. origin/main)
+    spin test --test-modified
+
+    # Specify the base branch explicitly
+    spin test --test-modified --base-ref main
+
+    # Include doctests for modified subpackages
+    spin test --test-modified --doctest
+
+``spin test`` automatically detects whether scikit-image is installed as a
+wheel (e.g. via ``spin install``) or being tested from a meson build
+directory.  To test a pip-installed wheel, install it first and then run
+``spin test`` as usual:
+
+.. code-block:: shell
+
+    spin install
+    spin test -- tests/skimage/morphology
+
+    # Combine with --test-modified to run only changed subpackages
+    spin test --test-modified
+
 
 Warnings during testing phase
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

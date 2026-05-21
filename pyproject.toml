@@ -190,7 +190,14 @@ ignore = [
 convention = 'numpy'
 
 [tool.pytest.ini_options]
-minversion = "6.0"
+# pythonpath requires pytest >= 7.0; --strict-config (in addopts) would error
+# on startup with older versions anyway.
+minversion = "7.0"
+# Add the repo root to sys.path so pytest can import from the ``tests/``
+# directory without requiring ``__init__.py`` files in every subdirectory.
+# It does not affect ``src/``; packages there are found via the installed
+# wheel or the meson build directory (set up by spin).
+pythonpath = ["."]
 addopts = [
     "-ra",
     "--strict-config",
