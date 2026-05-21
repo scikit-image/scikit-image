@@ -76,12 +76,17 @@ jobs:
             ccache-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.OPTIONS_NAME }}-
             ccache-${{ runner.os }}-
 
+      - name: Zero ccache stats
+        shell: bash
+        run: ccache --zero-stats
+
       - name: Build skimage
         shell: bash
         run: |
           spin build
 
       - name: Show ccache stats
+        if: always()
         shell: bash
         run: ccache --show-stats
 
