@@ -1,7 +1,6 @@
 import os
 import subprocess
 import sys
-from pathlib import Path
 
 import click
 import spin
@@ -102,19 +101,18 @@ Use an editable install (`spin install`) which supports this or avoid passing
 def _is_wheel_install():
     """Return True if skimage is installed as a (non-editable) wheel.
 
-    Checks whether skimage lives in a ``site-packages`` directory, which is
-    always true for wheel installs regardless of where the venv is located
-    (including venvs inside the repo tree such as ``.venv/``).
-    Returns False if skimage is not yet importable (meson build dir not set up)
-    or if it is an editable install pointing at this source tree.
+    Uses ``importlib.metadata`` to look for the ``WHEEL`` metadata file that
+    pip/wheel installers always write.  Returns False if scikit-image is not
+    registered with the metadata system (e.g. a plain meson build with only
+    PYTHONPATH set, or an editable install).
     """
-    if _is_editable_install_of_same_source("scikit-image"):
-        return False
+    import importlib.metadata
+
     try:
-        import skimage
-    except ImportError:
+        dist = importlib.metadata.distribution("scikit-image")
+        return any("WHEEL" in str(f) for f in dist.files)
+    except importlib.metadata.PackageNotFoundError:
         return False
-    return 'site-packages' in Path(skimage.__path__[0]).parts
 
 
 def _get_skimage_subpackages(build_dir=None):
@@ -284,9 +282,8 @@ def test(
     pytest_args = kwargs.get('pytest_args', ())
 
     # Detect whether we're running against a pip-installed wheel by checking
-    # whether skimage's location is outside the repo tree.  If skimage is not
-    # yet importable (meson build dir not on sys.path) this returns False and
-    # spin will set up PYTHONPATH via parent_callback as usual.
+    # for the WHEEL metadata file written by pip/wheel installers.  Returns
+    # False for plain meson builds (PYTHONPATH only) and editable installs.
     installed = _is_wheel_install()
 
     # For out-of-tree builds, src/ paths don't work as doctest collection paths.
