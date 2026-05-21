@@ -8,11 +8,12 @@ from skimage.segmentation import random_walker
 from skimage.transform import resize
 
 
-def make_2d_syntheticdata(lx, ly=None):
+def make_2d_syntheticdata(lx, ly=None, rng=None):
     if ly is None:
         ly = lx
-    # test results depend on this seed value
-    rng = np.random.RandomState(1234)
+    if rng is None:
+        # test results depend on this seed value
+        rng = np.random.RandomState(1234)
     data = np.zeros((lx, ly)) + 0.1 * rng.randn(lx, ly)
     small_l = int(lx // 5)
     data[
@@ -29,13 +30,14 @@ def make_2d_syntheticdata(lx, ly=None):
     return data, seeds
 
 
-def make_3d_syntheticdata(lx, ly=None, lz=None):
+def make_3d_syntheticdata(lx, ly=None, lz=None, rng=None):
     if ly is None:
         ly = lx
     if lz is None:
         lz = lx
-    # test results depend on this seed value
-    rng = np.random.RandomState(1234)
+    if rng is None:
+        # test results depend on this seed value
+        rng = np.random.RandomState(1234)
     data = np.zeros((lx, ly, lz)) + 0.1 * rng.randn(lx, ly, lz)
     small_l = int(lx // 5)
     data[
