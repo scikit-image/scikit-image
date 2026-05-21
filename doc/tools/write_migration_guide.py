@@ -21,11 +21,12 @@ def write_migration(in_tpl, doc_dict, out_path=None):
     out_path = Path(out_path)
     tpl = Template(in_tpl.read_text())
     render_dict = doc_dict.copy()
-    out_str = tpl.render(migration_advice=render_dict)
+    out_str = tpl.render(advice_map=render_dict)
     # Check all keys have been consumed.
     if render_dict:
         raise RuntimeError('These keys not used in template:' + ', '.join(render_dict))
     Path(out_path).write_text(out_str)
+    return out_path
 
 
 def get_parser():
@@ -45,7 +46,10 @@ def main():
     parser = get_parser()
     args = parser.parse_args()
     doc_dict, extra_dict = get_doc_dicts()
-    write_migration(args.migration_tpl, {**doc_dict, **extra_dict}, args.out_rst)
+    out_path = write_migration(
+        args.migration_tpl, {**doc_dict, **extra_dict}, args.out_rst
+    )
+    print(f"Wrote to '{out_path}'")
     if args.doctest:
         success, msg = run_doctests(doc_dict)
         print(msg)

@@ -59,15 +59,15 @@ When switching to the new ``skimage2`` namespace, some code will need to be upda
     a keyword argument default value. By importing functionality from
     ``skimage2``, you explicitly opt in to the new behavior.
 
-{#- Format and advice section #}
-{%- macro format_advice(name, ul_char='-') -%}
-.. _sk2adv-{{ name | replace('.', '-') | replace('_', '-') }}:
+{#- Format an advice section, pops `title` from `advice_map` implicitly! #}
+{%- macro format_advice_section(title, ul_char='-') -%}
+.. _sk2adv-{{ title | replace('.', '-') | replace('_', '-') }}:
 
-``{{ name }}``
-{{ ul_char * (name | length + 4) }}
+``{{ title }}``
+{{ ul_char * (title | length + 4) }}
 
-{# Consume item, will check later if dict empty -#}
-{{ migration_advice.pop(name) }}
+{# Consume item, calling script checks if dict is emptied -#}
+{{ advice_map.pop(title) }}
 {%- endmacro %}
 
 {#- Format "gray functions" manually #}
@@ -78,7 +78,7 @@ Grayscale morphological operators in `skimage.morphology`
 
 The following functions are deprecated in favor of counterparts in `skimage2.morphology`:
 
-{% for func_name in migration_advice['gray_funcs'] %}
+{% for func_name in advice_map['gray_funcs'] %}
 - :ref:`sk2adv-{{ func_name | replace('.', '-') | replace('_', '-') }}`
 {% endfor %}
 
@@ -106,13 +106,13 @@ The new counterparts behave differently in the following ways:
     `gh-8060 <https://github.com/scikit-image/scikit-image/pull/8060>`__ for
     more details.
 
-{% for func_name in migration_advice.pop('gray_funcs') %}
-{{ format_advice(func_name, ul_char='^') }}
+{% for name in advice_map.pop('gray_funcs') %}
+{{ format_advice_section(title=name, ul_char='^') }}
 {% endfor -%}
 
-{#- Iterate & format remaining advice #}
-{%- for title in migration_advice.keys() | sort %}
-{{ format_advice(title) }}
+{#- Iterate over and format remaining advice #}
+{%- for name in advice_map.keys() | sort %}
+{{ format_advice_section(title=name) }}
 {% endfor %}
 
 Deprecations prior to skimage2
