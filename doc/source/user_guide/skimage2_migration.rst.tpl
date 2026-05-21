@@ -59,9 +59,13 @@ When switching to the new ``skimage2`` namespace, some code will need to be upda
     a keyword argument default value. By importing functionality from
     ``skimage2``, you explicitly opt in to the new behavior.
 
+{% macro format_label(title) -%}
+sk2adv-{{ title | replace('.', '-') | replace('_', '-') }}
+{%- endmacro %}
+
 {#- Format an advice section, pops `title` from `advice_map` implicitly! #}
 {%- macro format_advice_section(title, ul_char='-') -%}
-.. _sk2adv-{{ title | replace('.', '-') | replace('_', '-') }}:
+.. _{{ format_label(title) }}:
 
 ``{{ title }}``
 {{ ul_char * (title | length + 4) }}
@@ -78,8 +82,8 @@ Grayscale morphological operators in `skimage.morphology`
 
 The following functions are deprecated in favor of counterparts in `skimage2.morphology`:
 
-{% for func_name in advice_map['gray_funcs'] %}
-- :ref:`sk2adv-{{ func_name | replace('.', '-') | replace('_', '-') }}`
+{% for name in advice_map['gray_funcs'] %}
+- :ref:`{{ format_label(name) }}`
 {% endfor %}
 
 The new counterparts behave differently in the following ways:
