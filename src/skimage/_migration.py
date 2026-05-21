@@ -103,8 +103,8 @@ def _public_api_names(obj):
 
     Returns
     -------
-    public_matches : str
-        "Paths" to the given `obj` that are adverties and reachable through
+    public_matches : list of str
+        "Paths" to the given `obj` that are advertised and reachable through
         ``__all__``
 
     Examples
@@ -236,14 +236,18 @@ class Skimage2Migration:
         qualname, modname = func.__qualname__, func.__module__
 
         if qname_old is None:
-            qname_old, *other = _public_api_names(func)
-            if other:
-                msg = f"multiple matches for `old_qname` for {func!r}, set explicitly"
-                raise RuntimeError(msg)
-            if not qname_old:
+            # Not given, try to guess if not ambiguous
+            candidates = _public_api_names(func)
+            if not candidates:
                 msg = f"could not determine `old_qname` for {func!r}, set explicitly"
                 raise RuntimeError(msg)
+            if len(candidates) > 1:
+                msg = f"multiple matches for `old_qname` for {func!r}, set explicitly"
+                raise RuntimeError(msg)
+            qname_old = candidates[0]
 
+        # At this point `qname_old` should contain the name of the given `func`
+        # and no private prefixes
         assert func.__qualname__ in qname_old, (func.__qualname__, qname_old)
         assert "._" not in qname_old, qname_old
 
