@@ -59,30 +59,27 @@ When switching to the new ``skimage2`` namespace, some code will need to be upda
     a keyword argument default value. By importing functionality from
     ``skimage2``, you explicitly opt in to the new behavior.
 
-{% macro func_heading(name, ul_char='-') -%}
-.. _{{ name | replace('.', '-') | replace('_', '-')}}:
+{#- Format and advice section #}
+{%- macro format_advice(name, ul_char='-') -%}
+.. _sk2adv-{{ name | replace('.', '-') | replace('_', '-') }}:
 
 ``{{ name }}``
 {{ ul_char * (name | length + 4) }}
 
-{{ d[name] }}
+{# Consume item, will check later if dict empty -#}
+{{ migration_advice.pop(name) }}
 {%- endmacro %}
 
-{{ func_heading('skimage.data.binary_blobs') }}
-
-{{ func_heading('skimage.feature.peak_local_max') }}
-
-{{ func_heading('skimage.feature.canny') }}
-
-{{ func_heading('skimage.metrics.structural_similarity') }}
+{#- Format "gray functions" manually #}
+.. _sk2adv-gray-funcs:
 
 Grayscale morphological operators in `skimage.morphology`
 ---------------------------------------------------------
 
 The following functions are deprecated in favor of counterparts in `skimage2.morphology`:
 
-{% for func_name in d['gray_funcs'] %}
-- ``skimage.morphology.{{ func_name }}``
+{% for func_name in migration_advice['gray_funcs'] %}
+- :ref:`sk2adv-{{ func_name | replace('.', '-') | replace('_', '-') }}`
 {% endfor %}
 
 The new counterparts behave differently in the following ways:
@@ -109,9 +106,15 @@ The new counterparts behave differently in the following ways:
     `gh-8060 <https://github.com/scikit-image/scikit-image/pull/8060>`__ for
     more details.
 
-{% for func_name in d['gray_funcs'] %}
-{{ func_heading('skimage.morphology.' ~ func_name, '^') }}
+{% for func_name in migration_advice.pop('gray_funcs') %}
+{{ format_advice(func_name, ul_char='^') }}
+{% endfor -%}
+
+{#- Iterate & format remaining advice #}
+{%- for title in migration_advice.keys() | sort %}
+{{ format_advice(title) }}
 {% endfor %}
+
 
 Deprecations prior to skimage2
 ==============================

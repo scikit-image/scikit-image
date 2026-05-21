@@ -25,12 +25,7 @@ _SUPPORTED_MODES = {
 
 # For migration doc build.
 ski2_migration_decorator.extra_params['gray_funcs'] = (
-    'erosion',
-    'dilation',
-    'opening',
-    'closing',
-    'white_tophat',
-    'black_tophat',
+    f'skimage.morphology.{name}' for name in __all__
 )
 
 _PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR = """\
