@@ -414,11 +414,9 @@ Using an editable install, `scikit-image` will rebuild itself as
 necessary.
 If you are building manually, rebuild with:
 
+```sh
+spin build
 ```
-.. code-block:: sh
-```
-
-> spin build
 
 Repeated, incremental builds usually work just fine, but if you notice build
 problems, rebuild from scratch using:
