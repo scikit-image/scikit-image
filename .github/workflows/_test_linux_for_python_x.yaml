@@ -132,7 +132,7 @@ jobs:
           PYTHONOPTIMIZE: ${{ inputs.PYTHONOPTIMIZE }}
         run: |
           pip install pytest-run-parallel
-          $PYTEST --doctest-plus --showlocals --pyargs skimage --parallel-threads=4 ./tests
+          spin test --doctest -- --parallel-threads=4
 
       - name: Check benchmarks
         run: |
