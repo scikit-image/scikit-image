@@ -230,11 +230,11 @@ expedited review and acceptance.
 
 ## Guidelines
 
-- All code should have tests (see [test coverage] below for more details).
+- All code should have tests (see [test coverage](#test-coverage) below for more details).
 - All code should be documented, to the same
   [standard](https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard) as NumPy and SciPy.
 - For new functionality, always add an example to the gallery (see
-  [Gallery] below for more details).
+  [Gallery](#gallery) below for more details).
 - No changes are ever merged without review and approval by two core team members.
   There are two exceptions to this rule. First, pull requests which affect
   only the documentation require review and approval by only one core team
