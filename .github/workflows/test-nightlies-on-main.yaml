@@ -1,5 +1,5 @@
-# Workflow to build and test against nightly wheels
-name: Test Nightly
+name: Test nightlies
+# On `main`, test against nightly wheels of upstream.
 
 on:
   push:
@@ -31,12 +31,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           persist-credentials: false
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
           cache: "pip"

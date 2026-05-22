@@ -1,6 +1,6 @@
 import numpy as np
 
-from .._shared.utils import _supported_float_type
+from _skimage2._shared.utils import _supported_float_type
 from ..filters._rank_order import rank_order
 from ._grayreconstruct import reconstruction_loop
 
@@ -213,5 +213,7 @@ def reconstruction(seed, mask, method='dilation', footprint=None, offset=None):
 
     # Reshape reconstructed image to original image shape and remove padding.
     rec_img = value_map[value_rank[:image_stride]]
-    rec_img.shape = np.array(seed.shape) + (np.array(footprint.shape) - 1)
+    rec_img = np.reshape(
+        rec_img, np.array(seed.shape) + (np.array(footprint.shape) - 1), copy=False
+    )
     return rec_img[inside_slices]

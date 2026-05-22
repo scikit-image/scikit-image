@@ -5,7 +5,7 @@ from ._geometric import SimilarityTransform, AffineTransform, ProjectiveTransfor
 from ._warps_cy import _warp_fast
 from ..measure import block_reduce
 
-from .._shared.utils import (
+from _skimage2._shared.utils import (
     get_bound_method_class,
     safe_as_int,
     warn,
@@ -651,7 +651,7 @@ def warp_coords(coord_map, shape, dtype=np.float64):
         of coordinates and each element is a ``(row, col)`` pair.
     shape : tuple
         Shape of output image ``(rows, cols[, bands])``.
-    dtype : np.dtype or string
+    dtype : dtype-like
         dtype for return value (sane choices: float32 or float64).
 
     Returns

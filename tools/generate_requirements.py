@@ -4,17 +4,10 @@
 Also builda a conda environment.yml
 """
 
-import sys
 import re
 from pathlib import Path
 
-try:  # standard module since Python 3.11
-    import tomllib as toml
-except ImportError:
-    try:  # available for older Python via pip
-        import tomli as toml
-    except ImportError:
-        sys.exit("Please install `tomli` first: `pip install tomli`")
+import tomllib as toml
 
 script_pth = Path(__file__)
 repo_dir = script_pth.parent.parent
@@ -53,11 +46,41 @@ def generate_environment_yml(req_sections: dict[str, list[str]]) -> None:
 
             pkgname = re.split('[>=]', dep)[0]
             dep = dep.replace(pkgname, rename_idx.get(pkgname, pkgname))
+            if dep == "scikit-image":
+                continue
 
             lines.append(f"  - {dep}")
 
+            # Strip duplicates
+            if re.split('[>=]', lines[-2])[0] == re.split('[>=]', lines[-1])[0]:
+                lines = lines[:-1]
+
     with open("environment.yml", "w") as f:
         f.writelines(f"{line}\n" for line in lines)
+
+
+def expand_dependencies(
+    dep_list: list[str],
+    optional_dict: dict[str, list[str]],
+    package_name: str = 'scikit-image',
+) -> list[str]:
+    """Explode dependencies with optional extras into a flat list.
+
+    If `scikit-image[optional_group]` is used as a dependency itself, replace
+    with the actual dependencies of `optional_group`.
+    """
+    exploded = []
+    for dep in dep_list:
+        if dep.startswith(package_name):
+            extras = dep.split('[')[1].rstrip(']').split(',')
+            exploded.extend(
+                expand_dependencies(
+                    optional_dict[extras[0]], optional_dict, package_name
+                )
+            )
+        else:
+            exploded.append(dep)
+    return exploded
 
 
 def main() -> None:
@@ -66,7 +89,14 @@ def main() -> None:
     generate_requirement_file("default", pyproject["project"]["dependencies"])
 
     for key, opt_list in pyproject["project"]["optional-dependencies"].items():
-        generate_requirement_file(key, opt_list)
+        generate_requirement_file(
+            key,
+            expand_dependencies(
+                opt_list,
+                pyproject["project"]["optional-dependencies"],
+                package_name='scikit-image',
+            ),
+        )
 
     generate_environment_yml(
         {

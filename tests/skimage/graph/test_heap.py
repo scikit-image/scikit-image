@@ -2,7 +2,7 @@ import time
 import random
 import skimage.graph.heap as heap
 
-from skimage._shared.testing import run_in_parallel
+from _skimage2._shared.testing import run_in_parallel
 
 
 @run_in_parallel()

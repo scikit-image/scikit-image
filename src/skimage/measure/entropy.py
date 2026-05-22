@@ -10,7 +10,7 @@ def shannon_entropy(image, base=2):
 
     Parameters
     ----------
-    image : (M, N) ndarray
+    image : ndarray of shape (M, N)
         Grayscale input image.
     base : float, optional
         The logarithmic base to use.

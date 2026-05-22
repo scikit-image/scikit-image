@@ -6,6 +6,8 @@ updates:
     directory: "/"
     schedule:
       interval: "quarterly"
+    cooldown:
+      default-days: 14
     labels:
       - ":robot: type: Infrastructure"
     groups:

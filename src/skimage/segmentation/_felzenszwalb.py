@@ -1,7 +1,7 @@
 import numpy as np
 
 from ._felzenszwalb_cy import _felzenszwalb_cython
-from .._shared import utils
+from _skimage2._shared import utils
 
 
 @utils.channel_as_last_axis(multichannel_output=False)
@@ -23,7 +23,7 @@ def felzenszwalb(image, scale=1, sigma=0.8, min_size=20, *, channel_axis=-1):
 
     Parameters
     ----------
-    image : (M, N[, 3]) ndarray
+    image : ndarray of shape (M, N[, 3])
         Input image.
     scale : float
         Free parameter. Higher means larger clusters.
@@ -41,7 +41,7 @@ def felzenszwalb(image, scale=1, sigma=0.8, min_size=20, *, channel_axis=-1):
 
     Returns
     -------
-    segment_mask : (M, N) ndarray
+    segment_mask : ndarray of shape (M, N)
         Integer mask indicating segment labels.
 
     References

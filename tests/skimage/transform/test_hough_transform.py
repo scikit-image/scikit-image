@@ -2,8 +2,8 @@ import numpy as np
 import pytest
 from numpy.testing import assert_almost_equal, assert_equal
 
-from skimage import data, transform
-from skimage._shared.testing import run_in_parallel
+from skimage import data, transform, feature
+from _skimage2._shared.testing import run_in_parallel
 from skimage.draw import circle_perimeter, ellipse_perimeter, line
 
 
@@ -72,12 +72,15 @@ def test_probabilistic_hough():
 def test_probabilistic_hough_seed():
     # Load image that is likely to give a randomly varying number of lines
     image = data.checkerboard()
-
+    edges = feature.canny(image, 2, 1, 25)
     # Use constant seed to ensure a deterministic output
     lines = transform.probabilistic_hough_line(
-        image, threshold=50, line_length=50, line_gap=1, rng=41537233
+        edges, threshold=50, line_length=50, line_gap=5, rng=41537233
     )
-    assert len(lines) == 56
+    # This is a regression test.  It does not assert
+    # the answer is correct, only that it was the result we got
+    # when running the test on a known version of the code.
+    assert len(lines) == 28
 
 
 def test_probabilistic_hough_bad_input():
@@ -203,7 +206,8 @@ def test_hough_line_peaks_zero_input():
 def test_hough_line_peaks_single_angle():
     # Regression test for gh-4814
     # This code snippet used to raise an IndexError
-    img = np.random.random((100, 100))
+    rng = np.random.RandomState(3663933399)
+    img = rng.random((100, 100))
     tested_angles = np.array([np.pi / 2])
     h, theta, d = transform.hough_line(img, theta=tested_angles)
     accum, angles, dists = transform.hough_line_peaks(h, theta, d, threshold=2)

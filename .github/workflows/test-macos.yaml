@@ -11,9 +11,6 @@ permissions:
   contents: read
   issues: write
 
-env:
-  PYTEST: "pytest --config-file ${{ github.workspace }}/pyproject.toml"
-
 jobs:
   test_skimage_macos:
     name: ${{ matrix.os }}-cp${{ matrix.python-version }}
@@ -23,14 +20,14 @@ jobs:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.13"]
-        os: [macos-13]
+        python-version: ["3.12", "3.14"]
+        os: [macos-latest]
         OPTIONAL_DEPS: [1]
         OPTIONS_NAME: ["default"]
         include:
           - python-version: "3.13"
-            # Also test on ARM version of MacOS
-            os: macos-15
+            # Also test on Intel version of MacOS
+            os: macos-15-intel
             OPTIONAL_DEPS: 1
             OPTIONS_NAME: "default"
     env:
@@ -43,12 +40,12 @@ jobs:
 
     steps:
       - name: Checkout scikit-image
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version}}
           allow-prereleases: true
@@ -64,9 +61,9 @@ jobs:
         run: |
           source .github/scripts/setup-build-env.sh
 
-      - name: Build and install
+      - name: Build skimage
         run: |
-          pip install -v --no-build-isolation .
+          spin build
 
       - name: Install test dependencies
         env:
@@ -74,13 +71,32 @@ jobs:
         run: |
           source .github/scripts/setup-test-env.sh
 
+      - name: Check for run-all-tests label
+        id: check-run-all-tests-label
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: bash .github/scripts/check-run-all-tests-label.sh
+
       - name: Run tests
+        env:
+          TEST_MODIFIED: ${{ steps.check-run-all-tests-label.outputs.test_modified }}
         run: |
-          $PYTEST --showlocals ./tests
+          if [[ "$TEST_MODIFIED" == "true" ]]; then
+            MODIFIED_FLAG="--test-modified"
+            git fetch origin "$GITHUB_BASE_REF"
+          else
+            MODIFIED_FLAG=""
+          fi
+          spin test --no-doctest $MODIFIED_FLAG
+
+      - name: Doctest skimage2 migration
+        run: |
+          spin run -- python doc/tools/run_migration_doctests.py
 
       - name: Check benchmarks
         run: |
-          asv check -v -E existing
+          spin asv -- check -v -E existing
 
       - name: "Job has failed: reporting"
         if: ${{ failure() && github.ref == 'refs/heads/main' }}

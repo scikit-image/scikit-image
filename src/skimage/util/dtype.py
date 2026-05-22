@@ -566,7 +566,7 @@ def img_as_ubyte(image, force_copy=False):
 
     Returns
     -------
-    out : ndarray of ubyte (uint8)
+    out : ndarray of dtype uint8
         Output image.
 
     Notes
@@ -590,7 +590,7 @@ def img_as_bool(image, force_copy=False):
 
     Returns
     -------
-    out : ndarray of bool (`bool_`)
+    out : ndarray of dtype bool
         Output image.
 
     Notes

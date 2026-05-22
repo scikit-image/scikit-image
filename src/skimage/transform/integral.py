@@ -15,7 +15,7 @@ def integral_image(image, *, dtype=None):
     ----------
     image : ndarray
         Input image.
-    dtype : data-type, optional
+    dtype : dtype-like, optional
         Data type (NumPy dtype) to be used for calculation, and for
         output array `S`.  If None, defaults to the more precise of either
         float64 or `image`'s dtype.
