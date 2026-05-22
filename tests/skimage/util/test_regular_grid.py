@@ -1,6 +1,6 @@
 import numpy as np
 from skimage.util import regular_grid
-from skimage._shared.testing import assert_equal
+from _skimage2._shared.testing import assert_equal
 
 
 def test_regular_grid_full():

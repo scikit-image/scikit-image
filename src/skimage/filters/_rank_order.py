@@ -17,7 +17,7 @@ def rank_order(image):
 
     Returns
     -------
-    labels : ndarray of unsigned integers, of shape image.shape
+    labels : ndarray of dtype np.unsignedinteger, same shape as input `image`
         New array where each pixel has the rank-order value of the
         corresponding pixel in ``image``. Pixel values are between 0 and
         n - 1, where n is the number of distinct unique values in

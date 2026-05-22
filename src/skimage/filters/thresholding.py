@@ -7,15 +7,15 @@ from collections.abc import Iterable
 import numpy as np
 from scipy import ndimage as ndi
 
-from .._shared.filters import gaussian
-from .._shared.utils import _supported_float_type, warn
-from .._shared.version_requirements import require
+from ._gaussian import gaussian
+from _skimage2._shared.utils import _supported_float_type, warn
+from _skimage2._shared.version_requirements import require
 from ..exposure import histogram
 from ..filters._multiotsu import (
     _get_multiotsu_thresh_indices,
     _get_multiotsu_thresh_indices_lut,
 )
-from ..transform import integral_image
+from ..transform.integral import integral_image
 from ..util import dtype_limits
 from ._sparse import _correlate_sparse, _validate_window_size
 
@@ -41,7 +41,7 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
 
     Parameters
     ----------
-    image : (M, N) ndarray
+    image : ndarray of shape (M, N)
         Input image.
     methods : dict, optional
         Names and associated functions.
@@ -111,7 +111,7 @@ def try_all_threshold(image, figsize=(8, 5), verbose=True):
 
     Parameters
     ----------
-    image : (M, N) ndarray
+    image : ndarray of shape (M, N)
         Input image.
     figsize : tuple, optional
         Figure size (in inches).
@@ -185,7 +185,7 @@ def threshold_local(
     ----------
     image : (M, N[, ...]) ndarray
         Grayscale input image.
-    block_size : int or sequence of int
+    block_size : int or Sequence of int
         Odd size of pixel neighborhood which is used to calculate the
         threshold value (e.g. 3, 5, 7, ..., 21, ...).
     method : {'generic', 'gaussian', 'mean', 'median'}, optional
@@ -206,7 +206,7 @@ def threshold_local(
         The mode parameter determines how the array borders are handled, where
         cval is the value when mode is equal to 'constant'.
         Default is 'reflect'.
-    param : {int, function}, optional
+    param : int or Callable, optional
         Either specify sigma for 'gaussian' method or function object for
         'generic' method. This functions takes the flat array of local
         neighborhood as a single argument and returns the calculated
@@ -298,7 +298,7 @@ def _validate_image_histogram(image, hist, nbins=None, normalize=False):
     -------
     counts : 1D array of float
         Each element is the number of pixels falling in each intensity bin.
-    bin_centers : 1D array
+    bin_centers : ndarray of shape (n,)
         Each element is the value corresponding to the center of each intensity
         bin.
 
@@ -1198,8 +1198,8 @@ def apply_hysteresis_threshold(image, low, high):
 
     Returns
     -------
-    thresholded : (M[, ...]) array of bool
-        Array in which ``True`` indicates the locations where ``image``
+    thresholded : ndarray of dtype bool and shape (M[, ...])
+        Array in which ``True`` indicates the locations where `image`
         was above the hysteresis threshold.
 
     Examples

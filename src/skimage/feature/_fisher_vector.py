@@ -55,7 +55,7 @@ def learn_gmm(descriptors, *, n_modes=32, gm_args=None):
 
     Parameters
     ----------
-    descriptors : np.ndarray (N, M) or list [(N1, M), (N2, M), ...]
+    descriptors : ndarray of shape (N, M) or list of (tuple[int, int])
         List of NumPy arrays, or a single NumPy array, of the descriptors
         used to estimate the GMM. The reason a list of NumPy arrays is
         permissible is because often when using a Fisher vector encoding,
@@ -122,7 +122,7 @@ def learn_gmm(descriptors, *, n_modes=32, gm_args=None):
 
     if gm_args:
         has_cov_type = 'covariance_type' in gm_args
-        cov_type_not_diag = gm_args['covariance_type'] != 'diag'
+        cov_type_not_diag = gm_args.get('covariance_type', None) != 'diag'
         if has_cov_type and cov_type_not_diag:
             raise FisherVectorException('Covariance type must be "diag".')
 

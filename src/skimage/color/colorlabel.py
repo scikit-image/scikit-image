@@ -2,7 +2,7 @@ import itertools
 
 import numpy as np
 
-from .._shared.utils import _supported_float_type, warn
+from _skimage2._shared.utils import _supported_float_type, warn
 from ..util import img_as_float
 from . import rgb_colors
 from .colorconv import gray2rgb, rgb2hsv, hsv2rgb
@@ -119,7 +119,7 @@ def label2rgb(
         values between [0, 1].
     image_alpha : float [0, 1], optional
         Opacity of the image.
-    kind : string, one of {'overlay', 'avg'}
+    kind : {'overlay', 'avg'}, optional
         The kind of color image desired. 'overlay' cycles over defined colors
         and overlays the colored labels over the original image. 'avg' replaces
         each labeled segment with its average color, for a stained-class or
