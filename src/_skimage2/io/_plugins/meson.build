@@ -24,5 +24,5 @@ ini_files = [
 py3.install_sources(
   python_sources + ini_files,
   pure: false,             # Will be installed next to binaries
-  subdir: 'skimage/io/_plugins'  # Folder relative to site-packages to install to
+  subdir: '_skimage2/io/_plugins'  # Folder relative to site-packages to install to
 )

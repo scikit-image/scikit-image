@@ -17,7 +17,7 @@ foreach pyx_file: pyx_files
     include_directories: ['../../_skimage2/_shared'],
     dependencies: [np_dep],
     install: true,
-    subdir: 'skimage/feature'
+    subdir: '_skimage2/feature'
   )
 endforeach
 
@@ -33,7 +33,7 @@ py3.extension_module('brief_cy',
   include_directories: [incdir_pythran],
   dependencies: [py3_dep, np_dep],
   install: true,
-  subdir: 'skimage/feature'
+  subdir: '_skimage2/feature'
 )
 
 _hessian_det_appx_pythran = custom_target('_hessian_det_appx_pythran',
@@ -48,7 +48,7 @@ py3.extension_module('_hessian_det_appx',
   include_directories: [incdir_pythran],
   dependencies: [py3_dep, np_dep],
   install: true,
-  subdir: 'skimage/feature'
+  subdir: '_skimage2/feature'
 )
 
 python_sources = [
@@ -77,11 +77,11 @@ python_sources = [
 py3.install_sources(
   python_sources,
   pure: false,             # Will be installed next to binaries
-  subdir: 'skimage/feature'  # Folder relative to site-packages to install to
+  subdir: '_skimage2/feature'  # Folder relative to site-packages to install to
 )
 
 py3.install_sources(
   ['orb_descriptor_positions.txt'],
   pure: false,             # Will be installed next to binaries
-  subdir: 'skimage/feature'  # Folder relative to site-packages to install to
+  subdir: '_skimage2/feature'  # Folder relative to site-packages to install to
 )

@@ -9,9 +9,10 @@ python_sources = [
 py3.install_sources(
   python_sources,
   pure: false,
-  subdir: 'skimage'
+  subdir: '_skimage2'
 )
 
+subdir('_shared')
 subdir('_vendored')
 subdir('color')
 subdir('data')

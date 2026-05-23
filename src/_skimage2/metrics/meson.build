@@ -13,5 +13,5 @@ python_sources = [
 py3.install_sources(
   python_sources,
   pure: false,             # Will be installed next to binaries
-  subdir: 'skimage/metrics'  # Folder relative to site-packages to install to
+  subdir: '_skimage2/metrics'  # Folder relative to site-packages to install to
 )

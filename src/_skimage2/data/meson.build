@@ -9,7 +9,7 @@ python_sources = [
 py3.install_sources(
   python_sources,
   pure: false,             # Will be installed next to binaries
-  subdir: 'skimage/data'  # Folder relative to site-packages to install to
+  subdir: '_skimage2/data'  # Folder relative to site-packages to install to
 )
 
 py3.install_sources([
@@ -49,5 +49,5 @@ py3.install_sources([
   'motorcycle_right.png',
   ],
   pure: false,
-  subdir: 'skimage/data'
+  subdir: '_skimage2/data'
 )

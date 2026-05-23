@@ -4,7 +4,7 @@ py3.extension_module('_draw',
   include_directories: ['../../_skimage2/_shared'],
   dependencies: [np_dep],
   install: true,
-  subdir: 'skimage/draw'
+  subdir: '_skimage2/draw'
 )
 
 python_sources = [
@@ -20,5 +20,5 @@ python_sources = [
 py3.install_sources(
   python_sources,
   pure: false,             # Will be installed next to binaries
-  subdir: 'skimage/draw'  # Folder relative to site-packages to install to
+  subdir: '_skimage2/draw'  # Folder relative to site-packages to install to
 )

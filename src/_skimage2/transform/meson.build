@@ -11,7 +11,7 @@ foreach ext: extensions
     include_directories: ['../../_skimage2/_shared'],
     dependencies: [np_dep],
     install: true,
-    subdir: 'skimage/transform'
+    subdir: '_skimage2/transform'
   )
 endforeach
 
@@ -31,5 +31,5 @@ python_sources = [
 py3.install_sources(
   python_sources,
   pure: false,             # Will be installed next to binaries
-  subdir: 'skimage/transform'  # Folder relative to site-packages to install to
+  subdir: '_skimage2/transform'  # Folder relative to site-packages to install to
 )
