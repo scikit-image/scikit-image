@@ -81,9 +81,7 @@ def test_unwrap_2d_nan():
     image_wrapped = np.angle(np.exp(1j * image))
     mask = np.zeros(image.shape, dtype=bool)
     mask[4:6, 4:8] = True
-    image_wrapped_masked = np.ma.array(image_wrapped,
-                                       mask=mask,
-                                       fill_value=0.5)
+    image_wrapped_masked = np.ma.array(image_wrapped, mask=mask, fill_value=0.5)
     mask_res = unwrap_phase(image_wrapped_masked, rng=0)
     image_wrapped_nans = image_wrapped.copy()
     image_wrapped_nans[mask] = np.nan
@@ -107,9 +105,7 @@ def test_unwrap_3d_nan():
     image_wrapped = np.angle(np.exp(1j * image))
     mask = np.zeros(image.shape, dtype=bool)
     mask[4:6, 4:6, 1:3] = True
-    image_wrapped_masked = np.ma.array(image_wrapped,
-                                       mask=mask,
-                                       fill_value=0.5)
+    image_wrapped_masked = np.ma.array(image_wrapped, mask=mask, fill_value=0.5)
     mask_res = unwrap_phase(image_wrapped_masked, rng=0)
     image_wrapped_nans = image_wrapped.copy()
     image_wrapped_nans[mask] = np.nan

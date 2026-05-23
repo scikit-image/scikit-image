@@ -119,8 +119,7 @@ def unwrap_phase(image, wrap_around=False, rng=None):
         rng = np.random.default_rng(rng)
 
     if np.ma.isMaskedArray(image):
-        mask = (nan_mask |
-                np.require(np.ma.getmaskarray(image), np.uint8, ['C']))
+        mask = nan_mask | np.require(np.ma.getmaskarray(image), np.uint8, ['C'])
     else:
         mask = nan_mask
 
