@@ -1,5 +1,5 @@
 import numpy as np
-from skimage.util import regular_grid
+from _skimage2.util import regular_grid
 from _skimage2._shared.testing import assert_equal
 
 

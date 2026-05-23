@@ -6,10 +6,10 @@ import warnings
 import numpy as np
 import pytest
 
-from skimage import io
+from _skimage2 import io
 from _skimage2._shared.testing import assert_array_equal, fetch, assert_stacklevel
 from _skimage2._shared._dependency_checks import is_wasm
-from skimage.data import data_dir
+from _skimage2.data import data_dir
 
 
 one_by_one_jpeg = (

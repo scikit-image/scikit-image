@@ -4,8 +4,8 @@ import copy
 import numpy as np
 
 from _skimage2._shared.testing import assert_array_equal
-from skimage import data
-from skimage.feature import BRIEF, corner_peaks, corner_harris
+from _skimage2 import data
+from _skimage2.feature import BRIEF, corner_peaks, corner_harris
 from _skimage2._shared import testing
 
 

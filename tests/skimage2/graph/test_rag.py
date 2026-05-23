@@ -4,8 +4,8 @@ from numpy.testing import assert_array_equal
 import numpy as np
 import scipy as sp
 
-from skimage import graph
-from skimage import segmentation, data
+from _skimage2 import graph
+from _skimage2 import segmentation, data
 from _skimage2._shared import testing
 
 # Version is less than 1.17.0.dev0

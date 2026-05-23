@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 import scipy as sp
 
-from skimage.morphology import (
+from _skimage2.morphology import (
     remove_small_objects,
     remove_small_holes,
     remove_objects_by_distance,

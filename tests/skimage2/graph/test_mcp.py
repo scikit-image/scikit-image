@@ -1,7 +1,7 @@
 import pytest
 
 import numpy as np
-import skimage.graph.mcp as mcp
+import _skimage2.graph.mcp as mcp
 
 from _skimage2._shared.testing import (
     assert_array_equal,

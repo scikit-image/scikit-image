@@ -11,15 +11,15 @@ from scipy.ndimage import fourier_shift, shift as real_shift
 import scipy.fft as fft
 
 from _skimage2._shared.utils import _supported_float_type
-from skimage.data import camera, brain
+from _skimage2.data import camera, brain
 
 
-from skimage.io import imread
-from skimage.registration._masked_phase_cross_correlation import (
+from _skimage2.io import imread
+from _skimage2.registration._masked_phase_cross_correlation import (
     _masked_phase_cross_correlation as masked_register_translation,
     cross_correlate_masked,
 )
-from skimage.registration import phase_cross_correlation
+from _skimage2.registration import phase_cross_correlation
 
 
 def test_masked_registration_vs_phase_cross_correlation():

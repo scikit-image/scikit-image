@@ -1,7 +1,7 @@
 import numpy as np
-import skimage.data as data
-from skimage.data._fetchers import _image_fetcher
-from skimage import io
+import _skimage2.data as data
+from _skimage2.data._fetchers import _image_fetcher
+from _skimage2 import io
 from _skimage2._shared.testing import (
     assert_equal,
     assert_almost_equal,

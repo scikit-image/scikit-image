@@ -1,9 +1,9 @@
 import numpy as np
 from _skimage2._shared.testing import assert_almost_equal, assert_equal
 
-from skimage import data, img_as_float
-from skimage.morphology import diamond
-from skimage.feature import match_template, peak_local_max
+from _skimage2 import data, img_as_float
+from _skimage2.morphology import diamond
+from _skimage2.feature import match_template, peak_local_max
 from _skimage2._shared import testing
 
 

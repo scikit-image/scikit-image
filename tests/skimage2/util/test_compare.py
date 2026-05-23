@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from skimage.util.compare import compare_images
+from _skimage2.util.compare import compare_images
 
 
 def test_compare_images_ValueError_shape():

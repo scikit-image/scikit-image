@@ -3,8 +3,8 @@ import pytest
 from scipy import ndimage as ndi
 from numpy.testing import assert_allclose, assert_array_equal
 
-import skimage as ski
-from skimage.morphology import footprint_rectangle, mirror_footprint, pad_footprint
+import _skimage2 as ski2
+from _skimage2.morphology import footprint_rectangle, mirror_footprint, pad_footprint
 from _skimage2._shared.testing import fetch
 
 import _skimage2.morphology._grayscale_operators as gray
@@ -35,9 +35,9 @@ class TestMorphology:
         "footprint_args",
         [
             ("square", lambda n: footprint_rectangle((n, n))),
-            ("diamond", ski.morphology.diamond),
-            ("disk", ski.morphology.disk),
-            ("star", ski.morphology.star),
+            ("diamond", ski2.morphology.diamond),
+            ("disk", ski2.morphology.disk),
+            ("star", ski2.morphology.star),
         ],
     )
     @pytest.mark.parametrize("size", list(range(1, 4)))
@@ -52,9 +52,9 @@ class TestMorphology:
     def test_reproduce_skimage_data_not_mirrored(self, footprint_args, size, func):
         # Test that `erosion`, `opening`, and `white_tophat` can
         # reproduce data in `gray_morph_output.npz`
-        image = ski.color.rgb2gray(ski.data.coffee())
-        image = ski.transform.downscale_local_mean(image, (20, 20))
-        image = ski.util.img_as_ubyte(image)
+        image = ski2.color.rgb2gray(ski.data.coffee())
+        image = ski2.transform.downscale_local_mean(image, (20, 20))
+        image = ski2.util.img_as_ubyte(image)
 
         footprint_name, footprint_func = footprint_args
         key = f'{footprint_name}_{size}_{func.__name__}'
@@ -69,9 +69,9 @@ class TestMorphology:
         "footprint_args",
         [
             ("square", lambda n: footprint_rectangle((n, n))),
-            ("diamond", ski.morphology.diamond),
-            ("disk", ski.morphology.disk),
-            ("star", ski.morphology.star),
+            ("diamond", ski2.morphology.diamond),
+            ("disk", ski2.morphology.disk),
+            ("star", ski2.morphology.star),
         ],
     )
     @pytest.mark.parametrize("size", list(range(1, 4)))
@@ -86,9 +86,9 @@ class TestMorphology:
     def test_reproduce_skimage_data_mirrored(self, footprint_args, size, func):
         # Test that `dilation`, `closing`, and `black_tophat` can
         # reproduce data in `gray_morph_output.npz`
-        image = ski.color.rgb2gray(ski.data.coffee())
-        image = ski.transform.downscale_local_mean(image, (20, 20))
-        image = ski.util.img_as_ubyte(image)
+        image = ski2.color.rgb2gray(ski.data.coffee())
+        image = ski2.transform.downscale_local_mean(image, (20, 20))
+        image = ski2.util.img_as_ubyte(image)
 
         footprint_name, footprint_func = footprint_args
         key = f'{footprint_name}_{size}_{func.__name__}'
@@ -104,7 +104,7 @@ class TestMorphology:
         np.testing.assert_equal(result, expected)
 
     def test_gray_closing_extensive(self):
-        img = ski.data.coins()
+        img = ski2.data.coins()
         footprint = np.array([[0, 0, 1], [0, 1, 1], [1, 1, 1]])
 
         # Default mode="ignore" is extensive
@@ -118,7 +118,7 @@ class TestMorphology:
         assert not np.all(result_default >= img)
 
     def test_gray_opening_anti_extensive(self):
-        img = ski.data.coins()
+        img = ski2.data.coins()
         footprint = np.array([[0, 0, 1], [0, 1, 1], [1, 1, 1]])
 
         # Default mode="ignore" is anti-extensive
@@ -210,7 +210,7 @@ class TestAsymmetricFootprints:
 
 @pytest.mark.parametrize("func", gray_operators)
 def test_default_footprint(func):
-    strel = ski.morphology.diamond(radius=1)
+    strel = ski2.morphology.diamond(radius=1)
     image = np.array(
         [
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -361,7 +361,7 @@ def test_float():
 
 def test_uint16():
     im16, eroded16, dilated16, opened16, closed16 = map(
-        ski.util.img_as_uint, [im, eroded, dilated, opened, closed]
+        ski2.util.img_as_uint, [im, eroded, dilated, opened, closed]
     )
     assert_allclose(gray.erosion(im16), eroded16)
     assert_allclose(gray.dilation(im16), dilated16)
@@ -430,8 +430,8 @@ def test_diamond_decomposition(cam_image, func, radius, decomposition):
 
     comparison is made to the case without decomposition.
     """
-    footprint_ndarray = ski.morphology.diamond(radius, decomposition=None)
-    footprint = ski.morphology.diamond(radius, decomposition=decomposition)
+    footprint_ndarray = ski2.morphology.diamond(radius, decomposition=None)
+    footprint = ski2.morphology.diamond(radius, decomposition=decomposition)
     expected = func(cam_image, footprint=footprint_ndarray)
     out = func(cam_image, footprint=footprint)
     assert_array_equal(expected, out)
@@ -451,10 +451,10 @@ def test_octagon_decomposition(cam_image, func, m, n, decomposition):
     """
     if m == 0 and n == 0:
         with pytest.raises(ValueError):
-            ski.morphology.octagon(m, n, decomposition=decomposition)
+            ski2.morphology.octagon(m, n, decomposition=decomposition)
     else:
-        footprint_ndarray = ski.morphology.octagon(m, n, decomposition=None)
-        footprint = ski.morphology.octagon(m, n, decomposition=decomposition)
+        footprint_ndarray = ski2.morphology.octagon(m, n, decomposition=None)
+        footprint = ski2.morphology.octagon(m, n, decomposition=decomposition)
         expected = func(cam_image, footprint=footprint_ndarray)
         out = func(cam_image, footprint=footprint)
         assert_array_equal(expected, out)
@@ -483,8 +483,8 @@ def test_octahedron_decomposition(cell3d_image, func, radius, decomposition):
 
     comparison is made to the case without decomposition.
     """
-    footprint_ndarray = ski.morphology.octahedron(radius, decomposition=None)
-    footprint = ski.morphology.octahedron(radius, decomposition=decomposition)
+    footprint_ndarray = ski2.morphology.octahedron(radius, decomposition=None)
+    footprint = ski2.morphology.octahedron(radius, decomposition=decomposition)
     expected = func(cell3d_image, footprint=footprint_ndarray)
     out = func(cell3d_image, footprint=footprint)
     assert_array_equal(expected, out)

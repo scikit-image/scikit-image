@@ -3,7 +3,7 @@ import pytest
 from numpy.testing import assert_array_equal
 
 from _skimage2._shared.utils import _supported_float_type
-from skimage.segmentation import chan_vese
+from _skimage2.segmentation import chan_vese
 
 
 @pytest.mark.parametrize('dtype', [np.float32, np.float64])

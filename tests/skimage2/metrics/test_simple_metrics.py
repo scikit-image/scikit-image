@@ -2,8 +2,8 @@ import numpy as np
 import pytest
 from numpy.testing import assert_equal, assert_almost_equal
 
-from skimage import data
-from skimage.metrics import (
+from _skimage2 import data
+from _skimage2.metrics import (
     peak_signal_noise_ratio,
     normalized_root_mse,
     mean_squared_error,
@@ -27,7 +27,7 @@ def test_PSNR_vs_IPOL():
     -----
     To generate p_IPOL, we need a local copy of cam_noisy::
 
-      from skimage import io
+      from _skimage2 import io
       io.imsave('/tmp/cam_noisy.png', cam_noisy)
 
     Then, we use the following command:

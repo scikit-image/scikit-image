@@ -6,10 +6,10 @@ import numpy as np
 from numpy.testing import assert_allclose
 from numpy.testing import assert_array_equal
 
-from skimage.transform import integral_image
-from skimage.feature import haar_like_feature
-from skimage.feature import haar_like_feature_coord
-from skimage.feature import draw_haar_like_feature
+from _skimage2.transform import integral_image
+from _skimage2.feature import haar_like_feature
+from _skimage2.feature import haar_like_feature_coord
+from _skimage2.feature import draw_haar_like_feature
 
 
 def test_haar_like_feature_error():

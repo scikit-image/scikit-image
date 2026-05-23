@@ -2,8 +2,8 @@ from _skimage2._shared import testing
 from _skimage2._shared.testing import assert_array_equal, assert_allclose
 
 import numpy as np
-from skimage.data import camera
-from skimage.util import random_noise, img_as_float
+from _skimage2.data import camera
+from _skimage2.util import random_noise, img_as_float
 
 
 def test_set_seed():

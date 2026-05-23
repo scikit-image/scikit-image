@@ -1,4 +1,4 @@
-from skimage.draw import line_nd
+from _skimage2.draw import line_nd
 from _skimage2._shared.testing import assert_equal
 
 

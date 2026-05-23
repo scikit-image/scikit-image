@@ -1,7 +1,7 @@
 import os
 from tempfile import NamedTemporaryFile
 
-from skimage.io import load_sift, load_surf
+from _skimage2.io import load_sift, load_surf
 
 from _skimage2._shared.testing import assert_equal
 

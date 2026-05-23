@@ -1,9 +1,9 @@
 import numpy as np
 from numpy.testing import assert_array_equal
 
-from skimage import color, data, morphology
-from skimage.morphology import isotropic
-from skimage.util import img_as_bool
+from _skimage2 import color, data, morphology
+from _skimage2.morphology import isotropic
+from _skimage2.util import img_as_bool
 
 img = color.rgb2gray(data.astronaut())
 bw_img = img > 100 / 255.0

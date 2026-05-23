@@ -1,5 +1,5 @@
 import numpy as np
-from skimage.measure import shannon_entropy
+from _skimage2.measure import shannon_entropy
 
 from _skimage2._shared.testing import assert_almost_equal
 

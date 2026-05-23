@@ -5,11 +5,11 @@ from scipy.ndimage import map_coordinates
 
 from _skimage2._shared.testing import expected_warnings, run_in_parallel
 from _skimage2._shared.utils import _supported_float_type
-from skimage.color.colorconv import rgb2gray
-from skimage.data import checkerboard, astronaut
-from skimage.draw.draw import circle_perimeter_aa
-from skimage.feature.peak import peak_local_max
-from skimage.transform._warps import (
+from _skimage2.color.colorconv import rgb2gray
+from _skimage2.data import checkerboard, astronaut
+from _skimage2.draw.draw import circle_perimeter_aa
+from _skimage2.feature.peak import peak_local_max
+from _skimage2.transform._warps import (
     _stackcopy,
     _linear_polar_mapping,
     _log_polar_mapping,
@@ -23,12 +23,12 @@ from skimage.transform._warps import (
     downscale_local_mean,
     resize_local_mean,
 )
-from skimage.transform._geometric import (
+from _skimage2.transform._geometric import (
     AffineTransform,
     ProjectiveTransform,
     SimilarityTransform,
 )
-from skimage.util.dtype import img_as_float, _convert
+from _skimage2.util.dtype import img_as_float, _convert
 
 
 def test_stackcopy():

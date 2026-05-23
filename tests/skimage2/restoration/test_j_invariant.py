@@ -6,12 +6,12 @@ import pytest
 
 from _skimage2._shared.testing import assert_
 from _skimage2._shared.utils import _supported_float_type
-from skimage.data import binary_blobs
-from skimage.data import camera, chelsea
-from skimage.metrics import mean_squared_error as mse
-from skimage.restoration import calibrate_denoiser, denoise_wavelet
-from skimage.restoration.j_invariant import denoise_invariant
-from skimage.util import img_as_float, random_noise
+from _skimage2.data import binary_blobs
+from _skimage2.data import camera, chelsea
+from _skimage2.metrics import mean_squared_error as mse
+from _skimage2.restoration import calibrate_denoiser, denoise_wavelet
+from _skimage2.restoration.j_invariant import denoise_invariant
+from _skimage2.util import img_as_float, random_noise
 
 
 PYWT_NOT_INSTALLED = importlib.util.find_spec("pywt") is None

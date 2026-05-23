@@ -4,8 +4,8 @@ import pytest
 from _skimage2._shared import testing
 from _skimage2._shared._warnings import expected_warnings
 from _skimage2._shared.testing import xfail, arch32, is_wasm
-from skimage.segmentation import random_walker
-from skimage.transform import resize
+from _skimage2.segmentation import random_walker
+from _skimage2.transform import resize
 
 
 def make_2d_syntheticdata(lx, ly=None, rng=None):
@@ -581,7 +581,7 @@ def test_prob_tol():
 
 
 def test_umfpack_import():
-    from skimage.segmentation import random_walker_segmentation
+    from _skimage2.segmentation import random_walker_segmentation
 
     UmfpackContext = random_walker_segmentation.UmfpackContext
     try:

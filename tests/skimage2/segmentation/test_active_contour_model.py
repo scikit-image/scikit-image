@@ -2,11 +2,11 @@ import numpy as np
 import pytest
 from numpy.testing import assert_equal, assert_allclose
 
-from skimage import data
+from _skimage2 import data
 from _skimage2._shared.utils import _supported_float_type
-from skimage.color import rgb2gray
-from skimage.filters import gaussian
-from skimage.segmentation import active_contour
+from _skimage2.color import rgb2gray
+from _skimage2.filters import gaussian
+from _skimage2.segmentation import active_contour
 
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])

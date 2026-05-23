@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from skimage.measure import (
+from _skimage2.measure import (
     intersection_coeff,
     manders_coloc_coeff,
     manders_overlap_coeff,

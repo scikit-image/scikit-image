@@ -3,7 +3,7 @@ import pytest
 from numpy.testing import assert_almost_equal, assert_array_equal
 from scipy.spatial import distance
 
-from skimage.metrics import hausdorff_distance, hausdorff_pair
+from _skimage2.metrics import hausdorff_distance, hausdorff_pair
 
 
 def test_hausdorff_empty():

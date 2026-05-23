@@ -1,13 +1,13 @@
 import numpy as np
 
-from skimage import data, img_as_float
+from _skimage2 import data, img_as_float
 from _skimage2._shared import testing
 from _skimage2._shared.testing import assert_allclose
 from _skimage2._shared.utils import _supported_float_type
-from skimage.color import rgb2gray
-from skimage.metrics import mean_squared_error, normalized_root_mse
-from skimage.morphology import dilation, disk
-from skimage.restoration import inpaint
+from _skimage2.color import rgb2gray
+from _skimage2.metrics import mean_squared_error, normalized_root_mse
+from _skimage2.morphology import dilation, disk
+from _skimage2.restoration import inpaint
 
 
 @testing.parametrize('dtype', [np.float16, np.float32, np.float64])

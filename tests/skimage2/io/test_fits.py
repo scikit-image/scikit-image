@@ -1,5 +1,5 @@
 import numpy as np
-import skimage.io as io
+import _skimage2.io as io
 from _skimage2._shared import testing
 
 

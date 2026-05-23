@@ -1,5 +1,5 @@
-import skimage.data as data
-from skimage.feature import Cascade
+import _skimage2.data as data
+from _skimage2.feature import Cascade
 
 
 def test_detector_astronaut():

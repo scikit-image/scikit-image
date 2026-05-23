@@ -13,11 +13,11 @@ import numpy as np
 import pytest
 from numpy.testing import assert_almost_equal, assert_array_almost_equal, assert_equal
 
-from skimage import data
+from _skimage2 import data
 from _skimage2._shared._warnings import expected_warnings
 from _skimage2._shared.testing import assert_stacklevel
 from _skimage2._shared.utils import _supported_float_type, slice_at_axis
-from skimage.color import (
+from _skimage2.color import (
     rgb2hsv,
     hsv2rgb,
     rgb2xyz,
@@ -54,7 +54,7 @@ from skimage.color import (
     rgba2rgb,
     gray2rgba,
 )
-from skimage.util import img_as_float, img_as_ubyte, img_as_float32
+from _skimage2.util import img_as_float, img_as_ubyte, img_as_float32
 
 # TODO: when minimum numpy dependency is 1.25 use:
 # np..exceptions.AxisError instead of AxisError
@@ -287,7 +287,7 @@ class TestColorconv:
 
     # BRO<->RGB roundtrip with ubyte image
     def test_bro_rgb_roundtrip(self):
-        from skimage.color.colorconv import bro_from_rgb, rgb_from_bro
+        from _skimage2.color.colorconv import bro_from_rgb, rgb_from_bro
 
         img_in = img_as_ubyte(self.img_stains)
         img_out = combine_stains(img_in, rgb_from_bro)
@@ -297,7 +297,7 @@ class TestColorconv:
     # BRO<->RGB roundtrip with float image
     @pytest.mark.parametrize("channel_axis", [0, 1, -1])
     def test_bro_rgb_roundtrip_float(self, channel_axis):
-        from skimage.color.colorconv import bro_from_rgb, rgb_from_bro
+        from _skimage2.color.colorconv import bro_from_rgb, rgb_from_bro
 
         img_in = self.img_stains
         img_in = np.moveaxis(img_in, source=-1, destination=channel_axis)

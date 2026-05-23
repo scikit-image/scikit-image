@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from numpy.testing import assert_array_equal
 
-from skimage.segmentation import (
+from _skimage2.segmentation import (
     disk_level_set,
     inverse_gaussian_gradient,
     morphological_chan_vese,

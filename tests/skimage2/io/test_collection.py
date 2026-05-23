@@ -3,9 +3,9 @@ import itertools
 
 import numpy as np
 import imageio.v3 as iio3
-from skimage import data_dir
-from skimage.io.collection import ImageCollection, MultiImage, alphanumeric_key
-from skimage.io import reset_plugins
+from _skimage2 import data_dir
+from _skimage2.io.collection import ImageCollection, MultiImage, alphanumeric_key
+from _skimage2.io import reset_plugins
 
 from _skimage2._shared import testing
 from _skimage2._shared.testing import assert_equal, assert_allclose, fetch

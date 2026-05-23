@@ -3,8 +3,8 @@ import pytest
 from numpy.testing import assert_, assert_equal, assert_array_almost_equal
 
 from _skimage2._shared.utils import _supported_float_type
-from skimage.data import camera, coins
-from skimage.filters import (
+from _skimage2.data import camera, coins
+from _skimage2.filters import (
     LPIFilter2D,
     filter_inverse,
     filter_forward,

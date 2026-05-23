@@ -3,7 +3,7 @@ import numpy as np
 from _skimage2._shared import testing
 from _skimage2._shared.testing import assert_equal
 
-from skimage.util._label import label_points
+from _skimage2.util._label import label_points
 
 
 def test_label_points_coords_dimension():

@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
 
-from skimage import data
-from skimage.segmentation import felzenszwalb
+from _skimage2 import data
+from _skimage2.segmentation import felzenszwalb
 
 from _skimage2._shared import testing
 from _skimage2._shared.testing import (

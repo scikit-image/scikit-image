@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 
-from skimage.feature import multiscale_basic_features
+from _skimage2.feature import multiscale_basic_features
 
 
 @pytest.mark.parametrize('edges', (False, True))

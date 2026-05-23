@@ -1,10 +1,10 @@
 import numpy as np
 from _skimage2._shared.testing import assert_array_equal
-from skimage.data import moon
-from skimage.feature import CENSURE
+from _skimage2.data import moon
+from _skimage2.feature import CENSURE
 from _skimage2._shared.testing import run_in_parallel
 from _skimage2._shared import testing
-from skimage.transform import rescale
+from _skimage2.transform import rescale
 
 
 img = moon()

@@ -5,7 +5,7 @@ import pytest
 from numpy.testing import assert_allclose, assert_almost_equal, assert_equal
 
 from _skimage2._shared.utils import _supported_float_type
-from skimage.color.delta_e import (
+from _skimage2.color.delta_e import (
     deltaE_cie76,
     deltaE_ciede94,
     deltaE_ciede2000,

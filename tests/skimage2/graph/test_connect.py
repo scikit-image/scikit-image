@@ -1,5 +1,5 @@
 import numpy as np
-import skimage.graph.mcp as mcp
+import _skimage2.graph.mcp as mcp
 
 # import stentseg.graph._mcp as mcp
 

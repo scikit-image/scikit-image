@@ -17,12 +17,12 @@ from _skimage2._shared.testing import (
     fetch,
     mono_check,
 )
-from skimage.metrics import structural_similarity
+from _skimage2.metrics import structural_similarity
 
-from skimage.util import img_as_float
-from skimage.color import rgb2lab
-from skimage.io import imread, imsave, reset_plugins, use_plugin, plugin_order
-from skimage.io._plugins.pil_plugin import (
+from _skimage2.util import img_as_float
+from _skimage2.color import rgb2lab
+from _skimage2.io import imread, imsave, reset_plugins, use_plugin, plugin_order
+from _skimage2.io._plugins.pil_plugin import (
     _palette_is_grayscale,
     ndarray_to_pil,
     pil_to_ndarray,

@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from skimage.io import imread, imsave, use_plugin, reset_plugins, plugin_order
+from _skimage2.io import imread, imsave, use_plugin, reset_plugins, plugin_order
 from _skimage2._shared import testing
 
 

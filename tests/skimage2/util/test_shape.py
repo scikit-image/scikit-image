@@ -2,7 +2,7 @@ import numpy as np
 
 from _skimage2._shared import testing
 from _skimage2._shared.testing import assert_equal
-from skimage.util.shape import view_as_blocks, view_as_windows
+from _skimage2.util.shape import view_as_blocks, view_as_windows
 
 
 def test_view_as_blocks_block_not_a_tuple():

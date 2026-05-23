@@ -2,7 +2,7 @@ import itertools
 
 import numpy as np
 import pytest
-from skimage.util._map_array import map_array, ArrayMap
+from _skimage2.util._map_array import map_array, ArrayMap
 
 from _skimage2._shared import testing
 

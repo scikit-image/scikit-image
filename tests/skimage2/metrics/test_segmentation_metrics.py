@@ -2,7 +2,7 @@ import numpy as np
 import scipy as sp
 import pytest
 
-from skimage.metrics import (
+from _skimage2.metrics import (
     adapted_rand_error,
     variation_of_information,
     contingency_table,

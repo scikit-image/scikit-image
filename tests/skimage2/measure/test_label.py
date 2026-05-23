@@ -1,8 +1,8 @@
 import pytest
 import numpy as np
-from skimage import data
-from skimage.measure._label import _label_bool, label
-from skimage.measure._ccomp import label_cython as clabel
+from _skimage2 import data
+from _skimage2.measure._label import _label_bool, label
+from _skimage2.measure._ccomp import label_cython as clabel
 
 from _skimage2._shared import testing
 

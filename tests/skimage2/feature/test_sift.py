@@ -2,10 +2,10 @@ import numpy as np
 import pytest
 from numpy.testing import assert_almost_equal, assert_equal
 
-from skimage import data
+from _skimage2 import data
 from _skimage2._shared.testing import run_in_parallel
-from skimage.feature import SIFT
-from skimage.util.dtype import _convert
+from _skimage2.feature import SIFT
+from _skimage2.util.dtype import _convert
 
 img = data.coins()
 

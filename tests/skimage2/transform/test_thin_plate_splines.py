@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
 
-import skimage as ski
-from skimage.transform import ThinPlateSplineTransform
+import _skimage2 as ski2
+from _skimage2.transform import ThinPlateSplineTransform
 
 SRC = np.array([[0, 0], [0, 5], [5, 5], [5, 0]])
 
@@ -68,12 +68,12 @@ class TestThinPlateSplineTransform:
         assert tps.src is None
 
     def test_rotate(self):
-        image = ski.data.astronaut()
-        desired = ski.transform.rotate(image, angle=90)
+        image = ski2.data.astronaut()
+        desired = ski2.transform.rotate(image, angle=90)
         src = np.array([[0, 0], [0, 511], [511, 511], [511, 0]])
         dst = np.array([[511, 0], [0, 0], [0, 511], [511, 511]])
         tps = self.tform_class.from_estimate(src, dst)
-        result = ski.transform.warp(image, tps)
+        result = ski2.transform.warp(image, tps)
 
         np.testing.assert_allclose(result, desired, atol=1e-13)
 
@@ -81,5 +81,5 @@ class TestThinPlateSplineTransform:
         tps2 = self.tform_class()
         with pytest.warns(FutureWarning, match='`estimate` is deprecated'):
             assert tps2.estimate(src, dst)
-        result = ski.transform.warp(image, tps2)
+        result = ski2.transform.warp(image, tps2)
         np.testing.assert_allclose(result, desired, atol=1e-13)

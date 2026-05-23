@@ -3,7 +3,7 @@ import pytest
 from numpy.testing import assert_allclose
 from scipy import ndimage
 
-from skimage.filters import median, rank
+from _skimage2.filters import median, rank
 from _skimage2._shared.testing import assert_stacklevel
 
 

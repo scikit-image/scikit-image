@@ -5,9 +5,9 @@ import pytest
 import numpy as np
 from numpy.testing import assert_almost_equal, assert_array_equal, assert_equal
 
-from skimage import data
+from _skimage2 import data
 from _skimage2._shared.utils import _supported_float_type
-from skimage.transform import pyramids
+from _skimage2.transform import pyramids
 
 
 image = data.astronaut()

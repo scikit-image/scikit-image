@@ -13,9 +13,9 @@ from _skimage2._shared.testing import (
     xfail,
     assert_stacklevel,
 )
-from skimage.measure import CircleModel, EllipseModel, LineModelND, ransac
-from skimage.measure.fit import _dynamic_max_trials, add_from_estimate
-from skimage.transform import AffineTransform, PolynomialTransform
+from _skimage2.measure import CircleModel, EllipseModel, LineModelND, ransac
+from _skimage2.measure.fit import _dynamic_max_trials, add_from_estimate
+from _skimage2.transform import AffineTransform, PolynomialTransform
 
 MODEL_CLASSES = CircleModel, EllipseModel, LineModelND
 

@@ -4,11 +4,11 @@ import numpy as np
 import pytest
 from numpy.testing import assert_almost_equal
 
-from skimage import feature
-from skimage.draw import disk
-from skimage.draw.draw3d import ellipsoid
-from skimage.feature import blob_dog, blob_doh, blob_log
-from skimage.feature.blob import _blob_overlap
+from _skimage2 import feature
+from _skimage2.draw import disk
+from _skimage2.draw.draw3d import ellipsoid
+from _skimage2.feature import blob_dog, blob_doh, blob_log
+from _skimage2.feature.blob import _blob_overlap
 from _skimage2._shared.testing import assert_stacklevel
 from _skimage2._shared.dtype import numeric_dtype_min_max
 from _skimage2._shared._dependency_checks import is_wasm

@@ -1,7 +1,7 @@
 import numpy as np
 from _skimage2._shared.testing import assert_array_equal, assert_allclose
 
-from skimage.draw import ellipsoid, ellipsoid_stats, rectangle
+from _skimage2.draw import ellipsoid, ellipsoid_stats, rectangle
 from _skimage2._shared import testing
 
 

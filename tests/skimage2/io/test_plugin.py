@@ -3,8 +3,8 @@ import numpy as np
 import pytest
 
 from ...dependency_checks import uses_matplotlib
-from skimage import io
-from skimage.io import manage_plugins
+from _skimage2 import io
+from _skimage2.io import manage_plugins
 from _skimage2._shared.testing import fetch, assert_stacklevel
 
 
@@ -48,7 +48,7 @@ def test_use_priority():
 @pytest.mark.thread_unsafe("Monkeypatches global plugins state")
 @uses_matplotlib
 def test_load_preferred_plugins_all():
-    from skimage.io._plugins import pil_plugin, matplotlib_plugin
+    from _skimage2.io._plugins import pil_plugin, matplotlib_plugin
 
     with protect_preferred_plugins():
         manage_plugins.preferred_plugins = {'all': ['pil'], 'imshow': ['matplotlib']}
@@ -64,7 +64,7 @@ def test_load_preferred_plugins_all():
 @pytest.mark.thread_unsafe("Monkeypatches global plugins state")
 @uses_matplotlib
 def test_load_preferred_plugins_imread():
-    from skimage.io._plugins import pil_plugin, matplotlib_plugin
+    from _skimage2.io._plugins import pil_plugin, matplotlib_plugin
 
     with protect_preferred_plugins():
         manage_plugins.preferred_plugins['imread'] = ['pil']

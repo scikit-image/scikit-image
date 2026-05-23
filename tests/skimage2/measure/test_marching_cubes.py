@@ -2,8 +2,8 @@ import numpy as np
 import pytest
 from numpy.testing import assert_allclose
 
-from skimage.draw import ellipsoid, ellipsoid_stats
-from skimage.measure import marching_cubes, mesh_surface_area
+from _skimage2.draw import ellipsoid, ellipsoid_stats
+from _skimage2.measure import marching_cubes, mesh_surface_area
 
 
 def test_marching_cubes_isotropic():

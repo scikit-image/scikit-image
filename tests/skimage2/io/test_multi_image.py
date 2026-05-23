@@ -1,8 +1,8 @@
 import os
 
 import numpy as np
-from skimage.io import use_plugin, reset_plugins
-from skimage.io.collection import MultiImage
+from _skimage2.io import use_plugin, reset_plugins
+from _skimage2.io.collection import MultiImage
 
 from _skimage2._shared import testing
 from _skimage2._shared.testing import assert_equal, assert_allclose

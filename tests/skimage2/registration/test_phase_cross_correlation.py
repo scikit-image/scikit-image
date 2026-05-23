@@ -7,12 +7,12 @@ from numpy.testing import assert_allclose
 from scipy.ndimage import fourier_shift
 import scipy.fft as fft
 
-from skimage import img_as_float
+from _skimage2 import img_as_float
 from _skimage2._shared._warnings import expected_warnings
 from _skimage2._shared.testing import assert_stacklevel
 from _skimage2._shared.utils import _supported_float_type
-from skimage.data import camera, binary_blobs, eagle
-from skimage.registration._phase_cross_correlation import (
+from _skimage2.data import camera, binary_blobs, eagle
+from _skimage2.registration._phase_cross_correlation import (
     phase_cross_correlation,
     _upsampled_dft,
 )

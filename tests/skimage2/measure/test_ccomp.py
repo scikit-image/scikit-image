@@ -1,7 +1,7 @@
 import numpy as np
 
-from skimage.measure import label
-import skimage.measure._ccomp as ccomp
+from _skimage2.measure import label
+import _skimage2.measure._ccomp as ccomp
 
 from _skimage2._shared import testing
 from _skimage2._shared.testing import assert_array_equal

@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from skimage.util import slice_along_axes
+from _skimage2.util import slice_along_axes
 
 
 def test_2d_crop_0():

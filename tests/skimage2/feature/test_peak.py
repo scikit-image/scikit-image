@@ -6,8 +6,8 @@ from numpy.testing import assert_array_almost_equal, assert_array_equal, assert_
 from scipy import ndimage as ndi
 
 from _skimage2._shared.testing import assert_stacklevel
-from skimage.feature import peak
-from skimage.util import PendingSkimage2Change
+from _skimage2.feature import peak
+from _skimage2.util import PendingSkimage2Change
 
 
 class TestPeakLocalMax:

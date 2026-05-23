@@ -5,7 +5,7 @@ import pytest
 from _skimage2._shared.testing import run_in_parallel
 from ...dependency_checks import uses_matplotlib
 
-from skimage.draw import (
+from _skimage2.draw import (
     set_color,
     line,
     line_aa,
@@ -21,7 +21,7 @@ from skimage.draw import (
     rectangle,
     rectangle_perimeter,
 )
-from skimage.measure import regionprops
+from _skimage2.measure import regionprops
 
 
 def test_set_color():

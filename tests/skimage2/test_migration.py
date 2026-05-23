@@ -5,7 +5,7 @@ from textwrap import dedent
 import numpy as np
 import pytest
 
-from skimage._migration import (
+from _skimage2._migration import (
     Skimage2Migration,
     ski2_migration_decorator,
     _select_blocks,
@@ -71,7 +71,7 @@ Only in doc
 Examples
 --------
 
->>> import skimage as ski1
+>>> import _skimage2 as ski21
 >>> import _skimage2 as ski2
 >>> res1 = ski1.somemod.somefunc(10, 11)
 >>> res2 = ski2.somemod.somefunc(10, 11)
@@ -117,7 +117,7 @@ Only in doc
 Examples
 --------
 
->>> import skimage as ski1
+>>> import _skimage2 as ski21
 >>> import _skimage2 as ski2
 >>> res1 = ski1.somemod.somefunc(10, 11)
 >>> res2 = ski2.somemod.somefunc(10, 11)
@@ -161,7 +161,7 @@ def test_skimage2migration_decoration_interpolation():
     docs = migration_dec.migration_docs
     assert docs == {_func_qname_old: doc}
 
-    from skimage.util import PendingSkimage2Change
+    from _skimage2.util import PendingSkimage2Change
 
     with pytest.warns(PendingSkimage2Change) as record:
         assert dfunc(2, 4) == 8
@@ -188,7 +188,7 @@ def test_skimage2migration_dedent():
     migration_dec = Skimage2Migration(MIGRATION_URL)
     dfunc = migration_dec(EXAMPLE_INPUT)(func)
 
-    from skimage.util import PendingSkimage2Change
+    from _skimage2.util import PendingSkimage2Change
 
     # Warning and doc nevertheless stays the same.
     assert migration_dec.migration_docs == {_func_qname_old: doc}
@@ -200,8 +200,8 @@ def test_skimage2migration_dedent():
 
 
 def test_peak_local_max():
-    from skimage.feature import peak_local_max
-    from skimage.util import PendingSkimage2Change
+    from _skimage2.feature import peak_local_max
+    from _skimage2.util import PendingSkimage2Change
 
     assert 'skimage.feature.peak_local_max' in ski2_migration_decorator.migration_docs
 

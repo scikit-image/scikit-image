@@ -2,13 +2,13 @@ import numpy as np
 import pytest
 
 from _skimage2._shared.testing import expected_warnings, run_in_parallel
-from skimage.feature import (
+from _skimage2.feature import (
     graycomatrix,
     graycoprops,
     local_binary_pattern,
     multiblock_lbp,
 )
-from skimage.transform import integral_image
+from _skimage2.transform import integral_image
 
 
 class TestGLCM:

@@ -1,6 +1,6 @@
 import numpy as np
 
-from skimage import draw
+from _skimage2 import draw
 
 
 image_shape = (512, 512)

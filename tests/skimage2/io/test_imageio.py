@@ -1,7 +1,7 @@
 from tempfile import NamedTemporaryFile
 
 import numpy as np
-from skimage.io import imread, imsave, plugin_order
+from _skimage2.io import imread, imsave, plugin_order
 
 from _skimage2._shared import testing
 from _skimage2._shared.testing import fetch, assert_stacklevel

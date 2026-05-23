@@ -2,9 +2,9 @@ import numpy as np
 import pytest
 from numpy.testing import assert_, assert_allclose, assert_array_almost_equal
 
-from skimage import data, filters
+from _skimage2 import data, filters
 from _skimage2._shared.utils import _supported_float_type
-from skimage.filters.edges import _mask_filter_result
+from _skimage2.filters.edges import _mask_filter_result
 
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])

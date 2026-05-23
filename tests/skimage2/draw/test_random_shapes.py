@@ -3,7 +3,7 @@ import pytest
 
 from _skimage2._shared import testing
 from _skimage2._shared._warnings import expected_warnings
-from skimage.draw import random_shapes
+from _skimage2.draw import random_shapes
 
 
 def test_generates_color_images_with_correct_shape():

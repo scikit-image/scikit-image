@@ -4,7 +4,7 @@ import pytest
 from numpy.testing import assert_array_almost_equal
 
 from _skimage2._shared.utils import _supported_float_type
-from skimage.morphology.grayreconstruct import reconstruction
+from _skimage2.morphology.grayreconstruct import reconstruction
 
 
 def test_zeros():

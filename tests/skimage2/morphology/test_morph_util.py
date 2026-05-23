@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from numpy.testing import assert_array_equal
 
-from skimage.morphology import _util
+from _skimage2.morphology import _util
 
 
 @pytest.mark.parametrize("image_shape", [(111,), (33, 44), (22, 55, 11), (6, 5, 4, 3)])

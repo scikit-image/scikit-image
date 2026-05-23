@@ -3,9 +3,9 @@ import pytest
 from numpy.testing import assert_array_equal, assert_equal
 from scipy import ndimage as ndi
 
-from skimage import data, color, morphology
-from skimage.util import img_as_bool
-from skimage.morphology import binary, footprints, gray, footprint_rectangle
+from _skimage2 import data, color, morphology
+from _skimage2.util import img_as_bool
+from _skimage2.morphology import binary, footprints, gray, footprint_rectangle
 from _skimage2._shared.testing import assert_stacklevel
 
 

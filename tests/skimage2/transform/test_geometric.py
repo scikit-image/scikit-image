@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 from numpy.testing import assert_almost_equal, assert_array_almost_equal, assert_equal
 
-from skimage.transform import (
+from _skimage2.transform import (
     AffineTransform,
     EssentialMatrixTransform,
     EuclideanTransform,
@@ -18,7 +18,7 @@ from skimage.transform import (
     estimate_transform,
     matrix_transform,
 )
-from skimage.transform._geometric import (
+from _skimage2.transform._geometric import (
     _GeometricTransform,
     _affine_matrix_from_vector,
     _calc_center_normalize,
@@ -28,7 +28,7 @@ from skimage.transform._geometric import (
     _append_homogeneous_dim,
     TRANSFORMS,
 )
-from skimage import data
+from _skimage2 import data
 
 from _skimage2._shared.utils import FailedEstimationAccessError
 

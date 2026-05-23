@@ -1,5 +1,5 @@
 import numpy as np
-from skimage.segmentation import join_segmentations, relabel_sequential
+from _skimage2.segmentation import join_segmentations, relabel_sequential
 
 from _skimage2._shared import testing
 from _skimage2._shared.testing import assert_array_equal

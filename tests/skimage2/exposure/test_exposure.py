@@ -11,12 +11,12 @@ from numpy.testing import (
 )
 from packaging.version import Version
 
-from skimage import data
-from skimage import exposure
-from skimage import util
-from skimage.color import rgb2gray
-from skimage.exposure.exposure import intensity_range
-from skimage.util.dtype import dtype_range
+from _skimage2 import data
+from _skimage2 import exposure
+from _skimage2 import util
+from _skimage2.color import rgb2gray
+from _skimage2.exposure.exposure import intensity_range
+from _skimage2.util.dtype import dtype_range
 from _skimage2._shared._warnings import expected_warnings
 from _skimage2._shared.utils import _supported_float_type
 

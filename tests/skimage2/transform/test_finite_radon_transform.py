@@ -1,6 +1,6 @@
 import numpy as np
 
-from skimage.transform import frt2, ifrt2
+from _skimage2.transform import frt2, ifrt2
 
 
 def test_frt():

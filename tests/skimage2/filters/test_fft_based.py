@@ -6,9 +6,9 @@ from numpy.testing import assert_allclose, assert_array_equal
 import scipy.fft as fftmodule
 
 from _skimage2._shared.utils import _supported_float_type
-from skimage.data import astronaut, coins
-from skimage.filters import butterworth
-from skimage.filters._fft_based import _get_nd_butterworth_filter
+from _skimage2.data import astronaut, coins
+from _skimage2.filters import butterworth
+from _skimage2.filters._fft_based import _get_nd_butterworth_filter
 
 
 def _fft_centered(x):

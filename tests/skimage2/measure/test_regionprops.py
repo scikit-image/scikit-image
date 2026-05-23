@@ -14,9 +14,9 @@ from numpy.testing import (
     assert_equal,
 )
 
-from skimage import data, draw, transform
+from _skimage2 import data, draw, transform
 from _skimage2._shared import testing
-from skimage.measure._regionprops import (
+from _skimage2.measure._regionprops import (
     COL_DTYPES,
     OBJECT_COLUMNS,
     PROPS,
@@ -30,7 +30,7 @@ from skimage.measure._regionprops import (
     regionprops,
     regionprops_table,
 )
-from skimage.segmentation import slic
+from _skimage2.segmentation import slic
 
 SAMPLE = np.array(
     [
@@ -684,7 +684,7 @@ def test_axis_major_length():
     length = regionprops(SAMPLE, spacing=(2, 2))[0].axis_major_length
     assert_almost_equal(length, 2 * target_length)
 
-    from skimage.draw import ellipse
+    from _skimage2.draw import ellipse
 
     img = np.zeros((20, 24), dtype=np.uint8)
     rr, cc = ellipse(11, 11, 7, 9, rotation=np.deg2rad(45))
@@ -734,7 +734,7 @@ def test_axis_minor_length():
     length = regionprops(SAMPLE, spacing=(1.5, 1.5))[0].axis_minor_length
     assert_almost_equal(length, 1.5 * target_length)
 
-    from skimage.draw import ellipse
+    from _skimage2.draw import ellipse
 
     img = np.zeros((10, 12), dtype=np.uint8)
     rr, cc = ellipse(5, 6, 3, 5, rotation=np.deg2rad(30))

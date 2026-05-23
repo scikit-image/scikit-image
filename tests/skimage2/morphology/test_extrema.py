@@ -6,7 +6,7 @@ import numpy as np
 from numpy.testing import assert_equal
 from pytest import raises, warns
 
-from skimage.morphology import extrema
+from _skimage2.morphology import extrema
 
 
 eps = 1e-12

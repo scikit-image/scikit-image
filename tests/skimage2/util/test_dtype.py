@@ -2,7 +2,7 @@ import numpy as np
 import itertools
 import pytest
 
-from skimage import (
+from _skimage2 import (
     img_as_float,
     img_as_float32,
     img_as_float64,
@@ -10,7 +10,7 @@ from skimage import (
     img_as_uint,
     img_as_ubyte,
 )
-from skimage.util.dtype import _convert
+from _skimage2.util.dtype import _convert
 
 from _skimage2._shared._warnings import expected_warnings
 from _skimage2._shared import testing
@@ -193,7 +193,7 @@ def test_float_conversion_dtype():
 
 def test_float_conversion_dtype_warns():
     """Test that convert issues a warning when called"""
-    from skimage.util.dtype import convert
+    from _skimage2.util.dtype import convert
 
     x = np.array([-1, 1])
 

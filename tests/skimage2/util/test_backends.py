@@ -2,8 +2,8 @@ import importlib
 
 import pytest
 
-import skimage.metrics
-from skimage.util import _backends
+import _skimage2.metrics
+from _skimage2.util import _backends
 
 
 def mock_public_api_module(func):

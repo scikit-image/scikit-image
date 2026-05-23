@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from skimage.segmentation import quickshift
+from _skimage2.segmentation import quickshift
 
 from _skimage2._shared import testing
 from _skimage2._shared.testing import (

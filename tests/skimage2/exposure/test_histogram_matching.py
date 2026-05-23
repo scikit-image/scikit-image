@@ -2,10 +2,10 @@ import numpy as np
 import pytest
 from numpy.testing import assert_almost_equal, assert_array_almost_equal
 
-from skimage import data
-from skimage import exposure
+from _skimage2 import data
+from _skimage2 import exposure
 from _skimage2._shared.utils import _supported_float_type
-from skimage.exposure import histogram_matching
+from _skimage2.exposure import histogram_matching
 
 
 @pytest.mark.parametrize(

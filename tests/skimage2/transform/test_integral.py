@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from numpy.testing import assert_allclose, assert_equal
 
-from skimage.transform import integral_image, integrate
+from _skimage2.transform import integral_image, integrate
 
 
 MODULE_RNG = np.random.RandomState(1444596450)

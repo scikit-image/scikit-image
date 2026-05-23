@@ -3,7 +3,7 @@ import inspect
 import numpy as np
 import pytest
 
-from skimage import data, morphology, util
+from _skimage2 import data, morphology, util
 from _skimage2._shared._warnings import expected_warnings
 from _skimage2._shared.testing import (
     assert_allclose,
@@ -12,12 +12,12 @@ from _skimage2._shared.testing import (
     fetch,
     run_in_parallel,
 )
-from skimage.filters import rank
-from skimage.filters.rank import __all__ as all_rank_filters
-from skimage.filters.rank import __3Dfilters as _3d_rank_filters
-from skimage.filters.rank import subtract_mean
-from skimage.morphology import ball, disk, gray
-from skimage.util import img_as_float, img_as_ubyte
+from _skimage2.filters import rank
+from _skimage2.filters.rank import __all__ as all_rank_filters
+from _skimage2.filters.rank import __3Dfilters as _3d_rank_filters
+from _skimage2.filters.rank import subtract_mean
+from _skimage2.morphology import ball, disk, gray
+from _skimage2.util import img_as_float, img_as_ubyte
 
 
 def test_otsu_edge_case():

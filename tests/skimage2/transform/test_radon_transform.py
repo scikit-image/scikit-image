@@ -7,8 +7,8 @@ from ...dependency_checks import has_mpl
 from _skimage2._shared._warnings import expected_warnings
 from _skimage2._shared.testing import run_in_parallel
 from _skimage2._shared.utils import _supported_float_type, convert_to_float
-from skimage.data import shepp_logan_phantom
-from skimage.transform import radon, iradon, iradon_sart, rescale
+from _skimage2.data import shepp_logan_phantom
+from _skimage2.transform import radon, iradon, iradon_sart, rescale
 
 
 PHANTOM = shepp_logan_phantom()[::2, ::2]
@@ -304,7 +304,7 @@ def test_radon_circle():
 
 
 def check_sinogram_circle_to_square(size):
-    from skimage.transform.radon_transform import _sinogram_circle_to_square
+    from _skimage2.transform.radon_transform import _sinogram_circle_to_square
 
     image = _random_circle((size, size))
     theta = np.linspace(0.0, 180.0, size, False)
@@ -380,7 +380,7 @@ def test_radon_iradon_circle(shape, interpolation, output_size):
 
 
 def test_order_angles_golden_ratio():
-    from skimage.transform.radon_transform import order_angles_golden_ratio
+    from _skimage2.transform.radon_transform import order_angles_golden_ratio
 
     rng = np.random.RandomState(1817052179)
     lengths = [1, 4, 10, 180]

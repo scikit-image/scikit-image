@@ -1,5 +1,5 @@
 import numpy as np
-from skimage.measure import block_reduce
+from _skimage2.measure import block_reduce
 
 from _skimage2._shared import testing
 from _skimage2._shared.testing import assert_equal

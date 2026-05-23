@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 from numpy.testing import assert_array_almost_equal, assert_array_equal
 from _skimage2._shared.testing import fetch
-from skimage.io import imread, imsave, reset_plugins, use_plugin
+from _skimage2.io import imread, imsave, reset_plugins, use_plugin
 
 
 @pytest.fixture(autouse=True)

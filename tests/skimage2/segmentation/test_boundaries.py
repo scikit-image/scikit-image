@@ -3,7 +3,7 @@ import pytest
 from numpy.testing import assert_array_equal, assert_allclose
 
 from _skimage2._shared.utils import _supported_float_type
-from skimage.segmentation import find_boundaries, mark_boundaries
+from _skimage2.segmentation import find_boundaries, mark_boundaries
 
 
 white = (1, 1, 1)

@@ -1,6 +1,6 @@
 import numpy as np
 
-from skimage.restoration import unwrap_phase
+from _skimage2.restoration import unwrap_phase
 
 from _skimage2._shared import testing
 from _skimage2._shared.testing import (

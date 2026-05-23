@@ -4,11 +4,11 @@ import numpy as np
 import pytest
 from scipy import ndimage as ndi
 
-from skimage import draw
+from _skimage2 import draw
 from _skimage2._shared import testing
 from _skimage2._shared.testing import assert_allclose, assert_almost_equal, assert_equal
 from _skimage2._shared.utils import _supported_float_type
-from skimage.measure import (
+from _skimage2.measure import (
     centroid,
     inertia_tensor,
     inertia_tensor_eigvals,

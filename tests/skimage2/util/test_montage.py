@@ -2,7 +2,7 @@ from _skimage2._shared import testing
 from _skimage2._shared.testing import assert_equal, assert_array_equal
 
 import numpy as np
-from skimage.util import montage
+from _skimage2.util import montage
 
 # TODO: when minimum numpy dependency is 1.25 use:
 # np..exceptions.AxisError instead of AxisError

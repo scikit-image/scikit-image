@@ -2,7 +2,7 @@ import numpy as np
 import scipy as sp
 import pytest
 
-from skimage.graph._graph import pixel_graph, central_pixel
+from _skimage2.graph._graph import pixel_graph, central_pixel
 
 mask = np.array([[1, 0, 0], [0, 1, 1], [0, 1, 0]], dtype=bool)
 image = np.random.RandomState(3224015571).random(mask.shape)

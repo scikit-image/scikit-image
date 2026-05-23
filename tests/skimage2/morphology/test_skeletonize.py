@@ -3,11 +3,11 @@ import pytest
 from numpy.testing import assert_array_equal
 import scipy.ndimage as ndi
 
-from skimage import io, draw
+from _skimage2 import io, draw
 from _skimage2._shared.testing import fetch
-from skimage.data import binary_blobs
-from skimage.morphology import medial_axis, skeletonize, thin
-from skimage.morphology._skeletonize import G123_LUT, G123P_LUT, _generate_thin_luts
+from _skimage2.data import binary_blobs
+from _skimage2.morphology import medial_axis, skeletonize, thin
+from _skimage2.morphology._skeletonize import G123_LUT, G123P_LUT, _generate_thin_luts
 
 
 class TestSkeletonize:

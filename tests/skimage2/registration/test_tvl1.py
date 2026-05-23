@@ -2,8 +2,8 @@ import numpy as np
 import pytest
 
 from _skimage2._shared.utils import _supported_float_type
-from skimage.registration import optical_flow_tvl1
-from skimage.transform import warp
+from _skimage2.registration import optical_flow_tvl1
+from _skimage2.transform import warp
 
 
 # Sync with implementation in test_ilk.py

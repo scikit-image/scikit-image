@@ -3,7 +3,7 @@ import pytest
 from numpy.testing import assert_almost_equal, assert_array_almost_equal, assert_equal
 
 from _skimage2._shared.utils import _supported_float_type
-from skimage.filters._gabor import _sigma_prefactor, gabor, gabor_kernel
+from _skimage2.filters._gabor import _sigma_prefactor, gabor, gabor_kernel
 
 
 def test_gabor_kernel_size():

@@ -7,12 +7,12 @@ import numpy as np
 import pytest
 from scipy import ndimage as ndi
 
-import skimage.measure
-from skimage.filters import gaussian
-from skimage.feature import peak_local_max
-from skimage.measure import label
+import _skimage2.measure
+from _skimage2.filters import gaussian
+from _skimage2.feature import peak_local_max
+from _skimage2.measure import label
 
-from skimage.segmentation._watershed import watershed
+from _skimage2.segmentation._watershed import watershed
 
 eps = 1e-12
 # fmt: off

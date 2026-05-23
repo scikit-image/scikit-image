@@ -4,9 +4,9 @@ import numpy as np
 import pytest
 from numpy.testing import assert_equal
 
-from skimage import data, filters, img_as_float
+from _skimage2 import data, filters, img_as_float
 from _skimage2._shared.testing import run_in_parallel
-from skimage.segmentation import slic
+from _skimage2.segmentation import slic
 
 
 @run_in_parallel()

@@ -3,22 +3,22 @@ import pytest
 from scipy import ndimage as ndi
 from numpy.testing import assert_allclose, assert_array_equal, assert_equal
 
-from skimage import color, data, transform
+from _skimage2 import color, data, transform
 from _skimage2._shared.testing import fetch
-from skimage.morphology import gray, footprints, footprint_rectangle
-from skimage.util import img_as_uint, img_as_ubyte
+from _skimage2.morphology import gray, footprints, footprint_rectangle
+from _skimage2.util import img_as_uint, img_as_ubyte
 
 
 @pytest.fixture
 def cam_image():
-    from skimage import data
+    from _skimage2 import data
 
     return np.ascontiguousarray(data.camera()[64:112, 64:96])
 
 
 @pytest.fixture
 def cell3d_image():
-    from skimage import data
+    from _skimage2 import data
 
     return np.ascontiguousarray(data.cells3d()[30:48, 0, 20:36, 20:32])
 
@@ -37,7 +37,7 @@ class TestMorphology:
     # These expected outputs were generated with skimage v0.22.0 + PR #6695
     # using:
     #
-    #   from skimage.morphology.tests.test_gray import TestMorphology
+    #   from _skimage2.morphology.tests.test_gray import TestMorphology
     #   import numpy as np
     #   output = TestMorphology()._build_expected_output()
     #   np.savez_compressed('gray_morph_output.npz', **output)

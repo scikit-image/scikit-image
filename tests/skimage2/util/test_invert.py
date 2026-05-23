@@ -1,7 +1,7 @@
 import numpy as np
-from skimage import dtype_limits
-from skimage.util.dtype import dtype_range
-from skimage.util import invert
+from _skimage2 import dtype_limits
+from _skimage2.util.dtype import dtype_range
+from _skimage2.util import invert
 
 from _skimage2._shared.testing import assert_array_equal
 

@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from scipy.signal import get_window
 
-from skimage.filters import window
+from _skimage2.filters import window
 
 
 @pytest.mark.parametrize("size", [5, 6])

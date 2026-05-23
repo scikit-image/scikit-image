@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from skimage.morphology import flood, flood_fill
+from _skimage2.morphology import flood, flood_fill
 
 eps = 1e-12
 

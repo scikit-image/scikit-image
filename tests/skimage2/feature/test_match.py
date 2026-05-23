@@ -1,9 +1,9 @@
 import numpy as np
 from _skimage2._shared.testing import assert_equal
-from skimage import data
-from skimage import transform
-from skimage.color import rgb2gray
-from skimage.feature import BRIEF, match_descriptors, corner_peaks, corner_harris
+from _skimage2 import data
+from _skimage2 import transform
+from _skimage2.color import rgb2gray
+from _skimage2.feature import BRIEF, match_descriptors, corner_peaks, corner_harris
 from _skimage2._shared import testing
 
 

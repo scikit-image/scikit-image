@@ -9,8 +9,8 @@ from numpy.testing import (
 )
 
 from _skimage2._shared.testing import expected_warnings
-from skimage.color.colorconv import hsv2rgb, rgb2hsv
-from skimage.color.colorlabel import label2rgb
+from _skimage2.color.colorconv import hsv2rgb, rgb2hsv
+from _skimage2.color.colorlabel import label2rgb
 
 
 def test_shape_mismatch():

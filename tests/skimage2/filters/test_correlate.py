@@ -4,7 +4,7 @@ from numpy.testing import assert_equal
 from scipy import ndimage as ndi
 
 from _skimage2._shared.utils import _supported_float_type
-from skimage.filters import correlate_sparse
+from _skimage2.filters import correlate_sparse
 
 
 def test_correlate_sparse_valid_mode():

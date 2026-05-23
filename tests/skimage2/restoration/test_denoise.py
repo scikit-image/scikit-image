@@ -6,12 +6,12 @@ import numpy as np
 import pytest
 from numpy.testing import assert_array_almost_equal, assert_array_equal
 
-from skimage import color, data, img_as_float, restoration
+from _skimage2 import color, data, img_as_float, restoration
 from _skimage2._shared._warnings import expected_warnings
 from _skimage2._shared.testing import assert_stacklevel
 from _skimage2._shared.utils import _supported_float_type, slice_at_axis
-from skimage.metrics import peak_signal_noise_ratio, structural_similarity
-from skimage.restoration._denoise import _wavelet_threshold
+from _skimage2.metrics import peak_signal_noise_ratio, structural_similarity
+from _skimage2.restoration._denoise import _wavelet_threshold
 
 
 PYWT_NOT_INSTALLED = importlib.util.find_spec("pywt") is None

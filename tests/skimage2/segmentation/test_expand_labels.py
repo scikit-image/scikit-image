@@ -1,10 +1,10 @@
 from scipy import ndimage as ndi
-from skimage import data
+from _skimage2 import data
 
 import numpy as np
 
-from skimage import measure
-from skimage.segmentation._expand_labels import expand_labels
+from _skimage2 import measure
+from _skimage2.segmentation._expand_labels import expand_labels
 
 from _skimage2._shared import testing
 from _skimage2._shared.testing import assert_array_equal

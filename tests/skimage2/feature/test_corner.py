@@ -2,11 +2,11 @@ import numpy as np
 import pytest
 from numpy.testing import assert_almost_equal, assert_array_equal, assert_equal
 
-from skimage import data, draw, img_as_float
+from _skimage2 import data, draw, img_as_float
 from _skimage2._shared.testing import run_in_parallel
 from _skimage2._shared.utils import _supported_float_type
-from skimage.color import rgb2gray
-from skimage.feature import (
+from _skimage2.color import rgb2gray
+from _skimage2.feature import (
     corner_fast,
     corner_foerstner,
     corner_harris,
@@ -24,7 +24,7 @@ from skimage.feature import (
     structure_tensor,
     structure_tensor_eigenvalues,
 )
-from skimage.morphology import footprint_rectangle, octagon
+from _skimage2.morphology import footprint_rectangle, octagon
 
 
 @pytest.fixture

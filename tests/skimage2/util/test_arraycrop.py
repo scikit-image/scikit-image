@@ -1,5 +1,5 @@
 import numpy as np
-from skimage.util import crop
+from _skimage2.util import crop
 from _skimage2._shared.testing import assert_array_equal, assert_equal
 
 

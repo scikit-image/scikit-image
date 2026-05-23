@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
 
-from skimage.morphology import convex_hull_image, convex_hull_object
-from skimage.morphology._convex_hull import possible_hull
+from _skimage2.morphology import convex_hull_image, convex_hull_object
+from _skimage2.morphology._convex_hull import possible_hull
 
 from _skimage2._shared import testing
 from _skimage2._shared.testing import assert_array_equal

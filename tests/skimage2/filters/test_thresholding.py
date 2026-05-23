@@ -10,18 +10,18 @@ from numpy.testing import (
 )
 from scipy import ndimage as ndi
 
-from skimage import data, util
+from _skimage2 import data, util
 from ...dependency_checks import uses_matplotlib
 from _skimage2._shared._warnings import expected_warnings
 from _skimage2._shared.utils import _supported_float_type
-from skimage.color import rgb2gray
-from skimage.draw import disk
-from skimage.exposure import histogram
-from skimage.filters._multiotsu import (
+from _skimage2.color import rgb2gray
+from _skimage2.draw import disk
+from _skimage2.exposure import histogram
+from _skimage2.filters._multiotsu import (
     _get_multiotsu_thresh_indices,
     _get_multiotsu_thresh_indices_lut,
 )
-from skimage.filters.thresholding import (
+from _skimage2.filters.thresholding import (
     _cross_entropy,
     _mean_std,
     threshold_isodata,

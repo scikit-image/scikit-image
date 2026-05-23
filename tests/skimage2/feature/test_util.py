@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from ...dependency_checks import uses_matplotlib
-from skimage.feature.util import (
+from _skimage2.feature.util import (
     FeatureDetector,
     DescriptorExtractor,
     _prepare_grayscale_input_2D,

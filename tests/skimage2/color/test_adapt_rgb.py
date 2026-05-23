@@ -2,9 +2,9 @@ from functools import partial
 
 import numpy as np
 
-from skimage import img_as_float, img_as_uint
-from skimage import color, data, filters
-from skimage.color.adapt_rgb import adapt_rgb, each_channel, hsv_value
+from _skimage2 import img_as_float, img_as_uint
+from _skimage2 import color, data, filters
+from _skimage2.color.adapt_rgb import adapt_rgb, each_channel, hsv_value
 
 # Down-sample image for quicker testing.
 COLOR_IMAGE = data.astronaut()[::5, ::6]

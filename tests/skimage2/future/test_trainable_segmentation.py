@@ -4,8 +4,8 @@ import numpy as np
 import pytest
 from scipy import spatial
 
-from skimage.future import fit_segmenter, predict_segmenter, TrainableSegmenter
-from skimage.feature import multiscale_basic_features
+from _skimage2.future import fit_segmenter, predict_segmenter, TrainableSegmenter
+from _skimage2.feature import multiscale_basic_features
 
 
 class DummyNNClassifier:
