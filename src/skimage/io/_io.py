@@ -3,7 +3,7 @@ import warnings
 
 import numpy as np
 
-from .._shared.utils import warn, deprecate_parameter, DEPRECATED
+from _skimage2._shared.utils import warn, deprecate_parameter, DEPRECATED
 from ..exposure import is_low_contrast
 from ..color.colorconv import rgb2gray, rgba2rgb
 from ..io.manage_plugins import call_plugin, _hide_plugin_deprecation_warnings

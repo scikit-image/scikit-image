@@ -7,15 +7,15 @@ from collections.abc import Iterable
 import numpy as np
 from scipy import ndimage as ndi
 
-from .._shared.filters import gaussian
-from .._shared.utils import _supported_float_type, warn
-from .._shared.version_requirements import require
+from ._gaussian import gaussian
+from _skimage2._shared.utils import _supported_float_type, warn
+from _skimage2._shared.version_requirements import require
 from ..exposure import histogram
 from ..filters._multiotsu import (
     _get_multiotsu_thresh_indices,
     _get_multiotsu_thresh_indices_lut,
 )
-from ..transform import integral_image
+from ..transform.integral import integral_image
 from ..util import dtype_limits
 from ._sparse import _correlate_sparse, _validate_window_size
 

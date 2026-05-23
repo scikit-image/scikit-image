@@ -4,8 +4,8 @@ import importlib.util
 import numpy as np
 import pytest
 
-from skimage._shared.testing import assert_
-from skimage._shared.utils import _supported_float_type
+from _skimage2._shared.testing import assert_
+from _skimage2._shared.utils import _supported_float_type
 from skimage.data import binary_blobs
 from skimage.data import camera, chelsea
 from skimage.metrics import mean_squared_error as mse
@@ -99,8 +99,8 @@ def test_calibrate_denoiser():
 @xfail_without_pywt
 def test_input_image_not_modified():
     input_image = noisy_img.copy()
-
-    parameter_ranges = {'sigma': np.random.random(5) / 2}
+    rng = np.random.RandomState(903329136)
+    parameter_ranges = {'sigma': rng.random(5) / 2}
     calibrate_denoiser(
         input_image, _denoise_wavelet, denoise_parameters=parameter_ranges
     )

@@ -35,8 +35,8 @@ def test_overrange_tolerance_int(tolerance):
 
 def test_overrange_tolerance_float():
     max_value = np.finfo(np.float32).max
-
-    image = np.random.uniform(size=(64, 64), low=-1.0, high=1.0).astype(np.float32)
+    rng = np.random.RandomState(1075920821)
+    image = rng.uniform(size=(64, 64), low=-1.0, high=1.0).astype(np.float32)
     image *= max_value
 
     expected = np.ones_like(image)

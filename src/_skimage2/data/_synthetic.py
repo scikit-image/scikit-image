@@ -2,6 +2,9 @@
 
 import numpy as np
 
+from ..filters._gaussian import gaussian
+from .._shared._warnings import warn_external
+
 
 def binary_blobs(
     shape,
@@ -64,10 +67,6 @@ def binary_blobs(
     ...     shape=(256, 256), blob_size=25, volume_fraction=0.3
     ... )
     """
-    # TODO Undo inlined imports once available in _skimage2 namespace
-    from skimage._shared.filters import gaussian
-    from skimage._shared._warnings import warn_external
-
     if boundary_mode not in {"nearest", "wrap"}:
         raise ValueError(f"unsupported `boundary_mode`: {boundary_mode!r}")
 
@@ -102,10 +101,7 @@ def binary_blobs(
 
     mask[tuple(points)] = 1
     mask = gaussian(
-        mask,
-        sigma=0.25 * min_length * blob_size_fraction,
-        preserve_range=False,
-        mode=boundary_mode,
+        mask, sigma=0.25 * min_length * blob_size_fraction, mode=boundary_mode
     )
     threshold = np.quantile(mask, 1 - volume_fraction)
     blobs = mask >= threshold

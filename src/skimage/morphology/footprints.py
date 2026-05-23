@@ -8,12 +8,10 @@ from _skimage2.morphology._footprints import (
     mirror_footprint as sk2_mirror_footprint,
     pad_footprint as sk2_pad_footprint,
 )
+from _skimage2._shared.utils import deprecate_func
+from skimage._migration import ski2_migration_decorator
 
-from .. import draw
-from skimage import morphology
-from .._shared.utils import deprecate_func
-from .._shared._warnings import warn_external
-from ..util import PendingSkimage2Change
+from .. import draw, morphology
 
 
 # Precomputed ball and disk decompositions were saved as 2D arrays where the
@@ -1025,6 +1023,15 @@ def star(a, dtype=np.uint8):
     return footprint.astype(dtype)
 
 
+@ski2_migration_decorator(
+    '''\
+<!--- cond-start: warning -->
+`%(qname_old)s` is deprecated in favor of `%(qname_new)s` with identical
+behavior.
+<!--- cond-end -->
+''',
+    qname_old='skimage.morphology.mirror_footprint',
+)
 def mirror_footprint(footprint):
     """Mirror each dimension in the footprint.
 
@@ -1049,14 +1056,17 @@ def mirror_footprint(footprint):
            [0, 0, 0]], dtype=uint8)
 
     """
-    warn_external(
-        "`skimage.morphology.mirror_footprint` is deprecated in favor of "
-        "`skimage2.morphology.mirror_footprint` with identical behavior.",
-        category=PendingSkimage2Change,
-    )
     return sk2_mirror_footprint(footprint)
 
 
+@ski2_migration_decorator(
+    '''\
+<!--- cond-start: warning -->
+`%(qname_old)s` is deprecated in favor of `%(qname_new)s` with identical behavior
+<!--- cond-end -->
+''',
+    qname_old='skimage.morphology.pad_footprint',
+)
 def pad_footprint(footprint, *, pad_end=True):
     """Pad the footprint to an odd size along each dimension.
 
@@ -1084,9 +1094,4 @@ def pad_footprint(footprint, *, pad_end=True):
            [1, 1, 0]], dtype=uint8)
 
     """
-    warn_external(
-        "`skimage.morphology.pad_footprint` is deprecated in favor of "
-        "`skimage2.morphology.pad_footprint` with identical behavior.",
-        category=PendingSkimage2Change,
-    )
     return sk2_pad_footprint(footprint, pad_end=pad_end)

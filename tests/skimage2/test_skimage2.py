@@ -4,9 +4,10 @@ import subprocess
 
 import pytest
 
-from skimage._shared._dependency_checks import is_wasm
+from _skimage2._shared._dependency_checks import is_wasm
 
 
+@pytest.mark.thread_unsafe(reason="importlib.reload is not thread-safe")
 @pytest.mark.skipif(is_wasm, reason="emscripten does not support processes")
 def test_import_skimage2_warning():
     result = subprocess.run(
