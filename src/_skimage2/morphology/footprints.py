@@ -3,13 +3,8 @@ import warnings
 
 import numpy as np
 
-from _skimage2.morphology._footprints import (
-    _footprint_is_sequence,
-    mirror_footprint as sk2_mirror_footprint,
-    pad_footprint as sk2_pad_footprint,
-)
-from _skimage2._shared.utils import deprecate_func
-from skimage._migration import ski2_migration_decorator
+from ._footprints import _footprint_is_sequence
+from .._shared.utils import deprecate_func
 
 from .. import draw, morphology
 
@@ -1021,77 +1016,3 @@ def star(a, dtype=np.uint8):
     footprint[footprint > 0] = 1
 
     return footprint.astype(dtype)
-
-
-@ski2_migration_decorator(
-    '''\
-<!--- cond-start: warning -->
-`%(qname_old)s` is deprecated in favor of `%(qname_new)s` with identical
-behavior.
-<!--- cond-end -->
-''',
-    qname_old='skimage.morphology.mirror_footprint',
-)
-def mirror_footprint(footprint):
-    """Mirror each dimension in the footprint.
-
-    Parameters
-    ----------
-    footprint : ndarray or tuple
-        The input footprint or sequence of footprints
-
-    Returns
-    -------
-    inverted : ndarray or tuple
-        The footprint, mirrored along each dimension.
-
-    Examples
-    --------
-    >>> footprint = np.array([[0, 0, 0],
-    ...                       [0, 1, 1],
-    ...                       [0, 1, 1]], np.uint8)
-    >>> mirror_footprint(footprint)
-    array([[1, 1, 0],
-           [1, 1, 0],
-           [0, 0, 0]], dtype=uint8)
-
-    """
-    return sk2_mirror_footprint(footprint)
-
-
-@ski2_migration_decorator(
-    '''\
-<!--- cond-start: warning -->
-`%(qname_old)s` is deprecated in favor of `%(qname_new)s` with identical behavior
-<!--- cond-end -->
-''',
-    qname_old='skimage.morphology.pad_footprint',
-)
-def pad_footprint(footprint, *, pad_end=True):
-    """Pad the footprint to an odd size along each dimension.
-
-    Parameters
-    ----------
-    footprint : ndarray or tuple
-        The input footprint or sequence of footprints
-    pad_end : bool, optional
-        If ``True``, pads at the end of each dimension (right side), otherwise
-        pads on the front (left side).
-
-    Returns
-    -------
-    padded : ndarray or tuple
-        The footprint, padded to an odd size along each dimension.
-
-    Examples
-    --------
-    >>> footprint = np.array([[0, 0],
-    ...                       [1, 1],
-    ...                       [1, 1]], np.uint8)
-    >>> pad_footprint(footprint)
-    array([[0, 0, 0],
-           [1, 1, 0],
-           [1, 1, 0]], dtype=uint8)
-
-    """
-    return sk2_pad_footprint(footprint, pad_end=pad_end)
