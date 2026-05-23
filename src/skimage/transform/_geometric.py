@@ -984,11 +984,11 @@ class ProjectiveTransform(_HMatrixTransform):
     Whether this will appear as a counter-clockwise or clockwise rotation in
     terms of an image array, will depend on your input coordinates; if the
     first column in your coordinate array has coordinates in terms of the
-    first image (array) axis, then the ``x`` coordinates above correspond to
-    the first (row, ``i``) axis in the image array. In that case the rotation
-    applied to the coordinates is *counter-clockwise*. If the first column has
-    coordinates from the second image array axis, then the rotation is
-    *clockwise*.
+    first image axis (first array axis), then the ``x`` coordinates above
+    correspond to the first (row, ``i``) axis in the image array. In that case
+    the rotation applied to the coordinates is *counter-clockwise*. If the
+    first column has coordinates from the second axis of the image array,
+    instead of the first, then the rotation is *clockwise*.
 
     To translate ``x`` (first coordinate axis) by 10 and ``y`` by 20::
 
