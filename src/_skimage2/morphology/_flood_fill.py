@@ -75,7 +75,7 @@ def flood_fill(
 
     Examples
     --------
-    >>> from skimage.morphology import flood_fill
+    >>> from _skimage2.morphology import flood_fill
     >>> image = np.zeros((4, 7), dtype=int)
     >>> image[1:3, 1:3] = 1
     >>> image[3, 0] = 1
@@ -174,7 +174,7 @@ def flood(image, seed_point, *, footprint=None, connectivity=None, tolerance=Non
 
     Examples
     --------
-    >>> from skimage.morphology import flood
+    >>> from _skimage2.morphology import flood
     >>> image = np.zeros((4, 7), dtype=int)
     >>> image[1:3, 1:3] = 1
     >>> image[3, 0] = 1

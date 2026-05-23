@@ -88,7 +88,7 @@ def expected_warnings(matching):
     >>> rng = np.random.default_rng()
     >>> image = rng.integers(0, 2**16, size=(100, 100), dtype=np.uint16)
     >>> # rank filters are slow when bit-depth exceeds 10 bits
-    >>> from skimage import filters
+    >>> from _skimage2 import filters
     >>> with expected_warnings(['Bad rank filter performance']):
     ...     median_filtered = filters.rank.median(image)
 

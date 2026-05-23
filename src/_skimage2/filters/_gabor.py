@@ -68,7 +68,7 @@ def gabor_kernel(
 
     Examples
     --------
-    >>> from skimage.filters import gabor_kernel
+    >>> from _skimage2.filters import gabor_kernel
     >>> from matplotlib import pyplot as plt  # doctest: +SKIP
 
     >>> gk = gabor_kernel(frequency=0.2)
@@ -177,8 +177,8 @@ def gabor(
 
     Examples
     --------
-    >>> from skimage.filters import gabor
-    >>> from skimage import data
+    >>> from _skimage2.filters import gabor
+    >>> from _skimage2 import data
     >>> from matplotlib import pyplot as plt  # doctest: +SKIP
 
     >>> image = data.coins()

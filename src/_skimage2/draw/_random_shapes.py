@@ -381,7 +381,7 @@ def random_shapes(
 
     Examples
     --------
-    >>> import skimage.draw
+    >>> import _skimage2.draw
     >>> image, labels = skimage.draw.random_shapes((32, 32), max_shapes=3)
     >>> image # doctest: +SKIP
     array([

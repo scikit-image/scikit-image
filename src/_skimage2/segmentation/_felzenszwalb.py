@@ -55,8 +55,8 @@ def felzenszwalb(image, scale=1, sigma=0.8, min_size=20, *, channel_axis=-1):
 
     Examples
     --------
-    >>> from skimage.segmentation import felzenszwalb
-    >>> from skimage.data import coffee
+    >>> from _skimage2.segmentation import felzenszwalb
+    >>> from _skimage2.data import coffee
     >>> img = coffee()
     >>> segments = felzenszwalb(img, scale=3.0, sigma=0.95, min_size=5)
     """

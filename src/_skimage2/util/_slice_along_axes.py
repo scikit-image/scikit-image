@@ -25,7 +25,7 @@ def slice_along_axes(image, slices, axes=None, copy=False):
 
     Examples
     --------
-    >>> from skimage import data
+    >>> from _skimage2 import data
     >>> img = data.camera()
     >>> img.shape
     (512, 512)

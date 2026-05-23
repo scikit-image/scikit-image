@@ -197,9 +197,9 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
     Examples
     --------
-    >>> from skimage.feature import SIFT, match_descriptors
-    >>> from skimage.data import camera
-    >>> from skimage.transform import rotate
+    >>> from _skimage2.feature import SIFT, match_descriptors
+    >>> from _skimage2.data import camera
+    >>> from _skimage2.transform import rotate
     >>> img1 = camera()
     >>> img2 = rotate(camera(), 90)
     >>> detector_extractor1 = SIFT()

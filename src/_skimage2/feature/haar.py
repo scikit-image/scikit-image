@@ -61,8 +61,8 @@ tuple coord
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage.transform import integral_image
-    >>> from skimage.feature import haar_like_feature_coord
+    >>> from _skimage2.transform import integral_image
+    >>> from _skimage2.feature import haar_like_feature_coord
     >>> feat_coord, feat_type = haar_like_feature_coord(2, 2, 'type-4')
     >>> feat_coord # doctest: +SKIP
     array([ list([[(0, 0), (0, 0)], [(0, 1), (0, 1)],
@@ -148,8 +148,8 @@ def haar_like_feature(
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage.transform import integral_image
-    >>> from skimage.feature import haar_like_feature
+    >>> from _skimage2.transform import integral_image
+    >>> from _skimage2.feature import haar_like_feature
     >>> img = np.ones((5, 5), dtype=np.uint8)
     >>> img_ii = integral_image(img)
     >>> feature = haar_like_feature(img_ii, 0, 0, 5, 5, 'type-3-x')
@@ -160,7 +160,7 @@ def haar_like_feature(
 
     You can compute the feature for some pre-computed coordinates.
 
-    >>> from skimage.feature import haar_like_feature_coord
+    >>> from _skimage2.feature import haar_like_feature_coord
     >>> feature_coord, feature_type = zip(
     ...     *[haar_like_feature_coord(5, 5, feat_t)
     ...       for feat_t in ('type-2-x', 'type-3-x')])
@@ -294,8 +294,8 @@ def draw_haar_like_feature(
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage.feature import haar_like_feature_coord
-    >>> from skimage.feature import draw_haar_like_feature
+    >>> from _skimage2.feature import haar_like_feature_coord
+    >>> from _skimage2.feature import draw_haar_like_feature
     >>> feature_coord, _ = haar_like_feature_coord(2, 2, 'type-4')
     >>> image = draw_haar_like_feature(np.zeros((2, 2)),
     ...                                0, 0, 2, 2,

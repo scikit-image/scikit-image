@@ -39,7 +39,7 @@ def route_through_array(array, start, end, fully_connected=True, geometric=True)
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage.graph import route_through_array
+    >>> from _skimage2.graph import route_through_array
     >>>
     >>> image = np.array([[1, 3], [10, 12]])
     >>> image

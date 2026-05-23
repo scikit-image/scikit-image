@@ -49,8 +49,8 @@ def hough_line_peaks(
 
     Examples
     --------
-    >>> from skimage.transform import hough_line, hough_line_peaks
-    >>> from skimage.draw import line
+    >>> from _skimage2.transform import hough_line, hough_line_peaks
+    >>> from _skimage2.draw import line
     >>> img = np.zeros((15, 15), dtype=bool)
     >>> rr, cc = line(0, 0, 14, 14)
     >>> img[rr, cc] = 1
@@ -105,8 +105,8 @@ def hough_circle(image, radius, normalize=True, full_output=False):
 
     Examples
     --------
-    >>> from skimage.transform import hough_circle
-    >>> from skimage.draw import circle_perimeter
+    >>> from _skimage2.transform import hough_circle
+    >>> from _skimage2.draw import circle_perimeter
     >>> img = np.zeros((100, 100), dtype=bool)
     >>> rr, cc = circle_perimeter(25, 35, 23)
     >>> img[rr, cc] = 1
@@ -152,8 +152,8 @@ def hough_ellipse(image, threshold=4, accuracy=1, min_size=4, max_size=None):
 
     Examples
     --------
-    >>> from skimage.transform import hough_ellipse
-    >>> from skimage.draw import ellipse_perimeter
+    >>> from _skimage2.transform import hough_ellipse
+    >>> from _skimage2.draw import ellipse_perimeter
     >>> img = np.zeros((25, 25), dtype=np.uint8)
     >>> rr, cc = ellipse_perimeter(10, 10, 6, 8)
     >>> img[cc, rr] = 1
@@ -352,7 +352,7 @@ def hough_circle_peaks(
 
     Examples
     --------
-    >>> from skimage import transform, draw
+    >>> from _skimage2 import transform, draw
     >>> img = np.zeros((120, 100), dtype=int)
     >>> radius, x_0, y_0 = (20, 99, 50)
     >>> y, x = draw.circle_perimeter(y_0, x_0, radius)

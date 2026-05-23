@@ -461,7 +461,7 @@ class FundamentalMatrixTransform(_HMatrixTransform):
     Examples
     --------
     >>> import numpy as np
-    >>> import skimage as ski
+    >>> import _skimage2 as ski2
 
     Define source and destination points:
 
@@ -484,7 +484,7 @@ class FundamentalMatrixTransform(_HMatrixTransform):
 
     Estimate the transformation matrix:
 
-    >>> tform = ski.transform.FundamentalMatrixTransform.from_estimate(
+    >>> tform = ski2.transform.FundamentalMatrixTransform.from_estimate(
     ...      src, dst)
     >>> tform.params
     array([[-0.21785884,  0.41928191, -0.03430748],
@@ -520,7 +520,7 @@ class FundamentalMatrixTransform(_HMatrixTransform):
     Estimation succeeded.
     >>> # Not so for a degenerate transform with identical points.
     >>> bad_src = np.ones((8, 2))
-    >>> bad_tform = ski.transform.FundamentalMatrixTransform.from_estimate(
+    >>> bad_tform = ski2.transform.FundamentalMatrixTransform.from_estimate(
     ...      bad_src, dst)
     >>> if not bad_tform:
     ...     print("Estimation failed.")
@@ -761,9 +761,9 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
     Examples
     --------
     >>> import numpy as np
-    >>> import skimage as ski
+    >>> import _skimage2 as ski2
     >>>
-    >>> tform = ski.transform.EssentialMatrixTransform(
+    >>> tform = ski2.transform.EssentialMatrixTransform(
     ...     rotation=np.eye(3), translation=np.array([0, 0, 1])
     ... )
     >>> tform.params
@@ -786,7 +786,7 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
     ...                 [1.779735, 1.116857],
     ...                 [0.878616, 0.602447],
     ...                 [0.642616, 1.028681]])
-    >>> tform = ski.transform.EssentialMatrixTransform.from_estimate(src, dst)
+    >>> tform = ski2.transform.EssentialMatrixTransform.from_estimate(src, dst)
     >>> tform.residuals(src, dst)
     array([0.42455187, 0.01460448, 0.13847034, 0.12140951, 0.27759346,
            0.32453118, 0.00210776, 0.26512283])
@@ -802,7 +802,7 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
     Estimation succeeded.
     >>> # Not so for a degenerate transform with identical points.
     >>> bad_src = np.ones((8, 2))
-    >>> bad_tform = ski.transform.EssentialMatrixTransform.from_estimate(
+    >>> bad_tform = ski2.transform.EssentialMatrixTransform.from_estimate(
     ...      bad_src, dst)
     >>> if not bad_tform:
     ...     print("Estimation failed.")
@@ -974,11 +974,11 @@ class ProjectiveTransform(_HMatrixTransform):
     Examples
     --------
     >>> import numpy as np
-    >>> import skimage as ski
+    >>> import _skimage2 as ski2
 
     Define a transform with an homogeneous transformation matrix:
 
-    >>> tform = ski.transform.ProjectiveTransform(np.diag([2., 3., 1.]))
+    >>> tform = ski2.transform.ProjectiveTransform(np.diag([2., 3., 1.]))
     >>> tform.params
     array([[2., 0., 0.],
            [0., 3., 0.],
@@ -993,7 +993,7 @@ class ProjectiveTransform(_HMatrixTransform):
     >>> dst = np.array([[200, 200],
     ...                 [300, 150],
     ...                 [150, 400]])
-    >>> tform = ski.transform.ProjectiveTransform.from_estimate(src, dst)
+    >>> tform = ski2.transform.ProjectiveTransform.from_estimate(src, dst)
     >>> np.allclose(tform.params, [[ -16.56,    5.82,  895.81],
     ...                            [ -10.31,   -8.29, 2075.43],
     ...                            [  -0.05,    0.02,    1.  ]], atol=0.01)
@@ -1001,8 +1001,8 @@ class ProjectiveTransform(_HMatrixTransform):
 
     Apply the transformation to some image data.
 
-    >>> img = ski.data.astronaut()
-    >>> warped = ski.transform.warp(img, inverse_map=tform.inverse)
+    >>> img = ski2.data.astronaut()
+    >>> warped = ski2.transform.warp(img, inverse_map=tform.inverse)
 
     The estimation can fail - for example, if all the input or output points
     are the same.  If this happens, you will get a transform that is not
@@ -1015,7 +1015,7 @@ class ProjectiveTransform(_HMatrixTransform):
     Estimation succeeded.
     >>> # Not so for a degenerate transform with identical points.
     >>> bad_src = np.ones((3, 2))
-    >>> bad_tform = ski.transform.ProjectiveTransform.from_estimate(
+    >>> bad_tform = ski2.transform.ProjectiveTransform.from_estimate(
     ...      bad_src, dst)
     >>> if not bad_tform:
     ...     print("Estimation failed.")
@@ -1405,11 +1405,11 @@ class AffineTransform(ProjectiveTransform):
     Examples
     --------
     >>> import numpy as np
-    >>> import skimage as ski
+    >>> import _skimage2 as ski2
 
     Define a transform with an homogeneous transformation matrix:
 
-    >>> tform = ski.transform.AffineTransform(np.diag([2., 3., 1.]))
+    >>> tform = ski2.transform.AffineTransform(np.diag([2., 3., 1.]))
     >>> tform.params
     array([[2., 0., 0.],
            [0., 3., 0.],
@@ -1417,7 +1417,7 @@ class AffineTransform(ProjectiveTransform):
 
     Define a transform with parameters:
 
-    >>> tform = ski.transform.AffineTransform(scale=4, rotation=0.2)
+    >>> tform = ski2.transform.AffineTransform(scale=4, rotation=0.2)
     >>> np.round(tform.params, 2)
     array([[ 3.92, -0.79,  0.  ],
            [ 0.79,  3.92,  0.  ],
@@ -1432,7 +1432,7 @@ class AffineTransform(ProjectiveTransform):
     >>> dst = np.array([[200, 200],
     ...                 [300, 150],
     ...                 [150, 400]])
-    >>> tform = ski.transform.AffineTransform.from_estimate(src, dst)
+    >>> tform = ski2.transform.AffineTransform.from_estimate(src, dst)
     >>> np.allclose(tform.params, [[   0.5,   -1. ,  275. ],
     ...                            [   1.5,    4. , -625. ],
     ...                            [   0. ,    0. ,    1. ]])
@@ -1440,8 +1440,8 @@ class AffineTransform(ProjectiveTransform):
 
     Apply the transformation to some image data.
 
-    >>> img = ski.data.astronaut()
-    >>> warped = ski.transform.warp(img, inverse_map=tform.inverse)
+    >>> img = ski2.data.astronaut()
+    >>> warped = ski2.transform.warp(img, inverse_map=tform.inverse)
 
     The estimation can fail - for example, if all the input or output points
     are the same.  If this happens, you will get a transform that is not
@@ -1454,7 +1454,7 @@ class AffineTransform(ProjectiveTransform):
     Estimation succeeded.
     >>> # Not so for a degenerate transform with identical points.
     >>> bad_src = np.ones((3, 2))
-    >>> bad_tform = ski.transform.AffineTransform.from_estimate(
+    >>> bad_tform = ski2.transform.AffineTransform.from_estimate(
     ...      bad_src, dst)
     >>> if not bad_tform:
     ...     print("Estimation failed.")
@@ -1573,7 +1573,7 @@ class PiecewiseAffineTransform(_GeometricTransform):
     Examples
     --------
     >>> import numpy as np
-    >>> import skimage as ski
+    >>> import _skimage2 as ski2
 
     Define a transformation by estimation:
 
@@ -1593,7 +1593,7 @@ class PiecewiseAffineTransform(_GeometricTransform):
     ...        [1176, 3660],
     ...        [3754, 790],
     ...        [1024, 1931]]
-    >>> tform = ski.transform.PiecewiseAffineTransform.from_estimate(src, dst)
+    >>> tform = ski2.transform.PiecewiseAffineTransform.from_estimate(src, dst)
 
     Calling the transform applies the transformation to the points:
 
@@ -1616,7 +1616,7 @@ class PiecewiseAffineTransform(_GeometricTransform):
     Estimation succeeded.
     >>> # Not so for a degenerate transform with identical points.
     >>> bad_src = [[1, 1]] * 6 + src[6:]
-    >>> bad_tform = ski.transform.PiecewiseAffineTransform.from_estimate(
+    >>> bad_tform = ski2.transform.PiecewiseAffineTransform.from_estimate(
     ...      bad_src, dst)
     >>> if not bad_tform:
     ...     print("Estimation failed.")
@@ -1868,11 +1868,11 @@ class EuclideanTransform(ProjectiveTransform):
     Examples
     --------
     >>> import numpy as np
-    >>> import skimage as ski
+    >>> import _skimage2 as ski2
 
     Define a transform with an homogeneous transformation matrix:
 
-    >>> tform = ski.transform.EuclideanTransform(np.diag([2., 3., 1.]))
+    >>> tform = ski2.transform.EuclideanTransform(np.diag([2., 3., 1.]))
     >>> tform.params
     array([[2., 0., 0.],
            [0., 3., 0.],
@@ -1880,7 +1880,7 @@ class EuclideanTransform(ProjectiveTransform):
 
     Define a transform with parameters:
 
-    >>> tform = ski.transform.EuclideanTransform(
+    >>> tform = ski2.transform.EuclideanTransform(
     ...             rotation=0.2, translation=[1, 2])
     >>> np.round(tform.params, 2)
     array([[ 0.98, -0.2 ,  1.  ],
@@ -1896,7 +1896,7 @@ class EuclideanTransform(ProjectiveTransform):
     >>> dst = np.array([[200, 200],
     ...                 [300, 150],
     ...                 [150, 400]])
-    >>> tform = ski.transform.EuclideanTransform.from_estimate(src, dst)
+    >>> tform = ski2.transform.EuclideanTransform.from_estimate(src, dst)
     >>> np.allclose(tform.params, [[ 0.99, 0.12,  16.77],
     ...                            [-0.12, 0.99, 122.91],
     ...                            [ 0.  , 0.  ,   1.  ]], atol=0.01)
@@ -1904,8 +1904,8 @@ class EuclideanTransform(ProjectiveTransform):
 
     Apply the transformation to some image data.
 
-    >>> img = ski.data.astronaut()
-    >>> warped = ski.transform.warp(img, inverse_map=tform.inverse)
+    >>> img = ski2.data.astronaut()
+    >>> warped = ski2.transform.warp(img, inverse_map=tform.inverse)
 
     The estimation can fail - for example, if all the input or output points
     are the same.  If this happens, you will get a transform that is not
@@ -1918,7 +1918,7 @@ class EuclideanTransform(ProjectiveTransform):
     Estimation succeeded.
     >>> # Not so for a degenerate transform with identical points.
     >>> bad_src = np.ones((3, 2))
-    >>> bad_tform = ski.transform.EuclideanTransform.from_estimate(
+    >>> bad_tform = ski2.transform.EuclideanTransform.from_estimate(
     ...      bad_src, dst)
     >>> if not bad_tform:
     ...     print("Estimation failed.")
@@ -2124,11 +2124,11 @@ class SimilarityTransform(EuclideanTransform):
     Examples
     --------
     >>> import numpy as np
-    >>> import skimage as ski
+    >>> import _skimage2 as ski2
 
     Define a transform with an homogeneous transformation matrix:
 
-    >>> tform = ski.transform.SimilarityTransform(np.diag([2., 3., 1.]))
+    >>> tform = ski2.transform.SimilarityTransform(np.diag([2., 3., 1.]))
     >>> tform.params
     array([[2., 0., 0.],
            [0., 3., 0.],
@@ -2136,7 +2136,7 @@ class SimilarityTransform(EuclideanTransform):
 
     Define a transform with parameters:
 
-    >>> tform = ski.transform.SimilarityTransform(
+    >>> tform = ski2.transform.SimilarityTransform(
     ...             rotation=0.2, translation=[1, 2])
     >>> np.round(tform.params, 2)
     array([[ 0.98, -0.2 ,  1.  ],
@@ -2152,7 +2152,7 @@ class SimilarityTransform(EuclideanTransform):
     >>> dst = np.array([[200, 200],
     ...                 [300, 150],
     ...                 [150, 400]])
-    >>> tform = ski.transform.SimilarityTransform.from_estimate(src, dst)
+    >>> tform = ski2.transform.SimilarityTransform.from_estimate(src, dst)
     >>> np.allclose(tform.params, [[ 1.79, 0.21, -142.86],
     ...                            [-0.21, 1.79,   21.43],
     ...                            [ 0.  , 0.  ,    1.  ]], atol=0.01)
@@ -2160,8 +2160,8 @@ class SimilarityTransform(EuclideanTransform):
 
     Apply the transformation to some image data.
 
-    >>> img = ski.data.astronaut()
-    >>> warped = ski.transform.warp(img, inverse_map=tform.inverse)
+    >>> img = ski2.data.astronaut()
+    >>> warped = ski2.transform.warp(img, inverse_map=tform.inverse)
 
     The estimation can fail - for example, if all the input or output points
     are the same.  If this happens, you will get a transform that is not
@@ -2174,7 +2174,7 @@ class SimilarityTransform(EuclideanTransform):
     Estimation succeeded.
     >>> # Not so for a degenerate transform with identical points.
     >>> bad_src = np.ones((3, 2))
-    >>> bad_tform = ski.transform.SimilarityTransform.from_estimate(
+    >>> bad_tform = ski2.transform.SimilarityTransform.from_estimate(
     ...      bad_src, dst)
     >>> if not bad_tform:
     ...     print("Estimation failed.")
@@ -2281,7 +2281,7 @@ class PolynomialTransform(_GeometricTransform):
     Examples
     --------
     >>> import numpy as np
-    >>> import skimage as ski
+    >>> import _skimage2 as ski2
 
     Define a transformation by estimation:
 
@@ -2301,7 +2301,7 @@ class PolynomialTransform(_GeometricTransform):
     ...        [1176, 3660],
     ...        [3754, 790],
     ...        [1024, 1931]]
-    >>> tform = ski.transform.PolynomialTransform.from_estimate(src, dst)
+    >>> tform = ski2.transform.PolynomialTransform.from_estimate(src, dst)
 
     Calling the transform applies the transformation to the points:
 
@@ -2615,24 +2615,24 @@ def estimate_transform(ttype, src, dst, *args, **kwargs):
     Examples
     --------
     >>> import numpy as np
-    >>> import skimage as ski
+    >>> import _skimage2 as ski2
 
     >>> # estimate transformation parameters
     >>> src = np.array([0, 0, 10, 10]).reshape((2, 2))
     >>> dst = np.array([12, 14, 1, -20]).reshape((2, 2))
 
-    >>> tform = ski.transform.estimate_transform('similarity', src, dst)
+    >>> tform = ski2.transform.estimate_transform('similarity', src, dst)
 
     >>> np.allclose(tform.inverse(tform(src)), src)
     True
 
     >>> # warp image using the estimated transformation
-    >>> image = ski.data.camera()
+    >>> image = ski2.data.camera()
 
-    >>> ski.transform.warp(image, inverse_map=tform.inverse) # doctest: +SKIP
+    >>> ski2.transform.warp(image, inverse_map=tform.inverse) # doctest: +SKIP
 
     >>> # create transformation with explicit parameters
-    >>> tform2 = ski.transform.SimilarityTransform(scale=1.1, rotation=1,
+    >>> tform2 = ski2.transform.SimilarityTransform(scale=1.1, rotation=1,
     ...     translation=(10, 20))
 
     >>> # unite transformations, applied in order from left to right
@@ -2651,7 +2651,7 @@ def estimate_transform(ttype, src, dst, *args, **kwargs):
     Estimation succeeded.
     >>> # Not so for a degenerate transform with identical points.
     >>> bad_src = np.ones((2, 2))
-    >>> bad_tform = ski.transform.estimate_transform('similarity',
+    >>> bad_tform = ski2.transform.estimate_transform('similarity',
     ...                                              bad_src, dst)
     >>> if not bad_tform:
     ...     print("Estimation failed.")

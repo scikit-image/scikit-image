@@ -60,7 +60,7 @@ def manual_polygon_segmentation(image, alpha=0.4, return_all=False):
 
     Examples
     --------
-    >>> from skimage import data, future
+    >>> from _skimage2 import data, future
     >>> import matplotlib.pyplot as plt  # doctest: +SKIP
     >>> camera = data.camera()
     >>> mask = future.manual_polygon_segmentation(camera)  # doctest: +SKIP
@@ -178,7 +178,7 @@ def manual_lasso_segmentation(image, alpha=0.4, return_all=False):
 
     Examples
     --------
-    >>> from skimage import data, future
+    >>> from _skimage2 import data, future
     >>> import matplotlib.pyplot as plt  # doctest: +SKIP
     >>> camera = data.camera()
     >>> mask = future.manual_lasso_segmentation(camera)  # doctest: +SKIP

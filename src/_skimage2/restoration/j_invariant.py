@@ -141,10 +141,10 @@ def denoise_invariant(
 
     Examples
     --------
-    >>> import skimage
-    >>> from skimage.restoration import denoise_invariant, denoise_tv_chambolle
-    >>> image = skimage.util.img_as_float(skimage.data.chelsea())
-    >>> noisy = skimage.util.random_noise(image, var=0.2 ** 2)
+    >>> import _skimage2 as ski2
+    >>> from _skimage2.restoration import denoise_invariant, denoise_tv_chambolle
+    >>> image = ski2.util.img_as_float(ski2.data.chelsea())
+    >>> noisy = ski2.util.random_noise(image, var=0.2 ** 2)
     >>> denoised = denoise_invariant(noisy, denoise_function=denoise_tv_chambolle)  # doctest: +SKIP
     """
     image = img_as_float(image)
@@ -264,8 +264,8 @@ def calibrate_denoiser(
 
     Examples
     --------
-    >>> from skimage import color, data
-    >>> from skimage.restoration import denoise_tv_chambolle
+    >>> from _skimage2 import color, data
+    >>> from _skimage2.restoration import denoise_tv_chambolle
     >>> import numpy as np
     >>> img = color.rgb2gray(data.astronaut()[:50, :50])
     >>> rng = np.random.default_rng()

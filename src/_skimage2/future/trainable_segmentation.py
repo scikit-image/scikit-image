@@ -1,4 +1,4 @@
-from skimage.feature import multiscale_basic_features
+from _skimage2.feature import multiscale_basic_features
 
 try:
     from sklearn.exceptions import NotFittedError

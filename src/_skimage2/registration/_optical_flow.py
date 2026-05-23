@@ -237,9 +237,9 @@ def optical_flow_tvl1(
 
     Examples
     --------
-    >>> from skimage.color import rgb2gray
-    >>> from skimage.data import stereo_motorcycle
-    >>> from skimage.registration import optical_flow_tvl1
+    >>> from _skimage2.color import rgb2gray
+    >>> from _skimage2.data import stereo_motorcycle
+    >>> from _skimage2.registration import optical_flow_tvl1
     >>> image0, image1, disp = stereo_motorcycle()
     >>> # --- Convert the images to gray level: color is not supported.
     >>> image0 = rgb2gray(image0)
@@ -407,9 +407,9 @@ def optical_flow_ilk(
 
     Examples
     --------
-    >>> from skimage.color import rgb2gray
-    >>> from skimage.data import stereo_motorcycle
-    >>> from skimage.registration import optical_flow_ilk
+    >>> from _skimage2.color import rgb2gray
+    >>> from _skimage2.data import stereo_motorcycle
+    >>> from _skimage2.registration import optical_flow_ilk
     >>> reference_image, moving_image, disp = stereo_motorcycle()
     >>> # --- Convert the images to gray level: color is not supported.
     >>> reference_image = rgb2gray(reference_image)

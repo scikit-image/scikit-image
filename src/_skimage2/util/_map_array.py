@@ -29,8 +29,8 @@ def map_array(input_arr, input_vals, output_vals, out=None):
     Examples
     --------
     >>> import numpy as np
-    >>> import skimage as ski
-    >>> ski.util.map_array(
+    >>> import _skimage2 as ski2
+    >>> ski2.util.map_array(
     ...    input_arr=np.array([[0, 2, 2, 0], [3, 4, 5, 0]]),
     ...    input_vals=np.array([1, 2, 3, 4, 6]),
     ...    output_vals=np.array([6, 7, 8, 9, 10]),

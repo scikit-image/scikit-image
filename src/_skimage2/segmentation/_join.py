@@ -28,7 +28,7 @@ def join_segmentations(s1, s2, return_mapping: bool = False):
 
     Examples
     --------
-    >>> from skimage.segmentation import join_segmentations
+    >>> from _skimage2.segmentation import join_segmentations
     >>> s1 = np.array([[0, 0, 1, 1],
     ...                [0, 2, 1, 1],
     ...                [2, 2, 2, 1]])
@@ -116,7 +116,7 @@ def relabel_sequential(label_field, offset=1):
 
     Examples
     --------
-    >>> from skimage.segmentation import relabel_sequential
+    >>> from _skimage2.segmentation import relabel_sequential
     >>> label_field = np.array([1, 1, 5, 5, 8, 99, 42])
     >>> relab, fw, inv = relabel_sequential(label_field)
     >>> relab

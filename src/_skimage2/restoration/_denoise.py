@@ -175,7 +175,7 @@ def denoise_bilateral(
 
     Examples
     --------
-    >>> from skimage import data, img_as_float
+    >>> from _skimage2 import data, img_as_float
     >>> astro = img_as_float(data.astronaut())
     >>> astro = astro[220:300, 220:320]
     >>> rng = np.random.default_rng()
@@ -570,7 +570,7 @@ def denoise_tv_chambolle(
     --------
     2D example on astronaut image:
 
-    >>> from skimage import color, data
+    >>> from _skimage2 import color, data
     >>> img = color.rgb2gray(data.astronaut())[:50, :50]
     >>> rng = np.random.default_rng()
     >>> img += 0.5 * img.std() * rng.standard_normal(img.shape)
@@ -964,7 +964,7 @@ def denoise_wavelet(
 
     Examples
     --------
-    >>> from skimage import color, data
+    >>> from _skimage2 import color, data
     >>> img = img_as_float(data.astronaut())
     >>> img = color.rgb2gray(img)
     >>> rng = np.random.default_rng()
@@ -1087,8 +1087,8 @@ def estimate_sigma(image, average_sigmas=False, *, channel_axis=None):
 
     Examples
     --------
-    >>> import skimage.data
-    >>> from skimage import img_as_float
+    >>> import _skimage2.data
+    >>> from _skimage2 import img_as_float
     >>> img = img_as_float(skimage.data.camera())
     >>> sigma = 0.1
     >>> rng = np.random.default_rng()

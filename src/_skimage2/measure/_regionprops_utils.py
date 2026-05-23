@@ -340,13 +340,13 @@ def euler_number(image, connectivity=None):
     Examples
     --------
     >>> import numpy as np
-    >>> import skimage as ski
+    >>> import _skimage2 as ski2
     >>> SAMPLE = np.zeros((100,100,100));
     >>> SAMPLE[40:60, 40:60, 40:60]=1
-    >>> ski.measure.euler_number(SAMPLE) # doctest: +ELLIPSIS
+    >>> ski2.measure.euler_number(SAMPLE) # doctest: +ELLIPSIS
     1...
     >>> SAMPLE[45:55,45:55,45:55] = 0;
-    >>> ski.measure.euler_number(SAMPLE) # doctest: +ELLIPSIS
+    >>> ski2.measure.euler_number(SAMPLE) # doctest: +ELLIPSIS
     2...
     >>> SAMPLE = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0],
     ...                    [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
@@ -358,9 +358,9 @@ def euler_number(image, connectivity=None):
     ...                    [1, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0],
     ...                    [0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1],
     ...                    [0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1]])
-    >>> ski.measure.euler_number(SAMPLE)
+    >>> ski2.measure.euler_number(SAMPLE)
     0
-    >>> ski.measure.euler_number(SAMPLE, connectivity=1)
+    >>> ski2.measure.euler_number(SAMPLE, connectivity=1)
     2
     """
 
@@ -439,13 +439,13 @@ def perimeter(image, neighborhood=4):
 
     Examples
     --------
-    >>> import skimage as ski
+    >>> import _skimage2 as ski2
     >>> # coins image (binary)
-    >>> img_coins = ski.data.coins() > 110
+    >>> img_coins = ski2.data.coins() > 110
     >>> # total perimeter of all objects in the image
-    >>> ski.measure.perimeter(img_coins, neighborhood=4)  # doctest: +ELLIPSIS
+    >>> ski2.measure.perimeter(img_coins, neighborhood=4)  # doctest: +ELLIPSIS
     7796.867...
-    >>> ski.measure.perimeter(img_coins, neighborhood=8)  # doctest: +ELLIPSIS
+    >>> ski2.measure.perimeter(img_coins, neighborhood=8)  # doctest: +ELLIPSIS
     8806.268...
 
     """
@@ -521,13 +521,13 @@ def perimeter_crofton(image, directions=4):
 
     Examples
     --------
-    >>> import skimage as ski
+    >>> import _skimage2 as ski2
     >>> # coins image (binary)
-    >>> img_coins = ski.data.coins() > 110
+    >>> img_coins = ski2.data.coins() > 110
     >>> # total perimeter of all objects in the image
-    >>> ski.measure.perimeter_crofton(img_coins, directions=2)  # doctest: +ELLIPSIS
+    >>> ski2.measure.perimeter_crofton(img_coins, directions=2)  # doctest: +ELLIPSIS
     8144.578...
-    >>> ski.measure.perimeter_crofton(img_coins, directions=4)  # doctest: +ELLIPSIS
+    >>> ski2.measure.perimeter_crofton(img_coins, directions=4)  # doctest: +ELLIPSIS
     7837.077...
     """
     if image.ndim != 2:

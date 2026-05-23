@@ -1,8 +1,8 @@
 from itertools import combinations_with_replacement
 import itertools
 import numpy as np
-from skimage import filters, feature
-from skimage.util.dtype import img_as_float32
+from _skimage2 import filters, feature
+from _skimage2.util.dtype import img_as_float32
 from _skimage2._shared._dependency_checks import is_wasm
 
 if not is_wasm:

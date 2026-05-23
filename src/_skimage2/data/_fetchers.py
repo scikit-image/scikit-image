@@ -99,23 +99,23 @@ def _create_image_fetcher(prefix=None):
         if prefix is not None:
             url = (
                 "https://github.com/scikit-image/scikit-image/raw/"
-                "{version}/tests/skimage/"
+                "{version}/tests/_skimage2/"
             )
         else:
             url = (
                 "https://github.com/scikit-image/scikit-image/raw/"
-                "{version}/src/skimage/"
+                "{version}/src/_skimage2/"
             )
     else:
         if prefix is not None:
             url = (
                 "https://github.com/scikit-image/scikit-image/raw/"
-                "v{version}/tests/skimage/"
+                "v{version}/tests/_skimage2/"
             )
         else:
             url = (
                 "https://github.com/scikit-image/scikit-image/raw/"
-                "v{version}/src/skimage/"
+                "v{version}/src/_skimage2/"
             )
 
     # Create a new friend to manage your sample data storage
@@ -214,7 +214,7 @@ def _fetch(data_filename, prefix=None):
         dataset has not been downloaded yet.
     """
     if prefix is not None:
-        return osp.join("tests", "skimage", data_filename)
+        return osp.join("tests", "skimage2", data_filename)
 
     expected_hash = registry[data_filename]
     if _image_fetcher is None:
@@ -255,7 +255,7 @@ def _fetch(data_filename, prefix=None):
         raise ConnectionError(
             'Tried to download a scikit-image dataset, but no internet '
             'connection is available. To avoid this message in the '
-            'future, try `skimage.data.download_all()` when you are '
+            'future, try `_skimage2.data.download_all()` when you are '
             'connected to the internet.'
         ) from err
 
@@ -290,7 +290,7 @@ def download_all(directory=None):
     scikit-image will only search for images stored in the default directory.
     Only specify the directory if you wish to download the images to your own
     folder for a particular reason. You can access the location of the default
-    data directory by inspecting the variable ``skimage.data.data_dir``.
+    data directory by inspecting the variable ``_skimage2.data.data_dir``.
     """
 
     if _image_fetcher is None:
@@ -348,7 +348,7 @@ def _load(f, as_gray=False):
     Returns
     -------
     img : ndarray
-        Image loaded from ``skimage.data_dir``.
+        Image loaded from ``_skimage2.data_dir``.
     """
     # importing io is quite slow since it scans all the backends
     # we lazy import it here
@@ -446,7 +446,7 @@ def brick():
 
     >>> import sys; print(sys.version)
     >>> import platform; print(platform.platform())
-    >>> import skimage; print(f'scikit-image version: {skimage.__version__}')
+    >>> import _skimage2; print(f'scikit-image version: {_skimage2.__version__}')
     >>> import numpy; print(f'numpy version: {numpy.__version__}')
     >>> import imageio; print(f'imageio version {imageio.__version__}')
     3.7.3 | packaged by conda-forge | (default, Jul  1 2019, 21:52:21)
@@ -466,10 +466,10 @@ def brick():
     ... z.extract('Bricks25_col.jpg')
 
     >>> from numpy.linalg import inv
-    >>> from skimage.transform import rescale, warp, rotate
-    >>> from skimage.color import rgb2gray
+    >>> from _skimage2.transform import rescale, warp, rotate
+    >>> from _skimage2.color import rgb2gray
     >>> from imageio import imread, imwrite
-    >>> from skimage import img_as_ubyte
+    >>> from _skimage2 import img_as_ubyte
     >>> import numpy as np
 
 
@@ -513,7 +513,7 @@ def grass():
 
     >>> import sys; print(sys.version)
     >>> import platform; print(platform.platform())
-    >>> import skimage; print(f'scikit-image version: {skimage.__version__}')
+    >>> import _skimage2; print(f'scikit-image version: {_skimage2.__version__}')
     >>> import numpy; print(f'numpy version: {numpy.__version__}')
     >>> import imageio; print(f'imageio version {imageio.__version__}')
     3.7.3 | packaged by conda-forge | (default, Jul  1 2019, 21:52:21)
@@ -530,7 +530,7 @@ def grass():
     >>> with open('grass_orig.jpg', 'bw') as f:
     ...     f.write(r.content)
     >>> grass_orig = imageio.imread('grass_orig.jpg')
-    >>> grass = skimage.img_as_ubyte(skimage.color.rgb2gray(grass_orig[:512, :512]))
+    >>> grass = _skimage2.img_as_ubyte(_skimage2.color.rgb2gray(grass_orig[:512, :512]))
     >>> imageio.imwrite('grass.png', grass)
     """
     return _load("data/grass.png", as_gray=True)
@@ -561,7 +561,7 @@ def gravel():
 
     >>> import sys; print(sys.version)
     >>> import platform; print(platform.platform())
-    >>> import skimage; print(f'scikit-image version: {skimage.__version__}')
+    >>> import _skimage2; print(f'scikit-image version: {_skimage2.__version__}')
     >>> import numpy; print(f'numpy version: {numpy.__version__}')
     >>> import imageio; print(f'imageio version {imageio.__version__}')
     3.7.3 | packaged by conda-forge | (default, Jul  1 2019, 21:52:21)
@@ -582,10 +582,10 @@ def gravel():
     >>> with zipfile.ZipFile('[2K]Gravel04.zip') as z:
     ...     z.extract('Gravel04_col.jpg')
 
-    >>> from skimage.transform import resize
+    >>> from _skimage2.transform import resize
     >>> gravel_orig = imageio.imread('Gravel04_col.jpg')
     >>> gravel = resize(gravel_orig, (1024, 1024))
-    >>> gravel = skimage.img_as_ubyte(skimage.color.rgb2gray(gravel[:512, :512]))
+    >>> gravel = _skimage2.img_as_ubyte(_skimage2.color.rgb2gray(gravel[:512, :512]))
     >>> imageio.imwrite('gravel.png', gravel)
     """
     return _load("data/gravel.png", as_gray=True)
@@ -1089,7 +1089,7 @@ def stereo_motorcycle():
 
     The images included here are down-sampled versions of the default exposure
     images in the benchmark. The images are down-sampled by a factor of 4 using
-    the function `skimage.transform.downscale_local_mean`. The calibration data
+    the function `_skimage2.transform.downscale_local_mean`. The calibration data
     in the following and the included ground-truth disparity map are valid for
     the down-sampled images::
 

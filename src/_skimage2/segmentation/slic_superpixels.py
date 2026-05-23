@@ -243,8 +243,8 @@ def slic(
 
     Examples
     --------
-    >>> from skimage.segmentation import slic
-    >>> from skimage.data import astronaut
+    >>> from _skimage2.segmentation import slic
+    >>> from _skimage2.data import astronaut
     >>> img = astronaut()
     >>> segments = slic(img, n_segments=100, compactness=10)
 

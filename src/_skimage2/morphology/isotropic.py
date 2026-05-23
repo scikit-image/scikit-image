@@ -55,13 +55,13 @@ def isotropic_erosion(image, radius, out=None, spacing=None):
     Erosion shrinks bright regions
 
     >>> import numpy as np
-    >>> import skimage as ski
+    >>> import _skimage2 as ski2
     >>> image = np.array([[0, 0, 1, 0, 0],
     ...                   [0, 1, 1, 1, 0],
     ...                   [0, 1, 1, 1, 0],
     ...                   [0, 1, 1, 1, 0],
     ...                   [0, 0, 0, 0, 0]], dtype=bool)
-    >>> result = ski.morphology.isotropic_erosion(image, radius=1)
+    >>> result = ski2.morphology.isotropic_erosion(image, radius=1)
     >>> result.view(np.uint8)
     array([[0, 0, 0, 0, 0],
            [0, 0, 1, 0, 0],
@@ -123,13 +123,13 @@ def isotropic_dilation(image, radius, out=None, spacing=None):
     Dilation enlarges bright regions
 
     >>> import numpy as np
-    >>> import skimage as ski
+    >>> import _skimage2 as ski2
     >>> image = np.array([[0, 0, 0, 0, 0],
     ...                   [0, 0, 0, 0, 0],
     ...                   [0, 0, 1, 0, 0],
     ...                   [0, 0, 1, 1, 0],
     ...                   [0, 0, 0, 0, 0]], dtype=bool)
-    >>> result = ski.morphology.isotropic_dilation(image, radius=1)
+    >>> result = ski2.morphology.isotropic_dilation(image, radius=1)
     >>> result.view(np.uint8)
     array([[0, 0, 0, 0, 0],
            [0, 0, 1, 0, 0],
@@ -189,13 +189,13 @@ def isotropic_opening(image, radius, out=None, spacing=None):
     Remove connection between two bright regions
 
     >>> import numpy as np
-    >>> import skimage as ski
+    >>> import _skimage2 as ski2
     >>> image = np.array([[1, 0, 0, 0, 1],
     ...                   [1, 1, 0, 1, 1],
     ...                   [1, 1, 1, 1, 1],
     ...                   [1, 1, 0, 1, 1],
     ...                   [1, 0, 0, 0, 1]], dtype=bool)
-    >>> result = ski.morphology.isotropic_opening(image, radius=1)
+    >>> result = ski2.morphology.isotropic_opening(image, radius=1)
     >>> result.view(np.uint8)
     array([[1, 0, 0, 0, 1],
            [1, 1, 0, 1, 1],
@@ -255,13 +255,13 @@ def isotropic_closing(image, radius, out=None, spacing=None):
     Close gap between two bright lines
 
     >>> import numpy as np
-    >>> import skimage as ski
+    >>> import _skimage2 as ski2
     >>> image = np.array([[0, 0, 0, 0, 0],
     ...                   [0, 0, 0, 0, 0],
     ...                   [1, 1, 0, 1, 1],
     ...                   [0, 0, 0, 0, 0],
     ...                   [0, 0, 0, 0, 0]], dtype=bool)
-    >>> result = ski.morphology.isotropic_closing(image, radius=1)
+    >>> result = ski2.morphology.isotropic_closing(image, radius=1)
     >>> result.view(np.uint8)
     array([[0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0],

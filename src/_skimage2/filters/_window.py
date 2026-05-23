@@ -81,7 +81,7 @@ def window(window_type, shape, warp_kwargs=None):
     --------
     Return a Hann window with shape (512, 512):
 
-    >>> from skimage.filters import window
+    >>> from _skimage2.filters import window
     >>> w = window('hann', (512, 512))
 
     Return a Kaiser window with beta parameter of 16 and shape (256, 256, 35):

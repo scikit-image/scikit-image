@@ -143,7 +143,7 @@ def rescale_legacy(image):
     array([  0., 127., 255.])
     """
     # TODO Undo inlined imports once available in _skimage2 namespace
-    from skimage.util.dtype import img_as_float
+    from _skimage2.util.dtype import img_as_float
 
     out = img_as_float(image)
     return out

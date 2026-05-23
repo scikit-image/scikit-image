@@ -21,8 +21,8 @@ def lookfor(what):
 
     Examples
     --------
-    >>> import skimage as ski
-    >>> ski.util.lookfor('regular_grid')
+    >>> import _skimage2 as ski2
+    >>> ski2.util.lookfor('regular_grid')
     Search results for 'regular_grid'
     ---------------------------------
     skimage.util.regular_grid

@@ -63,9 +63,9 @@ def median(
 
     Examples
     --------
-    >>> import skimage as ski
-    >>> img = ski.data.camera()
-    >>> med = ski.filters.median(img, ski.morphology.disk(5))
+    >>> import _skimage2 as ski2
+    >>> img = ski2.data.camera()
+    >>> med = ski2.filters.median(img, ski2.morphology.disk(5))
 
     """
     if behavior == 'rank':

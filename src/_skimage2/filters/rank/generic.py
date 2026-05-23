@@ -468,9 +468,9 @@ def autolevel(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift
 
     Examples
     --------
-    >>> from skimage import data
-    >>> from skimage.morphology import disk, ball
-    >>> from skimage.filters.rank import autolevel
+    >>> from _skimage2 import data
+    >>> from _skimage2.morphology import disk, ball
+    >>> from _skimage2.filters.rank import autolevel
     >>> import numpy as np
     >>> img = data.camera()
     >>> rng = np.random.default_rng()
@@ -530,9 +530,9 @@ def equalize(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_
 
     Examples
     --------
-    >>> from skimage import data
-    >>> from skimage.morphology import disk, ball
-    >>> from skimage.filters.rank import equalize
+    >>> from _skimage2 import data
+    >>> from _skimage2.morphology import disk, ball
+    >>> from _skimage2.filters.rank import equalize
     >>> import numpy as np
     >>> img = data.camera()
     >>> rng = np.random.default_rng()
@@ -592,9 +592,9 @@ def gradient(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_
 
     Examples
     --------
-    >>> from skimage import data
-    >>> from skimage.morphology import disk, ball
-    >>> from skimage.filters.rank import gradient
+    >>> from _skimage2 import data
+    >>> from _skimage2.morphology import disk, ball
+    >>> from _skimage2.filters.rank import gradient
     >>> import numpy as np
     >>> img = data.camera()
     >>> rng = np.random.default_rng()
@@ -663,9 +663,9 @@ def maximum(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z
 
     Examples
     --------
-    >>> from skimage import data
-    >>> from skimage.morphology import disk, ball
-    >>> from skimage.filters.rank import maximum
+    >>> from _skimage2 import data
+    >>> from _skimage2.morphology import disk, ball
+    >>> from _skimage2.filters.rank import maximum
     >>> import numpy as np
     >>> img = data.camera()
     >>> rng = np.random.default_rng()
@@ -725,9 +725,9 @@ def mean(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0)
 
     Examples
     --------
-    >>> from skimage import data
-    >>> from skimage.morphology import disk, ball
-    >>> from skimage.filters.rank import mean
+    >>> from _skimage2 import data
+    >>> from _skimage2.morphology import disk, ball
+    >>> from _skimage2.filters.rank import mean
     >>> import numpy as np
     >>> img = data.camera()
     >>> rng = np.random.default_rng()
@@ -789,9 +789,9 @@ def geometric_mean(
 
     Examples
     --------
-    >>> from skimage import data
-    >>> from skimage.morphology import disk, ball
-    >>> from skimage.filters.rank import mean
+    >>> from _skimage2 import data
+    >>> from _skimage2.morphology import disk, ball
+    >>> from _skimage2.filters.rank import mean
     >>> import numpy as np
     >>> img = data.camera()
     >>> rng = np.random.default_rng()
@@ -866,9 +866,9 @@ def subtract_mean(
 
     Examples
     --------
-    >>> from skimage import data
-    >>> from skimage.morphology import disk, ball
-    >>> from skimage.filters.rank import subtract_mean
+    >>> from _skimage2 import data
+    >>> from _skimage2.morphology import disk, ball
+    >>> from _skimage2.filters.rank import subtract_mean
     >>> import numpy as np
     >>> img = data.camera()
     >>> rng = np.random.default_rng()
@@ -942,9 +942,9 @@ def median(
 
     Examples
     --------
-    >>> from skimage import data
-    >>> from skimage.morphology import disk, ball
-    >>> from skimage.filters.rank import median
+    >>> from _skimage2 import data
+    >>> from _skimage2.morphology import disk, ball
+    >>> from _skimage2.filters.rank import median
     >>> import numpy as np
     >>> img = data.camera()
     >>> rng = np.random.default_rng()
@@ -1015,9 +1015,9 @@ def minimum(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z
 
     Examples
     --------
-    >>> from skimage import data
-    >>> from skimage.morphology import disk, ball
-    >>> from skimage.filters.rank import minimum
+    >>> from _skimage2 import data
+    >>> from _skimage2.morphology import disk, ball
+    >>> from _skimage2.filters.rank import minimum
     >>> import numpy as np
     >>> img = data.camera()
     >>> rng = np.random.default_rng()
@@ -1079,9 +1079,9 @@ def modal(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0
 
     Examples
     --------
-    >>> from skimage import data
-    >>> from skimage.morphology import disk, ball
-    >>> from skimage.filters.rank import modal
+    >>> from _skimage2 import data
+    >>> from _skimage2.morphology import disk, ball
+    >>> from _skimage2.filters.rank import modal
     >>> import numpy as np
     >>> img = data.camera()
     >>> rng = np.random.default_rng()
@@ -1147,9 +1147,9 @@ def enhance_contrast(
 
     Examples
     --------
-    >>> from skimage import data
-    >>> from skimage.morphology import disk, ball
-    >>> from skimage.filters.rank import enhance_contrast
+    >>> from _skimage2 import data
+    >>> from _skimage2.morphology import disk, ball
+    >>> from _skimage2.filters.rank import enhance_contrast
     >>> import numpy as np
     >>> img = data.camera()
     >>> rng = np.random.default_rng()
@@ -1212,8 +1212,8 @@ def pop(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
 
     Examples
     --------
-    >>> from skimage.morphology import footprint_rectangle # Need to add 3D example
-    >>> import skimage.filters.rank as rank
+    >>> from _skimage2.morphology import footprint_rectangle # Need to add 3D example
+    >>> import _skimage2.filters.rank as rank
     >>> img = 255 * np.array([[0, 0, 0, 0, 0],
     ...                       [0, 1, 1, 1, 0],
     ...                       [0, 1, 1, 1, 0],
@@ -1281,8 +1281,8 @@ def sum(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
 
     Examples
     --------
-    >>> from skimage.morphology import footprint_rectangle # Need to add 3D example
-    >>> import skimage.filters.rank as rank         # Cube seems to fail but
+    >>> from _skimage2.morphology import footprint_rectangle # Need to add 3D example
+    >>> import _skimage2.filters.rank as rank         # Cube seems to fail but
     >>> img = np.array([[0, 0, 0, 0, 0],            # Ball can pass
     ...                 [0, 1, 1, 1, 0],
     ...                 [0, 1, 1, 1, 0],
@@ -1350,8 +1350,8 @@ def threshold(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift
 
     Examples
     --------
-    >>> from skimage.morphology import footprint_rectangle # Need to add 3D example
-    >>> from skimage.filters.rank import threshold
+    >>> from _skimage2.morphology import footprint_rectangle # Need to add 3D example
+    >>> from _skimage2.filters.rank import threshold
     >>> img = 255 * np.array([[0, 0, 0, 0, 0],
     ...                       [0, 1, 1, 1, 0],
     ...                       [0, 1, 1, 1, 0],
@@ -1423,9 +1423,9 @@ def noise_filter(
 
     Examples
     --------
-    >>> from skimage import data
-    >>> from skimage.morphology import disk, ball
-    >>> from skimage.filters.rank import noise_filter
+    >>> from _skimage2 import data
+    >>> from _skimage2.morphology import disk, ball
+    >>> from _skimage2.filters.rank import noise_filter
     >>> import numpy as np
     >>> img = data.camera()
     >>> rng = np.random.default_rng()
@@ -1513,9 +1513,9 @@ def entropy(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z
 
     Examples
     --------
-    >>> from skimage import data
-    >>> from skimage.filters.rank import entropy
-    >>> from skimage.morphology import disk, ball
+    >>> from _skimage2 import data
+    >>> from _skimage2.filters.rank import entropy
+    >>> from _skimage2.morphology import disk, ball
     >>> import numpy as np
     >>> img = data.camera()
     >>> rng = np.random.default_rng()
@@ -1581,9 +1581,9 @@ def otsu(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0)
 
     Examples
     --------
-    >>> from skimage import data
-    >>> from skimage.filters.rank import otsu
-    >>> from skimage.morphology import disk, ball
+    >>> from _skimage2 import data
+    >>> from _skimage2.filters.rank import otsu
+    >>> from _skimage2.morphology import disk, ball
     >>> import numpy as np
     >>> img = data.camera()
     >>> rng = np.random.default_rng()
@@ -1654,9 +1654,9 @@ def windowed_histogram(
 
     Examples
     --------
-    >>> from skimage import data
-    >>> from skimage.filters.rank import windowed_histogram
-    >>> from skimage.morphology import disk, ball
+    >>> from _skimage2 import data
+    >>> from _skimage2.filters.rank import windowed_histogram
+    >>> from _skimage2.morphology import disk, ball
     >>> import numpy as np
     >>> img = data.camera()
     >>> rng = np.random.default_rng()
@@ -1716,12 +1716,12 @@ def majority(
     Examples
     --------
     >>> import numpy as np
-    >>> import skimage as ski
-    >>> img = ski.data.camera()
+    >>> import _skimage2 as ski2
+    >>> img = ski2.data.camera()
     >>> rng = np.random.default_rng()
     >>> volume = rng.integers(0, 255, size=(10, 10, 10), dtype=np.uint8)
-    >>> maj_img = ski.filters.rank.majority(img, ski.morphology.disk(5))
-    >>> maj_img_vol = ski.filters.rank.majority(volume, ski.morphology.ball(5))
+    >>> maj_img = ski2.filters.rank.majority(img, ski2.morphology.disk(5))
+    >>> maj_img_vol = ski2.filters.rank.majority(volume, ski2.morphology.ball(5))
 
     """
 

@@ -160,8 +160,8 @@ def resize(
 
     Examples
     --------
-    >>> from skimage import data
-    >>> from skimage.transform import resize
+    >>> from _skimage2 import data
+    >>> from _skimage2.transform import resize
     >>> image = data.camera()
     >>> resize(image, (100, 100)).shape
     (100, 100)
@@ -307,8 +307,8 @@ def rescale(
 
     Examples
     --------
-    >>> from skimage import data
-    >>> from skimage.transform import rescale
+    >>> from _skimage2 import data
+    >>> from _skimage2.transform import rescale
     >>> image = data.camera()
     >>> rescale(image, 0.1).shape
     (51, 51)
@@ -409,8 +409,8 @@ def rotate(
 
     Examples
     --------
-    >>> from skimage import data
-    >>> from skimage.transform import rotate
+    >>> from _skimage2 import data
+    >>> from _skimage2.transform import rotate
     >>> image = data.camera()
     >>> rotate(image, 2).shape
     (512, 512)
@@ -678,7 +678,7 @@ def warp_coords(coord_map, shape, dtype=np.float64):
     --------
     Produce a coordinate map that shifts an image up and to the right:
 
-    >>> from skimage import data
+    >>> from _skimage2 import data
     >>> from scipy.ndimage import map_coordinates
     >>>
     >>> def shift_up10_left20(xy):
@@ -873,8 +873,8 @@ def warp(
 
     Examples
     --------
-    >>> from skimage.transform import warp
-    >>> from skimage import data
+    >>> from _skimage2.transform import warp
+    >>> from _skimage2 import data
     >>> image = data.camera()
 
     The following image warps are all equal but differ substantially in
@@ -882,7 +882,7 @@ def warp(
 
     Use a geometric transform to warp an image (fast):
 
-    >>> from skimage.transform import SimilarityTransform
+    >>> from _skimage2.transform import SimilarityTransform
     >>> tform = SimilarityTransform(translation=(0, -10))
     >>> warped = warp(image, tform)
 
@@ -897,7 +897,7 @@ def warp(
 
     >>> matrix = np.array([[1, 0, 0], [0, 1, -10], [0, 0, 1]])
     >>> warped = warp(image, matrix)
-    >>> from skimage.transform import ProjectiveTransform
+    >>> from _skimage2.transform import ProjectiveTransform
     >>> warped = warp(image, ProjectiveTransform(matrix=matrix))
 
     You can also use the inverse of a geometric transformation (fast):
@@ -1167,8 +1167,8 @@ def warp_polar(
     --------
     Perform a basic polar warp on a grayscale image:
 
-    >>> from skimage import data
-    >>> from skimage.transform import warp_polar
+    >>> from _skimage2 import data
+    >>> from _skimage2.transform import warp_polar
     >>> image = data.checkerboard()
     >>> warped = warp_polar(image)
 
@@ -1349,8 +1349,8 @@ def resize_local_mean(
 
     Examples
     --------
-    >>> from skimage import data
-    >>> from skimage.transform import resize_local_mean
+    >>> from _skimage2 import data
+    >>> from _skimage2.transform import resize_local_mean
     >>> image = data.camera()
     >>> resize_local_mean(image, (100, 100)).shape
     (100, 100)

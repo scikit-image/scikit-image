@@ -31,10 +31,10 @@ def polygon2mask(image_shape, polygon):
 
     Examples
     --------
-    >>> import skimage as ski
+    >>> import _skimage2 as ski2
     >>> image_shape = (10, 10)
     >>> polygon = np.array([[1, 1], [2, 7], [8, 4]])
-    >>> mask = ski.draw.polygon2mask(image_shape, polygon)
+    >>> mask = ski2.draw.polygon2mask(image_shape, polygon)
     >>> mask.astype(int)
     array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -52,7 +52,7 @@ def polygon2mask(image_shape, polygon):
     drawn in the mask.
 
     >>> offset = np.array([[2, -4]])
-    >>> ski.draw.polygon2mask(image_shape, polygon - offset).astype(int)
+    >>> ski2.draw.polygon2mask(image_shape, polygon - offset).astype(int)
     array([[0, 0, 0, 0, 0, 0, 1, 1, 1, 1],
            [0, 0, 0, 0, 0, 0, 1, 1, 1, 1],
            [0, 0, 0, 0, 0, 0, 0, 1, 1, 1],

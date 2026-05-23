@@ -78,7 +78,7 @@ class PendingSkimage2Change(PendingDeprecationWarning):
     .. code-block:: python
 
         import warnings
-        import skimage as ski
+        import _skimage2 as ski2
         warnings.filterwarnings(
             action="default", category=ski.util.PendingSkimage2Change
         )

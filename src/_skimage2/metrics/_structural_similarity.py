@@ -24,13 +24,13 @@ setting the parameter explicitly.
 For example:
 
 >>> import numpy as np
->>> import skimage as ski
+>>> import _skimage2 as ski2
 >>> import skimage2 as ski2
 ...
 >>> im1 = np.arange(20)
 >>> im2 = im1 // 2
 ...
->>> result1 = ski.metrics.structural_similarity(im1, im2)
+>>> result1 = ski2.metrics.structural_similarity(im1, im2)
 ...
 >>> data_range = np.iinfo(im1.dtype).max - np.iinfo(im1.dtype).min
 >>> result2 = ski2.metrics.structural_similarity(im1, im2, data_range=data_range)

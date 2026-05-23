@@ -94,7 +94,7 @@ def h_maxima(image, h, footprint=None):
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage.morphology import extrema
+    >>> from _skimage2.morphology import extrema
 
     We create an image (quadratic function with a maximum in the center and
     4 additional constant maxima.
@@ -223,7 +223,7 @@ def h_minima(image, h, footprint=None):
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage.morphology import extrema
+    >>> from _skimage2.morphology import extrema
 
     We create an image (quadratic function with a minimum in the center and
     4 additional constant maxima.
@@ -341,7 +341,7 @@ def local_maxima(
 
     Examples
     --------
-    >>> from skimage.morphology import local_maxima
+    >>> from _skimage2.morphology import local_maxima
     >>> image = np.zeros((4, 7), dtype=int)
     >>> image[1:3, 1:3] = 1
     >>> image[3, 0] = 1
@@ -501,7 +501,7 @@ def local_minima(
 
     Examples
     --------
-    >>> from skimage.morphology import local_minima
+    >>> from _skimage2.morphology import local_minima
     >>> image = np.zeros((4, 7), dtype=int)
     >>> image[1:3, 1:3] = -1
     >>> image[3, 0] = -1

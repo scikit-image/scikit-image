@@ -5,7 +5,7 @@ from .. import measure
 import _skimage2 as ski2
 
 from _skimage2._shared._warnings import warn_external
-from skimage._migration import ski2_migration_decorator
+from _skimage2._migration import ski2_migration_decorator
 
 
 @ski2_migration_decorator(
@@ -61,7 +61,7 @@ Other keyword parameters can be left unchanged.
 
 >>> import numpy as np
 >>>
->>> import skimage as ski1
+>>> import _skimage2 as ski21
 >>> import skimage2 as ski2
 >>> image = ski1.data.camera()
 >>> res1 = ski1.feature.peak_local_max(image)

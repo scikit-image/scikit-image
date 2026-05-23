@@ -892,7 +892,7 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
 
     Examples
     --------
-    >>> from skimage import data, util, measure
+    >>> from _skimage2 import data, util, measure
     >>> image = data.coins()
     >>> label_image = measure.label(image > 110, connectivity=image.ndim)
     >>> proplist = regionprops(label_image, image)
@@ -1077,7 +1077,7 @@ def regionprops_table(
 
     Examples
     --------
-    >>> from skimage import data, util, measure
+    >>> from _skimage2 import data, util, measure
     >>> image = data.coins()
     >>> label_image = measure.label(image > 110, connectivity=image.ndim)
     >>> props = measure.regionprops_table(label_image, image,
@@ -1109,7 +1109,7 @@ def regionprops_table(
     ``extra_properties``. For example, we can create a custom function
     that measures the intensity quartiles in a region:
 
-    >>> from skimage import data, util, measure
+    >>> from _skimage2 import data, util, measure
     >>> import numpy as np
     >>> def quartiles(regionmask, intensity):
     ...     return np.percentile(intensity[regionmask], q=(25, 50, 75))
@@ -1393,10 +1393,10 @@ def regionprops(
 
     Examples
     --------
-    >>> import skimage as ski
-    >>> img = ski.util.img_as_ubyte(ski.data.coins()) > 110
-    >>> label_img = ski.measure.label(img, connectivity=img.ndim)
-    >>> props = ski.measure.regionprops(label_img)
+    >>> import _skimage2 as ski2
+    >>> img = ski2.util.img_as_ubyte(ski.data.coins()) > 110
+    >>> label_img = ski2.measure.label(img, connectivity=img.ndim)
+    >>> props = ski2.measure.regionprops(label_img)
     >>> # centroid of first labeled region
     >>> props[0].centroid
     (22.72987986048314, 81.91228523446583)
@@ -1407,12 +1407,12 @@ def regionprops(
     Add custom measurements by passing functions as ``extra_properties``:
 
     >>> import numpy as np
-    >>> import skimage as ski
-    >>> img = ski.util.img_as_ubyte(ski.data.coins()) > 110
-    >>> label_img = ski.measure.label(img, connectivity=img.ndim)
+    >>> import _skimage2 as ski2
+    >>> img = ski2.util.img_as_ubyte(ski.data.coins()) > 110
+    >>> label_img = ski2.measure.label(img, connectivity=img.ndim)
     >>> def pixelcount(regionmask):
     ...     return np.sum(regionmask)
-    >>> props = ski.measure.regionprops(label_img, extra_properties=(pixelcount,))
+    >>> props = ski2.measure.regionprops(label_img, extra_properties=(pixelcount,))
     >>> # pixelcount of first labeled region
     >>> props[0].pixelcount
     7741

@@ -75,7 +75,7 @@ class BRIEF(DescriptorExtractor):
 
     Examples
     --------
-    >>> from skimage.feature import (corner_harris, corner_peaks, BRIEF,
+    >>> from _skimage2.feature import (corner_harris, corner_peaks, BRIEF,
     ...                              match_descriptors)
     >>> import numpy as np
     >>> square1 = np.zeros((8, 8), dtype=np.int32)

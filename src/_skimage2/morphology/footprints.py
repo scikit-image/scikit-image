@@ -106,8 +106,8 @@ def footprint_rectangle(shape, *, dtype=np.uint8, decomposition=None):
 
     Examples
     --------
-    >>> import skimage as ski
-    >>> ski.morphology.footprint_rectangle((3, 5))
+    >>> import _skimage2 as ski2
+    >>> ski2.morphology.footprint_rectangle((3, 5))
     array([[1, 1, 1, 1, 1],
            [1, 1, 1, 1, 1],
            [1, 1, 1, 1, 1]], dtype=uint8)
@@ -115,7 +115,7 @@ def footprint_rectangle(shape, *, dtype=np.uint8, decomposition=None):
     Decomposition will return multiple footprints that combine into a simple
     footprint of the requested shape.
 
-    >>> ski.morphology.footprint_rectangle((9, 9), decomposition="sequence")
+    >>> ski2.morphology.footprint_rectangle((9, 9), decomposition="sequence")
     ((array([[1, 1, 1],
              [1, 1, 1],
              [1, 1, 1]], dtype=uint8),
@@ -123,7 +123,7 @@ def footprint_rectangle(shape, *, dtype=np.uint8, decomposition=None):
 
     `"sequence"` makes sure that the decomposition only returns 1D footprints.
 
-    >>> ski.morphology.footprint_rectangle((3, 5), decomposition="separable")
+    >>> ski2.morphology.footprint_rectangle((3, 5), decomposition="separable")
     ((array([[1],
              [1],
              [1]], dtype=uint8),
@@ -132,7 +132,7 @@ def footprint_rectangle(shape, *, dtype=np.uint8, decomposition=None):
 
     Generate a 5-dimensional hypercube with 3 samples in each dimension
 
-    >>> ski.morphology.footprint_rectangle((3,) * 5).shape
+    >>> ski2.morphology.footprint_rectangle((3,) * 5).shape
     (3, 3, 3, 3, 3)
     """
     has_even_width = any(width % 2 == 0 for width in shape)
@@ -671,7 +671,7 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
 
     Examples
     --------
-    >>> from skimage.morphology import footprints
+    >>> from _skimage2.morphology import footprints
     >>> footprints.ellipse(5, 3)
     array([[0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],

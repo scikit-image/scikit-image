@@ -31,7 +31,7 @@ def clear_border(labels, buffer_size=0, bgval=0, mask=None, *, out=None):
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage.segmentation import clear_border
+    >>> from _skimage2.segmentation import clear_border
     >>> labels = np.array([[0, 0, 0, 0, 0, 0, 0, 1, 0],
     ...                    [1, 1, 0, 0, 1, 0, 0, 1, 0],
     ...                    [1, 1, 0, 1, 0, 1, 0, 0, 0],

@@ -104,9 +104,9 @@ def mean_bilateral(
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage import data
-    >>> from skimage.morphology import disk
-    >>> from skimage.filters.rank import mean_bilateral
+    >>> from _skimage2 import data
+    >>> from _skimage2.morphology import disk
+    >>> from _skimage2.filters.rank import mean_bilateral
     >>> img = data.camera().astype(np.uint16)
     >>> bilat_img = mean_bilateral(img, disk(20), s0=10,s1=10)
 
@@ -162,8 +162,8 @@ def pop_bilateral(
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage.morphology import footprint_rectangle
-    >>> import skimage.filters.rank as rank
+    >>> from _skimage2.morphology import footprint_rectangle
+    >>> import _skimage2.filters.rank as rank
     >>> img = 255 * np.array([[0, 0, 0, 0, 0],
     ...                       [0, 1, 1, 1, 0],
     ...                       [0, 1, 1, 1, 0],
@@ -241,9 +241,9 @@ def sum_bilateral(
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage import data
-    >>> from skimage.morphology import disk
-    >>> from skimage.filters.rank import sum_bilateral
+    >>> from _skimage2 import data
+    >>> from _skimage2.morphology import disk
+    >>> from _skimage2.filters.rank import sum_bilateral
     >>> img = data.camera().astype(np.uint16)
     >>> bilat_img = sum_bilateral(img, disk(10), s0=10, s1=10)
 

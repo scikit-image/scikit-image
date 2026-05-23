@@ -197,7 +197,7 @@ def watershed(
 
     >>> from scipy import ndimage as ndi
     >>> distance = ndi.distance_transform_edt(image)
-    >>> from skimage.feature import peak_local_max
+    >>> from _skimage2.feature import peak_local_max
     >>> max_coords = peak_local_max(distance, labels=image,
     ...                             footprint=np.ones((3, 3)))
     >>> local_maxima = np.zeros_like(image, dtype=bool)

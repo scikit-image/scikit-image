@@ -277,7 +277,7 @@ def use_plugin(name, kind=None):
     --------
     To use Matplotlib as the default image reader, you would write:
 
-    >>> from skimage import io
+    >>> from _skimage2 import io
     >>> io.use_plugin('matplotlib', 'imread')  # doctest: +SKIP
 
     To see a list of available plugins run ``skimage.io.available_plugins``. Note

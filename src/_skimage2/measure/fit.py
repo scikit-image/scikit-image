@@ -1362,7 +1362,7 @@ def ransac(
     transformation. In this section, we also show how to use a
     proportion of the total samples, rather than an absolute number.
 
-    >>> from skimage.transform import SimilarityTransform
+    >>> from _skimage2.transform import SimilarityTransform
     >>> rng = np.random.default_rng()
     >>> src = 100 * rng.random((50, 2))
     >>> model0 = SimilarityTransform(scale=0.5, rotation=1,

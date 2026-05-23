@@ -1,6 +1,6 @@
 __all__ = ['imread', 'imread_collection']
 
-import skimage.io as io
+import _skimage2.io as io
 
 try:
     from astropy.io import fits

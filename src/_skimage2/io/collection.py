@@ -179,7 +179,7 @@ class ImageCollection:
     Examples
     --------
     >>> import imageio.v3 as iio3
-    >>> import skimage.io as io
+    >>> import _skimage2.io as io
 
     # Where your images are located
     >>> data_dir = os.path.join(os.path.dirname(__file__), '../data')

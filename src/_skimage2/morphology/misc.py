@@ -87,7 +87,7 @@ def remove_small_objects(
 
     Examples
     --------
-    >>> from skimage import morphology
+    >>> from _skimage2 import morphology
     >>> a = np.array([[0, 0, 0, 1, 0],
     ...               [1, 1, 1, 0, 0],
     ...               [1, 1, 1, 0, 1]], bool)
@@ -202,7 +202,7 @@ def remove_small_holes(
 
     Examples
     --------
-    >>> from skimage import morphology
+    >>> from _skimage2 import morphology
     >>> a = np.array([[1, 1, 1, 1, 1, 0],
     ...               [1, 1, 1, 0, 1, 0],
     ...               [1, 0, 0, 1, 1, 0],
@@ -347,10 +347,10 @@ def remove_objects_by_distance(
 
     Examples
     --------
-    >>> import skimage as ski
-    >>> ski.morphology.remove_objects_by_distance(np.array([2, 0, 1, 1]), 2)
+    >>> import _skimage2 as ski2
+    >>> ski2.morphology.remove_objects_by_distance(np.array([2, 0, 1, 1]), 2)
     array([0, 0, 1, 1])
-    >>> ski.morphology.remove_objects_by_distance(
+    >>> ski2.morphology.remove_objects_by_distance(
     ...     np.array([2, 0, 1, 1]), 2, priority=np.array([0, 1, 9])
     ... )
     array([2, 0, 0, 0])
@@ -364,7 +364,7 @@ def remove_objects_by_distance(
     ...      [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
     ...      [0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7]]
     ... )
-    >>> ski.morphology.remove_objects_by_distance(
+    >>> ski2.morphology.remove_objects_by_distance(
     ...     label_image, min_distance=3
     ... )
     array([[8, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],

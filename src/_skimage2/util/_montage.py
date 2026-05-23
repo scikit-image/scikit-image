@@ -69,7 +69,7 @@ def montage(
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage.util import montage
+    >>> from _skimage2.util import montage
     >>> arr_in = np.arange(3 * 2 * 2).reshape(3, 2, 2)
     >>> arr_in  # doctest: +NORMALIZE_WHITESPACE
     array([[[ 0,  1],

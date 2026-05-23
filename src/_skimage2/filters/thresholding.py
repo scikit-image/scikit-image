@@ -140,7 +140,7 @@ def try_all_threshold(image, figsize=(8, 5), verbose=True):
 
     Examples
     --------
-    >>> from skimage.data import text
+    >>> from _skimage2.data import text
     >>> fig, ax = try_all_threshold(text(), figsize=(10, 6), verbose=False)
     """
 
@@ -231,7 +231,7 @@ def threshold_local(
 
     Examples
     --------
-    >>> from skimage.data import camera
+    >>> from _skimage2.data import camera
     >>> image = camera()[:50, :50]
     >>> binary_image1 = image > threshold_local(image, 15, 'mean')
     >>> func = lambda arr: arr.mean()
@@ -364,7 +364,7 @@ def threshold_otsu(image=None, nbins=256, *, hist=None):
 
     Examples
     --------
-    >>> from skimage.data import camera
+    >>> from _skimage2.data import camera
     >>> image = camera()
     >>> thresh = threshold_otsu(image)
     >>> binary = image <= thresh
@@ -443,7 +443,7 @@ def threshold_yen(image=None, nbins=256, *, hist=None):
 
     Examples
     --------
-    >>> from skimage.data import camera
+    >>> from _skimage2.data import camera
     >>> image = camera()
     >>> thresh = threshold_yen(image)
     >>> binary = image <= thresh
@@ -522,7 +522,7 @@ def threshold_isodata(image=None, nbins=256, return_all=False, *, hist=None):
 
     Examples
     --------
-    >>> from skimage.data import coins
+    >>> from _skimage2.data import coins
     >>> image = coins()
     >>> thresh = threshold_isodata(image)
     >>> binary = image > thresh
@@ -686,7 +686,7 @@ def threshold_li(image, *, tolerance=None, initial_guess=None, iter_callback=Non
 
     Examples
     --------
-    >>> from skimage.data import camera
+    >>> from _skimage2.data import camera
     >>> image = camera()
     >>> thresh = threshold_li(image)
     >>> binary = image > thresh
@@ -839,7 +839,7 @@ def threshold_minimum(image=None, nbins=256, max_num_iter=10000, *, hist=None):
 
     Examples
     --------
-    >>> from skimage.data import camera
+    >>> from _skimage2.data import camera
     >>> image = camera()
     >>> thresh = threshold_minimum(image)
     >>> binary = image > thresh
@@ -906,7 +906,7 @@ def threshold_mean(image):
 
     Examples
     --------
-    >>> from skimage.data import camera
+    >>> from _skimage2.data import camera
     >>> image = camera()
     >>> thresh = threshold_mean(image)
     >>> binary = image > thresh
@@ -942,7 +942,7 @@ def threshold_triangle(image, nbins=256):
 
     Examples
     --------
-    >>> from skimage.data import camera
+    >>> from _skimage2.data import camera
     >>> image = camera()
     >>> thresh = threshold_triangle(image)
     >>> binary = image > thresh
@@ -1097,7 +1097,7 @@ def threshold_niblack(image, window_size=15, k=0.2):
     The Bradley threshold is a particular case of the Niblack
     one, being equivalent to
 
-    >>> from skimage import data
+    >>> from _skimage2 import data
     >>> image = data.page()
     >>> q = 1
     >>> threshold_image = threshold_niblack(image, k=0) * q
@@ -1115,7 +1115,7 @@ def threshold_niblack(image, window_size=15, k=0.2):
 
     Examples
     --------
-    >>> from skimage import data
+    >>> from _skimage2 import data
     >>> image = data.page()
     >>> threshold_image = threshold_niblack(image, window_size=7, k=0.1)
     """
@@ -1171,7 +1171,7 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
 
     Examples
     --------
-    >>> from skimage import data
+    >>> from _skimage2 import data
     >>> image = data.page()
     >>> t_sauvola = threshold_sauvola(image, window_size=15, k=0.2)
     >>> binary_image = image > t_sauvola
@@ -1294,8 +1294,8 @@ def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None):
 
     Examples
     --------
-    >>> from skimage.color import label2rgb
-    >>> from skimage import data
+    >>> from _skimage2.color import label2rgb
+    >>> from _skimage2 import data
     >>> image = data.camera()
     >>> thresholds = threshold_multiotsu(image)
     >>> regions = np.digitize(image, bins=thresholds)

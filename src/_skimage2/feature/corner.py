@@ -84,7 +84,7 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0, order='rc'):
 
     Examples
     --------
-    >>> from skimage.feature import structure_tensor
+    >>> from _skimage2.feature import structure_tensor
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 1
     >>> Arr, Arc, Acc = structure_tensor(square, sigma=0.1, order='rc')
@@ -285,7 +285,7 @@ def hessian_matrix(
 
     Examples
     --------
-    >>> from skimage.feature import hessian_matrix
+    >>> from _skimage2.feature import hessian_matrix
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 4
     >>> Hrr, Hrc, Hcc = hessian_matrix(square, sigma=0.1, order='rc',
@@ -466,8 +466,8 @@ def structure_tensor_eigenvalues(A_elems):
 
     Examples
     --------
-    >>> from skimage.feature import structure_tensor
-    >>> from skimage.feature import structure_tensor_eigenvalues
+    >>> from _skimage2.feature import structure_tensor
+    >>> from _skimage2.feature import structure_tensor_eigenvalues
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 1
     >>> A_elems = structure_tensor(square, sigma=0.1, order='rc')
@@ -503,7 +503,7 @@ def hessian_matrix_eigvals(H_elems):
 
     Examples
     --------
-    >>> from skimage.feature import hessian_matrix, hessian_matrix_eigvals
+    >>> from _skimage2.feature import hessian_matrix, hessian_matrix_eigvals
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 4
     >>> H_elems = hessian_matrix(square, sigma=0.1, order='rc',
@@ -572,7 +572,7 @@ def shape_index(image, sigma=1, mode='constant', cval=0):
 
     Examples
     --------
-    >>> from skimage.feature import shape_index
+    >>> from _skimage2.feature import shape_index
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 4
     >>> s = shape_index(square, sigma=0.1)
@@ -693,7 +693,7 @@ def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
 
     Examples
     --------
-    >>> from skimage.feature import corner_harris, corner_peaks
+    >>> from _skimage2.feature import corner_harris, corner_peaks
     >>> square = np.zeros([10, 10])
     >>> square[2:8, 2:8] = 1
     >>> square.astype(int)
@@ -762,7 +762,7 @@ def corner_shi_tomasi(image, sigma=1):
 
     Examples
     --------
-    >>> from skimage.feature import corner_shi_tomasi, corner_peaks
+    >>> from _skimage2.feature import corner_shi_tomasi, corner_peaks
     >>> square = np.zeros([10, 10])
     >>> square[2:8, 2:8] = 1
     >>> square.astype(int)
@@ -832,7 +832,7 @@ def corner_foerstner(image, sigma=1):
 
     Examples
     --------
-    >>> from skimage.feature import corner_foerstner, corner_peaks
+    >>> from _skimage2.feature import corner_foerstner, corner_peaks
     >>> square = np.zeros([10, 10])
     >>> square[2:8, 2:8] = 1
     >>> square.astype(int)
@@ -911,7 +911,7 @@ def corner_fast(image, n=12, threshold=0.15):
 
     Examples
     --------
-    >>> from skimage.feature import corner_fast, corner_peaks
+    >>> from _skimage2.feature import corner_fast, corner_peaks
     >>> square = np.zeros((12, 12))
     >>> square[3:9, 3:9] = 1
     >>> square.astype(int)
@@ -978,7 +978,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
 
     Examples
     --------
-    >>> from skimage.feature import corner_harris, corner_peaks, corner_subpix
+    >>> from _skimage2.feature import corner_harris, corner_peaks, corner_subpix
     >>> img = np.zeros((10, 10))
     >>> img[:5, :5] = 1
     >>> img[5:, 5:] = 1
@@ -1180,7 +1180,7 @@ def corner_peaks(
 
     Examples
     --------
-    >>> from skimage.feature import peak_local_max
+    >>> from _skimage2.feature import peak_local_max
     >>> response = np.zeros((5, 5))
     >>> response[2:4, 2:4] = 1
     >>> response
@@ -1266,7 +1266,7 @@ def corner_moravec(image, window_size=1):
 
     Examples
     --------
-    >>> from skimage.feature import corner_moravec
+    >>> from _skimage2.feature import corner_moravec
     >>> square = np.zeros([7, 7])
     >>> square[3, 3] = 1
     >>> square.astype(int)
@@ -1326,8 +1326,8 @@ def corner_orientations(image, corners, mask):
 
     Examples
     --------
-    >>> from skimage.morphology import octagon
-    >>> from skimage.feature import (corner_fast, corner_peaks,
+    >>> from _skimage2.morphology import octagon
+    >>> from _skimage2.feature import (corner_fast, corner_peaks,
     ...                              corner_orientations)
     >>> square = np.zeros((12, 12))
     >>> square[3:9, 3:9] = 1

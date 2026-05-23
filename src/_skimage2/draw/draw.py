@@ -81,7 +81,7 @@ def ellipse(r, c, r_radius, c_radius, shape=None, rotation=0.0):
 
     Examples
     --------
-    >>> from skimage.draw import ellipse
+    >>> from _skimage2.draw import ellipse
     >>> img = np.zeros((10, 12), dtype=np.uint8)
     >>> rr, cc = ellipse(5, 6, 3, 5, rotation=np.deg2rad(30))
     >>> img[rr, cc] = 1
@@ -178,7 +178,7 @@ def disk(center, radius, *, shape=None):
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage.draw import disk
+    >>> from _skimage2.draw import disk
     >>> shape = (4, 4)
     >>> img = np.zeros(shape, dtype=np.uint8)
     >>> rr, cc = disk((0, 0), 2, shape=shape)
@@ -246,7 +246,7 @@ def polygon_perimeter(r, c, shape=None, clip=False):
 
     Examples
     --------
-    >>> from skimage.draw import polygon_perimeter
+    >>> from _skimage2.draw import polygon_perimeter
     >>> img = np.zeros((10, 10), dtype=np.uint8)
     >>> rr, cc = polygon_perimeter([5, -1, 5, 10],
     ...                            [-1, 5, 11, 5],
@@ -315,7 +315,7 @@ def set_color(image, coords, color, alpha=1):
 
     Examples
     --------
-    >>> from skimage.draw import line, set_color
+    >>> from _skimage2.draw import line, set_color
     >>> img = np.zeros((10, 10), dtype=np.uint8)
     >>> rr, cc = line(1, 1, 20, 20)
     >>> set_color(img, (rr, cc), 1)
@@ -383,7 +383,7 @@ def line(r0, c0, r1, c1):
 
     Examples
     --------
-    >>> from skimage.draw import line
+    >>> from _skimage2.draw import line
     >>> img = np.zeros((10, 10), dtype=np.uint8)
     >>> rr, cc = line(1, 1, 8, 8)
     >>> img[rr, cc] = 1
@@ -425,7 +425,7 @@ def line_aa(r0, c0, r1, c1):
 
     Examples
     --------
-    >>> from skimage.draw import line_aa
+    >>> from _skimage2.draw import line_aa
     >>> img = np.zeros((10, 10), dtype=np.uint8)
     >>> rr, cc, val = line_aa(1, 1, 8, 8)
     >>> img[rr, cc] = val * 255
@@ -479,10 +479,10 @@ def polygon(r, c, shape=None):
 
     Examples
     --------
-    >>> import skimage as ski
+    >>> import _skimage2 as ski2
     >>> r = np.array([1, 2, 8])
     >>> c = np.array([1, 7, 4])
-    >>> rr, cc = ski.draw.polygon(r, c)
+    >>> rr, cc = ski2.draw.polygon(r, c)
     >>> img = np.zeros((10, 10), dtype=int)
     >>> img[rr, cc] = 1
     >>> img
@@ -504,7 +504,7 @@ def polygon(r, c, shape=None):
     the polygon.
 
     >>> offset = (2, -4)
-    >>> rr, cc = ski.draw.polygon(r - offset[0], c - offset[1], shape=img.shape)
+    >>> rr, cc = ski2.draw.polygon(r - offset[0], c - offset[1], shape=img.shape)
     >>> img = np.zeros((10, 10), dtype=int)
     >>> img[rr, cc] = 1
     >>> img
@@ -566,7 +566,7 @@ def circle_perimeter(r, c, radius, method='bresenham', shape=None):
 
     Examples
     --------
-    >>> from skimage.draw import circle_perimeter
+    >>> from _skimage2.draw import circle_perimeter
     >>> img = np.zeros((10, 10), dtype=np.uint8)
     >>> rr, cc = circle_perimeter(4, 4, 3)
     >>> img[rr, cc] = 1
@@ -622,7 +622,7 @@ def circle_perimeter_aa(r, c, radius, shape=None):
 
     Examples
     --------
-    >>> from skimage.draw import circle_perimeter_aa
+    >>> from _skimage2.draw import circle_perimeter_aa
     >>> img = np.zeros((10, 10), dtype=np.uint8)
     >>> rr, cc, val = circle_perimeter_aa(4, 4, 3)
     >>> img[rr, cc] = val * 255
@@ -638,7 +638,7 @@ def circle_perimeter_aa(r, c, radius, shape=None):
            [  0,   0,   0,   0,   0,   0,   0,   0,   0,   0],
            [  0,   0,   0,   0,   0,   0,   0,   0,   0,   0]], dtype=uint8)
 
-    >>> from skimage import data, draw
+    >>> from _skimage2 import data, draw
     >>> image = data.chelsea()
     >>> rr, cc, val = draw.circle_perimeter_aa(r=100, c=100, radius=75)
     >>> draw.set_color(image, (rr, cc), [1, 0, 0], alpha=val)
@@ -678,7 +678,7 @@ def ellipse_perimeter(r, c, r_radius, c_radius, orientation=0, shape=None):
 
     Examples
     --------
-    >>> from skimage.draw import ellipse_perimeter
+    >>> from _skimage2.draw import ellipse_perimeter
     >>> img = np.zeros((10, 10), dtype=np.uint8)
     >>> rr, cc = ellipse_perimeter(5, 5, 3, 4)
     >>> img[rr, cc] = 1
@@ -755,7 +755,7 @@ def bezier_curve(r0, c0, r1, c1, r2, c2, weight, shape=None):
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage.draw import bezier_curve
+    >>> from _skimage2.draw import bezier_curve
     >>> img = np.zeros((10, 10), dtype=np.uint8)
     >>> rr, cc = bezier_curve(1, 5, 5, -2, 8, 8, 2)
     >>> img[rr, cc] = 1
@@ -811,7 +811,7 @@ def rectangle(start, end=None, extent=None, shape=None):
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage.draw import rectangle
+    >>> from _skimage2.draw import rectangle
     >>> img = np.zeros((5, 5), dtype=np.uint8)
     >>> start = (1, 1)
     >>> extent = (3, 3)
@@ -838,7 +838,7 @@ def rectangle(start, end=None, extent=None, shape=None):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     >>> import numpy as np
-    >>> from skimage.draw import rectangle
+    >>> from _skimage2.draw import rectangle
     >>> img = np.zeros((6, 6), dtype=np.uint8)
     >>> start = (3, 3)
     >>>
@@ -907,7 +907,7 @@ def rectangle_perimeter(start, end=None, extent=None, shape=None, clip=False):
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage.draw import rectangle_perimeter
+    >>> from _skimage2.draw import rectangle_perimeter
     >>> img = np.zeros((5, 6), dtype=np.uint8)
     >>> start = (2, 3)
     >>> end = (3, 4)

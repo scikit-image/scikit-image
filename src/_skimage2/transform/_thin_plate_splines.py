@@ -28,7 +28,7 @@ class ThinPlateSplineTransform:
 
     Examples
     --------
-    >>> import skimage as ski
+    >>> import _skimage2 as ski2
 
     Define source and destination control points such that they simulate
     rotating by 90 degrees and generate a meshgrid from them:
@@ -38,7 +38,7 @@ class ThinPlateSplineTransform:
 
     Estimate the transformation:
 
-    >>> tps = ski.transform.ThinPlateSplineTransform.from_estimate(src, dst)
+    >>> tps = ski2.transform.ThinPlateSplineTransform.from_estimate(src, dst)
 
     Appyling the transformation to `src` approximates `dst`:
 
@@ -78,7 +78,7 @@ class ThinPlateSplineTransform:
     Not so for a degenerate transform with identical points.
 
     >>> bad_src = np.ones((4, 2))
-    >>> bad_tps = ski.transform.ThinPlateSplineTransform.from_estimate(
+    >>> bad_tps = ski2.transform.ThinPlateSplineTransform.from_estimate(
     ...      bad_src, dst)
     >>> if not bad_tps:
     ...     print("Estimation failed.")
