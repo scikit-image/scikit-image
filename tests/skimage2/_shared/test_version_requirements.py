@@ -19,8 +19,6 @@ def test_is_installed():
 
 
 def test_require():
-    pass
-
     # A function that only runs on Python >2.7 and numpy > 1.5 (should pass)
     @version_req.require('python', version='>2.7')
     @version_req.require('numpy', version='>1.5')

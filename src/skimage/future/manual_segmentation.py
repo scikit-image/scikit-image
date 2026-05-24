@@ -63,7 +63,7 @@ def manual_polygon_segmentation(image, alpha=0.4, return_all=False):
     >>> from skimage import data, future
     >>> import matplotlib.pyplot as plt
     >>> camera = data.camera()
-    >>> mask = future.manual_polygon_segmentation(camera)
+    >>> mask = future.manual_polygon_segmentation(camera)  # doctest: +SKIP
     >>> fig, ax = plt.subplots()  # doctest: +SKIP
     >>> ax.imshow(mask)           # doctest: +SKIP
     >>> plt.show()                # doctest: +SKIP
