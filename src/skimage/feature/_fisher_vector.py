@@ -26,7 +26,7 @@ scikit-image (here) by other authors.)
 
 import numpy as np
 
-from .._shared.version_requirements import require
+from _skimage2._shared.version_requirements import require
 
 
 class FisherVectorException(Exception):
