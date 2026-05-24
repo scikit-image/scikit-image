@@ -37,17 +37,18 @@ def get_module_version(module_name):
 
 @functools.cache
 def is_installed(name, version=None):
-    """Test if *name* is installed.
+    """Test if module given by `name` is installed.
+
+    Looks if a module is available/importable and checks its ``__version__``
+    attribute.
 
     Parameters
     ----------
     name : str
         Name of module or "python"
     version : str, optional
-        Version string to test against.
-        If version is not None, checking version
-        (must have an attribute named '__version__' or 'VERSION')
-        Version may start with =, >=, > or < to specify the exact requirement
+        Version string to test against. Version may start with "=", ">=", ">" or
+        "<" to specify the exact requirement, otherwise "=" is assumed.
 
     Returns
     -------
@@ -86,10 +87,8 @@ def require(name, *, version=None):
     name : str
         Name of module or "python".
     version : str, optional
-        Version string to test against.
-        If version is not None, checking version
-        (must have an attribute named '__version__' or 'VERSION')
-        Version may start with =, >=, > or < to specify the exact requirement
+        Version string to test against. Version may start with "=", ">=", ">" or
+        "<" to specify the exact requirement, otherwise "=" is assumed.
 
     Returns
     -------
