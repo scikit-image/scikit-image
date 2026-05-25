@@ -58,9 +58,9 @@ def is_installed(name, version=None):
     Examples
     --------
     Check presence if a module or specific submodule is available
-    >>> is_installed("skimage2")
+    >>> is_installed("skimage")
     True
-    >>> is_installed("_skimage2._shared")
+    >>> is_installed("skimage.morphology")
     True
 
     This function isn't looking for package names:
@@ -70,14 +70,14 @@ def is_installed(name, version=None):
 
     Check for a specific version:
 
-    >>> is_installed("skimage2", version=">=0.26")
+    >>> is_installed("scipy", version=">=1.0")
     True
-    >>> is_installed("skimage2", version="<0.26")
+    >>> is_installed("scipy", version="<1.0")
     False
 
     If no version attribute is available in the module, fallback to ``False``:
 
-    >>> is_installed("_skimage2._shared", version=">=0.1")
+    >>> is_installed("scipy.ndimage", version=">=1.0")
     False
     """
     if name.lower() == 'python':
