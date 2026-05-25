@@ -99,7 +99,9 @@ def _sort_probabilistic_hough_lines(lines):
 
 def _sorted_probabilistic_hough_line(*args, **kwargs):
     """Call `probabilistic_hough_line`, then return its sorted output."""
-    return _sort_probabilistic_hough_lines(transform.probabilistic_hough_line(*args, **kwargs))
+    return _sort_probabilistic_hough_lines(
+        transform.probabilistic_hough_line(*args, **kwargs)
+    )
 
 
 def _check_seeded_probabilistic_hough_lines(
@@ -150,13 +152,16 @@ def test_probabilistic_hough_examples():
     # Line length too short.  Note line length is pixel distance between end
     # points - line from [0, 0] through [0, 3] is length 3.
     assert _sorted_probabilistic_hough_line(img, line_length=L) == []
+
     # Single line in UD (y)
     lines = _sorted_probabilistic_hough_line(img.T, line_length=L - 1)
     assert lines == [y_line]
+
     # Two lines (x, y)
     both = img + img.T
     lines = _sorted_probabilistic_hough_line(both, line_length=L - 1)
     assert lines == [y_line, x_line]
+
     # Add diagonal lines.
     more = both.copy()
     offset = 15
@@ -178,22 +183,26 @@ def test_probabilistic_hough_examples():
         line_gap=2,
         line_length=L - 1,
     )
+
     # Filter by length of diagonals.  Get only the diagonals back.
     len_diag = int(np.floor(np.sqrt(2 * (n - 1) ** 2)))
     assert (
         _sorted_probabilistic_hough_line(more, line_gap=2, line_length=len_diag)
         == diags
     )
+
     # Check gap behaves as expected.
     assert _sorted_probabilistic_hough_line(img, line_gap=0, line_length=L - 1) == [
         x_line
     ]
+
     gappy = img.copy()
     gappy[5, 12] = 0
     assert _sorted_probabilistic_hough_line(gappy, line_gap=0, line_length=L - 1) == []
     assert _sorted_probabilistic_hough_line(gappy, line_gap=1, line_length=L - 1) == [
         x_line
     ]
+
     gappy[5, 13:15] = 0
     assert _sorted_probabilistic_hough_line(gappy, line_gap=2, line_length=L - 1) == []
     assert _sorted_probabilistic_hough_line(gappy, line_gap=3, line_length=L - 1) == [
