@@ -49,11 +49,11 @@ def test_probabilistic_hough():
         img[100 - i, i] = 100
         img[i, i] = 100
 
-    _check_seeded_lines(
-        1964,
-        50,
-        [[(25, 25), (74, 74)], [(25, 75), (74, 26)]],
-        img,
+    _check_seeded_probabilistic_hough_lines(
+        seed=1964,
+        n_batches=50,
+        expected=[[(25, 25), (74, 74)], [(25, 75), (74, 26)]],
+        img=img,
         threshold=10,
         line_gap=1,
         line_length=10,
@@ -86,7 +86,7 @@ def test_probabilistic_hough_bad_input():
         transform.probabilistic_hough_line(img)
 
 
-def _sort_lines(lines):
+def _sort_probabilistic_hough_lines(lines):
     """Sort each line by x, y, sort lines by contents.
 
     This outputs lines as a list in a predictable order, given line contents.
@@ -97,12 +97,14 @@ def _sort_lines(lines):
     return sorted(sorted_lines)
 
 
-def _sorted_phl(*args, **kwargs):
-    """Utility that calls PHL, then returns sort of output lines."""
-    return _sort_lines(transform.probabilistic_hough_line(*args, **kwargs))
+def _sorted_probabilistic_hough_line(*args, **kwargs):
+    """Call `probabilistic_hough_line`, then return its sorted output."""
+    return _sort_probabilistic_hough_lines(transform.probabilistic_hough_line(*args, **kwargs))
 
 
-def _check_seeded_lines(seed, n_batches, expected, img, **kwargs):
+def _check_seeded_probabilistic_hough_lines(
+    *, seed, n_batches, expected, img, **kwargs
+):
     r"""Check that seeded random lines are equivalent to those in `expected`
 
     Create multiple (`n_batches`), but predictable, batches of random lines and
@@ -113,16 +115,17 @@ def _check_seeded_lines(seed, n_batches, expected, img, **kwargs):
     seed : int
         Initial seed for to generate seed RNG
     n_batches : int
-        Number of calls to `_sorted_phl` (and therefore
+        Number of calls to `_sorted_probabilistic_hough_line` (and therefore
         `probablistic_hough_line`), to generate a new set of lines.
     expected : list
-        Expected (and sorted) lines from each call to `_sorted_phl`.
+        Expected (and sorted) lines from each call to
+        `_sorted_probabilistic_hough_line`.
     img : array
-        Image as input to `_sorted_phl` (and therefore
+        Image as input to `_sorted_probabilistic_hough_line` (and therefore
         `probablistic_hough_line`),
     \*\*kwargs : dict
-        Keyword arguments passed to `_sorted_phl` (and therefore
-        `probablistic_hough_line`),
+        Keyword arguments passed to `_sorted_probabilistic_hough_line`
+        (and therefore `probablistic_hough_line`),
     """
     # Seed because of occasional errors from shorter lines. These happen
     # because of the random order of point selection that sometimes leads
@@ -132,7 +135,7 @@ def _check_seeded_lines(seed, n_batches, expected, img, **kwargs):
     for rng_seed in seed_gen.integers(np.iinfo(int).max, size=n_batches):
         # Start new RNG at (randomly generated) seed.
         # Enforce shorter gap
-        assert _sorted_phl(img, rng=rng_seed, **kwargs) == expected
+        assert _sorted_probabilistic_hough_line(img, rng=rng_seed, **kwargs) == expected
 
 
 def test_probabilistic_hough_examples():
@@ -142,17 +145,17 @@ def test_probabilistic_hough_examples():
     img[5, 10 : (10 + L)] = 1
     x_line = [(10, 5), (9 + L, 5)]
     y_line = [(5, 10), (5, 9 + L)]
-    lines = _sorted_phl(img, line_length=L - 1)
+    lines = _sorted_probabilistic_hough_line(img, line_length=L - 1)
     assert lines == [x_line]
     # Line length too short.  Note line length is pixel distance between end
     # points - line from [0, 0] through [0, 3] is length 3.
-    assert _sorted_phl(img, line_length=L) == []
+    assert _sorted_probabilistic_hough_line(img, line_length=L) == []
     # Single line in UD (y)
-    lines = _sorted_phl(img.T, line_length=L - 1)
+    lines = _sorted_probabilistic_hough_line(img.T, line_length=L - 1)
     assert lines == [y_line]
     # Two lines (x, y)
     both = img + img.T
-    lines = _sorted_phl(both, line_length=L - 1)
+    lines = _sorted_probabilistic_hough_line(both, line_length=L - 1)
     assert lines == [y_line, x_line]
     # Add diagonal lines.
     more = both.copy()
@@ -167,21 +170,35 @@ def test_probabilistic_hough_examples():
         [(offset, offset), (back_off, back_off)],
         [(offset, back_off), (back_off, offset)],
     ]
-    _check_seeded_lines(
-        1964, 10, [y_line, x_line] + diags, more, line_gap=2, line_length=L - 1
+    _check_seeded_probabilistic_hough_lines(
+        seed=1964,
+        n_batches=10,
+        expected=[y_line, x_line] + diags,
+        img=more,
+        line_gap=2,
+        line_length=L - 1,
     )
     # Filter by length of diagonals.  Get only the diagonals back.
     len_diag = int(np.floor(np.sqrt(2 * (n - 1) ** 2)))
-    assert _sorted_phl(more, line_gap=2, line_length=len_diag) == diags
+    assert (
+        _sorted_probabilistic_hough_line(more, line_gap=2, line_length=len_diag)
+        == diags
+    )
     # Check gap behaves as expected.
-    assert _sorted_phl(img, line_gap=0, line_length=L - 1) == [x_line]
+    assert _sorted_probabilistic_hough_line(img, line_gap=0, line_length=L - 1) == [
+        x_line
+    ]
     gappy = img.copy()
     gappy[5, 12] = 0
-    assert _sorted_phl(gappy, line_gap=0, line_length=L - 1) == []
-    assert _sorted_phl(gappy, line_gap=1, line_length=L - 1) == [x_line]
+    assert _sorted_probabilistic_hough_line(gappy, line_gap=0, line_length=L - 1) == []
+    assert _sorted_probabilistic_hough_line(gappy, line_gap=1, line_length=L - 1) == [
+        x_line
+    ]
     gappy[5, 13:15] = 0
-    assert _sorted_phl(gappy, line_gap=2, line_length=L - 1) == []
-    assert _sorted_phl(gappy, line_gap=3, line_length=L - 1) == [x_line]
+    assert _sorted_probabilistic_hough_line(gappy, line_gap=2, line_length=L - 1) == []
+    assert _sorted_probabilistic_hough_line(gappy, line_gap=3, line_length=L - 1) == [
+        x_line
+    ]
 
 
 @pytest.mark.parametrize('n_lines', range(2, 21, 4))
