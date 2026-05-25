@@ -1,7 +1,7 @@
 """Morphological algorithms, e.g., closing, opening, skeletonization."""
 
 from .binary import binary_closing, binary_dilation, binary_erosion, binary_opening
-from ._gray import black_tophat, closing, dilation, erosion, opening, white_tophat
+from .gray import black_tophat, closing, dilation, erosion, opening, white_tophat
 from .isotropic import (
     isotropic_erosion,
     isotropic_dilation,

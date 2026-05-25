@@ -1,0 +1,660 @@
+from _skimage2.morphology._grayscale_operators import __doc__  # noqa: F401
+
+from _skimage2.morphology._footprints import (_default_footprint,
+                                              mirror_footprint,
+                                              pad_footprint,
+                                             )
+
+import _skimage2 as ski2
+from skimage._migration import ski2_migration_decorator
+
+__all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat', 'black_tophat']
+
+
+_SUPPORTED_MODES = {
+    "reflect",
+    "constant",
+    "nearest",
+    "mirror",
+    "wrap",
+    "max",
+    "min",
+    "ignore",
+}
+
+# For migration doc build.
+ski2_migration_decorator.extra_params['gray_funcs'] = (
+    'erosion',
+    'dilation',
+    'opening',
+    'closing',
+    'white_tophat',
+    'black_tophat',
+)
+
+_PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR = """\
+``skimage.morphology.%(qual)s`` is deprecated in favor of
+``skimage2.morphology.%(qual)s``, which changes the default value
+for parameter `mode` to ``'ignore'`` (was ``'reflect'``).
+
+To keep the old (``skimage``, v1.x) behavior, set ``mode='reflect'``
+explicitly. If you set it explicitly before, the behavior is unchanged.
+
+<!-- cond-start: doc -->
+>>> import numpy as np
+>>>
+>>> import skimage as ski1
+>>> import skimage2 as ski2
+>>>
+>>> image = ski1.data.camera()
+>>> res1 = ski1.morphology.%(qual)s(image)  # skimage default is mode='reflect'
+>>> res2 = ski2.morphology.%(qual)s(image, mode='reflect')
+>>> assert np.all(res1 == res2)
+
+<!--- cond-end -->
+"""
+
+# `dilation`, `closing`, `black_tophat` need a more specific warning.
+# See `_patch_footprint_mirroring`
+_PENDING_SKIMAGE2_TEMPLATE_MIRROR = """\
+``skimage.morphology.%(qual)s`` is deprecated in favor of
+``skimage2.morphology.%(qual)s`` which changes the default value for parameter
+`mode` to ``'ignore'`` (was ``'reflect'``). It also mirrors the `footprint`
+(inverts its order in each dimension), which aligns its behavior with SciPy's
+conventions.
+
+To keep the old (``skimage``, v1.x) behavior:
+
+- Set ``mode='reflect'`` explicitly. If you set it explicitly before, the
+  behavior is unchanged.
+- If you currently use an asymmetric `footprint`, modify it like this before
+  passing it to ``skimage2.morphology.%(qual)s``:
+
+  .. code-block:: python
+
+    footprint = ski2.morphology.pad_footprint(footprint, pad_end=False)
+    footprint = ski2.morphology.mirror_footprint(footprint)
+
+<!--- cond-start: doc -->
+For example:
+
+>>> import numpy as np
+>>>
+>>> import skimage as ski1
+>>> import skimage2 as ski2
+>>>
+>>> image = ski1.data.camera()
+>>> asym_foot = np.zeros((4, 4))
+>>> asym_foot[2:, 2:] = 1
+>>> res1 = ski1.morphology.%(qual)s(image, footprint=asym_foot)
+>>> pad_asym = ski2.morphology.pad_footprint(asym_foot, pad_end=False)
+>>> mirror_asym = ski2.morphology.mirror_footprint(pad_asym)
+>>> res2 = ski2.morphology.%(qual)s(image, footprint=mirror_asym, mode='reflect')
+>>> assert np.all(res1 == res2)
+
+<!--- cond-end -->
+"""
+
+
+def _patch_footprint_mirroring(footprint):
+    """Mirror asymmetric footprints before dispatching to `skimage2`.
+
+    This function ensures backwards compatibility when asymmetric footprints
+    are passed to `skimage.morphology.dilation`, `skimage.morphology.closing`
+    and `skimage.morphology.black_tophat`. See _Notes_ for details.
+
+    Parameters
+    ----------
+    footprint : ndarray or tuple, optional
+
+    Returns
+    -------
+    patched_footprint : ndarray or tuple
+
+    Notes
+    -----
+    Inside `scipy.ndimage.grey_dilation` the footprint is inverted/mirrored.
+    This inversion is intentional so that `closing` and `opening` (the
+    compositions of `erosion` and `dilation`) are *extensive* and
+    *anti-extensive*.
+
+    `skimage.morphology.dilation` accidentally undoes this by mirroring
+     the footprint, before passing it to `scipy.ndimage.grey_dilation`.
+
+    `skimage.morphology.closing` and `skimage.morphology.black_tophat` then
+    mirror/invert again to correct for this.
+
+    In `skimage2` we drop all mirroring and align with SciPy. This function
+    documents this procedure and ensures the wrappers around `skimage2` keep the
+    old behavior for `skimage.morphology.dilation`, `skimage.morphology.closing`
+    and `skimage.morphology.black_tophat`.
+
+    `skimage.morphology.erosion`, `skimage.morphology.opening` and
+    `skimage.morphology.white_tophat` _aren't_ affected.
+    """
+    # We need to *pad* before mirroring so that even dimension are padded
+    # on the correct side.
+    footprint = pad_footprint(footprint, pad_end=False)
+    footprint = mirror_footprint(footprint)
+    return footprint
+
+
+@ski2_migration_decorator(
+    _PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR, qname_old='skimage.morphology.erosion'
+)
+@_default_footprint
+def erosion(
+    image,
+    footprint=None,
+    out=None,
+    *,
+    mode="reflect",
+    cval=0.0,
+):
+    """Return grayscale morphological erosion of an image.
+
+    Morphological erosion sets a pixel at (i,j) to the minimum over all pixels
+    in the neighborhood centered at (i,j). Erosion shrinks bright regions and
+    enlarges dark regions.
+
+    Parameters
+    ----------
+    image : ndarray
+        Image array.
+    footprint : ndarray or tuple, optional
+        The neighborhood expressed as a 2-D array of 1's and 0's.
+        If None, use a cross-shaped footprint (connectivity=1). The footprint
+        can also be provided as a sequence of smaller footprints as described
+        in the notes below.
+    out : ndarray, optional
+        The array to store the result of the morphology. If None is
+        passed, a new array will be allocated.
+    mode : str, optional
+        The `mode` parameter determines how the array borders are handled.
+        Valid modes are: 'reflect', 'constant', 'nearest', 'mirror', 'wrap',
+        'max', 'min', or 'ignore'.
+        If 'max' or 'ignore', pixels outside the image domain are assumed
+        to be the maximum for the image's dtype, which causes them to not
+        influence the result. Default is 'reflect'.
+    cval : scalar, optional
+        Value to fill past edges of input if `mode` is 'constant'. Default
+        is 0.0.
+
+        .. versionadded:: 0.23
+            `mode` and `cval` were added in 0.23.
+
+    Returns
+    -------
+    eroded : array, same shape as `image`
+        The result of the morphological erosion.
+
+    Notes
+    -----
+    For ``uint8`` (and ``uint16`` up to a certain bit-depth) data, the
+    lower algorithm complexity makes the :func:`skimage.filters.rank.minimum`
+    function more efficient for larger images and footprints.
+
+    The footprint can also be a provided as a sequence of 2-tuples where the
+    first element of each 2-tuple is a footprint ndarray and the second element
+    is an integer describing the number of times it should be iterated. For
+    example ``footprint=[(np.ones((9, 1)), 1), (np.ones((1, 9)), 1)]``
+    would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
+    effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
+    computational cost. Most of the builtin footprints such as
+    :func:`skimage.morphology.disk` provide an option to automatically generate
+    a footprint sequence of this type.
+
+    For even-sized footprints, :func:`skimage.morphology.binary_erosion` and
+    this function produce an output that differs: one is shifted by one pixel
+    compared to the other. :func:`skimage.morphology.pad_footprint` is available
+    to account for this.
+
+    Examples
+    --------
+    >>> # Erosion shrinks bright regions
+    >>> import numpy as np
+    >>> from skimage.morphology import footprint_rectangle
+    >>> bright_square = np.array([[0, 0, 0, 0, 0],
+    ...                           [0, 1, 1, 1, 0],
+    ...                           [0, 1, 1, 1, 0],
+    ...                           [0, 1, 1, 1, 0],
+    ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
+    >>> erosion(bright_square, footprint_rectangle((3, 3)))
+    array([[0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0],
+           [0, 0, 1, 0, 0],
+           [0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0]], dtype=uint8)
+
+    """
+    out = ski2.morphology.erosion(
+        image, footprint=footprint, out=out, mode=mode, cval=cval
+    )
+    return out
+
+
+@ski2_migration_decorator(
+    _PENDING_SKIMAGE2_TEMPLATE_MIRROR, qname_old='skimage.morphology.dilation'
+)
+@_default_footprint
+def dilation(
+    image,
+    footprint=None,
+    out=None,
+    *,
+    mode="reflect",
+    cval=0.0,
+):
+    """Return grayscale morphological dilation of an image.
+
+    Morphological dilation sets the value of a pixel to the maximum over all
+    pixel values within a local neighborhood centered about it. The values
+    where the footprint is 1 define this neighborhood.
+    Dilation enlarges bright regions and shrinks dark regions.
+
+    Parameters
+    ----------
+    image : ndarray
+        Image array.
+    footprint : ndarray or tuple, optional
+        The neighborhood expressed as a 2-D array of 1's and 0's.
+        If None, use a cross-shaped footprint (connectivity=1). The footprint
+        can also be provided as a sequence of smaller footprints as described
+        in the notes below.
+    out : ndarray, optional
+        The array to store the result of the morphology. If None is
+        passed, a new array will be allocated.
+    mode : str, optional
+        The `mode` parameter determines how the array borders are handled.
+        Valid modes are: 'reflect', 'constant', 'nearest', 'mirror', 'wrap',
+        'max', 'min', or 'ignore'.
+        If 'min' or 'ignore', pixels outside the image domain are assumed
+        to be the maximum for the image's dtype, which causes them to not
+        influence the result. Default is 'reflect'.
+    cval : scalar, optional
+        Value to fill past edges of input if `mode` is 'constant'. Default
+        is 0.0.
+
+        .. versionadded:: 0.23
+            `mode` and `cval` were added in 0.23.
+
+    Returns
+    -------
+    dilated : uint8 array, same shape and type as `image`
+        The result of the morphological dilation.
+
+    Notes
+    -----
+    For ``uint8`` (and ``uint16`` up to a certain bit-depth) data, the lower
+    algorithm complexity makes the :func:`skimage.filters.rank.maximum`
+    function more efficient for larger images and footprints.
+
+    The footprint can also be a provided as a sequence of 2-tuples where the
+    first element of each 2-tuple is a footprint ndarray and the second element
+    is an integer describing the number of times it should be iterated. For
+    example ``footprint=[(np.ones((9, 1)), 1), (np.ones((1, 9)), 1)]``
+    would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
+    effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
+    computational cost. Most of the builtin footprints such as
+    :func:`skimage.morphology.disk` provide an option to automatically generate
+    a footprint sequence of this type.
+
+    For non-symmetric footprints, :func:`skimage.morphology.binary_dilation`
+    and :func:`skimage.morphology.dilation` produce an output that differs:
+    `binary_dilation` mirrors the footprint, whereas `dilation` does not.
+    :func:`skimage.morphology.mirror_footprint` is available to correct for this.
+
+    Examples
+    --------
+    >>> # Dilation enlarges bright regions
+    >>> import numpy as np
+    >>> from skimage.morphology import footprint_rectangle
+    >>> bright_pixel = np.array([[0, 0, 0, 0, 0],
+    ...                          [0, 0, 0, 0, 0],
+    ...                          [0, 0, 1, 0, 0],
+    ...                          [0, 0, 0, 0, 0],
+    ...                          [0, 0, 0, 0, 0]], dtype=np.uint8)
+    >>> dilation(bright_pixel, footprint_rectangle((3, 3)))
+    array([[0, 0, 0, 0, 0],
+           [0, 1, 1, 1, 0],
+           [0, 1, 1, 1, 0],
+           [0, 1, 1, 1, 0],
+           [0, 0, 0, 0, 0]], dtype=uint8)
+
+    """
+    footprint = _patch_footprint_mirroring(footprint)
+    out = ski2.morphology.dilation(
+        image, footprint=footprint, out=out, mode=mode, cval=cval
+    )
+    return out
+
+
+@ski2_migration_decorator(
+    _PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR, qname_old='skimage.morphology.opening'
+)
+@_default_footprint
+def opening(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
+    """Return grayscale morphological opening of an image.
+
+    The morphological opening of an image is defined as an erosion followed by
+    a dilation. Opening can remove small bright spots (i.e. "salt") and connect
+    small dark cracks. This tends to "open" up (dark) gaps between (bright)
+    features.
+
+    Parameters
+    ----------
+    image : ndarray
+        Image array.
+    footprint : ndarray or tuple, optional
+        The neighborhood expressed as a 2-D array of 1's and 0's.
+        If None, use a cross-shaped footprint (connectivity=1). The footprint
+        can also be provided as a sequence of smaller footprints as described
+        in the notes below.
+    out : ndarray, optional
+        The array to store the result of the morphology. If None
+        is passed, a new array will be allocated.
+    mode : str, optional
+        The `mode` parameter determines how the array borders are handled.
+        Valid modes are: 'reflect', 'constant', 'nearest', 'mirror', 'wrap',
+        'max', 'min', or 'ignore'.
+        If 'ignore', pixels outside the image domain are assumed
+        to be the maximum for the image's dtype in the erosion, and minimum
+        in the dilation, which causes them to not influence the result.
+        Default is 'reflect'.
+    cval : scalar, optional
+        Value to fill past edges of input if `mode` is 'constant'. Default
+        is 0.0.
+
+        .. versionadded:: 0.23
+            `mode` and `cval` were added in 0.23.
+
+    Returns
+    -------
+    opening : array, same shape and type as `image`
+        The result of the morphological opening.
+
+    Notes
+    -----
+    The footprint can also be a provided as a sequence of 2-tuples where the
+    first element of each 2-tuple is a footprint ndarray and the second element
+    is an integer describing the number of times it should be iterated. For
+    example ``footprint=[(np.ones((9, 1)), 1), (np.ones((1, 9)), 1)]``
+    would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
+    effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
+    computational cost. Most of the builtin footprints such as
+    :func:`skimage.morphology.disk` provide an option to automatically generate
+    a footprint sequence of this type.
+
+    Examples
+    --------
+    >>> # Open up gap between two bright regions (but also shrink regions)
+    >>> import numpy as np
+    >>> from skimage.morphology import footprint_rectangle
+    >>> bad_connection = np.array([[1, 0, 0, 0, 1],
+    ...                            [1, 1, 0, 1, 1],
+    ...                            [1, 1, 1, 1, 1],
+    ...                            [1, 1, 0, 1, 1],
+    ...                            [1, 0, 0, 0, 1]], dtype=np.uint8)
+    >>> opening(bad_connection, footprint_rectangle((3, 3)))
+    array([[0, 0, 0, 0, 0],
+           [1, 1, 0, 1, 1],
+           [1, 1, 0, 1, 1],
+           [1, 1, 0, 1, 1],
+           [0, 0, 0, 0, 0]], dtype=uint8)
+
+    """
+    out = ski2.morphology.opening(
+        image, footprint=footprint, out=out, mode=mode, cval=cval
+    )
+    return out
+
+
+@ski2_migration_decorator(
+    _PENDING_SKIMAGE2_TEMPLATE_MIRROR, qname_old='skimage.morphology.closing'
+)
+@_default_footprint
+def closing(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
+    """Return grayscale morphological closing of an image.
+
+    The morphological closing of an image is defined as a dilation followed by
+    an erosion. Closing can remove small dark spots (i.e. "pepper") and connect
+    small bright cracks. This tends to "close" up (dark) gaps between (bright)
+    features.
+
+    Parameters
+    ----------
+    image : ndarray
+        Image array.
+    footprint : ndarray or tuple, optional
+        The neighborhood expressed as a 2-D array of 1's and 0's.
+        If None, use a cross-shaped footprint (connectivity=1). The footprint
+        can also be provided as a sequence of smaller footprints as described
+        in the notes below.
+    out : ndarray, optional
+        The array to store the result of the morphology. If None,
+        a new array will be allocated.
+    mode : str, optional
+        The `mode` parameter determines how the array borders are handled.
+        Valid modes are: 'reflect', 'constant', 'nearest', 'mirror', 'wrap',
+        'max', 'min', or 'ignore'.
+        If 'ignore', pixels outside the image domain are assumed
+        to be the maximum for the image's dtype in the erosion, and minimum
+        in the dilation, which causes them to not influence the result.
+        Default is 'reflect'.
+    cval : scalar, optional
+        Value to fill past edges of input if `mode` is 'constant'. Default
+        is 0.0.
+
+        .. versionadded:: 0.23
+            `mode` and `cval` were added in 0.23.
+
+    Returns
+    -------
+    closing : array, same shape and type as `image`
+        The result of the morphological closing.
+
+    Notes
+    -----
+    The footprint can also be a provided as a sequence of 2-tuples where the
+    first element of each 2-tuple is a footprint ndarray and the second element
+    is an integer describing the number of times it should be iterated. For
+    example ``footprint=[(np.ones((9, 1)), 1), (np.ones((1, 9)), 1)]``
+    would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
+    effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
+    computational cost. Most of the builtin footprints such as
+    :func:`skimage.morphology.disk` provide an option to automatically generate
+    a footprint sequence of this type.
+
+    Examples
+    --------
+    >>> # Close a gap between two bright lines
+    >>> import numpy as np
+    >>> from skimage.morphology import footprint_rectangle
+    >>> broken_line = np.array([[0, 0, 0, 0, 0],
+    ...                         [0, 0, 0, 0, 0],
+    ...                         [1, 1, 0, 1, 1],
+    ...                         [0, 0, 0, 0, 0],
+    ...                         [0, 0, 0, 0, 0]], dtype=np.uint8)
+    >>> closing(broken_line, footprint_rectangle((3, 3)))
+    array([[0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0],
+           [1, 1, 1, 1, 1],
+           [0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0]], dtype=uint8)
+
+    """
+    footprint = _patch_footprint_mirroring(footprint)
+    out = ski2.morphology.closing(
+        image, footprint=footprint, out=out, mode=mode, cval=cval
+    )
+    return out
+
+
+@ski2_migration_decorator(
+    _PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR, qname_old='skimage.morphology.white_tophat'
+)
+@_default_footprint
+def white_tophat(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
+    """Return white top hat of an image.
+
+    The white top hat of an image is defined as the image minus its
+    morphological opening. This operation returns the bright spots of the image
+    that are smaller than the footprint.
+
+    Parameters
+    ----------
+    image : ndarray
+        Image array.
+    footprint : ndarray or tuple, optional
+        The neighborhood expressed as a 2-D array of 1's and 0's.
+        If None, use a cross-shaped footprint (connectivity=1). The footprint
+        can also be provided as a sequence of smaller footprints as described
+        in the notes below.
+    out : ndarray, optional
+        The array to store the result of the morphology. If None
+        is passed, a new array will be allocated.
+    mode : str, optional
+        The `mode` parameter determines how the array borders are handled.
+        Valid modes are: 'reflect', 'constant', 'nearest', 'mirror', 'wrap',
+        'max', 'min', or 'ignore'. See :func:`skimage.morphology.opening`.
+        Default is 'reflect'.
+    cval : scalar, optional
+        Value to fill past edges of input if `mode` is 'constant'. Default
+        is 0.0.
+
+        .. versionadded:: 0.23
+            `mode` and `cval` were added in 0.23.
+
+    Returns
+    -------
+    out : array, same shape and type as `image`
+        The result of the morphological white top hat.
+
+    Notes
+    -----
+    The footprint can also be a provided as a sequence of 2-tuples where the
+    first element of each 2-tuple is a footprint ndarray and the second element
+    is an integer describing the number of times it should be iterated. For
+    example ``footprint=[(np.ones((9, 1)), 1), (np.ones((1, 9)), 1)]``
+    would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
+    effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
+    computational cost. Most of the builtin footprints such as
+    :func:`skimage.morphology.disk` provide an option to automatically generate
+    a footprint sequence of this type.
+
+    See Also
+    --------
+    black_tophat
+
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/Top-hat_transform
+
+    Examples
+    --------
+    >>> # Subtract gray background from bright peak
+    >>> import numpy as np
+    >>> from skimage.morphology import footprint_rectangle
+    >>> bright_on_gray = np.array([[2, 3, 3, 3, 2],
+    ...                            [3, 4, 5, 4, 3],
+    ...                            [3, 5, 9, 5, 3],
+    ...                            [3, 4, 5, 4, 3],
+    ...                            [2, 3, 3, 3, 2]], dtype=np.uint8)
+    >>> white_tophat(bright_on_gray, footprint_rectangle((3, 3)))
+    array([[0, 0, 0, 0, 0],
+           [0, 0, 1, 0, 0],
+           [0, 1, 5, 1, 0],
+           [0, 0, 1, 0, 0],
+           [0, 0, 0, 0, 0]], dtype=uint8)
+
+    """
+    out = ski2.morphology.white_tophat(
+        image, footprint=footprint, out=out, mode=mode, cval=cval
+    )
+    return out
+
+
+@ski2_migration_decorator(
+    _PENDING_SKIMAGE2_TEMPLATE_MIRROR, qname_old='skimage.morphology.black_tophat'
+)
+@_default_footprint
+def black_tophat(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
+    """Return black top hat of an image.
+
+    The black top hat of an image is defined as its morphological closing minus
+    the original image. This operation returns the dark spots of the image that
+    are smaller than the footprint. Note that dark spots in the
+    original image are bright spots after the black top hat.
+
+    Parameters
+    ----------
+    image : ndarray
+        Image array.
+    footprint : ndarray or tuple, optional
+        The neighborhood expressed as a 2-D array of 1's and 0's.
+        If None, use a cross-shaped footprint (connectivity=1). The footprint
+        can also be provided as a sequence of smaller footprints as described
+        in the notes below.
+    out : ndarray, optional
+        The array to store the result of the morphology. If None
+        is passed, a new array will be allocated.
+    mode : str, optional
+        The `mode` parameter determines how the array borders are handled.
+        Valid modes are: 'reflect', 'constant', 'nearest', 'mirror', 'wrap',
+        'max', 'min', or 'ignore'. See :func:`skimage.morphology.closing`.
+        Default is 'reflect'.
+    cval : scalar, optional
+        Value to fill past edges of input if `mode` is 'constant'. Default
+        is 0.0.
+
+        .. versionadded:: 0.23
+            `mode` and `cval` were added in 0.23.
+
+    Returns
+    -------
+    out : array, same shape and type as `image`
+        The result of the morphological black top hat.
+
+    Notes
+    -----
+    The footprint can also be a provided as a sequence of 2-tuples where the
+    first element of each 2-tuple is a footprint ndarray and the second element
+    is an integer describing the number of times it should be iterated. For
+    example ``footprint=[(np.ones((9, 1)), 1), (np.ones((1, 9)), 1)]``
+    would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
+    effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
+    computational cost. Most of the builtin footprints such as
+    :func:`skimage.morphology.disk` provide an option to automatically generate
+    a footprint sequence of this type.
+
+    See Also
+    --------
+    white_tophat
+
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/Top-hat_transform
+
+    Examples
+    --------
+    >>> # Change dark peak to bright peak and subtract background
+    >>> import numpy as np
+    >>> from skimage.morphology import footprint_rectangle
+    >>> dark_on_gray = np.array([[7, 6, 6, 6, 7],
+    ...                          [6, 5, 4, 5, 6],
+    ...                          [6, 4, 0, 4, 6],
+    ...                          [6, 5, 4, 5, 6],
+    ...                          [7, 6, 6, 6, 7]], dtype=np.uint8)
+    >>> black_tophat(dark_on_gray, footprint_rectangle((3, 3)))
+    array([[0, 0, 0, 0, 0],
+           [0, 0, 1, 0, 0],
+           [0, 1, 5, 1, 0],
+           [0, 0, 1, 0, 0],
+           [0, 0, 0, 0, 0]], dtype=uint8)
+
+    """
+    footprint = _patch_footprint_mirroring(footprint)
+    out = ski2.morphology.black_tophat(
+        image, footprint=footprint, out=out, mode=mode, cval=cval
+    )
+    return out
