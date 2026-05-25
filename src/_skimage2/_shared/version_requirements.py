@@ -54,6 +54,31 @@ def is_installed(name, version=None):
     -------
     out : bool
         True if `name` is installed matching the optional version.
+
+    Examples
+    --------
+    Check presence if a module or specific submodule is available
+    >>> is_installed("skimage2")
+    True
+    >>> is_installed("_skimage2._shared")
+    True
+
+    This function isn't looking for package names:
+
+    >>> is_installed("scikit-image")
+    False
+
+    Check for a specific version:
+
+    >>> is_installed("skimage2", version=">=0.26")
+    True
+    >>> is_installed("skimage2", version="<0.26")
+    False
+
+    If no version attribute is available in the module, fallback to ``False``:
+
+    >>> is_installed("_skimage2._shared", version=">=0.1")
+    False
     """
     if name.lower() == 'python':
         actver = sys.version[:6]
@@ -64,6 +89,9 @@ def is_installed(name, version=None):
             return False
     if version is None:
         return True
+    elif actver is None:
+        # Did not find a version to compare to
+        return False
     else:
         # since version_requirements is in the critical import path,
         # we lazy import re
