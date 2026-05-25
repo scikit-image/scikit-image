@@ -7,7 +7,6 @@ from scipy import ndimage as ndi
 
 from _skimage2._shared.testing import assert_stacklevel
 from _skimage2.feature import peak
-from _skimage2.util import PendingSkimage2Change
 
 
 class TestPeakLocalMax:
@@ -626,20 +625,6 @@ def test_input_values_with_labels():
     _ = peak.peak_local_max(img, labels=labels)
 
     assert_array_equal(img, img_before)
-
-
-@pytest.mark.filterwarnings("default::skimage.util.PendingSkimage2Change")
-def test_peak_local_max_skimage2_warning():
-    image = np.zeros((5, 5), dtype=np.uint8)
-    image[1:3, 1:3] = 10
-    regex = (
-        r"`skimage.feature.peak_local_max` is deprecated in favor of\n"
-        r"`skimage2.feature.peak_local_max`"
-    )
-    with pytest.warns(PendingSkimage2Change, match=regex) as record:
-        peaks = peak.peak_local_max(image, min_distance=1)
-    assert_stacklevel(record)
-    assert len(peaks) == 4
 
 
 class TestProminentPeaks:

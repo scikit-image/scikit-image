@@ -3,11 +3,6 @@
 This module contains a number of utility functions to work with images in general.
 """
 
-import functools
-import warnings
-
-import numpy as np
-
 # keep .dtype imports first to avoid circular imports
 from .dtype import (
     dtype_limits,
