@@ -62,7 +62,7 @@ def _hide_plugin_deprecation_warnings():
             action="ignore",
             message=".*use `imageio` or other I/O packages directly.*",
             category=FutureWarning,
-            module="skimage",
+            module="_skimage2",
         )
         yield
 
@@ -341,7 +341,8 @@ def _load(plugin):
         raise ValueError(f"Plugin {plugin} not found.")
     else:
         modname = plugin_module_name[plugin]
-        plugin_module = __import__('skimage.io._plugins.' + modname, fromlist=[modname])
+        plugin_module = __import__('_skimage2.io._plugins.' + modname,
+                                   fromlist=[modname])
 
     provides = plugin_provides[plugin]
     for p in provides:

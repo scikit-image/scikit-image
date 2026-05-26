@@ -17,7 +17,7 @@ __all__ = [
 
 
 _remove_plugin_param_template = (
-    "The plugin infrastructure in `skimage.io` and the parameter "
+    "The plugin infrastructure in `_skimage2.io` and the parameter "
     "`{deprecated_name}` are deprecated since version {deprecated_version} and "
     "will be removed in {changed_version} (or later). To avoid this warning, "
     "please do not use the parameter `{deprecated_name}`. Instead, use `imageio` "
@@ -59,11 +59,11 @@ def imread(fname, as_gray=False, plugin=DEPRECATED, **plugin_args):
         plugin = None
     if plugin_args:
         msg = (
-            "The plugin infrastructure in `skimage.io` is deprecated since "
+            "The plugin infrastructure in `_skimage2.io` is deprecated since "
             "version 0.25 and will be removed in 0.27 (or later). To avoid "
             "this warning, please do not pass additional keyword arguments "
             "for plugins (`**plugin_args`). Instead, use `imageio` or other "
-            "I/O packages directly. See also `skimage.io.imread`."
+            "I/O packages directly. See also `_skimage2.io.imread`."
         )
         warnings.warn(msg, category=FutureWarning, stacklevel=3)
 
@@ -130,11 +130,11 @@ def imread_collection(
         plugin = None
     if plugin_args:
         msg = (
-            "The plugin infrastructure in `skimage.io` is deprecated since "
+            "The plugin infrastructure in `_skimage2.io` is deprecated since "
             "version 0.25 and will be removed in 0.27 (or later). To avoid "
             "this warning, please do not pass additional keyword arguments "
             "for plugins (`**plugin_args`). Instead, use `imageio` or other "
-            "I/O packages directly. See also `skimage.io.imread_collection`."
+            "I/O packages directly. See also `_skimage2.io.imread_collection`."
         )
         warnings.warn(msg, category=FutureWarning, stacklevel=3)
     with _hide_plugin_deprecation_warnings():
@@ -174,11 +174,11 @@ def imsave(fname, arr, plugin=DEPRECATED, *, check_contrast=True, **plugin_args)
         plugin = None
     if plugin_args:
         msg = (
-            "The plugin infrastructure in `skimage.io` is deprecated since "
+            "The plugin infrastructure in `_skimage2.io` is deprecated since "
             "version 0.25 and will be removed in 0.27 (or later). To avoid "
             "this warning, please do not pass additional keyword arguments "
             "for plugins (`**plugin_args`). Instead, use `imageio` or other "
-            "I/O packages directly. See also `skimage.io.imsave`."
+            "I/O packages directly. See also `_skimage2.io.imsave`."
         )
         warnings.warn(msg, category=FutureWarning, stacklevel=3)
 
