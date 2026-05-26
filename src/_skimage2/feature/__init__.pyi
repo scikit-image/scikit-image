@@ -57,7 +57,7 @@ from .texture import (
     multiblock_lbp,
     draw_multiblock_lbp,
 )
-from ._peak import peak_local_max
+from ._peaks import peak_local_max
 from .corner import (
     corner_kitchen_rosenfeld,
     corner_harris,
