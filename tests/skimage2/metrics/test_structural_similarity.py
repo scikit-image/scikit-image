@@ -83,11 +83,11 @@ def test_structural_similarity_grad(seed, dtype):
 @pytest.mark.parametrize(
     'dtype', [np.uint8, np.int32, np.float16, np.float32, np.float64]
 )
-@pytest.mark.thread_unsafe('Fails the CI; pending investigation')
 def test_structural_similarity_dtype(dtype):
+    rng = np.random.default_rng(9817293871)
     N = 30
-    X = np.random.rand(N, N)
-    Y = np.random.rand(N, N)
+    X = rng.normal(size=(N, N))
+    Y = rng.normal(size=(N, N))
     if np.dtype(dtype).kind in 'iub':
         data_range = 255.0
         X = (X * 255).astype(dtype)
