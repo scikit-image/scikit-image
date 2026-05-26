@@ -1,12 +1,32 @@
 python_sources = [
-    'conftest.py',
-    '__init__.pyi',
-    '__init__.py',
-    '_migration.py',
+  '__init__.py',
+  '__init__.pyi',
+  'conftest.py',
+  'py.typed',
+  '_migration.py'
 ]
 
 py3.install_sources(
   python_sources,
-  pure: false,          # Will be installed next to binaries
-  subdir: 'skimage'  # Folder relative to site-packages to install to
+  pure: false,
+  subdir: 'skimage'
 )
+
+subdir('_vendored')
+subdir('color')
+subdir('data')
+subdir('draw')
+subdir('exposure')
+subdir('feature')
+subdir('filters')
+subdir('future')
+subdir('graph')
+subdir('io')
+subdir('measure')
+subdir('metrics')
+subdir('morphology')
+subdir('registration')
+subdir('restoration')
+subdir('segmentation')
+subdir('transform')
+subdir('util')

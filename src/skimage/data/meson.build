@@ -1,7 +1,7 @@
 python_sources = [
     '_fetchers.py',
     '__init__.pyi',
-    '_synthetic.py',
+    '_binary_blobs.py',
     '__init__.py',
     '_registry.py',
 ]

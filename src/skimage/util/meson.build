@@ -4,6 +4,7 @@ python_sources = [
     'apply_parallel.py',
     'unique.py',
     '__init__.py',
+    '__init__.pyi',
     '_remap.py',
     '_slice_along_axes.py',
     'noise.py',

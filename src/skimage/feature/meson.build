@@ -14,7 +14,7 @@ python_sources = [
     '__init__.py',
     'haar.py',
     '_hog.py',
-    '_peaks.py',
+    'peaks.py',
     'censure.py',
     'peak.py',
     '_haar.py',

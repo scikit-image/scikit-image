@@ -20,7 +20,7 @@ python_sources = [
     'max_tree.py',
     '_max_tree.py',
     '_flood_fill_cy.py',
-    '_grayscale_operators.py',
+    'gray.py',
 ]
 
 py3.install_sources(

@@ -15,6 +15,8 @@ endforeach
 
 python_sources = [
   '__init__.py',
+  '__init__.pyi',
+  '_value_rescaling.py',
   '_backends.py',
   '_invert.py',
   '_label.py',
