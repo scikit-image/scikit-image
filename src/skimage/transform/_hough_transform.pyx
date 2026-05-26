@@ -497,7 +497,9 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
                 continue
 
             value = 0
-            max_value = -1  # Max value in accumulator, start value.
+            # Max value in accumulator, start value.  Starts at one below
+            # threshold to minimize not-important positive comparisons below.
+            max_value = threshold - 1  # And thus, < threshold (see below).
             max_theta_idx = -1  # Index into {c,s}theta arrays, start value.
 
             # STEP 2: Apply Hough transform on point.
