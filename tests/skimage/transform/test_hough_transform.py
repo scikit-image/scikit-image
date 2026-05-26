@@ -250,6 +250,7 @@ def test_probabilistic_hough_scores():
 
 
 def precision_recall(lines, shape, threshold, rng=None):
+    """Calculate precision and recall of `probabilistic_hough_line` for given lines."""
     out_img = write_lines(lines, shape)
     out_lines = transform.probabilistic_hough_line(
         out_img, threshold=threshold, line_gap=2, line_length=50, rng=rng
@@ -259,7 +260,9 @@ def precision_recall(lines, shape, threshold, rng=None):
     tp = np.sum(detected_tf & out_tf)
     fp = np.sum(detected_tf & ~out_tf)
     denom = tp + fp  # Can be 0
-    return tp / denom if denom else 0.0, tp / np.sum(out_img)
+    precision = tp / denom if denom else 0.0
+    recall = tp / np.sum(out_img)
+    return precision, recall
 
 
 def test_gen_lines():
