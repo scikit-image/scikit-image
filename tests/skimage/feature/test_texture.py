@@ -262,6 +262,22 @@ class TestLBP:
         )
         np.testing.assert_array_equal(lbp, ref)
 
+
+    def test_linux_mac_portability(self):
+        try:
+            import sklearn
+        except ImportError:
+            pytest.skip("test requires sklearn")
+        from sklearn.datasets import fetch_openml
+        dataset = fetch_openml("Fashion-MNIST")
+        X = dataset.data
+        images = X.to_numpy().reshape(-1, 28, 28)
+        image = images[135]
+        LBP = local_binary_pattern(image, P=16, R=2, method="uniform")
+        actual = LBP[-8][11:15]
+        np.testing.assert_array_equal(actual, [11, 9, 11, 13])
+
+
     def test_ror(self):
         lbp = local_binary_pattern(self.image, 8, 1, 'ror')
         ref = np.array(
