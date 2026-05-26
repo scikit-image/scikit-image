@@ -109,7 +109,7 @@ def _set_plugin(plugin_type, plugin_list):
 @deprecate_func(
     deprecated_version="0.25",
     removed_version="0.27",
-    hint="The plugin infrastructure of `skimage.io` is deprecated. "
+    hint="The plugin infrastructure of `_skimage2.io` is deprecated. "
     "Instead, use `imageio` or other I/O packages directly.",
 )
 def reset_plugins():
@@ -172,7 +172,7 @@ with _hide_plugin_deprecation_warnings():
 @deprecate_func(
     deprecated_version="0.25",
     removed_version="0.27",
-    hint="The plugin infrastructure of `skimage.io` is deprecated. "
+    hint="The plugin infrastructure of `_skimage2.io` is deprecated. "
     "Instead, use `imageio` or other I/O packages directly.",
 )
 def find_available_plugins(loaded=False):
@@ -211,7 +211,7 @@ with _hide_plugin_deprecation_warnings():
 @deprecate_func(
     deprecated_version="0.25",
     removed_version="0.27",
-    hint="The plugin infrastructure of `skimage.io` is deprecated. "
+    hint="The plugin infrastructure of `_skimage2.io` is deprecated. "
     "Instead, use `imageio` or other I/O packages directly.",
 )
 def call_plugin(kind, *args, **kwargs):
@@ -257,7 +257,7 @@ def call_plugin(kind, *args, **kwargs):
 @deprecate_func(
     deprecated_version="0.25",
     removed_version="0.27",
-    hint="The plugin infrastructure of `skimage.io` is deprecated. "
+    hint="The plugin infrastructure of `_skimage2.io` is deprecated. "
     "Instead, use `imageio` or other I/O packages directly.",
 )
 def use_plugin(name, kind=None):
@@ -267,7 +267,7 @@ def use_plugin(name, kind=None):
     Parameters
     ----------
     name : str
-        Name of plugin. See ``skimage.io.available_plugins`` for a list of available
+        Name of plugin. See ``_skimage2.io.available_plugins`` for a list of available
         plugins.
     kind : {'imsave', 'imread', 'imshow', 'imread_collection', 'imshow_collection'}, optional
         Set the plugin for this function.  By default,
@@ -280,7 +280,7 @@ def use_plugin(name, kind=None):
     >>> from _skimage2 import io
     >>> io.use_plugin('matplotlib', 'imread')  # doctest: +SKIP
 
-    To see a list of available plugins run ``skimage.io.available_plugins``. Note
+    To see a list of available plugins run ``_skimage2.io.available_plugins``. Note
     that this lists plugins that are defined, but the full list may not be usable
     if your system does not have the required libraries installed.
 
@@ -360,7 +360,7 @@ def _load(plugin):
 @deprecate_func(
     deprecated_version="0.25",
     removed_version="0.27",
-    hint="The plugin infrastructure of `skimage.io` is deprecated. "
+    hint="The plugin infrastructure of `_skimage2.io` is deprecated. "
     "Instead, use `imageio` or other I/O packages directly.",
 )
 def plugin_info(plugin):
@@ -386,7 +386,7 @@ def plugin_info(plugin):
 @deprecate_func(
     deprecated_version="0.25",
     removed_version="0.27",
-    hint="The plugin infrastructure of `skimage.io` is deprecated. "
+    hint="The plugin infrastructure of `_skimage2.io` is deprecated. "
     "Instead, use `imageio` or other I/O packages directly.",
 )
 def plugin_order():
