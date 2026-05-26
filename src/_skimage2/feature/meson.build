@@ -67,7 +67,7 @@ python_sources = [
   'haar.py',
   'match.py',
   'orb.py',
-  'peak.py',
+  '_peaks.py',
   'sift.py',
   'template.py',
   'texture.py',
