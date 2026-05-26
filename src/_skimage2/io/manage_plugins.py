@@ -3,11 +3,11 @@
 To improve performance, plugins are only loaded as needed. As a result, there
 can be multiple states for a given plugin:
 
-    available: Defined in an *ini file located in ``skimage.io._plugins``.
-        See also :func:`skimage.io.available_plugins`.
+    available: Defined in an *ini file located in ``_skimage2.io._plugins``.
+        See also :func:`_skimage2.io.available_plugins`.
     partial definition: Specified in an *ini file, but not defined in the
         corresponding plugin module. This will raise an error when loaded.
-    available but not on this system: Defined in ``skimage.io._plugins``, but
+    available but not on this system: Defined in ``_skimage2.io._plugins``, but
         a dependent library (e.g. Qt, PIL) is not available on your system.
         This will raise an error when loaded.
     loaded: The real availability is determined when it's explicitly loaded,
@@ -40,7 +40,7 @@ __all__ = [
 plugin_store = None
 # Dictionary mapping plugin names to a list of functions they provide.
 plugin_provides = {}
-# The module names for the plugins in `skimage.io._plugins`.
+# The module names for the plugins in `_skimage2.io._plugins`.
 plugin_module_name = {}
 # Meta-data about plugins provided by *.ini files.
 plugin_meta_data = {}
@@ -235,9 +235,9 @@ def call_plugin(kind, *args, **kwargs):
     if len(plugin_funcs) == 0:
         msg = (
             f"No suitable plugin registered for {kind}.\n\n"
-            "You may load I/O plugins with the `skimage.io.use_plugin` "
+            "You may load I/O plugins with the `_skimage2.io.use_plugin` "
             "command.  A list of all available plugins are shown in the "
-            "`skimage.io` docstring."
+            "`_skimage2.io` docstring."
         )
         raise RuntimeError(msg)
 
