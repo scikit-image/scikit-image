@@ -1,104 +1,64 @@
+import functools
+
 import numpy as np
+from scipy.ndimage import uniform_filter
 
-import _skimage2 as ski2
-from _skimage2._shared._warnings import warn_external
-
-from .._migration import ski2_migration_decorator
-from ..util.dtype import dtype_range
-
+from ..filters._gaussian import gaussian
+from .._shared import utils
+from .._shared._warnings import warn_external
+from .._shared.utils import _supported_float_type, check_shape_equality
 
 __all__ = ['structural_similarity']
 
 
-@ski2_migration_decorator(
-    r"""
-``%(qname_old)s`` is deprecated in favor of
-``%(qname_new)s``, which has a new signature.
-The parameter `data_range` is now a required parameter.
-
-If you didn't provide `data_range` explicitly before and relied on its
-default behavior, you can keep the old (``skimage``, v1.x) behavior by
-setting the parameter explicitly.
-
-<!--- cond-start: doc -->
-For example:
-
->>> import numpy as np
->>> import _skimage2 as ski2
->>> import skimage2 as ski2
-...
->>> im1 = np.arange(20)
->>> im2 = im1 // 2
-...
->>> result1 = ski2.metrics.structural_similarity(im1, im2)
-...
->>> data_range = np.iinfo(im1.dtype).max - np.iinfo(im1.dtype).min
->>> result2 = ski2.metrics.structural_similarity(im1, im2, data_range=data_range)
-...
->>> np.testing.assert_equal(result1, result2)
-
-<!--- cond-end -->
-For floating dtypes, setting `data_range` was already required in
-``skimage``/v1.x.
-""",
-    qname_old='skimage.metrics.structural_similarity',
-)
 def structural_similarity(
     im1,
     im2,
     *,
+    data_range,
     win_size=None,
     gradient=False,
-    data_range=None,
     channel_axis=None,
     gaussian_weights=False,
     full=False,
-    **kwargs,
+    use_sample_covariance=True,
+    K1=0.01,
+    K2=0.03,
+    sigma=1.5,
 ):
-    """
-    Compute the mean structural similarity index between two images.
-    Please pay attention to the `data_range` parameter with floating-point images.
+    """Compute the mean structural similarity index between two images.
 
     Parameters
     ----------
     im1, im2 : ndarray
         Images. Any dimensionality with same shape.
+    data_range : float
+        The data range of the input image (difference between maximum and
+        minimum possible values).
     win_size : int or None, optional
         The side-length of the sliding window used in comparisons
         (default: 7). Must be an odd value. If `gaussian_weights` is
         True, `win_size` cannot be specified since the window size is
-        determined by `sigma`.
+        then determined by `sigma`.
     gradient : bool, optional
         If True, also return the gradient with respect to im2.
-    data_range : float, optional
-        The data range of the input image (difference between maximum and
-        minimum possible values). By default, this is estimated from the image
-        data type. This estimate may be wrong for floating-point image data.
-        Therefore it is recommended to always pass this scalar value explicitly
-        (see note below).
     channel_axis : int or None, optional
         If None, the image is assumed to be a grayscale (single channel) image.
         Otherwise, this parameter indicates which axis of the array corresponds
         to channels.
-
-        .. versionadded:: 0.19
-           ``channel_axis`` was added in 0.19.
     gaussian_weights : bool, optional
         If True, the local mean and variance are computed using a normalized
         Gaussian kernel of width `sigma` rather than a uniform window.
     full : bool, optional
         If True, also return the full structural similarity image.
-
-    Other Parameters
-    ----------------
-    use_sample_covariance : bool
+    use_sample_covariance : bool, optional
         If True, normalize covariances by N-1 rather than, N where N is the
         number of pixels within the sliding window.
-    K1 : float
+    K1 : float, optional
         Algorithm parameter, K1 (small constant, see [1]_).
-    K2 : float
+    K2 : float, optional
         Algorithm parameter, K2 (small constant, see [1]_).
-    sigma : float
+    sigma : float, optional
         Standard deviation for the Gaussian when `gaussian_weights` is True.
         Default is 1.5.
 
@@ -114,24 +74,9 @@ def structural_similarity(
 
     Notes
     -----
-    If `data_range` is not specified, the range is automatically guessed
-    based on the image data type. However for floating-point image data, this
-    estimate yields a result double the value of the desired range, as the
-    `dtype_range` in `skimage.util.dtype.py` has defined intervals from -1 to
-    +1. This yields an estimate of 2, instead of 1, which is most often
-    required when working with image data (as negative light intensities are
-    nonsensical). In case of working with YCbCr-like color data, note that
-    these ranges are different per channel (Cb and Cr have double the range
-    of Y), so one cannot calculate a channel-averaged SSIM with a single call
-    to this function, as identical ranges are assumed for each channel.
-
     To match the implementation of Wang et al. [1]_, set `gaussian_weights`
     to True, `sigma` to 1.5, `use_sample_covariance` to False, and
     specify the `data_range` argument.
-
-    .. versionchanged:: 0.16
-        This function was renamed from ``skimage.measure.compare_ssim`` to
-        ``skimage.metrics.structural_similarity``.
 
     References
     ----------
@@ -147,48 +92,177 @@ def structural_similarity(
        :arxiv:`0901.0065`
        :DOI:`10.1007/s10043-009-0119-z`
 
+    Examples
+    --------
+    >>> import skimage as ski
+    >>> import _skimage2 as ski2
+
+    Structural similarity between identical images is 1.0
+    >>> im1 = ski.data.camera()
+    >>> structural_similarity(im1, im1.copy(), data_range=im1.max())
+    1.0
+
+    Override part of the image with 0:
+    >>> im2 = im1.copy()
+    >>> im2[:30, :] = 0
+    >>> structural_similarity(im1, im2, data_range=im1.max())  # doctest: +ELLIPSIS
+    0.9408...
     """
-    if data_range is None:
-        if np.issubdtype(im1.dtype, np.floating) or np.issubdtype(
-            im2.dtype, np.floating
-        ):
-            raise ValueError(
-                'Since image dtype is floating point, you must specify '
-                'the data_range parameter. Please read the documentation '
-                'carefully (including the note). It is recommended that '
-                'you always specify the data_range anyway.'
-            )
-        if im1.dtype != im2.dtype:
-            warn_external(
-                "Inputs have mismatched dtypes. Setting data_range based on im1.dtype.",
-            )
-        dmin, dmax = dtype_range[im1.dtype.type]
-        data_range = dmax - dmin
-        if np.issubdtype(im1.dtype, np.integer) and (im1.dtype != np.uint8):
-            warn_external(
-                "Setting data_range based on im1.dtype. "
-                + f"data_range = {data_range:.0f}. "
-                + "Please specify data_range explicitly to avoid mistakes.",
-            )
+    # TODO Undo inlined imports once available in _skimage2 namespace
+    from skimage.util.arraycrop import crop
 
-    if gaussian_weights and win_size is not None:
-        warn_external(
-            "Passing win_size with gaussian_weights=True is deprecated "
-            "and will raise an error in a future version. The window "
-            "size is determined by sigma; use sigma to control the "
-            "effective window size.",
-            category=FutureWarning,
+    if im1.dtype != im2.dtype:
+        warn_external("Inputs have mismatched dtypes")
+
+    check_shape_equality(im1, im2)
+    float_type = _supported_float_type(im1.dtype)
+
+    if channel_axis is not None:
+        # loop over channels
+        kwargs = dict(
+            win_size=win_size,
+            gradient=gradient,
+            data_range=data_range,
+            channel_axis=None,
+            gaussian_weights=gaussian_weights,
+            full=full,
+            use_sample_covariance=use_sample_covariance,
+            K1=K1,
+            K2=K2,
+            sigma=sigma,
         )
-        win_size = None  # let _skimage2 derive it from sigma
+        nch = im1.shape[channel_axis]
+        mssim = np.empty(nch, dtype=float_type)
 
-    return ski2.metrics.structural_similarity(
-        im1,
-        im2,
-        win_size=win_size,
-        gradient=gradient,
-        data_range=data_range,
-        channel_axis=channel_axis,
-        gaussian_weights=gaussian_weights,
-        full=full,
-        **kwargs,
+        if gradient:
+            G = np.empty(im1.shape, dtype=float_type)
+        if full:
+            S = np.empty(im1.shape, dtype=float_type)
+        channel_axis = channel_axis % im1.ndim
+        _at = functools.partial(utils.slice_at_axis, axis=channel_axis)
+        for ch in range(nch):
+            ch_result = structural_similarity(im1[_at(ch)], im2[_at(ch)], **kwargs)
+            if gradient and full:
+                mssim[ch], G[_at(ch)], S[_at(ch)] = ch_result
+            elif gradient:
+                mssim[ch], G[_at(ch)] = ch_result
+            elif full:
+                mssim[ch], S[_at(ch)] = ch_result
+            else:
+                mssim[ch] = ch_result
+        mssim = mssim.mean()
+        if gradient and full:
+            return mssim, G, S
+        elif gradient:
+            return mssim, G
+        elif full:
+            return mssim, S
+        else:
+            return mssim
+
+    if K1 < 0:
+        raise ValueError("K1 must be positive")
+    if K2 < 0:
+        raise ValueError("K2 must be positive")
+    if sigma < 0:
+        raise ValueError("sigma must be positive")
+
+    if gaussian_weights:
+        # Set to give an 11-tap filter with the default sigma of 1.5 to match
+        # Wang et. al. 2004.
+        truncate = 3.5
+        if win_size is not None:
+            raise ValueError(
+                "win_size cannot be specified when gaussian_weights is True; "
+                "the window size is determined by sigma. "
+                "Use sigma to control the effective window size."
+            )
+        # derive win_size from sigma for padding and normalization
+        r = int(truncate * sigma + 0.5)  # radius as in ndimage
+        win_size = 2 * r + 1
+    elif win_size is None:
+        win_size = 7  # backwards compatibility
+
+    if np.any((np.asarray(im1.shape) - win_size) < 0):
+        raise ValueError(
+            'win_size exceeds image extent. '
+            'Either ensure that your images are '
+            'at least 7x7; or pass win_size explicitly '
+            'in the function call, with an odd value '
+            'less than or equal to the smaller side of your '
+            'images. If your images are multichannel '
+            '(with color channels), set channel_axis to '
+            'the axis number corresponding to the channels.'
+        )
+
+    if not (win_size % 2 == 1):
+        raise ValueError('Window size must be odd.')
+
+    ndim = im1.ndim
+
+    if gaussian_weights:
+        filter_func = gaussian
+        filter_args = {'sigma': sigma, 'truncate': truncate, 'mode': 'reflect'}
+    else:
+        filter_func = uniform_filter
+        filter_args = {'size': win_size}
+
+    # ndimage filters need floating point data
+    im1 = im1.astype(float_type, copy=False)
+    im2 = im2.astype(float_type, copy=False)
+
+    NP = win_size**ndim
+
+    # filter has already normalized by NP
+    if use_sample_covariance:
+        cov_norm = NP / (NP - 1)  # sample covariance
+    else:
+        cov_norm = 1.0  # population covariance to match Wang et. al. 2004
+
+    # compute (weighted) means
+    ux = filter_func(im1, **filter_args)
+    uy = filter_func(im2, **filter_args)
+
+    # compute (weighted) variances and covariances
+    uxx = filter_func(im1 * im1, **filter_args)
+    uyy = filter_func(im2 * im2, **filter_args)
+    uxy = filter_func(im1 * im2, **filter_args)
+    vx = cov_norm * (uxx - ux * ux)
+    vy = cov_norm * (uyy - uy * uy)
+    vxy = cov_norm * (uxy - ux * uy)
+
+    R = data_range
+    C1 = (K1 * R) ** 2
+    C2 = (K2 * R) ** 2
+
+    A1, A2, B1, B2 = (
+        2 * ux * uy + C1,
+        2 * vxy + C2,
+        ux**2 + uy**2 + C1,
+        vx + vy + C2,
     )
+    D = B1 * B2
+    S = (A1 * A2) / D
+
+    # to avoid edge effects will ignore filter radius strip around edges
+    pad = (win_size - 1) // 2
+
+    # compute (weighted) mean of ssim. Use float64 for accuracy.
+    mssim = crop(S, pad).mean(dtype=np.float64)
+
+    if gradient:
+        # The following is Eqs. 7-8 of Avanaki 2009.
+        grad = filter_func(A1 / D, **filter_args) * im1
+        grad += filter_func(-S / B2, **filter_args) * im2
+        grad += filter_func((ux * (A2 - A1) - uy * (B2 - B1) * S) / D, **filter_args)
+        grad *= 2 / im1.size
+
+        if full:
+            return mssim, grad, S
+        else:
+            return mssim, grad
+    else:
+        if full:
+            return mssim, S
+        else:
+            return mssim
