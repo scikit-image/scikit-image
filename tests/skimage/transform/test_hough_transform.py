@@ -141,9 +141,9 @@ def _check_seeded_probabilistic_hough_lines(
 
 
 def test_probabilistic_hough_examples():
-    # Single line in LR (x)
+    # Single line in Left-Right (x)
     img = np.zeros((40, 40))
-    L = 20
+    L = 20  # Line length.
     img[5, 10 : (10 + L)] = 1
     x_line = [(10, 5), (9 + L, 5)]
     y_line = [(5, 10), (5, 9 + L)]
@@ -153,7 +153,7 @@ def test_probabilistic_hough_examples():
     # points - line from [0, 0] through [0, 3] is length 3.
     assert _sorted_probabilistic_hough_line(img, line_length=L) == []
 
-    # Single line in UD (y)
+    # Single line in Up-Down (y)
     lines = _sorted_probabilistic_hough_line(img.T, line_length=L - 1)
     assert lines == [y_line]
 
@@ -162,10 +162,10 @@ def test_probabilistic_hough_examples():
     lines = _sorted_probabilistic_hough_line(both, line_length=L - 1)
     assert lines == [y_line, x_line]
 
-    # Add diagonal lines.
+    # Add two (left to right, right-to-left) diagonal lines.
     more = both.copy()
     offset = 15
-    n = 20
+    n = 20  # Lateral (LR, UD, Chebyshev) length of diagonal line.
     back_off = offset + n - 1
     for i in range(n):
         oi = offset + i
@@ -212,13 +212,14 @@ def test_probabilistic_hough_examples():
 
 @pytest.mark.parametrize('n_lines', range(2, 21, 4))
 def test_probabilistic_hough_recall_precision(n_lines):
-    # From C. Galamhos, J. Matas and J. Kittler, "Progressive probabilistic
-    # Hough transform for line detection", in IEEE Computer Society Conference
-    # on Computer Vision and Pattern Recognition, 1999.
+    # From J. Matas, C. Galamhos and J. Kittler, "Progressive probabilistic
+    # Hough transform", authors copy at
+    # <https://cmp.felk.cvut.cz/~matas/papers/matas-bmvc98.pdf> as of
+    # 2026-05-26 - quote:
     #
     # """
     # A hundred images containing a fixed number of randomly positioned lines
-    # were syntheticaly generated, the only source of noise being in the
+    # were synthetically generated, the only source of noise being in the
     # digitisation of the lines themselves. Figure 4 shows a typical image used
     # in the experiment, the image resolution was 256 both horizontally and
     # vertically, the lines were hundred pixels long. The number of lines
