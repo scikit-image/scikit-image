@@ -106,7 +106,7 @@ class TestCanny:
         assert_equal(result1, result2)
 
     def test_use_quantiles(self):
-        image = ski2.util.img_as_float(ski.data.camera()[::100, ::100])
+        image = ski2.util.img_as_float(ski2.data.camera()[::100, ::100])
 
         # Correct output produced manually with quantiles
         # of 0.8 and 0.6 for high and low respectively
@@ -130,7 +130,7 @@ class TestCanny:
         assert np.all(canny(image) == 0)
 
     def test_invalid_use_quantiles(self):
-        image = ski2.util.img_as_float(ski.data.camera()[::50, ::50])
+        image = ski2.util.img_as_float(ski2.data.camera()[::50, ::50])
         regex = r"Quantile thresholds must be between 0 and 1"
 
         with pytest.raises(ValueError, match=regex):
