@@ -1,8 +1,8 @@
 import numpy as np
 
 from ..util.dtype import img_as_float
-from .._shared import utils
-from .._shared.filters import gaussian
+from _skimage2._shared import utils
+from ._gaussian import gaussian
 
 
 def _unsharp_mask_single_channel(image, radius, amount, vrange):
@@ -52,7 +52,7 @@ def unsharp_mask(
 
     Returns
     -------
-    output : (M[, ...][, C]) ndarray of float
+    output : ndarray of dtype float and shape (M[, ...][, C])
         Image with unsharp mask applied.
 
     Notes

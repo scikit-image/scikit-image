@@ -72,7 +72,7 @@ def line_nd(start, stop, *, endpoint=False, integer=True):
 
     Returns
     -------
-    coords : tuple of arrays
+    coords : tuple of (ndarray, ...)
         The coordinates of points on the line.
 
     Examples

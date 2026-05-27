@@ -5,7 +5,7 @@ import scipy.ndimage as ndi
 from scipy.ndimage import laplace
 
 import skimage
-from .._shared import utils
+from _skimage2._shared import utils
 from ..measure import label
 from ._inpaint import _build_matrix_inner
 

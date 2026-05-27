@@ -3,9 +3,9 @@ import math
 import numpy as np
 import scipy.ndimage as ndi
 
-from .._shared.utils import check_nD, _supported_float_type
+from _skimage2._shared.utils import check_nD, _supported_float_type
 from ..feature.util import DescriptorExtractor, FeatureDetector
-from .._shared.filters import gaussian
+from ..filters._gaussian import gaussian
 from ..transform import rescale
 from ..util import img_as_float
 from ._sift import _local_max, _ori_distances, _update_histogram
@@ -157,19 +157,19 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         The datatype of the image.
     scalespace_sigmas : (n_octaves, n_scales + 3) array
         The sigma value of all scales in all octaves.
-    keypoints : (N, 2) array
+    keypoints : ndarray of shape (N, 2)
         Keypoint coordinates as ``(row, col)``.
-    positions : (N, 2) array
+    positions : ndarray of shape (N, 2)
         Subpixel-precision keypoint coordinates as ``(row, col)``.
-    sigmas : (N,) array
+    sigmas : ndarray of shape (N,)
         The corresponding sigma (blur) value of a keypoint.
-    scales : (N,) array
+    scales : ndarray of shape (N,)
         The corresponding scale of a keypoint.
-    orientations : (N,) array
+    orientations : ndarray of shape (N,)
         The orientations of the gradient around every keypoint.
-    octaves : (N,) array
+    octaves : ndarray of shape (N,)
         The corresponding octave of a keypoint.
-    descriptors : (N, n_hist*n_hist*n_ori) array
+    descriptors : ndarray of shape (N, n_hist*n_hist*n_ori)
         The descriptors of a keypoint.
 
     Notes
@@ -304,7 +304,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             mode='reflect',
         )
 
-        # Eq. 10:  sigmas.shape = (n_octaves, n_scales + 3).
+        # Eq. 10:  sigmas.reshape((n_octaves, n_scales + 3), copy=False).
         # The three extra scales are:
         #    One for the differences needed for DoG and two auxiliary
         #    images (one at either end) for peak_local_max with exclude
@@ -317,7 +317,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         self.scalespace_sigmas = sigmas
 
         # Eq. 7: Gaussian smoothing depends on difference with previous sigma
-        #        gaussian_sigmas.shape = (n_octaves, n_scales + 2)
+        #        gaussian_sigmas.reshape((n_octaves, n_scales + 2), copy=False)
         var_diff = np.diff(sigmas * sigmas, axis=1)
         gaussian_sigmas = np.sqrt(var_diff) / self.deltas[:, np.newaxis]
 

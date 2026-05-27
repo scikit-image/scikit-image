@@ -277,7 +277,7 @@ def download_all(directory=None):
 
     Parameters
     ----------
-    directory : path-like, optional
+    directory : str or Path, optional
         The directory where the dataset should be stored.
 
     Raises
@@ -340,7 +340,7 @@ def _load(f, as_gray=False):
 
     Parameters
     ----------
-    f : string
+    f : str
         File name.
     as_gray : bool, optional
         Whether to convert the image to grayscale.
@@ -394,7 +394,7 @@ def eagle():
 
     Returns
     -------
-    eagle : (2019, 1826) uint8 ndarray
+    eagle : ndarray of shape (2019, 1826) and dtype uint8
         Eagle image.
     """
     return _load("data/eagle.png")
@@ -603,7 +603,7 @@ def text():
 
     Returns
     -------
-    text : (172, 448) uint8 ndarray
+    text : ndarray of shape (172, 448) and dtype uint8
         Text image.
     """
 
@@ -619,7 +619,7 @@ def checkerboard():
 
     Returns
     -------
-    checkerboard : (200, 200) uint8 ndarray
+    checkerboard : ndarray of shape (200, 200) and dtype uint8
         Checkerboard image.
     """
     return _load("data/chessboard_GRAY.png")
@@ -634,7 +634,7 @@ def cells3d():
 
     Returns
     -------
-    cells3d: (60, 2, 256, 256) uint16 ndarray
+    cells3d : ndarray of shape (60, 2, 256, 256) and dtype uint16
         The volumetric images of cells taken with an optical microscope.
 
     Notes
@@ -659,7 +659,7 @@ def human_mitosis():
 
     Returns
     -------
-    human_mitosis: (512, 512) uint8 ndarray
+    human_mitosis : ndarray of shape (512, 512) and dtype uint8
         Data of human cells undergoing mitosis taken during the preparation
         of the manuscript in [1]_.
 
@@ -701,7 +701,7 @@ def cell():
 
     Returns
     -------
-    cell : (660, 550) uint8 array
+    cell : ndarray of shape (660, 550) and dtype uint8
         Image of a cell.
 
     References
@@ -733,7 +733,7 @@ def coins():
 
     Returns
     -------
-    coins : (303, 384) uint8 ndarray
+    coins : ndarray of shape (303, 384) and dtype uint8
         Coins image.
     """
     return _load("data/coins.png")
@@ -758,7 +758,7 @@ def kidney():
 
     Returns
     -------
-    kidney : (16, 512, 512, 3) uint16 ndarray
+    kidney : ndarray of shape (16, 512, 512, 3) and dtype uint16
         Kidney 3D multichannel image.
     """
     return _load("data/kidney.tif")
@@ -782,7 +782,7 @@ def lily():
 
     Returns
     -------
-    lily : (922, 922, 4) uint16 ndarray
+    lily : ndarray of shape (922, 922, 4) and dtype uint16
         Lily 2D multichannel image.
     """
     return _load("data/lily.tif")
@@ -793,7 +793,7 @@ def logo():
 
     Returns
     -------
-    logo : (500, 500, 4) uint8 ndarray
+    logo : ndarray of shape (500, 500, 4) and dtype uint8
         Logo image.
     """
     return _load("data/logo.png")
@@ -813,7 +813,7 @@ def microaneurysms():
 
     Returns
     -------
-    microaneurysms : (102, 102) uint8 ndarray
+    microaneurysms : ndarray of shape (102, 102) and dtype uint8
         Retina image with lesions.
 
     References
@@ -849,7 +849,7 @@ def page():
 
     Returns
     -------
-    page : (191, 384) uint8 ndarray
+    page : ndarray of shape (191, 384) and dtype uint8
         Page image.
     """
     return _load("data/page.png")
@@ -882,7 +882,7 @@ def clock():
 
     Returns
     -------
-    clock : (300, 400) uint8 ndarray
+    clock : ndarray of shape (300, 400) and dtype uint8
         Clock image.
     """
     return _load("data/clock_motion.png")
@@ -920,7 +920,7 @@ def chelsea():
 
     Returns
     -------
-    chelsea : (300, 451, 3) uint8 ndarray
+    chelsea : ndarray of shape (300, 451, 3) and dtype uint8
         Chelsea image.
     """
     return _load("data/chelsea.png")
@@ -943,7 +943,7 @@ def coffee():
 
     Returns
     -------
-    coffee : (400, 600, 3) uint8 ndarray
+    coffee : ndarray of shape (400, 600, 3) and dtype uint8
         Coffee image.
     """
     return _load("data/coffee.png")
@@ -967,7 +967,7 @@ def hubble_deep_field():
 
     Returns
     -------
-    hubble_deep_field : (872, 1000, 3) uint8 ndarray
+    hubble_deep_field : ndarray of shape (872, 1000, 3) and dtype uint8
         Hubble deep field image.
     """
     return _load("data/hubble_deep_field.jpg")
@@ -994,7 +994,7 @@ def retina():
 
     Returns
     -------
-    retina : (1411, 1411, 3) uint8 ndarray
+    retina : ndarray of shape (1411, 1411, 3) and dtype uint8
         Retina image in RGB.
     """
     return _load("data/retina.jpg")
@@ -1011,7 +1011,7 @@ def shepp_logan_phantom():
 
     Returns
     -------
-    phantom : (400, 400) float64 image
+    phantom : ndarray of shape (400, 400) and dtype float64
         Image of the Shepp-Logan phantom in grayscale.
     """
     return _load("data/phantom.png", as_gray=True)
@@ -1022,7 +1022,7 @@ def colorwheel():
 
     Returns
     -------
-    colorwheel : (370, 371, 3) uint8 image
+    colorwheel : ndarray of shape (370, 371, 3) and dtype uint8
         A colorwheel.
     """
     return _load("data/color.png")
@@ -1039,7 +1039,7 @@ def palisades_of_vogt():
 
     Returns
     -------
-    palisades_of_vogt: (60, 1440, 1440) uint16 ndarray
+    palisades_of_vogt : ndarray of shape (60, 1440, 1440) and dtype uint16
 
     Notes
     -----
@@ -1067,7 +1067,7 @@ def rocket():
 
     Returns
     -------
-    rocket : (427, 640, 3) uint8 ndarray
+    rocket : ndarray of shape (427, 640, 3) and dtype uint8
         Rocket image.
     """
     return _load("data/rocket.jpg")
@@ -1105,7 +1105,7 @@ def stereo_motorcycle():
         Left stereo image.
     img_right : (500, 741, 3) uint8 ndarray
         Right stereo image.
-    disp : (500, 741, 3) float ndarray
+    disp : ndarray of shape (500, 741, 3) and dtype float
         Ground-truth disparity map, where each value describes the offset in
         column direction between corresponding pixels in the left and the right
         stereo images. E.g. the corresponding pixel of
@@ -1146,7 +1146,7 @@ def lfw_subset():
 
     Returns
     -------
-    images : (200, 25, 25) uint8 ndarray
+    images : ndarray of shape (200, 25, 25) and dtype uint8
         100 first images are faces and subsequent 100 are non-faces.
 
     Notes
@@ -1185,7 +1185,8 @@ def skin():
 
     Returns
     -------
-    skin : (960, 1280, 3) RGB image of uint8
+    skin : ndarray of shape (960, 1280, 3) and dtype uint8
+        RGB image.
     """
     return _load('data/skin.jpg')
 
@@ -1196,7 +1197,7 @@ def nickel_solidification():
 
     Returns
     -------
-    nickel_solidification: (11, 384, 512) uint16 ndarray
+    nickel_solidification : ndarray of shape (11, 384, 512) and dtype uint16
 
     Notes
     -----
@@ -1213,7 +1214,7 @@ def protein_transport():
 
     Returns
     -------
-    protein_transport: (15, 2, 180, 183) uint8 ndarray
+    protein_transport : ndarray of shape (15, 2, 180, 183) and dtype uint8
 
     Notes
     -----
@@ -1232,7 +1233,7 @@ def brain():
 
     Returns
     -------
-    image : (10, 256, 256) uint16 ndarray
+    image : ndarray of shape (10, 256, 256) and dtype uint16
 
     Notes
     -----

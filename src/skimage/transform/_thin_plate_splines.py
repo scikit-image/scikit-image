@@ -1,9 +1,9 @@
 from typing import Self
 
 import numpy as np
-from scipy.spatial import distance_matrix
+from scipy.spatial.distance import cdist
 
-from .._shared.utils import check_nD, _deprecate_estimate, FailedEstimation
+from _skimage2._shared.utils import check_nD, _deprecate_estimate, FailedEstimation
 
 
 class ThinPlateSplineTransform:
@@ -15,7 +15,7 @@ class ThinPlateSplineTransform:
 
     Attributes
     ----------
-    src : (N, 2) array_like
+    src : array_like of shape (N, 2)
         Coordinates of control points in source image.
 
     References
@@ -103,13 +103,13 @@ class ThinPlateSplineTransform:
 
         Parameters
         ----------
-        coords : (N, 2) array_like
+        coords : array_like of shape (N, 2)
             x, y coordinates to transform
 
         Returns
         -------
-        transformed_coords: (N, D) array
-            Destination coordinates
+        transformed_coords: ndarray of shape (N, D)
+            Destination coordinates.
         """
         if self._spline_mappings is None:
             msg = (
@@ -138,9 +138,9 @@ class ThinPlateSplineTransform:
 
         Parameters
         ----------
-        src : (N, 2) array_like
+        src : array_like of shape (N, 2)
             Control points at source coordinates.
-        dst : (N, 2) array_like
+        dst : array_like of shape (N, 2)
             Control points at destination coordinates.
 
         Returns
@@ -180,7 +180,7 @@ class ThinPlateSplineTransform:
         self.src = src
         n, d = src.shape
 
-        dist = distance_matrix(src, src)
+        dist = cdist(src, src)
         K = self._radial_basis_kernel(dist)
         P = np.hstack([np.ones((n, 1)), src])
         n_plus_3 = n + 3
@@ -197,7 +197,7 @@ class ThinPlateSplineTransform:
 
     def _radial_distance(self, coords):
         """Compute the radial distance between input points and source points."""
-        dists = distance_matrix(coords, self.src)
+        dists = cdist(coords, self.src)
         return self._radial_basis_kernel(dists)
 
     def _spline_function(self, coords, radial_dist):
@@ -234,9 +234,9 @@ class ThinPlateSplineTransform:
 
         Parameters
         ----------
-        src : (N, 2) array_like
+        src : array_like of shape (N, 2)
             Control points at source coordinates.
-        dst : (N, 2) array_like
+        dst : array_like of shape (N, 2)
             Control points at destination coordinates.
 
         Returns

@@ -5,13 +5,13 @@
 import numpy as np
 cimport numpy as cnp
 from libc.math cimport sin, cos
-from .._shared.interpolation cimport bilinear_interpolation, round
-from .._shared.transform cimport integrate
+from _skimage2._shared.interpolation cimport bilinear_interpolation, round
+from _skimage2._shared.transform cimport integrate
 
 cdef extern from "numpy/npy_math.h":
     cnp.float64_t NAN "NPY_NAN"
 
-from .._shared.fused_numerics cimport np_anyint as any_int
+from _skimage2._shared.fused_numerics cimport np_anyint as any_int
 
 cnp.import_array()
 
