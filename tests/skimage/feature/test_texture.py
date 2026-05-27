@@ -263,7 +263,7 @@ class TestLBP:
         np.testing.assert_array_equal(lbp, ref)
 
 
-    def test_linux_mac_portability(self):
+    def test_gh_8198(self):
         try:
             import sklearn
         except ImportError:
