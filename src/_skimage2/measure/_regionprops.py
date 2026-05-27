@@ -1394,7 +1394,7 @@ def regionprops(
     Examples
     --------
     >>> import _skimage2 as ski2
-    >>> img = ski2.util.img_as_ubyte(ski.data.coins()) > 110
+    >>> img = ski2.util.img_as_ubyte(ski2.data.coins()) > 110
     >>> label_img = ski2.measure.label(img, connectivity=img.ndim)
     >>> props = ski2.measure.regionprops(label_img)
     >>> # centroid of first labeled region
@@ -1408,7 +1408,7 @@ def regionprops(
 
     >>> import numpy as np
     >>> import _skimage2 as ski2
-    >>> img = ski2.util.img_as_ubyte(ski.data.coins()) > 110
+    >>> img = ski2.util.img_as_ubyte(ski2.data.coins()) > 110
     >>> label_img = ski2.measure.label(img, connectivity=img.ndim)
     >>> def pixelcount(regionmask):
     ...     return np.sum(regionmask)

@@ -435,7 +435,7 @@ def test_octagon_decomposition(cam_image, function, m, n, decomposition):
     else:
         footprint_ndarray = footprints.octagon(m, n, decomposition=None)
         footprint = footprints.octagon(m, n, decomposition=decomposition)
-        func = getattr(gray, function)
+        func = getattr(morph, function)
         expected = func(cam_image, footprint=footprint_ndarray)
         out = func(cam_image, footprint=footprint)
         assert_array_equal(expected, out)
@@ -454,7 +454,7 @@ def test_cube_decomposition(cell3d_image, function, shape, decomposition):
     """
     footprint_ndarray = footprint_rectangle(shape, decomposition=None)
     footprint = footprint_rectangle(shape, decomposition=decomposition)
-    func = getattr(gray, function)
+    func = getattr(morph, function)
     expected = func(cell3d_image, footprint=footprint_ndarray)
     out = func(cell3d_image, footprint=footprint)
     assert_array_equal(expected, out)
@@ -473,7 +473,7 @@ def test_octahedron_decomposition(cell3d_image, function, radius, decomposition)
     """
     footprint_ndarray = footprints.octahedron(radius, decomposition=None)
     footprint = footprints.octahedron(radius, decomposition=decomposition)
-    func = getattr(gray, function)
+    func = getattr(morph, function)
     expected = func(cell3d_image, footprint=footprint_ndarray)
     out = func(cell3d_image, footprint=footprint)
     assert_array_equal(expected, out)

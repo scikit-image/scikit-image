@@ -98,7 +98,7 @@ def structural_similarity(
     >>> import _skimage2 as ski2
 
     Structural similarity between identical images is 1.0
-    >>> im1 = ski.data.camera()
+    >>> im1 = ski2.data.camera()
     >>> structural_similarity(im1, im1.copy(), data_range=im1.max())
     1.0
 

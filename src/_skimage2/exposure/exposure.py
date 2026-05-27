@@ -664,7 +664,7 @@ def adjust_gamma(image, gamma=1, gain=1):
     Examples
     --------
     >>> import _skimage2 as ski2
-    >>> image = ski2.util.img_as_float(ski.data.moon())
+    >>> image = ski2.util.img_as_float(ski2.data.moon())
     >>> gamma_corrected = ski2.exposure.adjust_gamma(image, 2)
     >>> # Output is darker for gamma > 1
     >>> image.mean() > gamma_corrected.mean()

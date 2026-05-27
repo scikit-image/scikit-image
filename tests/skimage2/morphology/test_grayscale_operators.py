@@ -12,12 +12,12 @@ import _skimage2.morphology._grayscale_operators as gray
 
 @pytest.fixture
 def cam_image():
-    return np.ascontiguousarray(ski.data.camera()[64:112, 64:96])
+    return np.ascontiguousarray(ski2.data.camera()[64:112, 64:96])
 
 
 @pytest.fixture
 def cell3d_image():
-    return np.ascontiguousarray(ski.data.cells3d()[30:48, 0, 20:36, 20:32])
+    return np.ascontiguousarray(ski2.data.cells3d()[30:48, 0, 20:36, 20:32])
 
 
 gray_operators = (

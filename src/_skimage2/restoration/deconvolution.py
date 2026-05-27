@@ -56,7 +56,7 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     --------
     >>> import _skimage2 as ski2
     >>> import scipy as sp
-    >>> img = ski2.color.rgb2gray(ski.data.astronaut())
+    >>> img = ski2.color.rgb2gray(ski2.data.astronaut())
     >>> psf = np.ones((5, 5)) / 25
     >>> img = sp.signal.convolve2d(img, psf, 'same')
     >>> rng = np.random.default_rng()
