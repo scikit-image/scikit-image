@@ -402,7 +402,7 @@ def test_circle_perimeter_aa_shape():
 
 
 @pytest.mark.parametrize("radius", [0, 10, 200])
-def test_circle_perimeter_duplicates(radius):
+def test_circle_perimeter_aa_duplicates(radius):
     """Check that returned points don't contain duplicates."""
     rr, cc, val = circle_perimeter_aa(0, 0, radius)
     assert rr.shape == val.shape
