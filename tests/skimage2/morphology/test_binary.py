@@ -5,7 +5,8 @@ from scipy import ndimage as ndi
 
 from _skimage2 import data, color, morphology
 from _skimage2.util import img_as_bool
-from _skimage2.morphology import binary, footprints, gray, footprint_rectangle
+from _skimage2.morphology import (binary, footprints, footprint_rectangle,
+                                  erosion, dilation, closing, opening)
 from _skimage2._shared.testing import assert_stacklevel
 
 
@@ -24,28 +25,28 @@ pytestmark = pytest.mark.filterwarnings(
 def test_non_square_image():
     footprint = footprint_rectangle((3, 3))
     binary_res = binary.binary_erosion(bw_img[:100, :200], footprint)
-    gray_res = img_as_bool(gray.erosion(bw_img[:100, :200], footprint))
+    gray_res = img_as_bool(erosion(bw_img[:100, :200], footprint))
     assert_array_equal(binary_res, gray_res)
 
 
 def test_binary_erosion():
     footprint = footprint_rectangle((3, 3))
     binary_res = binary.binary_erosion(bw_img, footprint)
-    gray_res = img_as_bool(gray.erosion(bw_img, footprint))
+    gray_res = img_as_bool(erosion(bw_img, footprint))
     assert_array_equal(binary_res, gray_res)
 
 
 def test_binary_dilation():
     footprint = footprint_rectangle((3, 3))
     binary_res = binary.binary_dilation(bw_img, footprint)
-    gray_res = img_as_bool(gray.dilation(bw_img, footprint))
+    gray_res = img_as_bool(dilation(bw_img, footprint))
     assert_array_equal(binary_res, gray_res)
 
 
 def test_binary_closing():
     footprint = footprint_rectangle((3, 3))
     binary_res = binary.binary_closing(bw_img, footprint)
-    gray_res = img_as_bool(gray.closing(bw_img, footprint))
+    gray_res = img_as_bool(closing(bw_img, footprint))
     assert_array_equal(binary_res, gray_res)
 
 
@@ -63,7 +64,7 @@ def test_binary_closing_extensive():
 def test_binary_opening():
     footprint = footprint_rectangle((3, 3))
     binary_res = binary.binary_opening(bw_img, footprint)
-    gray_res = img_as_bool(gray.opening(bw_img, footprint))
+    gray_res = img_as_bool(opening(bw_img, footprint))
     assert_array_equal(binary_res, gray_res)
 
 
@@ -207,7 +208,7 @@ def test_footprint_overflow():
     img = np.zeros((20, 20), dtype=bool)
     img[2:19, 2:19] = True
     binary_res = binary.binary_erosion(img, footprint)
-    gray_res = img_as_bool(gray.erosion(img, footprint))
+    gray_res = img_as_bool(erosion(img, footprint))
     assert_array_equal(binary_res, gray_res)
 
 

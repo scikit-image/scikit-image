@@ -16,7 +16,8 @@ from _skimage2.filters import rank
 from _skimage2.filters.rank import __all__ as all_rank_filters
 from _skimage2.filters.rank import __3Dfilters as _3d_rank_filters
 from _skimage2.filters.rank import subtract_mean
-from _skimage2.morphology import ball, disk, gray
+from _skimage2.morphology import ball, disk
+from _skimage2.morphology import dilation, erosion
 from _skimage2.util import img_as_float, img_as_ubyte
 
 
@@ -294,7 +295,7 @@ class TestRank:
         for r in range(3, 20, 2):
             elem = np.ones((r, r), dtype=np.uint8)
             rank.maximum(image=image, footprint=elem, out=out, mask=mask)
-            cm = gray.dilation(image, elem)
+            cm = dilation(image, elem)
             assert_equal(out, cm)
 
     def test_compare_with_gray_erosion(self):
@@ -308,7 +309,7 @@ class TestRank:
         for r in range(3, 20, 2):
             elem = np.ones((r, r), dtype=np.uint8)
             rank.minimum(image=image, footprint=elem, out=out, mask=mask)
-            cm = gray.erosion(image, elem)
+            cm = erosion(image, elem)
             assert_equal(out, cm)
 
     def test_bitdepth(self):

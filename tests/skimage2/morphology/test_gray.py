@@ -5,7 +5,8 @@ from numpy.testing import assert_allclose, assert_array_equal, assert_equal
 
 from _skimage2 import color, data, transform
 from _skimage2._shared.testing import fetch
-from _skimage2.morphology import gray, footprints, footprint_rectangle
+from _skimage2.morphology import footprints, footprint_rectangle
+import _skimage2.morphology as morph
 from _skimage2.util import img_as_uint, img_as_ubyte
 
 
@@ -24,12 +25,12 @@ def cell3d_image():
 
 
 gray_morphology_funcs = (
-    gray.erosion,
-    gray.dilation,
-    gray.opening,
-    gray.closing,
-    gray.white_tophat,
-    gray.black_tophat,
+    morph.erosion,
+    morph.dilation,
+    morph.opening,
+    morph.closing,
+    morph.white_tophat,
+    morph.black_tophat,
 )
 
 
@@ -76,10 +77,10 @@ class TestMorphology:
         footprint = np.array([[0, 0, 1], [0, 1, 1], [1, 1, 1]])
 
         # Default mode="reflect" is not extensive for backwards-compatibility
-        result_default = gray.closing(img, footprint=footprint)
+        result_default = morph.closing(img, footprint=footprint)
         assert not np.all(result_default >= img)
 
-        result = gray.closing(img, footprint=footprint, mode="ignore")
+        result = morph.closing(img, footprint=footprint, mode="ignore")
         assert np.all(result >= img)
 
     def test_gray_opening_anti_extensive(self):
@@ -87,14 +88,14 @@ class TestMorphology:
         footprint = np.array([[0, 0, 1], [0, 1, 1], [1, 1, 1]])
 
         # Default mode="reflect" is not extensive for backwards-compatibility
-        result_default = gray.opening(img, footprint=footprint)
+        result_default = morph.opening(img, footprint=footprint)
         assert not np.all(result_default <= img)
 
-        result_ignore = gray.opening(img, footprint=footprint, mode="ignore")
+        result_ignore = morph.opening(img, footprint=footprint, mode="ignore")
         assert np.all(result_ignore <= img)
 
     @pytest.mark.parametrize("func", gray_morphology_funcs)
-    @pytest.mark.parametrize("mode", gray._SUPPORTED_MODES)
+    @pytest.mark.parametrize("mode", morph._SUPPORTED_MODES)
     def test_supported_mode(self, func, mode):
         img = np.ones((10, 10))
         func(img, mode=mode)
@@ -120,56 +121,56 @@ class TestAsymmetricFootprints:
 
     def test_dilate_erode_symmetry(self):
         for s in self.footprints:
-            c = gray.erosion(self.black_pixel, s)
-            d = gray.dilation(self.white_pixel, s)
+            c = morph.erosion(self.black_pixel, s)
+            d = morph.dilation(self.white_pixel, s)
             assert np.all(c == (255 - d))
 
     def test_open_black_pixel(self):
         for s in self.footprints:
-            gray_open = gray.opening(self.black_pixel, s)
+            gray_open = morph.opening(self.black_pixel, s)
             assert np.all(gray_open == self.black_pixel)
 
     def test_close_white_pixel(self):
         for s in self.footprints:
-            gray_close = gray.closing(self.white_pixel, s)
+            gray_close = morph.closing(self.white_pixel, s)
             assert np.all(gray_close == self.white_pixel)
 
     def test_open_white_pixel(self):
         for s in self.footprints:
-            assert np.all(gray.opening(self.white_pixel, s) == 0)
+            assert np.all(morph.opening(self.white_pixel, s) == 0)
 
     def test_close_black_pixel(self):
         for s in self.footprints:
-            assert np.all(gray.closing(self.black_pixel, s) == 255)
+            assert np.all(morph.closing(self.black_pixel, s) == 255)
 
     def test_white_tophat_white_pixel(self):
         for s in self.footprints:
-            tophat = gray.white_tophat(self.white_pixel, s)
+            tophat = morph.white_tophat(self.white_pixel, s)
             assert np.all(tophat == self.white_pixel)
 
     def test_black_tophat_black_pixel(self):
         for s in self.footprints:
-            tophat = gray.black_tophat(self.black_pixel, s)
+            tophat = morph.black_tophat(self.black_pixel, s)
             assert np.all(tophat == self.white_pixel)
 
     def test_white_tophat_black_pixel(self):
         for s in self.footprints:
-            tophat = gray.white_tophat(self.black_pixel, s)
+            tophat = morph.white_tophat(self.black_pixel, s)
             assert np.all(tophat == 0)
 
     def test_black_tophat_white_pixel(self):
         for s in self.footprints:
-            tophat = gray.black_tophat(self.white_pixel, s)
+            tophat = morph.black_tophat(self.white_pixel, s)
             assert np.all(tophat == 0)
 
 
 gray_functions = [
-    gray.erosion,
-    gray.dilation,
-    gray.opening,
-    gray.closing,
-    gray.white_tophat,
-    gray.black_tophat,
+    morph.erosion,
+    morph.dilation,
+    morph.opening,
+    morph.closing,
+    morph.white_tophat,
+    morph.black_tophat,
 ]
 
 
@@ -204,7 +205,7 @@ def test_3d_fallback_default_footprint():
     image = np.zeros((7, 7, 7), bool)
     image[2:-2, 2:-2, 2:-2] = 1
 
-    opened = gray.opening(image)
+    opened = morph.opening(image)
 
     # expect a "hyper-cross" centered in the 5x5x5:
     image_expected = np.zeros((7, 7, 7), dtype=bool)
@@ -212,7 +213,7 @@ def test_3d_fallback_default_footprint():
     assert_array_equal(opened, image_expected)
 
 
-gray_3d_fallback_functions = [gray.closing, gray.opening]
+gray_3d_fallback_functions = [morph.closing, morph.opening]
 
 
 @pytest.mark.parametrize("function", gray_3d_fallback_functions)
@@ -233,7 +234,7 @@ def test_3d_fallback_white_tophat():
     image[3, 2:5, 2:5] = 1
     image[4, 3:5, 3:5] = 1
 
-    new_image = gray.white_tophat(image)
+    new_image = morph.white_tophat(image)
     footprint = ndi.generate_binary_structure(3, 1)
     image_expected = ndi.white_tophat(image.view(dtype=np.uint8), footprint=footprint)
     assert_array_equal(new_image, image_expected)
@@ -245,7 +246,7 @@ def test_3d_fallback_black_tophat():
     image[3, 2:5, 2:5] = 0
     image[4, 3:5, 3:5] = 0
 
-    new_image = gray.black_tophat(image)
+    new_image = morph.black_tophat(image)
     footprint = ndi.generate_binary_structure(3, 1)
     image_expected = ndi.black_tophat(image.view(dtype=np.uint8), footprint=footprint)
     assert_array_equal(new_image, image_expected)
@@ -257,8 +258,8 @@ def test_2d_ndimage_equivalence():
     image[3:-3, 3:-3] = 196
     image[4, 4] = 255
 
-    opened = gray.opening(image)
-    closed = gray.closing(image)
+    opened = morph.opening(image)
+    closed = morph.closing(image)
 
     footprint = ndi.generate_binary_structure(2, 1)
     ndimage_opened = ndi.grey_opening(image, footprint=footprint)
@@ -321,20 +322,20 @@ closed = np.array(
 
 
 def test_float():
-    assert_allclose(gray.erosion(im), eroded)
-    assert_allclose(gray.dilation(im), dilated)
-    assert_allclose(gray.opening(im), opened)
-    assert_allclose(gray.closing(im), closed)
+    assert_allclose(morph.erosion(im), eroded)
+    assert_allclose(morph.dilation(im), dilated)
+    assert_allclose(morph.opening(im), opened)
+    assert_allclose(morph.closing(im), closed)
 
 
 def test_uint16():
     im16, eroded16, dilated16, opened16, closed16 = map(
         img_as_uint, [im, eroded, dilated, opened, closed]
     )
-    assert_allclose(gray.erosion(im16), eroded16)
-    assert_allclose(gray.dilation(im16), dilated16)
-    assert_allclose(gray.opening(im16), opened16)
-    assert_allclose(gray.closing(im16), closed16)
+    assert_allclose(morph.erosion(im16), eroded16)
+    assert_allclose(morph.dilation(im16), dilated16)
+    assert_allclose(morph.opening(im16), opened16)
+    assert_allclose(morph.closing(im16), closed16)
 
 
 def test_discontiguous_out_array():
@@ -361,16 +362,16 @@ def test_discontiguous_out_array():
         ],
         np.uint8,
     )
-    gray.dilation(image, out=out_array)
+    morph.dilation(image, out=out_array)
     assert_array_equal(out_array_big, expected_dilation)
-    gray.erosion(image, out=out_array)
+    morph.erosion(image, out=out_array)
     assert_array_equal(out_array_big, expected_erosion)
 
 
 def test_1d_erosion():
     image = np.array([1, 2, 3, 2, 1])
     expected = np.array([1, 1, 2, 1, 1])
-    eroded = gray.erosion(image)
+    eroded = morph.erosion(image)
     assert_array_equal(eroded, expected)
 
 
@@ -388,7 +389,7 @@ def test_rectangle_decomposition(cam_image, function, nrows, ncols, decompositio
     """
     footprint_ndarray = footprint_rectangle((nrows, ncols), decomposition=None)
     footprint = footprint_rectangle((nrows, ncols), decomposition=decomposition)
-    func = getattr(gray, function)
+    func = getattr(morph, function)
     expected = func(cam_image, footprint=footprint_ndarray)
     out = func(cam_image, footprint=footprint)
     assert_array_equal(expected, out)
@@ -407,7 +408,7 @@ def test_diamond_decomposition(cam_image, function, radius, decomposition):
     """
     footprint_ndarray = footprints.diamond(radius, decomposition=None)
     footprint = footprints.diamond(radius, decomposition=decomposition)
-    func = getattr(gray, function)
+    func = getattr(morph, function)
     expected = func(cam_image, footprint=footprint_ndarray)
     out = func(cam_image, footprint=footprint)
     assert_array_equal(expected, out)
