@@ -7,6 +7,7 @@ from _skimage2 import color, data, transform
 from _skimage2._shared.testing import fetch
 from _skimage2.morphology import footprints, footprint_rectangle
 import _skimage2.morphology as morph
+from _skimage2.morphology._grayscale_operators import _SUPPORTED_MODES
 from _skimage2.util import img_as_uint, img_as_ubyte
 
 
@@ -95,7 +96,7 @@ class TestMorphology:
         assert np.all(result_ignore <= img)
 
     @pytest.mark.parametrize("func", gray_morphology_funcs)
-    @pytest.mark.parametrize("mode", morph._SUPPORTED_MODES)
+    @pytest.mark.parametrize("mode", _SUPPORTED_MODES)
     def test_supported_mode(self, func, mode):
         img = np.ones((10, 10))
         func(img, mode=mode)

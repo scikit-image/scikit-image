@@ -1,4 +1,5 @@
 from _skimage2.morphology._grayscale_operators import __doc__  # noqa: F401
+from _skimage2.morphology._grayscale_operators import _SUPPORTED_MODES
 
 from _skimage2.morphology._footprints import (_default_footprint,
                                               mirror_footprint,
@@ -10,17 +11,6 @@ from skimage._migration import ski2_migration_decorator
 
 __all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat', 'black_tophat']
 
-
-_SUPPORTED_MODES = {
-    "reflect",
-    "constant",
-    "nearest",
-    "mirror",
-    "wrap",
-    "max",
-    "min",
-    "ignore",
-}
 
 # For migration doc build.
 ski2_migration_decorator.extra_params['gray_funcs'] = (
