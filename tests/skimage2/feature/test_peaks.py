@@ -158,3 +158,22 @@ class TestPeakLocalMax:
         assert np.all(
             intensities[:-1] >= intensities[1:]
         ), f"output not intensity-sorted: {intensities.tolist()}"
+
+    def test_num_peaks_does_not_enforce_spacing_across_labels(self):
+        """`min_distance` is enforced within each label region only, never
+        across labels -- even when `num_peaks` truncates the output.
+
+        The two brightest peaks sit in different labels closer than
+        `min_distance`; both must be kept.
+        """
+        image = np.zeros((8, 8))
+        image[2, 2] = 5.0  # label A
+        image[2, 4] = 4.0  # label B, only 2 px from peak A (< min_distance)
+        image[6, 6] = 1.0  # label C, far away
+
+        labels = ndi.label(image > 0)[0]
+
+        peaks = peak_local_max(image, min_distance=3, num_peaks=2, labels=labels)
+
+        # Both close-but-differently-labeled peaks survive, in intensity order.
+        assert_equal(peaks, [[2, 2], [2, 4]])
