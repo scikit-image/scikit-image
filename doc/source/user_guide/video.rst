@@ -33,7 +33,7 @@ video. The files are numbered with five digits, padded on the left with zeros.
 
    ffmpeg -i "video.mov" -f image2 "video-frame%05d.png"
 
-More information is available in an `FFmpeg tutorial on image sequences 
+More information is available in an `FFmpeg tutorial on image sequences
 <https://en.wikibooks.org/wiki/FFMPEG_An_Intermediate_Guide/image_sequence#Making_an_Image_Sequence_from_a_video>`__.
 
 Generating an image sequence has disadvantages: they can be large and unwieldy,
@@ -62,6 +62,7 @@ PyAV's API reflects the way frames are stored in a video file.
 
 .. code-block:: python
 
+   import numpy as np
    for packet in container.demux():
        for frame in packet.decode():
            if frame.type == 'video':
@@ -117,7 +118,7 @@ supports a wide range of other image file formats as well.
     filename = '/tmp/file.mp4'
     vid = imageio.get_reader(filename,  'ffmpeg')
 
-    for num, image in vid.iter_data():
+    for image in vid.iter_data():
         print(image.mean())
 
     metadata = vid.get_meta_data()

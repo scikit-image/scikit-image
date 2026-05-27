@@ -115,7 +115,7 @@ correctly, in sync with scikit-image.
 Related Work
 ------------
 
-`pandas` released 1.0.0 in January 2020, including many backwards-incompatible
+``pandas`` released 1.0.0 in January 2020, including many backwards-incompatible
 API changes [3]_. `scipy` released version 1.0 in 2017, but, given its stage of
 maturity and position at the base of the scientific Python ecosystem, opted not
 to make major breaking changes [4]_. However, SciPy has adopted a policy of

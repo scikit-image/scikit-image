@@ -33,21 +33,23 @@ _denoise_wavelet = partial(denoise_wavelet, rescale_sigma=True)
 
 image = img_as_float(chelsea())
 sigma = 0.3
-noisy = random_noise(image, var=sigma ** 2)
+noisy = random_noise(image, var=sigma**2)
 
 # Parameters to test when calibrating the denoising algorithm
-parameter_ranges = {'sigma': np.arange(0.1, 0.3, 0.02),
-                    'wavelet': ['db1', 'db2'],
-                    'convert2ycbcr': [True, False],
-                    'channel_axis': [-1]}
+parameter_ranges = {
+    'sigma': np.arange(0.1, 0.3, 0.02),
+    'wavelet': ['db1', 'db2'],
+    'convert2ycbcr': [True, False],
+    'channel_axis': [-1],
+}
 
 # Denoised image using default parameters of `denoise_wavelet`
 default_output = denoise_wavelet(noisy, channel_axis=-1, rescale_sigma=True)
 
 # Calibrate denoiser
-calibrated_denoiser = calibrate_denoiser(noisy,
-                                         _denoise_wavelet,
-                                         denoise_parameters=parameter_ranges)
+calibrated_denoiser = calibrate_denoiser(
+    noisy, _denoise_wavelet, denoise_parameters=parameter_ranges
+)
 
 # Denoised image using calibrated denoiser
 calibrated_output = calibrated_denoiser(noisy)
@@ -55,9 +57,9 @@ calibrated_output = calibrated_denoiser(noisy)
 fig, axes = plt.subplots(1, 3, sharex=True, sharey=True, figsize=(15, 5))
 
 for ax, img, title in zip(
-        axes,
-        [noisy, default_output, calibrated_output],
-        ['Noisy Image', 'Denoised (Default)', 'Denoised (Calibrated)']
+    axes,
+    [noisy, default_output, calibrated_output],
+    ['Noisy Image', 'Denoised (Default)', 'Denoised (Calibrated)'],
 ):
     ax.imshow(img)
     ax.set_title(title)

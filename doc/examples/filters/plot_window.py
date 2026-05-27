@@ -1,4 +1,3 @@
-
 r"""
 ===================================
 Using window functions with images

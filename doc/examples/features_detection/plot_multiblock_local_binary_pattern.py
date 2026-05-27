@@ -20,6 +20,7 @@ a (9, 9) rectangle and divide it into (3, 3) block, upon which we then apply
 MB-LBP.
 
 """
+
 from skimage.feature import multiblock_lbp
 import numpy as np
 from numpy.testing import assert_equal
@@ -56,8 +57,7 @@ int_img = integral_image(test_img)
 
 lbp_code = multiblock_lbp(int_img, 0, 0, 90, 90)
 
-img = draw_multiblock_lbp(test_img, 0, 0, 90, 90,
-                          lbp_code=lbp_code, alpha=0.5)
+img = draw_multiblock_lbp(test_img, 0, 0, 90, 90, lbp_code=lbp_code, alpha=0.5)
 
 
 plt.imshow(img)

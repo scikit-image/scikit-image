@@ -11,18 +11,20 @@ representations.
 In this example a limited number of DAISY descriptors are extracted at a large
 scale for illustrative purposes.
 """
+
 from skimage.feature import daisy
 from skimage import data
 import matplotlib.pyplot as plt
 
 
 img = data.camera()
-descs, descs_img = daisy(img, step=180, radius=58, rings=2, histograms=6,
-                         orientations=8, visualize=True)
+descs, descs_img = daisy(
+    img, step=180, radius=58, rings=2, histograms=6, orientations=8, visualize=True
+)
 
 fig, ax = plt.subplots()
-ax.axis('off')
+ax.axis("off")
 ax.imshow(descs_img)
 descs_num = descs.shape[0] * descs.shape[1]
-ax.set_title('%i DAISY descriptors extracted:' % descs_num)
+ax.set_title(f"{descs_num} DAISY descriptors extracted:")
 plt.show()

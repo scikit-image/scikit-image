@@ -22,6 +22,7 @@ pre-defined handlers:
 Below, we demonstrate the use of ``adapt_rgb`` on a couple of gray-scale
 filters:
 """
+
 from skimage.color.adapt_rgb import adapt_rgb, each_channel, hsv_value
 from skimage import filters
 
@@ -86,6 +87,7 @@ from skimage.color import rgb2gray
 def as_gray(image_filter, image, *args, **kwargs):
     gray_image = rgb2gray(image)
     return image_filter(gray_image, *args, **kwargs)
+
 
 ######################################################################
 # It's important to create a signature that uses ``*args`` and ``**kwargs``

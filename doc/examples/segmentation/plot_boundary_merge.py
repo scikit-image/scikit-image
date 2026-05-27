@@ -5,17 +5,17 @@ Hierarchical Merging of Region Boundary RAGs
 
 This example demonstrates how to perform hierarchical merging on region
 boundary Region Adjacency Graphs (RAGs). Region boundary RAGs can be
-constructed with the :py:func:`skimage.future.graph.rag_boundary` function.
+constructed with the :py:func:`skimage.graph.rag_boundary` function.
 The regions with the lowest edge weights are successively merged until there
 is no edge with weight less than ``thresh``. The hierarchical merging is done
-through the :py:func:`skimage.future.graph.merge_hierarchical` function.
+through the :py:func:`skimage.graph.merge_hierarchical` function.
 For an example of how to construct region boundary based RAGs, see
 :any:`plot_rag_boundary`.
 
 """
 
 from skimage import data, segmentation, filters, color
-from skimage.future import graph
+from skimage import graph
 from matplotlib import pyplot as plt
 
 
@@ -55,7 +55,7 @@ def weight_boundary(graph, src, dst, n):
     count = count_src + count_dst
     return {
         'count': count,
-        'weight': (count_src * weight_src + count_dst * weight_dst)/count
+        'weight': (count_src * weight_src + count_dst * weight_dst) / count,
     }
 
 
@@ -66,25 +66,34 @@ def merge_boundary(graph, src, dst):
     """
     pass
 
+
 img = data.coffee()
 edges = filters.sobel(color.rgb2gray(img))
 labels = segmentation.slic(img, compactness=30, n_segments=400, start_label=1)
 g = graph.rag_boundary(labels, edges)
 
-graph.show_rag(labels, g, img)
-plt.title('Initial RAG')
+fig, axes = plt.subplots(nrows=2, ncols=2)
 
-labels2 = graph.merge_hierarchical(labels, g, thresh=0.08, rag_copy=False,
-                                   in_place_merge=True,
-                                   merge_func=merge_boundary,
-                                   weight_func=weight_boundary)
+graph.show_rag(labels, g, img, ax=axes[0, 0])
+axes[0, 0].set_title('Initial RAG')
 
-graph.show_rag(labels, g, img)
-plt.title('RAG after hierarchical merging')
+labels2 = graph.merge_hierarchical(
+    labels,
+    g,
+    thresh=0.08,
+    rag_copy=False,
+    in_place_merge=True,
+    merge_func=merge_boundary,
+    weight_func=weight_boundary,
+)
 
-plt.figure()
+graph.show_rag(labels, g, img, ax=axes[0, 1])
+axes[0, 1].set_title('RAG after hierarchical merging')
+
 out = color.label2rgb(labels2, img, kind='avg', bg_label=0)
-plt.imshow(out)
-plt.title('Final segmentation')
+axes[1, 0].imshow(out)
+axes[1, 0].set_title('Final segmentation')
+
+axes[1, 1].axis('off')
 
 plt.show()

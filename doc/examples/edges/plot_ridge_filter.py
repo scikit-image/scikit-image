@@ -57,7 +57,8 @@ cmap = plt.cm.gray
 plt.rcParams["axes.titlesize"] = "medium"
 axes = plt.figure(figsize=(10, 4)).subplots(2, 9)
 for i, black_ridges in enumerate([True, False]):
-    for j, (func, sigmas) in enumerate([
+    for j, (func, sigmas) in enumerate(
+        [
             (original, None),
             (meijering, [1]),
             (meijering, range(1, 5)),
@@ -67,7 +68,8 @@ for i, black_ridges in enumerate([True, False]):
             (frangi, range(1, 5)),
             (hessian, [1]),
             (hessian, range(1, 5)),
-    ]):
+        ]
+    ):
         result = func(image, black_ridges=black_ridges, sigmas=sigmas)
         axes[i, j].imshow(result, cmap=cmap)
         if i == 0:

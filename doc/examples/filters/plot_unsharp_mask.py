@@ -27,8 +27,7 @@ result_1 = unsharp_mask(image, radius=1, amount=1)
 result_2 = unsharp_mask(image, radius=5, amount=2)
 result_3 = unsharp_mask(image, radius=20, amount=1)
 
-fig, axes = plt.subplots(nrows=2, ncols=2,
-                         sharex=True, sharey=True, figsize=(10, 10))
+fig, axes = plt.subplots(nrows=2, ncols=2, sharex=True, sharey=True, figsize=(10, 10))
 ax = axes.ravel()
 
 ax[0].imshow(image, cmap=plt.cm.gray)

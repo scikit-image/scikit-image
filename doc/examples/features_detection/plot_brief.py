@@ -11,10 +11,16 @@ provide rotation-invariance. Scale-invariance can be achieved by detecting and
 extracting features at different scales.
 
 """
+
 from skimage import data
 from skimage import transform
-from skimage.feature import (match_descriptors, corner_peaks, corner_harris,
-                             plot_matches, BRIEF)
+from skimage.feature import (
+    match_descriptors,
+    corner_peaks,
+    corner_harris,
+    plot_matched_features,
+    BRIEF,
+)
 from skimage.color import rgb2gray
 import matplotlib.pyplot as plt
 
@@ -24,12 +30,9 @@ tform = transform.AffineTransform(scale=(1.2, 1.2), translation=(0, -100))
 img2 = transform.warp(img1, tform)
 img3 = transform.rotate(img1, 25)
 
-keypoints1 = corner_peaks(corner_harris(img1), min_distance=5,
-                          threshold_rel=0.1)
-keypoints2 = corner_peaks(corner_harris(img2), min_distance=5,
-                          threshold_rel=0.1)
-keypoints3 = corner_peaks(corner_harris(img3), min_distance=5,
-                          threshold_rel=0.1)
+keypoints1 = corner_peaks(corner_harris(img1), min_distance=5, threshold_rel=0.1)
+keypoints2 = corner_peaks(corner_harris(img2), min_distance=5, threshold_rel=0.1)
+keypoints3 = corner_peaks(corner_harris(img3), min_distance=5, threshold_rel=0.1)
 
 extractor = BRIEF()
 
@@ -52,11 +55,25 @@ fig, ax = plt.subplots(nrows=2, ncols=1)
 
 plt.gray()
 
-plot_matches(ax[0], img1, img2, keypoints1, keypoints2, matches12)
+plot_matched_features(
+    img1,
+    img2,
+    keypoints0=keypoints1,
+    keypoints1=keypoints2,
+    matches=matches12,
+    ax=ax[0],
+)
 ax[0].axis('off')
 ax[0].set_title("Original Image vs. Transformed Image")
 
-plot_matches(ax[1], img1, img3, keypoints1, keypoints3, matches13)
+plot_matched_features(
+    img1,
+    img3,
+    keypoints0=keypoints1,
+    keypoints1=keypoints3,
+    matches=matches13,
+    ax=ax[1],
+)
 ax[1].axis('off')
 ax[1].set_title("Original Image vs. Transformed Image")
 

@@ -13,6 +13,7 @@ border to be the pixel values in the original image. These maximal pixels will
 get dilated in order to reconstruct the background image.
 
 """
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -35,11 +36,9 @@ dilated = reconstruction(seed, mask, method='dilation')
 # Subtracting the dilated image leaves an image with just the coins and a
 # flat, black background, as shown below.
 
-fig, (ax0, ax1, ax2) = plt.subplots(nrows=1,
-                                    ncols=3,
-                                    figsize=(8, 2.5),
-                                    sharex=True,
-                                    sharey=True)
+fig, (ax0, ax1, ax2) = plt.subplots(
+    nrows=1, ncols=3, figsize=(8, 2.5), sharex=True, sharey=True
+)
 
 ax0.imshow(image, cmap='gray')
 ax0.set_title('original image')

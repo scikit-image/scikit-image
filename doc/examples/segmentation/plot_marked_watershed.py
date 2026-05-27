@@ -46,8 +46,7 @@ gradient = rank.gradient(denoised, disk(2))
 labels = watershed(gradient, markers)
 
 # display results
-fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(8, 8),
-                         sharex=True, sharey=True)
+fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(8, 8), sharex=True, sharey=True)
 ax = axes.ravel()
 
 ax[0].imshow(image, cmap=plt.cm.gray)
@@ -60,7 +59,7 @@ ax[2].imshow(markers, cmap=plt.cm.nipy_spectral)
 ax[2].set_title("Markers")
 
 ax[3].imshow(image, cmap=plt.cm.gray)
-ax[3].imshow(labels, cmap=plt.cm.nipy_spectral, alpha=.5)
+ax[3].imshow(labels, cmap=plt.cm.nipy_spectral, alpha=0.5)
 ax[3].set_title("Segmented")
 
 for a in ax:

@@ -1,5 +1,4 @@
 # Makefile for Sphinx documentation
-#
 
 # You can set these variables from the command line.
 PYTHON        ?= python
@@ -14,25 +13,30 @@ PAPEROPT_letter = -D latex_paper_size=letter
 ALLSPHINXOPTS   = -d $(SPHINXCACHE) $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) source
 DEST            = build
 
-.PHONY: all help clean html dirhtml pickle json htmlhelp qthelp latex changes linkcheck doctest gitwash gh-pages release_notes
+MIGRATION_TPL = source/user_guide/skimage2_migration.rst.tpl
+
+.PHONY: all help clean api migration-doc migration-test html api dirhtml pickle json htmlhelp qthelp devhelp latex latexpdf changes linkcheck doctest gitwash
 
 all: html
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
-	@echo "  html      to make standalone HTML files"
-	@echo "  dirhtml   to make HTML files named index.html in directories"
-	@echo "  pickle    to make pickle files"
-	@echo "  json      to make JSON files"
-	@echo "  htmlhelp  to make HTML files and a HTML help project"
-	@echo "  qthelp    to make HTML files and a qthelp project"
-	@echo "  devhelp   to make HTML files and a Devhelp project"
-	@echo "  latex     to make LaTeX files, you can set PAPER=a4 or PAPER=letter"
-	@echo "  latexpdf  to make LaTeX files and run them through pdflatex"
-	@echo "  changes   to make an overview of all changed/added/deprecated items"
-	@echo "  linkcheck to check all external links for integrity"
-	@echo "  doctest   to run all doctests embedded in the documentation (if enabled)"
-	@echo "  gitwash   to update the gitwash documentation"
+	@echo "  html           to make standalone HTML files"
+	@echo "  dirhtml        to make HTML files named index.html in directories"
+	@echo "  pickle         to make pickle files"
+	@echo "  json           to make JSON files"
+	@echo "  htmlhelp       to make HTML files and a HTML help project"
+	@echo "  qthelp         to make HTML files and a qthelp project"
+	@echo "  devhelp        to make HTML files and a Devhelp project"
+	@echo "  latex          to make LaTeX files, you can set PAPER=a4 or PAPER=letter"
+	@echo "  latexpdf       to make LaTeX files and run them through pdflatex"
+	@echo "  changes        to make an overview of all changed/added/deprecated items"
+	@echo "  linkcheck      to check all external links for integrity"
+	@echo "  doctest        to run all doctests embedded in the documentation (if enabled)"
+	@echo "  gitwash        to update the gitwash documentation"
+	@echo "  api            to build the API docs"
+	@echo "  migration-doc  to build the skimage2 migration doc"
+	@echo "  migration-test to run the skimage2 migration string doctests"
 
 clean:
 	-rm -rf $(DEST)
@@ -45,21 +49,20 @@ api:
 	$(PYTHON) tools/build_modref_templates.py
 	@echo "Build API docs...done."
 
-release_notes:
-	@echo "Copying release notes"
-	@tail -n +4 release/release_$$(\
-		ls release/release_*.*.* \
-			| sed s:release/release_:: \
-			| sort -nrt. -k1,1 -k2,2 \
-			| head -n 1) \
-		> release/_release_notes_for_docs.rst
+migration-doc: $(MIGRATION_TPL)
+	@echo -n "Build migration doc..."
+	$(PYTHON) tools/write_migration_guide.py $<
+	@echo "done."
 
-html: api release_notes
+migration-test:
+	@echo -n "Run migration tests..."
+	$(PYTHON) tools/run_migration_doctests.py
+	@echo "done."
+
+html: migration-doc api
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(DEST)/html
-	cp -r source/plots $(DEST)/html
 	@echo
 	@echo "Build finished. The HTML pages are in build/html."
-	$(PYTHON) source/random_gallery.py
 
 dirhtml:
 	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(DEST)/dirhtml
@@ -128,9 +131,6 @@ doctest:
 	$(SPHINXBUILD) -b doctest $(ALLSPHINXOPTS) $(DEST)/doctest
 	@echo "Testing of doctests in the sources finished, look at the " \
 	      "results in build/doctest/output.txt."
-
-gh-pages:
-	$(PYTHON) gh-pages.py
 
 gitwash:
 	$(PYTHON) tools/gitwash/gitwash_dumper.py source scikit-image \

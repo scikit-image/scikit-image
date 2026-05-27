@@ -7,16 +7,12 @@ except ImportError:
     pass
 
 
-class SetMetricsSuite(object):
+class SetMetricsSuite:
     shape = (6, 6)
     coords_a = np.zeros(shape, dtype=bool)
     coords_b = np.zeros(shape, dtype=bool)
 
     def setup(self):
-        try:
-            from skimage.metrics import hausdorff_distance, hausdorff_pair
-        except ImportError:
-            raise NotImplementedError("Hausdorff metrics unavailable")
         points_a = (1, 0)
         points_b = (5, 2)
         self.coords_a[points_a] = True

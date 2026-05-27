@@ -6,7 +6,8 @@ from skimage import util
 
 class NoiseSuite:
     """Benchmark for noise routines in scikit-image."""
-    params = ([0., 0.50, 1.], [0., 0.50, 1.])
+
+    params = ([0.0, 0.50, 1.0], [0.0, 0.50, 1.0])
 
     def setup(self, *_):
         self.image = np.zeros((5000, 5000))

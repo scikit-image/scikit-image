@@ -1,0 +1,123 @@
+name: Test Linux
+
+on: [push, pull_request, merge_group]
+
+concurrency:
+  # Cancel previous workflows of the same PR, but only for PRs
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # GH does not support creating separate jobs out of a matrix,
+  # so this is a workaround
+  build-linux-312:
+    uses: ./.github/workflows/_build_linux_for_python_x.yaml
+    with:
+      python-version: 3.12
+
+  build-linux-313:
+    uses: ./.github/workflows/_build_linux_for_python_x.yaml
+    with:
+      python-version: 3.13
+
+  build-linux-314:
+    uses: ./.github/workflows/_build_linux_for_python_x.yaml
+    with:
+      python-version: 3.14
+
+  build-linux-314t:
+    uses: ./.github/workflows/_build_linux_for_python_x.yaml
+    with:
+      python-version: 3.14t
+
+  test-linux-312:
+    name: test-linux-cp3.12-${{ matrix.OPTIONS_NAME }}
+    needs: [build-linux-312]
+    strategy:
+      fail-fast: false
+      matrix:
+        OPTIONS_NAME: ["main"]
+
+        include:
+          # Dependency options for setup-test-env.sh
+          - PIP_FLAGS: "--pre"
+            OPTIONS_NAME: "pre"
+          - OPTIONAL_DEPS: 1
+            OPTIONS_NAME: "optional-deps"
+          - PYTHONOPTIMIZE: 2
+            WITHOUT_POOCH: 1
+            OPTIONS_NAME: "optimize-and-no-pooch"
+          - INSTALL_FROM_SDIST: 1
+            OPTIONS_NAME: "install-from-sdist"
+          - MINIMUM_REQUIREMENTS: 1
+            OPTIONAL_DEPS: 0
+            EAGER_IMPORT: 1
+            OPTIONS_NAME: "mini-req-eager-import"
+          - MINIMUM_REQUIREMENTS: 1
+            OPTIONAL_DEPS: 1
+            OPTIONS_NAME: "mini-req-optional-deps"
+
+    uses: ./.github/workflows/_test_linux_for_python_x.yaml
+    with:
+      python-version: 3.12
+      OPTIONS_NAME: ${{ matrix.OPTIONS_NAME }}
+      MINIMUM_REQUIREMENTS: ${{ matrix.MINIMUM_REQUIREMENTS }}
+      OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
+      EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
+      WITHOUT_POOCH: ${{ matrix.WITHOUT_POOCH }}
+      PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
+      PYTHONOPTIMIZE: ${{ matrix.PYTHONOPTIMIZE }}
+      INSTALL_FROM_SDIST: ${{ matrix.INSTALL_FROM_SDIST }}
+
+  test-linux-313:
+    name: test-linux-cp3.13-main
+    needs: [build-linux-313]
+    uses: ./.github/workflows/_test_linux_for_python_x.yaml
+    with:
+      python-version: 3.13
+      OPTIONS_NAME: "main"
+
+  test-linux-314:
+    name: test-linux-cp3.14-main
+    needs: [build-linux-314]
+    uses: ./.github/workflows/_test_linux_for_python_x.yaml
+    with:
+      python-version: 3.14
+      OPTIONS_NAME: "main"
+
+  test-linux-314t:
+    name: test-linux-cp3.14t-main
+    needs: [build-linux-314t]
+    uses: ./.github/workflows/_test_linux_for_python_x.yaml
+    with:
+      python-version: 3.14t
+      OPTIONS_NAME: "main"
+
+  report-failures:
+    runs-on: ubuntu-latest
+    needs:
+      [
+        build-linux-312,
+        build-linux-313,
+        build-linux-314,
+        build-linux-314t,
+        test-linux-312,
+        test-linux-313,
+        test-linux-314,
+        test-linux-314t,
+      ]
+    if: ${{ always() && github.ref == 'refs/heads/main' && contains(needs.*.result, 'failure') }}
+    permissions:
+      issues: write
+    steps:
+      - name: "Job has failed: reporting"
+        uses: JasonEtco/create-an-issue@1b14a70e4d8dc185e5cc76d3bec9eab20257b2c5 # v2.9.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BUILD_TYPE: "linux tests"
+        with:
+          filename: .github/MAIN_FAIL_TEMPLATE.md
+          update_existing: true
