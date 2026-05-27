@@ -7,7 +7,7 @@ import itertools
 import warnings
 
 import numpy as np
-from scipy.fft import fftn, ifftn, fftfreq
+from scipy.fft import fftn, ifftn, fftfreq, next_fast_len
 from scipy import ndimage as ndi
 
 from ._masked_phase_cross_correlation import _masked_phase_cross_correlation
@@ -198,6 +198,19 @@ def _disambiguate_shift(reference_image, moving_image, shift):
 
     return np.array(real_shift_acc)
 
+def pad_to_fast(arr):
+    """
+    FFT is more efficient for composites of prime numbers.
+    Pad to the next fast shape
+    :param arr:
+    :return:
+    """
+    fast_shape = tuple(
+        next_fast_len(s) for s in arr.shape
+    )
+
+    pad_width = [(0, s - a) for a, s in zip(arr.shape, fast_shape)]
+    return np.pad(arr, pad_width, mode="constant")
 
 def phase_cross_correlation(
     reference_image,
@@ -332,8 +345,9 @@ def phase_cross_correlation(
         target_freq = moving_image
     # real data needs to be fft'd.
     elif space.lower() == 'real':
-        src_freq = fftn(reference_image)
-        target_freq = fftn(moving_image)
+        # pad to fast shape and cast to float32
+        src_freq = fftn(pad_to_fast(reference_image.astype(np.float32, copy=False)))
+        target_freq = fftn(pad_to_fast(moving_image.astype(np.float32, copy=False)))
     else:
         raise ValueError('space argument must be "real" of "fourier"')
 
