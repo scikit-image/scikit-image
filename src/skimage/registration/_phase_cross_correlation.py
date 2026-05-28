@@ -198,17 +198,20 @@ def _disambiguate_shift(reference_image, moving_image, shift):
 
     return np.array(real_shift_acc)
 
-def pad_to_fast(arr):
-    """
-    FFT is more efficient for composites of prime numbers.
-    Pad to the next fast shape
-    :param arr:
-    :return:
-    """
-    fast_shape = tuple(
-        next_fast_len(s) for s in arr.shape
-    )
+def _pad_to_fast(arr):
+    """Pad array to the next FFT-friendly size along each axis.
 
+    Parameters
+    ----------
+    arr : ndarray
+        Input array.
+
+    Returns
+    -------
+    ndarray
+        Zero-padded array whose shape is 5-smooth (composed of factors 2, 3, 5).
+    """
+    fast_shape = tuple(next_fast_len(s) for s in arr.shape)
     pad_width = [(0, s - a) for a, s in zip(arr.shape, fast_shape)]
     return np.pad(arr, pad_width, mode="constant")
 
