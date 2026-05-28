@@ -24,7 +24,9 @@ xfail_without_pywt = pytest.mark.xfail(
 
 test_img = img_as_float(camera())
 test_img_color = img_as_float(chelsea())
-test_img_3d = img_as_float(binary_blobs(64, n_dim=3)) / 2
+# Reproduce skimage behavior.
+_blobs = binary_blobs((64, 64, 64), blob_size=512 * 64)
+test_img_3d = img_as_float(_blobs) / 2
 noisy_img = random_noise(test_img, mode='gaussian', var=0.01)
 noisy_img_color = random_noise(test_img_color, mode='gaussian', var=0.01)
 noisy_img_3d = random_noise(test_img_3d, mode='gaussian', var=0.1)
