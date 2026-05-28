@@ -1,5 +1,4 @@
 from .binary import binary_closing, binary_dilation, binary_erosion, binary_opening
-from ._gray import black_tophat, closing, dilation, erosion, opening, white_tophat
 
 from .isotropic import (
     isotropic_erosion,
