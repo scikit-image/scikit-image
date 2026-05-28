@@ -349,8 +349,8 @@ def phase_cross_correlation(
     # real data needs to be fft'd.
     elif space.lower() == 'real':
         # pad to fast shape and cast to float32
-        src_freq = fftn(pad_to_fast(reference_image.astype(np.float32, copy=False)))
-        target_freq = fftn(pad_to_fast(moving_image.astype(np.float32, copy=False)))
+        src_freq = fftn(_pad_to_fast(reference_image.astype(np.float32, copy=False)))
+        target_freq = fftn(_pad_to_fast(moving_image.astype(np.float32, copy=False)))
     else:
         raise ValueError('space argument must be "real" of "fourier"')
 
