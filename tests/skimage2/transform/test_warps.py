@@ -8,7 +8,7 @@ from _skimage2._shared.utils import _supported_float_type
 from _skimage2.color.colorconv import rgb2gray
 from _skimage2.data import checkerboard, astronaut
 from _skimage2.draw.draw import circle_perimeter_aa
-from _skimage2.feature._peak import peak_local_max
+from _skimage2.feature import peak_local_max
 from _skimage2.transform._warps import (
     _stackcopy,
     _linear_polar_mapping,
