@@ -3,6 +3,7 @@ from collections.abc import Iterable
 import numpy as np
 from scipy import ndimage as ndi
 
+from ..util.dtype import img_as_float
 from .._shared.utils import _supported_float_type, convert_to_float
 
 
@@ -256,7 +257,6 @@ def difference_of_gaussians(
         cval=cval,
         channel_axis=channel_axis,
         truncate=truncate,
-        preserve_range=False,
     )
 
     im2 = gaussian(
@@ -266,7 +266,6 @@ def difference_of_gaussians(
         cval=cval,
         channel_axis=channel_axis,
         truncate=truncate,
-        preserve_range=False,
     )
 
     return im1 - im2
