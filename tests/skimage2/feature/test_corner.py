@@ -464,19 +464,30 @@ def test_square_image():
 
     # Harris
     results = peak_local_max(
-        corner_harris(im, method='k'), min_distance=10, threshold_rel=0
+        corner_harris(im, method='k'),
+        exclude_border=10,
+        min_distance=10,
+        threshold_rel=0,
     )
     # interest at corner
     assert len(results) == 1
 
     results = peak_local_max(
-        corner_harris(im, method='eps'), min_distance=10, threshold_rel=0
+        corner_harris(im, method='eps'),
+        exclude_border=10,
+        min_distance=10,
+        threshold_rel=0,
     )
     # interest at corner
     assert len(results) == 1
 
     # Shi-Tomasi
-    results = peak_local_max(corner_shi_tomasi(im), min_distance=10, threshold_rel=0)
+    results = peak_local_max(
+        corner_shi_tomasi(im),
+        exclude_border=10,
+        min_distance=10,
+        threshold_rel=0,
+    )
     # interest at corner
     assert len(results) == 1
 
@@ -514,23 +525,35 @@ def test_noisy_square_image():
     im = im + rng.uniform(size=im.shape) * 0.2
 
     # Moravec
-    results = peak_local_max(corner_moravec(im), min_distance=10, threshold_rel=0)
+    results = peak_local_max(corner_moravec(im),
+                             exclude_border=10,
+                             min_distance=10,
+                             threshold_rel=0)
     # undefined number of interest points
     assert results.any()
 
     # Harris
     results = peak_local_max(
-        corner_harris(im, method='k'), min_distance=10, threshold_rel=0
+        corner_harris(im, method='k'),
+        exclude_border=10,
+        min_distance=10,
+        threshold_rel=0,
     )
     assert len(results) == 1
     results = peak_local_max(
-        corner_harris(im, method='eps'), min_distance=10, threshold_rel=0
+        corner_harris(im, method='eps'),
+        exclude_border=10,
+        min_distance=10,
+        threshold_rel=0,
     )
     assert len(results) == 1
 
     # Shi-Tomasi
     results = peak_local_max(
-        corner_shi_tomasi(im, sigma=1.5), min_distance=10, threshold_rel=0
+        corner_shi_tomasi(im, sigma=1.5),
+        exclude_border=10,
+        min_distance=10,
+        threshold_rel=0,
     )
     assert len(results) == 1
 
@@ -543,11 +566,17 @@ def test_squared_dot():
     # Moravec fails
 
     # Harris
-    results = peak_local_max(corner_harris(im), min_distance=10, threshold_rel=0)
+    results = peak_local_max(corner_harris(im),
+                             exclude_border=10,
+                             min_distance=10,
+                             threshold_rel=0)
     assert (results == np.array([[6, 6]])).all()
 
     # Shi-Tomasi
-    results = peak_local_max(corner_shi_tomasi(im), min_distance=10, threshold_rel=0)
+    results = peak_local_max(corner_shi_tomasi(im),
+                             exclude_border=10,
+                             min_distance=10,
+                             threshold_rel=0)
     assert (results == np.array([[6, 6]])).all()
 
 
@@ -747,7 +776,10 @@ def test_corner_fast_astronaut():
             [223, 375],
         ]
     )
-    actual = corner_peaks(corner_fast(img, 12, 0.3), min_distance=10, threshold_rel=0)
+    actual = corner_peaks(corner_fast(img, 12, 0.3),
+                          exclude_border=10,
+                          min_distance=10,
+                          threshold_rel=0)
     assert_array_equal(actual, expected)
 
 
@@ -767,7 +799,11 @@ def test_corner_orientations_even_shape_error():
 def test_corner_orientations_astronaut():
     img = rgb2gray(data.astronaut())
     corners = corner_peaks(
-        corner_fast(img, 11, 0.35), min_distance=10, threshold_abs=0, threshold_rel=0.1
+        corner_fast(img, 11, 0.35),
+        exclude_border=10,
+        min_distance=10,
+        threshold_abs=0,
+        threshold_rel=0.1
     )
     expected = np.array(
         [

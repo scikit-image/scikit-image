@@ -1127,7 +1127,7 @@ def corner_peaks(
     min_distance=1,
     threshold_abs=None,
     threshold_rel=None,
-    exclude_border=True,
+    exclude_border=1,
     indices=True,
     num_peaks=np.inf,
     footprint=None,
@@ -1217,6 +1217,7 @@ def corner_peaks(
         footprint=footprint,
         labels=labels,
         num_peaks_per_label=num_peaks_per_label,
+        p_norm=p_norm,
     )
 
     if len(coords):
