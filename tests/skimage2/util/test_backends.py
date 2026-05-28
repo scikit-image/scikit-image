@@ -136,9 +136,9 @@ def test_notification_raised(fake_backends):
 @pytest.mark.parametrize(
     "func, expected",
     [
-        (skimage.metrics.mean_squared_error, "skimage.metrics"),
-        (skimage.io.concatenate_images, "skimage.io"),
-        (skimage.filters.rank.entropy, "skimage.filters.rank"),
+        (_skimage2.metrics.mean_squared_error, "_skimage2.metrics"),
+        (_skimage2.io.concatenate_images, "_skimage2.io"),
+        (_skimage2.filters.rank.entropy, "_skimage2.filters.rank"),
     ],
 )
 def test_module_name_determination(func, expected):
