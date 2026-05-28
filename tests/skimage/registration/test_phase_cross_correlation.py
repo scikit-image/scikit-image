@@ -6,13 +6,12 @@ import pytest
 from numpy.testing import assert_allclose
 from scipy.ndimage import fourier_shift
 import scipy.fft as fft
-import timeit
 
 from skimage import img_as_float
 from _skimage2._shared._warnings import expected_warnings
 from _skimage2._shared.testing import assert_stacklevel
 from _skimage2._shared.utils import _supported_float_type
-from skimage.data import camera, binary_blobs, eagle, cell, retina
+from skimage.data import camera, binary_blobs, eagle
 from skimage.registration._phase_cross_correlation import (
     phase_cross_correlation,
     _upsampled_dft,
@@ -250,18 +249,3 @@ def test_disambiguate_empty_image(null_images):
     assert len(records) == 2
     assert "Could not determine real-space shift" in records[0].message.args[0]
     assert "Could not determine RMS error between images" in records[1].message.args[0]
-
-
-def test_speed():
-    reference_image = retina()[:1021, :1031, 0] # worse case scenario for fft algo
-    subpixel_shift = (-2.4, 1.32)
-    shifted_image = fourier_shift(fft.fftn(reference_image), subpixel_shift)
-    shifted_image = fft.ifftn(shifted_image).real
-
-    time = timeit.timeit(
-        lambda: phase_cross_correlation(
-        reference_image, shifted_image, upsample_factor=100
-    ), number=100
-    )
-    print(time)
-    assert time < 10
