@@ -62,7 +62,7 @@ def hough_line_peaks(
     2
 
     """
-    from ..feature.peak import _prominent_peaks
+    from ..feature._peaks import _prominent_peaks
 
     min_angle = min(min_angle, hspace.shape[1])
     h, a, d = _prominent_peaks(
@@ -367,7 +367,7 @@ def hough_circle_peaks(
     Otherwise, circles will be returned in the order of decreasing voting
     number.
     """
-    from ..feature.peak import _prominent_peaks
+    from ..feature._peaks import _prominent_peaks
 
     r = []
     cx = []
