@@ -42,7 +42,7 @@ __all__ = [
     'vortex',
 ]
 
-from ._synthetic import binary_blobs
+from ._binary_blobs import binary_blobs
 from ._fetchers import (
     astronaut,
     brain,
