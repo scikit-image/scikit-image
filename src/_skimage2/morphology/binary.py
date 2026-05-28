@@ -284,7 +284,6 @@ def binary_opening(image, footprint=None, out=None, *, mode='ignore'):
             action="ignore",
             message="`binary_(dilation|erosion)` is deprecated",
             category=FutureWarning,
-            module="skimage",
         )
         tmp = binary_erosion(image, footprint, mode=mode)
         out = binary_dilation(tmp, footprint, out=out, mode=mode)
@@ -357,7 +356,6 @@ def binary_closing(image, footprint=None, out=None, *, mode='ignore'):
             action="ignore",
             message="`binary_(dilation|erosion)` is deprecated",
             category=FutureWarning,
-            module="skimage",
         )
         tmp = binary_dilation(image, footprint, mode=mode)
         out = binary_erosion(tmp, footprint, out=out, mode=mode)
