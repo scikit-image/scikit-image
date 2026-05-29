@@ -50,7 +50,9 @@ def imread(fname, as_gray=False):
         if is_tiff_file:
             img = tifffile.imread(fname)
         else:
-            img = iio.imread(fname)
+            img = np.asarray(iio.imread(fname))
+            if not img.flags['WRITEABLE']:
+                img = img.copy()
 
     if not hasattr(img, 'ndim'):
         return img
