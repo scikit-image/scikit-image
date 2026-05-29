@@ -4,7 +4,11 @@ from scipy import ndimage as ndi
 from scipy import sparse
 import math
 
-from .. import measure, segmentation, util, color
+from ..measure._regionprops import regionprops
+from ..segmentation.slic_superpixels import slic
+from ..segmentation.boundaries import mark_boundaries
+from ..util.dtype import img_as_float
+from ..color.colorconv import rgb2gray
 from _skimage2._shared.version_requirements import require
 
 
@@ -527,7 +531,7 @@ def show_rag(
 
     if ax is None:
         fig, ax = plt.subplots()
-    out = util.img_as_float(image, force_copy=True)
+    out = img_as_float(image, force_copy=True)
 
     if img_cmap is None:
         if image.ndim < 3 or image.shape[2] not in [3, 4]:
@@ -537,7 +541,7 @@ def show_rag(
         out = image[:, :, :3]
     else:
         img_cmap = plt.get_cmap(img_cmap)
-        out = color.rgb2gray(image)
+        out = rgb2gray(image)
         # Ignore the alpha channel
         out = img_cmap(out)[:, :, :3]
 
@@ -553,7 +557,7 @@ def show_rag(
         offset += 1
 
     rag_labels = map_array[labels]
-    regions = measure.regionprops(rag_labels)
+    regions = regionprops(rag_labels)
 
     for (n, data), region in zip(rag.nodes(data=True), regions):
         data['centroid'] = tuple(map(int, region['centroid']))
@@ -561,7 +565,7 @@ def show_rag(
     cc = colors.ColorConverter()
     if border_color is not None:
         border_color = cc.to_rgb(border_color)
-        out = segmentation.mark_boundaries(out, rag_labels, color=border_color)
+        out = mark_boundaries(out, rag_labels, color=border_color)
 
     ax.imshow(out)
 

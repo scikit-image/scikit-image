@@ -9,8 +9,7 @@ from ..util.dtype import img_as_float
 from _skimage2._shared import utils
 from _skimage2._shared.utils import _supported_float_type, warn
 from ._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
-from .. import color
-from ..color.colorconv import ycbcr_from_rgb
+from ..color.colorconv import rgb2gray, rgb2ycbcr, ycbcr2rgb, ycbcr_from_rgb
 
 
 __doctest_requires__ = {("denoise_wavelet", "estimate_sigma"): ["pywt"]}
@@ -991,7 +990,7 @@ def denoise_wavelet(
     )
     if multichannel:
         if convert2ycbcr:
-            out = color.rgb2ycbcr(image)
+            out = rgb2ycbcr(image)
             # convert user-supplied sigmas to the new colorspace as well
             if rescale_sigma:
                 sigma = _rescale_sigma_rgb2ycbcr(sigma)
@@ -1018,7 +1017,7 @@ def denoise_wavelet(
                 )
                 out[..., i] = out[..., i] * scale_factor
                 out[..., i] += _min
-            out = color.ycbcr2rgb(out)
+            out = ycbcr2rgb(out)
         else:
             out = np.empty_like(image)
             for c in range(image.shape[-1]):

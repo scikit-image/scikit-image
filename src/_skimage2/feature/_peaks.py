@@ -2,7 +2,8 @@ import numpy as np
 import scipy.ndimage as ndi
 from scipy.spatial import cKDTree, distance
 
-from .. import measure
+from ..measure._label import label
+from ..measure._regionprops import regionprops
 from .._shared._warnings import warn_external
 
 
@@ -484,8 +485,8 @@ def _prominent_peaks(
     img *= mask
     img_t = img > threshold
 
-    label_img = measure.label(img_t)
-    props = measure.regionprops(label_img, img_max)
+    label_img = label(img_t)
+    props = regionprops(label_img, img_max)
 
     # Sort the list of peaks by intensity, not left-right, so larger peaks
     # in Hough space cannot be arbitrarily suppressed by smaller neighbors

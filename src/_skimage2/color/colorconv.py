@@ -62,7 +62,8 @@ from _skimage2._shared.utils import (
     reshape_nd,
     slice_at_axis,
 )
-from ..util import dtype, dtype_limits
+from ..util import dtype as util_dtype
+from ..util.dtype import dtype_limits
 
 # TODO: when minimum numpy dependency is 1.25 use:
 # np..exceptions.AxisError instead of AxisError
@@ -171,9 +172,9 @@ def _prepare_colorarray(arr, force_copy=False, *, channel_axis=-1):
 
     float_dtype = _supported_float_type(arr.dtype)
     if float_dtype == np.float32:
-        _func = dtype.img_as_float32
+        _func = util_dtype.img_as_float32
     else:
-        _func = dtype.img_as_float64
+        _func = util_dtype.img_as_float64
     return _func(arr, force_copy=force_copy)
 
 
@@ -236,9 +237,9 @@ def rgba2rgb(rgba, background=(1, 1, 1), *, channel_axis=-1):
 
     float_dtype = _supported_float_type(arr.dtype)
     if float_dtype == np.float32:
-        arr = dtype.img_as_float32(arr)
+        arr = util_dtype.img_as_float32(arr)
     else:
-        arr = dtype.img_as_float64(arr)
+        arr = util_dtype.img_as_float64(arr)
 
     background = np.ravel(background).astype(arr.dtype)
     if len(background) != 3:
@@ -1958,9 +1959,9 @@ def _prepare_lab_array(arr, force_copy=True):
         raise ValueError('Input image has less than 3 channels.')
     float_dtype = _supported_float_type(arr.dtype)
     if float_dtype == np.float32:
-        _func = dtype.img_as_float32
+        _func = util_dtype.img_as_float32
     else:
-        _func = dtype.img_as_float64
+        _func = util_dtype.img_as_float64
     return _func(arr, force_copy=force_copy)
 
 

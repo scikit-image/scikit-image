@@ -13,9 +13,9 @@ from _skimage2._shared.utils import (
     DEPRECATED,
     deprecate_parameter,
 )
-from ..transform import integral_image
+from ..transform.integral import integral_image
 from ._hessian_det_appx import _hessian_matrix_det
-from . import peak_local_max
+from ._peaks import peak_local_max
 
 # This basic blob detection algorithm is based on:
 # http://www.cs.utah.edu/~jfishbau/advimproc/project1/ (04.04.2013)

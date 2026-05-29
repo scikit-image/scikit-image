@@ -5,8 +5,8 @@ import numpy as np
 
 from ._footprints import _footprint_is_sequence
 from .._shared.utils import deprecate_func
-
-from .. import draw, morphology
+from ..draw.draw import ellipse as _draw_ellipse
+from ._grayscale_operators import dilation
 
 
 # Precomputed ball and disk decompositions were saved as 2D arrays where the
@@ -70,7 +70,7 @@ def footprint_from_sequence(footprints):
     shape = _shape_from_sequence(footprints)
     imag = np.zeros(shape, dtype=bool)
     imag[tuple(s // 2 for s in shape)] = 1
-    return morphology.dilation(imag, footprints)
+    return dilation(imag, footprints)
 
 
 def footprint_rectangle(shape, *, dtype=np.uint8, decomposition=None):
@@ -684,7 +684,7 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
     """
     if decomposition is None:
         footprint = np.zeros((2 * height + 1, 2 * width + 1), dtype=dtype)
-        rows, cols = draw.ellipse(height, width, height + 1, width + 1)
+        rows, cols = _draw_ellipse(height, width, height + 1, width + 1)
         footprint[rows, cols] = 1
         return footprint
     elif decomposition == 'crosses':
