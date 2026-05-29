@@ -1,13 +1,13 @@
 import pathlib
 
 import numpy as np
+import tifffile
 import imageio.v3 as iio
 
 from _skimage2._shared._warnings import warn_external
 from ..exposure import is_low_contrast
 from ..color.colorconv import rgb2gray, rgba2rgb
 from ..io.manage_plugins import call_plugin, _hide_plugin_deprecation_warnings
-from ._plugins.tifffile_plugin import imread as imread_tiff
 from .util import file_or_url_context
 
 __all__ = [
@@ -38,11 +38,11 @@ def imread(fname, as_gray=False):
     if isinstance(fname, pathlib.Path):
         fname = str(fname.resolve())
 
-    is_tifffile = hasattr(fname, 'lower') and fname.lower().endswith(('.tiff', '.tif'))
+    is_tiff_file = hasattr(fname, 'lower') and fname.lower().endswith(('.tiff', '.tif'))
 
     with file_or_url_context(fname) as fname:
-        if is_tifffile:
-            img = imread_tiff(fname)
+        if is_tiff_file:
+            img = tifffile.imread(fname)
         else:
             img = iio.imread(fname)
 
@@ -91,6 +91,49 @@ def imread_collection(load_pattern, conserve_memory=True):
         )
 
 
+def _imsave_tiff(fname, arr):
+    """Load a tiff image to file.
+
+    Parameters
+    ----------
+    fname : str or file
+        File name or file-like object.
+    arr : ndarray
+        The array to write.
+    kwargs : keyword pairs, optional
+        Additional keyword arguments to pass through (see ``tifffile``'s
+        ``imwrite`` function).
+
+    Notes
+    -----
+    Provided by the tifffile library [1]_, and supports many
+    advanced image types including multi-page and floating-point.
+
+    This implementation will set ``photometric='RGB'`` when writing if the first
+    or last axis of `arr` has length 3 or 4. To override this, explicitly
+    pass the ``photometric`` kwarg.
+
+    This implementation will set ``planarconfig='SEPARATE'`` when writing if the
+    first axis of arr has length 3 or 4. To override this, explicitly
+    specify the ``planarconfig`` kwarg.
+
+    References
+    ----------
+    .. [1] https://pypi.org/project/tifffile/
+
+    """
+    kwargs = {}
+    if arr.shape[0] in [3, 4]:
+        kwargs['planarconfig'] = 'SEPARATE'
+        rgb = True
+    else:
+        rgb = arr.shape[-1] in [3, 4]
+    if rgb:
+        kwargs['photometric'] = 'RGB'
+
+    return tifffile.imwrite(fname, arr, **kwargs)
+
+
 def imsave(fname, arr, *, check_contrast=True):
     """Save an image to file.
 
@@ -103,13 +146,11 @@ def imsave(fname, arr, *, check_contrast=True):
     check_contrast : bool, optional
         Check for low contrast and print warning (default: True).
     """
-    plugin = None
-
     if isinstance(fname, pathlib.Path):
         fname = str(fname.resolve())
-    if plugin is None and hasattr(fname, 'lower'):
-        if fname.lower().endswith(('.tiff', '.tif')):
-            plugin = 'tifffile'
+
+    is_tiff_file = hasattr(fname, "lower") and fname.lower().endswith(('.tiff', '.tif'))
+
     if arr.dtype == bool:
         warn_external(
             f'{fname} is a boolean image: setting True to 255 and False to 0. '
@@ -121,4 +162,7 @@ def imsave(fname, arr, *, check_contrast=True):
         warn_external(f'{fname} is a low contrast image')
 
     with _hide_plugin_deprecation_warnings():
-        return call_plugin('imsave', fname, arr, plugin=plugin)
+        if is_tiff_file:
+            return _imsave_tiff(fname, arr)
+        else:
+            return iio.imwrite(fname, arr)
