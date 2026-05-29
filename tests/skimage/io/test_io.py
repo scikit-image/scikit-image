@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from skimage import io
-from _skimage2._shared.testing import assert_array_equal, fetch
+from _skimage2._shared.testing import assert_array_equal, fetch, assert_stacklevel
 from _skimage2._shared._dependency_checks import is_wasm
 from skimage.data import data_dir
 
@@ -37,6 +37,9 @@ def test_stack_basic():
 def test_stack_non_array():
     with pytest.raises(ValueError):
         io.push([[1, 2, 3]])
+
+
+# skimage.io.imread ------------------------------------------------------------
 
 
 def test_imread_file_url():
@@ -120,3 +123,69 @@ def test_failed_temporary_file(monkeypatch, error_class):
         )
         with pytest.raises(error_class):
             io.imread(image_url)
+
+
+def test_imread_as_gray():
+    img = io.imread(fetch('data/color.png'), as_gray=True)
+    assert img.ndim == 2
+    assert img.dtype == np.float64
+    assert type(img) is np.ndarray
+
+    img = io.imread(fetch('data/camera.png'), as_gray=True)
+    # check that conversion does not happen for a gray image
+    assert np.dtype(img.dtype).char in np.typecodes['AllInteger']
+
+
+def test_imread_palette():
+    img = io.imread(fetch('data/palette_color.png'))
+    assert img.ndim == 3
+
+
+def test_imread_truncated_jpg():
+    # imageio>2.0 uses Pillow / PIL to try and load the file.
+    # Oddly, PIL explicitly raises a OSError when the file read fails.
+    with pytest.raises(OSError, match=r"Truncated File Read"):
+        io.imread(fetch('data/truncated.jpg'))
+
+
+# skimage.io.imsave ------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "shape,dtype",
+    [
+        # float32, float64 can't be saved as PNG and raise
+        # uint32 is not roundtripping properly
+        ((10, 10), np.uint8),
+        ((10, 10), np.uint16),
+        ((10, 10, 2), np.uint8),
+        ((10, 10, 3), np.uint8),
+        ((10, 10, 4), np.uint8),
+    ],
+)
+def test_imsave_roundtrip(shape, dtype, tmp_path):
+    if np.issubdtype(dtype, np.floating):
+        min_ = 0
+        max_ = 1
+    else:
+        min_ = 0
+        max_ = np.iinfo(dtype).max
+    expected = np.linspace(
+        min_, max_, endpoint=True, num=np.prod(shape), dtype=dtype
+    )
+    expected = expected.reshape(shape)
+    file_path = tmp_path / "roundtrip.png"
+    io.imsave(file_path, expected)
+    actual = io.imread(file_path)
+    np.testing.assert_array_almost_equal(actual, expected)
+
+
+def test_imsave_bool_array():
+    with tempfile.NamedTemporaryFile(suffix='.png') as f:
+        fname = f.name
+
+    with pytest.warns(UserWarning, match=r'.* is a boolean image') as record:
+        a = np.zeros((5, 5), bool)
+        a[2, 2] = True
+        io.imsave(fname, a)
+    assert_stacklevel(record)
