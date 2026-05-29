@@ -99,7 +99,7 @@ def imread_collection(load_pattern, conserve_memory=True):
 
 
 def _imsave_tiff(fname, arr):
-    """Load a tiff image to file.
+    """Save a tiff image to file.
 
     Parameters
     ----------
@@ -107,9 +107,6 @@ def _imsave_tiff(fname, arr):
         File name or file-like object.
     arr : ndarray
         The array to write.
-    kwargs : keyword pairs, optional
-        Additional keyword arguments to pass through (see ``tifffile``'s
-        ``imwrite`` function).
 
     Notes
     -----
@@ -117,12 +114,12 @@ def _imsave_tiff(fname, arr):
     advanced image types including multi-page and floating-point.
 
     This implementation will set ``photometric='RGB'`` when writing if the first
-    or last axis of `arr` has length 3 or 4. To override this, explicitly
-    pass the ``photometric`` kwarg.
+    or last axis of `arr` has length 3 or 4. To override this, use
+    :func:`tifffile.imwrite` directly.
 
     This implementation will set ``planarconfig='SEPARATE'`` when writing if the
-    first axis of arr has length 3 or 4. To override this, explicitly
-    specify the ``planarconfig`` kwarg.
+    first axis of arr has length 3 or 4. To override this, use
+    :func:`tifffile.imwrite` directly.
 
     References
     ----------
