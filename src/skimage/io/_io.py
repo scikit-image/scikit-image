@@ -77,9 +77,8 @@ def imread_collection(load_pattern, conserve_memory=True):
     Parameters
     ----------
     load_pattern : str or list
-        List of objects to load. These are usually filenames, but may
-        vary depending on the currently active plugin. See :class:`ImageCollection`
-        for the default behaviour of this parameter.
+        Pattern string or list of strings to load. The filename path can be
+        absolute or relative. See :class:`ImageCollection` for more.
     conserve_memory : bool, optional
         If True, never keep more than one in memory at a specific
         time.  Otherwise, images will be cached once they are loaded.
