@@ -13,6 +13,8 @@ __dir__ = _skimage2.__dir__
 __getattr__ = _skimage2.__getattr__
 
 
+# Re-use the warning category defined on ``_skimage2`` so filters and test
+# harnesses can target ``ExperimentalAPIWarning`` consistently.
 warnings.warn(
     "Importing from the `skimage2` namespace is experimental. "
     "Its API is under development and considered unstable!",

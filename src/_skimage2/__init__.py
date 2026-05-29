@@ -52,12 +52,17 @@ import lazy_loader as _lazy
 
 __getattr__, *_ = _lazy.attach_stub(__name__, __file__)
 
+# Eager import: ``skimage2`` reads this attribute during its own import, before
+# lazy submodules are loaded, so it cannot be resolved via ``__getattr__``.
+from _skimage2._shared._warnings import ExperimentalAPIWarning
+
 
 # Don't use the `__all__` and `__dir__` returned by `attach_stubs` since that
 # one would expose utility functions we don't want to advertise in our
 # top-level module anymore.
 __all__ = [
     "__version__",
+    "ExperimentalAPIWarning",
     "color",
     "data",
     "draw",

@@ -18,7 +18,7 @@ _submodules = [
     'util',
 ]
 
-__all__ = _submodules + ['__version__']  # noqa: F822
+__all__ = _submodules + ['__version__', 'ExperimentalAPIWarning']  # noqa: F822
 
 from . import (
     color,
@@ -53,3 +53,5 @@ from .util.dtype import (
 )
 from .util.lookfor import lookfor
 from .data import data_dir
+# Used by ``skimage2`` on import; must be a real module attribute (see __init__.py).
+from ._shared._warnings import ExperimentalAPIWarning

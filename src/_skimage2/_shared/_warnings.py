@@ -6,7 +6,16 @@ import functools
 import os
 from pathlib import Path
 
-__all__ = ['all_warnings', 'expected_warnings', 'warn', 'warn_external']
+__all__ = ['all_warnings', 'expected_warnings', 'warn', 'warn_external', 'ExperimentalAPIWarning']
+
+
+class ExperimentalAPIWarning(UserWarning):
+    """Warning category for the experimental ``skimage2`` namespace.
+
+    Emitted when ``import skimage2`` is used. Defined here so both
+    ``_skimage2`` and ``skimage2`` share one warning type for filtering
+    (see ``pyproject.toml`` coverage omit rules).
+    """
 
 
 # A version of `warnings.warn` with a default stacklevel of 2.
