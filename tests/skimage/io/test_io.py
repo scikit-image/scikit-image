@@ -3,6 +3,7 @@ import pathlib
 import tempfile
 
 import numpy as np
+from numpy.testing import assert_allclose
 import pytest
 
 from skimage import io
@@ -148,6 +149,13 @@ def test_imread_truncated_jpg():
         io.imread(fetch('data/truncated.jpg'))
 
 
+def test_imread_bilevel():
+    expected = np.zeros((10, 10), bool)
+    expected[::2] = 1
+    img = io.imread(fetch('data/checker_bilevel.png'))
+    assert_array_equal(img.astype(bool), expected)
+
+
 # skimage.io.imsave ------------------------------------------------------------
 
 
@@ -180,12 +188,25 @@ def test_imsave_roundtrip(shape, dtype, tmp_path):
     np.testing.assert_array_almost_equal(actual, expected)
 
 
-def test_imsave_bool_array():
+@pytest.mark.parametrize("shape", [(10, 10), (10, 10, 3), (10, 10, 4)])
+def test_imsave_roundtrip_uint8(shape):
+    rng = np.random.RandomState(3174584926)
+    img = np.ones(shape, dtype=np.uint8) * rng.rand(*shape)
+    img = (img * 255).astype(np.uint8)
+    expected = img.astype(np.int32)
     with tempfile.NamedTemporaryFile(suffix='.png') as f:
         fname = f.name
 
+    io.imsave(fname, img)
+    actual = io.imread(fname)
+    assert_allclose(expected, actual)
+
+
+def test_imsave_bool_array():
+    a = np.zeros((5, 5), bool)
+    a[2, 2] = True
+    with tempfile.NamedTemporaryFile(suffix='.png') as f:
+        fname = f.name
     with pytest.warns(UserWarning, match=r'.* is a boolean image') as record:
-        a = np.zeros((5, 5), bool)
-        a[2, 2] = True
         io.imsave(fname, a)
     assert_stacklevel(record)
