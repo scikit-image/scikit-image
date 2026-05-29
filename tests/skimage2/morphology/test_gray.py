@@ -5,7 +5,12 @@ from numpy.testing import assert_allclose, assert_array_equal, assert_equal
 
 from _skimage2 import color, data, transform
 from _skimage2._shared.testing import fetch
-from _skimage2.morphology import footprints, footprint_rectangle
+from _skimage2.morphology import (
+    footprints,
+    footprint_rectangle,
+    mirror_footprint,
+    pad_footprint,
+)
 import _skimage2.morphology as morph
 from _skimage2.morphology._grayscale_operators import _SUPPORTED_MODES
 from _skimage2.util import img_as_uint, img_as_ubyte
@@ -35,65 +40,91 @@ gray_morphology_funcs = (
 )
 
 
+# Functions that require footprint mirroring for V1 compatibility.
+_v1_footprint_mirror_funcs = (
+    morph.dilation,
+    morph.closing,
+    morph.black_tophat,
+)
+
+
 class TestMorphology:
-    # These expected outputs were generated with skimage v0.22.0 + PR #6695
-    # using:
-    #
-    #   from _skimage2.morphology.tests.test_gray import TestMorphology
-    #   import numpy as np
-    #   output = TestMorphology()._build_expected_output()
-    #   np.savez_compressed('gray_morph_output.npz', **output)
+    # Ski2: gray_morph_output.npz is v1 regression data (mode='reflect').
+    # v2 default is mode='ignore'; see test_gray_morphology_ignore_default_*.
 
-    def _build_expected_output(self):
-        def square(n):
-            return footprint_rectangle((n, n))
+    # For generation of input reference values, see
+    # `tests/skimage/morphology/test_gray.py:TestMorphology.
 
-        footprints_2D = (
-            square,
-            footprints.diamond,
-            footprints.disk,
-            footprints.star,
-        )
-
+    @pytest.mark.parametrize(
+        "footprint_args",
+        [
+            ("square", lambda n: footprint_rectangle((n, n))),
+            ("diamond", footprints.diamond),
+            ("disk", footprints.disk),
+            ("star", footprints.star),
+        ],
+    )
+    @pytest.mark.parametrize("size", list(range(1, 4)))
+    @pytest.mark.parametrize("func", gray_morphology_funcs)
+    def test_reproduce_skimage_data_not_mirrored(self, footprint_args, size, func):
+        # Ski2: v1-compat — mode='reflect' matches skimage 0.22 reference data
+        # for functions that do not require mirroring of footprint.
         image = img_as_ubyte(
             transform.downscale_local_mean(color.rgb2gray(data.coffee()), (20, 20))
         )
 
-        output = {}
-        for n in range(1, 4):
-            for strel in footprints_2D:
-                for func in gray_morphology_funcs:
-                    key = f'{strel.__name__}_{n}_{func.__name__}'
-                    output[key] = func(image, strel(n))
+        footprint_name, footprint_func = footprint_args
+        key = f'{footprint_name}_{size}_{func.__name__}'
+        expected = dict(np.load(fetch('data/gray_morph_output.npz')))[key]
+        footprint = footprint_func(size)
 
-        return output
+        if func in _v1_footprint_mirror_funcs:
+            footprint = pad_footprint(footprint, pad_end=False)
+            footprint = mirror_footprint(footprint)
 
-    def test_gray_morphology(self):
-        expected = dict(np.load(fetch('data/gray_morph_output.npz')))
-        calculated = self._build_expected_output()
-        assert_equal(expected, calculated)
+        result = func(image, footprint, mode="reflect")
+        assert_equal(result, expected)
 
     def test_gray_closing_extensive(self):
         img = data.coins()
         footprint = np.array([[0, 0, 1], [0, 1, 1], [1, 1, 1]])
 
-        # Default mode="reflect" is not extensive for backwards-compatibility
-        result_default = morph.closing(img, footprint=footprint)
-        assert not np.all(result_default >= img)
-
+        # v2 default mode="ignore" is extensive
+        result = morph.closing(img, footprint=footprint)
+        assert np.all(result >= img)
         result = morph.closing(img, footprint=footprint, mode="ignore")
         assert np.all(result >= img)
+
+        # mode="reflect" (v1.x default) is not extensive
+        result_reflect = morph.closing(img, footprint=footprint, mode="reflect")
+        assert not np.all(result_reflect >= img)
 
     def test_gray_opening_anti_extensive(self):
         img = data.coins()
         footprint = np.array([[0, 0, 1], [0, 1, 1], [1, 1, 1]])
 
-        # Default mode="reflect" is not extensive for backwards-compatibility
-        result_default = morph.opening(img, footprint=footprint)
-        assert not np.all(result_default <= img)
+        # v2 default mode="ignore" is anti-extensive
+        result = morph.opening(img, footprint=footprint)
+        assert np.all(result <= img)
+        result = morph.opening(img, footprint=footprint, mode="ignore")
+        assert np.all(result <= img)
 
-        result_ignore = morph.opening(img, footprint=footprint, mode="ignore")
-        assert np.all(result_ignore <= img)
+        # mode="reflect" (v1.x default) is not anti-extensive
+        result_reflect = morph.opening(img, footprint=footprint, mode="reflect")
+        assert not np.all(result_reflect <= img)
+
+    def test_gray_morphology_ignore_default_edge_behavior(self):
+        # Ski2: v2 default (mode='ignore') differs from v1 (mode='reflect') at edges.
+        img = data.coins()
+        footprint = np.array([[0, 0, 1], [0, 1, 1], [1, 1, 1]])
+
+        dilated_ignore = morph.dilation(img, footprint=footprint)
+        dilated_reflect = morph.dilation(img, footprint=footprint, mode="reflect")
+        assert not np.array_equal(dilated_ignore, dilated_reflect)
+
+        closed_ignore = morph.closing(img, footprint=footprint)
+        closed_reflect = morph.closing(img, footprint=footprint, mode="reflect")
+        assert not np.array_equal(closed_ignore, closed_reflect)
 
     @pytest.mark.parametrize("func", gray_morphology_funcs)
     @pytest.mark.parametrize("mode", _SUPPORTED_MODES)
@@ -121,10 +152,15 @@ class TestAsymmetricFootprints:
         ]
 
     def test_dilate_erode_symmetry(self):
-        for s in self.footprints:
-            c = morph.erosion(self.black_pixel, s)
-            d = morph.dilation(self.white_pixel, s)
-            assert np.all(c == (255 - d))
+        # Ski2: v2 default (mode='ignore') — dilation mirrors footprint internally
+        # via pad_footprint; use asymmetric mirrored footprint for complement test.
+        for footprint in self.footprints:
+            eroded = morph.erosion(self.black_pixel, footprint=footprint)
+            asym_footprint = mirror_footprint(
+                pad_footprint(footprint, pad_end=False)
+            )
+            dilated = morph.dilation(self.white_pixel, footprint=asym_footprint)
+            assert np.all(eroded == (255 - dilated))
 
     def test_open_black_pixel(self):
         for s in self.footprints:
@@ -177,6 +213,7 @@ gray_functions = [
 
 @pytest.mark.parametrize("function", gray_functions)
 def test_default_footprint(function):
+    # Ski2: uses v2 default mode='ignore'. See test_grayscale_operators for overlap.
     strel = footprints.diamond(radius=1)
     image = np.array(
         [
@@ -254,6 +291,8 @@ def test_3d_fallback_black_tophat():
 
 
 def test_2d_ndimage_equivalence():
+    # Ski2: passes with v2 default mode='ignore' on this interior-heavy image;
+    # TODO: add edge-case regression if ndimage/scipy border handling diverges.
     image = np.zeros((9, 9), np.uint8)
     image[2:-2, 2:-2] = 128
     image[3:-3, 3:-3] = 196
@@ -270,7 +309,8 @@ def test_2d_ndimage_equivalence():
     assert_array_equal(closed, ndimage_closed)
 
 
-# float test images
+# Ski2: reference arrays below match v2 default (mode='ignore') on this small
+# interior image; TODO: add explicit edge tests for ignore vs reflect.
 im = np.array(
     [
         [0.55, 0.72, 0.6, 0.54, 0.42],
