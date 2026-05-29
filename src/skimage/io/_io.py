@@ -1,9 +1,8 @@
 import pathlib
-import warnings
 
 import numpy as np
 
-from _skimage2._shared.utils import warn, deprecate_parameter, DEPRECATED
+from _skimage2._shared.utils import warn
 from ..exposure import is_low_contrast
 from ..color.colorconv import rgb2gray, rgba2rgb
 from ..io.manage_plugins import call_plugin, _hide_plugin_deprecation_warnings
@@ -16,22 +15,7 @@ __all__ = [
 ]
 
 
-_remove_plugin_param_template = (
-    "The plugin infrastructure in `skimage.io` and the parameter "
-    "`{deprecated_name}` are deprecated since version {deprecated_version} and "
-    "will be removed in {changed_version} (or later). To avoid this warning, "
-    "please do not use the parameter `{deprecated_name}`. Instead, use `imageio` "
-    "or other I/O packages directly. See also `{func_name}`."
-)
-
-
-@deprecate_parameter(
-    "plugin",
-    start_version="0.25",
-    stop_version="0.27",
-    template=_remove_plugin_param_template,
-)
-def imread(fname, as_gray=False, plugin=DEPRECATED, **plugin_args):
+def imread(fname, as_gray=False):
     """Load an image from file.
 
     Parameters
@@ -42,40 +26,24 @@ def imread(fname, as_gray=False, plugin=DEPRECATED, **plugin_args):
         If True, convert color images to gray-scale (64-bit floats).
         Images that are already in gray-scale format are not converted.
 
-    Other Parameters
-    ----------------
-    plugin_args : DEPRECATED
-        The plugin infrastructure is deprecated.
-
     Returns
     -------
     img_array : ndarray
         The different color bands/channels are stored in the
         third dimension, such that a gray-image is MxN, an
         RGB-image MxNx3 and an RGBA-image MxNx4.
-
     """
-    if plugin is DEPRECATED:
-        plugin = None
-    if plugin_args:
-        msg = (
-            "The plugin infrastructure in `skimage.io` is deprecated since "
-            "version 0.25 and will be removed in 0.27 (or later). To avoid "
-            "this warning, please do not pass additional keyword arguments "
-            "for plugins (`**plugin_args`). Instead, use `imageio` or other "
-            "I/O packages directly. See also `skimage.io.imread`."
-        )
-        warnings.warn(msg, category=FutureWarning, stacklevel=3)
+    plugin = None
 
     if isinstance(fname, pathlib.Path):
         fname = str(fname.resolve())
 
-    if plugin is None and hasattr(fname, 'lower'):
+    if hasattr(fname, 'lower'):
         if fname.lower().endswith(('.tiff', '.tif')):
             plugin = 'tifffile'
 
     with file_or_url_context(fname) as fname, _hide_plugin_deprecation_warnings():
-        img = call_plugin('imread', fname, plugin=plugin, **plugin_args)
+        img = call_plugin('imread', fname, plugin=plugin)
 
     if not hasattr(img, 'ndim'):
         return img
@@ -93,15 +61,7 @@ def imread(fname, as_gray=False, plugin=DEPRECATED, **plugin_args):
     return img
 
 
-@deprecate_parameter(
-    "plugin",
-    start_version="0.25",
-    stop_version="0.27",
-    template=_remove_plugin_param_template,
-)
-def imread_collection(
-    load_pattern, conserve_memory=True, plugin=DEPRECATED, **plugin_args
-):
+def imread_collection(load_pattern, conserve_memory=True):
     """
     Load a collection of images.
 
@@ -119,41 +79,18 @@ def imread_collection(
     -------
     ic : :class:`~.ImageCollection`
         Collection of images.
-
-    Other Parameters
-    ----------------
-    plugin_args : DEPRECATED
-        The plugin infrastructure is deprecated.
-
     """
-    if plugin is DEPRECATED:
-        plugin = None
-    if plugin_args:
-        msg = (
-            "The plugin infrastructure in `skimage.io` is deprecated since "
-            "version 0.25 and will be removed in 0.27 (or later). To avoid "
-            "this warning, please do not pass additional keyword arguments "
-            "for plugins (`**plugin_args`). Instead, use `imageio` or other "
-            "I/O packages directly. See also `skimage.io.imread_collection`."
-        )
-        warnings.warn(msg, category=FutureWarning, stacklevel=3)
+    plugin = None
     with _hide_plugin_deprecation_warnings():
         return call_plugin(
             'imread_collection',
             load_pattern,
             conserve_memory,
             plugin=plugin,
-            **plugin_args,
         )
 
 
-@deprecate_parameter(
-    "plugin",
-    start_version="0.25",
-    stop_version="0.27",
-    template=_remove_plugin_param_template,
-)
-def imsave(fname, arr, plugin=DEPRECATED, *, check_contrast=True, **plugin_args):
+def imsave(fname, arr, *, check_contrast=True):
     """Save an image to file.
 
     Parameters
@@ -164,23 +101,8 @@ def imsave(fname, arr, plugin=DEPRECATED, *, check_contrast=True, **plugin_args)
         Image data.
     check_contrast : bool, optional
         Check for low contrast and print warning (default: True).
-
-    Other Parameters
-    ----------------
-    plugin_args : DEPRECATED
-        The plugin infrastructure is deprecated.
     """
-    if plugin is DEPRECATED:
-        plugin = None
-    if plugin_args:
-        msg = (
-            "The plugin infrastructure in `skimage.io` is deprecated since "
-            "version 0.25 and will be removed in 0.27 (or later). To avoid "
-            "this warning, please do not pass additional keyword arguments "
-            "for plugins (`**plugin_args`). Instead, use `imageio` or other "
-            "I/O packages directly. See also `skimage.io.imsave`."
-        )
-        warnings.warn(msg, category=FutureWarning, stacklevel=3)
+    plugin = None
 
     if isinstance(fname, pathlib.Path):
         fname = str(fname.resolve())
@@ -199,4 +121,4 @@ def imsave(fname, arr, plugin=DEPRECATED, *, check_contrast=True, **plugin_args)
         warn(f'{fname} is a low contrast image')
 
     with _hide_plugin_deprecation_warnings():
-        return call_plugin('imsave', fname, arr, plugin=plugin, **plugin_args)
+        return call_plugin('imsave', fname, arr, plugin=plugin)
