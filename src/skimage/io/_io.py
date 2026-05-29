@@ -1,11 +1,13 @@
 import pathlib
 
 import numpy as np
+import imageio.v3 as iio
 
 from _skimage2._shared._warnings import warn_external
 from ..exposure import is_low_contrast
 from ..color.colorconv import rgb2gray, rgba2rgb
 from ..io.manage_plugins import call_plugin, _hide_plugin_deprecation_warnings
+from ._plugins.tifffile_plugin import imread as imread_tiff
 from .util import file_or_url_context
 
 __all__ = [
@@ -33,17 +35,16 @@ def imread(fname, as_gray=False):
         third dimension, such that a gray-image is MxN, an
         RGB-image MxNx3 and an RGBA-image MxNx4.
     """
-    plugin = None
-
     if isinstance(fname, pathlib.Path):
         fname = str(fname.resolve())
 
-    if hasattr(fname, 'lower'):
-        if fname.lower().endswith(('.tiff', '.tif')):
-            plugin = 'tifffile'
+    is_tifffile = hasattr(fname, 'lower') and fname.lower().endswith(('.tiff', '.tif'))
 
-    with file_or_url_context(fname) as fname, _hide_plugin_deprecation_warnings():
-        img = call_plugin('imread', fname, plugin=plugin)
+    with file_or_url_context(fname) as fname:
+        if is_tifffile:
+            img = imread_tiff(fname)
+        else:
+            img = iio.imread(fname)
 
     if not hasattr(img, 'ndim'):
         return img
