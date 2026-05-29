@@ -90,13 +90,11 @@ docs = [
     'pytest-doctestplus>=1.6.0',
 ]
 optional = [
-    'SimpleITK; sys_platform != "emscripten"',
     'scikit-learn>=1.6',
     'pyamg>=5.2; sys_platform != "emscripten" and python_version < "3.14"',  # not packaged for Pyodide yet
     'scikit-image[optional_free_threaded]'
 ]
 optional_free_threaded = [
-    'astropy>=6.1',
     'dask[array]>=2025.1.0',
     'matplotlib>=3.10; sys_platform != "emscripten"',  # the pyodide maintainers recommend not testing with matplotlib
     'pooch>=1.6.0; sys_platform != "emscripten"',  # requires stack switching with alternative pytest runner
@@ -294,7 +292,6 @@ test-extras = ["test", "optional_free_threaded"]
 [[tool.cibuildwheel.overrides]]
 select = "*-musllinux*"
 test-extras = ["test", "optional_free_threaded"]
-# SimpleITK does not support musllinux yet
 
 [tool.cibuildwheel.linux]
 environment = {PIP_PREFER_BINARY=1, SKIMAGE_LINK_FLAGS="-Wl,--strip-debug"}

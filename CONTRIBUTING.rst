@@ -483,13 +483,6 @@ More rarely, you may also need:
   The ``pyamg`` module is used for the fast ``cg_mg`` mode of random
   walker segmentation.
 
-* `Astropy <https://www.astropy.org>`__
-  Provides FITS I/O capability.
-
-* `SimpleITK <http://www.simpleitk.org/>`__
-  Optional I/O plugin providing a wide variety of `formats <https://itk.org/Wiki/ITK_File_Formats>`__.
-  including specialized formats used in biomedical imaging.
-
 .. include:: ../../../requirements/optional.txt
   :literal:
 
