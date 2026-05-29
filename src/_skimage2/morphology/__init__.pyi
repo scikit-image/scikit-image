@@ -48,6 +48,8 @@ from .max_tree import (
     max_tree_local_maxima,
 )
 
+def label(label_image, background=None, return_num=False, connectivity=None): ...
+
 __all__ = [
     'area_closing',
     'area_opening',

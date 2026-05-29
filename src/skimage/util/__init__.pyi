@@ -26,6 +26,8 @@ from ._value_rescaling import rescale_minmax, rescale_legacy, _prescale_value_ra
 
 class PendingSkimage2Change(PendingDeprecationWarning): ...
 
+class FailedEstimationAccessError(AttributeError): ...
+
 __all__ = [
     'img_as_float32',
     'img_as_float64',
