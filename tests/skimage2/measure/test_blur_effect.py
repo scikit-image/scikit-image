@@ -36,9 +36,9 @@ def test_blur_effect_channel_axis():
     """
     image = ski2.data.astronaut()
     B0 = ski2.measure.blur_effect(image, channel_axis=-1)
-    B1 = ski2.measure.blur_effect(ski.color.rgb2gray(image))
+    B1 = ski2.measure.blur_effect(ski2.color.rgb2gray(image))
     B0_arr = ski2.measure.blur_effect(image, channel_axis=-1, reduce_func=None)
-    B1_arr = ski2.measure.blur_effect(ski.color.rgb2gray(image), reduce_func=None)
+    B1_arr = ski2.measure.blur_effect(ski2.color.rgb2gray(image), reduce_func=None)
     assert 0 <= B0 < 1
     assert B0 == B1
     np.testing.assert_array_equal(B0_arr, B1_arr)
@@ -48,8 +48,8 @@ def test_blur_effect_3d():
     """Test that the blur metric works on a 3D image."""
     image_3d = ski2.data.cells3d()[:, 1, :, :]  # grab just the nuclei
     B0 = ski2.measure.blur_effect(image_3d)
-    B1 = ski2.measure.blur_effect(ski.filters.gaussian(image_3d, sigma=1))
-    B2 = ski2.measure.blur_effect(ski.filters.gaussian(image_3d, sigma=4))
+    B1 = ski2.measure.blur_effect(ski2.filters.gaussian(image_3d, sigma=1))
+    B2 = ski2.measure.blur_effect(ski2.filters.gaussian(image_3d, sigma=4))
     assert 0 <= B0 < 1
     assert B0 < B1 < B2
 

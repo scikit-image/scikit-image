@@ -10,7 +10,7 @@ from scipy import ndimage as ndi
 import _skimage2.measure
 from _skimage2.filters import gaussian
 from _skimage2.feature import peak_local_max
-from _skimage2.measure import label
+from _skimage2.measure import label, regionprops
 
 from _skimage2.segmentation._watershed import watershed
 
@@ -849,7 +849,7 @@ def test_watershed_with_markers_offset():
 
     labels = watershed(-distance, markers, mask=image)
 
-    props = skimage.measure.regionprops(labels, intensity_image=-distance)
+    props = regionprops(labels, intensity_image=-distance)
 
     # Generally, assert that the smaller object could only conquer a thin line
     # in the direction of the positive gradient
