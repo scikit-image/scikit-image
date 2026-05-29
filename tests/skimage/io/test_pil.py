@@ -1,10 +1,5 @@
-import os
-from tempfile import NamedTemporaryFile
-
 import numpy as np
-import pytest
 from PIL import Image
-from _skimage2._shared import testing
 from _skimage2._shared._tempfile import temporary_file
 from _skimage2._shared.testing import (
     assert_array_almost_equal,
@@ -182,66 +177,11 @@ def ndarray_to_pil(arr, format_str=None):
     return im
 
 
-def test_imread_as_gray():
-    img = imread(fetch('data/color.png'), as_gray=True)
-    assert img.ndim == 2
-    assert img.dtype == np.float64
-    img = imread(fetch('data/camera.png'), as_gray=True)
-    # check that conversion does not happen for a gray image
-    assert np.dtype(img.dtype).char in np.typecodes['AllInteger']
-
-
-@pytest.mark.parametrize('explicit_kwargs', [False, True])
-def test_imread_separate_channels(explicit_kwargs):
-    # Test that imread returns RGB(A) values contiguously even when they are
-    # stored in separate planes.
-    x = np.random.RandomState(819070535).rand(3, 16, 8)
-    with NamedTemporaryFile(suffix='.tif') as f:
-        fname = f.name
-
-    # Tifffile is used as backend whenever suffix is .tif or .tiff
-    # To avoid pending changes to tifffile defaults, we must specify this is an
-    # RGB image with separate planes (i.e., channel_axis=0).
-    if explicit_kwargs:
-        pass
-    else:
-        pass
-
-    imsave(fname, x)
-    img = imread(fname)
-    os.remove(fname)
-    assert img.shape == (16, 8, 3), img.shape
-
-
-def test_imread_multipage_rgb_tif():
-    img = imread(fetch('data/multipage_rgb.tif'))
-    assert img.shape == (2, 10, 10, 3), img.shape
-
-
 def test_palette_is_gray():
     gray = Image.open(fetch('data/palette_gray.png'))
     assert _palette_is_grayscale(gray)
     color = Image.open(fetch('data/palette_color.png'))
     assert not _palette_is_grayscale(color)
-
-
-def test_imread_uint16():
-    expected = np.load(fetch('data/chessboard_GRAY_U8.npy'))
-    img = imread(fetch('data/chessboard_GRAY_U16.tif'))
-    assert np.issubdtype(img.dtype, np.uint16)
-    assert_array_almost_equal(img, expected)
-
-
-def test_imread_truncated_jpg():
-    with testing.raises(IOError):
-        imread(fetch('data/truncated.jpg'))
-
-
-def test_imread_uint16_big_endian():
-    expected = np.load(fetch('data/chessboard_GRAY_U8.npy'))
-    img = imread(fetch('data/chessboard_GRAY_U16B.tif'))
-    assert img.dtype.type == np.uint16
-    assert_array_almost_equal(img, expected)
 
 
 class TestSave:
@@ -284,8 +224,3 @@ def test_imexport_imimport():
     pil_image = ndarray_to_pil(image)
     out = pil_to_ndarray(pil_image)
     assert_equal(out.shape, shape)
-
-
-def test_extreme_palette():
-    img = imread(fetch('data/green_palette.png'))
-    assert_equal(img.ndim, 3)

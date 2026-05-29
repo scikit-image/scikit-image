@@ -126,15 +126,18 @@ def test_failed_temporary_file(monkeypatch, error_class):
             io.imread(image_url)
 
 
-def test_imread_as_gray():
+def test_imread_color_as_gray():
     img = io.imread(fetch('data/color.png'), as_gray=True)
     assert img.ndim == 2
     assert img.dtype == np.float64
     assert type(img) is np.ndarray
 
+
+def test_imread_camera_as_gray():
     img = io.imread(fetch('data/camera.png'), as_gray=True)
     # check that conversion does not happen for a gray image
     assert np.dtype(img.dtype).char in np.typecodes['AllInteger']
+    assert type(img) is np.ndarray
 
 
 def test_imread_uint16():
@@ -169,6 +172,11 @@ def test_imread_palette():
     assert img.ndim == 3
 
 
+def test_extreme_palette():
+    img = io.imread(fetch('data/green_palette.png'))
+    assert img.shape == (240, 320, 3)
+
+
 def test_imread_truncated_jpg():
     # imageio>2.0 uses Pillow / PIL to try and load the file.
     # Oddly, PIL explicitly raises a OSError when the file read fails.
@@ -181,6 +189,18 @@ def test_imread_bilevel():
     expected[::2] = 1
     img = io.imread(fetch('data/checker_bilevel.png'))
     assert_array_equal(img.astype(bool), expected)
+
+
+def test_imread_separate_channels():
+    # Test that imread returns RGB(A) values contiguously even when they are
+    # stored in separate planes.
+    x = np.random.RandomState(819070535).rand(3, 16, 8)
+    with tempfile.NamedTemporaryFile(suffix='.tif') as f:
+        fname = f.name
+    io.imsave(fname, x)
+    img = io.imread(fname)
+    os.remove(fname)
+    assert img.shape == (16, 8, 3), img.shape
 
 
 # skimage.io.imsave ------------------------------------------------------------
@@ -243,7 +263,7 @@ def test_imsave_roundtrip_tiff(shape, seed, dtype, use_pathlib):
     rng = np.random.RandomState(seed)
     img = rng.rand(*shape)
     if not np.issubdtype(dtype, np.floating):
-        img = (img * np.iinfo(dtype).max)
+        img = img * np.iinfo(dtype).max
     img = img.astype(dtype)
 
     with tempfile.NamedTemporaryFile(suffix='.tif') as f:
