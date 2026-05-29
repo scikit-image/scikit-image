@@ -108,8 +108,7 @@ def structural_similarity(
     >>> structural_similarity(im1, im2, data_range=im1.max())  # doctest: +ELLIPSIS
     0.9408...
     """
-    # TODO Undo inlined imports once available in _skimage2 namespace
-    from skimage.util.arraycrop import crop
+    from ..util.arraycrop import crop
 
     if im1.dtype != im2.dtype:
         warn_external("Inputs have mismatched dtypes")
