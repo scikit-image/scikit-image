@@ -133,8 +133,8 @@ def test_difference_of_gaussians(s, s2, channel_axis):
     if channel_axis is not None:
         n_channels = 5
         image = np.stack((image,) * n_channels, channel_axis)
-    im1 = gaussian(image, sigma=s, preserve_range=True, channel_axis=channel_axis)
-    im2 = gaussian(image, sigma=s2, preserve_range=True, channel_axis=channel_axis)
+    im1 = gaussian(image, sigma=s, channel_axis=channel_axis)
+    im2 = gaussian(image, sigma=s2, channel_axis=channel_axis)
     dog = im1 - im2
     dog2 = difference_of_gaussians(image, s, s2, channel_axis=channel_axis)
     assert np.allclose(dog, dog2)
@@ -143,9 +143,9 @@ def test_difference_of_gaussians(s, s2, channel_axis):
 @pytest.mark.parametrize("s", [1, (1, 2)])
 def test_auto_sigma2(s):
     image = np.random.RandomState(2627489853).rand(10, 10)
-    im1 = gaussian(image, sigma=s, preserve_range=True)
+    im1 = gaussian(image, sigma=s)
     s2 = 1.6 * np.array(s)
-    im2 = gaussian(image, sigma=s2, preserve_range=True)
+    im2 = gaussian(image, sigma=s2)
     dog = im1 - im2
     dog2 = difference_of_gaussians(image, s, s2)
     assert np.allclose(dog, dog2)

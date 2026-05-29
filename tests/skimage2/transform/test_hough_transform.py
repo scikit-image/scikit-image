@@ -72,7 +72,7 @@ def test_probabilistic_hough():
 def test_probabilistic_hough_seed():
     # Load image that is likely to give a randomly varying number of lines
     image = data.checkerboard()
-    edges = feature.canny(image, 2, 1, 25)
+    edges = feature.canny(image, sigma=2, low_threshold=1, high_threshold=25)
     # Use constant seed to ensure a deterministic output
     lines = transform.probabilistic_hough_line(
         edges, threshold=50, line_length=50, line_gap=5, rng=41537233

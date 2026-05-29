@@ -151,7 +151,7 @@ def test_binary_blobs(ndim, distance):
     - Distance beyond the expanded labels should always exceed the input
       distance.
     """
-    img = data.binary_blobs(length=64, blob_size_fraction=0.05, n_dim=ndim)
+    img = data.binary_blobs(shape=(64,) * ndim, blob_size=0.05 * 64)
     labels = measure.label(img)
     expanded = expand_labels(labels, distance=distance)
     original_mask = labels != 0

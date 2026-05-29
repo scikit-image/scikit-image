@@ -19,7 +19,6 @@ def test_filter_forward():
 
     gaussian_args = {
         'sigma': 2,
-        'preserve_range': True,
         'mode': 'constant',
         'truncate': 20,  # LPI filtering is more precise than the truncated
         # Gaussian, so don't truncate at the default of 4 sigma
