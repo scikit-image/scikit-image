@@ -225,7 +225,6 @@ xfail_strict = true
 filterwarnings = [
     "error",
     "ignore::skimage.util.PendingSkimage2Change",
-    "ignore:.*use `imageio` or other I/O packages directly.*:FutureWarning",
     # Passing win_size with gaussian_weights=True is deprecated
     "ignore:.*win_size.*gaussian_weights.*:FutureWarning",
     # warn by pyamg in ruge_stuben_solver
