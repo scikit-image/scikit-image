@@ -137,6 +137,20 @@ def test_imread_as_gray():
     assert np.dtype(img.dtype).char in np.typecodes['AllInteger']
 
 
+def test_imread_uint16():
+    expected = np.load(fetch('data/chessboard_GRAY_U8.npy'))
+    img = io.imread(fetch('data/chessboard_GRAY_U16.tif'))
+    assert np.issubdtype(img.dtype, np.uint16)
+    assert_allclose(img, expected)
+
+
+def test_imread_uint16_big_endian():
+    expected = np.load(fetch('data/chessboard_GRAY_U8.npy'))
+    img = io.imread(fetch('data/chessboard_GRAY_U16B.tif'))
+    assert img.dtype.type == np.uint16
+    assert_allclose(img, expected)
+
+
 def test_imread_palette():
     img = io.imread(fetch('data/palette_color.png'))
     assert img.ndim == 3
@@ -178,9 +192,7 @@ def test_imsave_roundtrip(shape, dtype, tmp_path):
     else:
         min_ = 0
         max_ = np.iinfo(dtype).max
-    expected = np.linspace(
-        min_, max_, endpoint=True, num=np.prod(shape), dtype=dtype
-    )
+    expected = np.linspace(min_, max_, endpoint=True, num=np.prod(shape), dtype=dtype)
     expected = expected.reshape(shape)
     file_path = tmp_path / "roundtrip.png"
     io.imsave(file_path, expected)
