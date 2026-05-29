@@ -2,7 +2,7 @@ import pathlib
 
 import numpy as np
 
-from _skimage2._shared.utils import warn
+from _skimage2._shared._warnings import warn_external
 from ..exposure import is_low_contrast
 from ..color.colorconv import rgb2gray, rgba2rgb
 from ..io.manage_plugins import call_plugin, _hide_plugin_deprecation_warnings
@@ -110,15 +110,14 @@ def imsave(fname, arr, *, check_contrast=True):
         if fname.lower().endswith(('.tiff', '.tif')):
             plugin = 'tifffile'
     if arr.dtype == bool:
-        warn(
+        warn_external(
             f'{fname} is a boolean image: setting True to 255 and False to 0. '
             'To silence this warning, please convert the image using '
             'img_as_ubyte.',
-            stacklevel=3,
         )
         arr = arr.astype('uint8') * 255
     if check_contrast and is_low_contrast(arr):
-        warn(f'{fname} is a low contrast image')
+        warn_external(f'{fname} is a low contrast image')
 
     with _hide_plugin_deprecation_warnings():
         return call_plugin('imsave', fname, arr, plugin=plugin)
