@@ -222,7 +222,7 @@ class Skimage2Migration:
             from `qname_old`, replacing initial ``skimage.`` with ``skimage2.``.
         warning_cls : type[Warning], optional
             The warning class to use. Defaults to
-            :obj:`~.PendingSkimage2Change` if not given.
+            :obj:`~skimage.util.PendingSkimage2Change` if not given.
 
         Returns
         -------
@@ -239,8 +239,10 @@ class Skimage2Migration:
 
             @wraps(func)
             def decorated(*args, **kwargs):
-                from _skimage2._shared._warnings import warn_external
-                from skimage.util import PendingSkimage2Change
+                from _skimage2._shared._warnings import (
+                    PendingSkimage2Change,
+                    warn_external,
+                )
 
                 if warn_msg:
                     warn_external(

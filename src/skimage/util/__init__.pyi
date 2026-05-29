@@ -25,6 +25,9 @@ from .lookfor import lookfor
 from ._value_rescaling import rescale_minmax, rescale_legacy, _prescale_value_range
 
 
+class PendingSkimage2Change(PendingDeprecationWarning): ...
+
+
 __all__ = [
     'img_as_float32',
     'img_as_float64',
