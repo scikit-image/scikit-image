@@ -34,6 +34,12 @@ def imread(fname, as_gray=False):
         The different color bands/channels are stored in the
         third dimension, such that a gray-image is MxN, an
         RGB-image MxNx3 and an RGBA-image MxNx4.
+
+    Notes
+    -----
+    This function wraps :func:`imageio.v3.imread` and :func:`tifffile.imread`.
+    The latter is only used if `fname` ends in ".tif" or ".tiff" (case ignored).
+    Use the wrapped functions directly if you need to pass additional parameters.
     """
     if isinstance(fname, pathlib.Path):
         fname = str(fname.resolve())
@@ -80,6 +86,11 @@ def imread_collection(load_pattern, conserve_memory=True):
     -------
     ic : :class:`~.ImageCollection`
         Collection of images.
+
+    See Also
+    --------
+    skimage.io.ImageCollection
+        The class, wrapped by this function.
     """
     return ImageCollection(
         load_pattern, conserve_memory=conserve_memory, load_func=iio.imread
@@ -140,6 +151,13 @@ def imsave(fname, arr, *, check_contrast=True):
         Image data.
     check_contrast : bool, optional
         Check for low contrast and print warning (default: True).
+
+    Notes
+    -----
+    This function is wraps :func:`imageio.v3.imwrite` and
+    :func:`tifffile.imwrite`. The latter is only used if `fname` ends in ".tif"
+    or ".tiff" (case ignored). Use the wrapped functions directly if you need
+    to pass additional parameters.
     """
     if isinstance(fname, pathlib.Path):
         fname = str(fname.resolve())
