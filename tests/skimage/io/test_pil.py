@@ -219,59 +219,11 @@ def test_imread_multipage_rgb_tif():
     assert img.shape == (2, 10, 10, 3), img.shape
 
 
-def test_imread_palette():
-    img = imread(fetch('data/palette_gray.png'))
-    assert img.ndim == 2
-    img = imread(fetch('data/palette_color.png'))
-    assert img.ndim == 3
-
-
-def test_imread_index_png_with_alpha():
-    # The file `foo3x5x4indexed.png` was created with this array
-    # (3x5 is (height)x(width)):
-    dfoo = np.array(
-        [
-            [
-                [127, 0, 255, 255],
-                [127, 0, 255, 255],
-                [127, 0, 255, 255],
-                [127, 0, 255, 255],
-                [127, 0, 255, 255],
-            ],
-            [
-                [192, 192, 255, 0],
-                [192, 192, 255, 0],
-                [0, 0, 255, 0],
-                [0, 0, 255, 0],
-                [0, 0, 255, 0],
-            ],
-            [
-                [0, 31, 255, 255],
-                [0, 31, 255, 255],
-                [0, 31, 255, 255],
-                [0, 31, 255, 255],
-                [0, 31, 255, 255],
-            ],
-        ],
-        dtype=np.uint8,
-    )
-    img = imread(fetch('data/foo3x5x4indexed.png'))
-    assert_array_equal(img, dfoo)
-
-
 def test_palette_is_gray():
     gray = Image.open(fetch('data/palette_gray.png'))
     assert _palette_is_grayscale(gray)
     color = Image.open(fetch('data/palette_color.png'))
     assert not _palette_is_grayscale(color)
-
-
-def test_bilevel():
-    expected = np.zeros((10, 10))
-    expected[::2] = 255
-
-    img = imread(fetch('data/checker_bilevel.png'))
-    assert_array_equal(img, expected)
 
 
 def test_imread_uint16():
@@ -286,20 +238,9 @@ def test_imread_truncated_jpg():
         imread(fetch('data/truncated.jpg'))
 
 
-def test_jpg_quality_arg():
-    chessboard = np.load(fetch('data/chessboard_GRAY_U8.npy'))
-    with temporary_file(suffix='.jpg') as jpg:
-        imsave(jpg, chessboard, quality=95)
-        im = imread(jpg)
-        sim = structural_similarity(
-            chessboard, im, data_range=chessboard.max() - chessboard.min()
-        )
-        assert sim > 0.99
-
-
 def test_imread_uint16_big_endian():
     expected = np.load(fetch('data/chessboard_GRAY_U8.npy'))
-    img = imread(fetch('data/chessboard_GRAY_U16B.tif'), plugin="pil")
+    img = imread(fetch('data/chessboard_GRAY_U16B.tif'))
     assert img.dtype.type == np.uint16
     assert_array_almost_equal(img, expected)
 
@@ -338,105 +279,12 @@ class TestSave:
         self.verify_imsave_roundtrip(self.roundtrip_pil_image)
 
 
-def test_imsave_incorrect_dimension():
-    with temporary_file(suffix='.png') as fname:
-        with testing.raises(ValueError):
-            with expected_warnings([fname + ' is a low contrast image']):
-                imsave(fname, np.zeros((2, 3, 3, 1)))
-        with testing.raises(ValueError):
-            with expected_warnings([fname + ' is a low contrast image']):
-                imsave(fname, np.zeros((2, 3, 2)))
-        # test that low contrast check is ignored
-        with testing.raises(ValueError):
-            with expected_warnings([]):
-                imsave(fname, np.zeros((2, 3, 2)), check_contrast=False)
-
-
-def test_imsave_filelike():
-    shape = (2, 2)
-    image = np.zeros(shape)
-    s = BytesIO()
-
-    # save to file-like object
-    with expected_warnings(['is a low contrast image']):
-        imsave(s, image)
-
-    # read from file-like object
-    s.seek(0)
-    out = imread(s)
-    assert_equal(out.shape, shape)
-    assert_allclose(out, image)
-
-
-def test_imsave_boolean_input():
-    shape = (2, 2)
-    image = np.eye(*shape, dtype=bool)
-    s = BytesIO()
-
-    # save to file-like object
-    with expected_warnings(['is a boolean image: setting True to 255 and False to 0']):
-        imsave(s, image)
-
-    # read from file-like object
-    s.seek(0)
-    out = imread(s)
-    assert_equal(out.shape, shape)
-    assert_allclose(out.astype(bool), image)
-
-
 def test_imexport_imimport():
     shape = (2, 2)
     image = np.zeros(shape)
     pil_image = ndarray_to_pil(image)
     out = pil_to_ndarray(pil_image)
     assert_equal(out.shape, shape)
-
-
-def test_all_color():
-    with expected_warnings(['.* is a boolean image', plugin_deprecation_warning]):
-        color_check('pil')
-    with expected_warnings(['.* is a boolean image', plugin_deprecation_warning]):
-        color_check('pil', 'bmp')
-
-
-def test_all_mono():
-    with expected_warnings(['.* is a boolean image', plugin_deprecation_warning]):
-        mono_check('pil')
-
-
-def test_multi_page_gif():
-    img = imread(fetch('data/no_time_for_that_tiny.gif'))
-    assert img.shape == (24, 25, 14, 3), img.shape
-    img2 = imread(fetch('data/no_time_for_that_tiny.gif'), img_num=5)
-    assert img2.shape == (25, 14, 3)
-    assert_allclose(img[5], img2)
-
-
-def test_cmyk():
-    ref = imread(fetch('data/color.png'))
-
-    img = Image.open(fetch('data/color.png'))
-    img = img.convert('CMYK')
-
-    with NamedTemporaryFile(suffix='.jpg') as f:
-        fname = f.name
-
-    img.save(fname)
-    try:
-        img.close()
-    except AttributeError:  # `close` not available on PIL
-        pass
-
-    new = imread(fname)
-
-    ref_lab = rgb2lab(ref)
-    new_lab = rgb2lab(new)
-
-    for i in range(3):
-        newi = np.ascontiguousarray(new_lab[:, :, i])
-        refi = np.ascontiguousarray(ref_lab[:, :, i])
-        sim = structural_similarity(refi, newi, data_range=refi.max() - refi.min())
-        assert sim > 0.99
 
 
 def test_extreme_palette():

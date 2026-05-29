@@ -2,7 +2,7 @@ from tempfile import NamedTemporaryFile
 
 import numpy as np
 from skimage import io
-from skimage.io import imread, imsave, use_plugin, reset_plugins
+from skimage.io import imread, imsave
 
 from _skimage2._shared import testing
 from _skimage2._shared.testing import (
@@ -11,18 +11,6 @@ from _skimage2._shared.testing import (
     assert_array_almost_equal,
     fetch,
 )
-
-import pytest
-
-pytest.importorskip('imread')
-
-
-@pytest.fixture(autouse=True)
-def _use_imread_plugin():
-    """Ensure that PIL plugin is used in tests here."""
-    use_plugin('imread')
-    yield
-    reset_plugins()
 
 
 def test_imread_as_gray():
@@ -40,7 +28,7 @@ def test_imread_palette():
 
 
 def test_imread_truncated_jpg():
-    with testing.raises(RuntimeError):
+    with testing.raises(OSError, match="Truncated File Read"):
         io.imread(fetch('data/truncated.jpg'))
 
 
@@ -69,7 +57,7 @@ class TestSave(TestCase):
             x = np.ones(shape, dtype=dtype) * rng.rand(*shape)
 
             if np.issubdtype(dtype, np.floating):
-                yield self.roundtrip, x, 255
+                self.roundtrip(x, 255)
             else:
                 x = (x * 255).astype(dtype)
-                yield self.roundtrip, x
+                self.roundtrip(x)

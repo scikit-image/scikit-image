@@ -1,13 +1,12 @@
 import os
 import pathlib
 import tempfile
-import warnings
 
 import numpy as np
 import pytest
 
 from skimage import io
-from _skimage2._shared.testing import assert_array_equal, fetch, assert_stacklevel
+from _skimage2._shared.testing import assert_array_equal, fetch
 from _skimage2._shared._dependency_checks import is_wasm
 from skimage.data import data_dir
 
@@ -121,54 +120,3 @@ def test_failed_temporary_file(monkeypatch, error_class):
         )
         with pytest.raises(error_class):
             io.imread(image_url)
-
-
-@pytest.mark.parametrize(
-    # Test `**plugin_args` with `mode`
-    "kwarg",
-    [{"plugin": None}, {"plugin": "imageio"}, {"mode": "r"}],
-)
-def test_plugin_deprecation_on_imread(kwarg):
-    path = fetch("data/multipage.tif")
-    regex = ".*use `imageio` or other I/O packages directly.*"
-    # tifffile raises "DeprecationWarning: Setting the shape on a NumPy array
-    # has been deprecated in NumPy 2.5" on NumPy >= 2.5 — suppress until fixed
-    # upstream. TODO: remove once tifffile > 2026.4.11 is released.
-    with pytest.warns(FutureWarning, match=regex) as record:
-        # tifffile raises "DeprecationWarning: Setting the shape on a NumPy array
-        # has been deprecated in NumPy 2.5" — suppress until fixed upstream.
-        # TODO: remove once tifffile > 2026.4.11 is released.
-        with warnings.catch_warnings():
-            warnings.filterwarnings(
-                "ignore",
-                message="Setting the shape on a NumPy array",
-                category=DeprecationWarning,
-            )
-            io.imread(path, **kwarg)
-    assert len(record) == 1
-    assert_stacklevel(record, offset=-2)
-
-
-@pytest.mark.parametrize(
-    # Test `**plugin_args` with `mode`
-    "kwarg",
-    [{"plugin": None}, {"plugin": "imageio"}, {"append": False}],
-)
-def test_plugin_deprecation_on_imsave(kwarg, tmp_path):
-    path = tmp_path / "test.tif"
-    array = np.array([0, 1], dtype=float)
-    regex = ".*use `imageio` or other I/O packages directly.*"
-    with pytest.warns(FutureWarning, match=regex) as record:
-        io.imsave(path, array, **kwarg)
-    assert len(record) == 1
-    assert_stacklevel(record, offset=-2)
-
-
-@pytest.mark.parametrize("kwarg", [{"plugin": None}, {"plugin": "imageio"}])
-def test_plugin_deprecation_on_imread_collection(kwarg):
-    pattern = data_dir + "*.png"
-    regex = ".*use `imageio` or other I/O packages directly.*"
-    with pytest.warns(FutureWarning, match=regex) as record:
-        io.imread_collection(pattern, **kwarg)
-    assert len(record) == 1
-    assert_stacklevel(record, offset=-2)

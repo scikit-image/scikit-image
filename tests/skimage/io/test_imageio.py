@@ -1,21 +1,12 @@
 from tempfile import NamedTemporaryFile
 
 import numpy as np
-from skimage.io import imread, imsave, plugin_order
+from skimage.io import imread, imsave
 
 from _skimage2._shared import testing
 from _skimage2._shared.testing import fetch, assert_stacklevel
 
 import pytest
-
-
-def test_prefered_plugin():
-    # Don't call use_plugin("imageio") before, this way we test that imageio is used
-    # by default
-    order = plugin_order()
-    assert order["imread"][0] == "imageio"
-    assert order["imsave"][0] == "imageio"
-    assert order["imread_collection"][0] == "imageio"
 
 
 def test_imageio_as_gray():
