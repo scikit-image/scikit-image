@@ -6,6 +6,7 @@ from _skimage2.feature.corner import __doc__  # noqa: F401
 
 from skimage._migration import ski2_migration_decorator
 
+
 @ski2_migration_decorator(
     """\
 ``%(qname_old)s`` will be removed in scikit-image 2. Please use
@@ -90,9 +91,11 @@ def corner_peaks(
 
     """
     # Allow exclude_border=True|False
-    exclude_border = 0 if exclude_border is False else (
-        int(np.floor(min_distance)) if exclude_border is True
-        else exclude_border)
+    exclude_border = (
+        0
+        if exclude_border is False
+        else (int(np.floor(min_distance)) if exclude_border is True else exclude_border)
+    )
     return ski2_corner_peaks(
         image,
         min_distance=min_distance,

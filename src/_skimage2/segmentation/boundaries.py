@@ -161,10 +161,11 @@ def find_boundaries(label_img, connectivity=1, mode='thick', background=0):
     ndim = label_img.ndim
     footprint = ndi.generate_binary_structure(ndim, connectivity)
     if mode != 'subpixel':
-        #Ski2: default edge mode for dilation and erosion changed from
+        # Ski2: default edge mode for dilation and erosion changed from
         # 'reflect' to 'ignore'.  Revert to 'reflect' behavior.
-        boundaries = (dilation(label_img, footprint, mode='reflect')
-                      != erosion(label_img, footprint, mode='reflect'))
+        boundaries = dilation(label_img, footprint, mode='reflect') != erosion(
+            label_img, footprint, mode='reflect'
+        )
         if mode == 'inner':
             foreground_image = label_img != background
             boundaries &= foreground_image

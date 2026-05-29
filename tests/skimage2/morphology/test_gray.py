@@ -156,9 +156,7 @@ class TestAsymmetricFootprints:
         # via pad_footprint; use asymmetric mirrored footprint for complement test.
         for footprint in self.footprints:
             eroded = morph.erosion(self.black_pixel, footprint=footprint)
-            asym_footprint = mirror_footprint(
-                pad_footprint(footprint, pad_end=False)
-            )
+            asym_footprint = mirror_footprint(pad_footprint(footprint, pad_end=False))
             dilated = morph.dilation(self.white_pixel, footprint=asym_footprint)
             assert np.all(eroded == (255 - dilated))
 

@@ -1,6 +1,3 @@
-import numpy as np
-
-from _skimage2.filters._gaussian import difference_of_gaussians  # noqa: F403
 from _skimage2.filters._gaussian import __doc__  # noqa: F401
 
 import _skimage2 as ski2
@@ -144,5 +141,3 @@ def gaussian(
         out=out,
     )
     return filtered_image
-
-

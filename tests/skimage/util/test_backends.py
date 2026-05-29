@@ -136,8 +136,8 @@ def test_notification_raised(fake_backends):
 # Tell tests below that we mean a skimage implementation, not the
 # implementation imported from skimage2.
 _SKI_ENTROPY = _backends.dispatchable_shim(
-    skimage.filters.rank.entropy,
-    'skimage.filters.rank')
+    skimage.filters.rank.entropy, 'skimage.filters.rank'
+)
 
 
 @pytest.mark.parametrize(

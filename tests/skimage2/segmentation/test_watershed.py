@@ -7,7 +7,6 @@ import numpy as np
 import pytest
 from scipy import ndimage as ndi
 
-import _skimage2.measure
 from _skimage2.filters import gaussian
 from _skimage2.feature import peak_local_max
 from _skimage2.measure import label, regionprops

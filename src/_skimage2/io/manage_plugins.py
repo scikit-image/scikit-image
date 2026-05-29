@@ -341,8 +341,9 @@ def _load(plugin):
         raise ValueError(f"Plugin {plugin} not found.")
     else:
         modname = plugin_module_name[plugin]
-        plugin_module = __import__('_skimage2.io._plugins.' + modname,
-                                   fromlist=[modname])
+        plugin_module = __import__(
+            '_skimage2.io._plugins.' + modname, fromlist=[modname]
+        )
 
     provides = plugin_provides[plugin]
     for p in provides:

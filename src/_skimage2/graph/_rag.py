@@ -5,7 +5,6 @@ from scipy import sparse
 import math
 
 from ..measure._regionprops import regionprops
-from ..segmentation.slic_superpixels import slic
 from ..segmentation.boundaries import mark_boundaries
 from ..util.dtype import img_as_float
 from ..color.colorconv import rgb2gray

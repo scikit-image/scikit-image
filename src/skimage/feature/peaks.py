@@ -1,6 +1,6 @@
 import numpy as np
 
-from _skimage2.feature._peaks import _prominent_peaks # noqa: F401
+from _skimage2.feature._peaks import _prominent_peaks  # noqa: F401
 from _skimage2.feature._peaks import __doc__  # noqa: F401
 
 import _skimage2 as ski2
@@ -237,5 +237,3 @@ def peak_local_max(
         p_norm=p_norm,
     )
     return coordinates
-
-

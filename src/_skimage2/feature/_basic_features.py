@@ -3,7 +3,8 @@ import itertools
 import numpy as np
 from _skimage2 import filters, feature
 from _skimage2.util.dtype import img_as_float32
-#Ski2: address legacy scaling.
+
+# Ski2: address legacy scaling.
 from _skimage2.util import rescale_legacy
 from _skimage2._shared._dependency_checks import is_wasm
 
@@ -37,7 +38,7 @@ def _singlescale_basic_features_singlechannel(
     img, sigma, intensity=True, edges=True, texture=True
 ):
     results = ()
-    #Ski2: address legacy scaling.
+    # Ski2: address legacy scaling.
     gaussian_filtered = filters.gaussian(rescale_legacy(img), sigma=sigma)
     if intensity:
         results += (gaussian_filtered,)

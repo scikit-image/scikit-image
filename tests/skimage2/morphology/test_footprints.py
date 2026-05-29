@@ -3,9 +3,13 @@ from numpy.testing import assert_equal
 import pytest
 
 from _skimage2._shared.testing import fetch, assert_stacklevel
-from _skimage2.morphology import (footprints, footprint_rectangle,
-                                  footprint_from_sequence, pad_footprint,
-                                  mirror_footprint)
+from _skimage2.morphology import (
+    footprints,
+    footprint_rectangle,
+    footprint_from_sequence,
+    pad_footprint,
+    mirror_footprint,
+)
 
 
 class TestFootprints:
@@ -210,6 +214,7 @@ def test_ball_series_approximation_unavailable():
     # ValueError if radius is too large (only precomputed up to radius=100)
     with pytest.raises(ValueError):
         footprints.ball(radius=10000, decomposition="sequence")
+
 
 # skimage.morphology.mirror_footprint --------------------------------------------------
 

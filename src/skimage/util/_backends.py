@@ -53,8 +53,7 @@ def public_api_module(func):
 
 def _check_supported_funcs(supported_functions, backend_name):
     """Reject backend registrations other than `skimage`."""
-    invalid = [n for n in supported_functions
-               if not re.search('skimage[:.]', n)]
+    invalid = [n for n in supported_functions if not re.search('skimage[:.]', n)]
     if invalid:
         names = ", ".join(sorted(invalid))
         msg = (
@@ -144,7 +143,7 @@ def dispatchable(func):
 
 
 def dispatchable_shim(impl_func, module):
-    """ Replace apparent `impl_func` ``__module__`` with `module`
+    """Replace apparent `impl_func` ``__module__`` with `module`
 
     This allows functions that are implemented in some namespace from which we
     cannot dispatch, to be sourced in a module from which we can dispatch.

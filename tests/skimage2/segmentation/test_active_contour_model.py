@@ -35,10 +35,8 @@ def test_fixed_reference(dtype):
     r = np.linspace(136, 50, 100)
     c = np.linspace(5, 424, 100)
     init = np.array([r, c]).T
-    #Ski2: consider test with actual value range.
-    image_smooth = gaussian(rescale_legacy(img), sigma=1).astype(
-        dtype, copy=False
-    )
+    # Ski2: consider test with actual value range.
+    image_smooth = gaussian(rescale_legacy(img), sigma=1).astype(dtype, copy=False)
     snake = active_contour(
         image_smooth,
         init,
@@ -62,7 +60,7 @@ def test_free_reference(dtype):
     r = np.linspace(70, 40, 100)
     c = np.linspace(5, 424, 100)
     init = np.array([r, c]).T
-    #Ski2: consider test with actual value range.
+    # Ski2: consider test with actual value range.
     img_smooth = gaussian(rescale_legacy(img), sigma=3).astype(dtype, copy=False)
     snake = active_contour(
         img_smooth,
@@ -83,7 +81,7 @@ def test_free_reference(dtype):
 
 @pytest.mark.parametrize('dtype', [np.float32, np.float64])
 def test_RGB(dtype):
-    #Ski2: consider test with actual value range.
+    # Ski2: consider test with actual value range.
     img = gaussian(rescale_legacy(data.text()), sigma=1)
     imgR = np.zeros((img.shape[0], img.shape[1], 3), dtype=dtype)
     imgG = np.zeros((img.shape[0], img.shape[1], 3), dtype=dtype)

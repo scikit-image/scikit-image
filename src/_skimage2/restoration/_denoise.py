@@ -9,7 +9,7 @@ from ..util.dtype import img_as_float
 from _skimage2._shared import utils
 from _skimage2._shared.utils import _supported_float_type, warn
 from ._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
-from ..color.colorconv import rgb2gray, rgb2ycbcr, ycbcr2rgb, ycbcr_from_rgb
+from ..color.colorconv import rgb2ycbcr, ycbcr2rgb, ycbcr_from_rgb
 
 
 __doctest_requires__ = {("denoise_wavelet", "estimate_sigma"): ["pywt"]}

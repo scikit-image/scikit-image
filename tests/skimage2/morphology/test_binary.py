@@ -5,8 +5,15 @@ from scipy import ndimage as ndi
 
 from _skimage2 import data, color, morphology
 from _skimage2.util import img_as_bool
-from _skimage2.morphology import (binary, footprints, footprint_rectangle,
-                                  erosion, dilation, closing, opening)
+from _skimage2.morphology import (
+    binary,
+    footprints,
+    footprint_rectangle,
+    erosion,
+    dilation,
+    closing,
+    opening,
+)
 from _skimage2._shared.testing import assert_stacklevel
 
 

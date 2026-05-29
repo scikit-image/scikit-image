@@ -53,5 +53,6 @@ from .util.dtype import (
 )
 from .util.lookfor import lookfor
 from .data import data_dir
+
 # Used by ``skimage2`` on import; must be a real module attribute (see __init__.py).
 from ._shared._warnings import ExperimentalAPIWarning

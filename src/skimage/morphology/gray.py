@@ -1,10 +1,10 @@
 from _skimage2.morphology._grayscale_operators import __doc__  # noqa: F401
-from _skimage2.morphology._grayscale_operators import _SUPPORTED_MODES
 
-from _skimage2.morphology._footprints import (_default_footprint,
-                                              mirror_footprint,
-                                              pad_footprint,
-                                             )
+from _skimage2.morphology._footprints import (
+    _default_footprint,
+    mirror_footprint,
+    pad_footprint,
+)
 
 import _skimage2 as ski2
 from skimage._migration import ski2_migration_decorator

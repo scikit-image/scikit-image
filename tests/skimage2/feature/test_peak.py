@@ -9,13 +9,13 @@ from _skimage2._shared.testing import assert_stacklevel
 from _skimage2.feature import peak_local_max
 from _skimage2.feature._peaks import _prominent_peaks
 
+
 def sorted_peaks(*args, **kwargs):
-    """ Test helper function """
+    """Test helper function"""
     return sorted(peak_local_max(*args, **kwargs).tolist())
 
 
 class TestPeakLocalMax:
-
     def test_trivial_case(self):
         trivial = np.zeros((25, 25))
         peak_indices = peak_local_max(trivial, min_distance=1)
@@ -32,9 +32,7 @@ class TestPeakLocalMax:
             image[r, c] = 1
 
         # Find the strong peaks (1.0), ignore noise (≤ 0.8)
-        peaks_detected = peak_local_max(image,
-                                        min_distance=5,
-                                        threshold_abs=0.9)
+        peaks_detected = peak_local_max(image, min_distance=5, threshold_abs=0.9)
 
         assert len(peaks_detected) == len(peak_locations)
         for loc in peaks_detected:
@@ -430,85 +428,121 @@ class TestPeakLocalMax:
         both_peaks = [[5, 5, 5], [15, 15, 15]]
 
         # Spacing tests: exclude border effects so only min_distance matters.
-        assert sorted_peaks(image,
-                            min_distance=17,  # Euclidean by default.
-                            threshold_rel=0,
-                            exclude_border=0) == both_peaks
-        assert sorted_peaks(image,
-                            min_distance=18,  # Beyond diagonal distance.
-                            threshold_rel=0,
-                            exclude_border=0) == [[5, 5, 5]]
-        assert sorted_peaks(image,
-                            min_distance=10,
-                            threshold_rel=0,
-                            exclude_border=0,
-                            p_norm=np.inf,  # Chebyshev
-                           ) == both_peaks
-        assert sorted_peaks(image,
-                            min_distance=11,
-                            threshold_rel=0,
-                            exclude_border=0,
-                            p_norm=np.inf,  # Chebyshev
-                           ) == [[5, 5, 5]]
-        assert sorted_peaks(image,
-                            min_distance=11,
-                            threshold_rel=0,
-                            exclude_border=0,
-                            p_norm=2,  # Euclidean, explicitly.
-                           ) == both_peaks
+        assert (
+            sorted_peaks(
+                image,
+                min_distance=17,  # Euclidean by default.
+                threshold_rel=0,
+                exclude_border=0,
+            )
+            == both_peaks
+        )
+        assert sorted_peaks(
+            image,
+            min_distance=18,  # Beyond diagonal distance.
+            threshold_rel=0,
+            exclude_border=0,
+        ) == [[5, 5, 5]]
+        assert (
+            sorted_peaks(
+                image,
+                min_distance=10,
+                threshold_rel=0,
+                exclude_border=0,
+                p_norm=np.inf,  # Chebyshev
+            )
+            == both_peaks
+        )
+        assert sorted_peaks(
+            image,
+            min_distance=11,
+            threshold_rel=0,
+            exclude_border=0,
+            p_norm=np.inf,  # Chebyshev
+        ) == [[5, 5, 5]]
+        assert (
+            sorted_peaks(
+                image,
+                min_distance=11,
+                threshold_rel=0,
+                exclude_border=0,
+                p_norm=2,  # Euclidean, explicitly.
+            )
+            == both_peaks
+        )
 
         # Default for exclude_border=1; it is not affected by min_distance.
-        assert sorted_peaks(image,
-                            min_distance=10,
-                            threshold_rel=0,
-                           ) == both_peaks
+        assert (
+            sorted_peaks(
+                image,
+                min_distance=10,
+                threshold_rel=0,
+            )
+            == both_peaks
+        )
 
         # Explicit border width excludes the near-border peak.
-        assert sorted_peaks(image,
-                            min_distance=5,
-                            threshold_rel=0,
-                            exclude_border=6,
-                           ) == [[15, 15, 15]]
+        assert sorted_peaks(
+            image,
+            min_distance=5,
+            threshold_rel=0,
+            exclude_border=6,
+        ) == [[15, 15, 15]]
 
     def test_4D(self):
         image = np.zeros((30, 30, 30, 30))
         image[15, 15, 15, 15] = 1
         image[5, 5, 5, 5] = 1
         both_peaks = [[5, 5, 5, 5], [15, 15, 15, 15]]
-        diag_dist = np.floor(np.sqrt(10 ** 2 * 4))
+        diag_dist = np.floor(np.sqrt(10**2 * 4))
 
-        assert sorted_peaks(image,
-                            min_distance=diag_dist,
-                            threshold_rel=0,
-                            exclude_border=0,
-                           ) == both_peaks
-        assert sorted_peaks(image,
-                            min_distance=diag_dist + 1,
-                            threshold_rel=0,
-                            exclude_border=0,
-                           ) == [[5, 5, 5, 5]]
-        assert sorted_peaks(image,
-                            min_distance=10,
-                            threshold_rel=0,
-                            exclude_border=0,
-                            p_norm=np.inf,  # Chebyshev
-                           ) == both_peaks
-        assert sorted_peaks(image,
-                            min_distance=11,
-                            threshold_rel=0,
-                            exclude_border=0,
-                            p_norm=np.inf,  # Chebyshev
-                           ) == [[5, 5, 5, 5]]
+        assert (
+            sorted_peaks(
+                image,
+                min_distance=diag_dist,
+                threshold_rel=0,
+                exclude_border=0,
+            )
+            == both_peaks
+        )
+        assert sorted_peaks(
+            image,
+            min_distance=diag_dist + 1,
+            threshold_rel=0,
+            exclude_border=0,
+        ) == [[5, 5, 5, 5]]
+        assert (
+            sorted_peaks(
+                image,
+                min_distance=10,
+                threshold_rel=0,
+                exclude_border=0,
+                p_norm=np.inf,  # Chebyshev
+            )
+            == both_peaks
+        )
+        assert sorted_peaks(
+            image,
+            min_distance=11,
+            threshold_rel=0,
+            exclude_border=0,
+            p_norm=np.inf,  # Chebyshev
+        ) == [[5, 5, 5, 5]]
         # Default exclude_border is 1, does not affect result here.
-        assert sorted_peaks(image,
-                            min_distance=diag_dist,
-                            threshold_rel=0,
-                           ) == both_peaks
-        assert sorted_peaks(image,
-                            min_distance=diag_dist,
-                            threshold_rel=0,
-                            exclude_border=6,
-                           ) == [[15, 15, 15, 15]]
+        assert (
+            sorted_peaks(
+                image,
+                min_distance=diag_dist,
+                threshold_rel=0,
+            )
+            == both_peaks
+        )
+        assert sorted_peaks(
+            image,
+            min_distance=diag_dist,
+            threshold_rel=0,
+            exclude_border=6,
+        ) == [[15, 15, 15, 15]]
 
     def test_threshold_rel_default(self):
         image = np.ones((5, 5))
@@ -521,7 +555,10 @@ class TestPeakLocalMax:
 
         image[2, 2] = 0
         with pytest.warns(RuntimeWarning, match=r"When `min_distance < 1`") as record:
-            assert len(peak_local_max(image, min_distance=0, exclude_border=0)) == image.size - 1
+            assert (
+                len(peak_local_max(image, min_distance=0, exclude_border=0))
+                == image.size - 1
+            )
         assert_stacklevel(record)
 
     def test_peak_at_border(self):
@@ -533,14 +570,19 @@ class TestPeakLocalMax:
         # Default exclude_border=1 excludes the column-0 peak only
         assert sorted_peaks(image, min_distance=4) == [[2, 4]]
 
-        assert sorted_peaks(image,
-                            min_distance=4,
-                            exclude_border=0,
-                           ) == [[2, 4], [3, 0]]
-        assert sorted_peaks(image,
-                            min_distance=4,
-                            exclude_border=3,
-                           ) == []
+        assert sorted_peaks(
+            image,
+            min_distance=4,
+            exclude_border=0,
+        ) == [[2, 4], [3, 0]]
+        assert (
+            sorted_peaks(
+                image,
+                min_distance=4,
+                exclude_border=3,
+            )
+            == []
+        )
 
     def test_p_norm(self):
         image = np.zeros((10, 10))
@@ -548,13 +590,9 @@ class TestPeakLocalMax:
         image[7, 7] = 1
 
         # With p_norm=inf (Chebyshev distance), peaks are 5 apart
-        peaks = peak_local_max(
-            image, min_distance=5, p_norm=np.inf, exclude_border=0
-        )
+        peaks = peak_local_max(image, min_distance=5, p_norm=np.inf, exclude_border=0)
         assert len(peaks) == 2
-        peaks = peak_local_max(
-            image, min_distance=6, p_norm=np.inf, exclude_border=0
-        )
+        peaks = peak_local_max(image, min_distance=6, p_norm=np.inf, exclude_border=0)
         assert len(peaks) == 1
 
         # With p_norm=2 (Euclidean distance), peaks are 7.07 apart
