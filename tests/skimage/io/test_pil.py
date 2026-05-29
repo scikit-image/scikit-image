@@ -1,5 +1,4 @@
 import os
-from io import BytesIO
 from tempfile import NamedTemporaryFile
 
 import numpy as np

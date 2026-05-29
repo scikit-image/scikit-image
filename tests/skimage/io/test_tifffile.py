@@ -56,9 +56,7 @@ class TestSave:
     @pytest.mark.parametrize("shape,seed", shapes_seeds)
     @pytest.mark.parametrize("dtype", dtypes)
     @pytest.mark.parametrize("use_pathlib", [False, True])
-    def test_imsave_roundtrip(
-        self, shape, seed, dtype, use_pathlib
-    ):
+    def test_imsave_roundtrip(self, shape, seed, dtype, use_pathlib):
         rng = np.random.RandomState(seed)
         x = rng.rand(*shape)
 
