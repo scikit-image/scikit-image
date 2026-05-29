@@ -415,6 +415,7 @@ class ImageCollection:
         return concatenate_images(self)
 
 
+# TODO What to do about this function?
 def imread_collection_wrapper(imread):
     def imread_collection(load_pattern, conserve_memory=True):
         """Return an `ImageCollection` from files matching the given pattern.

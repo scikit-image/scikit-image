@@ -7,8 +7,8 @@ import imageio.v3 as iio
 from _skimage2._shared._warnings import warn_external
 from ..exposure import is_low_contrast
 from ..color.colorconv import rgb2gray, rgba2rgb
-from ..io.manage_plugins import call_plugin, _hide_plugin_deprecation_warnings
 from .util import file_or_url_context
+from .collection import ImageCollection
 
 __all__ = [
     'imread',
@@ -81,14 +81,9 @@ def imread_collection(load_pattern, conserve_memory=True):
     ic : :class:`~.ImageCollection`
         Collection of images.
     """
-    plugin = None
-    with _hide_plugin_deprecation_warnings():
-        return call_plugin(
-            'imread_collection',
-            load_pattern,
-            conserve_memory,
-            plugin=plugin,
-        )
+    return ImageCollection(
+        load_pattern, conserve_memory=conserve_memory, load_func=iio.imread
+    )
 
 
 def _imsave_tiff(fname, arr):
@@ -161,8 +156,7 @@ def imsave(fname, arr, *, check_contrast=True):
     if check_contrast and is_low_contrast(arr):
         warn_external(f'{fname} is a low contrast image')
 
-    with _hide_plugin_deprecation_warnings():
-        if is_tiff_file:
-            return _imsave_tiff(fname, arr)
-        else:
-            return iio.imwrite(fname, arr)
+    if is_tiff_file:
+        return _imsave_tiff(fname, arr)
+    else:
+        return iio.imwrite(fname, arr)
