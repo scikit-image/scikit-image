@@ -1,10 +1,15 @@
 """Reading and saving of images and videos."""
 
-from .sift import *
-from .collection import *
+from .sift import load_sift, load_surf
+from .collection import (
+    concatenate_images,
+    imread_collection_wrapper,
+    ImageCollection,
+    MultiImage,
+)
 
-from ._io import *
-from ._image_stack import *
+from ._io import imread, imread_collection, imsave
+from ._image_stack import push, pop
 
 
 __all__ = [
