@@ -7,55 +7,180 @@ import pytest
 from PIL import Image
 from _skimage2._shared import testing
 from _skimage2._shared._tempfile import temporary_file
-from _skimage2._shared._warnings import expected_warnings
 from _skimage2._shared.testing import (
-    assert_allclose,
     assert_array_almost_equal,
-    assert_array_equal,
     assert_equal,
-    color_check,
     fetch,
-    mono_check,
 )
-from skimage.metrics import structural_similarity
-
-from skimage.util import img_as_float
-from skimage.color import rgb2lab
-from skimage.io import imread, imsave, reset_plugins, use_plugin, plugin_order
-from skimage.io._plugins.pil_plugin import (
-    _palette_is_grayscale,
-    ndarray_to_pil,
-    pil_to_ndarray,
-)
+from skimage.util import img_as_ubyte, img_as_uint
+from skimage.io import imread, imsave
 
 
-plugin_deprecation_warning = r"use `imageio` or other I/O packages directly|\A\Z"
+def pil_to_ndarray(image, dtype=None, img_num=None):
+    """Import a PIL Image object to an ndarray, in memory.
+
+    Parameters
+    ----------
+    Refer to ``imread``.
+
+    """
+    # PIL 12.1.0 renames getdata
+    if hasattr(image, "get_flattened_data"):
+        image.getdata = image.get_flattened_data
+
+    try:
+        # this will raise an IOError if the file is not readable
+        image.getdata()[0]
+    except OSError as e:
+        site = "http://pillow.readthedocs.org/en/latest/installation.html#external-libraries"
+        pillow_error_message = str(e)
+        error_message = (
+            f"Could not load '{image.filename}' \n"
+            f"Reason: '{pillow_error_message}'\n"
+            f"Please see documentation at: {site}"
+        )
+        raise ValueError(error_message)
+    frames = []
+    grayscale = None
+    i = 0
+    while 1:
+        try:
+            image.seek(i)
+        except EOFError:
+            break
+
+        frame = image
+
+        if img_num is not None and img_num != i:
+            image.getdata()[0]
+            i += 1
+            continue
+
+        if image.format == 'PNG' and image.mode == 'I' and dtype is None:
+            dtype = 'uint16'
+
+        if image.mode == 'P':
+            if grayscale is None:
+                grayscale = _palette_is_grayscale(image)
+
+            if grayscale:
+                frame = image.convert('L')
+            else:
+                if image.format == 'PNG' and 'transparency' in image.info:
+                    frame = image.convert('RGBA')
+                else:
+                    frame = image.convert('RGB')
+
+        elif image.mode == '1':
+            frame = image.convert('L')
+
+        elif 'A' in image.mode:
+            frame = image.convert('RGBA')
+
+        elif image.mode == 'CMYK':
+            frame = image.convert('RGB')
+
+        if image.mode.startswith('I;16'):
+            shape = image.size
+            dtype = '>u2' if image.mode.endswith('B') else '<u2'
+            if 'S' in image.mode:
+                dtype = dtype.replace('u', 'i')
+            frame = np.frombuffer(frame.tobytes(), dtype)
+            frame = np.reshape(frame, shape[::-1], copy=False)
+
+        else:
+            frame = np.array(frame, dtype=dtype)
+
+        frames.append(frame)
+        i += 1
+
+        if img_num is not None:
+            break
+
+    if hasattr(image, 'fp') and image.fp:
+        image.fp.close()
+
+    if img_num is None and len(frames) > 1:
+        return np.array(frames)
+    elif frames:
+        return frames[0]
+    elif img_num:
+        raise IndexError(f'Could not find image  #{img_num}')
 
 
-@pytest.fixture(autouse=True)
-def use_pil_plugin():
-    """Ensure that PIL plugin is used in tests here."""
-    use_plugin('pil')
-    yield
-    reset_plugins()
+def _palette_is_grayscale(pil_image):
+    """Return True if PIL image in palette mode is grayscale.
+
+    Parameters
+    ----------
+    pil_image : PIL image
+        PIL Image that is in Palette mode.
+
+    Returns
+    -------
+    is_grayscale : bool
+        True if all colors in image palette are gray.
+    """
+    if pil_image.mode != 'P':
+        raise ValueError('pil_image.mode must be equal to "P".')
+    # get palette as an array with R, G, B columns
+    # Starting in pillow 9.1 palettes may have less than 256 entries
+    palette = np.asarray(pil_image.getpalette()).reshape((-1, 3))
+    # Not all palette colors are used; unused colors have junk values.
+    start, stop = pil_image.getextrema()
+    valid_palette = palette[start : stop + 1]
+    # Image is grayscale if channel differences (R - G and G - B)
+    # are all zero.
+    return np.allclose(np.diff(valid_palette), 0)
 
 
-def test_prefered_plugin():
-    order = plugin_order()
-    assert order["imread"][0] == "pil"
-    assert order["imsave"][0] == "pil"
-    assert order["imread_collection"][0] == "pil"
+def ndarray_to_pil(arr, format_str=None):
+    """Export an ndarray to a PIL object.
 
+    Parameters
+    ----------
+    Refer to ``imsave``.
 
-def test_png_round_trip():
-    with NamedTemporaryFile(suffix='.png') as f:
-        fname = f.name
+    """
+    if arr.ndim == 3:
+        arr = img_as_ubyte(arr)
+        mode = {3: 'RGB', 4: 'RGBA'}[arr.shape[2]]
 
-    I = np.eye(3)
-    imsave(fname, I)
-    Ip = img_as_float(imread(fname))
-    os.remove(fname)
-    assert np.sum(np.abs(Ip - I)) < 1e-3
+    elif format_str in ['png', 'PNG']:
+        mode = 'I;16'
+
+        if arr.dtype.kind == 'f':
+            arr = img_as_uint(arr)
+
+        elif arr.max() < 256 and arr.min() >= 0:
+            arr = arr.astype(np.uint8)
+            mode = 'L'
+
+        else:
+            arr = img_as_uint(arr)
+
+    else:
+        arr = img_as_ubyte(arr)
+        mode = 'L'
+
+    try:
+        array_buffer = arr.tobytes()
+    except AttributeError:
+        array_buffer = arr.tostring()  # Numpy < 1.9
+
+    if arr.ndim == 2:
+        im = Image.new(mode, arr.T.shape)
+        try:
+            im.frombytes(array_buffer, 'raw', mode)
+        except AttributeError:
+            im.fromstring(array_buffer, 'raw', mode)  # PIL 1.1.7
+    else:
+        image_shape = (arr.shape[1], arr.shape[0])
+        try:
+            im = Image.frombytes(mode, image_shape, array_buffer)
+        except AttributeError:
+            im = Image.fromstring(mode, image_shape, array_buffer)  # PIL 1.1.7
+    return im
 
 
 def test_imread_as_gray():
