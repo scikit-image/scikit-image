@@ -126,7 +126,7 @@ def cycle_spin(
     >>> import _skimage2.data
     >>> from _skimage2 import img_as_float
     >>> from _skimage2.restoration import denoise_tv_chambolle, cycle_spin
-    >>> img = img_as_float(skimage.data.camera())
+    >>> img = img_as_float(_skimage2.data.camera())
     >>> sigma = 0.1
     >>> img = img + sigma * np.random.standard_normal(img.shape)
     >>> denoised = cycle_spin(img, func=denoise_tv_chambolle,
