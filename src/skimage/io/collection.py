@@ -115,9 +115,11 @@ class ImageCollection:
     Other parameters
     ----------------
     load_func : callable
-        ``imread`` by default. See Notes below.
+        Defaults to :func:`.imread``. However, if a `load_pattern` points to a
+        multipage TIFF file, each page will be read as an element in the
+        collection.
     **load_func_kwargs : dict
-        Any other keyword arguments are passed to `load_func`.
+        Any other keyword parameters are passed to `load_func`.
 
     Attributes
     ----------
