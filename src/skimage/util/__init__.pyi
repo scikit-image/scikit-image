@@ -25,7 +25,6 @@ from .lookfor import lookfor
 from ._value_rescaling import rescale_minmax, rescale_legacy, _prescale_value_range
 
 class PendingSkimage2Change(PendingDeprecationWarning): ...
-
 class FailedEstimationAccessError(AttributeError): ...
 
 __all__ = [
