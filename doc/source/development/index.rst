@@ -10,3 +10,4 @@ Below you will find resources about the development of scikit-image.
     ../gitwash/index
     core_developer
     ../skips/index
+    dispatching

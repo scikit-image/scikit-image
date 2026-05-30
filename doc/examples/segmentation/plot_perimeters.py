@@ -9,6 +9,7 @@ object (either a square or a disk) and its rotated version, as we increase the
 rotation angle.
 
 """
+
 import matplotlib.pyplot as plt
 import numpy as np
 

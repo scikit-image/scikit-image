@@ -19,10 +19,11 @@ enables projective 3D reconstruction of the captured scene. If the calibration
 is known, estimating the essential matrix enables metric 3D reconstruction of
 the captured scene.
 """
+
 import numpy as np
 from skimage import data
 from skimage.color import rgb2gray
-from skimage.feature import match_descriptors, ORB, plot_matches
+from skimage.feature import match_descriptors, ORB, plot_matched_features
 from skimage.measure import ransac
 from skimage.transform import FundamentalMatrixTransform
 import matplotlib.pyplot as plt
@@ -56,7 +57,7 @@ model, inliers = ransac(
     min_samples=8,
     residual_threshold=1,
     max_trials=5000,
-    random_state=rng,
+    rng=rng,
 )
 
 inlier_keypoints_left = keypoints_left[matches[inliers, 0]]
@@ -78,13 +79,13 @@ fig, ax = plt.subplots(nrows=2, ncols=1)
 
 plt.gray()
 
-plot_matches(
-    ax[0],
+plot_matched_features(
     img_left,
     img_right,
-    keypoints_left,
-    keypoints_right,
-    matches[inliers],
+    keypoints0=keypoints_left,
+    keypoints1=keypoints_right,
+    matches=matches[inliers],
+    ax=ax[0],
     only_matches=True,
 )
 ax[0].axis("off")

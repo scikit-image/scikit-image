@@ -20,6 +20,7 @@ values, and use the random walker for the segmentation.
        Anal. Mach. Intell. 2006 Nov; 28(11):1768-83 :DOI:`10.1109/TPAMI.2006.233`
 
 """
+
 import numpy as np
 import matplotlib.pyplot as plt
 

@@ -1,5 +1,5 @@
-scikits-image 0.8.0 release notes
-=================================
+scikits-image 0.8.0 (2013-03-04)
+================================
 
 We're happy to announce the 8th version of scikit-image!
 

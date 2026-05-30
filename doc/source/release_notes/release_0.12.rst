@@ -1,7 +1,7 @@
-scikit-image 0.12 release notes
-===============================
+scikit-image 0.12.3 (2016-03-08)
+================================
 
-We're happy to announce the release of scikit-image v0.12!
+We're happy to announce the release of scikit-image v0.12.3!
 
 scikit-image is an image processing toolbox for SciPy that includes algorithms
 for segmentation, geometric transformations, color space manipulation,

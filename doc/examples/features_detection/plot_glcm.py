@@ -29,6 +29,7 @@ References
        IEEE Transactions on systems, man, and cybernetics 6 (1973): 610-621.
        :DOI:`10.1109/TSMC.1973.4309314`
 """
+
 import matplotlib.pyplot as plt
 
 from skimage.feature import graycomatrix, graycoprops

@@ -10,9 +10,10 @@ until no highly similar region pairs remain.
 
 """
 
-from skimage import data, io, segmentation, color
+from skimage import data, segmentation, color
 from skimage import graph
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def _weight_mean_color(graph, src, dst, n):
@@ -76,5 +77,8 @@ labels2 = graph.merge_hierarchical(
 
 out = color.label2rgb(labels2, img, kind='avg', bg_label=0)
 out = segmentation.mark_boundaries(out, labels2, (0, 0, 0))
-io.imshow(out)
-io.show()
+
+fig, ax = plt.subplots()
+ax.imshow(out)
+plt.tight_layout()
+plt.show()

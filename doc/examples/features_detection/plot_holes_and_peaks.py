@@ -11,6 +11,7 @@ the maximum and minimum possible values of the reconstructed image.
 We start with an image containing both peaks and holes:
 
 """
+
 import matplotlib.pyplot as plt
 
 from skimage import data

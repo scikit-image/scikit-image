@@ -20,7 +20,7 @@ import numpy as np
 
 import plotly
 import plotly.express as px
-from skimage import data
+import skimage as ski
 
 
 #####################################################################
@@ -28,7 +28,7 @@ from skimage import data
 # ==========
 # This biomedical image is available through `scikit-image`'s data registry.
 
-data = data.kidney()
+data = ski.data.kidney()
 
 #####################################################################
 # The returned dataset is a 3D multichannel image:

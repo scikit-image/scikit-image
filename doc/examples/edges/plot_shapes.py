@@ -17,6 +17,7 @@ Anti-aliased drawing for:
 - circle
 
 """
+
 import math
 import numpy as np
 import matplotlib.pyplot as plt

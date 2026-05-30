@@ -1,5 +1,5 @@
-scikits-image 0.7.0 release notes
-=================================
+scikits-image 0.7.0 (2012-09-29)
+================================
 
 We're happy to announce the 7th version of scikits-image!
 

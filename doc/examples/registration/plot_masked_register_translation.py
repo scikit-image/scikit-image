@@ -21,6 +21,7 @@ are corrupted.
        :DOI:`10.1109/TIP.2011.2181402`
 
 """
+
 import numpy as np
 import matplotlib.pyplot as plt
 

@@ -16,6 +16,7 @@ segmentation").
 .. [2] https://www.ilastik.org/documentation/pixelclassification/pixelclassification
 .. [3] https://imagej.net/Trainable_Weka_Segmentation#Training_features_.282D.29
 """
+
 import numpy as np
 import matplotlib.pyplot as plt
 from skimage import data, segmentation, feature, future

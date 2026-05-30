@@ -15,6 +15,7 @@ results in a gray level image while misregistred pixels appear colored
 in the constructed RGB image.
 
 """
+
 import numpy as np
 from matplotlib import pyplot as plt
 from skimage.color import rgb2gray

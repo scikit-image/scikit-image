@@ -5,9 +5,10 @@ See "Writing benchmarks" in the asv docs for more information.
 
 import numpy as np
 from numpy.lib import NumpyVersion as Version
+import scipy.ndimage
 
 import skimage
-from skimage import data, morphology, util
+from skimage import color, data, morphology, util
 
 
 class Skeletonize3d:
@@ -24,7 +25,7 @@ class Skeletonize3d:
         # we stack the horse data 5 times to get an example volume
         self.image = np.stack(5 * [util.invert(data.horse())])
 
-    def time_skeletonize_3d(self):
+    def time_skeletonize(self):
         self.skeletonize(self.image)
 
     def peakmem_reference(self, *args):
@@ -43,16 +44,32 @@ class Skeletonize3d:
         """
         pass
 
-    def peakmem_skeletonize_3d(self):
+    def peakmem_skeletonize(self):
         self.skeletonize(self.image)
 
 
-# For binary morphology all functions ultimately are based on a single erosion
-# function in the scipy.ndimage C code, so only benchmark binary_erosion here.
-
-
-class BinaryMorphology2D:
+class IsotropicMorphology2D:
     # skip rectangle as roughly equivalent to square
+    param_names = ["shape", "radius"]
+    params = [
+        ((512, 512),),
+        (1, 3, 5, 15, 25, 40),
+    ]
+
+    def setup(self, shape, radius):
+        rng = np.random.default_rng(123)
+        # Create an image that is mostly True, with random isolated False areas
+        # (so it will not become fully False for any of the footprints).
+        self.image = rng.standard_normal(shape) < 3.5
+
+    def time_erosion(self, shape, radius, *args):
+        morphology.isotropic_erosion(self.image, radius)
+
+
+# Repeat the same footprint tests for grayscale morphology
+
+
+class GrayMorphology2D:
     param_names = ["shape", "footprint", "radius", "decomposition"]
     params = [
         ((512, 512),),
@@ -105,10 +122,10 @@ class BinaryMorphology2D:
                 self.footprint = fp_func(radius, radius, **footprint_kwargs)
 
     def time_erosion(self, shape, footprint, radius, *args):
-        morphology.binary_erosion(self.image, self.footprint)
+        morphology.erosion(self.image, self.footprint)
 
 
-class BinaryMorphology3D:
+class GrayMorphology3D:
     # skip rectangle as roughly equivalent to square
     param_names = ["shape", "footprint", "radius", "decomposition"]
     params = [
@@ -140,38 +157,6 @@ class BinaryMorphology3D:
         elif footprint in ["ball", "octahedron"]:
             self.footprint = fp_func(radius, **footprint_kwargs)
 
-    def time_erosion(self, shape, footprint, radius, *args):
-        morphology.binary_erosion(self.image, self.footprint)
-
-
-class IsotropicMorphology2D:
-    # skip rectangle as roughly equivalent to square
-    param_names = ["shape", "radius"]
-    params = [
-        ((512, 512),),
-        (1, 3, 5, 15, 25, 40),
-    ]
-
-    def setup(self, shape, radius):
-        rng = np.random.default_rng(123)
-        # Make an image that is mostly True, with random isolated False areas
-        # (so it will not become fully False for any of the footprints).
-        self.image = rng.standard_normal(shape) < 3.5
-
-    def time_erosion(self, shape, radius, *args):
-        morphology.isotropic_erosion(self.image, radius)
-
-
-# Repeat the same footprint tests for grayscale morphology
-# just need to call morphology.erosion instead of morphology.binary_erosion
-
-
-class GrayMorphology2D(BinaryMorphology2D):
-    def time_erosion(self, shape, footprint, radius, *args):
-        morphology.erosion(self.image, self.footprint)
-
-
-class GrayMorphology3D(BinaryMorphology3D):
     def time_erosion(self, shape, footprint, radius, *args):
         morphology.erosion(self.image, self.footprint)
 
@@ -218,7 +203,7 @@ class GrayReconstruction:
 
         References
         ----------
-        .. [1]: https://asv.readthedocs.io/en/stable/writing_benchmarks.html#peak-memory  # noqa
+        .. [1]: https://asv.readthedocs.io/en/stable/writing_benchmarks.html#peak-memory
         """
         pass
 
@@ -249,4 +234,40 @@ class LocalMaxima:
     def peakmem_2d(self, connectivity, allow_borders):
         morphology.local_maxima(
             self.image, connectivity=connectivity, allow_borders=allow_borders
+        )
+
+
+class RemoveObjectsByDistance:
+    param_names = ["min_distance"]
+    params = [5, 100]
+
+    def setup(self, *args):
+        image = data.hubble_deep_field()
+        image = color.rgb2gray(image)
+        objects = image > 0.18  # Chosen with threshold_li
+        self.labels, _ = scipy.ndimage.label(objects)
+
+    def time_remove_near_objects(self, min_distance):
+        morphology.remove_objects_by_distance(self.labels, min_distance=min_distance)
+
+    def peakmem_reference(self, *args):
+        """Provide reference for memory measurement with empty benchmark.
+
+        Peakmem benchmarks measure the maximum amount of RAM used by a
+        function. However, this maximum also includes the memory used
+        during the setup routine (as of asv 0.2.1; see [1]_).
+        Measuring an empty peakmem function might allow us to disambiguate
+        between the memory used by setup and the memory used by target (see
+        other ``peakmem_`` functions below).
+
+        References
+        ----------
+        .. [1]: https://asv.readthedocs.io/en/stable/writing_benchmarks.html#peak-memory
+        """
+        pass
+
+    def peakmem_remove_near_objects(self, min_distance):
+        morphology.remove_objects_by_distance(
+            self.labels,
+            min_distance=min_distance,
         )

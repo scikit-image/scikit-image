@@ -10,6 +10,7 @@ than the size of the dilation. Locations where the original image is equal to th
 dilated image are returned as local maxima.
 
 """
+
 from scipy import ndimage as ndi
 import matplotlib.pyplot as plt
 from skimage.feature import peak_local_max

@@ -1,7 +1,7 @@
 [project]
 name = 'scikit-image'
 description = 'Image processing in Python'
-requires-python = '>=3.10'
+requires-python = '>=3.12'
 readme = 'README.md'
 classifiers = [
     'Development Status :: 4 - Beta',
@@ -12,9 +12,9 @@ classifiers = [
     'Programming Language :: C',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.10',
-    'Programming Language :: Python :: 3.11',
     'Programming Language :: Python :: 3.12',
+    'Programming Language :: Python :: 3.13',
+    'Programming Language :: Python :: 3.14',
     'Programming Language :: Python :: 3 :: Only',
     'Topic :: Software Development :: Libraries',
     'Topic :: Scientific/Engineering',
@@ -25,14 +25,15 @@ classifiers = [
 ]
 dynamic = ['version']
 dependencies = [
-    'numpy>=1.22',
-    'scipy>=1.8',
-    'networkx>=2.8',
-    'pillow>=9.1',
-    'imageio>=2.33',
-    'tifffile>=2022.8.12',
-    'packaging>=21',
-    'lazy_loader>=0.3',
+    'numpy>=2.1',
+    'scipy>=1.15; sys_platform != "emscripten"',
+    'scipy>=1.14; sys_platform == "emscripten"',
+    'networkx>=3.0',
+    'pillow>=10.1',
+    'imageio>=2.33,!=2.35.0',
+    'tifffile>=2025.1.10',
+    'packaging>=24',
+    'lazy-loader>=0.5',
 ]
 
 [[project.maintainers]]
@@ -45,66 +46,72 @@ file = 'LICENSE.txt'
 [project.optional-dependencies]
 build = [
     # Also update [build-system] -> requires
-    'meson-python>=0.14',
-    'wheel',
-    'setuptools>=67',
-    'packaging>=21',
-    'ninja',
-    'Cython>=0.29.32,!=3.0.3',
-    'pythran',
-    'numpy>=1.22',
+    'meson-python>=0.16',
+    'ninja>=1.11.1.1',
+    'Cython>=3.0.10,!=3.2.0b1',
+    'pythran>=0.16',
+    'numpy>=2.0',
     # Developer UI
-    'spin==0.7',
-    'build',
+    'spin>=0.13',
+    'build>=1.2.1',
 ]
 data = ['pooch>=1.6.0']
 developer = [
     'pre-commit',
     'ipython',
-    "tomli; python_version < '3.11'",
+    'docstub==0.7.0rc0',
+    'scikit-image[asv]',
+]
+asv = [
+    'asv; sys_platform != "emscripten"',
 ]
 docs = [
-    'sphinx>=7.2',
-    'sphinx-gallery>=0.14',
-    'numpydoc>=1.6',
+    'sphinx>=8.0',
+    'sphinx-gallery[parallel]>=0.18',
+    'numpydoc>=1.7',
     'sphinx-copybutton',
-    'pytest-runner',
-    'matplotlib>=3.5',
-    'dask[array]>=2022.9.2',
-    'pandas>=1.5',
+    'sphinx-togglebutton',
+    'matplotlib>=3.10',
+    'dask[array]>=2025.1.0',
+    'pandas>=2.0',
     'seaborn>=0.11',
     'pooch>=1.6',
-    'tifffile>=2022.8.12',
+    'tifffile>=2025.1.10',
     'myst-parser',
+    'intersphinx-registry>=0.2411.14',
     'ipywidgets',
     'ipykernel',  # needed until https://github.com/jupyter-widgets/ipywidgets/issues/3731 is resolved
-    'plotly>=5.10',
-    'kaleido',
-    'scikit-learn>=1.1',
+    'plotly>=5.20',
+    'kaleido==0.2.1',
+    'scikit-learn>=1.6',
     'sphinx_design>=0.5',
-    'pydata-sphinx-theme>=0.14.1',
-    'PyWavelets>=1.1.1',
+    'pydata-sphinx-theme>=0.16',
+    'PyWavelets>=1.7',
+    'pytest-doctestplus>=1.6.0',
 ]
 optional = [
-    'SimpleITK',
-    'astropy>=5.0',
-    'cloudpickle>=0.2.1',  # necessary to provide the 'processes' scheduler for dask
-    'dask[array]>=2021.1.0',
-    'matplotlib>=3.5',
-    'pooch>=1.6.0',
-    'pyamg',
-    'PyWavelets>=1.1.1',
-    'scikit-learn>=1.1',
+    'SimpleITK; sys_platform != "emscripten"',
+    'scikit-learn>=1.6',
+    'pyamg>=5.2; sys_platform != "emscripten" and python_version < "3.14"',  # not packaged for Pyodide yet
+    'scikit-image[optional_free_threaded]'
 ]
+optional_free_threaded = [
+    'astropy>=6.1',
+    'dask[array]>=2025.1.0',
+    'matplotlib>=3.10; sys_platform != "emscripten"',  # the pyodide maintainers recommend not testing with matplotlib
+    'pooch>=1.6.0; sys_platform != "emscripten"',  # requires stack switching with alternative pytest runner
+    'PyWavelets>=1.7',
+]
+
 test = [
-    'asv',
-    'matplotlib>=3.5',
-    'numpydoc>=1.5',
-    'pooch>=1.6.0',
-    'pytest>=7.0',
+    'numpydoc>=1.7',
+    'pooch>=1.6.0; sys_platform != "emscripten"',
+    'pytest>=9',
     'pytest-cov>=2.11.0',
+    'pytest-pretty',
     'pytest-localserver',
     'pytest-faulthandler',
+    'pytest-doctestplus>=1.6.0',
 ]
 
 [project.urls]
@@ -117,18 +124,11 @@ tracker = 'https://github.com/scikit-image/scikit-image/issues'
 [build-system]
 build-backend = 'mesonpy'
 requires = [
-    'meson-python>=0.14',
-    'wheel',
-    'setuptools>=67',
-    'packaging>=21',
-    'Cython>=0.29.32,!=3.0.3',
-    'pythran',
-    'lazy_loader>=0.3',
-    "numpy==1.22.4; python_version=='3.10' and platform_system=='Windows' and platform_python_implementation != 'PyPy'",
-    "numpy==1.22.4; python_version=='3.10' and platform_system != 'Windows' and platform_python_implementation != 'PyPy'",
-    "numpy==1.23.3; python_version=='3.11' and platform_python_implementation != 'PyPy'",
-    "numpy; python_version>='3.12'",
-    "numpy; python_version>='3.10' and platform_python_implementation=='PyPy'",
+    'meson-python>=0.16',
+    'Cython>=3.0.10,!=3.2.0b1',
+    'pythran>=0.16',
+    'lazy_loader>=0.5',
+    'numpy>=2.0',
 ]
 
 [tool.spin]
@@ -137,8 +137,9 @@ package = 'skimage'
 [tool.spin.commands]
 Build = [
     'spin.cmds.meson.build',
-    'spin.cmds.meson.test',
-    'spin.cmds.build.sdist',
+    'spin.cmds.pip.install',
+    '.spin/cmds.py:test',
+    '.spin/cmds.py:sdist',
 ]
 Environments = [
     'spin.cmds.meson.run',
@@ -150,34 +151,26 @@ Metrics = [
     '.spin/cmds.py:asv'
 ]
 
-[tool.black]
-target-version = ['py310', 'py311', 'py312']
-skip-string-normalization = 1
+[tool.ruff.format]
+quote-style = "preserve"
 
-[tool.ruff]
-line-length = 88
-target-version = 'py310'
+[tool.ruff.lint]
 select = [
     'F',
     'E',
     'W',
     'UP',
+    'NPY201',
 ]
 ignore = [
     'E501',
     'E741',
     'E712',
-]
-exclude = [
-    '.git',
-    '.ruff_cache',
-    'build',
-    'build-install',
-    'dist',
-    'doc/source/auto_examples',
+    'E721',
+    'UP038',  # non-pep604-isinstance -- https://github.com/astral-sh/ruff/issues/7871
 ]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "**/__init__.py" = [
     'E402',
     'F401',
@@ -190,22 +183,132 @@ exclude = [
     'F403',
     'F405',
 ]
-"skimage/_shared/testing.py" = ['F401']
+"src/skimage/_shared/testing.py" = ['F401']
 "doc/examples/**/*.py" = ['E402']
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = 'numpy'
 
 [tool.pytest.ini_options]
-minversion = "6.0"
-addopts = "-ra  --strict-config  --strict-markers"
+# pythonpath requires pytest >= 7.0; --strict-config (in addopts) would error
+# on startup with older versions anyway.
+minversion = "7.0"
+# Add the repo root to sys.path so pytest can import from the ``tests/``
+# directory without requiring ``__init__.py`` files in every subdirectory.
+# It does not affect ``src/``; packages there are found via the installed
+# wheel or the meson build directory (set up by spin).
+pythonpath = ["."]
+addopts = [
+    "-ra",
+    "--strict-config",
+    "--strict-markers",
+    "--showlocals",
+    # Necessary for doctest collection with editable installations and
+    # non-unique test module names (skimage/skimage2 duplicates those)
+    "--import-mode=importlib",
+    # See comment on `testpaths`
+    "--pyargs",
+]
+
+# For out-of-tree installations, selecting `src/` as a test path fails.
+# Pytest doesn't expect the doctest's sources and installation to be
+# different. Instead, we use `--pyargs` in the `addopts` field so that pytest
+# can find docstests by importing.
+testpaths = [
+    "skimage",
+    "_skimage2",  # Exclude `skimage2` and its raised `ExperimentalAPIWarning`
+    "./tests/",
+]
+
 log_cli_level = "INFO"
 xfail_strict = true
-#testpaths = ["skimage", "../../../../../benchmarks"]
-python_files = ["benchmark_*.py", "test_*.py"]
-python_classes = ["Test*", "*Suite"]
-python_functions = ["time_*", "test_*", "peakmem_*"]
-filterwarnings = []
+filterwarnings = [
+    "error",
+    "ignore::skimage.util.PendingSkimage2Change",
+    "ignore:.*use `imageio` or other I/O packages directly.*:FutureWarning",
+    # Passing win_size with gaussian_weights=True is deprecated
+    "ignore:.*win_size.*gaussian_weights.*:FutureWarning",
+    # warn by pyamg in ruge_stuben_solver
+    "ignore:Implicit conversion of A to CSR:scipy.sparse.SparseEfficiencyWarning",
+    # Pyodide warning coming via threadpoolctl, remove when
+    # https://github.com/joblib/threadpoolctl/pull/201 is released
+    "ignore:.*JsProxy\\.as_object_map.*:RuntimeWarning",
+    # Warning caused by matplotlib 3.7.0 because it uses deprecated API of pyparsing 3.3.1
+    "ignore:.*(parseString|resetCache|enablePackrat|oneOf).*:DeprecationWarning:matplotlib",
+    # tifffile (v2025.12.20) uses deprecated NumPy API
+    "ignore:Setting the shape on a NumPy array:DeprecationWarning:tifffile",
+    # pytest warning when running under PYTHONOPTIMIZE=2 (assertions are stripped)
+    "ignore:assertions not in test modules or plugins:pytest.PytestConfigWarning",
+]
+norecursedirs = ["io/_plugins"]
 
-[tool.coverage.run]
-omit = ['*/tests/*']
+[tool.changelist]
+ignored_user_logins = [
+    "web-flow",
+    "pre-commit-ci[bot]"
+]
+
+
+[tool.docstub]
+ignore_files = [
+    # deprecated, to be removed before v0.27
+    "io/_plugins",
+    "io/manage_plugins.py",
+]
+
+[tool.docstub.type_prefixes]
+warnings = "warnings"
+matplotlib = "matplotlib"
+scipy = "scipy"
+dask = "dask"
+
+[tool.docstub.type_nicknames]
+dtype-like = "np.typing.DTypeLike"
+
+[tool.docstub.types]
+Path = "pathlib.Path"
+
+[tool.cibuildwheel]
+test-command = "pytest --doctest-plus"
+test-extras = ["test", "optional"]
+test-sources = ["tests", "pyproject.toml"]
+environment = {PIP_PREFER_BINARY=1}
+environment-pass = ["SKIMAGE_LINK_FLAGS", "PIP_EXTRA_INDEX_URL", "COLUMNS"]
+build-verbosity = 0
+
+[tool.cibuildwheel.config-settings]
+# Could be overwritten using CIBW_CONFIG_SETTINGS environment variable
+
+[[tool.cibuildwheel.overrides]]
+select = "cp3??t-*"
+test-environment = {PYTHON_GIL=0}
+test-extras = ["test", "optional_free_threaded"]
+
+[[tool.cibuildwheel.overrides]]
+select = "*-m*linux_aarch64"
+test-extras = ["test", "optional_free_threaded"]
+
+[[tool.cibuildwheel.overrides]]
+select = "*-win_arm64"
+test-extras = ["test", "optional_free_threaded"]
+
+[[tool.cibuildwheel.overrides]]
+select = "*-musllinux*"
+test-extras = ["test", "optional_free_threaded"]
+# SimpleITK does not support musllinux yet
+
+[tool.cibuildwheel.linux]
+environment = {PIP_PREFER_BINARY=1, SKIMAGE_LINK_FLAGS="-Wl,--strip-debug"}
+
+[tool.cibuildwheel.windows]
+archs = ["auto"]
+
+[tool.cibuildwheel.macos]
+test-command = "pytest"
+before-all = [
+    "bash {project}/tools/build_libomp.sh",
+]
+
+[tool.cibuildwheel.pyodide]
+test-command = "pytest"
+test-extras = ["test", "optional_free_threaded"]

@@ -38,6 +38,15 @@ from image files, using :func:`skimage.io.imread`: ::
     >>> filename = os.path.join(ski.data_dir, 'moon.png')
     >>> moon = ski.io.imread(filename)
 
+If you need more control over how images are loaded, you may want to
+consider using one of the many external Python libraries that can read
+images into NumPy arrays. For example, `imageio
+<https://imageio.readthedocs.io/en/stable/>`_ : ::
+
+    >>> import imageio.v3 as iio3
+    >>> filename = os.path.join(ski.data_dir, 'moon.png')
+    >>> moon = iio3.imread(filename)
+
 Use `natsort <https://pypi.org/project/natsort/>`_ to load multiple images ::
 
     >>> import os

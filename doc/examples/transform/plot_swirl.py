@@ -65,6 +65,7 @@ transformation decays to :math:`\approx 1/1000^{\mathsf{th}}` within the
 specified radius.
 
 """
+
 import matplotlib.pyplot as plt
 
 from skimage import data

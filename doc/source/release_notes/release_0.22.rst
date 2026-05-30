@@ -1,5 +1,5 @@
-scikit-image 0.22.0
-===================
+scikit-image 0.22.0 (2023-11-03)
+================================
 
 We're happy to announce the release of scikit-image 0.22.0!
 
