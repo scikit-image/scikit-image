@@ -22,8 +22,6 @@ feature
     Feature detection and extraction, e.g., texture analysis, corners, etc.
 filters
     Sharpening, edge finding, rank filters, thresholding, etc.
-future
-    Functionality with an experimental API.
 graph
     Graph-based operations, e.g., shortest paths.
 io
@@ -69,7 +67,6 @@ __all__ = [
     "exposure",
     "feature",
     "filters",
-    "future",
     "graph",
     "io",
     "measure",
