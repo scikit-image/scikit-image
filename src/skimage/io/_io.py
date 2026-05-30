@@ -80,9 +80,6 @@ def imread(fname, as_gray=False):
     as_gray : bool, optional
         If True, convert color images to gray-scale (64-bit floats).
         Images that are already in gray-scale format are not converted.
-    img_num : int, optional
-        Specifies which image to read in a file with multiple images
-        (zero-indexed).
 
     Returns
     -------
