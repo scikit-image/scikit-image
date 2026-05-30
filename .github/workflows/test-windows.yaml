@@ -76,12 +76,17 @@ jobs:
             ccache-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.OPTIONS_NAME }}-
             ccache-${{ runner.os }}-
 
+      - name: Zero ccache stats
+        shell: bash
+        run: ccache --zero-stats
+
       - name: Build skimage
         shell: bash
         run: |
           spin build
 
       - name: Show ccache stats
+        if: always()
         shell: bash
         run: ccache --show-stats
 
@@ -95,19 +100,30 @@ jobs:
         run: |
           source .github/scripts/setup-test-env.sh
 
+      - name: Check for run-all-tests label
+        id: check-run-all-tests-label
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: bash .github/scripts/check-run-all-tests-label.sh
+
       - name: Run tests
         shell: bash
         env:
-          IS_PR: ${{ github.event_name == 'pull_request' }}
-          HAS_LABEL: ${{ contains(join(github.event.pull_request.labels.*.name, ','), 'run-all-tests') }}
+          TEST_MODIFIED: ${{ steps.check-run-all-tests-label.outputs.test_modified }}
         run: |
-          if [[ "$IS_PR" == "true" && "$HAS_LABEL" == "false" ]]; then
+          if [[ "$TEST_MODIFIED" == "true" ]]; then
             MODIFIED_FLAG="--test-modified"
             git fetch origin "$GITHUB_BASE_REF"
           else
             MODIFIED_FLAG=""
           fi
           spin test --doctest $MODIFIED_FLAG
+
+      - name: Doctest skimage2 migration
+        run: |
+          spin run -- python doc/tools/run_migration_doctests.py
 
       - name: "Job has failed: reporting"
         if: ${{ failure() && github.ref == 'refs/heads/main' }}

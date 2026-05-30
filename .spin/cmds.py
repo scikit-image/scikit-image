@@ -98,6 +98,34 @@ Use an editable install (`spin install`) which supports this or avoid passing
 """
 
 
+def _is_wheel_install():
+    """Return True if skimage is installed as a (non-editable) wheel.
+
+    Uses ``importlib.metadata`` to look for the ``WHEEL`` metadata file that
+    pip/wheel installers always write, and cross-checks ``direct_url.json``
+    (PEP 610) to exclude editable installs, which also carry a ``WHEEL`` file.
+    Returns False if scikit-image is not registered with the metadata system
+    (e.g. a plain meson build with only PYTHONPATH set).
+    """
+    import importlib.metadata
+    import json
+
+    try:
+        dist = importlib.metadata.distribution("scikit-image")
+    except importlib.metadata.PackageNotFoundError:
+        return False
+
+    # Editable installs also have a WHEEL file; exclude them per PEP 610.
+    try:
+        direct_url = json.loads(dist.read_text("direct_url.json") or "{}")
+        if direct_url.get("dir_info", {}).get("editable"):
+            return False
+    except Exception:
+        pass
+
+    return any("WHEEL" in str(f) for f in (dist.files or []))
+
+
 def _get_skimage_subpackages(build_dir=None):
     """Return the set of all skimage/skimage2/_skimage2 subpackage names.
 
@@ -122,7 +150,18 @@ def _get_skimage_subpackages(build_dir=None):
 
 def _get_changed_subpackages(base_ref, pkg_mods):
     """Return the set of changed subpackages relative to *base_ref*, with cross-package expansion."""
-    base_ref = base_ref or os.environ.get('GITHUB_BASE_REF') or 'main'
+    if not base_ref:
+        base_ref = os.environ.get('GITHUB_BASE_REF')
+    if not base_ref and not os.environ.get('GITHUB_ACTIONS'):
+        # Locally, use the upstream branch tracked by the current branch (e.g. origin/main).
+        p = subprocess.run(
+            ['git', 'rev-parse', '--abbrev-ref', '--symbolic-full-name', '@{upstream}'],
+            capture_output=True,
+            cwd=_REPO_ROOT,
+        )
+        base_ref = p.stdout.decode().strip() if p.returncode == 0 else 'main'
+    if not base_ref:
+        base_ref = 'main'
     # In CI, the base branch is only available as origin/<base_ref> after fetch
     p = subprocess.run(
         ['git', 'rev-parse', '--verify', base_ref],
@@ -174,13 +213,20 @@ def _get_changed_subpackages(base_ref, pkg_mods):
     return expanded
 
 
-def _get_test_paths(changed_subpackages, doctest):
+def _get_test_paths(changed_subpackages, doctest, installed=False):
     """Map module names to their test and (optionally) source directories.
 
     src-layout: tests live outside src/, doctests live inside src/.
     _skimage2 tests live in tests/skimage2/ (not tests/_skimage2/)
     skimage2 doctests live in src/_skimage2/ (not src/skimage2/)
+
+    When *installed* is True, doctest paths are returned as module names
+    (e.g. ``skimage.metrics``) rather than ``src/`` filesystem paths, so
+    that pytest with ``--pyargs`` collects doctests from the installed
+    package in site-packages rather than the source tree.
     """
+    import importlib.util
+
     test_paths = []
     seen = set()
     for mod in sorted(changed_subpackages):
@@ -191,24 +237,36 @@ def _get_test_paths(changed_subpackages, doctest):
             test_paths.append(test_dir)
             seen.add(test_dir)
         if doctest:
-            src_path = mod_path.replace('skimage2/', '_skimage2/', 1)
-            src_dir = os.path.join(_REPO_ROOT, 'src', src_path)
-            if src_dir not in seen and os.path.isdir(src_dir):
-                test_paths.append(src_dir)
-                seen.add(src_dir)
+            if installed:
+                # Use the installed module name so --pyargs finds doctests in
+                # site-packages.  skimage2.X is re-exported from _skimage2.X,
+                # which is the actual installed package (see pyproject.toml).
+                # Guard with find_spec: some entries in pkg_mods (e.g.
+                # skimage._shared) may not exist as importable packages in the
+                # installed wheel.
+                installed_mod = (
+                    mod.replace('skimage2.', '_skimage2.', 1)
+                    if mod.startswith('skimage2.')
+                    else mod
+                )
+                try:
+                    spec = importlib.util.find_spec(installed_mod)
+                except (ModuleNotFoundError, ValueError):
+                    # ModuleNotFoundError: parent package not installed.
+                    # ValueError: find_spec rejects relative or invalid names.
+                    spec = None
+                if spec is not None and installed_mod not in seen:
+                    test_paths.append(installed_mod)
+                    seen.add(installed_mod)
+            else:
+                src_path = mod_path.replace('skimage2/', '_skimage2/', 1)
+                src_dir = os.path.join(_REPO_ROOT, 'src', src_path)
+                if src_dir not in seen and os.path.isdir(src_dir):
+                    test_paths.append(src_dir)
+                    seen.add(src_dir)
     return test_paths
 
 
-@click.option(
-    "--installed",
-    is_flag=True,
-    default=False,
-    help=(
-        "Run tests against an installed package (e.g. a pip-installed wheel) "
-        "instead of a spin/meson build directory. "
-        "Pytest is invoked directly without any spin build-environment setup."
-    ),
-)
 @click.option(
     "--test-modified",
     is_flag=True,
@@ -227,7 +285,6 @@ def _get_test_paths(changed_subpackages, doctest):
 def test(
     *,
     parent_callback,
-    installed=False,
     test_modified=False,
     doctest=False,
     base_ref=None,
@@ -235,9 +292,12 @@ def test(
 ):
     pytest_args = kwargs.get('pytest_args', ())
 
+    # Detect whether we're running against a pip-installed wheel by checking
+    # for the WHEEL metadata file written by pip/wheel installers.  Returns
+    # False for plain meson builds (PYTHONPATH only) and editable installs.
+    installed = _is_wheel_install()
+
     # For out-of-tree builds, src/ paths don't work as doctest collection paths.
-    # Short-circuits when installed=True so _is_editable_install_of_same_source is
-    # never called in that mode.
     is_out_of_tree_build = not installed and not _is_editable_install_of_same_source(
         "scikit-image"
     )
@@ -262,7 +322,7 @@ def test(
         # src/ paths are only valid for doctests in installed/editable mode;
         # out-of-tree builds must skip them to avoid silent collection failures.
         test_paths = _get_test_paths(
-            changed_subpackages, doctest and not is_out_of_tree_build
+            changed_subpackages, doctest and not is_out_of_tree_build, installed
         )
         pytest_args = pytest_args + tuple(test_paths)
 

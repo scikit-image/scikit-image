@@ -36,14 +36,6 @@ on:
         required: false
         type: string
         default: 0
-      test_modified:
-        required: false
-        type: string
-        default: "false"
-      base_ref:
-        required: false
-        type: string
-        default: ""
 
 jobs:
   test-linux:
@@ -102,10 +94,18 @@ jobs:
           # Attempt to resolve all requirements simultaneously
           pip install --dry-run --ignore-installed $(ls requirements/*.txt | sed 's/^/-r /')
 
-      - name: Run tests
+      - name: Check for run-all-tests label
+        id: check-run-all-tests-label
         env:
-          GITHUB_BASE_REF: ${{ inputs.base_ref }}
-          TEST_MODIFIED: ${{ inputs.test_modified }}
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: bash .github/scripts/check-run-all-tests-label.sh
+
+      - name: Run tests
+        if: ${{ inputs.python-version != '3.14t' }}
+        env:
+          TEST_MODIFIED: ${{ steps.check-run-all-tests-label.outputs.test_modified }}
+          GITHUB_BASE_REF: ${{ github.base_ref }}
           # A lazy loader configuration parameter
           EAGER_IMPORT: ${{ inputs.EAGER_IMPORT }}
           MINIMUM_REQUIREMENTS: ${{ inputs.MINIMUM_REQUIREMENTS }}
@@ -117,7 +117,22 @@ jobs:
           else
             MODIFIED_FLAG=""
           fi
-          spin test --installed --doctest $MODIFIED_FLAG
+          spin test --doctest $MODIFIED_FLAG
+
+      - name: Doctest skimage2 migration
+        run: |
+          python doc/tools/run_migration_doctests.py
+
+      - name: Run multithreaded tests (3.14t only)
+        if: ${{ inputs.python-version == '3.14t' }}
+        env:
+          # A lazy loader configuration parameter
+          EAGER_IMPORT: ${{ inputs.EAGER_IMPORT }}
+          MINIMUM_REQUIREMENTS: ${{ inputs.MINIMUM_REQUIREMENTS }}
+          PYTHONOPTIMIZE: ${{ inputs.PYTHONOPTIMIZE }}
+        run: |
+          pip install pytest-run-parallel
+          spin test --doctest -- --parallel-threads=4
 
       - name: Check benchmarks
         run: |

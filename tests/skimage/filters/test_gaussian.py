@@ -3,7 +3,13 @@ import pytest
 from numpy.testing import assert_array_equal
 
 from _skimage2._shared.utils import _supported_float_type
+from _skimage2._shared.testing import assert_stacklevel
+
 from skimage.filters import difference_of_gaussians, gaussian
+from skimage.util import PendingSkimage2Change
+
+
+# skimage.filters.gaussian -------------------------------------------------------------
 
 
 def test_negative_sigma():
@@ -120,6 +126,21 @@ def test_output_error():
     out = np.zeros_like(image, dtype=np.uint8)
     with pytest.raises(ValueError, match="dtype of `out` must be float"):
         gaussian(image, sigma=1, out=out, preserve_range=True)
+
+
+@pytest.mark.filterwarnings("default::skimage.util.PendingSkimage2Change")
+def test_gaussian_pending_skimage2_warn():
+    regex = (
+        r"`skimage.filters.gaussian` is deprecated in favor of\n"
+        r"`skimage2.filters.gaussian`"
+    )
+    with pytest.warns(PendingSkimage2Change, match=regex) as record:
+        result = gaussian(np.ones((3, 3)))
+    assert_stacklevel(record)
+    assert_array_equal(result, 1)
+
+
+# skimage.filters.difference_of_gaussians ----------------------------------------------
 
 
 @pytest.mark.parametrize("s", [1, (2, 3)])

@@ -31,12 +31,18 @@ jobs:
             OPTIONAL_DEPS: 1
             OPTIONS_NAME: "default"
     env:
-      CC: /usr/bin/clang
-      CXX: /usr/bin/clang++
+      CC: ccache /usr/bin/clang
+      CXX: ccache /usr/bin/clang++
       CPPFLAGS: "-Xpreprocessor -fopenmp"
       CFLAGS: "-Wno-implicit-function-declaration -I/usr/local/opt/libomp/include -I/opt/homebrew/opt/libomp/include"
       CXXFLAGS: "-I/usr/local/opt/libomp/include -I/opt/homebrew/opt/libomp/include"
       LDFLAGS: "-Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -L/opt/homebrew/opt/libomp/lib -lomp"
+      CCACHE_BASEDIR: "${{ github.workspace }}"
+      CCACHE_DIR: "${{ github.workspace }}/.ccache"
+      CCACHE_COMPRESS: true
+      CCACHE_COMPRESSLEVEL: 6
+      CCACHE_MAXSIZE: 400M
+      CCACHE_SLOPPINESS: "pch_defines,time_macros"
 
     steps:
       - name: Checkout scikit-image
@@ -55,7 +61,22 @@ jobs:
       - name: OSX configuration
         run: |
           # OpenMP is not present on macOS by default
-          brew install libomp
+          brew install libomp ccache
+
+      - name: Install and configure ccache
+        run: |
+          echo "$(brew --prefix)/opt/ccache/libexec" >> $GITHUB_PATH
+
+      - name: Restore/save ccache
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.ccache
+          key: ccache-${{ runner.os }}-py${{ matrix.python-version }}-${{ github.sha }}
+          restore-keys: |
+            ccache-${{ runner.os }}-py${{ matrix.python-version }}-
+
+      - name: Zero ccache stats
+        run: ccache --zero-stats
 
       - name: Install build dependencies
         run: |
@@ -65,24 +86,38 @@ jobs:
         run: |
           spin build
 
+      - name: ccache statistics
+        if: always()
+        run: ccache --show-stats
+
       - name: Install test dependencies
         env:
           OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
         run: |
           source .github/scripts/setup-test-env.sh
 
+      - name: Check for run-all-tests label
+        id: check-run-all-tests-label
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: bash .github/scripts/check-run-all-tests-label.sh
+
       - name: Run tests
         env:
-          IS_PR: ${{ github.event_name == 'pull_request' }}
-          HAS_LABEL: ${{ contains(join(github.event.pull_request.labels.*.name, ','), 'run-all-tests') }}
+          TEST_MODIFIED: ${{ steps.check-run-all-tests-label.outputs.test_modified }}
         run: |
-          if [[ "$IS_PR" == "true" && "$HAS_LABEL" == "false" ]]; then
+          if [[ "$TEST_MODIFIED" == "true" ]]; then
             MODIFIED_FLAG="--test-modified"
             git fetch origin "$GITHUB_BASE_REF"
           else
             MODIFIED_FLAG=""
           fi
           spin test --no-doctest $MODIFIED_FLAG
+
+      - name: Doctest skimage2 migration
+        run: |
+          spin run -- python doc/tools/run_migration_doctests.py
 
       - name: Check benchmarks
         run: |
