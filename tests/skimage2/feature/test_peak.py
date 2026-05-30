@@ -559,7 +559,7 @@ class TestPeakLocalMax:
                 len(peak_local_max(image, min_distance=0, exclude_border=0))
                 == image.size - 1
             )
-        assert_stacklevel(record)
+        assert_stacklevel(record, offset=-3)
 
     def test_peak_at_border(self):
         image = np.full((10, 10), -2)
