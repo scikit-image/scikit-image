@@ -49,7 +49,7 @@ from .util.dtype import (
     img_as_ubyte,
     img_as_bool,
 )
-from .util.lookfor import lookfor
+from .util._lookfor import lookfor
 from .data import data_dir
 
 # Used by ``skimage2`` on import; must be a real module attribute (see __init__.py).

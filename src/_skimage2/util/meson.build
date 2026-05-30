@@ -27,7 +27,7 @@ python_sources = [
   'arraycrop.py',
   'compare.py',
   'dtype.py',
-  'lookfor.py',
+  '_lookfor.py',
   'noise.py',
   'shape.py',
   'unique.py'
