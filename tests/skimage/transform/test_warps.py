@@ -53,6 +53,30 @@ def test_warp_tform():
     assert_array_almost_equal(x90, np.rot90(x))
 
 
+def test_warp_bilinear_constant_region_is_exact():
+    # Regression test for #8198. Bilinear interpolation (order=1) uses the
+    # linear interpolation form ``v0 + t * (v1 - v0)``, so interpolating anywhere
+    # inside a region of equal pixels must return that value *exactly*
+    # (bit-for-bit), regardless of the sub-pixel position or of how the compiler
+    # contracts the multiply-add (FMA). The previous ``(1 - t) * v0 + t * v1`` form
+    # was only exact at the grid points; off-grid it produced sub-ULP deltas whose
+    # sign depended on the platform (e.g. x86 two-rounding vs ARM FMA), which
+    # flipped downstream threshold comparisons (such as in
+    # ``local_binary_pattern``) inconsistently across platforms. Sweep several
+    # sub-pixel offsets and rotations so the invariant is exercised broadly.
+    value = 7.3
+    image = np.full((7, 7), value, dtype=np.float64)
+    expected = np.full_like(image, value)
+    for rotation in (0.0, 0.123, 0.5):
+        for tx, ty in [(0.37, 0.42), (0.1, 0.9), (0.5, 0.25), (0.73, 0.66)]:
+            tform = SimilarityTransform(
+                scale=1, rotation=rotation, translation=(-tx, ty)
+            )
+            warped = warp(image, tform, order=1, mode='edge')
+            # Compare on the exact bit pattern, not an approximate tolerance.
+            assert_array_equal(warped, expected)
+
+
 def test_warp_callable():
     x = np.zeros((5, 5), dtype=np.float64)
     x[2, 2] = 1

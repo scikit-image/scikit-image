@@ -112,9 +112,16 @@ cdef inline void bilinear_interpolation(
     cdef np_real_numeric bottom_left = get_pixel2d(image, rows, cols, maxr, minc, mode, cval)
     cdef np_real_numeric bottom_right = get_pixel2d(image, rows, cols, maxr, maxc, mode, cval)
 
-    top = (1 - dc) * top_left + dc * top_right
-    bottom = (1 - dc) * bottom_left + dc * bottom_right
-    out[0] = <np_real_numeric_out> ((1 - dr) * top + dr * bottom)
+    # Linear interpolation form ``v0 + t * (v1 - v0)`` instead of ``(1 - t) * v0 + t * v1``.
+    # When the two endpoints are equal the difference is exactly zero, so the
+    # result is exactly that endpoint regardless of ``t`` and of how the
+    # compiler contracts the multiply-add (FMA). This removes a class of
+    # platform-specific (e.g. x86 vs ARM) last-bit discrepancies that flip
+    # downstream threshold comparisons, see #8198. The endpoints are cast to
+    # float before subtracting to avoid wraparound for unsigned integer images.
+    top = top_left + dc * (<np_floats>top_right - <np_floats>top_left)
+    bottom = bottom_left + dc * (<np_floats>bottom_right - <np_floats>bottom_left)
+    out[0] = <np_real_numeric_out> (top + dr * (bottom - top))
 
 cdef inline np_floats quadratic_interpolation(np_floats x,
                                               np_real_numeric[3] f) noexcept nogil:
