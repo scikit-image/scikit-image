@@ -6,13 +6,15 @@ import numpy as np
 from scipy import ndimage as ndi
 from scipy import spatial, stats
 
+from _skimage2._shared.utils import _supported_float_type, safe_as_int
+from _skimage2._shared._warnings import warn_external
 from ..filters._gaussian import gaussian
-from _skimage2._shared.utils import _supported_float_type, safe_as_int, warn
-from ..transform.integral import integral_image
+from ..transform import integral_image
 from ..util import img_as_float
 from ._hessian_det_appx import _hessian_matrix_det
 from .corner_cy import _corner_fast, _corner_moravec, _corner_orientations
 from .util import _prepare_grayscale_input_2D, _prepare_grayscale_input_nD
+from .._migration import ski2_migration_decorator
 
 
 def _compute_derivatives(image, mode='constant', cval=0):
@@ -112,7 +114,7 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0, order='rc'):
     if not np.isscalar(sigma):
         sigma = tuple(sigma)
         if len(sigma) != image.ndim:
-            raise ValueError('sigma must have as many elements as image ' 'has axes')
+            raise ValueError('sigma must have as many elements as image has axes')
 
     image = _prepare_grayscale_input_nD(image)
 
@@ -309,12 +311,11 @@ def hessian_matrix(
 
     if use_gaussian_derivatives is None:
         use_gaussian_derivatives = False
-        warn(
+        warn_external(
             "use_gaussian_derivatives currently defaults to False, but will "
             "change to True in a future version. Please specify this "
             "argument explicitly to maintain the current behavior",
             category=FutureWarning,
-            stacklevel=2,
         )
 
     if use_gaussian_derivatives:
@@ -693,7 +694,7 @@ def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
 
     Examples
     --------
-    >>> from skimage.feature import corner_harris, corner_peaks
+    >>> from skimage.feature import corner_harris, peak_local_max
     >>> square = np.zeros([10, 10])
     >>> square[2:8, 2:8] = 1
     >>> square.astype(int)
@@ -707,7 +708,7 @@ def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
            [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
-    >>> corner_peaks(corner_harris(square), min_distance=1)
+    >>> peak_local_max(corner_harris(square), min_distance=1.1)
     array([[2, 2],
            [2, 7],
            [7, 2],
@@ -762,7 +763,7 @@ def corner_shi_tomasi(image, sigma=1):
 
     Examples
     --------
-    >>> from skimage.feature import corner_shi_tomasi, corner_peaks
+    >>> from skimage.feature import corner_shi_tomasi, peak_local_max
     >>> square = np.zeros([10, 10])
     >>> square[2:8, 2:8] = 1
     >>> square.astype(int)
@@ -776,7 +777,7 @@ def corner_shi_tomasi(image, sigma=1):
            [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
-    >>> corner_peaks(corner_shi_tomasi(square), min_distance=1)
+    >>> peak_local_max(corner_shi_tomasi(square), min_distance=1.1)
     array([[2, 2],
            [2, 7],
            [7, 2],
@@ -832,7 +833,7 @@ def corner_foerstner(image, sigma=1):
 
     Examples
     --------
-    >>> from skimage.feature import corner_foerstner, corner_peaks
+    >>> from skimage.feature import corner_foerstner, peak_local_max
     >>> square = np.zeros([10, 10])
     >>> square[2:8, 2:8] = 1
     >>> square.astype(int)
@@ -850,7 +851,7 @@ def corner_foerstner(image, sigma=1):
     >>> accuracy_thresh = 0.5
     >>> roundness_thresh = 0.3
     >>> foerstner = (q > roundness_thresh) * (w > accuracy_thresh) * w
-    >>> corner_peaks(foerstner, min_distance=1)
+    >>> peak_local_max(foerstner, min_distance=1.1)
     array([[2, 2],
            [2, 7],
            [7, 2],
@@ -911,7 +912,7 @@ def corner_fast(image, n=12, threshold=0.15):
 
     Examples
     --------
-    >>> from skimage.feature import corner_fast, corner_peaks
+    >>> from skimage.feature import corner_fast, peak_local_max
     >>> square = np.zeros((12, 12))
     >>> square[3:9, 3:9] = 1
     >>> square.astype(int)
@@ -927,7 +928,7 @@ def corner_fast(image, n=12, threshold=0.15):
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
-    >>> corner_peaks(corner_fast(square, 9), min_distance=1)
+    >>> peak_local_max(corner_fast(square, 9), min_distance=1.1)
     array([[3, 3],
            [3, 8],
            [8, 3],
@@ -978,7 +979,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
 
     Examples
     --------
-    >>> from skimage.feature import corner_harris, corner_peaks, corner_subpix
+    >>> from skimage.feature import corner_harris, peak_local_max, corner_subpix
     >>> img = np.zeros((10, 10))
     >>> img[:5, :5] = 1
     >>> img[5:, 5:] = 1
@@ -993,7 +994,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1]])
-    >>> coords = corner_peaks(corner_harris(img), min_distance=2)
+    >>> coords = peak_local_max(corner_harris(img), min_distance=2.1)
     >>> coords_subpix = corner_subpix(img, coords, window_size=7)
     >>> coords_subpix
     array([[4.5, 4.5]])
@@ -1122,6 +1123,114 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
     return corners_subpix
 
 
+@ski2_migration_decorator(
+    r"""
+    ``%(qname_old)s`` is deprecated in favor of
+    ``%(qname_new)s`` with new behavior:
+
+    * Peaks are removed when `< min_distance`, was `<= min_distance`
+    * Parameter `indices` is removed
+    * Parameter `p_norm` defaults to 2 (Euclidean distance),
+      was `numpy.inf` (Chebyshev distance)
+    * Parameter `exclude_border` defaults to 1, was ``True``
+    * Parameter `exclude_border` no longer accepts `False` and `True`,
+      pass 0 instead of `False`, or the value of `min_distance` instead of `True`
+    * Parameters after `image` are keyword-only
+
+    To keep the old behavior when switching to `skimage2`, update your call
+    according to the following cases:
+
+    <!--- cond-start: warning -->
+    * `min_distance` not passed, use `min_distance=np.nextafter(1, np.inf)
+    * `min_distance=<number>`, use `min_distance=np.nextafter(<number>, np.inf)
+    * `exclude_border` not passed, use `exclude_border=<value_of_min_distance>`
+    * `exclude_border=True`, same as above
+    * `exclude_border=False`, use `exclude_border=0`
+    * `exclude_border=<int>`, no change necessary
+    * `p_norm` not passed, use `p_norm=numpy.inf`
+    * `p_norm=<float>`, no change necessary
+    * `indices=True` or not passed, no change necessary
+    * `indices=False`, boolean mask with:
+          coords = ski2.feature.peak_local_max(...)
+          peaks = np.zeros_like(image, dtype=bool)
+          peaks[tuple(coords.T)] = True
+    <!--- cond-end -->
+    <!--- cond-start: doc -->
+    .. list-table::
+        :header-rows: 1
+
+        - - In `skimage`
+          - In `skimage2`
+
+        - - `min_distance` not passed (default)
+          - Use ``min_distance=numpy.nextafter(1, numpy.inf)``
+
+        - - ``min_distance=<number>``
+          - Use ``min_distance=numpy.nextafter(<number>, numpy.inf)``
+
+        - - `exclude_border` not passed (default)
+          - Assign it the same value as `min_distance` which may be its default
+            value ``1``. If `min_distance` is a float,
+            use ``int(np.floor(min_distance))``
+
+        - - ``exclude_border=True``
+          - Same as above in the default case.
+
+        - - ``exclude_border=False``
+          - Use ``min_distance=0``.
+
+        - - ``exclude_border=<int>``
+          - No change necessary.
+
+        - - ``p_norm`` not passed (default)
+          - Pass the Skimage 1 default explicitly with ``p_norm=numpy.inf``.
+
+        - - ``p_norm=<float>``
+          - No change necessary.
+
+        - - ``indices=True`` or not passed (default)
+          - No change necessary.
+
+        - - ``indices=False``
+          - Reconstruct peak mask with::
+
+               coords = ski2.feature.peak_local_max(...)
+               peaks = np.zeros_like(image, dtype=bool)
+               peaks[tuple(coords.T)] = True
+
+    Other keyword parameters can be left unchanged.
+
+    >>> import numpy as np
+    >>> import skimage as ski1
+    >>> import skimage2 as ski2
+    ...
+    >>> image = ski1.data.camera()
+    ...
+    >>> res1 = ski1.feature.corner_peaks(image)
+    >>> res2 = ski2.feature.peak_local_max(
+    ...     image,
+    ...     min_distance=np.nextafter(1, np.inf),
+    ...     exclude_border=1,
+    ...     p_norm=np.inf,
+    ... )
+    >>> np.testing.assert_equal(res1, res2)
+    ...
+    >>> res1 = ski1.feature.corner_peaks(image, min_distance=10, indices=False)
+    >>> coords2 = ski2.feature.peak_local_max(
+    ...     image,
+    ...     min_distance=np.nextafter(10, np.inf),
+    ...     exclude_border=10,
+    ...     p_norm=np.inf
+    ... )
+    >>> res2 = np.zeros_like(image, dtype=bool)
+    >>> res2[tuple(coords2.T)] = True
+    >>> np.testing.assert_equal(res1, res2)
+
+    <!--- cond-end -->
+    """,
+    qname_old='skimage.feature.corner_peaks',
+    qname_new='skimage2.feature.peak_local_max',
+)
 def corner_peaks(
     image,
     min_distance=1,
@@ -1129,11 +1238,11 @@ def corner_peaks(
     threshold_rel=None,
     exclude_border=True,
     indices=True,
-    num_peaks=np.inf,
+    num_peaks=None,
     footprint=None,
     labels=None,
     *,
-    num_peaks_per_label=np.inf,
+    num_peaks_per_label=None,
     p_norm=np.inf,
 ):
     """Find peaks in corner measure response image.
@@ -1143,21 +1252,71 @@ def corner_peaks(
 
     Parameters
     ----------
-    image : ndarray of shape (M, N)
+    image : ndarray
         Input image.
-    min_distance : int, optional
-        The minimal allowed distance separating peaks.
-    * : *
-        See :py:meth:`skimage.feature.peak_local_max`.
-    p_norm : float
+    min_distance : float, optional
+        The minimum required distance between peaks. If a peak is *less than or
+        equal to* `min_distance` from one with a larger intensity, it is removed.
+        `min_distance=1` will preserve all peaks but direct neighbors.
+        See also `p_norm` which defines how the distance is calculated.
+    threshold_abs : float, optional
+        Minimum intensity of peaks. By default, the absolute threshold is
+        the minimum intensity of the image.
+    threshold_rel : float, optional
+        Minimum intensity of peaks, calculated as
+        ``max(image) * threshold_rel``.
+    indices : bool, default
+        If ``True`` (default), return the coordinates of found peaks.
+        If ``False``, return boolean array shaped like `image`, with peaks
+        represented by ``True``.
+    exclude_border : int or tuple of int(s) or bool, optional
+        Control peak detection close to the border of `image`.
+
+        ``True``
+            Exclude peaks that are within ``floor(min_distance)`` of the border.
+        ``False`` or ``0``
+            Distance to border has no effect, all peaks are identified.
+        positive integer
+            Exclude peaks that are within this given distance of the border.
+        tuple of positive integers
+            Same as for a single integer, but specified for each axis.
+            E.g., for a 2D image, ``(5, 10)`` would reject peaks within 5 pixels
+            of the border in the first dimension, and within 10 pixels in the
+            second dimension.
+
+        The value of `p_norm` has no impact on this border distance.
+    num_peaks : int, optional
+        Maximum number of peaks. When the number of found peaks exceeds it,
+        drop peaks with the lowest intensity until the limit is satisfied.
+
+        .. deprecated:: 0.27
+            Passing ``numpy.inf`` is deprecated,
+            use the equivalent ``None`` instead.
+
+    footprint : ndarray of dtype bool, optional
+        Mask that determines the neighborhood (where ``True``) in which
+        a peak must be a local maximum (see *Notes*). If not given, defaults to
+        an array of ``True`` of size ``floor(2 * min_distance + 1)`` along each
+        axis.
+    labels : ndarray of dtype int, optional
+        If provided, defines unique regions (``labels == region_label``) to
+        search for peaks. Zero is reserved for the background.
+    num_peaks_per_label : int, optional
+        Maximum number of peaks for each label.
+
+        .. deprecated:: 0.27
+            Passing ``numpy.inf`` is deprecated, use ``None`` instead
+            (equivalent behavior).
+
+    p_norm : float, optional
         Which Minkowski p-norm to use. Should be in the range [1, inf].
         A finite large p may cause a ValueError if overflow can occur.
         ``inf`` corresponds to the Chebyshev distance and 2 to the
-        Euclidean distance.
+        Euclidean distance.  See also :func:`numpy.linalg.norm`.
 
     Returns
     -------
-    output : ndarray or ndarray of bools
+    output : ndarray of dtype int or ndarray of dtype bool
 
         * If `indices = True`  : (row, column, ...) coordinates of peaks.
         * If `indices = False` : Boolean array shaped like `image`, with peaks
@@ -1169,13 +1328,8 @@ def corner_peaks(
 
     Notes
     -----
-    .. versionchanged:: 0.18
-        The default value of `threshold_rel` has changed to None, which
-        corresponds to letting `skimage.feature.peak_local_max` decide on the
-        default. This is equivalent to `threshold_rel=0`.
-
     The `num_peaks` limit is applied before suppression of connected peaks.
-    To limit the number of peaks after suppression, set `num_peaks=np.inf` and
+    To limit the number of peaks after suppression, set ``num_peaks=None`` and
     post-process the output of this function.
 
     Examples
@@ -1198,10 +1352,21 @@ def corner_peaks(
     array([[2, 2]])
 
     """
-    if np.isinf(num_peaks):
+    # Deprecate passing `np.inf` to `num_peaks` and `num_peaks_per_label`
+    if num_peaks is not None and np.isinf(num_peaks):
         num_peaks = None
-    if np.isinf(num_peaks_per_label):
+        warn_external(
+            "Passing `np.inf` to `num_peaks` is deprecated in version 0.27, "
+            "use `num_peaks=None` instead.",
+            category=FutureWarning,
+        )
+    if num_peaks_per_label is not None and np.isinf(num_peaks_per_label):
         num_peaks_per_label = None
+        warn_external(
+            "Passing `np.inf` to `num_peaks_per_label` is deprecated in version 0.27, "
+            "use `num_peaks_per_label=None` instead.",
+            category=FutureWarning,
+        )
 
     # Avoid circular import
     from .peak import peak_local_max
@@ -1217,6 +1382,7 @@ def corner_peaks(
         footprint=footprint,
         labels=labels,
         num_peaks_per_label=num_peaks_per_label,
+        p_norm=p_norm,
     )
 
     if len(coords):
@@ -1327,7 +1493,7 @@ def corner_orientations(image, corners, mask):
     Examples
     --------
     >>> from skimage.morphology import octagon
-    >>> from skimage.feature import (corner_fast, corner_peaks,
+    >>> from skimage.feature import (corner_fast, peak_local_max,
     ...                              corner_orientations)
     >>> square = np.zeros((12, 12))
     >>> square[3:9, 3:9] = 1
@@ -1344,7 +1510,7 @@ def corner_orientations(image, corners, mask):
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
-    >>> corners = corner_peaks(corner_fast(square, 9), min_distance=1)
+    >>> corners = peak_local_max(corner_fast(square, 9), min_distance=1.1)
     >>> corners
     array([[3, 3],
            [3, 8],
