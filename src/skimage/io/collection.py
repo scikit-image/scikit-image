@@ -228,9 +228,9 @@ class ImageCollection:
             raise TypeError('Invalid pattern as input.')
 
         if load_func is None:
-            from ._io import imread
+            from ._io import _imread
 
-            self.load_func = imread
+            self.load_func = _imread
             self._numframes = self._find_images()
         else:
             self.load_func = load_func
@@ -518,6 +518,8 @@ class MultiImage(ImageCollection):
     >>> image_col = ImageCollection(multipage_tiff)
     >>> len(image_col)  # image_col contains two elements
     2
+    >>> image_col[0].shape
+    (15, 10)
     >>> for frame in image_col:
     ...     print(frame.shape)  # each element is a frame of shape (15, 10)
     ...
@@ -527,10 +529,10 @@ class MultiImage(ImageCollection):
 
     def __init__(self, filename, conserve_memory=True, dtype=None, **imread_kwargs):
         """Load a multi-img."""
-        from ._io import imread
+        from ._io import _imread
 
         self._filename = filename
-        super().__init__(filename, conserve_memory, load_func=imread, **imread_kwargs)
+        super().__init__(filename, conserve_memory, load_func=_imread, **imread_kwargs)
 
     @property
     def filename(self):

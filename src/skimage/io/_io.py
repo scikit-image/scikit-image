@@ -17,29 +17,28 @@ __all__ = [
 ]
 
 
-def imread(fname, as_gray=False):
+def _imread(fname, as_gray=False, *, img_num=None):
     """Load an image from file.
+
+    .. note::
+        An internal version of :func:`.imread` that still exposes the parameter
+        `img_num` (see :func:`.imread` for the full docstring). This is
+        necessary to preserve the default behavior of :class:`.ImageCollection`
+        which still relies on that parameter to index multipage TIFF images.
+        :fun:`imageio.v3.imread` does not accept this parameter.
+        In ``skimage2`` we probably want to rethink this API/behavior.
 
     Parameters
     ----------
     fname : str or pathlib.Path
-        Image file name, e.g. ``test.jpg`` or URL.
     as_gray : bool, optional
-        If True, convert color images to gray-scale (64-bit floats).
-        Images that are already in gray-scale format are not converted.
+    img_num : int, optional
+        Specifies which image to read in a file with multiple images
+        (zero-indexed).
 
     Returns
     -------
     img_array : ndarray
-        The different color bands/channels are stored in the
-        third dimension, such that a gray-image is MxN, an
-        RGB-image MxNx3 and an RGBA-image MxNx4.
-
-    Notes
-    -----
-    This function wraps :func:`imageio.v3.imread` and :func:`tifffile.imread`.
-    The latter is only used if `fname` ends in ".tif" or ".tiff" (case ignored).
-    Use the wrapped functions directly if you need to pass additional parameters.
     """
     if isinstance(fname, pathlib.Path):
         fname = str(fname.resolve())
@@ -48,7 +47,8 @@ def imread(fname, as_gray=False):
 
     with file_or_url_context(fname) as fname:
         if is_tiff_file:
-            img = tifffile.imread(fname)
+            kwargs = {} if img_num is None else {"key": img_num}
+            img = tifffile.imread(fname, **kwargs)
         else:
             img = np.asarray(iio.imread(fname))
             if not img.flags['WRITEABLE']:
@@ -68,6 +68,41 @@ def imread(fname, as_gray=False):
             img = rgb2gray(img)
 
     return img
+
+
+def imread(fname, as_gray=False):
+    """Load an image from file.
+
+    Parameters
+    ----------
+    fname : str or pathlib.Path
+        Image file name, e.g. ``test.jpg`` or URL.
+    as_gray : bool, optional
+        If True, convert color images to gray-scale (64-bit floats).
+        Images that are already in gray-scale format are not converted.
+    img_num : int, optional
+        Specifies which image to read in a file with multiple images
+        (zero-indexed).
+
+    Returns
+    -------
+    img_array : ndarray
+        The different color bands/channels are stored in the
+        third dimension, such that a gray-image is MxN, an
+        RGB-image MxNx3 and an RGBA-image MxNx4.
+
+    See Also
+    --------
+    skimage.io.imread_collection
+    skimage.io.ImageCollection
+
+    Notes
+    -----
+    This function wraps :func:`imageio.v3.imread` and :func:`tifffile.imread`.
+    The latter is only used if `fname` ends in ".tif" or ".tiff" (case ignored).
+    Use the wrapped functions directly if you need to pass additional parameters.
+    """
+    return _imread(fname, as_gray=as_gray)
 
 
 def imread_collection(load_pattern, conserve_memory=True):
