@@ -12,6 +12,8 @@ from PIL import Image
 
 from tifffile import TiffFile
 
+from .._migration import ski2_migration_decorator
+
 
 __all__ = [
     'MultiImage',
@@ -415,8 +417,40 @@ class ImageCollection:
         return concatenate_images(self)
 
 
-# TODO What to do about this function?
+@ski2_migration_decorator(
+    '''\
+<!--- cond-start: warning -->
+`%(qname_old)s` is deprecated. Instead, use the equivalent
+
+>>> from functools import partial
+>>> import skimage2 as ski2
+>>> ...
+>>> imread_collection = partial(ski2.io.ImageCollection, load_func=imread)
+<!--- cond-end -->
+''',
+    qname_old='skimage.io.imread_collection_wrapper',
+)
 def imread_collection_wrapper(imread):
+    """Init :class:`.ImageCollection` with a specific load (imread) function.
+
+    Parameters
+    ----------
+    imread : Callable
+        A callable matching :func:`.imread` in signature.
+
+    Returns
+    -------
+    func : Callable
+        Wrapper around :class:`.ImageCollection` on which ``load_func=imread``
+        is already set.
+
+    See Also
+    --------
+    skimage.io.ImageCollection
+    skimage.io.imread_collection
+    skimage.io.imread
+    """
+
     def imread_collection(load_pattern, conserve_memory=True):
         """Return an `ImageCollection` from files matching the given pattern.
 
