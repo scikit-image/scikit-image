@@ -262,6 +262,35 @@ class TestLBP:
         )
         np.testing.assert_array_equal(lbp, ref)
 
+    def test_uniform_platform_consistency_gh_8198(self):
+        # Regression test for #8198: local_binary_pattern returned different
+        # results on x86 (no FMA) and ARM (FMA). The bilinear-interpolation
+        # threshold ``texture[i] - image[r, c] >= 0`` flipped on a sub-ULP delta
+        # that one platform rounded to a tiny negative value and the other to 0.
+        #
+        # This 9x11 patch is rows 16:25, cols 7:18 of item 135 of Fashion-MNIST
+        # (the case reported in #8198); the affected output is ``lbp[4][4:8]``.
+        # With the old ``(1 - t) * v0 + t * v1`` interpolation this slice was
+        # ``[11, 8, 11, 13]`` on x86 and ``[11, 9, 11, 13]`` on ARM; both now
+        # agree on ``[11, 9, 11, 13]``. The patch is inlined (no network/sklearn
+        # dependency) so the test is deterministic and offline.
+        image = np.array(
+            [
+                [0, 41, 255, 216, 220, 219, 218, 219, 219, 219, 221],
+                [0, 135, 254, 217, 219, 219, 219, 219, 219, 220, 219],
+                [0, 190, 249, 216, 220, 220, 220, 221, 221, 222, 220],
+                [0, 223, 236, 219, 220, 220, 221, 222, 222, 222, 222],
+                [14, 234, 229, 220, 221, 221, 221, 221, 221, 221, 221],
+                [8, 246, 225, 220, 221, 221, 221, 221, 221, 221, 220],
+                [0, 253, 223, 222, 222, 222, 222, 223, 222, 223, 221],
+                [0, 253, 217, 218, 217, 218, 218, 217, 217, 217, 218],
+                [0, 255, 230, 227, 227, 227, 227, 227, 227, 227, 228],
+            ],
+            dtype=np.uint8,
+        )
+        lbp = local_binary_pattern(image, P=16, R=2, method="uniform")
+        np.testing.assert_array_equal(lbp[4][4:8], [11, 9, 11, 13])
+
     def test_ror(self):
         lbp = local_binary_pattern(self.image, 8, 1, 'ror')
         ref = np.array(
