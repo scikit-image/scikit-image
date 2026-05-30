@@ -101,7 +101,7 @@ def binary_erosion(image, footprint=None, out=None, *, mode='ignore'):
 
     For even-sized footprints, :func:`skimage.morphology.erosion` and
     this function produce an output that differs: one is shifted by one pixel
-    compared to the other. :func:`skimage.morphology.pad_footprint´ is available
+    compared to the other. :func:`skimage.morphology.pad_footprint` is available
     to account for this.
 
     See also
