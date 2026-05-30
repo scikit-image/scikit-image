@@ -6,9 +6,9 @@ import numpy as np
 from scipy import ndimage as ndi
 from scipy import spatial, stats
 
-from _skimage2._shared.filters import gaussian
 from _skimage2._shared.utils import _supported_float_type, safe_as_int
 from _skimage2._shared._warnings import warn_external
+from ..filters._gaussian import gaussian
 from ..transform import integral_image
 from ..util import img_as_float
 from ._hessian_det_appx import _hessian_matrix_det

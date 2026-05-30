@@ -1,14 +1,22 @@
-"""Utilities for migration CLI tools"""
+"""Utilities for migration command line tools
+
+Routines that support tools for:
+
+* Collecting migration docstrings from scikit-image source, and
+* Filling the migration guide from collected docstrings, and
+* Executing examples from collected docstrings.
+"""
 
 import doctest
 from functools import partial
 from os import environ
-from pathlib import Path
-
-from jinja2 import Template
 
 PARSER = doctest.DocTestParser()
 RUNNER = doctest.DocTestRunner()
+
+
+def _append_msgs(msg_str, messages=[]):
+    messages.append(msg_str)
 
 
 class TrackerDict(dict):
@@ -21,27 +29,6 @@ class TrackerDict(dict):
     def __getitem__(self, key):
         self.not_accessed_keys.discard(key)
         return super().__getitem__(key)
-
-
-def write_migration(in_tpl, doc_dict, out_path=None):
-    in_tpl = Path(in_tpl)
-    if out_path is None:
-        out_path = in_tpl.with_name(in_tpl.name.replace('.tpl', ''))
-    out_path = Path(out_path)
-    tpl = Template(in_tpl.read_text())
-    render_dict = TrackerDict(doc_dict)
-    out_str = tpl.render(d=render_dict)
-    # Check all keys have been consumed.
-    if render_dict.not_accessed_keys:
-        raise RuntimeError(
-            'These keys not used in template:'
-            + ', '.join(render_dict.not_accessed_keys)
-        )
-    Path(out_path).write_text(out_str)
-
-
-def _append_msgs(msg_str, messages=[]):
-    messages.append(msg_str)
 
 
 def run_doctest(func_name, doc):
