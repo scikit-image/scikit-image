@@ -1,7 +1,6 @@
 python_sources = [
     'sift.py',
     '_basic_features.py',
-    'brief_pythran.py',
     '_canny.py',
     'orb_cy.py',
     '__init__.pyi',
@@ -20,7 +19,6 @@ python_sources = [
     '_haar.py',
     '_hoghistogram.py',
     'corner.py',
-    '_hessian_det_appx_pythran.py',
     'texture.py',
     'template.py',
     '_canny_cy.py',
