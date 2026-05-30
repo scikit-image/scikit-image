@@ -103,11 +103,12 @@ class ImageCollection:
 
     Parameters
     ----------
-    load_pattern : str or sequence
-        A glob-like pattern or sequence of patterns to load files. If a
-        sequence of objects other than strings is passed, e.g. a range of
-        numbers, each item will be passed independently to `load_func` and
-        will represent an item in the collection.
+    load_pattern : str or Sequence
+        A glob-like pattern or sequence of patterns (separated by
+        :obj:`os.pathsep`) to load files. If a sequence of objects other than
+        strings is passed, e.g. a range of numbers, each item will be passed
+        independently to `load_func` and will represent an item in the
+        collection.
     conserve_memory : bool, optional
         If True, `ImageCollection` does not keep more than one in memory at a
         specific time. Otherwise, images will be cached once they are loaded.
