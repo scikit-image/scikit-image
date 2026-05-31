@@ -150,6 +150,12 @@ def test_3d_image_with_2d_template():
     assert_equal(result.shape, (10, 10, 5))
     assert_allclose(result, expected)
 
+    padded_result = match_template(image, template, pad_input=True)
+    padded_expected = match_template(image, template[..., np.newaxis], pad_input=True)
+
+    assert_equal(padded_result.shape, (12, 12, 5))
+    assert_allclose(padded_result, padded_expected)
+
 
 def test_3d_pad_input():
     rng = np.random.RandomState(3122599642)
