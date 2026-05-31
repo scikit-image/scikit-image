@@ -1,7 +1,7 @@
-from _skimage2.io.manage_plugins import *  # noqa: F403
-from _skimage2.io.manage_plugins import __doc__  # noqa: F401
+"""Shim: delegate to ``_skimage2.io.manage_plugins``."""
 
-from _skimage2.io.manage_plugins import (  # noqa: F401
-    _available_plugins,
-    _hide_plugin_deprecation_warnings,
-)
+import sys
+
+from _skimage2.io import manage_plugins
+
+sys.modules[__name__] = manage_plugins
