@@ -21,6 +21,9 @@ __all__ = [
 ]
 
 
+__doctest_requires__ = {"ImageCollection": "pooch"}
+
+
 def concatenate_images(ic):
     """Concatenate all images in the image collection into an array.
 
@@ -113,7 +116,7 @@ class ImageCollection:
         If True, `ImageCollection` does not keep more than one in memory at a
         specific time. Otherwise, images will be cached once they are loaded.
     load_func : callable, optional
-        Load images with a custom callable that accepts a single
+        Load images with a custom callable that accepts a single argument.
         Defaults to :func:`skimage.io.imread`.
     **load_func_kwargs : dict, optional
         Passed to `load_func` as additional keyword arguments on each call.
@@ -132,7 +135,6 @@ class ImageCollection:
 
     Examples
     --------
-    >>> import pytest; _ = pytest.importorskip("pooch")  # Skip without pooch
     >>> import skimage as ski
     >>> ski.data.download_all()  # Make sure all files are present in data_dir
     >>> collection = ski.io.ImageCollection(ski.data.data_dir + '/chess*.png')
@@ -147,8 +149,8 @@ class ImageCollection:
     of the `load_pattern` as its first argument. In this case, the elements of the
     sequence do not need to be names of existing files (or strings at all).
 
-    E.g. `load_func` can be used to access frames in format's such as TIF, GIF
-    or MP4 by their (page) index. E.g.:
+    `load_func` can be used to access frames in formats such as TIF, GIF or MP4
+    by their (page) index:
 
     >>> import imageio.v3 as iio
     >>> path = ski.data.data_dir + "/palisades_of_vogt.tif"
@@ -161,11 +163,13 @@ class ImageCollection:
     (1440, 1440)
 
     The above example needs to re-open the file for each frame. If you
-    anticipate that this might be a bottleneck, open the file before:
+    anticipate that this might be a bottleneck, pass an open file to the
+    image collection (and keep it open during use):
 
     >>> with iio.imopen(path, io_mode="r") as file:
     ...     collection = ski.io.ImageCollection(
-    ...         range(60), load_func=lambda i: file.read(page=i)
+    ...         range(60),
+    ...         load_func=lambda i: file.read(page=i),
     ...     )
     ...     collection[10].shape
     (1440, 1440)
