@@ -348,13 +348,13 @@ def test_denoise_bilateral_color(channel_axis):
 
 
 def test_denoise_bilateral_3d_grayscale():
-    img = np.ones((50, 50, 3))
+    img = np.ones((50, 50, 50, 3))
     with pytest.raises(ValueError):
         restoration.denoise_bilateral(img, channel_axis=None)
 
 
 def test_denoise_bilateral_3d_multichannel():
-    img = np.ones((50, 50, 50))
+    img = np.ones((50, 50, 50, 50))
     with expected_warnings(["grayscale"]):
         result = restoration.denoise_bilateral(img, channel_axis=-1)
 
@@ -362,7 +362,7 @@ def test_denoise_bilateral_3d_multichannel():
 
 
 def test_denoise_bilateral_multidimensional():
-    img = np.ones((10, 10, 10, 10))
+    img = np.ones((10, 10, 10, 10, 10))
     with pytest.raises(ValueError):
         restoration.denoise_bilateral(img, channel_axis=None)
     with pytest.raises(ValueError):
