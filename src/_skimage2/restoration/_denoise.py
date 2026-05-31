@@ -1088,7 +1088,7 @@ def estimate_sigma(image, average_sigmas=False, *, channel_axis=None):
     --------
     >>> import _skimage2.data
     >>> from _skimage2 import img_as_float
-    >>> img = img_as_float(skimage.data.camera())
+    >>> img = img_as_float(_skimage2.data.camera())
     >>> sigma = 0.1
     >>> rng = np.random.default_rng()
     >>> img = img + sigma * rng.standard_normal(img.shape)
