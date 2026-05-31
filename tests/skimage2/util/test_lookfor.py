@@ -11,5 +11,5 @@ def test_lookfor_basic(capsys):
 
     ski2.util.lookfor("regionprops")
     search_results = capsys.readouterr().out
-    assert "skimage.measure.regionprops" in search_results
-    assert "skimage.measure.regionprops_table" in search_results
+    assert "_skimage2.measure.regionprops" in search_results
+    assert "_skimage2.measure.regionprops_table" in search_results

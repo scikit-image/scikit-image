@@ -14,7 +14,7 @@ python_sources = [
     '_montage.py',
     'shape.py',
     '_label.py',
-    'lookfor.py',
+    '_lookfor.py',
     'arraycrop.py',
     'compare.py',
     '_regular_grid.py',
