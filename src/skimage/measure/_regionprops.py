@@ -3,6 +3,7 @@ from _skimage2.measure._regionprops import __doc__  # noqa: F401
 from _skimage2.measure._regionprops import (  # noqa: F401
     COL_DTYPES,
     OBJECT_COLUMNS,
+    PROP_VALS,
     PROPS,
     _inertia_eigvals_to_axes_lengths_3D,
     _parse_docs,
