@@ -249,8 +249,28 @@ def test_denoise_bilateral_negative():
     assert_array_equal(out, img)
 
 
+def test_denoise_bilateral3d_negative():
+    img = -np.ones((50, 50, 50))
+    out = restoration.denoise_bilateral(img)
+
+    # image with only negative values should be ok
+    assert_array_equal(out, img)
+
+
 def test_denoise_bilateral_negative2():
     img = np.ones((50, 50))
+    img[2, 2] = 2
+
+    out1 = restoration.denoise_bilateral(img)
+    out2 = restoration.denoise_bilateral(img - 10)  # contains negative values
+
+    # 2 images with a given offset should give the same result (with the same
+    # offset)
+    assert_array_almost_equal(out1, out2 + 10)
+
+
+def test_denoise_bilateral3d_negative2():
+    img = np.ones((50, 50, 50))
     img[2, 2] = 2
 
     out1 = restoration.denoise_bilateral(img)
@@ -277,6 +297,26 @@ def test_denoise_bilateral_2d():
     # make sure noise is reduced in the checkerboard cells
     assert img[30:45, 5:15].std() > out1[30:45, 5:15].std()
     assert out1[30:45, 5:15].std() > out2[30:45, 5:15].std()
+
+
+def test_denoise_bilateral_3d():
+    # simulating a checkerboard pattern
+    vol = np.zeros((30, 30, 30))
+    vol[::2, ::2, ::2] = 1
+
+    # Add noise
+    vol += 0.5 * vol.std() * np.random.RandomState(3805790903).rand(*vol.shape)
+    vol = np.clip(vol, 0, 1)
+
+    out1 = restoration.denoise_bilateral(
+        vol, sigma_color=0.1, sigma_spatial=10, channel_axis=None
+    )
+    out2 = restoration.denoise_bilateral(
+        vol, sigma_color=0.2, sigma_spatial=20, channel_axis=None
+    )
+
+    assert vol[5:15, 5:15, 5:15].std() > out1[5:15, 5:15, 5:15].std()
+    assert out1[5:15, 5:15, 5:15].std() > out2[5:15, 5:15, 5:15].std()
 
 
 def test_denoise_bilateral_pad():
@@ -319,8 +359,18 @@ def test_denoise_bilateral_zeros():
     assert_array_equal(img, restoration.denoise_bilateral(img, channel_axis=None))
 
 
+def test_denoise_bilateral3d_zeros():
+    img = np.zeros((10, 10, 10))
+    assert_array_equal(img, restoration.denoise_bilateral(img, channel_axis=None))
+
+
 def test_denoise_bilateral_constant():
     img = np.ones((10, 10)) * 5
+    assert_array_equal(img, restoration.denoise_bilateral(img, channel_axis=None))
+
+
+def test_denoise_bilateral3d_constant():
+    img = np.ones((10, 10, 10)) * 5
     assert_array_equal(img, restoration.denoise_bilateral(img, channel_axis=None))
 
 
@@ -347,13 +397,13 @@ def test_denoise_bilateral_color(channel_axis):
     assert out1[30:45, 5:15].std() > out2[30:45, 5:15].std()
 
 
-def test_denoise_bilateral_3d_grayscale():
+def test_denoise_bilateral_4d_grayscale():
     img = np.ones((50, 50, 50, 3))
     with pytest.raises(ValueError):
         restoration.denoise_bilateral(img, channel_axis=None)
 
 
-def test_denoise_bilateral_3d_multichannel():
+def test_denoise_bilateral_4d_multichannel():
     img = np.ones((50, 50, 50, 50))
     with expected_warnings(["grayscale"]):
         result = restoration.denoise_bilateral(img, channel_axis=-1)
@@ -371,6 +421,15 @@ def test_denoise_bilateral_multidimensional():
 
 def test_denoise_bilateral_nan():
     img = np.full((50, 50), np.nan)
+    # This is in fact an optional warning for our test suite.
+    # Python 3.5 will not trigger a warning.
+    with expected_warnings([r'invalid|\A\Z']):
+        out = restoration.denoise_bilateral(img, channel_axis=None)
+    assert_array_equal(img, out)
+
+
+def test_denoise_bilateral3d_nan():
+    img = np.full((50, 50, 50), np.nan)
     # This is in fact an optional warning for our test suite.
     # Python 3.5 will not trigger a warning.
     with expected_warnings([r'invalid|\A\Z']):
