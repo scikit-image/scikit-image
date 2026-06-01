@@ -119,6 +119,8 @@ def test_failed_temporary_file(monkeypatch, error_class):
     data_path = data_path.replace(os.path.sep, '/')
     image_url = f'file:///{data_path}/camera.png'
     with monkeypatch.context():
+        # Patch `tempfile.NamedTemporaryFile` to raise an error. This attribute
+        # is implicitly called by `imread` for URLs via `.io.file_or_url_context`.
         monkeypatch.setattr(
             tempfile, 'NamedTemporaryFile', _named_tempfile_func(error_class)
         )
@@ -191,15 +193,15 @@ def test_imread_bilevel():
     assert_array_equal(img.astype(bool), expected)
 
 
-def test_imread_separate_channels():
+def test_imread_separate_channels(tmp_path):
     # Test that imread returns RGB(A) values contiguously even when they are
     # stored in separate planes.
-    x = np.random.RandomState(819070535).rand(3, 16, 8)
-    with tempfile.NamedTemporaryFile(suffix='.tif') as f:
-        fname = f.name
-    io.imsave(fname, x)
-    img = io.imread(fname)
-    os.remove(fname)
+    img = np.random.RandomState(819070535).rand(3, 16, 8)
+
+    img_path = tmp_path / "image.tif"
+    io.imsave(img_path, img)
+    img = io.imread(img_path)
+    os.remove(img_path)
     assert img.shape == (16, 8, 3), img.shape
 
 
@@ -234,16 +236,16 @@ def test_imsave_roundtrip(shape, dtype, tmp_path):
 
 
 @pytest.mark.parametrize("shape", [(10, 10), (10, 10, 3), (10, 10, 4)])
-def test_imsave_roundtrip_uint8(shape):
+def test_imsave_roundtrip_uint8(shape, tmp_path):
     rng = np.random.RandomState(3174584926)
     img = np.ones(shape, dtype=np.uint8) * rng.rand(*shape)
     img = (img * 255).astype(np.uint8)
     expected = img.astype(np.int32)
-    with tempfile.NamedTemporaryFile(suffix='.png') as f:
-        fname = f.name
 
-    io.imsave(fname, img)
-    actual = io.imread(fname)
+    img_path = tmp_path / "image.png"
+
+    io.imsave(img_path, img)
+    actual = io.imread(img_path)
     assert_allclose(expected, actual)
 
 
@@ -259,28 +261,26 @@ def test_imsave_roundtrip_uint8(shape):
     "dtype", [np.uint8, np.uint16, np.float32, np.int16, np.float64]
 )
 @pytest.mark.parametrize("use_pathlib", [False, True])
-def test_imsave_roundtrip_tiff(shape, seed, dtype, use_pathlib):
+def test_imsave_roundtrip_tiff(shape, seed, dtype, use_pathlib, tmp_path):
     rng = np.random.RandomState(seed)
     img = rng.rand(*shape)
     if not np.issubdtype(dtype, np.floating):
         img = img * np.iinfo(dtype).max
     img = img.astype(dtype)
 
-    with tempfile.NamedTemporaryFile(suffix='.tif') as f:
-        fname = f.name
-    if use_pathlib:
-        fname = pathlib.Path(fname)
+    img_path = tmp_path / "image.tif"
+    if not use_pathlib:
+        img_path = str(img_path)
 
-    io.imsave(fname, img, check_contrast=False)
-    actual = io.imread(fname)
+    io.imsave(img_path, img, check_contrast=False)
+    actual = io.imread(img_path)
     assert_array_equal(img, actual)
 
 
-def test_imsave_bool_array():
+def test_imsave_bool_array(tmp_path):
     a = np.zeros((5, 5), bool)
     a[2, 2] = True
-    with tempfile.NamedTemporaryFile(suffix='.png') as f:
-        fname = f.name
+    img_path = tmp_path / "image.png"
     with pytest.warns(UserWarning, match=r'.* is a boolean image') as record:
-        io.imsave(fname, a)
+        io.imsave(img_path, a)
     assert_stacklevel(record)
