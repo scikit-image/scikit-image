@@ -300,23 +300,25 @@ def test_denoise_bilateral_2d():
 
 
 def test_denoise_bilateral_3d():
-    # simulating a checkerboard pattern
-    vol = np.zeros((30, 30, 30))
-    vol[::2, ::2, ::2] = 1
+    vol = np.zeros((60, 60, 60))
+    vol[:15, :15, :] = 1
+    vol[:15, 30:45, :] = 1
+    vol[30:45, :15, :] = 1
+    vol[30:45, 30:45, :] = 1
 
     # Add noise
     vol += 0.5 * vol.std() * np.random.RandomState(3805790903).rand(*vol.shape)
     vol = np.clip(vol, 0, 1)
 
     out1 = restoration.denoise_bilateral(
-        vol, sigma_color=0.1, sigma_spatial=10, channel_axis=None
+        vol, sigma_color=0.1, sigma_spatial=1, channel_axis=None
     )
     out2 = restoration.denoise_bilateral(
-        vol, sigma_color=0.2, sigma_spatial=20, channel_axis=None
+        vol, sigma_color=0.2, sigma_spatial=2, channel_axis=None
     )
 
-    assert vol[5:15, 5:15, 5:15].std() > out1[5:15, 5:15, 5:15].std()
-    assert out1[5:15, 5:15, 5:15].std() > out2[5:15, 5:15, 5:15].std()
+    assert vol[:15, 15:30, :].std() > out1[:15, 15:30, :].std()
+    assert out1[:15, 15:30, :].std() > out2[:15, 15:30, :].std()
 
 
 def test_denoise_bilateral_pad():
