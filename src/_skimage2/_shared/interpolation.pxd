@@ -379,10 +379,10 @@ cdef inline np_real_numeric get_pixel4d(np_real_numeric* image,
         if (r < 0) or (r >= rows) or (c < 0) or (c >= cols) or (z < 0) or (z >= depth):
             return cval
         else:
-            return image[z * rows * cols * dims + r * cols * dims + c * dims + d]
+            return image[r * cols * depth * dims + c * depth * dims + z * dims + d]
     else:
-        return image[coord_map(depth, z, mode) * rows * cols * dims + coord_map(rows, r, mode) * cols * dims +
-                     coord_map(cols, c, mode) * dims +
+        return image[coord_map(depth, r, mode) * cols * depth * dims + coord_map(rows, c, mode) * depth * dims +
+                     coord_map(cols, z, mode) * dims +
                      coord_map(dims, d, mode)]
 
 cdef inline Py_ssize_t coord_map(Py_ssize_t dim, long coord, char mode) noexcept nogil:
