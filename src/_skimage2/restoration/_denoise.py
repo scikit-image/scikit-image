@@ -307,7 +307,7 @@ def denoise_tv_bregman(
     Parameters
     ----------
     image : ndarray
-        Input image to be denoised (converted using :func:`~.img_as_float`).
+        Input image to be denoised (converted using :func:`skimage2.util.img_as_float`).
     weight : float, optional
         Denoising weight. It is equal to :math:`\frac{\lambda}{2}`. Therefore,
         the smaller the `weight`, the more denoising (at
@@ -515,7 +515,7 @@ def denoise_tv_chambolle(
     ----------
     image : ndarray
         Input image to be denoised. If its dtype is not float, it gets
-        converted with :func:`~.img_as_float`.
+        converted with :func:`skimage2.util.img_as_float`.
     weight : float, optional
         Denoising weight. It is equal to :math:`\frac{1}{\lambda}`. Therefore,
         the greater the `weight`, the more denoising (at the expense of

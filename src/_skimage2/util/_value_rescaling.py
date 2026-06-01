@@ -173,7 +173,7 @@ def _prescale_value_range(image, *, mode):
 
         ``'legacy'``
             Normalize only if `image` has an integer dtype. If `image` is of
-            floating dtype, it is left alone. See :func:`.img_as_float` for
+            floating dtype, it is left alone. See :func:`skimage2.util.img_as_float` for
             more details.
 
     Returns

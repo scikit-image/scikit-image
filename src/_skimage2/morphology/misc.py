@@ -287,7 +287,7 @@ def remove_objects_by_distance(
     ----------
     label_image : ndarray of integers
         An n-dimensional array containing object labels, e.g. as returned by
-        :func:`~.label`. A value of zero is considered background, all other
+        :func:`skimage2.measure.label`. A value of zero is considered background, all other
         object IDs must be positive integers.
     min_distance : int or float
         Remove objects whose distance to other objects is not greater than this
