@@ -172,8 +172,8 @@ def _denoise_bilateral3d(np_floats[:, :, :, ::1] image, cnp.float64_t max_value,
                                 for d in range(dims):
                                     total_values[d] += values[d] * weight
                                 total_weight += weight
-                        for d in range(dims):
-                            out[r, c, z, d] = total_values[d] / total_weight
+                    for d in range(dims):
+                        out[r, c, z, d] = total_values[d] / total_weight
 
     return np.squeeze(np.asarray(out))
 
