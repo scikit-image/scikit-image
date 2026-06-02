@@ -31,7 +31,7 @@ def _getmembers(item):
     return members
 
 
-def _lookfor_generate_cache(module, import_modules, regenerate):
+def _lookfor_generate_cache(module, import_modules, regenerate, namespace=None):
     """
     Generate docstring cache for given module.
 
@@ -68,15 +68,21 @@ def _lookfor_generate_cache(module, import_modules, regenerate):
     elif isinstance(module, list) or isinstance(module, tuple):
         cache = {}
         for mod in module:
-            cache.update(_lookfor_generate_cache(mod, import_modules, regenerate))
+            cache.update(
+                _lookfor_generate_cache(
+                    mod, import_modules, regenerate, namespace=namespace
+                )
+            )
         return cache
 
-    if id(module) in _lookfor_caches and not regenerate:
-        return _lookfor_caches[id(module)]
+    # Separate cache per namespace view (e.g. skimage vs _skimage2).
+    cache_key = id(module) if namespace is None else (id(module), namespace)
+    if cache_key in _lookfor_caches and not regenerate:
+        return _lookfor_caches[cache_key]
 
     # walk items and collect docstrings
     cache = {}
-    _lookfor_caches[id(module)] = cache
+    _lookfor_caches[cache_key] = cache
     seen = {}
     index = 0
     stack = [(module.__name__, module)]
@@ -147,14 +153,21 @@ def _lookfor_generate_cache(module, import_modules, regenerate):
                 if '.' not in item_name and mod_name:
                     item_name = f"{mod_name}.{item_name}"
 
+                in_public_ns = _all is None or n in _all
+
+                # Is this item _defined_ in our namespace?
                 if not item_name.startswith(name + '.'):
                     # don't crawl "foreign" objects
                     if isinstance(v, ufunc):
                         # ... unless they are ufuncs
                         pass
+                    elif namespace is not None and in_public_ns:
+                        # ... or we have specified namespace to search and
+                        # object is declared / assumed public.
+                        pass
                     else:
                         continue
-                elif not (inspect.ismodule(v) or _all is None or n in _all):
+                elif not (inspect.ismodule(v) or in_public_ns):
                     continue
 
                 stack.append((f"{name}.{n}", v))
@@ -176,7 +189,14 @@ def _lookfor_generate_cache(module, import_modules, regenerate):
     return cache
 
 
-def lookfor(what, module=None, import_modules=True, regenerate=False, output=None):
+def lookfor(
+    what,
+    module=None,
+    import_modules=True,
+    regenerate=False,
+    output=None,
+    namespace=None,
+):
     """
     Do a keyword search on docstrings.
 
@@ -224,7 +244,9 @@ def lookfor(what, module=None, import_modules=True, regenerate=False, output=Non
     import pydoc
 
     # Cache
-    cache = _lookfor_generate_cache(module, import_modules, regenerate)
+    cache = _lookfor_generate_cache(
+        module, import_modules, regenerate, namespace=namespace
+    )
 
     # Search
     # XXX: maybe using a real stemming search engine would be better?
