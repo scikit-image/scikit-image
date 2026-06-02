@@ -4,7 +4,6 @@ from functools import wraps
 import re
 import sys
 from textwrap import dedent
-from itertools import accumulate
 
 
 # URL to migration page.
@@ -91,13 +90,14 @@ def _select_blocks(doc, *, context_name):
 
 
 def _public_api_names(obj):
-    """Find the public name(s) of an object as advertised by ``__all__``.
+    """Find the public name(s) of an object as advertised by parent namespaces.
 
-    scikit-image advertises its public API with the help of ``__all__`` in its
-    modules. At the point at which any given module is being instantiated, its
-    parent modules will have already defined their ``__all__`` attributes. This
-    function looks for its own ``__qualname__`` in the ``__all__`` entries of
-    its parent modules.
+    ``skimage`` modules derive their namespaces from the equivalent
+    ``_skimage2`` modules.  These in turn define their public API with the help
+    of ``__all__`` in their modules. At the point at which any given module is
+    being instantiated, its parent modules will have already defined their
+    namespaces. This function looks for its own ``__qualname__`` in the
+    namespace entries of its parent modules.
 
     Parameters
     ----------
@@ -107,7 +107,7 @@ def _public_api_names(obj):
     -------
     public_matches : list of str
         Full dotted paths to the given `obj` that are advertised and reachable
-        through ``__all__`` in parent modules.
+        through the public namespace of its parent modules.
 
     Examples
     --------
@@ -121,18 +121,20 @@ def _public_api_names(obj):
     """
     qualname = obj.__qualname__
     base_name_in_module, *_ = qualname.partition(".")
-    all_parents = obj.__module__.split(".")
+    root, *sub_modules = obj.__module__.split(".")
+    # If implemented in _skimage2, point to skimage equivalent.
+    root = 'skimage' if root == '_skimage2' else root
 
     matches = []
-    for module_name in accumulate(all_parents, lambda x, y: f"{x}.{y}"):
-        # `obj` is passed, so its parents should be loaded
-        module = sys.modules[module_name]
-
-        if not hasattr(module, "__all__"):
-            # Module doesn't advertise any public API, abort
+    parts = []
+    for parent in [root] + sub_modules:
+        if parent.startswith('_'):  # Can't be public API.
             break
+        parts.append(parent)
+        # `obj` is passed, so its parents should be loaded
+        module = sys.modules['.'.join(parts)]
 
-        if base_name_in_module in module.__all__:
+        if getattr(module, base_name_in_module, None):
             public_name = f"{module.__name__}.{qualname}"
             matches.append(public_name)
 
