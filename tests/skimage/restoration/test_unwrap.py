@@ -55,6 +55,7 @@ def test_unwrap_1d():
     # Masked arrays are not allowed in 1D
     with testing.raises(ValueError, match='1D masked images cannot'):
         check_unwrap(image, True)
+    # Arrays with NaN not allowed in 1D
     nan_image = image.copy()
     nan_image[50] = np.nan
     with testing.raises(ValueError, match='1D images with NaNs cannot'):
