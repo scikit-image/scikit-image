@@ -23,11 +23,15 @@ _function_signature_re = re.compile(r"[a-z0-9_]+\(.*[,=].*\)", re.I)
 
 def _getmembers(item):
     import inspect
+    import warnings
 
-    try:
-        members = inspect.getmembers(item)
-    except Exception:
-        members = [(x, getattr(item, x)) for x in dir(item) if hasattr(item, x)]
+    # Introspection can trigger lazy imports that emit deprecation warnings.
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        try:
+            members = inspect.getmembers(item)
+        except Exception:
+            members = [(x, getattr(item, x)) for x in dir(item) if hasattr(item, x)]
     return members
 
 
