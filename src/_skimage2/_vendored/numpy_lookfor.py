@@ -35,7 +35,16 @@ def _getmembers(item):
     return members
 
 
-def _lookfor_generate_cache(module, import_modules, regenerate, namespace=None):
+def _in_foreign_namespace(item_name, other_namespaces):
+    for prefix in other_namespaces:
+        if item_name == prefix or item_name.startswith(prefix + '.'):
+            return True
+    return False
+
+
+def _lookfor_generate_cache(
+    module, import_modules, regenerate, namespace=None, other_namespaces=()
+):
     """
     Generate docstring cache for given module.
 
@@ -47,6 +56,11 @@ def _lookfor_generate_cache(module, import_modules, regenerate, namespace=None):
         Whether to import sub-modules in packages.
     regenerate : bool
         Re-generate the docstring cache
+    namespace : str, optional
+        Cache label when walking a namespace shim (e.g. ``'skimage'``).
+    other_namespaces : tuple of str, optional
+        Alternate module namespaces whose objects may be followed when
+        re-exported (e.g. ``('_skimage2',)`` for ``skimage`` shims).
 
     Returns
     -------
@@ -74,13 +88,23 @@ def _lookfor_generate_cache(module, import_modules, regenerate, namespace=None):
         for mod in module:
             cache.update(
                 _lookfor_generate_cache(
-                    mod, import_modules, regenerate, namespace=namespace
+                    mod,
+                    import_modules,
+                    regenerate,
+                    namespace=namespace,
+                    other_namespaces=other_namespaces,
                 )
             )
         return cache
 
+    if other_namespaces and not isinstance(other_namespaces, tuple):
+        other_namespaces = tuple(other_namespaces)
+
     # Separate cache per namespace view (e.g. skimage vs _skimage2).
-    cache_key = id(module) if namespace is None else (id(module), namespace)
+    if namespace is None and not other_namespaces:
+        cache_key = id(module)
+    else:
+        cache_key = (id(module), namespace, other_namespaces)
     if cache_key in _lookfor_caches and not regenerate:
         return _lookfor_caches[cache_key]
 
@@ -165,9 +189,12 @@ def _lookfor_generate_cache(module, import_modules, regenerate, namespace=None):
                     if isinstance(v, ufunc):
                         # ... unless they are ufuncs
                         pass
-                    elif namespace is not None and in_public_ns:
-                        # ... or we have specified namespace to search and
-                        # object is declared / assumed public.
+                    elif (
+                        other_namespaces
+                        and in_public_ns
+                        and _in_foreign_namespace(item_name, other_namespaces)
+                    ):
+                        # Re-export from an allowed implementation namespace.
                         pass
                     else:
                         continue
@@ -200,6 +227,7 @@ def lookfor(
     regenerate=False,
     output=None,
     namespace=None,
+    other_namespaces=(),
 ):
     """
     Do a keyword search on docstrings.
@@ -249,7 +277,11 @@ def lookfor(
 
     # Cache
     cache = _lookfor_generate_cache(
-        module, import_modules, regenerate, namespace=namespace
+        module,
+        import_modules,
+        regenerate,
+        namespace=namespace,
+        other_namespaces=other_namespaces,
     )
 
     # Search

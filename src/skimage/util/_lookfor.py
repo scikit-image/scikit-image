@@ -5,5 +5,10 @@ from _skimage2.util._lookfor import __doc__  # noqa: F401
 
 
 def lookfor(what):
-    # Walk skimage public namespace, not _skimage2 implementation modules.
-    return _lookfor(what, sys.modules['skimage'], namespace='skimage')
+    # Walk skimage public namespace; follow _skimage2 implementations only.
+    return _lookfor(
+        what,
+        sys.modules['skimage'],
+        namespace='skimage',
+        foreign_namespaces=('_skimage2',),
+    )
