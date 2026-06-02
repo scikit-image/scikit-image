@@ -13,11 +13,6 @@ permissions:
 jobs:
   # GH does not support creating separate jobs out of a matrix,
   # so this is a workaround
-  build-linux-311:
-    uses: ./.github/workflows/_build_linux_for_python_x.yaml
-    with:
-      python-version: 3.11
-
   build-linux-312:
     uses: ./.github/workflows/_build_linux_for_python_x.yaml
     with:
@@ -38,31 +33,6 @@ jobs:
     with:
       python-version: 3.14t
 
-  test-linux-311:
-    name: test-linux-cp3.11-${{ matrix.OPTIONS_NAME }}
-    needs: [build-linux-311]
-    strategy:
-      fail-fast: false
-      matrix:
-        OPTIONS_NAME: ["main"]
-
-        include:
-          # Dependency options for setup-test-env.sh
-          - MINIMUM_REQUIREMENTS: 1
-            OPTIONAL_DEPS: 0
-            EAGER_IMPORT: 1
-            OPTIONS_NAME: "mini-req-eager-import"
-          - MINIMUM_REQUIREMENTS: 1
-            OPTIONAL_DEPS: 1
-            OPTIONS_NAME: "mini-req-optional-deps"
-    uses: ./.github/workflows/_test_linux_for_python_x.yaml
-    with:
-      python-version: 3.11
-      OPTIONS_NAME: ${{ matrix.OPTIONS_NAME }}
-      MINIMUM_REQUIREMENTS: ${{ matrix.MINIMUM_REQUIREMENTS }}
-      OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
-      EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
-
   test-linux-312:
     name: test-linux-cp3.12-${{ matrix.OPTIONS_NAME }}
     needs: [build-linux-312]
@@ -82,12 +52,21 @@ jobs:
             OPTIONS_NAME: "optimize-and-no-pooch"
           - INSTALL_FROM_SDIST: 1
             OPTIONS_NAME: "install-from-sdist"
+          - MINIMUM_REQUIREMENTS: 1
+            OPTIONAL_DEPS: 0
+            EAGER_IMPORT: 1
+            OPTIONS_NAME: "mini-req-eager-import"
+          - MINIMUM_REQUIREMENTS: 1
+            OPTIONAL_DEPS: 1
+            OPTIONS_NAME: "mini-req-optional-deps"
 
     uses: ./.github/workflows/_test_linux_for_python_x.yaml
     with:
       python-version: 3.12
       OPTIONS_NAME: ${{ matrix.OPTIONS_NAME }}
+      MINIMUM_REQUIREMENTS: ${{ matrix.MINIMUM_REQUIREMENTS }}
       OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
+      EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
       WITHOUT_POOCH: ${{ matrix.WITHOUT_POOCH }}
       PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
       PYTHONOPTIMIZE: ${{ matrix.PYTHONOPTIMIZE }}
@@ -121,12 +100,10 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       [
-        build-linux-311,
         build-linux-312,
         build-linux-313,
         build-linux-314,
         build-linux-314t,
-        test-linux-311,
         test-linux-312,
         test-linux-313,
         test-linux-314,

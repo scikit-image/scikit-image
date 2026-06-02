@@ -1,4 +1,6 @@
 import sys
+import functools
+import inspect
 
 from packaging import version as _version
 
@@ -33,23 +35,50 @@ def get_module_version(module_name):
     return getattr(mod, '__version__', getattr(mod, 'VERSION', None))
 
 
+@functools.cache
 def is_installed(name, version=None):
-    """Test if *name* is installed.
+    """Test if module given by `name` is installed.
+
+    Looks if a module is available/importable and checks its ``__version__``
+    attribute.
 
     Parameters
     ----------
     name : str
         Name of module or "python"
     version : str, optional
-        Version string to test against.
-        If version is not None, checking version
-        (must have an attribute named '__version__' or 'VERSION')
-        Version may start with =, >=, > or < to specify the exact requirement
+        Version string to test against. Version may start with "=", ">=", ">" or
+        "<" to specify the exact requirement, otherwise "=" is assumed.
 
     Returns
     -------
     out : bool
         True if `name` is installed matching the optional version.
+
+    Examples
+    --------
+    Check presence if a module or specific submodule is available
+    >>> is_installed("skimage")
+    True
+    >>> is_installed("skimage.morphology")
+    True
+
+    This function isn't looking for package names:
+
+    >>> is_installed("scikit-image")
+    False
+
+    Check for a specific version:
+
+    >>> is_installed("scipy", version=">=1.0")
+    True
+    >>> is_installed("scipy", version="<1.0")
+    False
+
+    If no version attribute is available in the module, fallback to ``False``:
+
+    >>> is_installed("scipy.ndimage", version=">=1.0")
+    False
     """
     if name.lower() == 'python':
         actver = sys.version[:6]
@@ -60,6 +89,9 @@ def is_installed(name, version=None):
             return False
     if version is None:
         return True
+    elif actver is None:
+        # Did not find a version to compare to
+        return False
     else:
         # since version_requirements is in the critical import path,
         # we lazy import re
@@ -75,7 +107,7 @@ def is_installed(name, version=None):
         return _check_version(actver, version, symb)
 
 
-def require(name, version=None):
+def require(name, *, version=None):
     """Return decorator that forces a requirement for a function or class.
 
     Parameters
@@ -83,31 +115,44 @@ def require(name, version=None):
     name : str
         Name of module or "python".
     version : str, optional
-        Version string to test against.
-        If version is not None, checking version
-        (must have an attribute named '__version__' or 'VERSION')
-        Version may start with =, >=, > or < to specify the exact requirement
+        Version string to test against. Version may start with "=", ">=", ">" or
+        "<" to specify the exact requirement, otherwise "=" is assumed.
 
     Returns
     -------
     func : function
         A decorator that raises an ImportError if a function is run
         in the absence of the input dependency.
+
+    Notes
+    -----
+    This also adds a `__doctest_requires__` marker to the decorated objects
+    module, which instructs pytest-doctestplus to skip this doctest if the
+    requirement set by `name` isn't fulfilled.
     """
-    # since version_requirements is in the critical import path, we lazy import
-    # functools
-    import functools
 
     def decorator(obj):
+        if not is_installed(name, version):
+            # Set pytest-doctestplus marker at module level to skip doctest
+            # if the required module (and version) is not available
+            module = inspect.getmodule(obj)
+            doctest_marker = getattr(module, "__doctest_requires__", {})
+            doctest_marker.setdefault(obj.__name__, []).append(name)
+            setattr(module, "__doctest_requires__", doctest_marker)
+
         @functools.wraps(obj)
         def func_wrapped(*args, **kwargs):
             if is_installed(name, version):
                 return obj(*args, **kwargs)
             else:
-                msg = f'"{obj}" in "{obj.__module__}" requires "{name}'
+                requirement = name
                 if version is not None:
-                    msg += f" {version}"
-                raise ImportError(msg + '"')
+                    requirement += f" {version}"
+                msg = (
+                    f'`{obj.__qualname__}` in `{obj.__module__}` requires '
+                    f'`{requirement}`. Please ensure it is installed.'
+                )
+                raise ImportError(msg)
 
         return func_wrapped
 

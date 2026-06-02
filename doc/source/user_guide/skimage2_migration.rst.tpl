@@ -59,28 +59,31 @@ When switching to the new ``skimage2`` namespace, some code will need to be upda
     a keyword argument default value. By importing functionality from
     ``skimage2``, you explicitly opt in to the new behavior.
 
-{% macro func_heading(name, ul_char='-') -%}
-.. _{{ name | replace('.', '-') | replace('_', '-')}}:
-
-``{{ name }}``
-{{ ul_char * (name | length + 4) }}
-
-{{ d[name] }}
+{% macro format_label(title) -%}
+sk2adv-{{ title | replace('.', '-') | replace('_', '-') }}
 {%- endmacro %}
 
-{{ func_heading('skimage.data.binary_blobs') }}
+{#- Format an advice section, pops `title` from `advice_map` implicitly! #}
+{%- macro format_advice_section(title, ul_char='-') -%}
+.. _{{ format_label(title) }}:
 
-{{ func_heading('skimage.feature.peak_local_max') }}
+``{{ title }}``
+{{ ul_char * (title | length + 4) }}
 
-{{ func_heading('skimage.feature.canny') }}
+{# Consume item, calling script checks if dict is emptied -#}
+{{ advice_map.pop(title) }}
+{%- endmacro %}
+
+{#- Format "gray functions" manually #}
+.. _sk2adv-gray-funcs:
 
 Grayscale morphological operators in `skimage.morphology`
 ---------------------------------------------------------
 
 The following functions are deprecated in favor of counterparts in `skimage2.morphology`:
 
-{% for func_name in d['gray_funcs'] %}
-- ``skimage.morphology.{{ func_name }}``
+{% for name in advice_map['gray_funcs'] %}
+- :ref:`{{ format_label(name) }}`
 {% endfor %}
 
 The new counterparts behave differently in the following ways:
@@ -107,8 +110,13 @@ The new counterparts behave differently in the following ways:
     `gh-8060 <https://github.com/scikit-image/scikit-image/pull/8060>`__ for
     more details.
 
-{% for func_name in d['gray_funcs'] %}
-{{ func_heading('skimage.morphology.' ~ func_name, '^') }}
+{% for name in advice_map.pop('gray_funcs') %}
+{{ format_advice_section(title=name, ul_char='^') }}
+{% endfor -%}
+
+{#- Iterate over and format remaining advice #}
+{%- for name in advice_map.keys() | sort %}
+{{ format_advice_section(title=name) }}
 {% endfor %}
 
 Boundary modes in `skimage.util.apply_parallel`

@@ -864,10 +864,12 @@ def test_polynomial_estimation():
 
 
 def test_polynomial_weighted_estimation():
-    # Over-determined solution with same points, and unity weights
-    tform = estimate_transform('polynomial', SRC, DST, order=10)
+    # Use order=2 so the system is over-determined with 8 points:
+    # A has shape (16, 13), giving a unique least-squares solution.
+    # order=3 would require > 20 rows (i.e. > 10 points) to be over-determined.
+    tform = estimate_transform('polynomial', SRC, DST, order=2)
     tform_w = estimate_transform(
-        'polynomial', SRC, DST, order=10, weights=np.ones(SRC.shape[0])
+        'polynomial', SRC, DST, order=2, weights=np.ones(SRC.shape[0])
     )
     assert_almost_equal(tform.params, tform_w.params)
 
@@ -875,12 +877,12 @@ def test_polynomial_weighted_estimation():
     # the same result.
     point_weights = np.ones(SRC.shape[0] + 1)
     point_weights[0] = 1.0e-15
-    tform1 = estimate_transform('polynomial', SRC, DST, order=10)
+    tform1 = estimate_transform('polynomial', SRC, DST, order=2)
     tform2 = estimate_transform(
         'polynomial',
         SRC[np.arange(-1, SRC.shape[0]), :],
         DST[np.arange(-1, SRC.shape[0]), :],
-        order=10,
+        order=2,
         weights=point_weights,
     )
     assert_almost_equal(tform1.params, tform2.params, decimal=4)
