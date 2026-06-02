@@ -326,9 +326,10 @@ def test_depth_parameter_constant_padding():
     assert_array_almost_equal(res, expected)
 
 
-@pytest.mark.parametrize('mode', ('edge', 'nearest'))
-def test_apply_parallel_edge(mode):
-    """Test 'edge' padding mode."""
+def test_apply_parallel_edge():
+    """Test 'nearest' boundary mode."""
+
+    mode = 'nearest'
 
     # overlap of size 1 (with edge values padding each chunk)
     res = apply_parallel(func, x, chunks=chunks, depth=1, mode=mode)
@@ -355,9 +356,13 @@ def test_apply_parallel_edge(mode):
     assert_array_almost_equal(res, expected)
 
 
-@pytest.mark.parametrize('mode', ('reflect', 'symmetric'))
-def test_apply_parallel_symmetric(mode):
-    """Test 'symmetric' padding mode."""
+def test_apply_parallel_symmetric():
+    """Test 'reflect' boundary mode."""
+
+    mode = 'reflect'
+
+    # Equivalent to `mode='nearest'` for an overlap of size 1, since the edge
+    # value is repeating.
 
     # overlap of size 2 (with reflection of the vector padding each chunk)
     res = apply_parallel(func, x, chunks=chunks, depth=2, mode=mode)
