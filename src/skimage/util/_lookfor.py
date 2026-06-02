@@ -10,5 +10,5 @@ def lookfor(what):
         what,
         sys.modules['skimage'],
         namespace='skimage',
-        foreign_namespaces=('_skimage2',),
+        other_namespaces=('_skimage2',),
     )
