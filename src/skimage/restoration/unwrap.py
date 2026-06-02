@@ -20,7 +20,10 @@ def unwrap_phase(image, wrap_around=False, rng=None):
         provided, the masked entries will not be changed, and their values
         will not be used to guide the unwrapping of neighboring, unmasked
         values. Masked 1D arrays are not allowed, and will raise a
-        `ValueError`.  NaN values in the image form an implicit mask.
+        `ValueError`.  NaN values in the image form an implicit mask.  We
+        combine this implicit mask with any mask from a masked array, with
+        logical OR.  The output values under the resulting mask are set to the
+        minimum of the unwrapped phase.
     wrap_around : bool or sequence of bool, optional
         When an element of the sequence is  `True`, the unwrapping process
         will regard the edges along the corresponding axis of the image to be
