@@ -86,7 +86,7 @@ def test_unwrap_2d_nan():
     mask_res = unwrap_phase(image_wrapped_masked, rng=0)
     image_wrapped_nans = image_wrapped.copy()
     image_wrapped_nans[mask] = np.nan
-    assert np.all(mask_res == unwrap_phase(image_wrapped_nans, rng=0))
+    np.testing.assert_equal(mask_res, unwrap_phase(image_wrapped_nans, rng=0))
 
 
 @testing.parametrize("check_with_mask", (False, True))
@@ -110,7 +110,7 @@ def test_unwrap_3d_nan():
     mask_res = unwrap_phase(image_wrapped_masked, rng=0)
     image_wrapped_nans = image_wrapped.copy()
     image_wrapped_nans[mask] = np.nan
-    masked_nan = unwrap_phase(image_wrapped_nans, rng=0))
+    masked_nan = unwrap_phase(image_wrapped_nans, rng=0)
     np.testing.assert_equal(mask_res, masked_nan)
 
 
