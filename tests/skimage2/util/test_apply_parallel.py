@@ -32,7 +32,6 @@ def func(arr):
 # ground truth in this case
 gt = x + x.mean()
 chunks = (2, 2)
-d = da.from_array(x, chunks=chunks)
 
 
 def test_apply_parallel():
@@ -218,7 +217,9 @@ def test_apply_parallel_default_mode():
 
     depth = 2
     defa = apply_parallel(func, x, chunks=chunks, depth=depth)
-    # runs `d.map_overlap(func, depth=depth).compute()` under the hood
+    # under the hood, runs:
+    # d = da.from_array(x, chunks=chunks)
+    # d.map_overlap(func, depth=depth).compute()
     assert_array_almost_equal(defa, gt)
     none_c = apply_parallel(func, x, chunks=chunks, depth=depth, mode=None)
     assert_array_almost_equal(none_c, gt)
