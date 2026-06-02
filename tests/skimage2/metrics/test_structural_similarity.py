@@ -85,8 +85,9 @@ def test_structural_similarity_grad(seed, dtype):
 )
 def test_structural_similarity_dtype(dtype):
     N = 30
-    X = np.random.rand(N, N)
-    Y = np.random.rand(N, N)
+    rng = np.random.default_rng(1234)
+    X = rng.random((N, N))
+    Y = rng.random((N, N))
     if np.dtype(dtype).kind in 'iub':
         data_range = 255.0
         X = (X * 255).astype(dtype)
