@@ -19,18 +19,6 @@ def _append_msgs(msg_str, messages=[]):
     messages.append(msg_str)
 
 
-class TrackerDict(dict):
-    """Dict that keeps check on keys that have been accessed."""
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.not_accessed_keys = set(self)
-
-    def __getitem__(self, key):
-        self.not_accessed_keys.discard(key)
-        return super().__getitem__(key)
-
-
 def run_doctest(func_name, doc):
     test = PARSER.get_doctest(doc, {}, func_name, "(unknown)", 0)
     out_msgs = []

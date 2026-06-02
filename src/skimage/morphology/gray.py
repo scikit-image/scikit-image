@@ -15,14 +15,9 @@ __all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat', 'black_t
 
 
 # For migration doc build.
-ski2_migration_decorator.extra_params['gray_funcs'] = (
-    'erosion',
-    'dilation',
-    'opening',
-    'closing',
-    'white_tophat',
-    'black_tophat',
-)
+ski2_migration_decorator.extra_params['gray_funcs'] = [
+    f'skimage.morphology.{name}' for name in __all__
+]
 
 _PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR = """\
 ``skimage.morphology.%(qual)s`` is deprecated in favor of
