@@ -107,14 +107,16 @@ class ImageCollection:
     Parameters
     ----------
     load_pattern : str or Sequence
-        A glob-like pattern or sequence of patterns (separated by
-        :obj:`os.pathsep`) to load files. If a sequence of objects other than
-        strings is passed, e.g. a range of numbers, each item will be passed
-        independently to `load_func` and will represent an item in the
-        collection.
+        A glob-like pattern to load files. Multiple patterns can be given,
+        either as a sequence of strings, or as a single string in which patterns
+        are separated by :obj:`os.pathsep`.
+        You may also pass a sequence of objects other than strings, like a range
+        of numbers. In this case, each item will be passed independently to
+        `load_func` and will represent an item in the collection.
     conserve_memory : bool, optional
-        If True, `ImageCollection` does not keep more than one in memory at a
-        specific time. Otherwise, images will be cached once they are loaded.
+        By default, `ImageCollection` does not keep more than one in memory at a
+        specific time. But if ``False`` is given, images are cached once
+        accessed.
     load_func : callable, optional
         Load images with a custom callable that accepts a single argument.
         Defaults to :func:`skimage.io.imread`.
