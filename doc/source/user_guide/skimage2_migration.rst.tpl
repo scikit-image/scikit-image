@@ -74,12 +74,6 @@ sk2adv-{{ title | replace('.', '-') | replace('_', '-') }}
 {{ advice_map.pop(title) }}
 {%- endmacro %}
 
-{{ func_heading('skimage.feature.corner_peaks') }}
-
-{{ func_heading('skimage.filters.gaussian') }}
-
-{{ func_heading('skimage.metrics.structural_similarity') }}
-
 {#- Format "gray functions" manually #}
 .. _sk2adv-gray-funcs:
 
