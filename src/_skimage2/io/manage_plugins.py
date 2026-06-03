@@ -62,7 +62,7 @@ def _hide_plugin_deprecation_warnings():
             action="ignore",
             message=".*use `imageio` or other I/O packages directly.*",
             category=FutureWarning,
-            module="_skimage2",
+            module="(_skimage2|skimage)",
         )
         yield
 

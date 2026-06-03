@@ -12,7 +12,6 @@ __all__ = [
     'warn',
     'warn_external',
     'ExperimentalAPIWarning',
-    'PendingSkimage2Change',
 ]
 
 
@@ -22,27 +21,6 @@ class ExperimentalAPIWarning(UserWarning):
     # Emitted when ``import skimage2`` is used. Defined here so both
     # ``_skimage2`` and ``skimage2`` share one warning type for filtering (see
     # ``pyproject.toml`` coverage omit rules).
-
-
-class PendingSkimage2Change(PendingDeprecationWarning):
-    """Warning about API usage that will change when switching to ``skimage2``.
-
-    As a subclass of :class:`PendingDeprecationWarning`, this warning isn't
-    shown by default. But it can be enabled with a warnings filter to prepare
-    for code changes related to skimage2 early on:
-
-    .. code-block:: python
-
-        import warnings
-        import _skimage2 as ski2
-        warnings.filterwarnings(
-            action="default", category=ski.util.PendingSkimage2Change
-        )
-    """
-
-    # Used by ``skimage`` migration shims. Defined in ``_skimage2`` so pytest
-    # can register warning filters without importing the ``skimage`` package
-    # (which would trigger a full eager load when ``EAGER_IMPORT=1``).
 
 
 # A version of `warnings.warn` with a default stacklevel of 2.
