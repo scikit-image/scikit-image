@@ -47,7 +47,7 @@ def generate_environment_yml(req_sections: dict[str, list[str]]) -> None:
     pip_section = {None: []}
 
     def _section_to_lst(
-        section: str, req_sections: dict[str, list[str]], lines, offset=0
+        section: str | None, req_sections: dict[str, list[str]], lines, offset=0
     ):
         tab = offset * " "
         if section:
@@ -60,13 +60,14 @@ def generate_environment_yml(req_sections: dict[str, list[str]]) -> None:
             dep = re.sub('; .*', '', dep)
 
             pkgname = re.split('[>=]', dep)[0]
-            dep = dep.replace(pkgname, rename_idx.get(pkgname, pkgname))
-            if dep == "scikit-image":
-                continue
 
             if section and pkgname in pip_only:
                 if dep not in pip_section[None]:
                     pip_section[None].append(dep)
+                continue
+
+            dep = dep.replace(pkgname, rename_idx.get(pkgname, pkgname))
+            if dep == "scikit-image":
                 continue
 
             lines.append(tab + f"  - {dep}")
