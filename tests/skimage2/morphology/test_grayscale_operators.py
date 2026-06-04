@@ -160,68 +160,71 @@ class TestMorphology:
 
 
 class TestAsymmetricFootprints:
-    def setup_class(self):
-        self.black_pixel = 255 * np.ones((6, 6), dtype=np.uint8)
-        self.black_pixel[2, 2] = 0
-        self.white_pixel = 255 - self.black_pixel
-        self.footprints = [
-            footprint_rectangle((2, 2)),
-            footprint_rectangle((2, 1)),
-            footprint_rectangle((1, 2)),
-        ]
+    rectangle_footprints = [
+        footprint_rectangle((2, 2)),
+        footprint_rectangle((2, 1)),
+        footprint_rectangle((1, 2)),
+    ]
 
-    def test_dilate_erode_symmetry(self):
+    black_pixel = 255 * np.ones((6, 6), dtype=np.uint8)
+    black_pixel[2, 2] = 0
+    black_pixel.flags.writeable = False
+
+    white_pixel = 255 - black_pixel
+    white_pixel.flags.writeable = False
+
+    @pytest.mark.parametrize("footprint", rectangle_footprints)
+    def test_dilate_erode_symmetry(self, footprint):
         # Ski2: v2 default (mode='ignore') — dilation mirrors footprint internally
         # via pad_footprint; use asymmetric mirrored footprint for complement test.
-        for footprint in self.footprints:
-            eroded = gray.erosion(self.black_pixel, footprint=footprint)
+        eroded = gray.erosion(self.black_pixel, footprint=footprint)
 
-            # Dilation mirrors footprint internally so that closing is extensive
-            # and opening anti-extensive. To get a symmetric result, we need to
-            # use an asymmetric footprint. Also pad to odd-size before mirroring
-            # so that correct side is padded with 0.
-            asym_footprint = mirror_footprint(pad_footprint(footprint, pad_end=False))
-            dilated = gray.dilation(self.white_pixel, footprint=asym_footprint)
+        # Dilation mirrors footprint internally so that closing is extensive
+        # and opening anti-extensive. To get a symmetric result, we need to
+        # use an asymmetric footprint. Also pad to odd-size before mirroring
+        # so that correct side is padded with 0.
+        asym_footprint = mirror_footprint(pad_footprint(footprint, pad_end=False))
+        dilated = gray.dilation(self.white_pixel, footprint=asym_footprint)
 
-            assert np.all(eroded == (255 - dilated))
+        assert np.all(eroded == (255 - dilated))
 
-    def test_open_black_pixel(self):
-        for s in self.footprints:
-            gray_open = gray.opening(self.black_pixel, s)
-            assert np.all(gray_open == self.black_pixel)
+    @pytest.mark.parametrize("footprint", rectangle_footprints)
+    def test_open_black_pixel(self, footprint):
+        gray_open = gray.opening(self.black_pixel, footprint)
+        assert np.all(gray_open == self.black_pixel)
 
-    def test_close_white_pixel(self):
-        for s in self.footprints:
-            gray_close = gray.closing(self.white_pixel, s)
-            assert np.all(gray_close == self.white_pixel)
+    @pytest.mark.parametrize("footprint", rectangle_footprints)
+    def test_close_white_pixel(self, footprint):
+        gray_close = gray.closing(self.white_pixel, footprint)
+        assert np.all(gray_close == self.white_pixel)
 
-    def test_open_white_pixel(self):
-        for s in self.footprints:
-            assert np.all(gray.opening(self.white_pixel, s) == 0)
+    @pytest.mark.parametrize("footprint", rectangle_footprints)
+    def test_open_white_pixel(self, footprint):
+        assert np.all(gray.opening(self.white_pixel, footprint) == 0)
 
-    def test_close_black_pixel(self):
-        for s in self.footprints:
-            assert np.all(gray.closing(self.black_pixel, s) == 255)
+    @pytest.mark.parametrize("footprint", rectangle_footprints)
+    def test_close_black_pixel(self, footprint):
+        assert np.all(gray.closing(self.black_pixel, footprint) == 255)
 
-    def test_white_tophat_white_pixel(self):
-        for s in self.footprints:
-            tophat = gray.white_tophat(self.white_pixel, s)
-            assert np.all(tophat == self.white_pixel)
+    @pytest.mark.parametrize("footprint", rectangle_footprints)
+    def test_white_tophat_white_pixel(self, footprint):
+        tophat = gray.white_tophat(self.white_pixel, footprint)
+        assert np.all(tophat == self.white_pixel)
 
-    def test_black_tophat_black_pixel(self):
-        for s in self.footprints:
-            tophat = gray.black_tophat(self.black_pixel, s)
-            assert np.all(tophat == self.white_pixel)
+    @pytest.mark.parametrize("footprint", rectangle_footprints)
+    def test_black_tophat_black_pixel(self, footprint):
+        tophat = gray.black_tophat(self.black_pixel, footprint)
+        assert np.all(tophat == self.white_pixel)
 
-    def test_white_tophat_black_pixel(self):
-        for s in self.footprints:
-            tophat = gray.white_tophat(self.black_pixel, s)
-            assert np.all(tophat == 0)
+    @pytest.mark.parametrize("footprint", rectangle_footprints)
+    def test_white_tophat_black_pixel(self, footprint):
+        tophat = gray.white_tophat(self.black_pixel, footprint)
+        assert np.all(tophat == 0)
 
-    def test_black_tophat_white_pixel(self):
-        for s in self.footprints:
-            tophat = gray.black_tophat(self.white_pixel, s)
-            assert np.all(tophat == 0)
+    @pytest.mark.parametrize("footprint", rectangle_footprints)
+    def test_black_tophat_white_pixel(self, footprint):
+        tophat = gray.black_tophat(self.white_pixel, footprint)
+        assert np.all(tophat == 0)
 
 
 @pytest.mark.parametrize("func", gray_operators)
