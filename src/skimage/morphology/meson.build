@@ -2,7 +2,6 @@ python_sources = [
     '_flood_fill.py',
     'misc.py',
     'binary.py',
-    '_footprints.py',
     'extrema.py',
     'convex_hull.py',
     '__init__.pyi',
