@@ -10,7 +10,7 @@ from skimage._migration import ski2_migration_decorator
 @ski2_migration_decorator(
     """\
 ``%(qname_old)s`` will be removed in scikit-image 2. Please use
-    ``skimage2.feature.peak_local_max`` instead.
+``skimage2.feature.peak_local_max`` instead.
 """,
     qname_old='skimage.feature.corner_peaks',
 )

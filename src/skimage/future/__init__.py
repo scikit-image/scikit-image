@@ -18,4 +18,5 @@ Please adapt your code, perhaps by vendoring the code in this module.
 __getattr__, __dir__, __all__ = _lazy.attach_stub(__name__, __file__)
 
 # For migration doc build.
-_smd.extra_params['future_funcs'] = [f'skimage.future.{name}' for name in __all__]
+_smd.extra_params['future_funcs'] = [f'skimage.future.{name}'
+                                     for name in __all__]

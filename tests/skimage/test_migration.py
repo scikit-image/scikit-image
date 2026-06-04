@@ -1,6 +1,9 @@
 """Test migration module"""
 
+import inspect
 from textwrap import dedent
+import warnings
+
 
 import numpy as np
 import pytest
@@ -134,6 +137,16 @@ def func(a, b):
     return a * b
 
 
+class KlassDocOnly:
+    def __init__(self):
+        pass
+
+
+class KlassWithWarning:
+    def __init__(self):
+        pass
+
+
 def test_skimage2migration_parsing():
     migration_dec = Skimage2Migration(MIGRATION_URL)
     warn_msg, doc = migration_dec._parse_migration_doc(EXAMPLE_INPUT)
@@ -162,6 +175,7 @@ def test_skimage2migration_decoration_interpolation():
 
     docs = migration_dec.migration_docs
     assert docs == {_func_qname_old: doc}
+    assert dfunc is not func
 
     from skimage.util import PendingSkimage2Change
 
@@ -196,6 +210,7 @@ def test_skimage2migration_dedent():
 
     # Warning and doc nevertheless stays the same.
     assert migration_dec.migration_docs == {_func_qname_old: doc}
+    assert dfunc is not func
     with pytest.warns(PendingSkimage2Change) as record:
         assert dfunc(2, 4) == 8
 
@@ -207,6 +222,7 @@ def test_peak_local_max():
     from skimage.feature import peak_local_max
     from skimage.util import PendingSkimage2Change
 
+    assert peak_local_max is not inspect.unwrap(peak_local_max)
     assert 'skimage.feature.peak_local_max' in ski2_migration_decorator.migration_docs
 
     img = np.zeros((10, 10))
@@ -218,6 +234,26 @@ def test_peak_local_max():
         peak_local_max(img)
 
 
+def test_skimage2migration_no_warning_is_identity_decorator():
+    migration_dec = Skimage2Migration(MIGRATION_URL)
+    doc_only = dedent("""\
+    <!--- cond-start: doc -->
+    Doc only.
+    <!--- cond-end -->
+    """)
+    dfunc = migration_dec(doc_only, qname_old="tests.skimage.test_migration.func")(func)
+
+    assert dfunc is func
+    assert getattr(func, '__wrapped__', func) is func
+    assert migration_dec.migration_docs == {_func_qname_old: 'Doc only.'}
+
+    # No warning when no warning message in migration docstring.
+    with warnings.catch_warnings(record=True) as record:
+        warnings.simplefilter('always')
+        assert dfunc(2, 4) == 8
+    assert len(record) == 0
+
+
 def test_skimage2migration_comment_check():
     migration_dec = Skimage2Migration(MIGRATION_URL)
 
@@ -226,3 +262,62 @@ def test_skimage2migration_comment_check():
         ValueError, match=r"Remaining <!-- marker in warning of `foo\.bar`;"
     ):
         migration_dec._parse_migration_doc(doc, 'foo.bar')
+
+
+def test_skimage2migration_classes():
+    migration_dec = Skimage2Migration(MIGRATION_URL)
+    doc_only_qname = 'tests.skimage.test_migration.KlassDocOnly'
+    warn_qname = 'tests.skimage.test_migration.KlassWithWarning'
+
+    dklass = migration_dec(
+        dedent(
+            """<!--- cond-start: doc -->
+        Doc only.
+        <!--- cond-end -->
+        """
+        ),
+        qname_old=doc_only_qname,
+    )(KlassDocOnly)
+
+    assert dklass is KlassDocOnly
+
+    with warnings.catch_warnings(record=True) as record:
+        warnings.simplefilter('always')
+        dklass()
+    assert len(record) == 0
+
+    dklass = migration_dec("Basic warning", qname_old=warn_qname)(KlassWithWarning)
+
+    assert dklass is KlassWithWarning
+    assert inspect.isclass(dklass)
+
+    from skimage.util import PendingSkimage2Change
+
+    with pytest.warns(PendingSkimage2Change, match='Basic warning') as record:
+        dklass()
+    assert len(record) == 1
+
+    with pytest.warns(PendingSkimage2Change, match='Basic warning'):
+        dklass()
+
+
+def test_skimage2migration_trainable_segmenter_remains_class():
+    from skimage.future.trainable_segmentation import TrainableSegmenter
+    from skimage.util import PendingSkimage2Change
+
+    class _Clf:
+        """Dummy classifier for TrainableSegmenter"""
+
+        def fit(self, *args, **kwargs):
+            pass
+
+        def predict(self, *args, **kwargs):
+            return []
+
+    assert inspect.isclass(TrainableSegmenter)
+
+    with pytest.warns(PendingSkimage2Change):
+        segmenter = TrainableSegmenter(clf=_Clf())
+
+    assert hasattr(segmenter, 'fit')
+    assert hasattr(segmenter, 'predict')

@@ -122,7 +122,7 @@ modules in current ``skimage.future``, please either vendor the
 ``skimage.future`` code in your own code-base, or use other libraries.  If you
 are making heavy use of ``skimage.future`` routines, please feel free to raise
 an issue at the `scikit-image issues
-<<https://github.com/scikit-image/scikit-image/issues>`__ page to ask us to
+<https://github.com/scikit-image/scikit-image/issues>`__ page to ask us to
 port the function you want to use.
 
 {% for name in advice_map.pop('future_funcs') %}
