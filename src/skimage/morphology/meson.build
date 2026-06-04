@@ -16,8 +16,8 @@ python_sources = [
     '_util.py',
     '_grayreconstruct.py',
     'grayreconstruct.py',
-    'max_tree.py',
     '_max_tree.py',
+    '_max_tree_cy.py',
     '_flood_fill_cy.py',
     'gray.py',
 ]
