@@ -7,6 +7,9 @@ from scipy import spatial
 from skimage.future import fit_segmenter, predict_segmenter, TrainableSegmenter
 from skimage.feature import multiscale_basic_features
 
+from skimage.util import PendingSkimage2Change
+from _skimage2._shared.testing import assert_stacklevel
+
 
 class DummyNNClassifier:
     def fit(self, X, labels):
@@ -24,6 +27,7 @@ class DummyNNClassifier:
         return self.labels[nearest_neighbors]
 
 
+@pytest.mark.filterwarnings("default::skimage.util.PendingSkimage2Change")
 def test_trainable_segmentation_singlechannel():
     img = np.zeros((20, 20))
     img[:10] = 1
@@ -41,12 +45,21 @@ def test_trainable_segmentation_singlechannel():
         sigma_max=2,
     )
     features = features_func(img)
-    clf = fit_segmenter(labels, features, clf)
-    out = predict_segmenter(features, clf)
+    with pytest.warns(PendingSkimage2Change,
+                      match='`skimage.future.fit_segmenter` is deprecated'
+                     ) as record:
+        clf = fit_segmenter(labels, features, clf)
+    assert_stacklevel(record)
+    with pytest.warns(PendingSkimage2Change,
+                      match='`skimage.future.predict_segmenter` is deprecated'
+                     ) as record:
+        out = predict_segmenter(features, clf)
+    assert_stacklevel(record)
     assert np.all(out[:10] == 1)
     assert np.all(out[10:] == 2)
 
 
+@pytest.mark.filterwarnings("default::skimage.util.PendingSkimage2Change")
 def test_trainable_segmentation_multichannel():
     img = np.zeros((20, 20, 3))
     img[:10] = 1
@@ -64,12 +77,14 @@ def test_trainable_segmentation_multichannel():
         sigma_max=2,
         channel_axis=-1,
     )
-    clf = fit_segmenter(labels, features, clf)
-    out = predict_segmenter(features, clf)
+    with pytest.warns(PendingSkimage2Change):
+        clf = fit_segmenter(labels, features, clf)
+        out = predict_segmenter(features, clf)
     assert np.all(out[:10] == 1)
     assert np.all(out[10:] == 2)
 
 
+@pytest.mark.filterwarnings("default::skimage.util.PendingSkimage2Change")
 def test_trainable_segmentation_predict():
     img = np.zeros((20, 20))
     img[:10] = 1
@@ -87,14 +102,16 @@ def test_trainable_segmentation_predict():
         sigma_max=2,
     )
     features = features_func(img)
-    clf = fit_segmenter(labels, features, clf)
+    with pytest.warns(PendingSkimage2Change):
+        clf = fit_segmenter(labels, features, clf)
 
     test_features = rng.random((5, 20, 20))
-    with pytest.raises(ValueError) as err:
+    with pytest.warns(PendingSkimage2Change), pytest.raises(ValueError) as err:
         _ = predict_segmenter(test_features, clf)
         assert 'type of features' in str(err.value)
 
 
+@pytest.mark.filterwarnings("default::skimage.util.PendingSkimage2Change")
 def test_trainable_segmentation_oo():
     """Test the object-oriented interface using the TrainableSegmenter class."""
 
@@ -113,13 +130,15 @@ def test_trainable_segmentation_oo():
         sigma_min=0.5,
         sigma_max=2,
     )
-    segmenter = TrainableSegmenter(clf=clf, features_func=features_func)
-    segmenter.fit(img, labels)
+    with pytest.warns(PendingSkimage2Change):
+        segmenter = TrainableSegmenter(clf=clf, features_func=features_func)
+        segmenter.fit(img, labels)
 
     # model has been fitted
     np.testing.assert_array_almost_equal(clf.labels, labels[labels > 0])
 
-    out = segmenter.predict(img)
+    with pytest.warns(PendingSkimage2Change):
+        out = segmenter.predict(img)
     assert np.all(out[:10] == 1)
     assert np.all(out[10:] == 2)
 
@@ -129,20 +148,22 @@ def test_trainable_segmentation_oo():
         multiscale_basic_features,
         channel_axis=-1,
     )
-    segmenter = TrainableSegmenter(clf=clf, features_func=features_func)
-    segmenter.fit(img_with_channels, labels)
+    with pytest.warns(PendingSkimage2Change):
+        segmenter = TrainableSegmenter(clf=clf, features_func=features_func)
+        segmenter.fit(img_with_channels, labels)
 
     # model has been fitted
     np.testing.assert_array_almost_equal(clf.labels, labels[labels > 0])
 
-    out = segmenter.predict(img_with_channels)
+    with pytest.warns(PendingSkimage2Change):
+        out = segmenter.predict(img_with_channels)
     assert np.all(out[:10] == 1)
     assert np.all(out[10:] == 2)
 
     # test wrong number of dimensions
-    with pytest.raises(ValueError):
+    with pytest.warns(PendingSkimage2Change), pytest.raises(ValueError):
         segmenter.predict(np.expand_dims(img_with_channels, axis=-1))
 
     # test wrong number of channels
-    with pytest.raises(ValueError):
+    with pytest.warns(PendingSkimage2Change), pytest.raises(ValueError):
         segmenter.predict(np.concatenate([img_with_channels] * 2, axis=-1))

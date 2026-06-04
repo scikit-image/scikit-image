@@ -114,6 +114,25 @@ The new counterparts behave differently in the following ways:
 {{ format_advice_section(title=name, ul_char='^') }}
 {% endfor -%}
 
+Removal of ``skimage.future``
+-----------------------------
+
+There will be no ``future`` submodule in ``skimage2``.  If you are using
+modules in current ``skimage.future``, please either vendor the
+``skimage.future`` code in your own code-base, or use other libraries.  If you
+are making heavy use of ``skimage.future`` routines, please feel free to raise
+an issue at the `scikit-image issues
+<<https://github.com/scikit-image/scikit-image/issues>`__ page to ask us to
+port the function you want to use.
+
+{% for name in advice_map.pop('future_funcs') %}
+{{ format_advice_section(title=name, ul_char='^') }}
+{% endfor -%}
+
+.. Note that we need to have used any supporting dictionaries such as
+   'future_funcs' above by this point, otherwise they will be pulled out and
+   used in the clause below.
+
 {#- Iterate over and format remaining advice #}
 {%- for name in advice_map.keys() | sort %}
 {{ format_advice_section(title=name) }}

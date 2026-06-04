@@ -285,7 +285,7 @@ class Skimage2Migration:
             and end markers.
         qname_old : None or str, optional
             The canonical full (qualified) name in the ``skimage`` namespace,
-            including the ``skimage`` prefix. If None, use the functions full
+            including the ``skimage`` prefix. If None, use the function's fully
             qualified name.
         qname_new : None or str, optional
             The matching canonical full (qualified) name in the ``skimage2``
