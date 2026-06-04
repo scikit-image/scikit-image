@@ -5,9 +5,8 @@ from numpy.testing import assert_allclose, assert_array_equal
 
 import _skimage2 as ski2
 from _skimage2.morphology import footprint_rectangle, mirror_footprint, pad_footprint
+from _skimage2.morphology import _grayscale_operators as gray
 from _skimage2._shared.testing import fetch
-
-import _skimage2.morphology._grayscale_operators as gray
 
 
 @pytest.fixture
@@ -31,6 +30,11 @@ gray_operators = (
 
 
 class TestMorphology:
+    # Ski2: gray_morph_output.npz is v1 regression data (mode='reflect').
+    # v2 default is mode='ignore'; see test_gray_morphology_ignore_default_*.
+    # For generation of input reference values, see
+    # `tests/skimage/morphology/test_gray.py:TestMorphology.
+
     @pytest.mark.parametrize(
         "footprint_args",
         [
@@ -107,7 +111,7 @@ class TestMorphology:
         img = ski2.data.coins()
         footprint = np.array([[0, 0, 1], [0, 1, 1], [1, 1, 1]])
 
-        # Default mode="ignore" is extensive
+        # mode="ignore" (new v2 default) is extensive
         result = gray.closing(img, footprint=footprint)
         assert np.all(result >= img)
         result = gray.closing(img, footprint=footprint, mode="ignore")
@@ -121,7 +125,7 @@ class TestMorphology:
         img = ski2.data.coins()
         footprint = np.array([[0, 0, 1], [0, 1, 1], [1, 1, 1]])
 
-        # Default mode="ignore" is anti-extensive
+        # mode="ignore" (new v2 default) is anti-extensive
         result_ignore = gray.opening(img, footprint=footprint)
         assert np.all(result_ignore <= img)
         result_ignore = gray.opening(img, footprint=footprint, mode="ignore")
@@ -130,6 +134,16 @@ class TestMorphology:
         # mode="reflect" (v1.x default) is not anti-extensive
         result_default = gray.opening(img, footprint=footprint, mode="reflect")
         assert not np.all(result_default <= img)
+
+    @pytest.mark.parametrize("func", gray_operators)
+    def test_gray_morphology_ignore_default_edge_behavior(self, func):
+        # mode='ignore' (new v2 default) differs
+        # from mode='reflect' (old v1 default) at edges.
+        img = ski2.data.coins()
+        footprint = np.array([[0, 0, 1], [0, 1, 1], [1, 1, 1]])
+        result_ignore = func(img, footprint=footprint)
+        result_reflect = func(img, footprint=footprint, mode="reflect")
+        assert not np.array_equal(result_ignore, result_reflect)
 
     @pytest.mark.parametrize("func", gray_operators)
     @pytest.mark.parametrize("mode", gray._SUPPORTED_MODES)
@@ -157,6 +171,8 @@ class TestAsymmetricFootprints:
         ]
 
     def test_dilate_erode_symmetry(self):
+        # Ski2: v2 default (mode='ignore') — dilation mirrors footprint internally
+        # via pad_footprint; use asymmetric mirrored footprint for complement test.
         for footprint in self.footprints:
             eroded = gray.erosion(self.black_pixel, footprint=footprint)
 
@@ -210,6 +226,7 @@ class TestAsymmetricFootprints:
 
 @pytest.mark.parametrize("func", gray_operators)
 def test_default_footprint(func):
+    # Ski2: uses v2 default mode='ignore'. See test_grayscale_operators for overlap.
     strel = ski2.morphology.diamond(radius=1)
     image = np.array(
         [
@@ -284,6 +301,8 @@ def test_3d_fallback_black_tophat():
 
 
 def test_2d_ndimage_equivalence():
+    # Ski2: passes with v2 default mode='ignore' on this interior-heavy image;
+    # TODO: add edge-case regression if ndimage/scipy border handling diverges.
     image = np.zeros((9, 9), np.uint8)
     image[2:-2, 2:-2] = 128
     image[3:-3, 3:-3] = 196
@@ -300,7 +319,8 @@ def test_2d_ndimage_equivalence():
     assert_array_equal(closed, ndimage_closed)
 
 
-# float test images
+# Ski2: reference arrays below match v2 default (mode='ignore') on this small
+# interior image; TODO: add explicit edge tests for ignore vs reflect.
 im = np.array(
     [
         [0.55, 0.72, 0.6, 0.54, 0.42],
