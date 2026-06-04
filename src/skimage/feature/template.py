@@ -50,7 +50,12 @@ def match_template(
     template : (m, n[, p]) array
         Template to locate. It must be `(m <= M, n <= N[, p <= P])`.
         If `template` has fewer dimensions than `image`, singleton
-        dimensions are appended to match `image.ndim`.
+        dimensions are appended to match `image.ndim`. For example, a
+        2-D template matched against a 3-D image is treated as a template
+        with shape ``(m, n, 1)``. This applies the same 2-D template
+        independently along the final image axis and returns one response
+        plane per channel or layer, with shape ``(M - m + 1, N - n + 1, P)``
+        when `pad_input=False`.
     pad_input : bool
         If True, pad `image` so that output is the same size as the image, and
         output values correspond to the template center. Otherwise, the output
