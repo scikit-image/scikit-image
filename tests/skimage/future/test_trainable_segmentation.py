@@ -45,14 +45,14 @@ def test_trainable_segmentation_singlechannel():
         sigma_max=2,
     )
     features = features_func(img)
-    with pytest.warns(PendingSkimage2Change,
-                      match='`skimage.future.fit_segmenter` is deprecated'
-                     ) as record:
+    with pytest.warns(
+        PendingSkimage2Change, match='`skimage.future.fit_segmenter` is deprecated'
+    ) as record:
         clf = fit_segmenter(labels, features, clf)
     assert_stacklevel(record)
-    with pytest.warns(PendingSkimage2Change,
-                      match='`skimage.future.predict_segmenter` is deprecated'
-                     ) as record:
+    with pytest.warns(
+        PendingSkimage2Change, match='`skimage.future.predict_segmenter` is deprecated'
+    ) as record:
         out = predict_segmenter(features, clf)
     assert_stacklevel(record)
     assert np.all(out[:10] == 1)
