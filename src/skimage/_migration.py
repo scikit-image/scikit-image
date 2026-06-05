@@ -6,7 +6,7 @@ import re
 import sys
 from textwrap import dedent
 
-from _skimage2._shared._warnings import warn_external
+from _skimage2._shared._warnings import warn_external  # noqa: F401
 
 
 # URL to migration page.
