@@ -1,2 +1,3 @@
-from _skimage2.feature.template import *  # noqa: F403
-from _skimage2.feature.template import __doc__  # noqa: F401
+from _skimage2.feature.template import match_template as match_template  # noqa: F401
+
+__all__ = ['match_template']

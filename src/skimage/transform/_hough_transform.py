@@ -1,2 +1,3 @@
-from _skimage2.transform._hough_transform import *  # noqa: F403
-from _skimage2.transform._hough_transform import __doc__  # noqa: F401
+from _skimage2.transform._hough_transform import circle_perimeter as circle_perimeter  # noqa: F401
+
+__all__ = ['circle_perimeter']

@@ -1,5 +1,17 @@
-from _skimage2.measure._regionprops import *  # noqa: F403
-from _skimage2.measure._regionprops import __doc__  # noqa: F401
+from _skimage2.measure._regionprops import (
+    regionprops as regionprops,
+    euler_number as euler_number,
+    perimeter as perimeter,
+    perimeter_crofton as perimeter_crofton,
+)  # noqa: F401
+
+__all__ = [
+    'regionprops',
+    'euler_number',
+    'perimeter',
+    'perimeter_crofton',
+]
+
 from _skimage2.measure._regionprops import (  # noqa: F401
     COL_DTYPES,
     OBJECT_COLUMNS,

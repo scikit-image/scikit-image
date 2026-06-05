@@ -1,2 +1,15 @@
-from _skimage2.measure._marching_cubes_lewiner import *  # noqa: F403
-from _skimage2.measure._marching_cubes_lewiner import __doc__  # noqa: F401
+from _skimage2.measure._marching_cubes_lewiner import (
+    EDGETORELATIVEPOSX as EDGETORELATIVEPOSX,
+    EDGETORELATIVEPOSY as EDGETORELATIVEPOSY,
+    EDGETORELATIVEPOSZ as EDGETORELATIVEPOSZ,
+    marching_cubes as marching_cubes,
+    mesh_surface_area as mesh_surface_area,
+)  # noqa: F401
+
+__all__ = [
+    'EDGETORELATIVEPOSX',
+    'EDGETORELATIVEPOSY',
+    'EDGETORELATIVEPOSZ',
+    'marching_cubes',
+    'mesh_surface_area',
+]

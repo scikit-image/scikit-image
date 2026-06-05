@@ -1,2 +1,9 @@
-from _skimage2.draw.draw3d import *  # noqa: F403
-from _skimage2.draw.draw3d import __doc__  # noqa: F401
+from _skimage2.draw.draw3d import (
+    ellipsoid as ellipsoid,
+    ellipsoid_stats as ellipsoid_stats,
+)  # noqa: F401
+
+__all__ = [
+    'ellipsoid',
+    'ellipsoid_stats',
+]

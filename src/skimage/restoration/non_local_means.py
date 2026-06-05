@@ -1,2 +1,3 @@
-from _skimage2.restoration.non_local_means import *  # noqa: F403
-from _skimage2.restoration.non_local_means import __doc__  # noqa: F401
+from _skimage2.restoration.non_local_means import denoise_nl_means as denoise_nl_means  # noqa: F401
+
+__all__ = ['denoise_nl_means']

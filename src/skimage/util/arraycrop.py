@@ -1,2 +1,10 @@
-from _skimage2.util.arraycrop import *  # noqa: F403
-from _skimage2.util.arraycrop import __doc__  # noqa: F401
+"""
+
+The arraycrop module contains functions to crop values from the edges of an
+n-dimensional array.
+
+"""
+
+from _skimage2.util.arraycrop import crop as crop  # noqa: F401
+
+__all__ = ['crop']

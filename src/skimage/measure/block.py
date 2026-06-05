@@ -1,2 +1,3 @@
-from _skimage2.measure.block import *  # noqa: F403
-from _skimage2.measure.block import __doc__  # noqa: F401
+from _skimage2.measure.block import block_reduce as block_reduce  # noqa: F401
+
+__all__ = ['block_reduce']

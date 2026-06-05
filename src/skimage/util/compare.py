@@ -1,2 +1,3 @@
-from _skimage2.util.compare import *  # noqa: F403
-from _skimage2.util.compare import __doc__  # noqa: F401
+from _skimage2.util.compare import compare_images as compare_images  # noqa: F401
+
+__all__ = ['compare_images']

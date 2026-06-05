@@ -1,2 +1,3 @@
-from _skimage2.feature._hoghistogram import *  # noqa: F403
-from _skimage2.feature._hoghistogram import __doc__  # noqa: F401
+from _skimage2.feature._hoghistogram import hog_histograms as hog_histograms  # noqa: F401
+
+__all__ = ['hog_histograms']

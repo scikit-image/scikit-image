@@ -1,3 +1,13 @@
-from _skimage2.feature.blob import *  # noqa: F403
-from _skimage2.feature.blob import __doc__  # noqa: F401
+from _skimage2.feature.blob import (
+    blob_dog as blob_dog,
+    blob_doh as blob_doh,
+    blob_log as blob_log,
+)  # noqa: F401
+
+__all__ = [
+    'blob_dog',
+    'blob_doh',
+    'blob_log',
+]
+
 from _skimage2.feature.blob import _blob_overlap  # noqa: F401

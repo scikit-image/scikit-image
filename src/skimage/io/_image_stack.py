@@ -1,2 +1,11 @@
-from _skimage2.io._image_stack import *  # noqa: F403
-from _skimage2.io._image_stack import __doc__  # noqa: F401
+from _skimage2.io._image_stack import (
+    image_stack as image_stack,
+    push as push,
+    pop as pop,
+)  # noqa: F401
+
+__all__ = [
+    'image_stack',
+    'push',
+    'pop',
+]

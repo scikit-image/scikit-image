@@ -1,2 +1,3 @@
-from _skimage2.restoration._unwrap_3d import *  # noqa: F403
-from _skimage2.restoration._unwrap_3d import __doc__  # noqa: F401
+from _skimage2.restoration._unwrap_3d import unwrap_3d as unwrap_3d  # noqa: F401
+
+__all__ = ['unwrap_3d']

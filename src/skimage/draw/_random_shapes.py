@@ -1,2 +1,11 @@
-from _skimage2.draw._random_shapes import *  # noqa: F403
-from _skimage2.draw._random_shapes import __doc__  # noqa: F401
+from _skimage2.draw._random_shapes import (
+    SHAPE_CHOICES as SHAPE_CHOICES,
+    SHAPE_GENERATORS as SHAPE_GENERATORS,
+    random_shapes as random_shapes,
+)  # noqa: F401
+
+__all__ = [
+    'SHAPE_CHOICES',
+    'SHAPE_GENERATORS',
+    'random_shapes',
+]

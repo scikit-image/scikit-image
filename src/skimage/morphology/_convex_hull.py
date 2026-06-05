@@ -1,2 +1,3 @@
-from _skimage2.morphology._convex_hull import *  # noqa: F403
-from _skimage2.morphology._convex_hull import __doc__  # noqa: F401
+from _skimage2.morphology._convex_hull import possible_hull as possible_hull  # noqa: F401
+
+__all__ = ['possible_hull']

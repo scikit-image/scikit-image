@@ -1,3 +1,19 @@
-from _skimage2.io.collection import *  # noqa: F403
-from _skimage2.io.collection import __doc__  # noqa: F401
+"""
+Data structures to hold collections of images, with optional caching.
+"""
+
+from _skimage2.io.collection import (
+    MultiImage as MultiImage,
+    ImageCollection as ImageCollection,
+    concatenate_images as concatenate_images,
+    imread_collection_wrapper as imread_collection_wrapper,
+)  # noqa: F401
+
+__all__ = [
+    'MultiImage',
+    'ImageCollection',
+    'concatenate_images',
+    'imread_collection_wrapper',
+]
+
 from _skimage2.io.collection import alphanumeric_key  # noqa: F401

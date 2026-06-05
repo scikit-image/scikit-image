@@ -1,2 +1,3 @@
-from _skimage2.draw._polygon2mask import *  # noqa: F403
-from _skimage2.draw._polygon2mask import __doc__  # noqa: F401
+from _skimage2.draw._polygon2mask import polygon2mask as polygon2mask  # noqa: F401
+
+__all__ = ['polygon2mask']

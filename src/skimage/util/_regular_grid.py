@@ -1,2 +1,9 @@
-from _skimage2.util._regular_grid import *  # noqa: F403
-from _skimage2.util._regular_grid import __doc__  # noqa: F401
+from _skimage2.util._regular_grid import (
+    regular_grid as regular_grid,
+    regular_seeds as regular_seeds,
+)  # noqa: F401
+
+__all__ = [
+    'regular_grid',
+    'regular_seeds',
+]

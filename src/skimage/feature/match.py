@@ -1,2 +1,3 @@
-from _skimage2.feature.match import *  # noqa: F403
-from _skimage2.feature.match import __doc__  # noqa: F401
+from _skimage2.feature.match import match_descriptors as match_descriptors  # noqa: F401
+
+__all__ = ['match_descriptors']

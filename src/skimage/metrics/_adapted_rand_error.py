@@ -1,2 +1,5 @@
-from _skimage2.metrics._adapted_rand_error import *  # noqa: F403
-from _skimage2.metrics._adapted_rand_error import __doc__  # noqa: F401
+from _skimage2.metrics._adapted_rand_error import (
+    adapted_rand_error as adapted_rand_error,
+)  # noqa: F401
+
+__all__ = ['adapted_rand_error']

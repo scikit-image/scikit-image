@@ -1,2 +1,3 @@
-from _skimage2.graph.spath import *  # noqa: F403
-from _skimage2.graph.spath import __doc__  # noqa: F401
+from _skimage2.graph.spath import shortest_path as shortest_path  # noqa: F401
+
+__all__ = ['shortest_path']

@@ -1,2 +1,17 @@
-from _skimage2.morphology._flood_fill import *  # noqa: F403
-from _skimage2.morphology._flood_fill import __doc__  # noqa: F401
+"""
+flood_fill.py - in place flood fill algorithm
+
+This module provides a function to fill all equal (or within tolerance) values
+connected to a given seed point with a different value.
+
+"""
+
+from _skimage2.morphology._flood_fill import (
+    flood as flood,
+    flood_fill as flood_fill,
+)  # noqa: F401
+
+__all__ = [
+    'flood',
+    'flood_fill',
+]

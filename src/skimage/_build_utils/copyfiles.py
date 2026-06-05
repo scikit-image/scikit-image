@@ -1,2 +1,7 @@
-from _skimage2._build_utils.copyfiles import *  # noqa: F403
-from _skimage2._build_utils.copyfiles import __doc__  # noqa: F401
+"""
+Platform independent file copier script
+"""
+
+from _skimage2._build_utils.copyfiles import main as main  # noqa: F401
+
+__all__ = ['main']

@@ -1,2 +1,9 @@
-from _skimage2.graph._graph import *  # noqa: F403
-from _skimage2.graph._graph import __doc__  # noqa: F401
+from _skimage2.graph._graph import (
+    central_pixel as central_pixel,
+    pixel_graph as pixel_graph,
+)  # noqa: F401
+
+__all__ = [
+    'central_pixel',
+    'pixel_graph',
+]

@@ -1,5 +1,15 @@
-from _skimage2.metrics.simple_metrics import *  # noqa: F403
-from _skimage2.metrics.simple_metrics import __doc__  # noqa: F401
+from _skimage2.metrics.simple_metrics import (
+    peak_signal_noise_ratio as peak_signal_noise_ratio,
+    normalized_mutual_information as normalized_mutual_information,
+)  # noqa: F401
+
+__all__ = [
+    'mean_squared_error',
+    'normalized_root_mse',
+    'peak_signal_noise_ratio',
+    'normalized_mutual_information',
+]
+
 import _skimage2.metrics.simple_metrics as ski2_sm
 
 from ..util._backends import dispatchable_shim as _dshim

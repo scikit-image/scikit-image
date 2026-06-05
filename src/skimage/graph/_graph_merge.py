@@ -1,2 +1,3 @@
-from _skimage2.graph._graph_merge import *  # noqa: F403
-from _skimage2.graph._graph_merge import __doc__  # noqa: F401
+from _skimage2.graph._graph_merge import merge_hierarchical as merge_hierarchical  # noqa: F401
+
+__all__ = ['merge_hierarchical']

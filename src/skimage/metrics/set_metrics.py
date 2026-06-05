@@ -1,2 +1,9 @@
-from _skimage2.metrics.set_metrics import *  # noqa: F403
-from _skimage2.metrics.set_metrics import __doc__  # noqa: F401
+from _skimage2.metrics.set_metrics import (
+    hausdorff_distance as hausdorff_distance,
+    hausdorff_pair as hausdorff_pair,
+)  # noqa: F401
+
+__all__ = [
+    'hausdorff_distance',
+    'hausdorff_pair',
+]

@@ -1,2 +1,16 @@
-from _skimage2.transform.finite_radon_transform import *  # noqa: F403
-from _skimage2.transform.finite_radon_transform import __doc__  # noqa: F401
+"""
+
+:author: Gary Ruben, 2009
+:license: modified BSD
+
+"""
+
+from _skimage2.transform.finite_radon_transform import (
+    frt2 as frt2,
+    ifrt2 as ifrt2,
+)  # noqa: F401
+
+__all__ = [
+    'frt2',
+    'ifrt2',
+]

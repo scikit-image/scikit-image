@@ -1,2 +1,13 @@
-from _skimage2.morphology.convex_hull import *  # noqa: F403
-from _skimage2.morphology.convex_hull import __doc__  # noqa: F401
+"""
+Convex Hull.
+"""
+
+from _skimage2.morphology.convex_hull import (
+    convex_hull_image as convex_hull_image,
+    convex_hull_object as convex_hull_object,
+)  # noqa: F401
+
+__all__ = [
+    'convex_hull_image',
+    'convex_hull_object',
+]

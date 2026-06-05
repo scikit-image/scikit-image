@@ -1,2 +1,3 @@
-from _skimage2.segmentation._expand_labels import *  # noqa: F403
-from _skimage2.segmentation._expand_labels import __doc__  # noqa: F401
+from _skimage2.segmentation._expand_labels import expand_labels as expand_labels  # noqa: F401
+
+__all__ = ['expand_labels']

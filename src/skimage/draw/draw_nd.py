@@ -1,2 +1,3 @@
-from _skimage2.draw.draw_nd import *  # noqa: F403
-from _skimage2.draw.draw_nd import __doc__  # noqa: F401
+from _skimage2.draw.draw_nd import line_nd as line_nd  # noqa: F401
+
+__all__ = ['line_nd']

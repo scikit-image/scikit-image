@@ -1,2 +1,3 @@
-from _skimage2.measure._find_contours import *  # noqa: F403
-from _skimage2.measure._find_contours import __doc__  # noqa: F401
+from _skimage2.measure._find_contours import find_contours as find_contours  # noqa: F401
+
+__all__ = ['find_contours']

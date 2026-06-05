@@ -1,2 +1,9 @@
-from _skimage2.feature.brief import *  # noqa: F403
-from _skimage2.feature.brief import __doc__  # noqa: F401
+from _skimage2.feature.brief import (
+    BRIEF as BRIEF,
+    np2 as np2,
+)  # noqa: F401
+
+__all__ = [
+    'BRIEF',
+    'np2',
+]

@@ -1,2 +1,9 @@
-from _skimage2.segmentation._join import *  # noqa: F403
-from _skimage2.segmentation._join import __doc__  # noqa: F401
+from _skimage2.segmentation._join import (
+    join_segmentations as join_segmentations,
+    relabel_sequential as relabel_sequential,
+)  # noqa: F401
+
+__all__ = [
+    'join_segmentations',
+    'relabel_sequential',
+]

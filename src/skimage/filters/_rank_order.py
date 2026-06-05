@@ -1,2 +1,10 @@
-from _skimage2.filters._rank_order import *  # noqa: F403
-from _skimage2.filters._rank_order import __doc__  # noqa: F401
+"""
+
+_rank_order.py - convert an image of any type to an image of ints whose
+pixels have an identical rank order compared to the original image
+
+"""
+
+from _skimage2.filters._rank_order import rank_order as rank_order  # noqa: F401
+
+__all__ = ['rank_order']

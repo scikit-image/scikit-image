@@ -1,2 +1,11 @@
-from _skimage2.feature.orb import *  # noqa: F403
-from _skimage2.feature.orb import __doc__  # noqa: F401
+from _skimage2.feature.orb import (
+    OFAST_MASK as OFAST_MASK,
+    OFAST_UMAX as OFAST_UMAX,
+    ORB as ORB,
+)  # noqa: F401
+
+__all__ = [
+    'OFAST_MASK',
+    'OFAST_UMAX',
+    'ORB',
+]

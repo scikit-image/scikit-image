@@ -1,2 +1,3 @@
-from _skimage2.util.unique import *  # noqa: F403
-from _skimage2.util.unique import __doc__  # noqa: F401
+from _skimage2.util.unique import unique_rows as unique_rows  # noqa: F401
+
+__all__ = ['unique_rows']

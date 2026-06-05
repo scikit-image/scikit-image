@@ -1,2 +1,11 @@
-from _skimage2.io.util import *  # noqa: F403
-from _skimage2.io.util import __doc__  # noqa: F401
+from _skimage2.io.util import (
+    URL_REGEX as URL_REGEX,
+    file_or_url_context as file_or_url_context,
+    is_url as is_url,
+)  # noqa: F401
+
+__all__ = [
+    'URL_REGEX',
+    'file_or_url_context',
+    'is_url',
+]

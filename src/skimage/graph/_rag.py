@@ -1,2 +1,15 @@
-from _skimage2.graph._rag import *  # noqa: F403
-from _skimage2.graph._rag import __doc__  # noqa: F401
+from _skimage2.graph._rag import (
+    RAG as RAG,
+    min_weight as min_weight,
+    rag_boundary as rag_boundary,
+    rag_mean_color as rag_mean_color,
+    show_rag as show_rag,
+)  # noqa: F401
+
+__all__ = [
+    'RAG',
+    'min_weight',
+    'rag_boundary',
+    'rag_mean_color',
+    'show_rag',
+]

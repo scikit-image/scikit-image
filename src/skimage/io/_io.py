@@ -1,2 +1,11 @@
-from _skimage2.io._io import *  # noqa: F403
-from _skimage2.io._io import __doc__  # noqa: F401
+from _skimage2.io._io import (
+    imread as imread,
+    imsave as imsave,
+    imread_collection as imread_collection,
+)  # noqa: F401
+
+__all__ = [
+    'imread',
+    'imsave',
+    'imread_collection',
+]

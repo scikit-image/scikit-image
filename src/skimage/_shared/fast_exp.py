@@ -1,2 +1,3 @@
-from _skimage2._shared.fast_exp import *  # noqa: F403
-from _skimage2._shared.fast_exp import __doc__  # noqa: F401
+from _skimage2._shared.fast_exp import fast_exp as fast_exp  # noqa: F401
+
+__all__ = ['fast_exp']

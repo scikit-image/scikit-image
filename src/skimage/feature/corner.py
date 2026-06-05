@@ -1,8 +1,41 @@
+from _skimage2.feature.corner import (
+    corner_fast as corner_fast,
+    corner_foerstner as corner_foerstner,
+    corner_harris as corner_harris,
+    corner_kitchen_rosenfeld as corner_kitchen_rosenfeld,
+    corner_moravec as corner_moravec,
+    corner_orientations as corner_orientations,
+    corner_shi_tomasi as corner_shi_tomasi,
+    corner_subpix as corner_subpix,
+    hessian_matrix as hessian_matrix,
+    hessian_matrix_det as hessian_matrix_det,
+    hessian_matrix_eigvals as hessian_matrix_eigvals,
+    shape_index as shape_index,
+    structure_tensor as structure_tensor,
+    structure_tensor_eigenvalues as structure_tensor_eigenvalues,
+)  # noqa: F401
+
+__all__ = [
+    'corner_fast',
+    'corner_foerstner',
+    'corner_harris',
+    'corner_kitchen_rosenfeld',
+    'corner_moravec',
+    'corner_orientations',
+    'corner_peaks',
+    'corner_shi_tomasi',
+    'corner_subpix',
+    'hessian_matrix',
+    'hessian_matrix_det',
+    'hessian_matrix_eigvals',
+    'shape_index',
+    'structure_tensor',
+    'structure_tensor_eigenvalues',
+]
+
 import numpy as np
 
-from _skimage2.feature.corner import *  # noqa: F403
 from _skimage2.feature.corner import corner_peaks as ski2_corner_peaks
-from _skimage2.feature.corner import __doc__  # noqa: F401
 
 from skimage._migration import ski2_migration_decorator
 

@@ -1,5 +1,29 @@
-from _skimage2.transform._warps import *  # noqa: F403
-from _skimage2.transform._warps import __doc__  # noqa: F401
+from _skimage2.transform._warps import (
+    HOMOGRAPHY_TRANSFORMS as HOMOGRAPHY_TRANSFORMS,
+    downscale_local_mean as downscale_local_mean,
+    rescale as rescale,
+    resize as resize,
+    resize_local_mean as resize_local_mean,
+    rotate as rotate,
+    swirl as swirl,
+    warp as warp,
+    warp_coords as warp_coords,
+    warp_polar as warp_polar,
+)  # noqa: F401
+
+__all__ = [
+    'HOMOGRAPHY_TRANSFORMS',
+    'downscale_local_mean',
+    'rescale',
+    'resize',
+    'resize_local_mean',
+    'rotate',
+    'swirl',
+    'warp',
+    'warp_coords',
+    'warp_polar',
+]
+
 from _skimage2.transform._warps import (  # noqa: F401
     _linear_polar_mapping,
     _log_polar_mapping,
