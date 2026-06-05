@@ -1,9 +1,12 @@
 """Utilities for migration from ``skimage`` to ``skimage2``"""
 
 from functools import wraps
+import inspect
 import re
 import sys
 from textwrap import dedent
+
+from _skimage2._shared._warnings import warn_external
 
 
 # URL to migration page.
@@ -221,41 +224,49 @@ class Skimage2Migration:
                 )
         return warn_msg, doc_rep
 
-    def _get_func_params(self, func, qname_old=None, qname_new=None):
-        """Compile dictionary of parameters from input `func`
+    def _get_func_params(self, func_or_class, qname_old=None, qname_new=None):
+        """Compile substitution parameters for a decorated callable.
 
         Parameters
         ----------
-        func : function
+        func_or_class : function or class
+            The object being decorated.
         qname_old : None or str
-            If specified, use as the input original (pre-migration) name.
+            Canonical ``skimage`` name. If None, inferred from public API
+            registration; must be unambiguous.
         qname_new : None or str
-            If specified, use as the input migrated (post-migration) name.
+            Matching ``skimage2`` name. If None, derived from ``qname_old``.
 
         Returns
         -------
         params : dict
-            Dictionary of parameters.
+            Keys used to format migration warning and doc fragments.
         """
-        qualname, modname = func.__qualname__, func.__module__
+        qualname, modname = (func_or_class.__qualname__, func_or_class.__module__)
 
         if qname_old is None:
             # Not given, try to guess if not ambiguous
-            candidates = _public_api_names(func)
+            candidates = _public_api_names(func_or_class)
             if not candidates:
-                msg = f"could not determine for {func!r}, set `qname_old` explicitly"
+                msg = (
+                    f"could not determine for {func_or_class!r}, "
+                    "set `qname_old` explicitly"
+                )
                 raise RuntimeError(msg)
             if len(candidates) > 1:
                 msg = (
-                    f"multiple candidates for {func!r},"
+                    f"multiple candidates for {func_or_class!r},"
                     f"set `qname_old` explicitly: {candidates=}"
                 )
                 raise RuntimeError(msg)
             qname_old = candidates[0]
 
-        # At this point `qname_old` should contain the name of the given `func`,
+        # At this point `qname_old` should contain the name of the given callable,
         # no private prefixes, and no references to local scopes
-        assert func.__qualname__ in qname_old, (func.__qualname__, qname_old)
+        assert func_or_class.__qualname__ in qname_old, (
+            func_or_class.__qualname__,
+            qname_old,
+        )
         assert "._" not in qname_old, qname_old
         assert "<locals>" not in qname_old, qname_old
 
@@ -273,6 +284,27 @@ class Skimage2Migration:
             migration_url=self.migration_url,
         )
 
+    def _wrap_callable_with_warning(self, func, warn_msg, warning_cls=None):
+        """Return a wrapper that emits a migration warning, then calls `func`.
+
+        Parameters
+        ----------
+        func : callable
+            Target function or method (for example ``__init__``).
+        warn_msg : str
+            Pre-formatted warning message. Must be non-empty.
+        warning_cls : type[Warning] or None
+            Warning category. Defaults to ``PendingSkimage2Change``.
+        """
+        from skimage.util import PendingSkimage2Change
+
+        @wraps(func)
+        def wrapped(*args, **kwargs):
+            warn_external(warn_msg, category=warning_cls or PendingSkimage2Change)
+            return func(*args, **kwargs)
+
+        return wrapped
+
     def __call__(
         self, migration_doc, *, qname_old=None, qname_new=None, warning_cls=None
     ):
@@ -285,7 +317,7 @@ class Skimage2Migration:
             and end markers.
         qname_old : None or str, optional
             The canonical full (qualified) name in the ``skimage`` namespace,
-            including the ``skimage`` prefix. If None, use the function's fully
+            including the ``skimage`` prefix. If None, use the callable's fully
             qualified name.
         qname_new : None or str, optional
             The matching canonical full (qualified) name in the ``skimage2``
@@ -298,30 +330,33 @@ class Skimage2Migration:
         Returns
         -------
         decorator : Callable
-            A decorator to apply to callables.
+            A decorator to apply to functions or classes.
         """
 
-        def decorator(func):
-            """Decorate `func`"""
-            func_params = self._get_func_params(func, qname_old, qname_new)
+        def decorator(func_or_class):
+            """Register migration docs and optionally wrap with a warning.
+
+            When ``warn_msg`` is empty, returns ``func_or_class`` unchanged
+            (identity decoration). For classes, only ``__init__`` is wrapped.
+            """
+            func_params = self._get_func_params(func_or_class, qname_old, qname_new)
             warn_msg, doc = self._filled_docs(migration_doc, func_params)
             if doc:
                 self.migration_docs[func_params['qname_old']] = doc
 
-            @wraps(func)
-            def decorated(*args, **kwargs):
-                from _skimage2._shared._warnings import warn_external
+            if not warn_msg:
+                # Identity decorator
+                return func_or_class
 
-                from skimage.util import PendingSkimage2Change
+            if inspect.isclass(func_or_class):
+                func_or_class.__init__ = self._wrap_callable_with_warning(
+                    func_or_class.__init__, warn_msg, warning_cls
+                )
+                return func_or_class
 
-                if warn_msg:
-                    warn_external(
-                        warn_msg, category=warning_cls or PendingSkimage2Change
-                    )
-
-                return func(*args, **kwargs)
-
-            return decorated
+            return self._wrap_callable_with_warning(
+                func_or_class, warn_msg, warning_cls
+            )
 
         return decorator
 
