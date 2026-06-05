@@ -147,15 +147,17 @@ def _public_api_names(obj):
 class Skimage2Migration:
     """Class to decorate ``skimage`` routines with migration messages
 
-    Migration messages are in Markdown format.  You can specify which parts of
-    the message become the emitted warning, and go to the migration document,
-    using *conditional inclusion* start and end markers, of form ``<!---
-    cond-start: warning>`` followed by text for the warning only, followed by
-    ``<!--- cond-end -->``.
+    Migration messages are in ReST format.  You can specify which parts of the
+    message become the emitted warning, and which go into the migration
+    document, using *conditional inclusion* start and end markers. To include
+    the text in the emitted warning, but not the document, use markers of form
+    ``<!--- cond-start: warning>`` followed by text for the warning only,
+    followed by ``<!--- cond-end -->``.
 
-    Similarly, you can specify text that will only go in the migration document
-    by using ``<!--- cond-start: doc>`` followed by text for the migration
-    document only, followed by ``<!--- cond-end -->``.
+    Similarly, you can specify text that will only go in the migration
+    document, and not in the warning, by using ``<!--- cond-start: doc>``
+    followed by text for the migration document only, followed by ``<!---
+    cond-end -->``.
 
     The text may use old-style formatting markers, with the following values
     defined:
@@ -197,7 +199,7 @@ class Skimage2Migration:
         return (s % params for s in (w_str, m_str))
 
     def _parse_migration_doc(self, doc, func_uri=None):
-        """Parse Markdown migration string to give warning and doc fragment"""
+        """Parse ReST migration string to give warning and doc fragment"""
 
         # Select blocks for "warning" context
         warn_msg = _select_blocks(doc, context_name="warning")
@@ -313,8 +315,8 @@ class Skimage2Migration:
         Parameters
         ----------
         migration_doc : str
-            Markdown document that may have contain conditional inclusion start
-            and end markers.
+            ReST document that may have contain conditional inclusion start and
+            end markers.
         qname_old : None or str, optional
             The canonical full (qualified) name in the ``skimage`` namespace,
             including the ``skimage`` prefix. If None, use the callable's fully
