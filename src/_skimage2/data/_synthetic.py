@@ -8,8 +8,8 @@ from .._shared._warnings import warn_external
 
 def binary_blobs(
     shape,
-    *,
     blob_size,
+    *,
     volume_fraction=0.5,
     rng=None,
     boundary_mode='wrap',
