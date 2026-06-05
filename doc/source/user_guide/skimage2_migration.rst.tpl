@@ -129,9 +129,9 @@ port the function you want to use.
 {{ format_advice_section(title=name, ul_char='^') }}
 {% endfor -%}
 
-.. Note that we need to have used any supporting dictionaries such as
+{# Note that we need to have used any supporting dictionaries such as
    'future_funcs' above by this point, otherwise they will be pulled out and
-   used in the clause below.
+   used in the clause below. #}
 
 {#- Iterate over and format remaining advice #}
 {%- for name in advice_map.keys() | sort %}
