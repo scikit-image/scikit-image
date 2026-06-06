@@ -1,8 +1,10 @@
 """Test migration module"""
 
 import inspect
-from textwrap import dedent
 import warnings
+import importlib
+from textwrap import dedent
+from pathlib import Path
 
 
 import numpy as np
@@ -330,3 +332,1885 @@ def test_skimage2migration_trainable_segmenter_remains_class():
 
     assert hasattr(segmenter, 'fit')
     assert hasattr(segmenter, 'predict')
+
+
+def _walk_python_files(package_path, *, root=None):
+    """Walk Python modules in a given package.
+
+    Parameters
+    ----------
+    package_path : Path
+        Directory of a Python package.
+    root : Path, optional
+        The root of the Python package. Defaults to `package_path`.
+
+    Yields
+    ------
+    relative_key : str
+        A key describing the Python file / submodule relative to the given
+        `root` directory. For example, "_io.collection" or "graph.heap".
+    path : Path
+        The path of the module.
+    """
+    package_path = Path(package_path)
+    assert package_path.is_dir()
+
+    if root is None:
+        root = package_path
+    assert root.is_dir()
+
+    for path in sorted(package_path.glob("*")):
+        if path.is_dir():
+            yield from _walk_python_files(path, root=root)
+            continue
+        assert path.is_file()
+        if path.suffix in (".py", ".pyx"):
+            key = path.relative_to(root).parts[:-1]
+            if path.stem != "__init__":
+                key = key + (path.stem,)
+            key = ".".join(key)
+
+            yield key, path
+
+
+# TODO vet correctness
+ONLY_IN_SKI = {
+    "_migration",
+    'feature.peak',
+    'feature.peaks',
+    "future",
+    "future.manual_segmentation",
+    "future.trainable_segmentation",
+    "util._backends",
+}
+
+# TODO vet correctness
+ONLY_IN_SKI2 = {
+    "feature._hessian_det_appx_pythran",
+    "feature.brief_pythran",
+    'morphology._footprints',
+    'morphology._grayscale_operators',
+}
+
+# TODO vet correctness
+SKI_SKI2_RENAMED = {
+    "data._binary_blobs": "data._synthetic",
+    "feature.peak": "feature._peaks",
+    "morphology.gray": "morphology._grayscale_operators",
+}
+
+
+def test_package_trees():
+    import skimage
+    import _skimage2
+
+    ski_path = Path(skimage.__file__).parent
+    ski2_path = Path(_skimage2.__file__).parent
+
+    ski_tree = dict(_walk_python_files(ski_path))
+    ski2_tree = dict(_walk_python_files(ski2_path))
+
+    missing_from_ski = ski2_tree.keys() - ski_tree.keys()
+    missing_from_ski2 = ski_tree.keys() - ski2_tree.keys()
+
+    assert missing_from_ski == set(SKI_SKI2_RENAMED.values()) | ONLY_IN_SKI2
+    assert missing_from_ski2 == set(SKI_SKI2_RENAMED.keys()) | ONLY_IN_SKI
+
+
+# Generated on 'main'
+SKIMAGE_API = {
+    'skimage.color.adapt_rgb:adapt_rgb(apply_to_rgb)',
+    'skimage.color.adapt_rgb:each_channel(image_filter, image, *args, **kwargs)',
+    'skimage.color.adapt_rgb:hsv_value(image_filter, image, *args, **kwargs)',
+    'skimage.color.colorconv:AxisError',
+    'skimage.color.colorconv:ahx_from_rgb',
+    'skimage.color.colorconv:bex_from_rgb',
+    'skimage.color.colorconv:bpx_from_rgb',
+    'skimage.color.colorconv:bro_from_rgb',
+    'skimage.color.colorconv:channel_as_last_axis',
+    'skimage.color.colorconv:cie_primaries',
+    'skimage.color.colorconv:combine_stains(stains, conv_matrix, *, channel_axis=-1)',
+    'skimage.color.colorconv:convert_colorspace(arr, fromspace, tospace, *, '
+    'channel_axis=-1)',
+    'skimage.color.colorconv:dtype',
+    'skimage.color.colorconv:dtype_limits(image, clip_negative=False)',
+    'skimage.color.colorconv:fgx_from_rgb',
+    'skimage.color.colorconv:gdx_from_rgb',
+    'skimage.color.colorconv:gray2rgb(image, *, channel_axis=-1)',
+    'skimage.color.colorconv:gray2rgba(image, alpha=None, *, channel_axis=-1)',
+    'skimage.color.colorconv:gray_from_rgb',
+    'skimage.color.colorconv:hax_from_rgb',
+    'skimage.color.colorconv:hdx_from_rgb',
+    'skimage.color.colorconv:hed2rgb(hed, *, channel_axis=-1)',
+    'skimage.color.colorconv:hed_from_rgb',
+    'skimage.color.colorconv:hpx_from_rgb',
+    'skimage.color.colorconv:hsv2rgb(hsv, *, channel_axis=-1)',
+    'skimage.color.colorconv:identity(image, *args, **kwargs)',
+    'skimage.color.colorconv:lab2lch(lab, *, channel_axis=-1)',
+    "skimage.color.colorconv:lab2rgb(lab, illuminant='D65', observer='2', *, "
+    'channel_axis=-1)',
+    "skimage.color.colorconv:lab2xyz(lab, illuminant='D65', observer='2', *, "
+    'channel_axis=-1)',
+    'skimage.color.colorconv:lab_ref_white',
+    'skimage.color.colorconv:lch2lab(lch, *, channel_axis=-1)',
+    'skimage.color.colorconv:linalg',
+    'skimage.color.colorconv:luv2rgb(luv, *, channel_axis=-1)',
+    "skimage.color.colorconv:luv2xyz(luv, illuminant='D65', observer='2', *, "
+    'channel_axis=-1)',
+    'skimage.color.colorconv:np',
+    'skimage.color.colorconv:rbd_from_rgb',
+    'skimage.color.colorconv:reshape_nd(arr, ndim, dim)',
+    'skimage.color.colorconv:rgb2gray(rgb, *, channel_axis=-1)',
+    'skimage.color.colorconv:rgb2hed(rgb, *, channel_axis=-1)',
+    'skimage.color.colorconv:rgb2hsv(rgb, *, channel_axis=-1)',
+    "skimage.color.colorconv:rgb2lab(rgb, illuminant='D65', observer='2', *, "
+    'channel_axis=-1)',
+    'skimage.color.colorconv:rgb2luv(rgb, *, channel_axis=-1)',
+    'skimage.color.colorconv:rgb2rgbcie(rgb, *, channel_axis=-1)',
+    'skimage.color.colorconv:rgb2xyz(rgb, *, channel_axis=-1)',
+    'skimage.color.colorconv:rgb2ycbcr(rgb, *, channel_axis=-1)',
+    'skimage.color.colorconv:rgb2ydbdr(rgb, *, channel_axis=-1)',
+    'skimage.color.colorconv:rgb2yiq(rgb, *, channel_axis=-1)',
+    'skimage.color.colorconv:rgb2ypbpr(rgb, *, channel_axis=-1)',
+    'skimage.color.colorconv:rgb2yuv(rgb, *, channel_axis=-1)',
+    'skimage.color.colorconv:rgb_from_ahx',
+    'skimage.color.colorconv:rgb_from_bex',
+    'skimage.color.colorconv:rgb_from_bpx',
+    'skimage.color.colorconv:rgb_from_bro',
+    'skimage.color.colorconv:rgb_from_fgx',
+    'skimage.color.colorconv:rgb_from_gdx',
+    'skimage.color.colorconv:rgb_from_hax',
+    'skimage.color.colorconv:rgb_from_hdx',
+    'skimage.color.colorconv:rgb_from_hed',
+    'skimage.color.colorconv:rgb_from_hpx',
+    'skimage.color.colorconv:rgb_from_rbd',
+    'skimage.color.colorconv:rgb_from_rgbcie',
+    'skimage.color.colorconv:rgb_from_xyz',
+    'skimage.color.colorconv:rgb_from_ycbcr',
+    'skimage.color.colorconv:rgb_from_ydbdr',
+    'skimage.color.colorconv:rgb_from_yiq',
+    'skimage.color.colorconv:rgb_from_ypbpr',
+    'skimage.color.colorconv:rgb_from_yuv',
+    'skimage.color.colorconv:rgba2rgb(rgba, background=(1, 1, 1), *, channel_axis=-1)',
+    'skimage.color.colorconv:rgbcie2rgb(rgbcie, *, channel_axis=-1)',
+    'skimage.color.colorconv:rgbcie_from_rgb',
+    'skimage.color.colorconv:rgbcie_from_xyz',
+    'skimage.color.colorconv:sb_primaries',
+    'skimage.color.colorconv:separate_stains(rgb, conv_matrix, *, channel_axis=-1)',
+    'skimage.color.colorconv:slice_at_axis(sl, axis)',
+    'skimage.color.colorconv:warn',
+    "skimage.color.colorconv:xyz2lab(xyz, illuminant='D65', observer='2', *, "
+    'channel_axis=-1)',
+    "skimage.color.colorconv:xyz2luv(xyz, illuminant='D65', observer='2', *, "
+    'channel_axis=-1)',
+    'skimage.color.colorconv:xyz2rgb(xyz, *, channel_axis=-1)',
+    'skimage.color.colorconv:xyz_from_rgb',
+    'skimage.color.colorconv:xyz_from_rgbcie',
+    'skimage.color.colorconv:xyz_tristimulus_values(*, illuminant, observer, '
+    "dtype=<class 'float'>)",
+    'skimage.color.colorconv:ycbcr2rgb(ycbcr, *, channel_axis=-1)',
+    'skimage.color.colorconv:ycbcr_from_rgb',
+    'skimage.color.colorconv:ydbdr2rgb(ydbdr, *, channel_axis=-1)',
+    'skimage.color.colorconv:ydbdr_from_rgb',
+    'skimage.color.colorconv:yiq2rgb(yiq, *, channel_axis=-1)',
+    'skimage.color.colorconv:yiq_from_rgb',
+    'skimage.color.colorconv:ypbpr2rgb(ypbpr, *, channel_axis=-1)',
+    'skimage.color.colorconv:ypbpr_from_rgb',
+    'skimage.color.colorconv:yuv2rgb(yuv, *, channel_axis=-1)',
+    'skimage.color.colorconv:yuv_from_rgb',
+    'skimage.color.colorlabel:DEFAULT_COLORS',
+    'skimage.color.colorlabel:color_dict',
+    'skimage.color.colorlabel:label2rgb(label, image=None, colors=None, '
+    "alpha=0.3, bg_label=0, bg_color=(0, 0, 0), image_alpha=1, kind='overlay', *, "
+    'saturation=0, channel_axis=-1)',
+    'skimage.color.delta_e:deltaE_cie76(lab1, lab2, channel_axis=-1)',
+    'skimage.color.delta_e:deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1, *, '
+    'channel_axis=-1)',
+    'skimage.color.delta_e:deltaE_ciede94(lab1, lab2, kH=1, kC=1, kL=1, k1=0.045, '
+    'k2=0.015, *, channel_axis=-1)',
+    'skimage.color.delta_e:deltaE_cmc(lab1, lab2, kL=1, kC=1, *, channel_axis=-1)',
+    'skimage.color.delta_e:get_dH2(lab1, lab2, *, channel_axis=-1)',
+    'skimage.color.delta_e:lab2lch(lab, *, channel_axis=-1)',
+    'skimage.color.delta_e:np',
+    'skimage.color.rgb_colors:aliceblue',
+    'skimage.color.rgb_colors:antiquewhite',
+    'skimage.color.rgb_colors:aqua',
+    'skimage.color.rgb_colors:aquamarine',
+    'skimage.color.rgb_colors:azure',
+    'skimage.color.rgb_colors:beige',
+    'skimage.color.rgb_colors:bisque',
+    'skimage.color.rgb_colors:black',
+    'skimage.color.rgb_colors:blanchedalmond',
+    'skimage.color.rgb_colors:blue',
+    'skimage.color.rgb_colors:blueviolet',
+    'skimage.color.rgb_colors:brown',
+    'skimage.color.rgb_colors:burlywood',
+    'skimage.color.rgb_colors:cadetblue',
+    'skimage.color.rgb_colors:chartreuse',
+    'skimage.color.rgb_colors:chocolate',
+    'skimage.color.rgb_colors:coral',
+    'skimage.color.rgb_colors:cornflowerblue',
+    'skimage.color.rgb_colors:cornsilk',
+    'skimage.color.rgb_colors:crimson',
+    'skimage.color.rgb_colors:cyan',
+    'skimage.color.rgb_colors:darkblue',
+    'skimage.color.rgb_colors:darkcyan',
+    'skimage.color.rgb_colors:darkgoldenrod',
+    'skimage.color.rgb_colors:darkgray',
+    'skimage.color.rgb_colors:darkgreen',
+    'skimage.color.rgb_colors:darkgrey',
+    'skimage.color.rgb_colors:darkkhaki',
+    'skimage.color.rgb_colors:darkmagenta',
+    'skimage.color.rgb_colors:darkolivegreen',
+    'skimage.color.rgb_colors:darkorange',
+    'skimage.color.rgb_colors:darkorchid',
+    'skimage.color.rgb_colors:darkred',
+    'skimage.color.rgb_colors:darksalmon',
+    'skimage.color.rgb_colors:darkseagreen',
+    'skimage.color.rgb_colors:darkslateblue',
+    'skimage.color.rgb_colors:darkslategray',
+    'skimage.color.rgb_colors:darkslategrey',
+    'skimage.color.rgb_colors:darkturquoise',
+    'skimage.color.rgb_colors:darkviolet',
+    'skimage.color.rgb_colors:deeppink',
+    'skimage.color.rgb_colors:deepskyblue',
+    'skimage.color.rgb_colors:dimgray',
+    'skimage.color.rgb_colors:dimgrey',
+    'skimage.color.rgb_colors:dodgerblue',
+    'skimage.color.rgb_colors:firebrick',
+    'skimage.color.rgb_colors:floralwhite',
+    'skimage.color.rgb_colors:forestgreen',
+    'skimage.color.rgb_colors:fuchsia',
+    'skimage.color.rgb_colors:gainsboro',
+    'skimage.color.rgb_colors:ghostwhite',
+    'skimage.color.rgb_colors:gold',
+    'skimage.color.rgb_colors:goldenrod',
+    'skimage.color.rgb_colors:gray',
+    'skimage.color.rgb_colors:green',
+    'skimage.color.rgb_colors:greenyellow',
+    'skimage.color.rgb_colors:grey',
+    'skimage.color.rgb_colors:honeydew',
+    'skimage.color.rgb_colors:hotpink',
+    'skimage.color.rgb_colors:indianred',
+    'skimage.color.rgb_colors:indigo',
+    'skimage.color.rgb_colors:ivory',
+    'skimage.color.rgb_colors:khaki',
+    'skimage.color.rgb_colors:lavender',
+    'skimage.color.rgb_colors:lavenderblush',
+    'skimage.color.rgb_colors:lawngreen',
+    'skimage.color.rgb_colors:lemonchiffon',
+    'skimage.color.rgb_colors:lightblue',
+    'skimage.color.rgb_colors:lightcoral',
+    'skimage.color.rgb_colors:lightcyan',
+    'skimage.color.rgb_colors:lightgoldenrodyellow',
+    'skimage.color.rgb_colors:lightgray',
+    'skimage.color.rgb_colors:lightgreen',
+    'skimage.color.rgb_colors:lightgrey',
+    'skimage.color.rgb_colors:lightpink',
+    'skimage.color.rgb_colors:lightsalmon',
+    'skimage.color.rgb_colors:lightseagreen',
+    'skimage.color.rgb_colors:lightskyblue',
+    'skimage.color.rgb_colors:lightslategray',
+    'skimage.color.rgb_colors:lightslategrey',
+    'skimage.color.rgb_colors:lightsteelblue',
+    'skimage.color.rgb_colors:lightyellow',
+    'skimage.color.rgb_colors:lime',
+    'skimage.color.rgb_colors:limegreen',
+    'skimage.color.rgb_colors:linen',
+    'skimage.color.rgb_colors:magenta',
+    'skimage.color.rgb_colors:maroon',
+    'skimage.color.rgb_colors:mediumaquamarine',
+    'skimage.color.rgb_colors:mediumblue',
+    'skimage.color.rgb_colors:mediumorchid',
+    'skimage.color.rgb_colors:mediumpurple',
+    'skimage.color.rgb_colors:mediumseagreen',
+    'skimage.color.rgb_colors:mediumslateblue',
+    'skimage.color.rgb_colors:mediumspringgreen',
+    'skimage.color.rgb_colors:mediumturquoise',
+    'skimage.color.rgb_colors:mediumvioletred',
+    'skimage.color.rgb_colors:midnightblue',
+    'skimage.color.rgb_colors:mintcream',
+    'skimage.color.rgb_colors:mistyrose',
+    'skimage.color.rgb_colors:moccasin',
+    'skimage.color.rgb_colors:navajowhite',
+    'skimage.color.rgb_colors:navy',
+    'skimage.color.rgb_colors:oldlace',
+    'skimage.color.rgb_colors:olive',
+    'skimage.color.rgb_colors:olivedrab',
+    'skimage.color.rgb_colors:orange',
+    'skimage.color.rgb_colors:orangered',
+    'skimage.color.rgb_colors:orchid',
+    'skimage.color.rgb_colors:palegoldenrod',
+    'skimage.color.rgb_colors:palegreen',
+    'skimage.color.rgb_colors:palevioletred',
+    'skimage.color.rgb_colors:papayawhip',
+    'skimage.color.rgb_colors:peachpuff',
+    'skimage.color.rgb_colors:peru',
+    'skimage.color.rgb_colors:pink',
+    'skimage.color.rgb_colors:plum',
+    'skimage.color.rgb_colors:powderblue',
+    'skimage.color.rgb_colors:purple',
+    'skimage.color.rgb_colors:red',
+    'skimage.color.rgb_colors:rosybrown',
+    'skimage.color.rgb_colors:royalblue',
+    'skimage.color.rgb_colors:saddlebrown',
+    'skimage.color.rgb_colors:salmon',
+    'skimage.color.rgb_colors:sandybrown',
+    'skimage.color.rgb_colors:seagreen',
+    'skimage.color.rgb_colors:seashell',
+    'skimage.color.rgb_colors:sienna',
+    'skimage.color.rgb_colors:silver',
+    'skimage.color.rgb_colors:skyblue',
+    'skimage.color.rgb_colors:slateblue',
+    'skimage.color.rgb_colors:slategray',
+    'skimage.color.rgb_colors:slategrey',
+    'skimage.color.rgb_colors:snow',
+    'skimage.color.rgb_colors:springgreen',
+    'skimage.color.rgb_colors:steelblue',
+    'skimage.color.rgb_colors:tan',
+    'skimage.color.rgb_colors:teal',
+    'skimage.color.rgb_colors:thistle',
+    'skimage.color.rgb_colors:tomato',
+    'skimage.color.rgb_colors:turquoise',
+    'skimage.color.rgb_colors:violet',
+    'skimage.color.rgb_colors:wheat',
+    'skimage.color.rgb_colors:white',
+    'skimage.color.rgb_colors:whitesmoke',
+    'skimage.color.rgb_colors:yellow',
+    'skimage.color.rgb_colors:yellowgreen',
+    'skimage.color:ahx_from_rgb',
+    'skimage.color:bex_from_rgb',
+    'skimage.color:bpx_from_rgb',
+    'skimage.color:bro_from_rgb',
+    'skimage.color:color_dict',
+    'skimage.color:combine_stains(stains, conv_matrix, *, channel_axis=-1)',
+    'skimage.color:convert_colorspace(arr, fromspace, tospace, *, channel_axis=-1)',
+    'skimage.color:deltaE_cie76(lab1, lab2, channel_axis=-1)',
+    'skimage.color:deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1, *, channel_axis=-1)',
+    'skimage.color:deltaE_ciede94(lab1, lab2, kH=1, kC=1, kL=1, k1=0.045, '
+    'k2=0.015, *, channel_axis=-1)',
+    'skimage.color:deltaE_cmc(lab1, lab2, kL=1, kC=1, *, channel_axis=-1)',
+    'skimage.color:fgx_from_rgb',
+    'skimage.color:gdx_from_rgb',
+    'skimage.color:gray2rgb(image, *, channel_axis=-1)',
+    'skimage.color:gray2rgba(image, alpha=None, *, channel_axis=-1)',
+    'skimage.color:hax_from_rgb',
+    'skimage.color:hdx_from_rgb',
+    'skimage.color:hed2rgb(hed, *, channel_axis=-1)',
+    'skimage.color:hed_from_rgb',
+    'skimage.color:hpx_from_rgb',
+    'skimage.color:hsv2rgb(hsv, *, channel_axis=-1)',
+    'skimage.color:lab2lch(lab, *, channel_axis=-1)',
+    "skimage.color:lab2rgb(lab, illuminant='D65', observer='2', *, channel_axis=-1)",
+    "skimage.color:lab2xyz(lab, illuminant='D65', observer='2', *, channel_axis=-1)",
+    'skimage.color:label2rgb(label, image=None, colors=None, alpha=0.3, '
+    "bg_label=0, bg_color=(0, 0, 0), image_alpha=1, kind='overlay', *, "
+    'saturation=0, channel_axis=-1)',
+    'skimage.color:lch2lab(lch, *, channel_axis=-1)',
+    'skimage.color:luv2rgb(luv, *, channel_axis=-1)',
+    "skimage.color:luv2xyz(luv, illuminant='D65', observer='2', *, channel_axis=-1)",
+    'skimage.color:rbd_from_rgb',
+    'skimage.color:rgb2gray(rgb, *, channel_axis=-1)',
+    'skimage.color:rgb2hed(rgb, *, channel_axis=-1)',
+    'skimage.color:rgb2hsv(rgb, *, channel_axis=-1)',
+    "skimage.color:rgb2lab(rgb, illuminant='D65', observer='2', *, channel_axis=-1)",
+    'skimage.color:rgb2luv(rgb, *, channel_axis=-1)',
+    'skimage.color:rgb2rgbcie(rgb, *, channel_axis=-1)',
+    'skimage.color:rgb2xyz(rgb, *, channel_axis=-1)',
+    'skimage.color:rgb2ycbcr(rgb, *, channel_axis=-1)',
+    'skimage.color:rgb2ydbdr(rgb, *, channel_axis=-1)',
+    'skimage.color:rgb2yiq(rgb, *, channel_axis=-1)',
+    'skimage.color:rgb2ypbpr(rgb, *, channel_axis=-1)',
+    'skimage.color:rgb2yuv(rgb, *, channel_axis=-1)',
+    'skimage.color:rgb_from_ahx',
+    'skimage.color:rgb_from_bex',
+    'skimage.color:rgb_from_bpx',
+    'skimage.color:rgb_from_bro',
+    'skimage.color:rgb_from_fgx',
+    'skimage.color:rgb_from_gdx',
+    'skimage.color:rgb_from_hax',
+    'skimage.color:rgb_from_hdx',
+    'skimage.color:rgb_from_hed',
+    'skimage.color:rgb_from_hpx',
+    'skimage.color:rgb_from_rbd',
+    'skimage.color:rgba2rgb(rgba, background=(1, 1, 1), *, channel_axis=-1)',
+    'skimage.color:rgbcie2rgb(rgbcie, *, channel_axis=-1)',
+    'skimage.color:separate_stains(rgb, conv_matrix, *, channel_axis=-1)',
+    "skimage.color:xyz2lab(xyz, illuminant='D65', observer='2', *, channel_axis=-1)",
+    "skimage.color:xyz2luv(xyz, illuminant='D65', observer='2', *, channel_axis=-1)",
+    'skimage.color:xyz2rgb(xyz, *, channel_axis=-1)',
+    'skimage.color:xyz_tristimulus_values(*, illuminant, observer, dtype=<class '
+    "'float'>)",
+    'skimage.color:ycbcr2rgb(ycbcr, *, channel_axis=-1)',
+    'skimage.color:ydbdr2rgb(ydbdr, *, channel_axis=-1)',
+    'skimage.color:yiq2rgb(yiq, *, channel_axis=-1)',
+    'skimage.color:ypbpr2rgb(ypbpr, *, channel_axis=-1)',
+    'skimage.color:yuv2rgb(yuv, *, channel_axis=-1)',
+    'skimage.conftest:handle_np2',
+    'skimage.conftest:pytest',
+    'skimage.data:astronaut()',
+    'skimage.data:binary_blobs(length=512, blob_size_fraction=0.1, n_dim=2, '
+    "volume_fraction=0.5, rng=None, *, boundary_mode='nearest')",
+    'skimage.data:brain()',
+    'skimage.data:brick()',
+    'skimage.data:camera()',
+    'skimage.data:cat()',
+    'skimage.data:cell()',
+    'skimage.data:cells3d()',
+    'skimage.data:checkerboard()',
+    'skimage.data:chelsea()',
+    'skimage.data:clock()',
+    'skimage.data:coffee()',
+    'skimage.data:coins()',
+    'skimage.data:colorwheel()',
+    'skimage.data:data_dir',
+    'skimage.data:download_all(directory=None)',
+    'skimage.data:eagle()',
+    "skimage.data:file_hash(fname, alg='sha256')",
+    'skimage.data:grass()',
+    'skimage.data:gravel()',
+    'skimage.data:horse()',
+    'skimage.data:hubble_deep_field()',
+    'skimage.data:human_mitosis()',
+    'skimage.data:immunohistochemistry()',
+    'skimage.data:kidney()',
+    'skimage.data:lbp_frontal_face_cascade_filename()',
+    'skimage.data:lfw_subset()',
+    'skimage.data:lily()',
+    'skimage.data:logo()',
+    'skimage.data:microaneurysms()',
+    'skimage.data:moon()',
+    'skimage.data:nickel_solidification()',
+    'skimage.data:page()',
+    'skimage.data:palisades_of_vogt()',
+    'skimage.data:protein_transport()',
+    'skimage.data:retina()',
+    'skimage.data:rocket()',
+    'skimage.data:shepp_logan_phantom()',
+    'skimage.data:skin()',
+    'skimage.data:stereo_motorcycle()',
+    'skimage.data:text()',
+    'skimage.data:vortex()',
+    'skimage.draw.draw3d:elliprg',
+    'skimage.draw.draw3d:ellipsoid(a, b, c, spacing=(1.0, 1.0, 1.0), levelset=False)',
+    'skimage.draw.draw3d:ellipsoid_stats(a, b, c)',
+    'skimage.draw.draw3d:np',
+    'skimage.draw.draw:NP_COPY_IF_NEEDED',
+    'skimage.draw.draw:bezier_curve(r0, c0, r1, c1, r2, c2, weight, shape=None)',
+    "skimage.draw.draw:circle_perimeter(r, c, radius, method='bresenham', shape=None)",
+    'skimage.draw.draw:circle_perimeter_aa(r, c, radius, shape=None)',
+    'skimage.draw.draw:disk(center, radius, *, shape=None)',
+    'skimage.draw.draw:ellipse(r, c, r_radius, c_radius, shape=None, rotation=0.0)',
+    'skimage.draw.draw:ellipse_perimeter(r, c, r_radius, c_radius, orientation=0, '
+    'shape=None)',
+    'skimage.draw.draw:line(r0, c0, r1, c1)',
+    'skimage.draw.draw:line_aa(r0, c0, r1, c1)',
+    'skimage.draw.draw:np',
+    'skimage.draw.draw:polygon(r, c, shape=None)',
+    'skimage.draw.draw:polygon_clip(rp, cp, r0, c0, r1, c1)',
+    'skimage.draw.draw:polygon_perimeter(r, c, shape=None, clip=False)',
+    'skimage.draw.draw:rectangle(start, end=None, extent=None, shape=None)',
+    'skimage.draw.draw:rectangle_perimeter(start, end=None, extent=None, '
+    'shape=None, clip=False)',
+    'skimage.draw.draw:require(name, *, version=None)',
+    'skimage.draw.draw:set_color(image, coords, color, alpha=1)',
+    'skimage.draw.draw_nd:line_nd(start, stop, *, endpoint=False, integer=True)',
+    'skimage.draw.draw_nd:np',
+    'skimage.draw:bezier_curve(r0, c0, r1, c1, r2, c2, weight, shape=None)',
+    "skimage.draw:circle_perimeter(r, c, radius, method='bresenham', shape=None)",
+    'skimage.draw:circle_perimeter_aa(r, c, radius, shape=None)',
+    'skimage.draw:disk(center, radius, *, shape=None)',
+    'skimage.draw:ellipse(r, c, r_radius, c_radius, shape=None, rotation=0.0)',
+    'skimage.draw:ellipse_perimeter(r, c, r_radius, c_radius, orientation=0, '
+    'shape=None)',
+    'skimage.draw:ellipsoid(a, b, c, spacing=(1.0, 1.0, 1.0), levelset=False)',
+    'skimage.draw:ellipsoid_stats(a, b, c)',
+    'skimage.draw:line(r0, c0, r1, c1)',
+    'skimage.draw:line_aa(r0, c0, r1, c1)',
+    'skimage.draw:line_nd(start, stop, *, endpoint=False, integer=True)',
+    'skimage.draw:polygon(r, c, shape=None)',
+    'skimage.draw:polygon2mask(image_shape, polygon)',
+    'skimage.draw:polygon_perimeter(r, c, shape=None, clip=False)',
+    'skimage.draw:random_shapes(image_shape, max_shapes, min_shapes=1, '
+    'min_size=2, max_size=None, num_channels=3, shape=None, intensity_range=None, '
+    'allow_overlap=False, num_trials=100, rng=None, *, channel_axis=-1)',
+    'skimage.draw:rectangle(start, end=None, extent=None, shape=None)',
+    'skimage.draw:rectangle_perimeter(start, end=None, extent=None, shape=None, '
+    'clip=False)',
+    'skimage.draw:set_color(image, coords, color, alpha=1)',
+    'skimage.exposure.exposure:adjust_gamma(image, gamma=1, gain=1)',
+    'skimage.exposure.exposure:adjust_log(image, gain=1, inv=False)',
+    'skimage.exposure.exposure:adjust_sigmoid(image, cutoff=0.5, gain=10, inv=False)',
+    'skimage.exposure.exposure:cumulative_distribution(image, nbins=256)',
+    'skimage.exposure.exposure:equalize_hist(image, nbins=256, mask=None)',
+    "skimage.exposure.exposure:histogram(image, nbins=256, source_range='image', "
+    'normalize=False, *, channel_axis=None)',
+    "skimage.exposure.exposure:rescale_intensity(image, in_range='image', "
+    "out_range='dtype')",
+    'skimage.exposure.histogram_matching:match_histograms(image, reference, *, '
+    'channel_axis=None)',
+    'skimage.exposure.histogram_matching:np',
+    'skimage.exposure.histogram_matching:utils',
+    'skimage.exposure:adjust_gamma(image, gamma=1, gain=1)',
+    'skimage.exposure:adjust_log(image, gain=1, inv=False)',
+    'skimage.exposure:adjust_sigmoid(image, cutoff=0.5, gain=10, inv=False)',
+    'skimage.exposure:cumulative_distribution(image, nbins=256)',
+    'skimage.exposure:equalize_adapthist(image, kernel_size=None, '
+    'clip_limit=0.01, nbins=256)',
+    'skimage.exposure:equalize_hist(image, nbins=256, mask=None)',
+    "skimage.exposure:histogram(image, nbins=256, source_range='image', "
+    'normalize=False, *, channel_axis=None)',
+    'skimage.exposure:is_low_contrast(image, fraction_threshold=0.05, '
+    "lower_percentile=1, upper_percentile=99, method='linear')",
+    'skimage.exposure:match_histograms(image, reference, *, channel_axis=None)',
+    "skimage.exposure:rescale_intensity(image, in_range='image', out_range='dtype')",
+    'skimage.feature.blob:DEPRECATED',
+    'skimage.feature.blob:blob_dog(image, min_sigma=1, max_sigma=50, '
+    'sigma_ratio=1.6, threshold=0.5, overlap=0.5, *, threshold_rel=<DEPRECATED>, '
+    "exclude_border=False, prescale='legacy')",
+    'skimage.feature.blob:blob_doh(image, min_sigma=1, max_sigma=30, '
+    'num_sigma=10, threshold=0.01, overlap=0.5, log_scale=False, *, '
+    "threshold_rel=<DEPRECATED>, prescale='legacy')",
+    'skimage.feature.blob:blob_log(image, min_sigma=1, max_sigma=50, '
+    'num_sigma=10, threshold=0.2, overlap=0.5, log_scale=False, *, '
+    "threshold_rel=<DEPRECATED>, exclude_border=False, prescale='legacy')",
+    "skimage.feature.blob:check_nD(array, ndim, arg_name='image')",
+    'skimage.feature.blob:deprecate_parameter',
+    "skimage.feature.blob:gaussian(image, sigma=1.0, *, mode='nearest', cval=0, "
+    'preserve_range=False, truncate=4.0, channel_axis=None, out=None)',
+    'skimage.feature.blob:integral_image(image, *, dtype=None)',
+    'skimage.feature.blob:math',
+    'skimage.feature.blob:ndi',
+    'skimage.feature.blob:np',
+    'skimage.feature.blob:peak_local_max(image, min_distance=1, '
+    'threshold_abs=None, threshold_rel=None, exclude_border=True, num_peaks=None, '
+    'footprint=None, labels=None, num_peaks_per_label=None, p_norm=inf)',
+    'skimage.feature.blob:spatial',
+    'skimage.feature.brief:BRIEF',
+    'skimage.feature.brief:DescriptorExtractor',
+    'skimage.feature.brief:Version',
+    "skimage.feature.brief:check_nD(array, ndim, arg_name='image')",
+    'skimage.feature.brief:copy',
+    "skimage.feature.brief:gaussian(image, sigma=1.0, *, mode='nearest', cval=0, "
+    'preserve_range=False, truncate=4.0, channel_axis=None, out=None)',
+    'skimage.feature.brief:np',
+    'skimage.feature.brief:np2',
+    'skimage.feature.censure:CENSURE',
+    'skimage.feature.censure:FeatureDetector',
+    'skimage.feature.censure:OCTAGON_INNER_SHAPE',
+    'skimage.feature.censure:OCTAGON_OUTER_SHAPE',
+    'skimage.feature.censure:STAR_FILTER_SHAPE',
+    'skimage.feature.censure:STAR_SHAPE',
+    "skimage.feature.censure:check_nD(array, ndim, arg_name='image')",
+    'skimage.feature.censure:convolve(input, weights, output=None, '
+    "mode='reflect', cval=0.0, origin=0, *, axes=None)",
+    'skimage.feature.censure:integral_image(image, *, dtype=None)',
+    'skimage.feature.censure:maximum_filter(input, size=None, footprint=None, '
+    "output=None, mode='reflect', cval=0.0, origin=0, *, axes=None)",
+    'skimage.feature.censure:minimum_filter(input, size=None, footprint=None, '
+    "output=None, mode='reflect', cval=0.0, origin=0, *, axes=None)",
+    'skimage.feature.censure:np',
+    "skimage.feature.censure:octagon(m, n, dtype=<class 'numpy.uint8'>, *, "
+    'decomposition=None)',
+    "skimage.feature.censure:star(a, dtype=<class 'numpy.uint8'>)",
+    "skimage.feature.censure:structure_tensor(image, sigma=1, mode='constant', "
+    "cval=0, order='rc')",
+    'skimage.feature.corner:combinations_with_replacement',
+    'skimage.feature.corner:corner_fast(image, n=12, threshold=0.15)',
+    'skimage.feature.corner:corner_foerstner(image, sigma=1)',
+    "skimage.feature.corner:corner_harris(image, method='k', k=0.05, eps=1e-06, "
+    'sigma=1)',
+    "skimage.feature.corner:corner_kitchen_rosenfeld(image, mode='constant', cval=0)",
+    'skimage.feature.corner:corner_moravec(image, window_size=1)',
+    'skimage.feature.corner:corner_orientations(image, corners, mask)',
+    'skimage.feature.corner:corner_peaks(image, min_distance=1, '
+    'threshold_abs=None, threshold_rel=None, exclude_border=True, indices=True, '
+    'num_peaks=inf, footprint=None, labels=None, *, num_peaks_per_label=inf, '
+    'p_norm=inf)',
+    'skimage.feature.corner:corner_shi_tomasi(image, sigma=1)',
+    'skimage.feature.corner:corner_subpix(image, corners, window_size=11, alpha=0.99)',
+    'skimage.feature.corner:functools',
+    "skimage.feature.corner:gaussian(image, sigma=1.0, *, mode='nearest', cval=0, "
+    'preserve_range=False, truncate=4.0, channel_axis=None, out=None)',
+    "skimage.feature.corner:hessian_matrix(image, sigma=1, mode='constant', "
+    "cval=0, order='rc', use_gaussian_derivatives=None)",
+    'skimage.feature.corner:hessian_matrix_det(image, sigma=1, approximate=True)',
+    'skimage.feature.corner:hessian_matrix_eigvals(H_elems)',
+    'skimage.feature.corner:img_as_float(image, force_copy=False)',
+    'skimage.feature.corner:integral_image(image, *, dtype=None)',
+    'skimage.feature.corner:math',
+    'skimage.feature.corner:ndi',
+    'skimage.feature.corner:np',
+    'skimage.feature.corner:safe_as_int(val, atol=0.001)',
+    "skimage.feature.corner:shape_index(image, sigma=1, mode='constant', cval=0)",
+    'skimage.feature.corner:spatial',
+    'skimage.feature.corner:stats',
+    "skimage.feature.corner:structure_tensor(image, sigma=1, mode='constant', "
+    "cval=0, order='rc')",
+    'skimage.feature.corner:structure_tensor_eigenvalues(A_elems)',
+    'skimage.feature.corner:warn',
+    'skimage.feature.corner_cy:np',
+    'skimage.feature.haar:FEATURE_TYPE',
+    'skimage.feature.haar:add',
+    'skimage.feature.haar:chain',
+    'skimage.feature.haar:draw_haar_like_feature(image, r, c, width, height, '
+    'feature_coord, color_positive_block=(1.0, 0.0, 0.0), '
+    'color_negative_block=(0.0, 1.0, 0.0), alpha=0.5, max_n_features=None, '
+    'rng=None)',
+    'skimage.feature.haar:gray2rgb(image, *, channel_axis=-1)',
+    'skimage.feature.haar:haar_like_feature(int_image, r, c, width, height, '
+    'feature_type=None, feature_coord=None)',
+    'skimage.feature.haar:haar_like_feature_coord(width, height, feature_type=None)',
+    'skimage.feature.haar:haar_like_feature_coord_wrapper',
+    'skimage.feature.haar:haar_like_feature_wrapper',
+    'skimage.feature.haar:img_as_float(image, force_copy=False)',
+    'skimage.feature.haar:np',
+    'skimage.feature.haar:rectangle(start, end=None, extent=None, shape=None)',
+    "skimage.feature.match:cdist(XA, XB, metric='euclidean', *, out=None, **kwargs)",
+    'skimage.feature.match:match_descriptors(descriptors1, descriptors2, '
+    'metric=None, p=2, max_distance=inf, cross_check=True, max_ratio=1.0)',
+    'skimage.feature.match:np',
+    'skimage.feature.orb:DescriptorExtractor',
+    'skimage.feature.orb:FeatureDetector',
+    'skimage.feature.orb:NP_COPY_IF_NEEDED',
+    'skimage.feature.orb:OFAST_MASK',
+    'skimage.feature.orb:OFAST_UMAX',
+    'skimage.feature.orb:ORB',
+    "skimage.feature.orb:check_nD(array, ndim, arg_name='image')",
+    'skimage.feature.orb:corner_fast(image, n=12, threshold=0.15)',
+    "skimage.feature.orb:corner_harris(image, method='k', k=0.05, eps=1e-06, sigma=1)",
+    'skimage.feature.orb:corner_orientations(image, corners, mask)',
+    'skimage.feature.orb:corner_peaks(image, min_distance=1, threshold_abs=None, '
+    'threshold_rel=None, exclude_border=True, indices=True, num_peaks=inf, '
+    'footprint=None, labels=None, *, num_peaks_per_label=inf, p_norm=inf)',
+    'skimage.feature.orb:i',
+    'skimage.feature.orb:j',
+    'skimage.feature.orb:np',
+    'skimage.feature.orb:pyramid_gaussian(image, max_layer=-1, downscale=2, '
+    "sigma=None, order=1, mode='reflect', cval=0, preserve_range=False, *, "
+    'channel_axis=None)',
+    'skimage.feature.orb_cy:POS',
+    'skimage.feature.orb_cy:POS0',
+    'skimage.feature.orb_cy:POS1',
+    'skimage.feature.orb_cy:np',
+    'skimage.feature.peak:measure',
+    'skimage.feature.peak:ndi',
+    'skimage.feature.peak:np',
+    'skimage.feature.peak:peak_local_max(image, min_distance=1, '
+    'threshold_abs=None, threshold_rel=None, exclude_border=True, num_peaks=None, '
+    'footprint=None, labels=None, num_peaks_per_label=None, p_norm=inf)',
+    'skimage.feature.peak:ski2',
+    'skimage.feature.peak:ski2_migration_decorator',
+    'skimage.feature.peak:warn_external(message, *, category=None)',
+    'skimage.feature.sift:DescriptorExtractor',
+    'skimage.feature.sift:FeatureDetector',
+    'skimage.feature.sift:SIFT',
+    "skimage.feature.sift:check_nD(array, ndim, arg_name='image')",
+    "skimage.feature.sift:gaussian(image, sigma=1.0, *, mode='nearest', cval=0, "
+    'preserve_range=False, truncate=4.0, channel_axis=None, out=None)',
+    'skimage.feature.sift:img_as_float(image, force_copy=False)',
+    'skimage.feature.sift:math',
+    'skimage.feature.sift:ndi',
+    'skimage.feature.sift:np',
+    "skimage.feature.sift:rescale(image, scale, order=None, mode='reflect', "
+    'cval=0, clip=True, preserve_range=False, anti_aliasing=None, '
+    'anti_aliasing_sigma=None, *, channel_axis=None)',
+    "skimage.feature.template:check_nD(array, ndim, arg_name='image')",
+    "skimage.feature.template:fftconvolve(in1, in2, mode='full', axes=None)",
+    'skimage.feature.template:match_template(image, template, pad_input=False, '
+    "mode='constant', constant_values=0)",
+    'skimage.feature.template:math',
+    'skimage.feature.template:np',
+    "skimage.feature.texture:check_nD(array, ndim, arg_name='image')",
+    'skimage.feature.texture:draw_multiblock_lbp(image, r, c, width, height, '
+    'lbp_code=0, color_greater_block=(1, 1, 1), color_less_block=(0, 0.69, 0.96), '
+    'alpha=0.5)',
+    'skimage.feature.texture:gray2rgb(image, *, channel_axis=-1)',
+    'skimage.feature.texture:graycomatrix(image, distances, angles, levels=None, '
+    'symmetric=False, normed=False)',
+    "skimage.feature.texture:graycoprops(P, prop='contrast')",
+    'skimage.feature.texture:img_as_float(image, force_copy=False)',
+    "skimage.feature.texture:local_binary_pattern(image, P, R, method='default')",
+    'skimage.feature.texture:multiblock_lbp(int_image, r, c, width, height)',
+    'skimage.feature.texture:np',
+    'skimage.feature.texture:warnings',
+    'skimage.feature.util:DescriptorExtractor',
+    'skimage.feature.util:FeatureDetector',
+    "skimage.feature.util:check_nD(array, ndim, arg_name='image')",
+    'skimage.feature.util:img_as_float(image, force_copy=False)',
+    'skimage.feature.util:np',
+    'skimage.feature.util:plot_matched_features(image0, image1, *, keypoints0, '
+    "keypoints1, matches, ax, keypoints_color='k', matches_color=None, "
+    "only_matches=False, alignment='horizontal')",
+    'skimage.feature:BRIEF',
+    'skimage.feature:CENSURE',
+    'skimage.feature:Cascade',
+    'skimage.feature:ORB',
+    'skimage.feature:SIFT',
+    'skimage.feature:blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, '
+    'threshold=0.5, overlap=0.5, *, threshold_rel=<DEPRECATED>, '
+    "exclude_border=False, prescale='legacy')",
+    'skimage.feature:blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, '
+    'threshold=0.01, overlap=0.5, log_scale=False, *, threshold_rel=<DEPRECATED>, '
+    "prescale='legacy')",
+    'skimage.feature:blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, '
+    'threshold=0.2, overlap=0.5, log_scale=False, *, threshold_rel=<DEPRECATED>, '
+    "exclude_border=False, prescale='legacy')",
+    'skimage.feature:canny(image, sigma=1.0, low_threshold=None, '
+    "high_threshold=None, mask=None, use_quantiles=False, *, mode='constant', "
+    'cval=0.0)',
+    'skimage.feature:corner_fast(image, n=12, threshold=0.15)',
+    'skimage.feature:corner_foerstner(image, sigma=1)',
+    "skimage.feature:corner_harris(image, method='k', k=0.05, eps=1e-06, sigma=1)",
+    "skimage.feature:corner_kitchen_rosenfeld(image, mode='constant', cval=0)",
+    'skimage.feature:corner_moravec(image, window_size=1)',
+    'skimage.feature:corner_orientations(image, corners, mask)',
+    'skimage.feature:corner_peaks(image, min_distance=1, threshold_abs=None, '
+    'threshold_rel=None, exclude_border=True, indices=True, num_peaks=inf, '
+    'footprint=None, labels=None, *, num_peaks_per_label=inf, p_norm=inf)',
+    'skimage.feature:corner_shi_tomasi(image, sigma=1)',
+    'skimage.feature:corner_subpix(image, corners, window_size=11, alpha=0.99)',
+    'skimage.feature:daisy(image, step=4, radius=15, rings=3, histograms=8, '
+    "orientations=8, normalization='l1', sigmas=None, ring_radii=None, "
+    'visualize=False)',
+    'skimage.feature:draw_haar_like_feature(image, r, c, width, height, '
+    'feature_coord, color_positive_block=(1.0, 0.0, 0.0), '
+    'color_negative_block=(0.0, 1.0, 0.0), alpha=0.5, max_n_features=None, '
+    'rng=None)',
+    'skimage.feature:draw_multiblock_lbp(image, r, c, width, height, lbp_code=0, '
+    'color_greater_block=(1, 1, 1), color_less_block=(0, 0.69, 0.96), alpha=0.5)',
+    'skimage.feature:fisher_vector(descriptors, gmm, *, improved=False, alpha=0.5)',
+    'skimage.feature:graycomatrix(image, distances, angles, levels=None, '
+    'symmetric=False, normed=False)',
+    "skimage.feature:graycoprops(P, prop='contrast')",
+    'skimage.feature:haar_like_feature(int_image, r, c, width, height, '
+    'feature_type=None, feature_coord=None)',
+    'skimage.feature:haar_like_feature_coord(width, height, feature_type=None)',
+    "skimage.feature:hessian_matrix(image, sigma=1, mode='constant', cval=0, "
+    "order='rc', use_gaussian_derivatives=None)",
+    'skimage.feature:hessian_matrix_det(image, sigma=1, approximate=True)',
+    'skimage.feature:hessian_matrix_eigvals(H_elems)',
+    'skimage.feature:hog(image, orientations=9, pixels_per_cell=(8, 8), '
+    "cells_per_block=(3, 3), block_norm='L2-Hys', visualize=False, "
+    'transform_sqrt=False, feature_vector=True, *, channel_axis=None)',
+    'skimage.feature:learn_gmm(descriptors, *, n_modes=32, gm_args=None)',
+    "skimage.feature:local_binary_pattern(image, P, R, method='default')",
+    'skimage.feature:match_descriptors(descriptors1, descriptors2, metric=None, '
+    'p=2, max_distance=inf, cross_check=True, max_ratio=1.0)',
+    'skimage.feature:match_template(image, template, pad_input=False, '
+    "mode='constant', constant_values=0)",
+    'skimage.feature:multiblock_lbp(int_image, r, c, width, height)',
+    'skimage.feature:multiscale_basic_features(image, intensity=True, edges=True, '
+    'texture=True, sigma_min=0.5, sigma_max=16, num_sigma=None, workers=None, *, '
+    'channel_axis=None)',
+    'skimage.feature:peak_local_max(image, min_distance=1, threshold_abs=None, '
+    'threshold_rel=None, exclude_border=True, num_peaks=None, footprint=None, '
+    'labels=None, num_peaks_per_label=None, p_norm=inf)',
+    'skimage.feature:plot_matched_features(image0, image1, *, keypoints0, '
+    "keypoints1, matches, ax, keypoints_color='k', matches_color=None, "
+    "only_matches=False, alignment='horizontal')",
+    "skimage.feature:shape_index(image, sigma=1, mode='constant', cval=0)",
+    "skimage.feature:structure_tensor(image, sigma=1, mode='constant', cval=0, "
+    "order='rc')",
+    'skimage.feature:structure_tensor_eigenvalues(A_elems)',
+    'skimage.filters.edges:HFARID_WEIGHTS',
+    'skimage.filters.edges:HPREWITT_WEIGHTS',
+    'skimage.filters.edges:HSCHARR_WEIGHTS',
+    'skimage.filters.edges:HSOBEL_WEIGHTS',
+    'skimage.filters.edges:PREWITT_EDGE',
+    'skimage.filters.edges:PREWITT_SMOOTH',
+    'skimage.filters.edges:ROBERTS_ND_WEIGHTS',
+    'skimage.filters.edges:ROBERTS_PD_WEIGHTS',
+    'skimage.filters.edges:SCHARR_EDGE',
+    'skimage.filters.edges:SCHARR_SMOOTH',
+    'skimage.filters.edges:SOBEL_EDGE',
+    'skimage.filters.edges:SOBEL_SMOOTH',
+    'skimage.filters.edges:VFARID_WEIGHTS',
+    'skimage.filters.edges:VPREWITT_WEIGHTS',
+    'skimage.filters.edges:VSCHARR_WEIGHTS',
+    'skimage.filters.edges:VSOBEL_WEIGHTS',
+    'skimage.filters.edges:binary_erosion(input, structure=None, iterations=1, '
+    'mask=None, output=None, border_value=0, origin=0, brute_force=False, *, '
+    'axes=None)',
+    "skimage.filters.edges:check_nD(array, ndim, arg_name='image')",
+    "skimage.filters.edges:convolve(input, weights, output=None, mode='reflect', "
+    'cval=0.0, origin=0, *, axes=None)',
+    "skimage.filters.edges:farid(image, mask=None, *, axis=None, mode='reflect', "
+    'cval=0.0)',
+    'skimage.filters.edges:farid_edge',
+    'skimage.filters.edges:farid_h(image, *, mask=None)',
+    'skimage.filters.edges:farid_smooth',
+    'skimage.filters.edges:farid_v(image, *, mask=None)',
+    'skimage.filters.edges:img_as_float(image, force_copy=False)',
+    'skimage.filters.edges:laplace(image, ksize=3, mask=None)',
+    'skimage.filters.edges:laplacian(ndim, shape, is_real=True)',
+    'skimage.filters.edges:ndi',
+    'skimage.filters.edges:np',
+    'skimage.filters.edges:prewitt(image, mask=None, *, axis=None, '
+    "mode='reflect', cval=0.0)",
+    'skimage.filters.edges:prewitt_h(image, mask=None)',
+    'skimage.filters.edges:prewitt_v(image, mask=None)',
+    'skimage.filters.edges:roberts(image, mask=None)',
+    'skimage.filters.edges:roberts_neg_diag(image, mask=None)',
+    'skimage.filters.edges:roberts_pos_diag(image, mask=None)',
+    "skimage.filters.edges:scharr(image, mask=None, *, axis=None, mode='reflect', "
+    'cval=0.0)',
+    'skimage.filters.edges:scharr_h(image, mask=None)',
+    'skimage.filters.edges:scharr_v(image, mask=None)',
+    "skimage.filters.edges:sobel(image, mask=None, *, axis=None, mode='reflect', "
+    'cval=0.0)',
+    'skimage.filters.edges:sobel_h(image, mask=None)',
+    'skimage.filters.edges:sobel_v(image, mask=None)',
+    'skimage.filters.lpi_filter:LPIFilter2D',
+    "skimage.filters.lpi_filter:check_nD(array, ndim, arg_name='image')",
+    'skimage.filters.lpi_filter:fft',
+    'skimage.filters.lpi_filter:filter_forward(data, impulse_response=None, '
+    'filter_params=None, predefined_filter=None)',
+    'skimage.filters.lpi_filter:filter_inverse(data, impulse_response=None, '
+    'filter_params=None, max_gain=2, predefined_filter=None)',
+    'skimage.filters.lpi_filter:np',
+    'skimage.filters.lpi_filter:wiener(data, impulse_response=None, '
+    'filter_params=None, K=0.25, predefined_filter=None)',
+    'skimage.filters.rank.bilateral:mean_bilateral(image, footprint, out=None, '
+    'mask=None, shift_x=0, shift_y=0, s0=10, s1=10)',
+    'skimage.filters.rank.bilateral:pop_bilateral(image, footprint, out=None, '
+    'mask=None, shift_x=0, shift_y=0, s0=10, s1=10)',
+    'skimage.filters.rank.bilateral:sum_bilateral(image, footprint, out=None, '
+    'mask=None, shift_x=0, shift_y=0, s0=10, s1=10)',
+    'skimage.filters.rank.core_cy:np',
+    'skimage.filters.rank.core_cy_3d:np',
+    'skimage.filters.rank.generic:autolevel(image, footprint, out=None, '
+    'mask=None, shift_x=0, shift_y=0, shift_z=0)',
+    'skimage.filters.rank.generic:enhance_contrast(image, footprint, out=None, '
+    'mask=None, shift_x=0, shift_y=0, shift_z=0)',
+    'skimage.filters.rank.generic:entropy(image, footprint, out=None, mask=None, '
+    'shift_x=0, shift_y=0, shift_z=0)',
+    'skimage.filters.rank.generic:equalize(image, footprint, out=None, mask=None, '
+    'shift_x=0, shift_y=0, shift_z=0)',
+    'skimage.filters.rank.generic:geometric_mean(image, footprint, out=None, '
+    'mask=None, shift_x=0, shift_y=0, shift_z=0)',
+    'skimage.filters.rank.generic:gradient(image, footprint, out=None, mask=None, '
+    'shift_x=0, shift_y=0, shift_z=0)',
+    'skimage.filters.rank.generic:maximum(image, footprint, out=None, mask=None, '
+    'shift_x=0, shift_y=0, shift_z=0)',
+    'skimage.filters.rank.generic:mean(image, footprint, out=None, mask=None, '
+    'shift_x=0, shift_y=0, shift_z=0)',
+    'skimage.filters.rank.generic:median(image, footprint=None, out=None, '
+    'mask=None, shift_x=0, shift_y=0, shift_z=0)',
+    'skimage.filters.rank.generic:minimum(image, footprint, out=None, mask=None, '
+    'shift_x=0, shift_y=0, shift_z=0)',
+    'skimage.filters.rank.generic:modal(image, footprint, out=None, mask=None, '
+    'shift_x=0, shift_y=0, shift_z=0)',
+    'skimage.filters.rank.generic:noise_filter(image, footprint, out=None, '
+    'mask=None, shift_x=0, shift_y=0, shift_z=0)',
+    'skimage.filters.rank.generic:otsu(image, footprint, out=None, mask=None, '
+    'shift_x=0, shift_y=0, shift_z=0)',
+    'skimage.filters.rank.generic:pop(image, footprint, out=None, mask=None, '
+    'shift_x=0, shift_y=0, shift_z=0)',
+    'skimage.filters.rank.generic:subtract_mean(image, footprint, out=None, '
+    'mask=None, shift_x=0, shift_y=0, shift_z=0)',
+    'skimage.filters.rank.generic:threshold(image, footprint, out=None, '
+    'mask=None, shift_x=0, shift_y=0, shift_z=0)',
+    'skimage.filters.rank:autolevel(image, footprint, out=None, mask=None, '
+    'shift_x=0, shift_y=0, shift_z=0)',
+    'skimage.filters.rank:autolevel_percentile(image, footprint, out=None, '
+    'mask=None, shift_x=0, shift_y=0, p0=0, p1=1)',
+    'skimage.filters.rank:enhance_contrast(image, footprint, out=None, mask=None, '
+    'shift_x=0, shift_y=0, shift_z=0)',
+    'skimage.filters.rank:enhance_contrast_percentile(image, footprint, out=None, '
+    'mask=None, shift_x=0, shift_y=0, p0=0, p1=1)',
+    'skimage.filters.rank:entropy(image, footprint, out=None, mask=None, '
+    'shift_x=0, shift_y=0, shift_z=0)',
+    'skimage.filters.rank:equalize(image, footprint, out=None, mask=None, '
+    'shift_x=0, shift_y=0, shift_z=0)',
+    'skimage.filters.rank:geometric_mean(image, footprint, out=None, mask=None, '
+    'shift_x=0, shift_y=0, shift_z=0)',
+    'skimage.filters.rank:gradient(image, footprint, out=None, mask=None, '
+    'shift_x=0, shift_y=0, shift_z=0)',
+    'skimage.filters.rank:gradient_percentile(image, footprint, out=None, '
+    'mask=None, shift_x=0, shift_y=0, p0=0, p1=1)',
+    'skimage.filters.rank:majority(image, footprint, *, out=None, mask=None, '
+    'shift_x=0, shift_y=0, shift_z=0)',
+    'skimage.filters.rank:maximum(image, footprint, out=None, mask=None, '
+    'shift_x=0, shift_y=0, shift_z=0)',
+    'skimage.filters.rank:mean(image, footprint, out=None, mask=None, shift_x=0, '
+    'shift_y=0, shift_z=0)',
+    'skimage.filters.rank:mean_bilateral(image, footprint, out=None, mask=None, '
+    'shift_x=0, shift_y=0, s0=10, s1=10)',
+    'skimage.filters.rank:mean_percentile(image, footprint, out=None, mask=None, '
+    'shift_x=0, shift_y=0, p0=0, p1=1)',
+    'skimage.filters.rank:median(image, footprint=None, out=None, mask=None, '
+    'shift_x=0, shift_y=0, shift_z=0)',
+    'skimage.filters.rank:minimum(image, footprint, out=None, mask=None, '
+    'shift_x=0, shift_y=0, shift_z=0)',
+    'skimage.filters.rank:modal(image, footprint, out=None, mask=None, shift_x=0, '
+    'shift_y=0, shift_z=0)',
+    'skimage.filters.rank:noise_filter(image, footprint, out=None, mask=None, '
+    'shift_x=0, shift_y=0, shift_z=0)',
+    'skimage.filters.rank:otsu(image, footprint, out=None, mask=None, shift_x=0, '
+    'shift_y=0, shift_z=0)',
+    'skimage.filters.rank:percentile(image, footprint, out=None, mask=None, '
+    'shift_x=0, shift_y=0, p0=0)',
+    'skimage.filters.rank:pop(image, footprint, out=None, mask=None, shift_x=0, '
+    'shift_y=0, shift_z=0)',
+    'skimage.filters.rank:pop_bilateral(image, footprint, out=None, mask=None, '
+    'shift_x=0, shift_y=0, s0=10, s1=10)',
+    'skimage.filters.rank:pop_percentile(image, footprint, out=None, mask=None, '
+    'shift_x=0, shift_y=0, p0=0, p1=1)',
+    'skimage.filters.rank:subtract_mean(image, footprint, out=None, mask=None, '
+    'shift_x=0, shift_y=0, shift_z=0)',
+    'skimage.filters.rank:subtract_mean_percentile(image, footprint, out=None, '
+    'mask=None, shift_x=0, shift_y=0, p0=0, p1=1)',
+    'skimage.filters.rank:sum(image, footprint, out=None, mask=None, shift_x=0, '
+    'shift_y=0, shift_z=0)',
+    'skimage.filters.rank:sum_bilateral(image, footprint, out=None, mask=None, '
+    'shift_x=0, shift_y=0, s0=10, s1=10)',
+    'skimage.filters.rank:sum_percentile(image, footprint, out=None, mask=None, '
+    'shift_x=0, shift_y=0, p0=0, p1=1)',
+    'skimage.filters.rank:threshold(image, footprint, out=None, mask=None, '
+    'shift_x=0, shift_y=0, shift_z=0)',
+    'skimage.filters.rank:threshold_percentile(image, footprint, out=None, '
+    'mask=None, shift_x=0, shift_y=0, p0=0)',
+    'skimage.filters.rank:windowed_histogram(image, footprint, out=None, '
+    'mask=None, shift_x=0, shift_y=0, n_bins=None)',
+    "skimage.filters.ridges:check_nD(array, ndim, arg_name='image')",
+    'skimage.filters.ridges:frangi(image, sigmas=range(1, 10, 2), '
+    'scale_range=None, scale_step=None, alpha=0.5, beta=0.5, gamma=None, '
+    "black_ridges=True, mode='reflect', cval=0)",
+    'skimage.filters.ridges:hessian(image, sigmas=range(1, 10, 2), '
+    'scale_range=None, scale_step=None, alpha=0.5, beta=0.5, gamma=15, '
+    "black_ridges=True, mode='reflect', cval=0)",
+    'skimage.filters.ridges:linalg',
+    'skimage.filters.ridges:meijering(image, sigmas=range(1, 10, 2), alpha=None, '
+    "black_ridges=True, mode='reflect', cval=0)",
+    'skimage.filters.ridges:np',
+    'skimage.filters.ridges:sato(image, sigmas=range(1, 10, 2), '
+    "black_ridges=True, mode='reflect', cval=0)",
+    'skimage.filters.ridges:warn',
+    'skimage.filters.thresholding:apply_hysteresis_threshold(image, low, high)',
+    'skimage.filters.thresholding:threshold_isodata(image=None, nbins=256, '
+    'return_all=False, *, hist=None)',
+    'skimage.filters.thresholding:threshold_li(image, *, tolerance=None, '
+    'initial_guess=None, iter_callback=None)',
+    'skimage.filters.thresholding:threshold_local(image, block_size=3, '
+    "method='gaussian', offset=0, mode='reflect', param=None, cval=0)",
+    'skimage.filters.thresholding:threshold_mean(image)',
+    'skimage.filters.thresholding:threshold_minimum(image=None, nbins=256, '
+    'max_num_iter=10000, *, hist=None)',
+    'skimage.filters.thresholding:threshold_multiotsu(image=None, classes=3, '
+    'nbins=256, *, hist=None)',
+    'skimage.filters.thresholding:threshold_niblack(image, window_size=15, k=0.2)',
+    'skimage.filters.thresholding:threshold_otsu(image=None, nbins=256, *, hist=None)',
+    'skimage.filters.thresholding:threshold_sauvola(image, window_size=15, k=0.2, '
+    'r=None)',
+    'skimage.filters.thresholding:threshold_triangle(image, nbins=256)',
+    'skimage.filters.thresholding:threshold_yen(image=None, nbins=256, *, hist=None)',
+    'skimage.filters.thresholding:try_all_threshold(image, figsize=(8, 5), '
+    'verbose=True)',
+    'skimage.filters:LPIFilter2D',
+    'skimage.filters:apply_hysteresis_threshold(image, low, high)',
+    'skimage.filters:butterworth(image, cutoff_frequency_ratio=0.005, '
+    'high_pass=True, order=2.0, channel_axis=None, *, squared_butterworth=True, '
+    'npad=0)',
+    "skimage.filters:correlate_sparse(image, kernel, mode='reflect')",
+    'skimage.filters:difference_of_gaussians(image, low_sigma, high_sigma=None, '
+    "*, mode='nearest', cval=0, channel_axis=None, truncate=4.0)",
+    "skimage.filters:farid(image, mask=None, *, axis=None, mode='reflect', cval=0.0)",
+    'skimage.filters:farid_h(image, *, mask=None)',
+    'skimage.filters:farid_v(image, *, mask=None)',
+    'skimage.filters:filter_forward(data, impulse_response=None, '
+    'filter_params=None, predefined_filter=None)',
+    'skimage.filters:filter_inverse(data, impulse_response=None, '
+    'filter_params=None, max_gain=2, predefined_filter=None)',
+    'skimage.filters:frangi(image, sigmas=range(1, 10, 2), scale_range=None, '
+    'scale_step=None, alpha=0.5, beta=0.5, gamma=None, black_ridges=True, '
+    "mode='reflect', cval=0)",
+    'skimage.filters:gabor(image, frequency, theta=0, bandwidth=1, sigma_x=None, '
+    "sigma_y=None, n_stds=3, offset=0, mode='reflect', cval=0)",
+    'skimage.filters:gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, '
+    "sigma_y=None, n_stds=3, offset=0, dtype=<class 'numpy.complex128'>)",
+    "skimage.filters:gaussian(image, sigma=1.0, *, mode='nearest', cval=0, "
+    'preserve_range=False, truncate=4.0, channel_axis=None, out=None)',
+    'skimage.filters:hessian(image, sigmas=range(1, 10, 2), scale_range=None, '
+    'scale_step=None, alpha=0.5, beta=0.5, gamma=15, black_ridges=True, '
+    "mode='reflect', cval=0)",
+    'skimage.filters:laplace(image, ksize=3, mask=None)',
+    "skimage.filters:median(image, footprint=None, out=None, mode='nearest', "
+    "cval=0.0, behavior='ndimage')",
+    'skimage.filters:meijering(image, sigmas=range(1, 10, 2), alpha=None, '
+    "black_ridges=True, mode='reflect', cval=0)",
+    "skimage.filters:prewitt(image, mask=None, *, axis=None, mode='reflect', cval=0.0)",
+    'skimage.filters:prewitt_h(image, mask=None)',
+    'skimage.filters:prewitt_v(image, mask=None)',
+    'skimage.filters:rank',
+    'skimage.filters:rank_order(image)',
+    'skimage.filters:roberts(image, mask=None)',
+    'skimage.filters:roberts_neg_diag(image, mask=None)',
+    'skimage.filters:roberts_pos_diag(image, mask=None)',
+    'skimage.filters:sato(image, sigmas=range(1, 10, 2), black_ridges=True, '
+    "mode='reflect', cval=0)",
+    "skimage.filters:scharr(image, mask=None, *, axis=None, mode='reflect', cval=0.0)",
+    'skimage.filters:scharr_h(image, mask=None)',
+    'skimage.filters:scharr_v(image, mask=None)',
+    "skimage.filters:sobel(image, mask=None, *, axis=None, mode='reflect', cval=0.0)",
+    'skimage.filters:sobel_h(image, mask=None)',
+    'skimage.filters:sobel_v(image, mask=None)',
+    'skimage.filters:threshold_isodata(image=None, nbins=256, return_all=False, '
+    '*, hist=None)',
+    'skimage.filters:threshold_li(image, *, tolerance=None, initial_guess=None, '
+    'iter_callback=None)',
+    "skimage.filters:threshold_local(image, block_size=3, method='gaussian', "
+    "offset=0, mode='reflect', param=None, cval=0)",
+    'skimage.filters:threshold_mean(image)',
+    'skimage.filters:threshold_minimum(image=None, nbins=256, max_num_iter=10000, '
+    '*, hist=None)',
+    'skimage.filters:threshold_multiotsu(image=None, classes=3, nbins=256, *, '
+    'hist=None)',
+    'skimage.filters:threshold_niblack(image, window_size=15, k=0.2)',
+    'skimage.filters:threshold_otsu(image=None, nbins=256, *, hist=None)',
+    'skimage.filters:threshold_sauvola(image, window_size=15, k=0.2, r=None)',
+    'skimage.filters:threshold_triangle(image, nbins=256)',
+    'skimage.filters:threshold_yen(image=None, nbins=256, *, hist=None)',
+    'skimage.filters:try_all_threshold(image, figsize=(8, 5), verbose=True)',
+    'skimage.filters:unsharp_mask(image, radius=1.0, amount=1.0, '
+    'preserve_range=False, *, channel_axis=None)',
+    'skimage.filters:wiener(data, impulse_response=None, filter_params=None, '
+    'K=0.25, predefined_filter=None)',
+    'skimage.filters:window(window_type, shape, warp_kwargs=None)',
+    'skimage.future.manual_segmentation:LEFT_CLICK',
+    'skimage.future.manual_segmentation:RIGHT_CLICK',
+    'skimage.future.manual_segmentation:manual_lasso_segmentation(image, '
+    'alpha=0.4, return_all=False)',
+    'skimage.future.manual_segmentation:manual_polygon_segmentation(image, '
+    'alpha=0.4, return_all=False)',
+    'skimage.future.manual_segmentation:np',
+    'skimage.future.manual_segmentation:polygon(r, c, shape=None)',
+    'skimage.future.manual_segmentation:reduce',
+    'skimage.future.manual_segmentation:require(name, *, version=None)',
+    'skimage.future.trainable_segmentation:NotFittedError',
+    'skimage.future.trainable_segmentation:RandomForestClassifier',
+    'skimage.future.trainable_segmentation:TrainableSegmenter',
+    'skimage.future.trainable_segmentation:fit_segmenter(labels, features, clf)',
+    'skimage.future.trainable_segmentation:has_sklearn',
+    'skimage.future.trainable_segmentation:multiscale_basic_features(image, '
+    'intensity=True, edges=True, texture=True, sigma_min=0.5, sigma_max=16, '
+    'num_sigma=None, workers=None, *, channel_axis=None)',
+    'skimage.future.trainable_segmentation:predict_segmenter(features, clf)',
+    'skimage.future:TrainableSegmenter',
+    'skimage.future:fit_segmenter(labels, features, clf)',
+    'skimage.future:manual_lasso_segmentation(image, alpha=0.4, return_all=False)',
+    'skimage.future:manual_polygon_segmentation(image, alpha=0.4, return_all=False)',
+    'skimage.future:predict_segmenter(features, clf)',
+    'skimage.graph.heap:BinaryHeap',
+    'skimage.graph.heap:FastUpdateBinaryHeap',
+    'skimage.graph.mcp:MCP',
+    'skimage.graph.mcp:MCP_Connect',
+    'skimage.graph.mcp:MCP_Flexible',
+    'skimage.graph.mcp:MCP_Geometric',
+    'skimage.graph.mcp:route_through_array(array, start, end, '
+    'fully_connected=True, geometric=True)',
+    'skimage.graph.spath:np',
+    'skimage.graph.spath:shortest_path(arr, reach=1, axis=-1, output_indexlist=False)',
+    'skimage.graph:MCP',
+    'skimage.graph:MCP_Connect',
+    'skimage.graph:MCP_Flexible',
+    'skimage.graph:MCP_Geometric',
+    'skimage.graph:RAG',
+    'skimage.graph:central_pixel(graph, nodes=None, shape=None, partition_size=100)',
+    'skimage.graph:cut_normalized(labels, rag, thresh=0.001, num_cuts=10, '
+    'in_place=True, max_edge=1.0, *, rng=None)',
+    'skimage.graph:cut_threshold(labels, rag, thresh, in_place=True)',
+    'skimage.graph:merge_hierarchical(labels, rag, thresh, rag_copy, '
+    'in_place_merge, merge_func, weight_func)',
+    'skimage.graph:pixel_graph(image, *, mask=None, edge_function=None, '
+    "connectivity=1, spacing=None, sparse_type='matrix')",
+    'skimage.graph:rag_boundary(labels, edge_map, connectivity=2)',
+    "skimage.graph:rag_mean_color(image, labels, connectivity=2, mode='distance', "
+    'sigma=255.0)',
+    'skimage.graph:route_through_array(array, start, end, fully_connected=True, '
+    'geometric=True)',
+    'skimage.graph:shortest_path(arr, reach=1, axis=-1, output_indexlist=False)',
+    "skimage.graph:show_rag(labels, rag, image, border_color='black', "
+    "edge_width=1.5, edge_cmap='magma', img_cmap='bone', in_place=True, ax=None)",
+    'skimage.io.collection:ImageCollection',
+    'skimage.io.collection:MultiImage',
+    'skimage.io.collection:concatenate_images(ic)',
+    'skimage.io.collection:imread_collection_wrapper(imread)',
+    'skimage.io.manage_plugins:call_plugin(kind, *args, **kwargs)',
+    'skimage.io.manage_plugins:find_available_plugins(loaded=False)',
+    'skimage.io.manage_plugins:plugin_info(plugin)',
+    'skimage.io.manage_plugins:plugin_order()',
+    'skimage.io.manage_plugins:reset_plugins()',
+    'skimage.io.manage_plugins:use_plugin(name, kind=None)',
+    'skimage.io.sift:load_sift(f)',
+    'skimage.io.sift:load_surf(f)',
+    'skimage.io.util:HTTPError',
+    'skimage.io.util:URLError',
+    'skimage.io.util:URL_REGEX',
+    'skimage.io.util:contextmanager(func)',
+    'skimage.io.util:file_or_url_context(resource_name)',
+    'skimage.io.util:is_url(filename)',
+    'skimage.io.util:os',
+    'skimage.io.util:re',
+    'skimage.io.util:tempfile',
+    'skimage.io.util:urllib',
+    'skimage.io:ImageCollection',
+    'skimage.io:MultiImage',
+    'skimage.io:concatenate_images(ic)',
+    'skimage.io:imread(fname, as_gray=False, plugin=<DEPRECATED>, **plugin_args)',
+    'skimage.io:imread_collection(load_pattern, conserve_memory=True, '
+    'plugin=<DEPRECATED>, **plugin_args)',
+    'skimage.io:imread_collection_wrapper(imread)',
+    'skimage.io:imsave(fname, arr, plugin=<DEPRECATED>, *, check_contrast=True, '
+    '**plugin_args)',
+    'skimage.io:load_sift(f)',
+    'skimage.io:load_surf(f)',
+    'skimage.io:pop()',
+    'skimage.io:push(img)',
+    'skimage.measure.block:block_reduce(image, block_size=2, func=<function sum '
+    'at 0x7f3db888eb70>, cval=0, func_kwargs=None)',
+    'skimage.measure.block:np',
+    'skimage.measure.block:view_as_blocks(arr_in, block_shape)',
+    'skimage.measure.entropy:scipy_entropy(pk: ArrayLike, qk: ArrayLike | None = '
+    "None, base: float | None = None, axis: int = 0, *, nan_policy='propagate', "
+    'keepdims=False) -> numpy.number | numpy.ndarray',
+    'skimage.measure.entropy:shannon_entropy(image, base=2)',
+    'skimage.measure.entropy:unique',
+    'skimage.measure.fit:BaseModel',
+    'skimage.measure.fit:CircleModel',
+    'skimage.measure.fit:DEPRECATED',
+    'skimage.measure.fit:EllipseModel',
+    'skimage.measure.fit:FailedEstimation',
+    'skimage.measure.fit:LineModelND',
+    'skimage.measure.fit:Protocol',
+    'skimage.measure.fit:RansacModelProtocol',
+    'skimage.measure.fit:Self',
+    'skimage.measure.fit:add_from_estimate(cls)',
+    'skimage.measure.fit:catch_warnings',
+    'skimage.measure.fit:deprecate_func',
+    'skimage.measure.fit:deprecate_parameter',
+    'skimage.measure.fit:inspect',
+    'skimage.measure.fit:inv',
+    'skimage.measure.fit:math',
+    'skimage.measure.fit:np',
+    'skimage.measure.fit:ransac(data, model_class, min_samples, '
+    'residual_threshold, is_data_valid=None, is_model_valid=None, max_trials=100, '
+    'stop_sample_num=inf, stop_residuals_sum=0, stop_probability=1, rng=None, '
+    'initial_inliers=None, model_kwargs=None)',
+    'skimage.measure.fit:runtime_checkable(cls)',
+    'skimage.measure.fit:scipy',
+    'skimage.measure.fit:version',
+    'skimage.measure.fit:warn',
+    'skimage.measure.pnpoly:grid_points_in_poly(shape, verts, binarize=True)',
+    'skimage.measure.pnpoly:points_in_poly(points, verts)',
+    'skimage.measure.profile:ndi',
+    'skimage.measure.profile:np',
+    'skimage.measure.profile:profile_line(image, src, dst, linewidth=1, '
+    "order=None, mode='reflect', cval=0.0, *, reduce_func=<function mean at "
+    '0x7f3db88986f0>)',
+    'skimage.measure:CircleModel',
+    'skimage.measure:EllipseModel',
+    'skimage.measure:LineModelND',
+    'skimage.measure:RansacModelProtocol',
+    'skimage.measure:approximate_polygon(coords, tolerance)',
+    'skimage.measure:block_reduce(image, block_size=2, func=<function sum at '
+    '0x7f3db888eb70>, cval=0, func_kwargs=None)',
+    'skimage.measure:blur_effect(image, h_size=11, channel_axis=None, '
+    'reduce_func=<function max at 0x7f3db888f8f0>)',
+    'skimage.measure:centroid(image, *, spacing=None)',
+    'skimage.measure:euler_number(image, connectivity=None)',
+    "skimage.measure:find_contours(image, level=None, fully_connected='low', "
+    "positive_orientation='low', *, mask=None)",
+    'skimage.measure:grid_points_in_poly(shape, verts, binarize=True)',
+    'skimage.measure:inertia_tensor(image, mu=None, *, spacing=None)',
+    'skimage.measure:inertia_tensor_eigvals(image, mu=None, T=None, *, spacing=None)',
+    'skimage.measure:intersection_coeff(image0_mask, image1_mask, mask=None)',
+    'skimage.measure:label(label_image, background=None, return_num=False, '
+    'connectivity=None)',
+    'skimage.measure:manders_coloc_coeff(image0, image1_mask, mask=None)',
+    'skimage.measure:manders_overlap_coeff(image0, image1, mask=None)',
+    'skimage.measure:marching_cubes(volume, level=None, *, spacing=(1.0, 1.0, '
+    "1.0), gradient_direction='descent', step_size=1, allow_degenerate=True, "
+    "method='lewiner', mask=None)",
+    'skimage.measure:mesh_surface_area(verts, faces)',
+    'skimage.measure:moments(image, order=3, *, spacing=None)',
+    'skimage.measure:moments_central(image, center=None, order=3, *, '
+    'spacing=None, **kwargs)',
+    'skimage.measure:moments_coords(coords, order=3)',
+    'skimage.measure:moments_coords_central(coords, center=None, order=3)',
+    'skimage.measure:moments_hu(nu)',
+    'skimage.measure:moments_normalized(mu, order=3, spacing=None)',
+    'skimage.measure:pearson_corr_coeff(image0, image1, mask=None)',
+    'skimage.measure:perimeter(image, neighborhood=4)',
+    'skimage.measure:perimeter_crofton(image, directions=4)',
+    'skimage.measure:points_in_poly(points, verts)',
+    'skimage.measure:profile_line(image, src, dst, linewidth=1, order=None, '
+    "mode='reflect', cval=0.0, *, reduce_func=<function mean at 0x7f3db88986f0>)",
+    'skimage.measure:ransac(data, model_class, min_samples, residual_threshold, '
+    'is_data_valid=None, is_model_valid=None, max_trials=100, '
+    'stop_sample_num=inf, stop_residuals_sum=0, stop_probability=1, rng=None, '
+    'initial_inliers=None, model_kwargs=None)',
+    'skimage.measure:regionprops(label_image, intensity_image=None, cache=True, '
+    '*, extra_properties=None, spacing=None, offset=None)',
+    'skimage.measure:regionprops_table(label_image, intensity_image=None, '
+    "properties=('label', 'bbox'), *, cache=True, separator='-', "
+    'extra_properties=None, spacing=None)',
+    'skimage.measure:shannon_entropy(image, base=2)',
+    'skimage.measure:subdivide_polygon(coords, degree=2, preserve_ends=False)',
+    'skimage.metrics.set_metrics:cKDTree',
+    'skimage.metrics.set_metrics:hausdorff_distance(image0, image1, '
+    "method='standard')",
+    'skimage.metrics.set_metrics:hausdorff_pair(image0, image1)',
+    'skimage.metrics.set_metrics:np',
+    'skimage.metrics.set_metrics:warnings',
+    'skimage.metrics.simple_metrics:mean_squared_error(image0, image1)',
+    'skimage.metrics.simple_metrics:normalized_mutual_information(image0, image1, '
+    '*, bins=100)',
+    'skimage.metrics.simple_metrics:normalized_root_mse(image_true, image_test, '
+    "*, normalization='euclidean')",
+    'skimage.metrics.simple_metrics:peak_signal_noise_ratio(image_true, '
+    'image_test, *, data_range=None)',
+    'skimage.metrics:adapted_rand_error(image_true=None, image_test=None, *, '
+    'table=None, ignore_labels=(0,), alpha=0.5)',
+    'skimage.metrics:contingency_table(im_true, im_test, *, ignore_labels=None, '
+    "normalize=False, sparse_type='matrix')",
+    "skimage.metrics:hausdorff_distance(image0, image1, method='standard')",
+    'skimage.metrics:hausdorff_pair(image0, image1)',
+    'skimage.metrics:mean_squared_error(image0, image1)',
+    'skimage.metrics:normalized_mutual_information(image0, image1, *, bins=100)',
+    'skimage.metrics:normalized_root_mse(image_true, image_test, *, '
+    "normalization='euclidean')",
+    'skimage.metrics:peak_signal_noise_ratio(image_true, image_test, *, '
+    'data_range=None)',
+    'skimage.metrics:structural_similarity(im1, im2, *, win_size=None, '
+    'gradient=False, data_range=None, channel_axis=None, gaussian_weights=False, '
+    'full=False, **kwargs)',
+    'skimage.metrics:variation_of_information(image0=None, image1=None, *, '
+    'table=None, ignore_labels=())',
+    'skimage.morphology.binary:binary_closing(image, footprint=None, out=None, *, '
+    "mode='ignore')",
+    'skimage.morphology.binary:binary_dilation(image, footprint=None, out=None, '
+    "*, mode='ignore')",
+    'skimage.morphology.binary:binary_erosion(image, footprint=None, out=None, *, '
+    "mode='ignore')",
+    'skimage.morphology.binary:binary_opening(image, footprint=None, out=None, *, '
+    "mode='ignore')",
+    'skimage.morphology.binary:deprecate_func',
+    'skimage.morphology.binary:ndi',
+    'skimage.morphology.binary:np',
+    'skimage.morphology.binary:pad_footprint(footprint, *, pad_end=True)',
+    'skimage.morphology.binary:warnings',
+    'skimage.morphology.convex_hull:convex_hull_image(image, '
+    'offset_coordinates=True, tolerance=1e-10, include_borders=True)',
+    'skimage.morphology.convex_hull:convex_hull_object(image, *, connectivity=2)',
+    "skimage.morphology.extrema:crop(ar, crop_width, copy=False, order='K')",
+    'skimage.morphology.extrema:dtype_limits(image, clip_negative=False)',
+    'skimage.morphology.extrema:grayreconstruct',
+    'skimage.morphology.extrema:h_maxima(image, h, footprint=None)',
+    'skimage.morphology.extrema:h_minima(image, h, footprint=None)',
+    'skimage.morphology.extrema:invert(image, signed_float=False)',
+    'skimage.morphology.extrema:local_maxima(image, footprint=None, '
+    'connectivity=None, indices=False, allow_borders=True)',
+    'skimage.morphology.extrema:local_minima(image, footprint=None, '
+    'connectivity=None, indices=False, allow_borders=True)',
+    'skimage.morphology.extrema:np',
+    'skimage.morphology.extrema:warn',
+    "skimage.morphology.footprints:ball(radius, dtype=<class 'numpy.uint8'>, *, "
+    'strict_radius=True, decomposition=None)',
+    "skimage.morphology.footprints:cube(width, dtype=<class 'numpy.uint8'>, *, "
+    'decomposition=None)',
+    'skimage.morphology.footprints:deprecate_func',
+    "skimage.morphology.footprints:diamond(radius, dtype=<class 'numpy.uint8'>, "
+    '*, decomposition=None)',
+    "skimage.morphology.footprints:disk(radius, dtype=<class 'numpy.uint8'>, *, "
+    'strict_radius=True, decomposition=None)',
+    'skimage.morphology.footprints:draw',
+    'skimage.morphology.footprints:ellipse(width, height, dtype=<class '
+    "'numpy.uint8'>, *, decomposition=None)",
+    'skimage.morphology.footprints:footprint_from_sequence(footprints)',
+    'skimage.morphology.footprints:footprint_rectangle(shape, *, dtype=<class '
+    "'numpy.uint8'>, decomposition=None)",
+    'skimage.morphology.footprints:mirror_footprint(footprint)',
+    'skimage.morphology.footprints:morphology',
+    'skimage.morphology.footprints:np',
+    "skimage.morphology.footprints:octagon(m, n, dtype=<class 'numpy.uint8'>, *, "
+    'decomposition=None)',
+    'skimage.morphology.footprints:octahedron(radius, dtype=<class '
+    "'numpy.uint8'>, *, decomposition=None)",
+    'skimage.morphology.footprints:os',
+    'skimage.morphology.footprints:pad_footprint(footprint, *, pad_end=True)',
+    'skimage.morphology.footprints:rectangle(nrows, ncols, dtype=<class '
+    "'numpy.uint8'>, *, decomposition=None)",
+    'skimage.morphology.footprints:sk2_mirror_footprint(footprint)',
+    'skimage.morphology.footprints:sk2_pad_footprint(footprint, *, pad_end=True)',
+    'skimage.morphology.footprints:ski2_migration_decorator',
+    "skimage.morphology.footprints:square(width, dtype=<class 'numpy.uint8'>, *, "
+    'decomposition=None)',
+    "skimage.morphology.footprints:star(a, dtype=<class 'numpy.uint8'>)",
+    'skimage.morphology.footprints:warnings',
+    'skimage.morphology.gray:black_tophat(image, footprint=None, out=None, *, '
+    "mode='reflect', cval=0.0)",
+    'skimage.morphology.gray:closing(image, footprint=None, out=None, *, '
+    "mode='reflect', cval=0.0)",
+    'skimage.morphology.gray:dilation(image, footprint=None, out=None, *, '
+    "mode='reflect', cval=0.0)",
+    'skimage.morphology.gray:erosion(image, footprint=None, out=None, *, '
+    "mode='reflect', cval=0.0)",
+    'skimage.morphology.gray:opening(image, footprint=None, out=None, *, '
+    "mode='reflect', cval=0.0)",
+    'skimage.morphology.gray:white_tophat(image, footprint=None, out=None, *, '
+    "mode='reflect', cval=0.0)",
+    'skimage.morphology.grayreconstruct:np',
+    'skimage.morphology.grayreconstruct:rank_order(image)',
+    'skimage.morphology.grayreconstruct:reconstruction(seed, mask, '
+    "method='dilation', footprint=None, offset=None)",
+    'skimage.morphology.grayreconstruct:reconstruction_loop',
+    'skimage.morphology.isotropic:isotropic_closing(image, radius, out=None, '
+    'spacing=None)',
+    'skimage.morphology.isotropic:isotropic_dilation(image, radius, out=None, '
+    'spacing=None)',
+    'skimage.morphology.isotropic:isotropic_erosion(image, radius, out=None, '
+    'spacing=None)',
+    'skimage.morphology.isotropic:isotropic_opening(image, radius, out=None, '
+    'spacing=None)',
+    'skimage.morphology.isotropic:ndi',
+    'skimage.morphology.isotropic:np',
+    'skimage.morphology.max_tree:area_closing(image, area_threshold=64, '
+    'connectivity=1, parent=None, tree_traverser=None)',
+    'skimage.morphology.max_tree:area_opening(image, area_threshold=64, '
+    'connectivity=1, parent=None, tree_traverser=None)',
+    'skimage.morphology.max_tree:diameter_closing(image, diameter_threshold=8, '
+    'connectivity=1, parent=None, tree_traverser=None)',
+    'skimage.morphology.max_tree:diameter_opening(image, diameter_threshold=8, '
+    'connectivity=1, parent=None, tree_traverser=None)',
+    'skimage.morphology.max_tree:invert(image, signed_float=False)',
+    'skimage.morphology.max_tree:max_tree(image, connectivity=1)',
+    'skimage.morphology.max_tree:max_tree_local_maxima(image, connectivity=1, '
+    'parent=None, tree_traverser=None)',
+    'skimage.morphology.max_tree:np',
+    'skimage.morphology.max_tree:signed_float_types',
+    'skimage.morphology.max_tree:signed_int_types',
+    'skimage.morphology.max_tree:unsigned_int_types',
+    'skimage.morphology.misc:DEPRECATED',
+    'skimage.morphology.misc:cKDTree',
+    'skimage.morphology.misc:deprecate_parameter',
+    'skimage.morphology.misc:funcs',
+    'skimage.morphology.misc:ndi',
+    'skimage.morphology.misc:np',
+    'skimage.morphology.misc:remove_objects_by_distance(label_image, '
+    'min_distance, *, priority=None, p_norm=2, spacing=None, out=None)',
+    'skimage.morphology.misc:remove_small_holes(ar, area_threshold=<DEPRECATED>, '
+    'connectivity=1, *, max_size=63, out=None)',
+    'skimage.morphology.misc:remove_small_objects(ar, min_size=<DEPRECATED>, '
+    'connectivity=1, *, max_size=63, out=None)',
+    'skimage.morphology.misc:skimage2ndimage',
+    'skimage.morphology.misc:warn',
+    'skimage.morphology:area_closing(image, area_threshold=64, connectivity=1, '
+    'parent=None, tree_traverser=None)',
+    'skimage.morphology:area_opening(image, area_threshold=64, connectivity=1, '
+    'parent=None, tree_traverser=None)',
+    "skimage.morphology:ball(radius, dtype=<class 'numpy.uint8'>, *, "
+    'strict_radius=True, decomposition=None)',
+    'skimage.morphology:black_tophat(image, footprint=None, out=None, *, '
+    "mode='reflect', cval=0.0)",
+    'skimage.morphology:closing(image, footprint=None, out=None, *, '
+    "mode='reflect', cval=0.0)",
+    'skimage.morphology:convex_hull_image(image, offset_coordinates=True, '
+    'tolerance=1e-10, include_borders=True)',
+    'skimage.morphology:convex_hull_object(image, *, connectivity=2)',
+    'skimage.morphology:diameter_closing(image, diameter_threshold=8, '
+    'connectivity=1, parent=None, tree_traverser=None)',
+    'skimage.morphology:diameter_opening(image, diameter_threshold=8, '
+    'connectivity=1, parent=None, tree_traverser=None)',
+    "skimage.morphology:diamond(radius, dtype=<class 'numpy.uint8'>, *, "
+    'decomposition=None)',
+    'skimage.morphology:dilation(image, footprint=None, out=None, *, '
+    "mode='reflect', cval=0.0)",
+    "skimage.morphology:disk(radius, dtype=<class 'numpy.uint8'>, *, "
+    'strict_radius=True, decomposition=None)',
+    "skimage.morphology:ellipse(width, height, dtype=<class 'numpy.uint8'>, *, "
+    'decomposition=None)',
+    'skimage.morphology:erosion(image, footprint=None, out=None, *, '
+    "mode='reflect', cval=0.0)",
+    'skimage.morphology:flood(image, seed_point, *, footprint=None, '
+    'connectivity=None, tolerance=None)',
+    'skimage.morphology:flood_fill(image, seed_point, new_value, *, '
+    'footprint=None, connectivity=None, tolerance=None, in_place=False)',
+    'skimage.morphology:footprint_from_sequence(footprints)',
+    'skimage.morphology:footprint_rectangle(shape, *, dtype=<class '
+    "'numpy.uint8'>, decomposition=None)",
+    'skimage.morphology:h_maxima(image, h, footprint=None)',
+    'skimage.morphology:h_minima(image, h, footprint=None)',
+    'skimage.morphology:isotropic_closing(image, radius, out=None, spacing=None)',
+    'skimage.morphology:isotropic_dilation(image, radius, out=None, spacing=None)',
+    'skimage.morphology:isotropic_erosion(image, radius, out=None, spacing=None)',
+    'skimage.morphology:isotropic_opening(image, radius, out=None, spacing=None)',
+    'skimage.morphology:label(label_image, background=None, return_num=False, '
+    'connectivity=None)',
+    'skimage.morphology:local_maxima(image, footprint=None, connectivity=None, '
+    'indices=False, allow_borders=True)',
+    'skimage.morphology:local_minima(image, footprint=None, connectivity=None, '
+    'indices=False, allow_borders=True)',
+    'skimage.morphology:max_tree(image, connectivity=1)',
+    'skimage.morphology:max_tree_local_maxima(image, connectivity=1, parent=None, '
+    'tree_traverser=None)',
+    'skimage.morphology:medial_axis(image, mask=None, return_distance=False, *, '
+    'rng=None)',
+    'skimage.morphology:mirror_footprint(footprint)',
+    "skimage.morphology:octagon(m, n, dtype=<class 'numpy.uint8'>, *, "
+    'decomposition=None)',
+    "skimage.morphology:octahedron(radius, dtype=<class 'numpy.uint8'>, *, "
+    'decomposition=None)',
+    'skimage.morphology:opening(image, footprint=None, out=None, *, '
+    "mode='reflect', cval=0.0)",
+    'skimage.morphology:pad_footprint(footprint, *, pad_end=True)',
+    "skimage.morphology:reconstruction(seed, mask, method='dilation', "
+    'footprint=None, offset=None)',
+    'skimage.morphology:remove_objects_by_distance(label_image, min_distance, *, '
+    'priority=None, p_norm=2, spacing=None, out=None)',
+    'skimage.morphology:remove_small_holes(ar, area_threshold=<DEPRECATED>, '
+    'connectivity=1, *, max_size=63, out=None)',
+    'skimage.morphology:remove_small_objects(ar, min_size=<DEPRECATED>, '
+    'connectivity=1, *, max_size=63, out=None)',
+    'skimage.morphology:skeletonize(image, *, method=None)',
+    "skimage.morphology:star(a, dtype=<class 'numpy.uint8'>)",
+    'skimage.morphology:thin(image, max_num_iter=None)',
+    'skimage.morphology:white_tophat(image, footprint=None, out=None, *, '
+    "mode='reflect', cval=0.0)",
+    'skimage.registration:optical_flow_ilk(reference_image, moving_image, *, '
+    'radius=7, num_warp=10, gaussian=False, prefilter=False, dtype=<class '
+    "'numpy.float32'>)",
+    'skimage.registration:optical_flow_tvl1(reference_image, moving_image, *, '
+    'attachment=15, tightness=0.3, num_warp=5, num_iter=10, tol=0.0001, '
+    "prefilter=False, dtype=<class 'numpy.float32'>)",
+    'skimage.registration:phase_cross_correlation(reference_image, moving_image, '
+    "*, upsample_factor=1, space='real', disambiguate=False, reference_mask=None, "
+    "moving_mask=None, overlap_ratio=0.3, normalization='phase')",
+    "skimage.restoration.deconvolution:convolve(in1, in2, mode='full', method='auto')",
+    'skimage.restoration.deconvolution:np',
+    'skimage.restoration.deconvolution:richardson_lucy(image, psf, num_iter=50, '
+    'clip=True, filter_epsilon=None)',
+    'skimage.restoration.deconvolution:uft',
+    'skimage.restoration.deconvolution:unsupervised_wiener(image, psf, reg=None, '
+    'user_params=None, is_real=True, clip=True, *, rng=None)',
+    'skimage.restoration.deconvolution:wiener(image, psf, balance, reg=None, '
+    'is_real=True, clip=True)',
+    'skimage.restoration.inpaint:inpaint_biharmonic(image, mask, *, '
+    'split_into_regions=False, channel_axis=None)',
+    'skimage.restoration.inpaint:label(label_image, background=None, '
+    'return_num=False, connectivity=None)',
+    "skimage.restoration.inpaint:laplace(input, output=None, mode='reflect', "
+    'cval=0.0, *, axes=None)',
+    'skimage.restoration.inpaint:ndi',
+    'skimage.restoration.inpaint:np',
+    'skimage.restoration.inpaint:skimage',
+    'skimage.restoration.inpaint:sparse',
+    'skimage.restoration.inpaint:spsolve(A, b, permc_spec=None, use_umfpack=True)',
+    'skimage.restoration.inpaint:utils',
+    'skimage.restoration.j_invariant:calibrate_denoiser(image, denoise_function, '
+    'denoise_parameters, *, stride=4, approximate_loss=True, extra_output=False)',
+    'skimage.restoration.j_invariant:denoise_invariant(image, denoise_function, '
+    '*, stride=4, masks=None, denoiser_kwargs=None)',
+    'skimage.restoration.j_invariant:functools',
+    'skimage.restoration.j_invariant:img_as_float(image, force_copy=False)',
+    'skimage.restoration.j_invariant:itertools',
+    'skimage.restoration.j_invariant:mean_squared_error(image0, image1)',
+    'skimage.restoration.j_invariant:ndi',
+    'skimage.restoration.j_invariant:np',
+    'skimage.restoration.non_local_means:convert_to_float(image, preserve_range)',
+    'skimage.restoration.non_local_means:denoise_nl_means(image, patch_size=7, '
+    'patch_distance=11, h=0.1, fast_mode=True, sigma=0.0, *, '
+    'preserve_range=False, channel_axis=None)',
+    'skimage.restoration.non_local_means:np',
+    'skimage.restoration.non_local_means:utils',
+    'skimage.restoration.uft:fft',
+    'skimage.restoration.uft:image_quad_norm(inarray)',
+    'skimage.restoration.uft:ir2tf(imp_resp, shape, dim=None, is_real=True)',
+    'skimage.restoration.uft:laplacian(ndim, shape, is_real=True)',
+    'skimage.restoration.uft:np',
+    'skimage.restoration.uft:ufft2(inarray)',
+    'skimage.restoration.uft:ufftn(inarray, dim=None)',
+    'skimage.restoration.uft:uifft2(inarray)',
+    'skimage.restoration.uft:uifftn(inarray, dim=None)',
+    'skimage.restoration.uft:uirfft2(inarray, shape=None)',
+    'skimage.restoration.uft:uirfftn(inarray, dim=None, shape=None)',
+    'skimage.restoration.uft:urfft2(inarray)',
+    'skimage.restoration.uft:urfftn(inarray, dim=None)',
+    'skimage.restoration.unwrap:np',
+    'skimage.restoration.unwrap:unwrap_1d',
+    'skimage.restoration.unwrap:unwrap_2d',
+    'skimage.restoration.unwrap:unwrap_3d',
+    'skimage.restoration.unwrap:unwrap_phase(image, wrap_around=False, rng=None)',
+    'skimage.restoration.unwrap:warn',
+    'skimage.restoration:ball_kernel(radius, ndim)',
+    'skimage.restoration:calibrate_denoiser(image, denoise_function, '
+    'denoise_parameters, *, stride=4, approximate_loss=True, extra_output=False)',
+    'skimage.restoration:cycle_spin(x, func, max_shifts, shift_steps=1, '
+    'num_workers=<DEPRECATED>, func_kw=None, *, workers=None, channel_axis=None)',
+    'skimage.restoration:denoise_bilateral(image, win_size=None, '
+    "sigma_color=None, sigma_spatial=1, bins=10000, mode='constant', cval=0, *, "
+    'channel_axis=None)',
+    'skimage.restoration:denoise_invariant(image, denoise_function, *, stride=4, '
+    'masks=None, denoiser_kwargs=None)',
+    'skimage.restoration:denoise_nl_means(image, patch_size=7, patch_distance=11, '
+    'h=0.1, fast_mode=True, sigma=0.0, *, preserve_range=False, '
+    'channel_axis=None)',
+    'skimage.restoration:denoise_tv_bregman(image, weight=5.0, max_num_iter=100, '
+    'eps=0.001, isotropic=True, *, channel_axis=None)',
+    'skimage.restoration:denoise_tv_chambolle(image, weight=0.1, eps=0.0002, '
+    'max_num_iter=200, *, channel_axis=None)',
+    "skimage.restoration:denoise_wavelet(image, sigma=None, wavelet='db1', "
+    "mode='soft', wavelet_levels=None, convert2ycbcr=False, method='BayesShrink', "
+    'rescale_sigma=True, *, channel_axis=None)',
+    'skimage.restoration:ellipsoid_kernel(shape, intensity)',
+    'skimage.restoration:estimate_sigma(image, average_sigmas=False, *, '
+    'channel_axis=None)',
+    'skimage.restoration:inpaint_biharmonic(image, mask, *, '
+    'split_into_regions=False, channel_axis=None)',
+    'skimage.restoration:richardson_lucy(image, psf, num_iter=50, clip=True, '
+    'filter_epsilon=None)',
+    'skimage.restoration:rolling_ball(image, *, radius=100, kernel=None, '
+    'nansafe=False, num_threads=<DEPRECATED>, workers=None)',
+    'skimage.restoration:unsupervised_wiener(image, psf, reg=None, '
+    'user_params=None, is_real=True, clip=True, *, rng=None)',
+    'skimage.restoration:unwrap_phase(image, wrap_around=False, rng=None)',
+    'skimage.restoration:wiener(image, psf, balance, reg=None, is_real=True, '
+    'clip=True)',
+    'skimage.segmentation.active_contour_model:RectBivariateSpline',
+    'skimage.segmentation.active_contour_model:active_contour(image, snake, '
+    'alpha=0.01, beta=0.1, w_line=0.0, w_edge=1, gamma=0.01, max_px_move=1.0, '
+    "max_num_iter=2500, convergence=0.1, *, boundary_condition='periodic')",
+    'skimage.segmentation.active_contour_model:img_as_float(image, force_copy=False)',
+    'skimage.segmentation.active_contour_model:np',
+    'skimage.segmentation.active_contour_model:sobel(image, mask=None, *, '
+    "axis=None, mode='reflect', cval=0.0)",
+    'skimage.segmentation.boundaries:dilation(image, footprint=None, out=None, *, '
+    "mode='reflect', cval=0.0)",
+    'skimage.segmentation.boundaries:erosion(image, footprint=None, out=None, *, '
+    "mode='reflect', cval=0.0)",
+    'skimage.segmentation.boundaries:find_boundaries(label_img, connectivity=1, '
+    "mode='thick', background=0)",
+    'skimage.segmentation.boundaries:footprint_rectangle(shape, *, dtype=<class '
+    "'numpy.uint8'>, decomposition=None)",
+    'skimage.segmentation.boundaries:gray2rgb(image, *, channel_axis=-1)',
+    'skimage.segmentation.boundaries:img_as_float(image, force_copy=False)',
+    'skimage.segmentation.boundaries:mark_boundaries(image, label_img, color=(1, '
+    "1, 0), outline_color=None, mode='outer', background_label=0)",
+    'skimage.segmentation.boundaries:ndi',
+    'skimage.segmentation.boundaries:np',
+    'skimage.segmentation.boundaries:view_as_windows(arr_in, window_shape, step=1)',
+    'skimage.segmentation.morphsnakes:checkerboard_level_set(image_shape, '
+    'square_size=5)',
+    'skimage.segmentation.morphsnakes:disk_level_set(image_shape, *, center=None, '
+    'radius=None)',
+    'skimage.segmentation.morphsnakes:inverse_gaussian_gradient(image, '
+    'alpha=100.0, sigma=5.0)',
+    'skimage.segmentation.morphsnakes:morphological_chan_vese(image, num_iter, '
+    "init_level_set='checkerboard', smoothing=1, lambda1=1, lambda2=1, "
+    'iter_callback=<function <lambda> at 0x7f3d7e2f38a0>)',
+    'skimage.segmentation.morphsnakes:morphological_geodesic_active_contour(gimage, '
+    "num_iter, init_level_set='disk', smoothing=1, threshold='auto', balloon=0, "
+    'iter_callback=<function <lambda> at 0x7f3d7e2f3a00>)',
+    'skimage.segmentation.random_walker_segmentation:SCIPY_CG_TOL_PARAM_NAME',
+    'skimage.segmentation.random_walker_segmentation:UmfpackContext',
+    'skimage.segmentation.random_walker_segmentation:amg_loaded',
+    'skimage.segmentation.random_walker_segmentation:cg(A, b, x0=None, *, '
+    'rtol=1e-05, atol=0.0, maxiter=None, M=None, callback=None)',
+    'skimage.segmentation.random_walker_segmentation:img_as_float(image, '
+    'force_copy=False)',
+    'skimage.segmentation.random_walker_segmentation:ndi',
+    'skimage.segmentation.random_walker_segmentation:np',
+    'skimage.segmentation.random_walker_segmentation:random_walker(data, labels, '
+    "beta=130, mode='cg_j', tol=0.001, copy=True, return_full_prob=False, "
+    'spacing=None, *, prob_tol=0.001, channel_axis=None)',
+    'skimage.segmentation.random_walker_segmentation:sparse',
+    'skimage.segmentation.random_walker_segmentation:spsolve(A, b, '
+    'permc_spec=None, use_umfpack=True)',
+    'skimage.segmentation.random_walker_segmentation:utils',
+    'skimage.segmentation.random_walker_segmentation:warn',
+    'skimage.segmentation.slic_superpixels:Iterable',
+    'skimage.segmentation.slic_superpixels:gaussian(image, sigma=1.0, *, '
+    "mode='nearest', cval=0, preserve_range=False, truncate=4.0, "
+    'channel_axis=None, out=None)',
+    'skimage.segmentation.slic_superpixels:img_as_float(image, force_copy=False)',
+    'skimage.segmentation.slic_superpixels:kmeans2(data, k, iter=10, '
+    "thresh=1e-05, minit='random', missing='warn', check_finite=True, *, "
+    'rng=None, seed=None)',
+    'skimage.segmentation.slic_superpixels:math',
+    'skimage.segmentation.slic_superpixels:np',
+    "skimage.segmentation.slic_superpixels:pdist(X, metric='euclidean', *, "
+    'out=None, **kwargs)',
+    'skimage.segmentation.slic_superpixels:random',
+    'skimage.segmentation.slic_superpixels:regular_grid(ar_shape, n_points)',
+    "skimage.segmentation.slic_superpixels:rgb2lab(rgb, illuminant='D65', "
+    "observer='2', *, channel_axis=-1)",
+    'skimage.segmentation.slic_superpixels:slic(image, n_segments=100, '
+    'compactness=10.0, max_num_iter=10, sigma=0, spacing=None, convert2lab=None, '
+    'enforce_connectivity=True, min_size_factor=0.5, max_size_factor=3, '
+    'slic_zero=False, start_label=1, mask=None, *, channel_axis=-1)',
+    "skimage.segmentation.slic_superpixels:squareform(X, force='no', checks=True)",
+    'skimage.segmentation.slic_superpixels:utils',
+    'skimage.segmentation.slic_superpixels:warn',
+    'skimage.segmentation:active_contour(image, snake, alpha=0.01, beta=0.1, '
+    'w_line=0.0, w_edge=1, gamma=0.01, max_px_move=1.0, max_num_iter=2500, '
+    "convergence=0.1, *, boundary_condition='periodic')",
+    'skimage.segmentation:chan_vese(image, mu=0.25, lambda1=1.0, lambda2=1.0, '
+    "tol=0.001, max_num_iter=500, dt=0.5, init_level_set='checkerboard', "
+    'extended_output=False)',
+    'skimage.segmentation:checkerboard_level_set(image_shape, square_size=5)',
+    'skimage.segmentation:clear_border(labels, buffer_size=0, bgval=0, mask=None, '
+    '*, out=None)',
+    'skimage.segmentation:disk_level_set(image_shape, *, center=None, radius=None)',
+    'skimage.segmentation:expand_labels(label_image, distance=1, spacing=1)',
+    'skimage.segmentation:felzenszwalb(image, scale=1, sigma=0.8, min_size=20, *, '
+    'channel_axis=-1)',
+    'skimage.segmentation:find_boundaries(label_img, connectivity=1, '
+    "mode='thick', background=0)",
+    'skimage.segmentation:flood(image, seed_point, *, footprint=None, '
+    'connectivity=None, tolerance=None)',
+    'skimage.segmentation:flood_fill(image, seed_point, new_value, *, '
+    'footprint=None, connectivity=None, tolerance=None, in_place=False)',
+    'skimage.segmentation:inverse_gaussian_gradient(image, alpha=100.0, sigma=5.0)',
+    'skimage.segmentation:join_segmentations(s1, s2, return_mapping: bool = False)',
+    'skimage.segmentation:mark_boundaries(image, label_img, color=(1, 1, 0), '
+    "outline_color=None, mode='outer', background_label=0)",
+    'skimage.segmentation:morphological_chan_vese(image, num_iter, '
+    "init_level_set='checkerboard', smoothing=1, lambda1=1, lambda2=1, "
+    'iter_callback=<function <lambda> at 0x7f3d7e2f38a0>)',
+    'skimage.segmentation:morphological_geodesic_active_contour(gimage, num_iter, '
+    "init_level_set='disk', smoothing=1, threshold='auto', balloon=0, "
+    'iter_callback=<function <lambda> at 0x7f3d7e2f3a00>)',
+    'skimage.segmentation:quickshift(image, ratio=1.0, kernel_size=5, '
+    'max_dist=10, return_tree=False, sigma=0, convert2lab=True, rng=42, *, '
+    'channel_axis=-1)',
+    "skimage.segmentation:random_walker(data, labels, beta=130, mode='cg_j', "
+    'tol=0.001, copy=True, return_full_prob=False, spacing=None, *, '
+    'prob_tol=0.001, channel_axis=None)',
+    'skimage.segmentation:relabel_sequential(label_field, offset=1)',
+    'skimage.segmentation:slic(image, n_segments=100, compactness=10.0, '
+    'max_num_iter=10, sigma=0, spacing=None, convert2lab=None, '
+    'enforce_connectivity=True, min_size_factor=0.5, max_size_factor=3, '
+    'slic_zero=False, start_label=1, mask=None, *, channel_axis=-1)',
+    'skimage.segmentation:watershed(image, markers=None, connectivity=1, '
+    'offset=None, mask=None, compactness=0, watershed_line=False)',
+    'skimage.transform.finite_radon_transform:frt2(a)',
+    'skimage.transform.finite_radon_transform:ifrt2(a)',
+    'skimage.transform.hough_transform:cKDTree',
+    'skimage.transform.hough_transform:hough_circle(image, radius, '
+    'normalize=True, full_output=False)',
+    'skimage.transform.hough_transform:hough_circle_peaks(hspaces, radii, '
+    'min_xdistance=1, min_ydistance=1, threshold=None, num_peaks=inf, '
+    'total_num_peaks=inf, normalize=False)',
+    'skimage.transform.hough_transform:hough_ellipse(image, threshold=4, '
+    'accuracy=1, min_size=4, max_size=None)',
+    'skimage.transform.hough_transform:hough_line(image, theta=None)',
+    'skimage.transform.hough_transform:hough_line_peaks(hspace, angles, dists, '
+    'min_distance=9, min_angle=10, threshold=None, num_peaks=inf)',
+    'skimage.transform.hough_transform:label_distant_points(xs, ys, '
+    'min_xdistance, min_ydistance, max_points)',
+    'skimage.transform.hough_transform:np',
+    'skimage.transform.hough_transform:probabilistic_hough_line(image, '
+    'threshold=10, line_length=50, line_gap=10, theta=None, rng=None)',
+    'skimage.transform.integral:integral_image(image, *, dtype=None)',
+    'skimage.transform.integral:integrate(ii, start, end)',
+    'skimage.transform.integral:np',
+    'skimage.transform.pyramids:convert_to_float(image, preserve_range)',
+    "skimage.transform.pyramids:gaussian(image, sigma=1.0, *, mode='nearest', "
+    'cval=0, preserve_range=False, truncate=4.0, channel_axis=None, out=None)',
+    'skimage.transform.pyramids:math',
+    'skimage.transform.pyramids:np',
+    'skimage.transform.pyramids:pyramid_expand(image, upscale=2, sigma=None, '
+    "order=1, mode='reflect', cval=0, preserve_range=False, *, channel_axis=None)",
+    'skimage.transform.pyramids:pyramid_gaussian(image, max_layer=-1, '
+    "downscale=2, sigma=None, order=1, mode='reflect', cval=0, "
+    'preserve_range=False, *, channel_axis=None)',
+    'skimage.transform.pyramids:pyramid_laplacian(image, max_layer=-1, '
+    "downscale=2, sigma=None, order=1, mode='reflect', cval=0, "
+    'preserve_range=False, *, channel_axis=None)',
+    'skimage.transform.pyramids:pyramid_reduce(image, downscale=2, sigma=None, '
+    "order=1, mode='reflect', cval=0, preserve_range=False, *, channel_axis=None)",
+    'skimage.transform.pyramids:resize(image, output_shape, order=None, '
+    "mode='reflect', cval=0, clip=True, preserve_range=False, anti_aliasing=None, "
+    'anti_aliasing_sigma=None)',
+    'skimage.transform.radon_transform:iradon(radon_image, theta=None, '
+    "output_size=None, filter_name='ramp', interpolation='linear', circle=True, "
+    'preserve_range=True)',
+    'skimage.transform.radon_transform:iradon_sart(radon_image, theta=None, '
+    'image=None, projection_shifts=None, clip=None, relaxation=0.15, dtype=None)',
+    'skimage.transform.radon_transform:order_angles_golden_ratio(theta)',
+    'skimage.transform.radon_transform:radon(image, theta=None, circle=True, *, '
+    'preserve_range=False)',
+    'skimage.transform:AffineTransform',
+    'skimage.transform:EssentialMatrixTransform',
+    'skimage.transform:EuclideanTransform',
+    'skimage.transform:FundamentalMatrixTransform',
+    'skimage.transform:PiecewiseAffineTransform',
+    'skimage.transform:PolynomialTransform',
+    'skimage.transform:ProjectiveTransform',
+    'skimage.transform:SimilarityTransform',
+    'skimage.transform:ThinPlateSplineTransform',
+    'skimage.transform:downscale_local_mean(image, factors, cval=0, clip=True)',
+    'skimage.transform:estimate_transform(ttype, src, dst, *args, **kwargs)',
+    'skimage.transform:frt2(a)',
+    'skimage.transform:hough_circle(image, radius, normalize=True, full_output=False)',
+    'skimage.transform:hough_circle_peaks(hspaces, radii, min_xdistance=1, '
+    'min_ydistance=1, threshold=None, num_peaks=inf, total_num_peaks=inf, '
+    'normalize=False)',
+    'skimage.transform:hough_ellipse(image, threshold=4, accuracy=1, min_size=4, '
+    'max_size=None)',
+    'skimage.transform:hough_line(image, theta=None)',
+    'skimage.transform:hough_line_peaks(hspace, angles, dists, min_distance=9, '
+    'min_angle=10, threshold=None, num_peaks=inf)',
+    'skimage.transform:ifrt2(a)',
+    'skimage.transform:integral_image(image, *, dtype=None)',
+    'skimage.transform:integrate(ii, start, end)',
+    'skimage.transform:iradon(radon_image, theta=None, output_size=None, '
+    "filter_name='ramp', interpolation='linear', circle=True, "
+    'preserve_range=True)',
+    'skimage.transform:iradon_sart(radon_image, theta=None, image=None, '
+    'projection_shifts=None, clip=None, relaxation=0.15, dtype=None)',
+    'skimage.transform:matrix_transform(coords, matrix)',
+    'skimage.transform:order_angles_golden_ratio(theta)',
+    'skimage.transform:probabilistic_hough_line(image, threshold=10, '
+    'line_length=50, line_gap=10, theta=None, rng=None)',
+    'skimage.transform:pyramid_expand(image, upscale=2, sigma=None, order=1, '
+    "mode='reflect', cval=0, preserve_range=False, *, channel_axis=None)",
+    'skimage.transform:pyramid_gaussian(image, max_layer=-1, downscale=2, '
+    "sigma=None, order=1, mode='reflect', cval=0, preserve_range=False, *, "
+    'channel_axis=None)',
+    'skimage.transform:pyramid_laplacian(image, max_layer=-1, downscale=2, '
+    "sigma=None, order=1, mode='reflect', cval=0, preserve_range=False, *, "
+    'channel_axis=None)',
+    'skimage.transform:pyramid_reduce(image, downscale=2, sigma=None, order=1, '
+    "mode='reflect', cval=0, preserve_range=False, *, channel_axis=None)",
+    'skimage.transform:radon(image, theta=None, circle=True, *, preserve_range=False)',
+    "skimage.transform:rescale(image, scale, order=None, mode='reflect', cval=0, "
+    'clip=True, preserve_range=False, anti_aliasing=None, '
+    'anti_aliasing_sigma=None, *, channel_axis=None)',
+    "skimage.transform:resize(image, output_shape, order=None, mode='reflect', "
+    'cval=0, clip=True, preserve_range=False, anti_aliasing=None, '
+    'anti_aliasing_sigma=None)',
+    'skimage.transform:resize_local_mean(image, output_shape, grid_mode=True, '
+    'preserve_range=False, *, channel_axis=None)',
+    'skimage.transform:rotate(image, angle, resize=False, center=None, '
+    "order=None, mode='constant', cval=0, clip=True, preserve_range=False)",
+    'skimage.transform:swirl(image, center=None, strength=1, radius=100, '
+    "rotation=0, output_shape=None, order=None, mode='reflect', cval=0, "
+    'clip=True, preserve_range=False)',
+    'skimage.transform:warp(image, inverse_map, map_args=None, output_shape=None, '
+    "order=None, mode='constant', cval=0.0, clip=True, preserve_range=False)",
+    'skimage.transform:warp_coords(coord_map, shape, dtype=<class \'numpy.float64\'>)',
+    'skimage.transform:warp_polar(image, center=None, *, radius=None, '
+    "output_shape=None, scaling='linear', channel_axis=None, **kwargs)",
+    'skimage.util.apply_parallel:apply_parallel(function, array, chunks=None, '
+    'depth=0, mode=None, extra_arguments=(), extra_keywords=None, *, dtype=None, '
+    'compute=None, channel_axis=None)',
+    "skimage.util.arraycrop:crop(ar, crop_width, copy=False, order='K')",
+    "skimage.util.compare:compare_images(image0, image1, *, method='diff', "
+    'n_tiles=(8, 8))',
+    'skimage.util.compare:functools',
+    'skimage.util.compare:img_as_float(image, force_copy=False)',
+    'skimage.util.compare:np',
+    'skimage.util.compare:product',
+    'skimage.util.dtype:dtype_limits(image, clip_negative=False)',
+    'skimage.util.dtype:img_as_bool(image, force_copy=False)',
+    'skimage.util.dtype:img_as_float(image, force_copy=False)',
+    'skimage.util.dtype:img_as_float32(image, force_copy=False)',
+    'skimage.util.dtype:img_as_float64(image, force_copy=False)',
+    'skimage.util.dtype:img_as_int(image, force_copy=False)',
+    'skimage.util.dtype:img_as_ubyte(image, force_copy=False)',
+    'skimage.util.dtype:img_as_uint(image, force_copy=False)',
+    'skimage.util.lookfor:lookfor(what)',
+    'skimage.util.lookfor:sys',
+    "skimage.util.noise:random_noise(image, mode='gaussian', rng=None, clip=True, "
+    '**kwargs)',
+    'skimage.util.shape:view_as_blocks(arr_in, block_shape)',
+    'skimage.util.shape:view_as_windows(arr_in, window_shape, step=1)',
+    'skimage.util.unique:np',
+    'skimage.util.unique:unique_rows(ar)',
+    'skimage.util:FailedEstimationAccessError',
+    'skimage.util:PendingSkimage2Change',
+    'skimage.util:apply_parallel(function, array, chunks=None, depth=0, '
+    'mode=None, extra_arguments=(), extra_keywords=None, *, dtype=None, '
+    'compute=None, channel_axis=None)',
+    "skimage.util:compare_images(image0, image1, *, method='diff', n_tiles=(8, 8))",
+    "skimage.util:crop(ar, crop_width, copy=False, order='K')",
+    'skimage.util:dtype_limits(image, clip_negative=False)',
+    'skimage.util:img_as_bool(image, force_copy=False)',
+    'skimage.util:img_as_float(image, force_copy=False)',
+    'skimage.util:img_as_float32(image, force_copy=False)',
+    'skimage.util:img_as_float64(image, force_copy=False)',
+    'skimage.util:img_as_int(image, force_copy=False)',
+    'skimage.util:img_as_ubyte(image, force_copy=False)',
+    'skimage.util:img_as_uint(image, force_copy=False)',
+    'skimage.util:invert(image, signed_float=False)',
+    'skimage.util:label_points(coords, output_shape)',
+    'skimage.util:lookfor(what)',
+    'skimage.util:map_array(input_arr, input_vals, output_vals, out=None)',
+    "skimage.util:montage(arr_in, fill='mean', rescale_intensity=False, "
+    'grid_shape=None, padding_width=0, *, channel_axis=None)',
+    "skimage.util:random_noise(image, mode='gaussian', rng=None, clip=True, **kwargs)",
+    'skimage.util:regular_grid(ar_shape, n_points)',
+    "skimage.util:regular_seeds(ar_shape, n_points, dtype=<class 'int'>)",
+    'skimage.util:slice_along_axes(image, slices, axes=None, copy=False)',
+    'skimage.util:unique_rows(ar)',
+    'skimage.util:view_as_blocks(arr_in, block_shape)',
+    'skimage.util:view_as_windows(arr_in, window_shape, step=1)',
+    'skimage:color',
+    'skimage:data',
+    'skimage:draw',
+    'skimage:exposure',
+    'skimage:feature',
+    'skimage:filters',
+    'skimage:future',
+    'skimage:graph',
+    'skimage:io',
+    'skimage:measure',
+    'skimage:metrics',
+    'skimage:morphology',
+    'skimage:registration',
+    'skimage:restoration',
+    'skimage:segmentation',
+    'skimage:transform',
+    'skimage:util',
+}
+
+
+@pytest.mark.xfail(reason="")
+def test_public_skimage_api():
+    import skimage
+
+    ski_path = Path(skimage.__file__).parent
+    ski_tree = dict(_walk_python_files(ski_path))
+
+    skimage_api = set()
+    for relative_key in ski_tree:
+        import_name = "skimage"
+        if relative_key:
+            # For the "__init__" in the package root, relative_key is "",
+            # account for that
+            import_name = f"{import_name}.{relative_key}"
+
+        if "._" in import_name:
+            continue  # Skip private module
+
+        if import_name == "skimage.feature.brief_pythran":
+            import_name = "skimage.feature.brief_cy"
+
+        module = importlib.import_module(import_name)
+
+        public_members = getattr(module, "__all__", dir(module))
+        for name in public_members:
+            if name.startswith("_"):
+                continue  # skip private name
+
+            key = f"{import_name}:{name}"
+
+            obj = getattr(module, name)
+            if inspect.isfunction(obj):
+                signature = inspect.signature(obj)
+                key = f"{key}{signature}"
+
+            skimage_api.add(key)
+
+    assert skimage_api == SKIMAGE_API
