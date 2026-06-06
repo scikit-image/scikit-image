@@ -12,6 +12,7 @@ from skimage._migration import (
     Skimage2Migration,
     ski2_migration_decorator,
     _select_blocks,
+    _public_api_names,
 )
 
 
@@ -252,6 +253,14 @@ def test_skimage2migration_no_warning_is_identity_decorator():
         warnings.simplefilter('always')
         assert dfunc(2, 4) == 8
     assert len(record) == 0
+
+
+def test_skimage2_becomes_skimage():
+    # At least for now, skimage.morphology.max_tree defined in _skimage2 but it
+    # should be detected as being in skimage, due to public skimage API.
+    from skimage.morphology import max_tree
+
+    assert _public_api_names(max_tree) == ['skimage.morphology.max_tree']
 
 
 def test_skimage2migration_comment_check():

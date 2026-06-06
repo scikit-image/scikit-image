@@ -93,14 +93,13 @@ def _select_blocks(doc, *, context_name):
 
 
 def _public_api_names(obj):
-    """Find the public name(s) of an object as advertised by parent namespaces.
+    """Find the public name(s) of an object as advertised by ``__all__``.
 
-    ``skimage`` modules derive their namespaces from the equivalent
-    ``_skimage2`` modules.  These in turn define their public API with the help
-    of ``__all__`` in their modules. At the point at which any given module is
-    being instantiated, its parent modules will have already defined their
-    namespaces. This function looks for its own ``__qualname__`` in the
-    namespace entries of its parent modules.
+    scikit-image advertises its public API with the help of ``__all__`` in its
+    modules. At the point at which any given module is being instantiated, its
+    parent modules will have already defined their ``__all__`` attributes. This
+    function looks for its own ``__qualname__`` in the ``__all__`` entries of
+    its parent modules.
 
     Parameters
     ----------
@@ -110,7 +109,7 @@ def _public_api_names(obj):
     -------
     public_matches : list of str
         Full dotted paths to the given `obj` that are advertised and reachable
-        through the public namespace of its parent modules.
+        through ``__all__`` in parent modules.
 
     Examples
     --------
@@ -137,7 +136,11 @@ def _public_api_names(obj):
         # `obj` is passed, so its parents should be loaded
         module = sys.modules['.'.join(parts)]
 
-        if getattr(module, base_name_in_module, None):
+        if (_all := getattr(module, "__all__", None)) is None:
+            # Module doesn't advertise any public API, abort
+            break
+
+        if base_name_in_module in _all:
             public_name = f"{module.__name__}.{qualname}"
             matches.append(public_name)
 
