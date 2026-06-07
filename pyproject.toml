@@ -1,7 +1,7 @@
 [project]
 name = 'scikit-image'
 description = 'Image processing in Python'
-requires-python = '>=3.11'
+requires-python = '>=3.12'
 readme = 'README.md'
 classifiers = [
     'Development Status :: 4 - Beta',
@@ -12,7 +12,6 @@ classifiers = [
     'Programming Language :: C',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.11',
     'Programming Language :: Python :: 3.12',
     'Programming Language :: Python :: 3.13',
     'Programming Language :: Python :: 3.14',
@@ -26,14 +25,15 @@ classifiers = [
 ]
 dynamic = ['version']
 dependencies = [
-    'numpy>=1.24',
-    'scipy>=1.11.4',
+    'numpy>=2.1',
+    'scipy>=1.15; sys_platform != "emscripten"',
+    'scipy>=1.14; sys_platform == "emscripten"',
     'networkx>=3.0',
     'pillow>=10.1',
     'imageio>=2.33,!=2.35.0',
-    'tifffile>=2022.8.12',
-    'packaging>=21',
-    'lazy-loader>=0.4',
+    'tifffile>=2025.1.10',
+    'packaging>=24',
+    'lazy-loader>=0.5',
 ]
 
 [[project.maintainers]]
@@ -52,7 +52,7 @@ build = [
     'pythran>=0.16',
     'numpy>=2.0',
     # Developer UI
-    'spin==0.13',
+    'spin>=0.13',
     'build>=1.2.1',
 ]
 data = ['pooch>=1.6.0']
@@ -70,42 +70,43 @@ docs = [
     'sphinx-gallery[parallel]>=0.18',
     'numpydoc>=1.7',
     'sphinx-copybutton',
-    'matplotlib>=3.7',
-    'dask[array]>=2023.2.0',
+    'sphinx-togglebutton',
+    'matplotlib>=3.10',
+    'dask[array]>=2025.1.0',
     'pandas>=2.0',
     'seaborn>=0.11',
     'pooch>=1.6',
-    'tifffile>=2022.8.12',
+    'tifffile>=2025.1.10',
     'myst-parser',
     'intersphinx-registry>=0.2411.14',
     'ipywidgets',
     'ipykernel',  # needed until https://github.com/jupyter-widgets/ipywidgets/issues/3731 is resolved
     'plotly>=5.20',
     'kaleido==0.2.1',
-    'scikit-learn>=1.2',
+    'scikit-learn>=1.6',
     'sphinx_design>=0.5',
     'pydata-sphinx-theme>=0.16',
-    'PyWavelets>=1.6',
+    'PyWavelets>=1.7',
     'pytest-doctestplus>=1.6.0',
 ]
 optional = [
     'SimpleITK; sys_platform != "emscripten"',
-    'scikit-learn>=1.2',
+    'scikit-learn>=1.6',
     'pyamg>=5.2; sys_platform != "emscripten" and python_version < "3.14"',  # not packaged for Pyodide yet
     'scikit-image[optional_free_threaded]'
 ]
 optional_free_threaded = [
-    'astropy>=6.0',
-    'dask[array]>=2023.2.0',
-    'matplotlib>=3.7',
+    'astropy>=6.1',
+    'dask[array]>=2025.1.0',
+    'matplotlib>=3.10; sys_platform != "emscripten"',  # the pyodide maintainers recommend not testing with matplotlib
     'pooch>=1.6.0; sys_platform != "emscripten"',  # requires stack switching with alternative pytest runner
-    'PyWavelets>=1.6',
+    'PyWavelets>=1.7',
 ]
 
 test = [
     'numpydoc>=1.7',
     'pooch>=1.6.0; sys_platform != "emscripten"',
-    'pytest>=8.3',
+    'pytest>=9',
     'pytest-cov>=2.11.0',
     'pytest-pretty',
     'pytest-localserver',
@@ -126,7 +127,7 @@ requires = [
     'meson-python>=0.16',
     'Cython>=3.0.10,!=3.2.0b1',
     'pythran>=0.16',
-    'lazy_loader>=0.4',
+    'lazy_loader>=0.5',
     'numpy>=2.0',
 ]
 
@@ -189,12 +190,19 @@ ignore = [
 convention = 'numpy'
 
 [tool.pytest.ini_options]
-minversion = "6.0"
+# pythonpath requires pytest >= 7.0; --strict-config (in addopts) would error
+# on startup with older versions anyway.
+minversion = "7.0"
+# Add the repo root to sys.path so pytest can import from the ``tests/``
+# directory without requiring ``__init__.py`` files in every subdirectory.
+# It does not affect ``src/``; packages there are found via the installed
+# wheel or the meson build directory (set up by spin).
+pythonpath = ["."]
 addopts = [
     "-ra",
     "--strict-config",
     "--strict-markers",
-    "--maxfail=5",
+    "--showlocals",
     # Necessary for doctest collection with editable installations and
     # non-unique test module names (skimage/skimage2 duplicates those)
     "--import-mode=importlib",
@@ -208,7 +216,7 @@ addopts = [
 # can find docstests by importing.
 testpaths = [
     "skimage",
-    "skimage2",
+    "_skimage2",  # Exclude `skimage2` and its raised `ExperimentalAPIWarning`
     "./tests/",
 ]
 
@@ -216,16 +224,21 @@ log_cli_level = "INFO"
 xfail_strict = true
 filterwarnings = [
     "error",
-    "ignore:Importing from the `skimage2` namespace is experimental:UserWarning",
     "ignore::skimage.util.PendingSkimage2Change",
     "ignore:.*use `imageio` or other I/O packages directly.*:FutureWarning",
+    # Passing win_size with gaussian_weights=True is deprecated
+    "ignore:.*win_size.*gaussian_weights.*:FutureWarning",
     # warn by pyamg in ruge_stuben_solver
     "ignore:Implicit conversion of A to CSR:scipy.sparse.SparseEfficiencyWarning",
     # Pyodide warning coming via threadpoolctl, remove when
     # https://github.com/joblib/threadpoolctl/pull/201 is released
     "ignore:.*JsProxy\\.as_object_map.*:RuntimeWarning",
     # Warning caused by matplotlib 3.7.0 because it uses deprecated API of pyparsing 3.3.1
-    "ignore:.*(parseString|resetCache|enablePackrat).*:DeprecationWarning:matplotlib",
+    "ignore:.*(parseString|resetCache|enablePackrat|oneOf).*:DeprecationWarning:matplotlib",
+    # tifffile (v2025.12.20) uses deprecated NumPy API
+    "ignore:Setting the shape on a NumPy array:DeprecationWarning:tifffile",
+    # pytest warning when running under PYTHONOPTIMIZE=2 (assertions are stripped)
+    "ignore:assertions not in test modules or plugins:pytest.PytestConfigWarning",
 ]
 norecursedirs = ["io/_plugins"]
 
@@ -256,16 +269,14 @@ dtype-like = "np.typing.DTypeLike"
 Path = "pathlib.Path"
 
 [tool.cibuildwheel]
-test-command = "pytest --doctest-plus --pyargs skimage ./tests"
+test-command = "pytest --doctest-plus"
 test-extras = ["test", "optional"]
 test-sources = ["tests", "pyproject.toml"]
 environment = {PIP_PREFER_BINARY=1}
 environment-pass = ["SKIMAGE_LINK_FLAGS", "PIP_EXTRA_INDEX_URL", "COLUMNS"]
 build-verbosity = 0
-enable="cpython-freethreading"
 
 [tool.cibuildwheel.config-settings]
-setup-args = "-Dinclude-v2=false"
 # Could be overwritten using CIBW_CONFIG_SETTINGS environment variable
 
 [[tool.cibuildwheel.overrides]]
@@ -293,10 +304,11 @@ environment = {PIP_PREFER_BINARY=1, SKIMAGE_LINK_FLAGS="-Wl,--strip-debug"}
 archs = ["auto"]
 
 [tool.cibuildwheel.macos]
-test-command = "pytest ./tests"
+test-command = "pytest"
 before-all = [
     "bash {project}/tools/build_libomp.sh",
 ]
 
 [tool.cibuildwheel.pyodide]
-test-command = "pytest --pyargs skimage tests"
+test-command = "pytest"
+test-extras = ["test", "optional_free_threaded"]

@@ -9,9 +9,9 @@ from skimage.draw import disk
 from skimage.draw.draw3d import ellipsoid
 from skimage.feature import blob_dog, blob_doh, blob_log
 from skimage.feature.blob import _blob_overlap
-from skimage._shared.testing import assert_stacklevel
-from skimage._shared.dtype import numeric_dtype_min_max
-from skimage._shared._dependency_checks import is_wasm
+from _skimage2._shared.testing import assert_stacklevel
+from _skimage2._shared.dtype import numeric_dtype_min_max
+from _skimage2._shared._dependency_checks import is_wasm
 
 
 @pytest.mark.parametrize('dtype', [np.uint8, np.float16, np.float32, np.float64])

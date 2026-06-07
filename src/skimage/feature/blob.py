@@ -4,13 +4,14 @@ import numpy as np
 import scipy.ndimage as ndi
 from scipy import spatial
 
-from .._shared.filters import gaussian
-from .._shared.utils import (
+from _skimage2.util._value_rescaling import _prescale_value_range
+
+from ..filters._gaussian import gaussian
+from _skimage2._shared.utils import (
     _supported_float_type,
     check_nD,
     DEPRECATED,
     deprecate_parameter,
-    _rescale_value_range,
 )
 from ..transform import integral_image
 from ._hessian_det_appx import _hessian_matrix_det
@@ -389,7 +390,7 @@ def blob_dog(
     if threshold_rel is DEPRECATED:
         threshold_rel = None
 
-    image = _rescale_value_range(image, mode=prescale)
+    image = _prescale_value_range(image, mode=prescale)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
 
@@ -609,7 +610,7 @@ def blob_log(
     if threshold_rel is DEPRECATED:
         threshold_rel = None
 
-    image = _rescale_value_range(image, mode=prescale)
+    image = _prescale_value_range(image, mode=prescale)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
 
@@ -810,7 +811,7 @@ def blob_doh(
 
     check_nD(image, 2)
 
-    image = _rescale_value_range(image, mode=prescale)
+    image = _prescale_value_range(image, mode=prescale)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
 

@@ -3,7 +3,7 @@ import functools
 import numpy as np
 import scipy.fft as fft
 
-from .._shared.utils import _supported_float_type
+from _skimage2._shared.utils import _supported_float_type
 
 
 def _get_nd_butterworth_filter(

@@ -1,7 +1,7 @@
 import numpy as np
 from scipy import ndimage as ndi
 
-from .._shared.utils import _validate_interpolation_order, _fix_ndimage_mode
+from _skimage2._shared.utils import _validate_interpolation_order, _fix_ndimage_mode
 
 
 def profile_line(

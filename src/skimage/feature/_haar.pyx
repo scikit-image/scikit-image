@@ -8,8 +8,8 @@ import numpy as np
 cimport numpy as cnp
 from libcpp.vector cimport vector
 
-from .._shared.fused_numerics cimport np_real_numeric
-from .._shared.transform cimport integrate
+from _skimage2._shared.fused_numerics cimport np_real_numeric
+from _skimage2._shared.transform cimport integrate
 
 FEATURE_TYPE = {'type-2-x': 0, 'type-2-y': 1,
                 'type-3-x': 2, 'type-3-y': 3,

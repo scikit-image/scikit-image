@@ -2,14 +2,19 @@ import numpy as np
 import pytest
 from numpy.testing import assert_almost_equal
 
-from skimage2.data import binary_blobs
-from skimage._shared.testing import assert_stacklevel
+from _skimage2.data import binary_blobs
+from _skimage2._shared.testing import assert_stacklevel
 
 
 SEED = 3  # Pin randomness of tests
 
 
 class Test_binary_blobs:
+    def test_required_args_positional(self):
+        blobs_kw = binary_blobs(shape=(32, 32), blob_size=5, rng=SEED)
+        blobs_pos = binary_blobs((32, 32), 5, rng=SEED)
+        np.testing.assert_array_equal(blobs_kw, blobs_pos)
+
     def test_volume_fraction(self):
         blobs = binary_blobs(shape=(128, 128), blob_size=13, rng=SEED)
         assert_almost_equal(blobs.mean(), 0.5, decimal=1)

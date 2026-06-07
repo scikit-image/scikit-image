@@ -1,22 +1,21 @@
-"""skimage2 namespace"""
+"""Image Processing for Python (EXPERIMENTAL API version 2)."""
 
 import warnings
 
-import lazy_loader as _lazy
-
-from skimage import __version__
+import _skimage2
 
 
-class ExperimentalAPIWarning(UserWarning):
-    """Mark unstable API that's intentionally not published (yet)."""
+# Will simulate the namespace of `_skimage2` as close as possible.
+# This does not seem to work for `help(skimage2)` though and won't fool
+# inspection tools, that look for actual subdirectories.
+__all__ = _skimage2.__all__
+__dir__ = _skimage2.__dir__
+__getattr__ = _skimage2.__getattr__
 
 
 warnings.warn(
     "Importing from the `skimage2` namespace is experimental. "
     "Its API is under development and considered unstable!",
-    category=ExperimentalAPIWarning,
+    category=_skimage2.ExperimentalAPIWarning,
     stacklevel=2,
 )
-
-
-__getattr__, _, __all__ = _lazy.attach_stub(__name__, __file__)
