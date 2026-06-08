@@ -1149,7 +1149,6 @@ def _walk_api_via_dunder_all(module):
             yield qualname, obj
 
 
-@pytest.mark.xfail(reason="draft")
 def test_public_skimage_api(tmp_path):
     import skimage
 
@@ -1173,6 +1172,8 @@ def test_public_skimage_api(tmp_path):
 
         skimage_api.add(key)
 
+    # Save results to `tmp_dir` for easier "diffing". Generate diff with:
+    # git diff --no-index -U0 expected.txt actual.txt
     with (tmp_path / "actual.txt").open("w") as f:
         f.write("\n".join(sorted(skimage_api)))
     with (tmp_path / "expected.txt").open("w") as f:
