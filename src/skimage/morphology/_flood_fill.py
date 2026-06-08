@@ -13,7 +13,7 @@ from ._util import (
     _resolve_neighborhood,
     _set_border_values,
 )
-from .._shared.dtype import numeric_dtype_min_max
+from _skimage2._shared.dtype import numeric_dtype_min_max
 
 
 def flood_fill(

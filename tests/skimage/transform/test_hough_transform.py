@@ -3,7 +3,7 @@ import pytest
 from numpy.testing import assert_almost_equal, assert_equal
 
 from skimage import data, transform, feature
-from skimage._shared.testing import run_in_parallel
+from _skimage2._shared.testing import run_in_parallel
 from skimage.draw import circle_perimeter, ellipse_perimeter, line
 
 
@@ -206,7 +206,8 @@ def test_hough_line_peaks_zero_input():
 def test_hough_line_peaks_single_angle():
     # Regression test for gh-4814
     # This code snippet used to raise an IndexError
-    img = np.random.random((100, 100))
+    rng = np.random.RandomState(3663933399)
+    img = rng.random((100, 100))
     tested_angles = np.array([np.pi / 2])
     h, theta, d = transform.hough_line(img, theta=tested_angles)
     accum, angles, dists = transform.hough_line_peaks(h, theta, d, threshold=2)

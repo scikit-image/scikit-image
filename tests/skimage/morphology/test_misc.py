@@ -10,9 +10,13 @@ from skimage.morphology import (
     label,
 )
 
-from skimage._shared import testing
-from skimage._shared.testing import assert_array_equal, assert_equal, assert_stacklevel
-from skimage._shared._warnings import expected_warnings
+from _skimage2._shared import testing
+from _skimage2._shared.testing import (
+    assert_array_equal,
+    assert_equal,
+    assert_stacklevel,
+)
+from _skimage2._shared._warnings import expected_warnings
 
 
 test_object_image = np.array([[0, 0, 0, 1, 0], [1, 1, 1, 0, 0], [1, 1, 1, 0, 1]], bool)
@@ -109,28 +113,39 @@ def test_single_label_warning():
 
 
 def test_float_input():
-    float_test = np.random.rand(5, 5)
+    rng = np.random.RandomState(1050268745)
+    float_test = rng.rand(5, 5)
     with testing.raises(TypeError):
         remove_small_objects(float_test)
 
 
 def test_negative_input():
-    negative_int = np.random.randint(-4, -1, size=(5, 5))
+    rng = np.random.RandomState(3417457980)
+    negative_int = rng.randint(-4, -1, size=(5, 5))
     with testing.raises(ValueError):
         remove_small_objects(negative_int)
 
 
 def test_remove_small_objects_deprecated_min_size():
     expected = np.array([[0, 0, 0, 0, 0], [1, 1, 1, 0, 0], [1, 1, 1, 0, 0]], dtype=bool)
+    zeros = np.zeros_like(expected)
 
-    # This is fine
-    observed = remove_small_objects(test_object_image, max_size=3)
+    # New max_size=6 filters all objects without warning
+    observed = remove_small_objects(test_object_image, max_size=6)
+    assert_array_equal(observed, zeros)
+    # New max_size=5 leaves on object of size 6 without warning
+    observed = remove_small_objects(test_object_image, max_size=5)
     assert_array_equal(observed, expected)
 
-    # Using area_threshold= warns
+    # Deprecated min_size=7 warns and filters all objects
     regex = "Parameter `min_size` is deprecated"
     with pytest.warns(FutureWarning, match=regex) as record:
-        observed = remove_small_objects(test_object_image, min_size=5)
+        observed = remove_small_objects(test_object_image, min_size=7)
+    assert_stacklevel(record)
+    assert_array_equal(observed, zeros)
+    # Deprecated min_size=6 warns leaves on object of size 6
+    with pytest.warns(FutureWarning, match=regex) as record:
+        observed = remove_small_objects(test_object_image, min_size=6)
     assert_stacklevel(record)
     assert_array_equal(observed, expected)
 
@@ -336,7 +351,8 @@ def test_label_warning_holes():
 
 
 def test_float_input_holes():
-    float_test = np.random.rand(5, 5)
+    rng = np.random.RandomState(750711557)
+    float_test = rng.rand(5, 5)
     with testing.raises(TypeError):
         remove_small_holes(float_test)
 
@@ -407,7 +423,7 @@ class Test_remove_near_objects:
     @pytest.mark.parametrize("distance", [5, 50, 100])
     @pytest.mark.parametrize("p_norm", [1, 2, np.inf])
     def test_random(self, distance, p_norm):
-        rng = np.random.default_rng(1713648513)
+        rng = np.random.RandomState(1713648513)
         image = rng.random(size=(400, 400))
         maxima = local_maxima(image)
         objects = label(maxima)

@@ -6,14 +6,12 @@ import scipy.stats
 import numpy as np
 
 from ..util.dtype import img_as_float
-from .._shared import utils
-from .._shared.utils import _supported_float_type, warn
+from _skimage2._shared import utils
+from _skimage2._shared.utils import _supported_float_type, warn
+from _skimage2._shared.version_requirements import require
 from ._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
 from .. import color
 from ..color.colorconv import ycbcr_from_rgb
-
-
-__doctest_requires__ = {("denoise_wavelet", "estimate_sigma"): ["pywt"]}
 
 
 def _gaussian_weight(array, sigma_squared, *, dtype=float):
@@ -673,7 +671,7 @@ def _wavelet_threshold(
         Input data to be denoised. `image` can be of any numeric type,
         but it is cast into an ndarray of floats for the computation
         of the denoised image.
-    wavelet : string
+    wavelet : str
         The type of wavelet to perform. Can be any of the options
         pywt.wavelist outputs. For example, this may be any of ``{db1, db2,
         db3, db4, haar}``.
@@ -849,6 +847,7 @@ def _rescale_sigma_rgb2ycbcr(sigmas):
     return sigmas
 
 
+@require("pywt")
 @utils.channel_as_last_axis()
 def denoise_wavelet(
     image,
@@ -1046,6 +1045,7 @@ def denoise_wavelet(
     return out
 
 
+@require("pywt")
 def estimate_sigma(image, average_sigmas=False, *, channel_axis=None):
     """
     Robust wavelet-based estimator of the (Gaussian) noise standard deviation.

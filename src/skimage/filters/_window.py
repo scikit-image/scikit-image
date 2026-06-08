@@ -3,8 +3,8 @@ import functools
 import numpy as np
 from scipy.signal import get_window
 
-from .._shared.utils import safe_as_int
-from ..transform import warp
+from _skimage2._shared.utils import safe_as_int
+from ..transform._warps import warp
 
 
 def window(window_type, shape, warp_kwargs=None):
@@ -12,15 +12,15 @@ def window(window_type, shape, warp_kwargs=None):
 
     Parameters
     ----------
-    window_type : string, float, or tuple
+    window_type : str or float or tuple
         The type of window to be created. Any window type supported by
         ``scipy.signal.get_window`` is allowed here. See notes below for a
         current list, or the SciPy documentation for the version of SciPy
         on your machine.
-    shape : tuple of int or int
+    shape : int or tuple of (int, ...)
         The shape of the window along each axis. If an integer is provided,
         a 1D window is generated.
-    warp_kwargs : dict
+    warp_kwargs : dict of {str: Any}
         Keyword arguments passed to `skimage.transform.warp` (e.g.,
         ``warp_kwargs={'order':3}`` to change interpolation method).
 

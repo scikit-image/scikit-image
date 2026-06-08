@@ -46,7 +46,7 @@ Input types
 ===========
 
 Although we aim to preserve the data range and type of input images, functions
-may support only a subset of these data-types. In such
+may support only a subset of these data types. In such
 a case, the input will be converted to the required type (if possible), and
 a warning message printed to the log if a memory copy is needed. Type
 requirements should be noted in the docstrings.

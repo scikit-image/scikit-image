@@ -26,8 +26,7 @@ scikit-image (here) by other authors.)
 
 import numpy as np
 
-
-__doctest_requires__ = {("learn_gmm", "fisher_vector"): ["sklearn"]}
+from _skimage2._shared.version_requirements import require
 
 
 class FisherVectorException(Exception):
@@ -38,6 +37,7 @@ class DescriptorException(FisherVectorException):
     pass
 
 
+@require("sklearn")
 def learn_gmm(descriptors, *, n_modes=32, gm_args=None):
     """Estimate a Gaussian mixture model (GMM) given a set of descriptors and
     number of modes (i.e. Gaussians). This function is essentially a wrapper
@@ -55,7 +55,7 @@ def learn_gmm(descriptors, *, n_modes=32, gm_args=None):
 
     Parameters
     ----------
-    descriptors : np.ndarray (N, M) or list [(N1, M), (N2, M), ...]
+    descriptors : ndarray of shape (N, M) or list of (tuple[int, int])
         List of NumPy arrays, or a single NumPy array, of the descriptors
         used to estimate the GMM. The reason a list of NumPy arrays is
         permissible is because often when using a Fisher vector encoding,
@@ -90,14 +90,7 @@ def learn_gmm(descriptors, *, n_modes=32, gm_args=None):
     >>> # Estimate 16-mode GMM with these synthetic SIFT vectors
     >>> gmm = learn_gmm(sift_for_images, n_modes=num_modes)
     """
-
-    try:
-        from sklearn.mixture import GaussianMixture
-    except ImportError:
-        raise ImportError(
-            'scikit-learn is not installed. Please ensure it is installed in '
-            'order to use the Fisher vector functionality.'
-        )
+    from sklearn.mixture import GaussianMixture
 
     if not isinstance(descriptors, (list, np.ndarray)):
         raise DescriptorException(
@@ -129,7 +122,7 @@ def learn_gmm(descriptors, *, n_modes=32, gm_args=None):
 
     if gm_args:
         has_cov_type = 'covariance_type' in gm_args
-        cov_type_not_diag = gm_args['covariance_type'] != 'diag'
+        cov_type_not_diag = gm_args.get('covariance_type', None) != 'diag'
         if has_cov_type and cov_type_not_diag:
             raise FisherVectorException('Covariance type must be "diag".')
 
@@ -152,6 +145,7 @@ def learn_gmm(descriptors, *, n_modes=32, gm_args=None):
     return gmm
 
 
+@require("sklearn")
 def fisher_vector(descriptors, gmm, *, improved=False, alpha=0.5):
     """Compute the Fisher vector given some descriptors/vectors,
     and an associated estimated GMM.
@@ -202,13 +196,7 @@ def fisher_vector(descriptors, gmm, *, improved=False, alpha=0.5):
     >>> # Compute the Fisher vector
     >>> fv = fisher_vector(test_image_descriptors, gmm)
     """
-    try:
-        from sklearn.mixture import GaussianMixture
-    except ImportError:
-        raise ImportError(
-            'scikit-learn is not installed. Please ensure it is installed in '
-            'order to use the Fisher vector functionality.'
-        )
+    from sklearn.mixture import GaussianMixture
 
     if not isinstance(descriptors, np.ndarray):
         raise DescriptorException('Please ensure descriptors is a NumPy array.')

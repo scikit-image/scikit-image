@@ -11,7 +11,6 @@ on:
     paths:
       - ".github/workflows/wheels-test-and-release.yaml"
       - ".github/workflows/wheels-recipe.yaml"
-      - "pyproject.toml"
 
 concurrency:
   # Cancel previous workflows on the same branch
