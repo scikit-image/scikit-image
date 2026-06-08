@@ -1,7 +1,7 @@
 """
-========================================
-Compute mean structural similarity index
-========================================
+===================================
+Compute structural similarity index
+===================================
 
 When comparing images, the mean squared error (MSE)--while simple to
 implement--is not highly indicative of perceived similarity. The structural
