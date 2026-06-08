@@ -8,7 +8,6 @@ python_sources = [
     '_remap.py',
     '_slice_along_axes.py',
     'noise.py',
-    '_value_rescaling.py',
     '_map_array.py',
     '_backends.py',
     '_montage.py',

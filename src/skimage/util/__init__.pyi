@@ -22,7 +22,6 @@ from .noise import random_noise
 from .shape import view_as_blocks, view_as_windows
 from .unique import unique_rows
 from ._lookfor import lookfor
-from ._value_rescaling import rescale_minmax, rescale_legacy, _prescale_value_range
 
 class PendingSkimage2Change(PendingDeprecationWarning): ...
 class FailedEstimationAccessError(AttributeError): ...
@@ -53,7 +52,4 @@ __all__ = [
     'lookfor',
     'FailedEstimationAccessError',
     'PendingSkimage2Change',
-    'rescale_minmax',
-    'rescale_legacy',
-    "_prescale_value_range",
 ]
