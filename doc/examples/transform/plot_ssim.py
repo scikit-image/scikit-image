@@ -41,8 +41,8 @@ img_const = img + abs(noise)
 # Ensure that the (floating-point) values in the original image range
 # from 0 to 1.
 
-assert img.min() == 0.0
-assert img.max() == 1.0
+assert np.isclose(img.min(), 0.0), f"Expected img.min() ≈ 0.0, got {img.min()}"
+assert np.isclose(img.max(), 1.0), f"Expected img.max() ≈ 1.0, got {img.max()}"
 
 mse_none = ski.metrics.mean_squared_error(img, img)
 ssim_none = ski.metrics.structural_similarity(img, img, data_range=1.0)
