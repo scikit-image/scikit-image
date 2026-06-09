@@ -487,6 +487,9 @@ def jerman(
     >>> img = data.retina()
     >>> filtered = jerman(img[:, :, 1], sigmas=range(1, 8))
     """
+    # Avoid circular import
+    from ..feature.corner import hessian_matrix, hessian_matrix_eigvals
+
     check_nD(image, [2, 3])  # Check image dimensions.
     image = image.astype(_supported_float_type(image.dtype), copy=False)
     if not black_ridges:  # Normalize to black ridges.
