@@ -3,7 +3,7 @@ import pytest
 import itertools
 
 import numpy as np
-from numpy.testing import assert_equal, assert_array_equal, assert_array_almost_equal
+from numpy.testing import assert_equal, assert_allclose
 from scipy.spatial.distance import pdist, minkowski
 from scipy import ndimage as ndi
 
@@ -129,7 +129,7 @@ class TestPeakLocalMax:
         image[3, 3] = 20
         peaks = peak_local_max(image, min_distance=1, threshold_rel=0.5)
         assert len(peaks) == 1
-        assert_array_almost_equal(peaks, [(3, 3)])
+        assert_allclose(peaks, [(3, 3)])
 
     def test_absolute_threshold(self):
         image = np.zeros((5, 5), dtype=np.uint8)
@@ -137,7 +137,7 @@ class TestPeakLocalMax:
         image[3, 3] = 20
         peaks = peak_local_max(image, min_distance=1, threshold_abs=10)
         assert len(peaks) == 1
-        assert_array_almost_equal(peaks, [(3, 3)])
+        assert_allclose(peaks, [(3, 3)])
 
     def test_constant_image(self):
         image = np.full((20, 20), 128, dtype=np.uint8)
@@ -302,24 +302,24 @@ class TestPeakLocalMax:
         expected = np.array([[2, 2, 2]], dtype=int)
         expectedNoBorder = np.array([[0, 0, 1], [2, 2, 2], [3, 0, 0]], dtype=int)
         result = peak_local_max(nd_image, min_distance=2, exclude_border=2)
-        assert_array_equal(result, expected)
+        assert_equal(result, expected)
         # Check that bools work as expected
-        assert_array_equal(
+        assert_equal(
             peak_local_max(nd_image, min_distance=2, exclude_border=2),
             peak_local_max(nd_image, min_distance=2, exclude_border=True),
         )
-        assert_array_equal(
+        assert_equal(
             peak_local_max(nd_image, min_distance=2, exclude_border=0),
             peak_local_max(nd_image, min_distance=2, exclude_border=False),
         )
 
         # Check both versions with no border
         result = peak_local_max(nd_image, min_distance=2, exclude_border=0)
-        assert_array_equal(result, expectedNoBorder)
+        assert_equal(result, expectedNoBorder)
         peak_idx = peak_local_max(nd_image, exclude_border=False)
         result = np.zeros_like(nd_image, dtype=bool)
         result[tuple(peak_idx.T)] = True
-        assert_array_equal(result, nd_image.astype(bool))
+        assert_equal(result, nd_image.astype(bool))
 
     @pytest.mark.parametrize("ndim", [1, 2, 3, 4])
     def test_empty(self, ndim):
@@ -377,7 +377,7 @@ class TestPeakLocalMax:
             threshold_rel=0,
             exclude_border=False,
         )
-        assert_array_equal(result, expected)
+        assert_equal(result, expected)
 
     def test_adjacent_and_different(self):
         image = np.zeros((10, 20))
@@ -394,11 +394,11 @@ class TestPeakLocalMax:
             threshold_rel=0,
             exclude_border=False,
         )
-        assert_array_equal(result, expected)
+        assert_equal(result, expected)
         result = peak_local_max(
             image, labels=labels, min_distance=1, threshold_rel=0, exclude_border=False
         )
-        assert_array_equal(result, expected)
+        assert_equal(result, expected)
 
     def test_not_adjacent_and_different(self):
         image = np.zeros((10, 20))
@@ -415,7 +415,7 @@ class TestPeakLocalMax:
             threshold_rel=0,
             exclude_border=False,
         )
-        assert_array_equal(result, expected)
+        assert_equal(result, expected)
 
     def test_two_objects(self):
         image = np.zeros((10, 20))
@@ -433,7 +433,7 @@ class TestPeakLocalMax:
             threshold_rel=0,
             exclude_border=False,
         )
-        assert_array_equal(result, expected)
+        assert_equal(result, expected)
 
     def test_adjacent_different_objects(self):
         image = np.zeros((10, 20))
@@ -451,7 +451,7 @@ class TestPeakLocalMax:
             threshold_rel=0,
             exclude_border=False,
         )
-        assert_array_equal(result, expected)
+        assert_equal(result, expected)
 
     def test_four_quadrants(self):
         rng = np.random.RandomState(2544711809)
@@ -560,7 +560,7 @@ class TestPeakLocalMax:
         assert len(peak_local_max(image)) == 0
 
         image[2, 2] = 2
-        assert_array_equal(peak_local_max(image), [[2, 2]])
+        assert_equal(peak_local_max(image), [[2, 2]])
 
         image[2, 2] = 0
         with pytest.warns(RuntimeWarning, match=r"When `min_distance < 1`") as record:
@@ -732,7 +732,8 @@ def test_input_values_with_labels():
 
     _ = peak_local_max(img, labels=labels)
 
-    assert_array_equal(img, img_before)
+    assert_equal(img, img_before)
+
 
 class TestProminentPeaks:
     def test_isolated_peaks(self):
