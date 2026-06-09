@@ -13,7 +13,6 @@ python_sources = [
     '__init__.py',
     'haar.py',
     '_hog.py',
-    'peaks.py',
     'censure.py',
     'peak.py',
     '_haar.py',
