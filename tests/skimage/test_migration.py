@@ -603,6 +603,9 @@ SKIMAGE_FILE_TREE_IGNORE = {
     '_build_utils/version',
     # Added after v0.26.0:
     '_migration',
+    # Nowhere used on GitHub, and the module is quite "young"
+    '_vendored/__init__',
+    '_vendored/numpy_lookfor',
 }
 
 
