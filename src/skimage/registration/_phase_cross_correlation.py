@@ -35,12 +35,12 @@ def _upsampled_dft(data, upsampled_region_size, upsample_factor=1, axis_offsets=
     ----------
     data : array
         The input data array (DFT of original data) to upsample.
-    upsampled_region_size : integer or tuple of integers, optional
+    upsampled_region_size : int or tuple of (int, ...), optional
         The size of the region to be sampled.  If one integer is provided, it
         is duplicated up to the dimensionality of ``data``.
-    upsample_factor : integer, optional
+    upsample_factor : int, optional
         The upsampling factor.  Defaults to 1.
-    axis_offsets : tuple of integers, optional
+    axis_offsets : tuple of (int, ...), optional
         The offsets of the region to be sampled.  Defaults to None (uses
         image center)
 
@@ -232,7 +232,7 @@ def phase_cross_correlation(
         ``upsample_factor == 20`` means the images will be registered
         within 1/20th of a pixel. Default is 1 (no upsampling).
         Not used if any of ``reference_mask`` or ``moving_mask`` is not None.
-    space : string, one of "real" or "fourier", optional
+    space : {"real", "fourier"}, optional
         Defines how the algorithm interprets input data. "real" means
         data will be FFT'd to compute the correlation, while "fourier"
         data will bypass FFT of input data. Case insensitive. Not

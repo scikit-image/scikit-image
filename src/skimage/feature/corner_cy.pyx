@@ -7,7 +7,7 @@ cimport numpy as cnp
 from libc.float cimport DBL_MAX
 from libc.math cimport atan2, fabs
 
-from .._shared.fused_numerics cimport np_floats
+from _skimage2._shared.fused_numerics cimport np_floats
 
 cnp.import_array()
 

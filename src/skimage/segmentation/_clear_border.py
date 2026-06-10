@@ -8,7 +8,7 @@ def clear_border(labels, buffer_size=0, bgval=0, mask=None, *, out=None):
 
     Parameters
     ----------
-    labels : (M[, N[, ..., P]]) array of int or bool
+    labels : ndarray of shape (M[, N[, ..., P]]) and dtype (int or bool)
         Imaging data labels.
     buffer_size : int, optional
         The width of the border examined.  By default, only objects

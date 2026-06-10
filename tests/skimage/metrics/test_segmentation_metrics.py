@@ -8,7 +8,7 @@ from skimage.metrics import (
     contingency_table,
 )
 
-from skimage._shared.testing import (
+from _skimage2._shared.testing import (
     assert_equal,
     assert_almost_equal,
     assert_array_equal,

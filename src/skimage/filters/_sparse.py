@@ -1,6 +1,6 @@
 import numpy as np
 
-from .._shared.utils import _supported_float_type, _to_np_mode
+from _skimage2._shared.utils import _supported_float_type, _to_np_mode
 
 
 def _validate_window_size(axis_sizes):
@@ -51,9 +51,9 @@ def _correlate_sparse(image, kernel_shape, kernel_indices, kernel_values):
     ----------
     image : ndarray
         The (prepadded) image to be correlated.
-    kernel_shape : tuple of int
+    kernel_shape : tuple of (int, ...)
         The shape of the sparse filter kernel.
-    kernel_indices : list of coordinate tuples
+    kernel_indices : list of (tuple of (int, ...))
         The indices of each non-zero kernel entry.
     kernel_values : list of float
         The kernel values at each location in kernel_indices.

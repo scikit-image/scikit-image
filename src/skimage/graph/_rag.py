@@ -5,10 +5,7 @@ from scipy import sparse
 import math
 
 from .. import measure, segmentation, util, color
-from .._shared.version_requirements import require
-
-
-__doctest_requires__ = {("show_rag",): ["matplotlib"]}
+from _skimage2._shared.version_requirements import require
 
 
 def _edge_generator_from_csr(csr_array):
@@ -117,7 +114,7 @@ class RAG(nx.Graph):
         An initial segmentation, with each region labeled as a different
         integer. Every unique value in ``label_image`` will correspond to
         a node in the graph.
-    connectivity : int in {1, ..., ``label_image.ndim``}, optional
+    connectivity : int, in range [1, `label_image.ndim`], optional
         The connectivity between pixels in ``label_image``. For a 2D image,
         a connectivity of 1 corresponds to immediate neighbors up, down,
         left, and right, while a connectivity of 2 also includes diagonal
@@ -126,7 +123,7 @@ class RAG(nx.Graph):
         Initial or additional edges to pass to :obj:`networkx.Graph`
         constructor. Valid edge specifications include edge list (list of tuples),
         NumPy arrays, and SciPy sparse matrices.
-    **attr : keyword arguments, optional
+    **attr : Any, optional
         Additional attributes to add to the graph.
     """
 
@@ -186,7 +183,7 @@ class RAG(nx.Graph):
         in_place : bool, optional
             If set to `True`, the merged node has the id `dst`, else merged
             node has a new id which is returned.
-        extra_arguments : sequence, optional
+        extra_arguments : Sequence, optional
             The sequence of extra positional arguments passed to
             `weight_func`.
         extra_keywords : dictionary, optional
@@ -458,7 +455,7 @@ def rag_boundary(labels, edge_map, connectivity=2):
     return rag
 
 
-@require("matplotlib", ">=3.3")
+@require("matplotlib", version=">=3.3")
 def show_rag(
     labels,
     rag,
