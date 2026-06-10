@@ -1,6 +1,14 @@
+import operator
+from functools import partial
+
 import numpy as np
 import pytest
-from numpy.testing import assert_allclose, assert_array_less, assert_equal
+from numpy.testing import (
+    assert_allclose,
+    assert_array_compare,
+    assert_array_less,
+    assert_equal,
+)
 
 from skimage import img_as_float
 from _skimage2._shared.utils import _supported_float_type
@@ -343,3 +351,44 @@ def test_border_management(func, tol):
     assert abs(full_mean - inside_mean) < tol
     assert abs(full_mean - border_mean) < tol
     assert abs(inside_mean - border_mean) < tol
+
+
+def test_jerman_result_decrease_with_tau_increase():
+    # tau is a parameter of the Jerman filter used to enhance the difference between
+    # lamdba3 and lambda2. Increasing tau makes the filter less sensitive to noisy
+    # structures.
+    #
+    # The Jerman filter depends only on the ratio of lambda_rho / lambda2, where
+    # lambda_rho is the enhanced lambda3 (lambda3 can only increase with tau, see
+    # implementation). The implementation also ensures lambda_rho >= lambda2, so r =
+    # lambda_rho / lambda2 >= 1. The final value of the filter depends on:
+    #
+    # V = lambda2**2 * (lambda_rho - lambda2) * 27 / ((lambda2 + lambda_rho) ** 3) with
+    # V = 1 if lambda2 >= lambda_rho/2 > 0
+    #
+    # Substituting lambda_rho = lambda2 * r:
+    #
+    # V = 1 if 2 >= r > 1, otherwise for r > 2:
+    #
+    # V(r) = lambda2**2 * (lambda2 * (r - 1)) * 27 / ((lambda2 * (1 + r)) ** 3)
+    # V(r) = (r - 1) * 27 / ((1 + r) ** 3)
+    #
+    # We can verify that V(r) decreses with r > 2 with the derivative of V that is
+    # strictly negative for r > 2:
+    #
+    # V'(r) = 27 * (4 - 2*r) / ((1 + r) ** 4)
+    #
+    # r increases with tau (or stays the same). V decreases with r (or stays the same).
+    assert_array_less_or_equal = partial(assert_array_compare, operator.le)
+
+    img = rgb2gray(retina()[300:500, 700:900])
+    monotonic_tau_increase = np.linspace(0, 2, 5)
+
+    out = jerman(img, tau=monotonic_tau_increase[0])
+    for tau in monotonic_tau_increase[1:]:
+        out_next = jerman(img, tau=tau)
+        assert_array_less_or_equal(out_next, out)
+        # for the retina image, we know we do not max out the filter response, so we
+        # expect a decrease in the sum of all values.
+        assert out_next.sum() <= out.sum()
+        out = out_next
