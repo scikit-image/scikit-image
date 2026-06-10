@@ -2,6 +2,7 @@ import numpy as np
 
 from .._shared.utils import _supported_float_type
 from .._shared._warnings import warn_external
+from .dtype import img_as_float
 
 
 def rescale_minmax(image):
@@ -142,11 +143,7 @@ def rescale_legacy(image):
     >>> rescale_legacy(np.array([0, 127, 255], dtype=float))
     array([  0., 127., 255.])
     """
-    # TODO Undo inlined imports once available in _skimage2 namespace
-    from _skimage2.util.dtype import img_as_float
-
-    out = img_as_float(image)
-    return out
+    return img_as_float(image)
 
 
 def _prescale_value_range(image, *, mode):
