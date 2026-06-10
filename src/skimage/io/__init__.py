@@ -9,6 +9,7 @@ from .collection import *
 
 from ._io import *
 from ._image_stack import *
+from . import util
 
 
 with _hide_plugin_deprecation_warnings():
@@ -25,6 +26,7 @@ __all__ = [
     "load_surf",
     "pop",
     "push",
+    "util",
     "ImageCollection",
     "MultiImage",
 ]

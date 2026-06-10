@@ -38,6 +38,7 @@ from ._max_tree import (
     max_tree,
     max_tree_local_maxima,
 )
+from . import gray
 
 def label(label_image, background=None, return_num=False, connectivity=None): ...
 
@@ -60,6 +61,7 @@ __all__ = [
     'flood_fill',
     'footprint_from_sequence',
     'footprint_rectangle',
+    'gray',
     'h_maxima',
     'h_minima',
     'isotropic_closing',

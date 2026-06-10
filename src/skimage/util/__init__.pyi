@@ -22,6 +22,7 @@ from .noise import random_noise
 from .shape import view_as_blocks, view_as_windows
 from .unique import unique_rows
 from ._lookfor import lookfor
+from . import arraycrop, dtype, noise
 
 class PendingSkimage2Change(PendingDeprecationWarning): ...
 class FailedEstimationAccessError(AttributeError): ...
@@ -38,10 +39,13 @@ __all__ = [
     'view_as_blocks',
     'view_as_windows',
     'slice_along_axes',
+    'arraycrop',
     'crop',
     'compare_images',
+    'dtype',
     'map_array',
     'montage',
+    'noise',
     'random_noise',
     'regular_grid',
     'regular_seeds',
