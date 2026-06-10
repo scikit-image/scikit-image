@@ -87,10 +87,6 @@ Copyright: 2009, Dirk-Jan Kroon
            2017, Tim Jerman
 License: BSD-3-Clause
 
-Function: skimage/_shared/_warnings.py:warn_external
-Copyright: 2012-2025 Matplotlib Development Team
-License: PSF-2.0
-
 License: BSD-2-Clause
 
 Redistribution and use in source and binary forms, with or without
