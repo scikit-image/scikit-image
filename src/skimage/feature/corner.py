@@ -105,7 +105,7 @@ def corner_peaks(
 
     Examples
     --------
-    >>> from _skimage2.feature import peak_local_max
+    >>> from skimage.feature import peak_local_max
     >>> response = np.zeros((5, 5))
     >>> response[2:4, 2:4] = 1
     >>> response
