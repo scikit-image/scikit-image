@@ -5,6 +5,7 @@ import warnings
 import re
 from textwrap import dedent
 from pathlib import Path
+from pprint import pformat
 
 
 import numpy as np
@@ -334,6 +335,277 @@ def test_skimage2migration_trainable_segmenter_remains_class():
     assert hasattr(segmenter, 'predict')
 
 
+# The file tree in the installed v0.26.0 `skimage` package.
+# Generated on 'v0.26.0' (ee0a7a3ebd9ac8c2602f40e55bc015a3c8a81ae8) by running
+# `test_skimage_file_tree` (see `skimage_file_tree.txt` in its `tmp_dir`).
+SKIMAGE_FILE_TREE = {
+    '__init__',
+    '_build_utils/__init__',
+    '_build_utils/copyfiles',
+    '_build_utils/cythoner',
+    '_build_utils/gcc_build_bitness',
+    '_build_utils/tempita',
+    '_build_utils/version',
+    '_shared/__init__',
+    '_shared/_dependency_checks',
+    '_shared/_geometry',
+    '_shared/_tempfile',
+    '_shared/_warnings',
+    '_shared/compat',
+    '_shared/coord',
+    '_shared/dtype',
+    '_shared/fast_exp',
+    '_shared/filters',
+    '_shared/geometry',
+    '_shared/interpolation',
+    '_shared/tester',
+    '_shared/testing',
+    '_shared/transform',
+    '_shared/utils',
+    '_shared/version_requirements',
+    '_vendored/__init__',
+    '_vendored/numpy_lookfor',
+    'color/__init__',
+    'color/adapt_rgb',
+    'color/colorconv',
+    'color/colorlabel',
+    'color/delta_e',
+    'color/rgb_colors',
+    'conftest',
+    'data/__init__',
+    'data/_binary_blobs',
+    'data/_fetchers',
+    'data/_registry',
+    'draw/__init__',
+    'draw/_draw',
+    'draw/_polygon2mask',
+    'draw/_random_shapes',
+    'draw/draw',
+    'draw/draw3d',
+    'draw/draw_nd',
+    'exposure/__init__',
+    'exposure/_adapthist',
+    'exposure/exposure',
+    'exposure/histogram_matching',
+    'feature/__init__',
+    'feature/_basic_features',
+    'feature/_canny',
+    'feature/_canny_cy',
+    'feature/_cascade',
+    'feature/_daisy',
+    'feature/_fisher_vector',
+    'feature/_haar',
+    'feature/_hessian_det_appx_pythran',
+    'feature/_hog',
+    'feature/_hoghistogram',
+    'feature/_orb_descriptor_positions',
+    'feature/_sift',
+    'feature/_texture',
+    'feature/blob',
+    'feature/brief',
+    'feature/brief_pythran',
+    'feature/censure',
+    'feature/censure_cy',
+    'feature/corner',
+    'feature/corner_cy',
+    'feature/haar',
+    'feature/match',
+    'feature/orb',
+    'feature/orb_cy',
+    'feature/peak',
+    'feature/sift',
+    'feature/template',
+    'feature/texture',
+    'feature/util',
+    'filters/__init__',
+    'filters/_fft_based',
+    'filters/_gabor',
+    'filters/_gaussian',
+    'filters/_median',
+    'filters/_multiotsu',
+    'filters/_rank_order',
+    'filters/_sparse',
+    'filters/_unsharp_mask',
+    'filters/_window',
+    'filters/edges',
+    'filters/lpi_filter',
+    'filters/rank/__init__',
+    'filters/rank/_percentile',
+    'filters/rank/bilateral',
+    'filters/rank/bilateral_cy',
+    'filters/rank/core_cy',
+    'filters/rank/core_cy_3d',
+    'filters/rank/generic',
+    'filters/rank/generic_cy',
+    'filters/rank/percentile_cy',
+    'filters/ridges',
+    'filters/thresholding',
+    'future/__init__',
+    'future/manual_segmentation',
+    'future/trainable_segmentation',
+    'graph/__init__',
+    'graph/_graph',
+    'graph/_graph_cut',
+    'graph/_graph_merge',
+    'graph/_mcp',
+    'graph/_ncut',
+    'graph/_ncut_cy',
+    'graph/_rag',
+    'graph/_spath',
+    'graph/heap',
+    'graph/mcp',
+    'graph/spath',
+    'io/__init__',
+    'io/_image_stack',
+    'io/_io',
+    'io/_plugins/__init__',
+    'io/_plugins/fits_plugin',
+    'io/_plugins/gdal_plugin',
+    'io/_plugins/imageio_plugin',
+    'io/_plugins/imread_plugin',
+    'io/_plugins/matplotlib_plugin',
+    'io/_plugins/pil_plugin',
+    'io/_plugins/simpleitk_plugin',
+    'io/_plugins/tifffile_plugin',
+    'io/collection',
+    'io/manage_plugins',
+    'io/sift',
+    'io/util',
+    'measure/__init__',
+    'measure/_blur_effect',
+    'measure/_ccomp',
+    'measure/_colocalization',
+    'measure/_find_contours',
+    'measure/_find_contours_cy',
+    'measure/_label',
+    'measure/_marching_cubes_lewiner',
+    'measure/_marching_cubes_lewiner_cy',
+    'measure/_marching_cubes_lewiner_luts',
+    'measure/_moments',
+    'measure/_moments_analytical',
+    'measure/_moments_cy',
+    'measure/_pnpoly',
+    'measure/_polygon',
+    'measure/_regionprops',
+    'measure/_regionprops_utils',
+    'measure/block',
+    'measure/entropy',
+    'measure/fit',
+    'measure/pnpoly',
+    'measure/profile',
+    'metrics/__init__',
+    'metrics/_adapted_rand_error',
+    'metrics/_contingency_table',
+    'metrics/_structural_similarity',
+    'metrics/_variation_of_information',
+    'metrics/set_metrics',
+    'metrics/simple_metrics',
+    'morphology/__init__',
+    'morphology/_convex_hull',
+    'morphology/_extrema_cy',
+    'morphology/_flood_fill',
+    'morphology/_flood_fill_cy',
+    'morphology/_grayreconstruct',
+    'morphology/_max_tree',
+    'morphology/_misc_cy',
+    'morphology/_skeletonize',
+    'morphology/_skeletonize_various_cy',
+    'morphology/_util',
+    'morphology/binary',
+    'morphology/convex_hull',
+    'morphology/extrema',
+    'morphology/footprints',
+    'morphology/gray',
+    'morphology/grayreconstruct',
+    'morphology/isotropic',
+    'morphology/max_tree',
+    'morphology/misc',
+    'registration/__init__',
+    'registration/_masked_phase_cross_correlation',
+    'registration/_optical_flow',
+    'registration/_optical_flow_utils',
+    'registration/_phase_cross_correlation',
+    'restoration/__init__',
+    'restoration/_cycle_spin',
+    'restoration/_denoise',
+    'restoration/_denoise_cy',
+    'restoration/_inpaint',
+    'restoration/_nl_means_denoising',
+    'restoration/_rolling_ball',
+    'restoration/_rolling_ball_cy',
+    'restoration/_unwrap_1d',
+    'restoration/_unwrap_2d',
+    'restoration/_unwrap_3d',
+    'restoration/deconvolution',
+    'restoration/inpaint',
+    'restoration/j_invariant',
+    'restoration/non_local_means',
+    'restoration/uft',
+    'restoration/unwrap',
+    'segmentation/__init__',
+    'segmentation/_chan_vese',
+    'segmentation/_clear_border',
+    'segmentation/_expand_labels',
+    'segmentation/_felzenszwalb',
+    'segmentation/_felzenszwalb_cy',
+    'segmentation/_join',
+    'segmentation/_quickshift',
+    'segmentation/_quickshift_cy',
+    'segmentation/_slic',
+    'segmentation/_watershed',
+    'segmentation/_watershed_cy',
+    'segmentation/active_contour_model',
+    'segmentation/boundaries',
+    'segmentation/morphsnakes',
+    'segmentation/random_walker_segmentation',
+    'segmentation/slic_superpixels',
+    'transform/__init__',
+    'transform/_geometric',
+    'transform/_hough_transform',
+    'transform/_radon_transform',
+    'transform/_thin_plate_splines',
+    'transform/_warps',
+    'transform/_warps_cy',
+    'transform/finite_radon_transform',
+    'transform/hough_transform',
+    'transform/integral',
+    'transform/pyramids',
+    'transform/radon_transform',
+    'util/__init__',
+    'util/_backends',
+    'util/_invert',
+    'util/_label',
+    'util/_map_array',
+    'util/_montage',
+    'util/_regular_grid',
+    'util/_remap',
+    'util/_slice_along_axes',
+    'util/apply_parallel',
+    'util/arraycrop',
+    'util/compare',
+    'util/dtype',
+    'util/lookfor',
+    'util/noise',
+    'util/shape',
+    'util/unique',
+}
+
+
+# Define reviewed exceptions. These are ignored in `test_skimage_file_tree`
+# when comparing `SKIMAGE_FILE_TREE` with the current file tree.
+SKIMAGE_FILE_TREE_IGNORE = {
+    # _build_utils were never installed were only available at build-time
+    '_build_utils/__init__',
+    '_build_utils/copyfiles',
+    '_build_utils/cythoner',
+    '_build_utils/gcc_build_bitness',
+    '_build_utils/tempita',
+    '_build_utils/version',
+    # Added after v0.26.0:
+    '_migration',
+}
+
+
 def _walk_python_files(package_path, *, root=None):
     """Walk Python modules in a given package.
 
@@ -346,11 +618,12 @@ def _walk_python_files(package_path, *, root=None):
 
     Yields
     ------
-    relative_key : str
+    key : str
         A key describing the Python file / submodule relative to the given
-        `root` directory. For example, "_io.collection" or "graph.heap".
+        `root` directory. Suffixes are not included. For example,
+        "io/collection" or "graph/heap".
     path : Path
-        The path of the module.
+        The full path to the file.
     """
     package_path = Path(package_path)
     assert package_path.is_dir()
@@ -366,55 +639,28 @@ def _walk_python_files(package_path, *, root=None):
         assert path.is_file()
         if path.suffix in (".py", ".pyx"):
             key = path.relative_to(root).parts[:-1]
-            if path.stem != "__init__":
-                key = key + (path.stem,)
-            key = ".".join(key)
-
+            key = key + (path.stem,)
+            key = "/".join(key)
             yield key, path
 
 
-# TODO vet correctness
-ONLY_IN_SKI = {
-    "_migration",
-    'feature.peak',
-    'feature.peaks',
-    "future",
-    "future.manual_segmentation",
-    "future.trainable_segmentation",
-    "util._backends",
-}
-
-# TODO vet correctness
-ONLY_IN_SKI2 = {
-    "feature._hessian_det_appx_pythran",
-    "feature.brief_pythran",
-    'morphology._footprints',
-    'morphology._grayscale_operators',
-}
-
-# TODO vet correctness
-SKI_SKI2_RENAMED = {
-    "data._binary_blobs": "data._synthetic",
-    "feature.peak": "feature._peaks",
-    "morphology.gray": "morphology._grayscale_operators",
-}
-
-
-def test_package_trees():
+def test_skimage_file_tree(tmp_path):
     import skimage
-    import _skimage2
 
-    ski_path = Path(skimage.__file__).parent
-    ski2_path = Path(_skimage2.__file__).parent
+    skimage_path = Path(skimage.__file__).parent
+    skimage_file_tree = {key for key, _ in _walk_python_files(skimage_path)}
 
-    ski_tree = dict(_walk_python_files(ski_path))
-    ski2_tree = dict(_walk_python_files(ski2_path))
+    actual = skimage_file_tree - SKIMAGE_FILE_TREE_IGNORE
+    expected = SKIMAGE_FILE_TREE - SKIMAGE_FILE_TREE_IGNORE
 
-    missing_from_ski = ski2_tree.keys() - ski_tree.keys()
-    missing_from_ski2 = ski_tree.keys() - ski2_tree.keys()
+    with (tmp_path / "skimage_file_tree.txt").open("w") as f:
+        f.writelines(pformat(skimage_file_tree))
+    with (tmp_path / "actual.txt").open("w") as f:
+        f.writelines(pformat(actual))
+    with (tmp_path / "expected.txt").open("w") as f:
+        f.writelines(pformat(expected))
 
-    assert missing_from_ski == set(SKI_SKI2_RENAMED.values()) | ONLY_IN_SKI2
-    assert missing_from_ski2 == set(SKI_SKI2_RENAMED.keys()) | ONLY_IN_SKI
+    assert actual == expected
 
 
 # Generated on 'main' (27041bd05f38facf02570a6bdb9aa4010f2d68b5)
@@ -1157,7 +1403,6 @@ def test_public_skimage_api(tmp_path):
     skimage_api = set()
     for qualname, obj in _walk_api_via_dunder_all(skimage):
         assert "._" not in qualname
-        # assert ":_" not in qualname or ":__version__" in qualname
 
         key = qualname
 
@@ -1175,8 +1420,8 @@ def test_public_skimage_api(tmp_path):
     # Save results to `tmp_dir` for easier "diffing". Generate diff with:
     # git diff --no-index -U0 expected.txt actual.txt
     with (tmp_path / "actual.txt").open("w") as f:
-        f.write("\n".join(sorted(skimage_api)))
+        f.writelines(pformat(skimage_api))
     with (tmp_path / "expected.txt").open("w") as f:
-        f.write("\n".join(sorted(SKIMAGE_API)))
+        f.writelines(pformat(SKIMAGE_API))
 
     assert skimage_api == SKIMAGE_API
