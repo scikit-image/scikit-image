@@ -6,9 +6,9 @@ import numpy as np
 from scipy import ndimage as ndi
 from scipy import spatial, stats
 
-from _skimage2._shared.filters import gaussian
+from ..filters._gaussian import gaussian
 from _skimage2._shared.utils import _supported_float_type, safe_as_int, warn
-from ..transform import integral_image
+from ..transform.integral import integral_image
 from ..util import img_as_float
 from ._hessian_det_appx import _hessian_matrix_det
 from .corner_cy import _corner_fast, _corner_moravec, _corner_orientations
@@ -1231,7 +1231,17 @@ def corner_peaks(
                 rejected_peaks_indices.update(candidates)
 
         # Remove the peaks that are too close to each other
-        coords = np.delete(coords, tuple(rejected_peaks_indices), axis=0)[:num_peaks]
+        coords = np.delete(coords, tuple(rejected_peaks_indices), axis=0)
+
+        if num_peaks is not None and len(coords) > num_peaks:
+            # Sort by intensity (highest first) before applying the `num_peaks` limit.
+            # Without labels, `peak_local_max` already returns peaks in intensity order,
+            # but with labels the peaks are grouped per label, so taking the first
+            # `num_peaks` would bias toward the lowest label IDs.
+            intensities = image[tuple(coords.T)]
+            order = np.argsort(-intensities, stable=True)
+            order = order[:num_peaks]
+            coords = coords[order, :]
 
     if indices:
         return coords

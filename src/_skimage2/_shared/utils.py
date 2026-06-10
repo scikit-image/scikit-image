@@ -2,6 +2,7 @@ import functools
 import inspect
 import sys
 import warnings
+import textwrap
 from contextlib import contextmanager
 
 import numpy as np
@@ -671,11 +672,9 @@ class deprecate_func:
     ... )
     ... def foo():
     ...     pass
-
-    Calling ``foo`` will warn with::
-
-        FutureWarning: `foo` is deprecated since version 1.0.0
-        and will be removed in version 1.2.0. Use `bar` instead.
+    >>> foo()  # doctest: +SHOW_WARNINGS
+    FutureWarning: `foo` is deprecated since version 1.0.0
+    and will be removed in version 1.2.0. Use `bar` instead.
     """
 
     def __init__(
@@ -707,11 +706,24 @@ class deprecate_func:
             return func(*args, **kwargs)
 
         # modify docstring to display deprecation warning
-        doc = f'**Deprecated:** {message}'
-        if wrapped.__doc__ is None:
-            wrapped.__doc__ = doc
+        note = "\n".join(textwrap.wrap(message))
+        note = textwrap.indent(note, prefix="   ")
+        note = f".. deprecated:: {self.deprecated_version}\n{note}"
+
+        if sys.flags.optimize >= 2:
+            # `-OO` flag (PYTHONOPTIMIZE) discards docstrings,
+            # don't insert note at all
+            pass
+        elif wrapped.__doc__ is None:
+            wrapped.__doc__ = note
         else:
-            wrapped.__doc__ = doc + '\n\n    ' + wrapped.__doc__
+            # Insert after first line
+            short, _, remaining = wrapped.__doc__.partition("\n\n")
+            if sys.version_info[:2] < (3, 13):
+                # Reproduce unstripped docstrings prior to Python 3.13
+                note = textwrap.indent(note, prefix="    ")
+            new_doc = f"{short}\n\n{note}\n\n{remaining}"
+            wrapped.__doc__ = new_doc
 
         return wrapped
 
@@ -962,6 +974,17 @@ def convert_to_float(image, preserve_range):
     image : ndarray
         Transformed version of the input.
 
+    Examples
+    --------
+    >>> image = np.array([-10, 20], dtype=np.int8)
+    >>> convert_to_float(image, preserve_range=False)
+    array([-0.07874016,  0.15748031])
+
+    >>> convert_to_float(image.astype(float), preserve_range=False)
+    array([-10.,  20.])
+
+    >>> convert_to_float(image.astype(np.float16), preserve_range=False)
+    array([-10.,  20.], dtype=float32)
     """
     if image.dtype == np.float16:
         return image.astype(np.float32)

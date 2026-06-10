@@ -156,7 +156,9 @@ warn_msg, doc = Skimage2Migration(MIGRATION_URL)._filled_docs(
 
 def test_skimage2migration_decoration_interpolation():
     migration_dec = Skimage2Migration(MIGRATION_URL)
-    dfunc = migration_dec(EXAMPLE_INPUT)(func)
+    dfunc = migration_dec(EXAMPLE_INPUT, qname_old="tests.skimage.test_migration.func")(
+        func
+    )
 
     docs = migration_dec.migration_docs
     assert docs == {_func_qname_old: doc}
@@ -170,23 +172,25 @@ def test_skimage2migration_decoration_interpolation():
     assert record[0].message.args[0] == warn_msg
 
     # Specify canonical location.
-    migration_dec(EXAMPLE_INPUT, qname_old='skimage.bar.baz')(func)
-    assert docs['skimage.bar.baz'].startswith(
-        'Replace all calls to ``skimage.bar.baz`` with ``skimage2.bar.baz``.'
+    migration_dec(EXAMPLE_INPUT, qname_old='skimage.bar.func')(func)
+    assert docs['skimage.bar.func'].startswith(
+        'Replace all calls to ``skimage.bar.func`` with ``skimage2.bar.func``.'
     )
     # And skimage2 location.
     migration_dec(
-        EXAMPLE_INPUT, qname_old='skimage.bar.boo', qname_new='skimage2.bun.biz'
+        EXAMPLE_INPUT, qname_old='skimage.bar.func', qname_new='skimage2.bun.biz'
     )(func)
-    assert docs['skimage.bar.boo'].startswith(
-        'Replace all calls to ``skimage.bar.boo`` with ``skimage2.bun.biz``.'
+    assert docs['skimage.bar.func'].startswith(
+        'Replace all calls to ``skimage.bar.func`` with ``skimage2.bun.biz``.'
     )
 
 
 def test_skimage2migration_dedent():
     # Test text dedented.
     migration_dec = Skimage2Migration(MIGRATION_URL)
-    dfunc = migration_dec(EXAMPLE_INPUT)(func)
+    dfunc = migration_dec(EXAMPLE_INPUT, qname_old="tests.skimage.test_migration.func")(
+        func
+    )
 
     from skimage.util import PendingSkimage2Change
 
