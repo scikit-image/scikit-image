@@ -196,7 +196,7 @@ class LineModelND(_BaseModel):
     >>> lm.origin
     array([1.5 , 5.25])
     >>> lm.direction  # doctest: +ELLIPSIS
-    array([0.5547..., 0.8320...])
+    array([0.5547..., 0.83205...])
     >>> res = lm.residuals(np.stack([x, y], axis=-1))
     >>> np.abs(np.round(res, 9))
     array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
