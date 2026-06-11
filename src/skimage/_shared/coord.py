@@ -66,4 +66,3 @@ def ensure_spacing(
         max_out=max_out,
         max_split_size=max_split_size,
     )
-

@@ -610,6 +610,12 @@ SKIMAGE_FILE_TREE_IGNORE = {
     '_vendored/numpy_lookfor',
 }
 
+# Compiled to modules with a different name
+SKIMAGE_COMPILED_FILES = {
+    'feature/_hessian_det_appx_pythran': 'feature/_hessian_det_appx',
+    'feature/brief_pythran': 'feature/brief_cy',
+}
+
 
 def _walk_python_files(package_path, *, root=None):
     """Walk Python modules in a given package.
@@ -657,6 +663,11 @@ def test_skimage_file_tree(tmp_path):
 
     actual = skimage_file_tree - SKIMAGE_FILE_TREE_IGNORE
     expected = SKIMAGE_FILE_TREE - SKIMAGE_FILE_TREE_IGNORE
+
+    for name, rename in SKIMAGE_COMPILED_FILES.items():
+        if name in expected:
+            expected.remove(name)
+            expected.add(rename)
 
     with (tmp_path / "skimage_file_tree.txt").open("w") as f:
         f.writelines(pformat(skimage_file_tree))

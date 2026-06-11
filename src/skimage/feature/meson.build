@@ -28,6 +28,8 @@ python_sources = [
     '_sift.py',
     'corner_cy.py',
     'match.py',
+    'brief_cy.py',
+    '_hessian_det_appx.py',
 ]
 
 py3.install_sources(
