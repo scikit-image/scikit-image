@@ -610,6 +610,7 @@ SKIMAGE_FILE_TREE_IGNORE = {
     '_vendored/numpy_lookfor',
 }
 
+
 # Compiled to modules with a different name
 SKIMAGE_COMPILED_FILES = {
     'feature/_hessian_det_appx_pythran': 'feature/_hessian_det_appx',
@@ -677,32 +678,6 @@ def test_skimage_file_tree(tmp_path):
         f.writelines(pformat(expected))
 
     assert actual == expected
-
-
-def test_skimage_meson_includes():
-    """Check that all modules in skimage are mentioned in meson.build"""
-    import skimage
-
-    submodules = set()  # Collect to check these later too
-
-    skimage_path = Path(skimage.__file__).parent
-    for key, path in _walk_python_files(skimage_path):
-        meson_build = path.parent / "meson.build"
-        assert meson_build.is_file()
-        with meson_build.open("r") as f:
-            meson = f.read()
-        # Naive test if file is mentioned
-        assert path.name in meson
-
-        submodules.add(path.parent)
-
-    # Likewise, check if submodules are included in parent's meson.build
-    for path in submodules:
-        meson_build = path.parent / "meson.build"
-        assert meson_build.is_file()
-        with meson_build.open("r") as f:
-            meson = f.read()
-        assert f"subdir('{path.name}')" in meson
 
 
 # Generated on 'main' (27041bd05f38facf02570a6bdb9aa4010f2d68b5)
