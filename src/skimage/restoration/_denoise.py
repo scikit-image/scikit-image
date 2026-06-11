@@ -266,6 +266,10 @@ def denoise_bilateral(
 
     elif image.ndim == 3 and channel_axis is None:
         image = img_as_float(image)[..., np.newaxis]
+
+    else:
+        image = img_as_float(image)
+
     image = np.ascontiguousarray(image)
     sigma_color = sigma_color or image.std()
 
