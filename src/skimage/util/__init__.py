@@ -67,3 +67,4 @@ from _skimage2._shared.utils import FailedEstimationAccessError  # noqa: F401
 #   import skimage
 #   assert callable(skimage.util.lookfor)
 from .lookfor import lookfor  # noqa: F401
+from .apply_parallel import apply_parallel  # noqa: F401

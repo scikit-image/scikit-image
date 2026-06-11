@@ -279,6 +279,7 @@ def test_skimage2_becomes_skimage():
     [
         ("skimage.morphology", "max_tree"),
         ("skimage.util", "lookfor"),
+        ("skimage.util", "apply_parallel"),
     ],
 )
 @pytest.mark.skipif(is_wasm, reason="emscripten does not support processes")
