@@ -261,9 +261,11 @@ def test_skimage2migration_no_warning_is_identity_decorator():
 def test_skimage2_becomes_skimage():
     # At least for now, skimage.morphology.max_tree defined in _skimage2 but it
     # should be detected as being in skimage, due to public skimage API.
-    from skimage.morphology import max_tree
+    import skimage.morphology
 
-    assert _public_api_names(max_tree) == ['skimage.morphology.max_tree']
+    assert _public_api_names(skimage.morphology.max_tree) == [
+        'skimage.morphology.max_tree'
+    ]
 
 
 def test_skimage2migration_comment_check():
@@ -603,8 +605,8 @@ SKIMAGE_FILE_TREE_IGNORE = {
     '_build_utils/version',
     # Added after v0.26.0:
     '_migration',
-    # Nowhere used on GitHub, and the module is quite "young"
-    '_vendored/__init__',
+    # Nowhere used on GitHub
+    '_vendored/__init__',  # also quite young
     '_vendored/numpy_lookfor',
 }
 
