@@ -9,6 +9,17 @@ __getattr__, _, __all__ = _lazy.attach_stub(__name__, __file__)
 # actually want to have in `__all__` and `__dir__`. For example, we want to keep
 # deprecated functions available but not advertise them
 # (see https://github.com/scientific-python/lazy-loader/pull/133)
+to_strip = {
+    # Allow backwards-compatible submodule access but don't advertise
+    # or include in HTML docs
+    'arraycrop',
+    'compare',
+    'dtype',
+    'noise',
+    'shape',
+    'unique',
+}
+__all__ = list(set(__all__) - to_strip)
 __all__ += ["PendingSkimage2Change", "FailedEstimationAccessError"]
 
 

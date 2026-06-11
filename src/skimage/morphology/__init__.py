@@ -10,6 +10,7 @@ __getattr__, _, __all__ = _lazy.attach_stub(__name__, __file__)
 # deprecated functions available but not advertise them
 # (see https://github.com/scientific-python/lazy-loader/pull/133)
 to_strip = {
+    # Deprecated
     'binary_closing',
     'binary_dilation',
     'binary_erosion',
@@ -17,6 +18,16 @@ to_strip = {
     'cube',
     'rectangle',
     'square',
+    # Allow backwards-compatible submodule access but don't advertise
+    # or include in HTML docs
+    'binary',
+    'convex_hull',
+    'extrema',
+    'footprints',
+    'gray',
+    'grayreconstruct',
+    'isotropic',
+    'misc',
 }
 __all__ = list(set(__all__) - to_strip)
 
