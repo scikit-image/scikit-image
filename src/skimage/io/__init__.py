@@ -26,7 +26,6 @@ __all__ = [
     "load_surf",
     "pop",
     "push",
-    "util",
     "ImageCollection",
     "MultiImage",
 ]
