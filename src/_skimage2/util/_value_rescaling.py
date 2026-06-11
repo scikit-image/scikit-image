@@ -124,8 +124,8 @@ def rescale_legacy(image):
     Rescales the value range according to the dtype of `image` according to
     the same logic as the legacy function :func:`skimage.util.img_as_float`.
 
-    - With an *signed* integer dtype, `image` is rescaled to the range [-1., 1.].
-    - With a *unsigned* integer dtype, `image` is rescaled to the range [0., 1.].
+    - With a *signed* integer dtype, `image` is rescaled to the range [-1., 1.].
+    - With an *unsigned* integer dtype, `image` is rescaled to the range [0., 1.].
     - With a floating dtype, the output range will not be modified; the range
       can be outside the above ranges.
 
