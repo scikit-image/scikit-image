@@ -1467,3 +1467,22 @@ def test_public_skimage_api(tmp_path):
         f.writelines(pformat(SKIMAGE_API))
 
     assert skimage_api == SKIMAGE_API
+
+
+def test_skimage_api_docstring_imports():
+    # Check that wrappers in skimage don't mention skimage2.
+    # Only checks objects whose "__module__" attribute doesn't include "skimage2"!
+    import skimage
+
+    exceptions = {
+        "skimage.io:imread_collection_wrapper",  # No docstring in v0.26
+    }
+    for qualname, obj in _walk_api_via_dunder_all(skimage):
+        if qualname in exceptions:
+            continue
+        assert obj.__doc__
+        if hasattr(obj, "__module__") and "skimage2" not in obj.__module__:
+            assert "import skimage2" not in obj.__doc__
+            assert "import _skimage2" not in obj.__doc__
+            assert "from skimage2" not in obj.__doc__
+            assert "from _skimage2" not in obj.__doc__
