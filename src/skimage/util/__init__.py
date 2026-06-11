@@ -2,7 +2,7 @@
 
 import lazy_loader as _lazy
 
-__getattr__, _, __all__ = _lazy.attach_stub(__name__, __file__)
+_lazy_getattr, _, __all__ = _lazy.attach_stub(__name__, __file__)
 
 # lazy_loader ignores the manually defined `__all__` in the PYI file. Instead,
 # it populates `__all__` from what is imported. So patch in differences that we
@@ -27,6 +27,20 @@ def __dir__():
     return __all__.copy()
 
 
+def __getattr__(name):
+    obj = _lazy_getattr(name)
+
+    if name == "lookfor":
+        # Depending on how `lookfor` is first imported, lazy_loader may return
+        # the module or the function of the same name. Avoid that and always
+        # return the function.
+        import importlib
+
+        obj = importlib.import_module("skimage.util.lookfor").lookfor
+
+    return obj
+
+
 class PendingSkimage2Change(PendingDeprecationWarning):
     """Warning about API usage that will change when switching to ``skimage2``.
 
@@ -46,3 +60,10 @@ class PendingSkimage2Change(PendingDeprecationWarning):
 
 
 from _skimage2._shared.utils import FailedEstimationAccessError  # noqa: F401
+
+
+# Bypass lazy_loader to maintain old behavior, that is, make the following pass:
+#   from skimage.util.lookfor import lookfor
+#   import skimage
+#   assert callable(skimage.util.lookfor)
+from .lookfor import lookfor  # noqa: F401

@@ -40,3 +40,9 @@ def __dir__():
 
 
 from ..measure._label import label  # noqa: F401
+
+# Bypass lazy_loader to maintain old behavior, that is, make the following pass:
+#   from skimage.morphology.max_tree import max_tree
+#   import skimage
+#   assert callable(skimage.morphology.max_tree)
+from .max_tree import max_tree  # noqa: F401

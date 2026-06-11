@@ -1,6 +1,8 @@
 """Test migration module"""
 
+import sys
 import inspect
+import subprocess
 import warnings
 import re
 from textwrap import dedent
@@ -10,6 +12,8 @@ from pprint import pformat
 
 import numpy as np
 import pytest
+
+from _skimage2._shared._dependency_checks import is_wasm
 
 from skimage._migration import (
     Skimage2Migration,
@@ -259,13 +263,40 @@ def test_skimage2migration_no_warning_is_identity_decorator():
 
 
 def test_skimage2_becomes_skimage():
-    # At least for now, skimage.morphology.max_tree defined in _skimage2 but it
+    # At least for now, skimage.filters.frangi is defined in _skimage2, but it
     # should be detected as being in skimage, due to public skimage API.
-    import skimage.morphology
+    from skimage.filters import frangi
 
-    assert _public_api_names(skimage.morphology.max_tree) == [
-        'skimage.morphology.max_tree'
+    assert "_skimage2" in frangi.__module__
+    assert _public_api_names(frangi) == [
+        'skimage.filters.frangi',
+        'skimage.filters.ridges.frangi',
     ]
+
+
+@pytest.mark.parametrize(
+    "module,name",
+    [
+        ("skimage.morphology", "max_tree"),
+        ("skimage.util", "lookfor"),
+    ],
+)
+@pytest.mark.skipif(is_wasm, reason="emscripten does not support processes")
+def test_skimage_module_func_name_clashes(module, name):
+    # Depending on how `max_tree` or `lookfor` are first imported, lazy_loader
+    # may return the module or the function of the same name. Test that the
+    # function is always returned.
+    cmd = (
+        f"from {module}.{name} import {name}; "
+        f"import skimage; "
+        f"print(callable({module}.{name}))"
+    )
+    result = subprocess.run(
+        [sys.executable, "-c", cmd],
+        capture_output=True,
+        text=True,
+    )
+    assert result.stdout == "True\n"
 
 
 def test_skimage2migration_comment_check():
