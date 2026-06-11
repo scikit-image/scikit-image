@@ -15,6 +15,7 @@ python_sources = [
     'geometry.py',
     'testing.py',
     'version_requirements.py',
+    'filters.py',
 ]
 
 py3.install_sources(
