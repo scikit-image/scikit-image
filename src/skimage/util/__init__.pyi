@@ -21,7 +21,7 @@ from .compare import compare_images
 from .noise import random_noise
 from .shape import view_as_blocks, view_as_windows
 from .unique import unique_rows
-from ._lookfor import lookfor
+from .lookfor import lookfor
 from . import arraycrop, compare, dtype, noise, shape, unique
 
 class PendingSkimage2Change(PendingDeprecationWarning): ...
