@@ -1,6 +1,7 @@
 python_sources = [
     'fast_exp.py',
     'tester.py',
+    'coord.py',
     'compat.py',
     '_dependency_checks.py',
     'interpolation.py',
