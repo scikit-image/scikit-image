@@ -1478,9 +1478,12 @@ def test_public_skimage_api(tmp_path):
     assert skimage_api == SKIMAGE_API
 
 
+@pytest.mark.skipif(
+    sys.flags.optimize >= 2, reason="docstrings unavailable with PYTHONOPTIMIZE=2"
+)
 def test_skimage_api_docstring_imports():
     # Check that wrappers in skimage don't mention skimage2.
-    # Only checks objects whose "__module__" attribute doesn't include "skimage2"!
+    # Only checks objects whose "__module__" attribute starts with "skimage."!
     import skimage
 
     exceptions = {
@@ -1489,9 +1492,10 @@ def test_skimage_api_docstring_imports():
     for qualname, obj in _walk_api_via_dunder_all(skimage):
         if qualname in exceptions:
             continue
+        if not getattr(obj, "__module__", "").startswith("skimage."):
+            continue
         assert obj.__doc__
-        if hasattr(obj, "__module__") and "skimage2" not in obj.__module__:
-            assert "import skimage2" not in obj.__doc__
-            assert "import _skimage2" not in obj.__doc__
-            assert "from skimage2" not in obj.__doc__
-            assert "from _skimage2" not in obj.__doc__
+        assert "import skimage2" not in obj.__doc__
+        assert "import _skimage2" not in obj.__doc__
+        assert "from skimage2" not in obj.__doc__
+        assert "from _skimage2" not in obj.__doc__
