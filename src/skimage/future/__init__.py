@@ -2,7 +2,12 @@
 
 .. warning::
     Note that we will not port these functions to the ``skimage2`` namespace.
-    Please adapt your code accordingly.
+    Please either vendor the ``skimage.future`` code in your own code-base, or
+    use other libraries.  If you are making heavy use of ``skimage.future``
+    routines, please feel free to raise the function you want to use. an issue
+    at the `scikit-image issues
+    <https://github.com/scikit-image/scikit-image/issues>`__ page to ask us to
+    port the function you want to use.
 """
 
 import lazy_loader as _lazy
