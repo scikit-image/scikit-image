@@ -1,7 +1,11 @@
 """Example images and datasets.
 
-A curated set of general-purpose and scientific images used in tests, examples,
-and documentation. Also includes functionality to generate synthetic data.
+A curated set of general purpose and scientific images used in tests, examples,
+and documentation.
+
+Newer datasets are no longer included as part of the package, but are
+downloaded on demand. To make data available offline, use :func:`download_all`.
+
 """
 
 import lazy_loader as _lazy

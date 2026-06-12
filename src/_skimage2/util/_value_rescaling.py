@@ -2,6 +2,7 @@ import numpy as np
 
 from .._shared.utils import _supported_float_type
 from .._shared._warnings import warn_external
+from .dtype import img_as_float
 
 
 def rescale_minmax(image):
@@ -123,8 +124,8 @@ def rescale_legacy(image):
     Rescales the value range according to the dtype of `image` according to
     the same logic as the legacy function :func:`skimage.util.img_as_float`.
 
-    - With a *signed* integer dtype, `image` is rescaled to the range [0., 1.].
-    - With an *unsigned* integer dtype, `image` is rescaled to the range [-1., 1.].
+    - With a *signed* integer dtype, `image` is rescaled to the range [-1., 1.].
+    - With an *unsigned* integer dtype, `image` is rescaled to the range [0., 1.].
     - With a floating dtype, the output range will not be modified; the range
       can be outside the above ranges.
 
@@ -142,11 +143,7 @@ def rescale_legacy(image):
     >>> rescale_legacy(np.array([0, 127, 255], dtype=float))
     array([  0., 127., 255.])
     """
-    # TODO Undo inlined imports once available in _skimage2 namespace
-    from skimage.util.dtype import img_as_float
-
-    out = img_as_float(image)
-    return out
+    return img_as_float(image)
 
 
 def _prescale_value_range(image, *, mode):
@@ -173,7 +170,7 @@ def _prescale_value_range(image, *, mode):
 
         ``'legacy'``
             Normalize only if `image` has an integer dtype. If `image` is of
-            floating dtype, it is left alone. See :func:`.img_as_float` for
+            floating dtype, it is left alone. See :func:`skimage2.util.img_as_float` for
             more details.
 
     Returns

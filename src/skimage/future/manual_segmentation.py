@@ -1,6 +1,8 @@
 from functools import reduce
 import numpy as np
 from ..draw import polygon
+from .._migration import ski2_migration_decorator
+from . import _PENDING_SKIMAGE2_NO_FUTURE
 from _skimage2._shared.version_requirements import require
 
 
@@ -30,6 +32,10 @@ def _draw_polygon(ax, vertices, alpha=0.4):
     return polygon_object
 
 
+@ski2_migration_decorator(
+    _PENDING_SKIMAGE2_NO_FUTURE,
+    qname_old='skimage.future.manual_polygon_segmentation',
+)
 @require("matplotlib", version=">=3.3")
 def manual_polygon_segmentation(image, alpha=0.4, return_all=False):
     """Return a label image based on polygon selections made with the mouse.
@@ -149,6 +155,10 @@ def manual_polygon_segmentation(image, alpha=0.4, return_all=False):
         return reduce(np.maximum, labels, np.broadcast_to(0, image.shape[:2]))
 
 
+@ski2_migration_decorator(
+    _PENDING_SKIMAGE2_NO_FUTURE,
+    qname_old='skimage.future.manual_lasso_segmentation',
+)
 @require("matplotlib", version=">=3.3")
 def manual_lasso_segmentation(image, alpha=0.4, return_all=False):
     """Return a label image based on freeform selections made with the mouse.

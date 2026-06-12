@@ -1,40 +1,26 @@
-extensions = [
-  '_felzenszwalb_cy',
-  '_quickshift_cy',
-  '_slic',
-  '_watershed_cy'
-]
-
-foreach ext: extensions
-  py3.extension_module(ext,
-    cython_gen.process(ext + '.pyx'),
-    c_args: cython_c_args,
-    include_directories: ['../../_skimage2/_shared'],
-    dependencies: [np_dep],
-    install: true,
-    subdir: 'skimage/segmentation'
-  )
-endforeach
-
 python_sources = [
-  '__init__.py',
-  '__init__.pyi',
-  '_chan_vese.py',
-  '_clear_border.py',
-  '_expand_labels.py',
-  '_felzenszwalb.py',
-  '_join.py',
-  '_quickshift.py',
-  '_watershed.py',
-  'active_contour_model.py',
-  'boundaries.py',
-  'morphsnakes.py',
-  'random_walker_segmentation.py',
-  'slic_superpixels.py'
+    '__init__.pyi',
+    'boundaries.py',
+    'random_walker_segmentation.py',
+    '_felzenszwalb.py',
+    '__init__.py',
+    '_quickshift.py',
+    '_join.py',
+    'slic_superpixels.py',
+    'active_contour_model.py',
+    'morphsnakes.py',
+    '_slic.py',
+    '_chan_vese.py',
+    '_watershed.py',
+    '_clear_border.py',
+    '_felzenszwalb_cy.py',
+    '_quickshift_cy.py',
+    '_expand_labels.py',
+    '_watershed_cy.py',
 ]
 
 py3.install_sources(
   python_sources,
-  pure: false,             # Will be installed next to binaries
+  pure: false,          # Will be installed next to binaries
   subdir: 'skimage/segmentation'  # Folder relative to site-packages to install to
 )

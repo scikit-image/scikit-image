@@ -133,18 +133,33 @@ def test_notification_raised(fake_backends):
     assert r == 42 * 3
 
 
+# Tell tests below that we mean a skimage implementation, not the
+# implementation imported from skimage2.
+_SKI_ENTROPY = _backends.dispatchable_shim(
+    skimage.filters.rank.entropy, 'skimage.filters.rank'
+)
+
+
 @pytest.mark.parametrize(
-    "func, expected",
+    "func, expected, exp_func",
     [
-        (skimage.metrics.mean_squared_error, "skimage.metrics"),
-        (skimage.io.concatenate_images, "skimage.io"),
-        (skimage.filters.rank.entropy, "skimage.filters.rank"),
+        (skimage.metrics.mean_squared_error, "skimage.metrics", None),
+        # Imported from ski2
+        (skimage.io.concatenate_images, "_skimage2.io", None),
+        # Imported from skimage, as above, but finds ski2 implementation.
+        (_SKI_ENTROPY, "skimage.filters.rank", skimage.filters.rank.entropy),
     ],
 )
-def test_module_name_determination(func, expected):
+def test_module_name_determination(func, expected, exp_func):
+    exp_func = func if exp_func is None else exp_func
     module_name = _backends.public_api_module(func)
 
     assert module_name == expected
 
     mod = importlib.import_module(module_name)
-    assert getattr(mod, func.__name__) is func
+    assert getattr(mod, func.__name__) is exp_func
+
+
+def test_backend_information_rejects_skimage2_keys():
+    with pytest.raises(ValueError, match="_skimage2"):
+        _backends.BackendInformation(["_skimage2.metrics:mean_squared_error"])

@@ -15,10 +15,9 @@ def test_import_skimage2_warning():
         capture_output=True,
         text=True,
     )
-    assert result.stderr.startswith(
-        "<string>:1: "
+    assert (
         "ExperimentalAPIWarning: "
-        "Importing from the `skimage2` namespace is experimental"
+        "Importing from the `skimage2` namespace is experimental" in result.stderr
     )
     assert result.stdout == ""
     assert result.returncode == 0

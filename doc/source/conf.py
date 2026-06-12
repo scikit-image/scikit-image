@@ -87,6 +87,8 @@ suppress_warnings = [
     # Ignore new warning in Sphinx 7.3.0 while pickling environment:
     #   WARNING: cannot cache unpickable configuration value: 'sphinx_gallery_conf'
     "config.cache",
+    # TODO: remove once skimage2 API docs have Examples sections
+    "skimage2",
 ]
 
 # -- Options for HTML output -------------------------------------------------

@@ -1,7 +1,9 @@
 import numpy as np
 
 import _skimage2 as ski2
+
 from _skimage2._shared._warnings import warn_external
+from _skimage2.metrics._structural_similarity import __doc__  # noqa: F401
 
 from .._migration import ski2_migration_decorator
 from ..util.dtype import dtype_range

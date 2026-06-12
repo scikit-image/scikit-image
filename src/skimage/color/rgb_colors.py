@@ -1,146 +1,297 @@
-aliceblue = (0.941, 0.973, 1)
-antiquewhite = (0.98, 0.922, 0.843)
-aqua = (0, 1, 1)
-aquamarine = (0.498, 1, 0.831)
-azure = (0.941, 1, 1)
-beige = (0.961, 0.961, 0.863)
-bisque = (1, 0.894, 0.769)
-black = (0, 0, 0)
-blanchedalmond = (1, 0.922, 0.804)
-blue = (0, 0, 1)
-blueviolet = (0.541, 0.169, 0.886)
-brown = (0.647, 0.165, 0.165)
-burlywood = (0.871, 0.722, 0.529)
-cadetblue = (0.373, 0.62, 0.627)
-chartreuse = (0.498, 1, 0)
-chocolate = (0.824, 0.412, 0.118)
-coral = (1, 0.498, 0.314)
-cornflowerblue = (0.392, 0.584, 0.929)
-cornsilk = (1, 0.973, 0.863)
-crimson = (0.863, 0.0784, 0.235)
-cyan = (0, 1, 1)
-darkblue = (0, 0, 0.545)
-darkcyan = (0, 0.545, 0.545)
-darkgoldenrod = (0.722, 0.525, 0.0431)
-darkgray = (0.663, 0.663, 0.663)
-darkgreen = (0, 0.392, 0)
-darkgrey = (0.663, 0.663, 0.663)
-darkkhaki = (0.741, 0.718, 0.42)
-darkmagenta = (0.545, 0, 0.545)
-darkolivegreen = (0.333, 0.42, 0.184)
-darkorange = (1, 0.549, 0)
-darkorchid = (0.6, 0.196, 0.8)
-darkred = (0.545, 0, 0)
-darksalmon = (0.914, 0.588, 0.478)
-darkseagreen = (0.561, 0.737, 0.561)
-darkslateblue = (0.282, 0.239, 0.545)
-darkslategray = (0.184, 0.31, 0.31)
-darkslategrey = (0.184, 0.31, 0.31)
-darkturquoise = (0, 0.808, 0.82)
-darkviolet = (0.58, 0, 0.827)
-deeppink = (1, 0.0784, 0.576)
-deepskyblue = (0, 0.749, 1)
-dimgray = (0.412, 0.412, 0.412)
-dimgrey = (0.412, 0.412, 0.412)
-dodgerblue = (0.118, 0.565, 1)
-firebrick = (0.698, 0.133, 0.133)
-floralwhite = (1, 0.98, 0.941)
-forestgreen = (0.133, 0.545, 0.133)
-fuchsia = (1, 0, 1)
-gainsboro = (0.863, 0.863, 0.863)
-ghostwhite = (0.973, 0.973, 1)
-gold = (1, 0.843, 0)
-goldenrod = (0.855, 0.647, 0.125)
-gray = (0.502, 0.502, 0.502)
-green = (0, 0.502, 0)
-greenyellow = (0.678, 1, 0.184)
-grey = (0.502, 0.502, 0.502)
-honeydew = (0.941, 1, 0.941)
-hotpink = (1, 0.412, 0.706)
-indianred = (0.804, 0.361, 0.361)
-indigo = (0.294, 0, 0.51)
-ivory = (1, 1, 0.941)
-khaki = (0.941, 0.902, 0.549)
-lavender = (0.902, 0.902, 0.98)
-lavenderblush = (1, 0.941, 0.961)
-lawngreen = (0.486, 0.988, 0)
-lemonchiffon = (1, 0.98, 0.804)
-lightblue = (0.678, 0.847, 0.902)
-lightcoral = (0.941, 0.502, 0.502)
-lightcyan = (0.878, 1, 1)
-lightgoldenrodyellow = (0.98, 0.98, 0.824)
-lightgray = (0.827, 0.827, 0.827)
-lightgreen = (0.565, 0.933, 0.565)
-lightgrey = (0.827, 0.827, 0.827)
-lightpink = (1, 0.714, 0.757)
-lightsalmon = (1, 0.627, 0.478)
-lightseagreen = (0.125, 0.698, 0.667)
-lightskyblue = (0.529, 0.808, 0.98)
-lightslategray = (0.467, 0.533, 0.6)
-lightslategrey = (0.467, 0.533, 0.6)
-lightsteelblue = (0.69, 0.769, 0.871)
-lightyellow = (1, 1, 0.878)
-lime = (0, 1, 0)
-limegreen = (0.196, 0.804, 0.196)
-linen = (0.98, 0.941, 0.902)
-magenta = (1, 0, 1)
-maroon = (0.502, 0, 0)
-mediumaquamarine = (0.4, 0.804, 0.667)
-mediumblue = (0, 0, 0.804)
-mediumorchid = (0.729, 0.333, 0.827)
-mediumpurple = (0.576, 0.439, 0.859)
-mediumseagreen = (0.235, 0.702, 0.443)
-mediumslateblue = (0.482, 0.408, 0.933)
-mediumspringgreen = (0, 0.98, 0.604)
-mediumturquoise = (0.282, 0.82, 0.8)
-mediumvioletred = (0.78, 0.0824, 0.522)
-midnightblue = (0.098, 0.098, 0.439)
-mintcream = (0.961, 1, 0.98)
-mistyrose = (1, 0.894, 0.882)
-moccasin = (1, 0.894, 0.71)
-navajowhite = (1, 0.871, 0.678)
-navy = (0, 0, 0.502)
-oldlace = (0.992, 0.961, 0.902)
-olive = (0.502, 0.502, 0)
-olivedrab = (0.42, 0.557, 0.137)
-orange = (1, 0.647, 0)
-orangered = (1, 0.271, 0)
-orchid = (0.855, 0.439, 0.839)
-palegoldenrod = (0.933, 0.91, 0.667)
-palegreen = (0.596, 0.984, 0.596)
-palevioletred = (0.686, 0.933, 0.933)
-papayawhip = (1, 0.937, 0.835)
-peachpuff = (1, 0.855, 0.725)
-peru = (0.804, 0.522, 0.247)
-pink = (1, 0.753, 0.796)
-plum = (0.867, 0.627, 0.867)
-powderblue = (0.69, 0.878, 0.902)
-purple = (0.502, 0, 0.502)
-red = (1, 0, 0)
-rosybrown = (0.737, 0.561, 0.561)
-royalblue = (0.255, 0.412, 0.882)
-saddlebrown = (0.545, 0.271, 0.0745)
-salmon = (0.98, 0.502, 0.447)
-sandybrown = (0.98, 0.643, 0.376)
-seagreen = (0.18, 0.545, 0.341)
-seashell = (1, 0.961, 0.933)
-sienna = (0.627, 0.322, 0.176)
-silver = (0.753, 0.753, 0.753)
-skyblue = (0.529, 0.808, 0.922)
-slateblue = (0.416, 0.353, 0.804)
-slategray = (0.439, 0.502, 0.565)
-slategrey = (0.439, 0.502, 0.565)
-snow = (1, 0.98, 0.98)
-springgreen = (0, 1, 0.498)
-steelblue = (0.275, 0.51, 0.706)
-tan = (0.824, 0.706, 0.549)
-teal = (0, 0.502, 0.502)
-thistle = (0.847, 0.749, 0.847)
-tomato = (1, 0.388, 0.278)
-turquoise = (0.251, 0.878, 0.816)
-violet = (0.933, 0.51, 0.933)
-wheat = (0.961, 0.871, 0.702)
-white = (1, 1, 1)
-whitesmoke = (0.961, 0.961, 0.961)
-yellow = (1, 1, 0)
-yellowgreen = (0.604, 0.804, 0.196)
+from _skimage2.color.rgb_colors import (
+    aliceblue as aliceblue,
+    antiquewhite as antiquewhite,
+    aqua as aqua,
+    aquamarine as aquamarine,
+    azure as azure,
+    beige as beige,
+    bisque as bisque,
+    black as black,
+    blanchedalmond as blanchedalmond,
+    blue as blue,
+    blueviolet as blueviolet,
+    brown as brown,
+    burlywood as burlywood,
+    cadetblue as cadetblue,
+    chartreuse as chartreuse,
+    chocolate as chocolate,
+    coral as coral,
+    cornflowerblue as cornflowerblue,
+    cornsilk as cornsilk,
+    crimson as crimson,
+    cyan as cyan,
+    darkblue as darkblue,
+    darkcyan as darkcyan,
+    darkgoldenrod as darkgoldenrod,
+    darkgray as darkgray,
+    darkgreen as darkgreen,
+    darkgrey as darkgrey,
+    darkkhaki as darkkhaki,
+    darkmagenta as darkmagenta,
+    darkolivegreen as darkolivegreen,
+    darkorange as darkorange,
+    darkorchid as darkorchid,
+    darkred as darkred,
+    darksalmon as darksalmon,
+    darkseagreen as darkseagreen,
+    darkslateblue as darkslateblue,
+    darkslategray as darkslategray,
+    darkslategrey as darkslategrey,
+    darkturquoise as darkturquoise,
+    darkviolet as darkviolet,
+    deeppink as deeppink,
+    deepskyblue as deepskyblue,
+    dimgray as dimgray,
+    dimgrey as dimgrey,
+    dodgerblue as dodgerblue,
+    firebrick as firebrick,
+    floralwhite as floralwhite,
+    forestgreen as forestgreen,
+    fuchsia as fuchsia,
+    gainsboro as gainsboro,
+    ghostwhite as ghostwhite,
+    gold as gold,
+    goldenrod as goldenrod,
+    gray as gray,
+    green as green,
+    greenyellow as greenyellow,
+    grey as grey,
+    honeydew as honeydew,
+    hotpink as hotpink,
+    indianred as indianred,
+    indigo as indigo,
+    ivory as ivory,
+    khaki as khaki,
+    lavender as lavender,
+    lavenderblush as lavenderblush,
+    lawngreen as lawngreen,
+    lemonchiffon as lemonchiffon,
+    lightblue as lightblue,
+    lightcoral as lightcoral,
+    lightcyan as lightcyan,
+    lightgoldenrodyellow as lightgoldenrodyellow,
+    lightgray as lightgray,
+    lightgreen as lightgreen,
+    lightgrey as lightgrey,
+    lightpink as lightpink,
+    lightsalmon as lightsalmon,
+    lightseagreen as lightseagreen,
+    lightskyblue as lightskyblue,
+    lightslategray as lightslategray,
+    lightslategrey as lightslategrey,
+    lightsteelblue as lightsteelblue,
+    lightyellow as lightyellow,
+    lime as lime,
+    limegreen as limegreen,
+    linen as linen,
+    magenta as magenta,
+    maroon as maroon,
+    mediumaquamarine as mediumaquamarine,
+    mediumblue as mediumblue,
+    mediumorchid as mediumorchid,
+    mediumpurple as mediumpurple,
+    mediumseagreen as mediumseagreen,
+    mediumslateblue as mediumslateblue,
+    mediumspringgreen as mediumspringgreen,
+    mediumturquoise as mediumturquoise,
+    mediumvioletred as mediumvioletred,
+    midnightblue as midnightblue,
+    mintcream as mintcream,
+    mistyrose as mistyrose,
+    moccasin as moccasin,
+    navajowhite as navajowhite,
+    navy as navy,
+    oldlace as oldlace,
+    olive as olive,
+    olivedrab as olivedrab,
+    orange as orange,
+    orangered as orangered,
+    orchid as orchid,
+    palegoldenrod as palegoldenrod,
+    palegreen as palegreen,
+    palevioletred as palevioletred,
+    papayawhip as papayawhip,
+    peachpuff as peachpuff,
+    peru as peru,
+    pink as pink,
+    plum as plum,
+    powderblue as powderblue,
+    purple as purple,
+    red as red,
+    rosybrown as rosybrown,
+    royalblue as royalblue,
+    saddlebrown as saddlebrown,
+    salmon as salmon,
+    sandybrown as sandybrown,
+    seagreen as seagreen,
+    seashell as seashell,
+    sienna as sienna,
+    silver as silver,
+    skyblue as skyblue,
+    slateblue as slateblue,
+    slategray as slategray,
+    slategrey as slategrey,
+    snow as snow,
+    springgreen as springgreen,
+    steelblue as steelblue,
+    tan as tan,
+    teal as teal,
+    thistle as thistle,
+    tomato as tomato,
+    turquoise as turquoise,
+    violet as violet,
+    wheat as wheat,
+    white as white,
+    whitesmoke as whitesmoke,
+    yellow as yellow,
+    yellowgreen as yellowgreen,
+)  # noqa: F401
+
+__all__ = [
+    'aliceblue',
+    'antiquewhite',
+    'aqua',
+    'aquamarine',
+    'azure',
+    'beige',
+    'bisque',
+    'black',
+    'blanchedalmond',
+    'blue',
+    'blueviolet',
+    'brown',
+    'burlywood',
+    'cadetblue',
+    'chartreuse',
+    'chocolate',
+    'coral',
+    'cornflowerblue',
+    'cornsilk',
+    'crimson',
+    'cyan',
+    'darkblue',
+    'darkcyan',
+    'darkgoldenrod',
+    'darkgray',
+    'darkgreen',
+    'darkgrey',
+    'darkkhaki',
+    'darkmagenta',
+    'darkolivegreen',
+    'darkorange',
+    'darkorchid',
+    'darkred',
+    'darksalmon',
+    'darkseagreen',
+    'darkslateblue',
+    'darkslategray',
+    'darkslategrey',
+    'darkturquoise',
+    'darkviolet',
+    'deeppink',
+    'deepskyblue',
+    'dimgray',
+    'dimgrey',
+    'dodgerblue',
+    'firebrick',
+    'floralwhite',
+    'forestgreen',
+    'fuchsia',
+    'gainsboro',
+    'ghostwhite',
+    'gold',
+    'goldenrod',
+    'gray',
+    'green',
+    'greenyellow',
+    'grey',
+    'honeydew',
+    'hotpink',
+    'indianred',
+    'indigo',
+    'ivory',
+    'khaki',
+    'lavender',
+    'lavenderblush',
+    'lawngreen',
+    'lemonchiffon',
+    'lightblue',
+    'lightcoral',
+    'lightcyan',
+    'lightgoldenrodyellow',
+    'lightgray',
+    'lightgreen',
+    'lightgrey',
+    'lightpink',
+    'lightsalmon',
+    'lightseagreen',
+    'lightskyblue',
+    'lightslategray',
+    'lightslategrey',
+    'lightsteelblue',
+    'lightyellow',
+    'lime',
+    'limegreen',
+    'linen',
+    'magenta',
+    'maroon',
+    'mediumaquamarine',
+    'mediumblue',
+    'mediumorchid',
+    'mediumpurple',
+    'mediumseagreen',
+    'mediumslateblue',
+    'mediumspringgreen',
+    'mediumturquoise',
+    'mediumvioletred',
+    'midnightblue',
+    'mintcream',
+    'mistyrose',
+    'moccasin',
+    'navajowhite',
+    'navy',
+    'oldlace',
+    'olive',
+    'olivedrab',
+    'orange',
+    'orangered',
+    'orchid',
+    'palegoldenrod',
+    'palegreen',
+    'palevioletred',
+    'papayawhip',
+    'peachpuff',
+    'peru',
+    'pink',
+    'plum',
+    'powderblue',
+    'purple',
+    'red',
+    'rosybrown',
+    'royalblue',
+    'saddlebrown',
+    'salmon',
+    'sandybrown',
+    'seagreen',
+    'seashell',
+    'sienna',
+    'silver',
+    'skyblue',
+    'slateblue',
+    'slategray',
+    'slategrey',
+    'snow',
+    'springgreen',
+    'steelblue',
+    'tan',
+    'teal',
+    'thistle',
+    'tomato',
+    'turquoise',
+    'violet',
+    'wheat',
+    'white',
+    'whitesmoke',
+    'yellow',
+    'yellowgreen',
+]
