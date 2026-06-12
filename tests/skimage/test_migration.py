@@ -19,7 +19,7 @@ from skimage._migration import (
     Skimage2Migration,
     ski2_migration_decorator,
     _select_blocks,
-    _public_api_names,
+    _public_skimage_api_names,
 )
 
 
@@ -268,7 +268,7 @@ def test_skimage2_becomes_skimage():
     from skimage.filters import frangi
 
     assert "_skimage2" in frangi.__module__
-    assert _public_api_names(frangi) == [
+    assert _public_skimage_api_names(frangi) == [
         'skimage.filters.frangi',
         'skimage.filters.ridges.frangi',
     ]

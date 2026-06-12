@@ -92,8 +92,10 @@ def _select_blocks(doc, *, context_name):
     return context
 
 
-def _public_api_names(obj):
-    """Find the public name(s) of an object as advertised by ``__all__``.
+def _public_skimage_api_names(obj):
+    """Find the name(s) as advertised by ``__all__`` in ``skimage``.
+
+    .. warning:: Only looks for names in ``skimage``, not ``skimage2``!
 
     scikit-image advertises its public API with the help of ``__all__`` in its
     modules. At the point at which any given module is being instantiated, its
@@ -114,18 +116,26 @@ def _public_api_names(obj):
     Examples
     --------
     >>> from skimage.data._binary_blobs import binary_blobs
-    >>> _public_api_names(binary_blobs)
+    >>> _public_skimage_api_names(binary_blobs)
     ['skimage.data.binary_blobs']
 
     >>> from skimage.filters.rank import autolevel
-    >>> _public_api_names(autolevel)
+    >>> _public_skimage_api_names(autolevel)
     ['skimage.filters.rank.autolevel', 'skimage.filters.rank.generic.autolevel']
+
+    Will always look for ``skimage`` equivalent to work with shims that use
+    functions from ``skimage2``.
+
+    >>> from _skimage2.filters import gaussian
+    >>> _public_skimage_api_names(gaussian)
+    ['skimage.filters.gaussian']
     """
     qualname = obj.__qualname__
     base_name_in_module, *_ = qualname.partition(".")
     root, *sub_modules = obj.__module__.split(".")
     # If implemented in _skimage2, point to skimage equivalent.
-    root = 'skimage' if root == '_skimage2' else root
+    if root == '_skimage2':
+        root = 'skimage'
 
     matches = []
     parts = []
@@ -136,11 +146,12 @@ def _public_api_names(obj):
         # `obj` is passed, so its parents should be loaded
         module = sys.modules['.'.join(parts)]
 
-        if (_all := getattr(module, "__all__", None)) is None:
+        dunder_all = getattr(module, "__all__", None)
+        if dunder_all is None:
             # Module doesn't advertise any public API, abort
             break
 
-        if base_name_in_module in _all:
+        if base_name_in_module in dunder_all:
             public_name = f"{module.__name__}.{qualname}"
             matches.append(public_name)
 
@@ -234,7 +245,7 @@ class Skimage2Migration:
 
         Parameters
         ----------
-        func_or_class : function or class
+        func_or_class : Any
             The object being decorated.
         qname_old : None or str
             Canonical ``skimage`` name. If None, inferred from public API
@@ -251,7 +262,7 @@ class Skimage2Migration:
 
         if qname_old is None:
             # Not given, try to guess if not ambiguous
-            candidates = _public_api_names(func_or_class)
+            candidates = _public_skimage_api_names(func_or_class)
             if not candidates:
                 msg = (
                     f"could not determine for {func_or_class!r}, "
