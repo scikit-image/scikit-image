@@ -1447,7 +1447,8 @@ def _walk_api_via_dunder_all(module):
 def test_public_skimage_api(tmp_path):
     import skimage
 
-    re_unique_id = re.compile(r"at 0x[0-9a-f]{12}>")
+    # Capitalization and length may vary with platform
+    re_hex_id = re.compile(r"at 0x[0-9a-fA-F]{1,16}>")
 
     skimage_api = set()
     for qualname, obj in _walk_api_via_dunder_all(skimage):
@@ -1459,7 +1460,7 @@ def test_public_skimage_api(tmp_path):
             # For functions, include signature in key
             signature = inspect.signature(obj)
             # Strip unique id for objects that include it in representation
-            signature = re_unique_id.sub("at 0x...>", str(signature))
+            signature = re_hex_id.sub("at 0x...>", str(signature))
             key = f"{key}{signature}"
 
         # TODO Record signature of methods too
