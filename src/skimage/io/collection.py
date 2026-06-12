@@ -19,5 +19,7 @@ __all__ = [
 from _skimage2.io.collection import alphanumeric_key  # noqa: F401
 
 from skimage._docutils import bind_namespace
+from skimage._pickle_compat import apply_pickle_exports
 
 bind_namespace(globals())
+apply_pickle_exports(globals())

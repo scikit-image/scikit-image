@@ -4,6 +4,7 @@ python_sources = [
   'conftest.py',
   'py.typed',
   '_docutils.py',
+  '_pickle_compat.py',
   '_migration.py'
 ]
 
