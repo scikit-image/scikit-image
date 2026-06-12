@@ -310,6 +310,7 @@ def test_skimage2migration_comment_check():
         migration_dec._parse_migration_doc(doc, 'foo.bar')
 
 
+@pytest.mark.thread_unsafe("Warning filter state is not thread safe")
 def test_skimage2migration_classes():
     migration_dec = Skimage2Migration(MIGRATION_URL)
     doc_only_qname = 'tests.skimage.test_migration.KlassDocOnly'
