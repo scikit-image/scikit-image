@@ -12,7 +12,10 @@ from .._migration import ski2_migration_decorator as _smd
 # functions in lazy loading clause below.
 _PENDING_SKIMAGE2_NO_FUTURE = """\
 ``skimage.future.%(qual)s`` is deprecated, and will be removed in ``skimage2``.
-Please adapt your code, perhaps by vendoring the code in this module.
+Please either vendor the ``skimage.future`` code in your own code-base, or use
+other libraries.  If you are making heavy use of ``skimage.future`` routines,
+please feel free to raise a scikit-image issue to ask us to port the function
+you want to use.
 """
 
 __getattr__, __dir__, __all__ = _lazy.attach_stub(__name__, __file__)

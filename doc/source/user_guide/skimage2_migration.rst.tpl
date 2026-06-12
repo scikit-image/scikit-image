@@ -114,6 +114,7 @@ The new counterparts behave differently in the following ways:
 {{ format_advice_section(title=name, ul_char='^') }}
 {% endfor -%}
 
+
 Removal of ``skimage.future``
 -----------------------------
 
