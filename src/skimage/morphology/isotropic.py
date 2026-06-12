@@ -17,3 +17,7 @@ __all__ = [
     'isotropic_erosion',
     'isotropic_opening',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

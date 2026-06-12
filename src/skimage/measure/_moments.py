@@ -21,3 +21,7 @@ __all__ = [
     'moments_hu',
     'moments_normalized',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

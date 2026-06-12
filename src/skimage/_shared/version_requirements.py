@@ -11,3 +11,7 @@ __all__ = [
     'is_installed',
     'require',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

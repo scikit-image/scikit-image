@@ -13,3 +13,7 @@ __all__ = [
     'MCP_Geometric',
     'route_through_array',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

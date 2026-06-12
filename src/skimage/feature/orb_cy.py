@@ -9,3 +9,7 @@ __all__ = [
     'POS0',
     'POS1',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

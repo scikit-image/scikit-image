@@ -11,3 +11,7 @@ __all__ = [
     'reshape_array',
     'undo_reshape_array',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

@@ -5,3 +5,7 @@ import sys
 from _skimage2.io import manage_plugins
 
 sys.modules[__name__] = manage_plugins
+
+from skimage._docutils import bind_namespace  # noqa: E402
+
+bind_namespace(globals())

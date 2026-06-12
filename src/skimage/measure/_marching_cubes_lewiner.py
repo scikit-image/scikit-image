@@ -13,3 +13,7 @@ __all__ = [
     'marching_cubes',
     'mesh_surface_area',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

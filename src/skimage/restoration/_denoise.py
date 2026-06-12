@@ -15,3 +15,7 @@ __all__ = [
 ]
 
 from _skimage2.restoration._denoise import _wavelet_threshold  # noqa: F401
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

@@ -7,3 +7,7 @@ __all__ = [
     'hausdorff_distance',
     'hausdorff_pair',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

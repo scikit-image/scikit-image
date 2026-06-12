@@ -7,3 +7,7 @@ __all__ = [
     'find_boundaries',
     'mark_boundaries',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

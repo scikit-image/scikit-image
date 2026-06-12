@@ -73,3 +73,7 @@ __all__ = [
 ]
 
 from _skimage2.filters.edges import _mask_filter_result  # noqa: F401
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

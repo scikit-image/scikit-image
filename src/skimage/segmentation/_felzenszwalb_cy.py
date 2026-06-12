@@ -9,3 +9,7 @@ __all__ = [
     'img_as_float64',
     'warn',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

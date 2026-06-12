@@ -11,3 +11,7 @@ __all__ = [
     'get_min_ncut',
     'partition_by_cut',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

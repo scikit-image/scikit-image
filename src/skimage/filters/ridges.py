@@ -23,3 +23,7 @@ __all__ = [
     'meijering',
     'sato',
 ]
+
+from skimage._docutils import bind_namespace  # noqa: E402
+
+bind_namespace(globals())

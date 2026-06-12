@@ -16,3 +16,7 @@ from _skimage2.segmentation.random_walker_segmentation import (
 from _skimage2.segmentation.random_walker_segmentation import UmfpackContext  # noqa: F401
 
 __all__ = ['random_walker']
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

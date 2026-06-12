@@ -11,3 +11,7 @@ __all__ = [
     'manders_overlap_coeff',
     'intersection_coeff',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

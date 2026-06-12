@@ -1,4 +1,3 @@
-from _skimage2.morphology._grayscale_operators import __doc__  # noqa: F401
 from _skimage2.morphology._grayscale_operators import _SUPPORTED_MODES  # noqa: F401
 
 
@@ -645,3 +644,8 @@ def black_tophat(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
         image, footprint=footprint, out=out, mode=mode, cval=cval
     )
     return out
+
+
+from skimage._docutils import bind_namespace  # noqa: E402
+
+bind_namespace(globals())

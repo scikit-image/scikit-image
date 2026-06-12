@@ -14,3 +14,7 @@ __all__ = [
     'frt2',
     'ifrt2',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

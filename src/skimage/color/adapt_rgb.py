@@ -9,3 +9,7 @@ __all__ = [
     'hsv_value',
     'each_channel',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

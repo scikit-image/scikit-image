@@ -1,6 +1,5 @@
 import _skimage2 as ski2
 
-from _skimage2.feature._canny import __doc__  # noqa: F401
 
 from skimage._migration import ski2_migration_decorator
 
@@ -128,3 +127,8 @@ def canny(
         mode=mode,
         cval=cval,
     )
+
+
+from skimage._docutils import bind_namespace  # noqa: E402
+
+bind_namespace(globals())

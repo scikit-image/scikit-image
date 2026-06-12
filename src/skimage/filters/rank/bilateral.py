@@ -36,3 +36,7 @@ __all__ = [
     'pop_bilateral',
     'sum_bilateral',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

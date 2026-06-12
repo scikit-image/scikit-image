@@ -19,3 +19,7 @@ __all__ = [
     'perimeter',
     'perimeter_crofton',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

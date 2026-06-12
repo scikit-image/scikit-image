@@ -13,3 +13,7 @@ __all__ = [
     'disk_level_set',
     'checkerboard_level_set',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

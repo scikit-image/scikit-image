@@ -66,3 +66,8 @@ def ensure_spacing(
         max_out=max_out,
         max_split_size=max_split_size,
     )
+
+
+from skimage._docutils import bind_namespace  # noqa: E402
+
+bind_namespace(globals())
