@@ -27,7 +27,6 @@ class DummyNNClassifier:
         return self.labels[nearest_neighbors]
 
 
-@pytest.mark.filterwarnings("default::skimage.util.PendingSkimage2Change")
 def test_trainable_segmentation_singlechannel():
     img = np.zeros((20, 20))
     img[:10] = 1
@@ -59,7 +58,6 @@ def test_trainable_segmentation_singlechannel():
     assert np.all(out[10:] == 2)
 
 
-@pytest.mark.filterwarnings("default::skimage.util.PendingSkimage2Change")
 def test_trainable_segmentation_multichannel():
     img = np.zeros((20, 20, 3))
     img[:10] = 1
@@ -77,14 +75,20 @@ def test_trainable_segmentation_multichannel():
         sigma_max=2,
         channel_axis=-1,
     )
-    with pytest.warns(PendingSkimage2Change):
+    with pytest.warns(
+        PendingSkimage2Change, match='`skimage.future.fit_segmenter` is deprecated'
+    ) as record:
         clf = fit_segmenter(labels, features, clf)
+    assert_stacklevel(record)
+    with pytest.warns(
+        PendingSkimage2Change, match='`skimage.future.predict_segmenter` is deprecated'
+    ) as record:
         out = predict_segmenter(features, clf)
+    assert_stacklevel(record)
     assert np.all(out[:10] == 1)
     assert np.all(out[10:] == 2)
 
 
-@pytest.mark.filterwarnings("default::skimage.util.PendingSkimage2Change")
 def test_trainable_segmentation_predict():
     img = np.zeros((20, 20))
     img[:10] = 1
@@ -111,7 +115,6 @@ def test_trainable_segmentation_predict():
         assert 'type of features' in str(err.value)
 
 
-@pytest.mark.filterwarnings("default::skimage.util.PendingSkimage2Change")
 def test_trainable_segmentation_oo():
     """Test the object-oriented interface using the TrainableSegmenter class."""
 
