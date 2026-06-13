@@ -99,7 +99,7 @@ def _create_image_fetcher(prefix=None):
         if prefix is not None:
             url = (
                 "https://github.com/scikit-image/scikit-image/raw/"
-                "{version}/tests/skimage/"
+                "{version}/tests/skimage2/"
             )
         else:
             url = (
@@ -110,7 +110,7 @@ def _create_image_fetcher(prefix=None):
         if prefix is not None:
             url = (
                 "https://github.com/scikit-image/scikit-image/raw/"
-                "v{version}/tests/skimage/"
+                "v{version}/tests/skimage2/"
             )
         else:
             url = (
