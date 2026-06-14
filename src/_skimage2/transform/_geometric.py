@@ -16,6 +16,7 @@ from _skimage2._shared.utils import (
     FailedEstimation,
 )
 from _skimage2._shared.compat import NP_COPY_IF_NEEDED
+import scipy
 
 
 def _affine_matrix_from_vector(v):
@@ -1493,12 +1494,15 @@ class AffineTransform(ProjectiveTransform):
                     "Do not specify any implicit parameters when "
                     "matrix is specified."
                 )
-            if dimensionality is not None and dimensionality > 2:
-                raise ValueError('Implicit parameters only valid for 2D transforms')
+            if dimensionality is not None and dimensionality > 3:
+                raise ValueError(
+                    'Implicit parameters only valid for 2D or 3D transforms'
+                )
+            self.dim = 2 if dimensionality is None else dimensionality
             # 2D parameter checks explicit or implicit in _srst2matrix.
             matrix = self._srst2matrix(scale, rotation, shear, translation)
-            if matrix.shape[0] != 3:
-                raise ValueError('Implicit parameters must give 2D transforms')
+            if matrix.shape[0] > 4 or matrix.shape[0] <= 2:
+                raise ValueError('Implicit parameters must give 2D or 3D transforms')
         super().__init__(matrix=matrix, dimensionality=dimensionality)
 
     @property
@@ -1506,50 +1510,191 @@ class AffineTransform(ProjectiveTransform):
         """Indices into flat ``self.params`` with coefficients to estimate"""
         return range(self.dimensionality * (self.dimensionality + 1))
 
+    def _decompose_affine_matrix(
+        self, matrix, upper_triangular=True
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Decompose linear transform matrix into rotate, scale, shear.
+        Parameters
+        ----------
+        matrix : np.array shape (N, N)
+            nD array representing the composed linear transform.
+        upper_triangular : bool
+            Whether to decompose shear into an upper triangular or
+            lower triangular matrix.
+
+        Returns
+        -------
+        rotation : ndarray of shape (3,)
+            Rotation angles (in radians) for each axis.
+        scale : ndarray of shape (3,)
+            Scaling factors along each axis.
+        shear : ndarray of shape (3,)
+            Shear angles (in radians), computed as arctan of the shear coefficients.
+        """
+        n = matrix.shape[0]
+        if upper_triangular:
+            rotate, tri = scipy.linalg.qr(matrix)
+        else:
+            upper_tri, rotate = scipy.linalg.rq(matrix.T)
+            rotate = rotate.T
+            tri = upper_tri.T
+        for i in range(tri.shape[0]):
+            if tri[i, i] < 0:
+                tri[i, :] *= -1
+                rotate[:, i] *= -1
+        scale = np.diag(tri).copy()
+
+        # Take any reflection into account
+        if np.linalg.det(rotate) < 0:
+            scale[0] *= -1
+            tri[0] *= -1
+            rotate = matrix @ np.linalg.inv(tri)
+        tri_normalized = tri @ np.linalg.inv(np.diag(scale))
+
+        if upper_triangular:
+            shear = tri_normalized[np.triu(np.ones((n, n)), 1).astype(bool)]
+        else:
+            shear = tri_normalized
+
+        rotation_y = math.asin(-rotate[2, 0])
+        if abs(math.cos(rotation_y)) > 1e-12:
+            rotation_x = math.atan2(rotate[2, 1], rotate[2, 2])
+            rotation_z = math.atan2(rotate[1, 0], rotate[0, 0])
+        else:
+            rotation_x = 0.0
+            rotation_z = math.atan2(-rotate[0, 1], rotate[1, 1])
+        rotate = (rotation_x, rotation_y, rotation_z)
+        shear = np.arctan(shear)
+
+        return scale, rotate, shear
+
     def _srst2matrix(self, scale, rotation, shear, translation):
-        scale = (1, 1) if scale is None else scale
-        sx, sy = (scale, scale) if np.isscalar(scale) else scale
-        rotation = 0 if rotation is None else rotation
-        if not np.isscalar(rotation):
-            raise ValueError('rotation must be scalar (2D rotation)')
-        shear = 0 if shear is None else shear
-        shear_x, shear_y = (shear, 0) if np.isscalar(shear) else shear
-        translation = (0, 0) if translation is None else translation
-        if np.isscalar(translation):
-            raise ValueError('translation must be length 2')
-        a2, b2 = translation
+        if self.dim == 2:
+            scale = (1, 1) if scale is None else scale
+            sx, sy = (scale, scale) if np.isscalar(scale) else scale
+            rotation = 0 if rotation is None else rotation
+            if not np.isscalar(rotation):
+                raise ValueError('rotation must be scalar (2D rotation)')
+            shear = 0 if shear is None else shear
+            shear_x, shear_y = (shear, 0) if np.isscalar(shear) else shear
+            translation = (0, 0) if translation is None else translation
+            if np.isscalar(translation):
+                raise ValueError('translation must be length 2')
+            a2, b2 = translation
 
-        a0 = sx * (math.cos(rotation) + math.tan(shear_y) * math.sin(rotation))
-        a1 = -sy * (math.tan(shear_x) * math.cos(rotation) + math.sin(rotation))
+            a0 = sx * (math.cos(rotation) + math.tan(shear_y) * math.sin(rotation))
+            a1 = -sy * (math.tan(shear_x) * math.cos(rotation) + math.sin(rotation))
 
-        b0 = sx * (math.sin(rotation) - math.tan(shear_y) * math.cos(rotation))
-        b1 = -sy * (math.tan(shear_x) * math.sin(rotation) - math.cos(rotation))
-        return np.array([[a0, a1, a2], [b0, b1, b2], [0, 0, 1]])
+            b0 = sx * (math.sin(rotation) - math.tan(shear_y) * math.cos(rotation))
+            b1 = -sy * (math.tan(shear_x) * math.sin(rotation) - math.cos(rotation))
+
+            return np.array([[a0, a1, a2], [b0, b1, b2], [0, 0, 1]])
+
+        if self.dim == 3:
+            scale = (1, 1, 1) if scale is None else scale
+            sx, sy, sz = (scale, scale, scale) if np.isscalar(scale) else scale
+            rotation = (0, 0, 0) if rotation is None else rotation
+            rotation_x, rotation_y, rotation_z = (
+                (rotation, 0, 0) if np.isscalar(rotation) else rotation
+            )
+            if len(rotation) == 2:
+                rotation_x, rotation_y = rotation
+                rotation_z = 0
+            shear = (0, 0, 0) if shear is None else shear
+            shear_xy, shear_xz, shear_yz = (
+                (shear, 0, 0) if np.isscalar(shear) else shear
+            )
+            if len(shear) == 2:
+                shear_xy, shear_xz, shear_yz = (shear, shear, 0)
+            translation = (0, 0, 0) if translation is None else translation
+            if np.isscalar(translation):
+                raise ValueError('translation must be length 3')
+            a3, b3, c3 = translation
+
+            a0 = sx * (math.cos(rotation_y) * math.cos(rotation_z))
+            a1 = sy * (
+                math.tan(shear_xy) * math.cos(rotation_y) * math.cos(rotation_z)
+                + math.sin(rotation_x) * math.sin(rotation_y) * math.cos(rotation_z)
+                - math.sin(rotation_z) * math.cos(rotation_x)
+            )
+            a2 = sz * (
+                math.tan(shear_xz) * math.cos(rotation_y) * math.cos(rotation_z)
+                + math.tan(shear_yz)
+                * (
+                    math.sin(rotation_x) * math.sin(rotation_y) * math.cos(rotation_z)
+                    - math.sin(rotation_z) * math.cos(rotation_x)
+                )
+                + math.sin(rotation_x) * math.sin(rotation_z)
+                + math.sin(rotation_y) * math.cos(rotation_x) * math.cos(rotation_z)
+            )
+            b0 = sx * (math.cos(rotation_y) * math.sin(rotation_z))
+            b1 = sy * (
+                math.tan(shear_xy) * math.cos(rotation_y) * math.sin(rotation_z)
+                + math.sin(rotation_x) * math.sin(rotation_y) * math.sin(rotation_z)
+                + math.cos(rotation_x) * math.cos(rotation_z)
+            )
+            b2 = sz * (
+                math.tan(shear_xz) * math.cos(rotation_y) * math.sin(rotation_z)
+                + math.tan(shear_yz)
+                * (
+                    math.sin(rotation_x) * math.sin(rotation_y) * math.sin(rotation_z)
+                    + math.cos(rotation_x) * math.cos(rotation_z)
+                )
+                - math.sin(rotation_x) * math.cos(rotation_z)
+                + math.sin(rotation_y) * math.sin(rotation_z) * math.cos(rotation_x)
+            )
+            c0 = -sx * math.sin(rotation_y)
+            c1 = sy * (
+                -math.tan(shear_xy) * math.sin(rotation_y)
+                + math.sin(rotation_x) * math.cos(rotation_y)
+            )
+            c2 = sz * (
+                -math.tan(shear_xz) * math.sin(rotation_y)
+                + math.tan(shear_yz) * math.sin(rotation_x) * math.cos(rotation_y)
+                + math.cos(rotation_x) * math.cos(rotation_y)
+            )
+            return np.array(
+                [[a0, a1, a2, a3], [b0, b1, b2, b3], [c0, c1, c2, c3], [0, 0, 0, 1]]
+            )
+
+        return 0
 
     @property
     def scale(self):
-        if self.dimensionality != 2:
+        if self.dimensionality > 3 or self.dimensionality == 1:
             return np.sqrt(np.sum(self.params**2, axis=0))[: self.dimensionality]
-        ss = np.sum(self.params**2, axis=0)
-        ss[1] = ss[1] / (math.tan(self.shear) ** 2 + 1)
-        return np.sqrt(ss)[: self.dimensionality]
+
+        if self.dimensionality == 2:
+            ss = np.sum(self.params**2, axis=0)
+            ss[1] = ss[1] / (math.tan(self.shear) ** 2 + 1)
+            return np.sqrt(ss)[: self.dimensionality]
+
+        return self._decompose_affine_matrix(self.params[:3, :3])[0]
 
     @property
     def rotation(self):
-        if self.dimensionality != 2:
+        if self.dimensionality > 3 or self.dimensionality == 1:
             raise NotImplementedError(
-                'The rotation property is only implemented for 2D transforms.'
+                'The rotation property is only implemented for 2D or 3D transforms.'
             )
-        return math.atan2(self.params[1, 0], self.params[0, 0])
+
+        if self.dimensionality == 2:
+            return math.atan2(self.params[1, 0], self.params[0, 0])
+
+        return self._decompose_affine_matrix(self.params[:3, :3])[1]
 
     @property
     def shear(self):
-        if self.dimensionality != 2:
+        if self.dimensionality > 3 or self.dimensionality == 1:
             raise NotImplementedError(
-                'The shear property is only implemented for 2D transforms.'
+                'The shear property is only implemented for 2D or 3D transforms.'
             )
-        beta = math.atan2(-self.params[0, 1], self.params[1, 1])
-        return beta - self.rotation
+
+        if self.dimensionality == 2:
+            beta = math.atan2(-self.params[0, 1], self.params[1, 1])
+            return beta - self.rotation
+
+        return self._decompose_affine_matrix(self.params[:3, :3])[2]
 
     @property
     def translation(self):
