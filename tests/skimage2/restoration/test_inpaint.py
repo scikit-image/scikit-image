@@ -157,7 +157,7 @@ def test_invalid_input():
 
 
 @testing.parametrize('n', [1, 2, 3])
-@testing.parametrize('dtype', [np.float64])
+@testing.parametrize('dtype', [np.uint8, np.float32, np.float64])
 @testing.parametrize('order', ['C', 'F'])
 @testing.parametrize('channel_axis', [None, -1])
 @testing.parametrize('split_into_regions', [False, True])
