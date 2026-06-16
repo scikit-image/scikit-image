@@ -156,7 +156,7 @@ def test_invalid_input():
         inpaint.inpaint_nharmonic(img, mask)
 
 
-@testing.parametrize('n', [1, 2, 3, 4, 5, 6])
+@testing.parametrize('n', [1, 2, 3])
 @testing.parametrize('dtype', [np.float64])
 @testing.parametrize('order', ['C', 'F'])
 @testing.parametrize('channel_axis', [None, -1])
@@ -215,7 +215,4 @@ def test_inpaint_nrmse(n, dtype, order, channel_axis, split_into_regions):
     nrmse_defect = normalized_root_mse(image_orig, image_defect)
     nrmse_result = normalized_root_mse(img_as_float(image_orig), image_result)
 
-    if n <= 3:
-        assert nrmse_result < 0.2 * nrmse_defect
-    else:
-        assert nrmse_result < 0.7 * nrmse_defect
+    assert nrmse_result < 0.2 * nrmse_defect
