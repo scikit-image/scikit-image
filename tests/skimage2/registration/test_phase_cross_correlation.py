@@ -179,7 +179,7 @@ def test_mismatch_offsets_size():
 
 @pytest.mark.parametrize(
     ('shift0', 'shift1'),
-    itertools.product((100, -100, 350, -350), (100, -100, 350, -350)),
+    list(itertools.product((100, -100, 350, -350), (100, -100, 350, -350))),
 )
 def test_disambiguate_2d(shift0, shift1):
     image = eagle()[500:, 900:]  # use a highly textured part of image
