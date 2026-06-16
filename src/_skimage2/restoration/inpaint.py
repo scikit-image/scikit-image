@@ -16,11 +16,12 @@ def _get_neighborhood(nd_idx, radius, nd_shape):
     return bounds_lo, bounds_hi
 
 
-def _get_neigh_coef(shape, center, dtype=float):
+def _get_neigh_coef(shape, center, n=2, dtype=float):
     # Create biharmonic coefficients ndarray
     neigh_coef = np.zeros(shape, dtype=dtype)
     neigh_coef[center] = 1
-    neigh_coef = laplace(laplace(neigh_coef))
+    for _ in range(n):
+        neigh_coef = laplace(neigh_coef)
 
     # extract non-zero locations and values
     coef_idx = np.where(neigh_coef)
@@ -30,8 +31,8 @@ def _get_neigh_coef(shape, center, dtype=float):
     return neigh_coef, coef_idx, coef_vals
 
 
-def _inpaint_biharmonic_single_region(
-    image, mask, out, neigh_coef_full, coef_vals, raveled_offsets
+def _inpaint_nharmonic_single_region(
+    image, mask, n, out, neigh_coef_full, coef_vals, raveled_offsets
 ):
     """Solve a (sparse) linear system corresponding to biharmonic inpainting.
 
@@ -122,7 +123,7 @@ def _inpaint_biharmonic_single_region(
         coef_idx, coefs = coef_cache.get((coef_shape, coef_center), (None, None))
         if coef_idx is None:
             _, coef_idx, coefs = _get_neigh_coef(
-                coef_shape, coef_center, dtype=out.dtype
+                coef_shape, coef_center, n, dtype=out.dtype
             )
             coef_cache[(coef_shape, coef_center)] = (coef_idx, coefs)
 
@@ -195,8 +196,8 @@ def _inpaint_biharmonic_single_region(
 
 
 @utils.channel_as_last_axis()
-def inpaint_biharmonic(image, mask, *, split_into_regions=False, channel_axis=None):
-    """Inpaint masked points in image with biharmonic equations.
+def inpaint_nharmonic(image, mask, *, n=2, split_into_regions=False, channel_axis=None):
+    """Inpaint masked points in image with nharmonic equations.
 
     Parameters
     ----------
@@ -241,7 +242,7 @@ def inpaint_biharmonic(image, mask, *, split_into_regions=False, channel_axis=No
     >>> mask[2, 2:] = 1
     >>> mask[1, 3:] = 1
     >>> mask[0, 4:] = 1
-    >>> out = inpaint_biharmonic(img, mask)
+    >>> out = inpaint_nharmonic(img, mask)
     """
 
     if image.ndim < 1:
@@ -266,12 +267,12 @@ def inpaint_biharmonic(image, mask, *, split_into_regions=False, channel_axis=No
         image = image[..., np.newaxis]
     out = np.copy(image, order='C')
 
-    # Create biharmonic coefficients ndarray
-    radius = 2
+    # Create nharmonic coefficients ndarray
+    radius = n
     coef_shape = (2 * radius + 1,) * mask.ndim
     coef_center = (radius,) * mask.ndim
     neigh_coef_full, coef_idx, coef_vals = _get_neigh_coef(
-        coef_shape, coef_center, dtype=out.dtype
+        coef_shape, coef_center, n, dtype=out.dtype
     )
 
     # stride for the last spatial dimension
@@ -312,9 +313,10 @@ def inpaint_biharmonic(image, mask, *, split_into_regions=False, channel_axis=No
             )
             raveled_offsets = np.sum(offsets * ostrides[..., np.newaxis], axis=0)
 
-            _inpaint_biharmonic_single_region(
+            _inpaint_nharmonic_single_region(
                 image[roi_sl],
                 mask_region,
+                n,
                 otmp,
                 neigh_coef_full,
                 coef_vals,
@@ -327,8 +329,8 @@ def inpaint_biharmonic(image, mask, *, split_into_regions=False, channel_axis=No
         ostrides = np.array([s // channel_stride_bytes for s in out[..., 0].strides])
         raveled_offsets = np.sum(offsets * ostrides[..., np.newaxis], axis=0)
 
-        _inpaint_biharmonic_single_region(
-            image, mask, out, neigh_coef_full, coef_vals, raveled_offsets
+        _inpaint_nharmonic_single_region(
+            image, mask, n, out, neigh_coef_full, coef_vals, raveled_offsets
         )
 
     # Handle enormous values on a per-channel basis
