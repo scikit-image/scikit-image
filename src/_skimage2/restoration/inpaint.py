@@ -196,7 +196,9 @@ def _inpaint_nharmonic_single_region(
 
 
 @utils.channel_as_last_axis()
-def inpaint_nharmonic(image, mask, *, n=2, split_into_regions=False, channel_axis=None):
+def inpaint_biharmonic(
+    image, mask, *, n=2, split_into_regions=False, channel_axis=None
+):
     """Inpaint masked points in image with nharmonic equations.
 
     Parameters
