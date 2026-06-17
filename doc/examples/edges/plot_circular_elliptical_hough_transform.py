@@ -36,12 +36,12 @@ Its size is extended by two times the larger radius.
 """
 
 import numpy as np
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 
-from skimage import data, color
+from skimage import data
 from skimage.transform import hough_circle, hough_circle_peaks
 from skimage.feature import canny
-from skimage.draw import circle_perimeter
 from skimage.util import img_as_ubyte
 
 
@@ -59,12 +59,13 @@ accums, cx, cy, radii = hough_circle_peaks(hough_res, hough_radii, total_num_pea
 
 # Draw them
 fig, ax = plt.subplots(ncols=1, nrows=1, figsize=(10, 4))
-image = color.gray2rgb(image)
-for center_y, center_x, radius in zip(cy, cx, radii):
-    circy, circx = circle_perimeter(center_y, center_x, radius, shape=image.shape)
-    image[circy, circx] = (220, 20, 20)
-
 ax.imshow(image, cmap=plt.cm.gray)
+for center_y, center_x, radius in zip(cy, cx, radii):
+    ax.add_patch(
+        mpl.patches.Circle(
+            (center_x, center_y), radius, edgecolor="tab:red", facecolor="none"
+        )
+    )
 plt.show()
 
 
@@ -99,7 +100,6 @@ import matplotlib.pyplot as plt
 from skimage import data, color, img_as_ubyte
 from skimage.feature import canny
 from skimage.transform import hough_ellipse
-from skimage.draw import ellipse_perimeter
 
 # Load picture, convert to grayscale and detect edges
 image_rgb = data.coffee()[0:220, 160:420]
@@ -120,21 +120,36 @@ best = list(result[-1])
 yc, xc, a, b = (int(round(x)) for x in best[1:5])
 orientation = best[5]
 
-# Draw the ellipse on the original image
-cy, cx = ellipse_perimeter(yc, xc, a, b, orientation)
-image_rgb[cy, cx] = (0, 0, 255)
-# Draw the edge (white) and the resulting ellipse (red)
-edges = color.gray2rgb(img_as_ubyte(edges))
-edges[cy, cx] = (250, 0, 0)
-
 fig2, (ax1, ax2) = plt.subplots(
     ncols=2, nrows=1, figsize=(8, 4), sharex=True, sharey=True
 )
 
+# Draw the ellipse on the original image
 ax1.set_title('Original picture')
 ax1.imshow(image_rgb)
+ax1.add_patch(
+    mpl.patches.Ellipse(
+        (xc, yc),
+        2 * b,
+        2 * a,
+        angle=np.degrees(orientation),
+        edgecolor="tab:blue",
+        facecolor="none",
+    )
+)
 
+# Draw the edge (white) and the resulting ellipse (red)
 ax2.set_title('Edge (white) and result (red)')
-ax2.imshow(edges)
+ax2.imshow(edges, cmap="gray")
+ax2.add_patch(
+    mpl.patches.Ellipse(
+        (xc, yc),
+        2 * b,
+        2 * a,
+        angle=np.degrees(orientation),
+        edgecolor="tab:red",
+        facecolor="none",
+    )
+)
 
 plt.show()
