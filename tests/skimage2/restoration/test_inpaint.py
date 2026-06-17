@@ -19,7 +19,7 @@ def test_inpaint_biharmonic_2d(dtype, split_into_regions):
     mask[1, 3:] = 1
     mask[0, 4:] = 1
     img[np.where(mask)] = 0
-    out = inpaint.inpaint_nharmonic(img, mask, split_into_regions=split_into_regions)
+    out = inpaint.inpaint_biharmonic(img, mask, split_into_regions=split_into_regions)
     assert out.dtype == _supported_float_type(img.dtype)
 
     ref = np.array(
@@ -45,7 +45,7 @@ def test_inpaint_biharmonic_2d_color(channel_axis):
     mse_defect = mean_squared_error(img, img_defect)
 
     img_defect = np.moveaxis(img_defect, -1, channel_axis)
-    img_restored = inpaint.inpaint_nharmonic(
+    img_restored = inpaint.inpaint_biharmonic(
         img_defect, mask, channel_axis=channel_axis
     )
     img_restored = np.moveaxis(img_restored, channel_axis, -1)
@@ -63,7 +63,7 @@ def test_inpaint_biharmonic_2d_float_dtypes(dtype):
     mask[0, 4:] = 1
     img[np.where(mask)] = 0
     img = img.astype(dtype, copy=False)
-    out = inpaint.inpaint_nharmonic(img, mask)
+    out = inpaint.inpaint_biharmonic(img, mask)
     assert out.dtype == img.dtype
     ref = np.array(
         [
@@ -86,7 +86,7 @@ def test_inpaint_biharmonic_3d(split_into_regions):
     mask[1, 3:, :] = 1
     mask[0, 4:, :] = 1
     img[np.where(mask)] = 0
-    out = inpaint.inpaint_nharmonic(img, mask, split_into_regions=split_into_regions)
+    out = inpaint.inpaint_biharmonic(img, mask, split_into_regions=split_into_regions)
     ref = np.dstack(
         (
             np.array(
@@ -134,7 +134,7 @@ def test_inpaint_nharmonic_2d(order, dtype, split_into_regions):
     mask[r0 + 0, c0 + 1 : c0 + 2] = 1
     img[np.where(mask)] = 0
 
-    out = inpaint.inpaint_nharmonic(
+    out = inpaint.inpaint_biharmonic(
         img, mask, n=order, split_into_regions=split_into_regions
     )
     assert out.dtype == _supported_float_type(img.dtype)
@@ -144,16 +144,16 @@ def test_inpaint_nharmonic_2d(order, dtype, split_into_regions):
 def test_invalid_input():
     img, mask = np.zeros([]), np.zeros([])
     with testing.raises(ValueError):
-        inpaint.inpaint_nharmonic(img, mask)
+        inpaint.inpaint_biharmonic(img, mask)
 
     img, mask = np.zeros((2, 2)), np.zeros((4, 1))
     with testing.raises(ValueError):
-        inpaint.inpaint_nharmonic(img, mask)
+        inpaint.inpaint_biharmonic(img, mask)
 
     img = np.ma.array(np.zeros((2, 2)), mask=[[0, 0], [0, 0]])
     mask = np.zeros((2, 2))
     with testing.raises(TypeError):
-        inpaint.inpaint_nharmonic(img, mask)
+        inpaint.inpaint_biharmonic(img, mask)
 
 
 @testing.parametrize('n', [1, 2, 3])
@@ -203,7 +203,7 @@ def test_inpaint_nrmse(n, dtype, order, channel_axis, split_into_regions):
     image_defect = image_defect.astype(dtype, copy=False)
 
     image_defect = np.asarray(image_defect, order=order)
-    image_result = inpaint.inpaint_nharmonic(
+    image_result = inpaint.inpaint_biharmonic(
         image_defect,
         mask,
         n=n,
