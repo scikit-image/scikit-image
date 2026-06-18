@@ -21,8 +21,25 @@ a view to remedy the fragmentation of the array computing ecosystem caused by th
 accumulated divergences among these---almost, but not completely dissimilar---array/tensor libraries.
 
 Adopting the Array API standard in ``scikit-image`` gives users flexibility in choosing
-their software stack for array computing, and enables performance improvements from
-using low-level implementations of hardware accelerated algorithms [4]_.
+their software stack for array computing, and unlocks performance improvements from
+hardware accelerated implementations [4]_. Specific ways to harness hardware acceleration
+differ for different scikit-image functions. For functions implemented in Cython,
+some form of dispatching is required (and scikit-image has experimented with already).
+
+For functions which rely on SciPy however---``scipy.ndimage`` and ``scipy.fft`` are
+heavily used in scikit-image, and delegate to CUDA kernels for CuPy array inputs internally---
+adopting the Array API unlocks hardware acceleration at a marginal maintenance cost.
+What fraction of the ``scikit-image`` API surface is amendable to this "immediate"
+acceleration? While the answer varies by the submodule, from a partial sample of the
+API surface, we estimate that 50-70% of it can use harware acceleration from porting
+the Python code to be Array API compatible. See the Discussion section for details.
+
+More generally, Array API compatibility gives a generic framework for, and implements
+the foundational infrastructure of, dispatching to specialized accelerator-enabled
+implementations (such as CUCIM and similar GPU libraries). Specific details
+of the dispatching can take multiple forms, and are under discussions across the ecosystem.
+What the Array API compatibility provides however, is a general and ecosystem-aligned
+framework for working through these (both fascinating and difficult) details.
 
 
 Motivation and Scope
@@ -265,17 +282,51 @@ concern is whether adopting the Array API brings meaningful benefits---these han
 kernels are and will remain being NumPy-only, while the majority of gains reported
 in [4]_ are from using hardware accelerators.
 
-First of all, to an extent of ``scikit-image`` using ``scipy.ndimage``, the latter
-does benefit from GPU execution for CuPy arrays, today. This way, scikit-image functions
-which call scipy.ndimage functions *and* have their internals Array API compatible, use
+First of all, to an extent that ``scikit-image`` uses SciPy, the relevant SciPy submodules,
+notably ``scipy.ndimage`` and ``scipy.fft``, do benefit from GPU execution for CuPy
+arrays, today.
+This way, scikit-image functions which wrap ``scipy.ndimage`` or
+``scipy.fft`` functions *and* have their internals Array API compatible, use
 CUDA automatically for CuPy array inputs. See [15]_ for a worked example.
 
-More generally, Array API compatibility gives a generic framework for, and implements
-the foundational infrastructure of, dispatching to specialized accelerator-enabled
-implementations (such as CUCIM and similar GPU libraries). Specific details
-of the dispatching can take multiple forms, and are under discussion elsewhere. What the
-Array API compatibility provides however, is a general and ecosystem-aligned framework
-for working through these (both fascinating and difficult) details.
+It is instructive to see what fraction of the scikit-image functionality can use this
+form of GPU acceleration. A table below gives a breakdown for several scikit-image
+submodules [16]_. Each column of the table gives a percentage of the API surface of
+a submodule, grouped according to the following criteria:
+
+- a function is _"CuPy ready"_ if simply converting a function to the Array API makes
+  it run natively on GPU. Typically, this means that the function currently only uses
+  NumPy calls and its dependencies are GPU-enabled (typically, ``scipy.ndimage`` and
+  ``scipy.fft``).
+
+- _"minor dep"_ means that while not all dependencies are GPU-ready today, it can be made
+  GPU ready with small amount of work, upstream or in scikit-image itself. Typical 
+  reasons include ``scipy.spatial.KDTree`` (which has a delegation target in
+  ``cupyx.scipy.spatial.KDTree``) or ``numpy.bincount`` (which is technically not
+  in the Array API standard version 2025.12, but is considered for inclusion and
+  has a delegation target in CuPy versions ``>= 13``).
+
+- _"major dep"_  means that a function has dependencies which will either require a
+  significant amount of work to make it GPU-compatible or a major new dependency.
+  A typical example is ``scipy.spatial.ConvexHull``.
+
+- _"Cython kernel"_ means that a function uses a dedicated Cython kernel, maintained in
+  ``scikit-image`` itself. These Cython kernels are of course CPU only.
+
+
+API dependency breakdown for several submodules
+
+=========    ==========  =========  =========  =============  ==============
+submodule    CuPy ready  minor dep  major dep  Cython kernel  number of APIs
+=========    ==========  =========  =========  =============  ==============
+morphology   46%         4%         9%         45%            46
+exposure     40%         60%        0          0              10
+filters      79%         17%        0          2%             47
+filters.rank 0           0          0          100%           31
+transform    68%         15%        3%         13%            38
+metrics      40%         20%        30%        10%            10
+=========    ==========  =========  =========  =============  ==============
+
 
 
 References and Footnotes
@@ -288,7 +339,7 @@ license [1]_, as in `Copyright`, below, with attribution encouraged with CC0+BY
    https://creativecommons.org/publicdomain/zero/1.0/
 .. [2] https://dancohen.org/2013/11/26/cc0-by/
 .. [3] https://data-apis.org/array-api/latest/
-.. [4] https://labs.quansight.org/blog/array-api-meta-blogposts
+.. [4] https://labs.quansight.org/blog/array-api-meta-blogpost
 .. [5] SciPy tracker issue for the Array API adoption,
    https://github.com/scipy/scipy/issues/18867
 .. [6] SciPy Array API coverage,
@@ -313,7 +364,9 @@ license [1]_, as in `Copyright`, below, with attribution encouraged with CC0+BY
    https://docs.scipy.org/doc/scipy/dev/api-dev/array_api.html#implementation-notes
 .. [15] A proof of concept demonstration of the Array API compatibility in
    ``scikit-image``, https://github.com/scikit-image/scikit-image/pull/8182
-
+.. [16] For the raw annotated breakdown see
+   https://docs.google.com/spreadsheets/d/1Kz5b2G1FowAg0MjPxZxZ7yPs-IJrlaFGksE3AiScO98/edit?usp=sharing
+   Data collected for `scikit-image` version 0.26.
 
 Copyright
 ---------
