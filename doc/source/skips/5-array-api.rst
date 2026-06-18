@@ -300,7 +300,7 @@ a submodule, grouped according to the following criteria:
   ``scipy.fft``).
 
 - _"minor dep"_ means that while not all dependencies are GPU-ready today, it can be made
-  GPU ready with small amount of work, upstream or in scikit-image itself. Typical 
+  GPU ready with small amount of work, upstream or in scikit-image itself. Typical
   reasons include ``scipy.spatial.KDTree`` (which has a delegation target in
   ``cupyx.scipy.spatial.KDTree``) or ``numpy.bincount`` (which is technically not
   in the Array API standard version 2025.12, but is considered for inclusion and
@@ -316,16 +316,21 @@ a submodule, grouped according to the following criteria:
 
 API dependency breakdown for several submodules
 
-=========    ==========  =========  =========  =============  ==============
-submodule    CuPy ready  minor dep  major dep  Cython kernel  number of APIs
-=========    ==========  =========  =========  =============  ==============
-morphology   46%         4%         9%         45%            46
-exposure     40%         60%        0          0              10
-filters      79%         17%        0          2%             47
-filters.rank 0           0          0          100%           31
-transform    68%         15%        3%         13%            38
-metrics      40%         20%        30%        10%            10
-=========    ==========  =========  =========  =============  ==============
++--------------+------------+-----------+-----------+---------------+----------------+
+| submodule    | CuPy ready | minor dep | major dep | Cython kernel | number of APIs |
++==============+============+===========+===========+===============+================+
+| morphology   | 46%        | 4%        | 9%        | 45%           | 46             |
++--------------+------------+-----------+-----------+---------------+----------------+
+| exposure     | 40%        | 60%       | 0         | 0             | 10             |
++--------------+------------+-----------+-----------+---------------+----------------+
+| filters      | 79%        | 17%       | 0         | 2%            | 47             |
++--------------+------------+-----------+-----------+---------------+----------------+
+| filters.rank | 0          | 0         | 0         | 100%          | 31             |
++--------------+------------+-----------+-----------+---------------+----------------+
+| transform    | 68%        | 15%       | 3%        | 13%           | 38             |
++--------------+------------+-----------+-----------+---------------+----------------+
+| metrics      | 40%        | 20%       | 30%       | 10%           | 10             |
++--------------+------------+-----------+-----------+---------------+----------------+
 
 
 
