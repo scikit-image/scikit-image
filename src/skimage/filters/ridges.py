@@ -31,7 +31,7 @@ def meijering(
 
     Parameters
     ----------
-    image : (M, N[, ...]) ndarray
+    image : ndarray of shape (M, N[, ...])
         Array with input image data.
     sigmas : iterable of floats, optional
         Sigmas used as scales of filter
@@ -49,7 +49,7 @@ def meijering(
 
     Returns
     -------
-    out : (M, N[, ...]) ndarray
+    out : ndarray of shape (M, N[, ...])
         Filtered image (maximum of pixels across all scales).
 
     See also
