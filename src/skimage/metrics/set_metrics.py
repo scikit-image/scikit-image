@@ -50,7 +50,7 @@ def hausdorff_distance(image0, image1, method="standard"):
     >>> image_a[points_a] = True
     >>> image_b[points_b] = True
     >>> hausdorff_distance(image_a, image_b)
-    3.0
+    np.float64(3.0)
 
     """
 

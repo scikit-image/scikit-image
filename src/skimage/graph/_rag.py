@@ -42,7 +42,7 @@ def _edge_generator_from_csr(csr_array):
     col_indices = csr_array.indices
     for i in range(nrows):
         for j in range(indptr[i], indptr[i + 1]):
-            yield i, col_indices[j], values[j]
+            yield i, int(col_indices[j]), float(values[j])
 
 
 def min_weight(graph, src, dst, n):

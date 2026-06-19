@@ -1399,10 +1399,10 @@ def regionprops(
     >>> props = ski.measure.regionprops(label_img)
     >>> # centroid of first labeled region
     >>> props[0].centroid
-    (22.72987986048314, 81.91228523446583)
+    (np.float64(22.72987986048314), np.float64(81.91228523446583))
     >>> # centroid of first labeled region
     >>> props[0]['centroid']
-    (22.72987986048314, 81.91228523446583)
+    (np.float64(22.72987986048314), np.float64(81.91228523446583))
 
     Add custom measurements by passing functions as ``extra_properties``:
 
@@ -1415,10 +1415,10 @@ def regionprops(
     >>> props = ski.measure.regionprops(label_img, extra_properties=(pixelcount,))
     >>> # pixelcount of first labeled region
     >>> props[0].pixelcount
-    7741
+    np.int64(7741)
     >>> # pixelcount of first labeled region
     >>> props[1]['pixelcount']
-    42
+    np.int64(42)
 
     """
 

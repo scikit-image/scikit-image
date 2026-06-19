@@ -39,24 +39,24 @@ def regular_grid(ar_shape, n_points):
     >>> ar = np.zeros((20, 40))
     >>> g = regular_grid(ar.shape, 8)
     >>> g
-    (slice(5, None, 10), slice(5, None, 10))
+    (slice(np.int64(5), None, np.int64(10)), slice(np.int64(5), None, np.int64(10)))
     >>> ar[g] = 1
     >>> ar.sum()
-    8.0
+    np.float64(8.0)
     >>> ar = np.zeros((20, 40))
     >>> g = regular_grid(ar.shape, 32)
     >>> g
-    (slice(2, None, 5), slice(2, None, 5))
+    (slice(np.int64(2), None, np.int64(5)), slice(np.int64(2), None, np.int64(5)))
     >>> ar[g] = 1
     >>> ar.sum()
-    32.0
+    np.float64(32.0)
     >>> ar = np.zeros((3, 20, 40))
     >>> g = regular_grid(ar.shape, 8)
     >>> g
-    (slice(1, None, 3), slice(5, None, 10), slice(5, None, 10))
+    (slice(np.int64(1), None, np.int64(3)), slice(np.int64(5), None, np.int64(10)), slice(np.int64(5), None, np.int64(10)))
     >>> ar[g] = 1
     >>> ar.sum()
-    8.0
+    np.float64(8.0)
     """
     ar_shape = np.asanyarray(ar_shape)
     ndim = len(ar_shape)
