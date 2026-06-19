@@ -7,7 +7,7 @@ import itertools
 import warnings
 
 import numpy as np
-from scipy.fft import fftn, ifftn, fftfreq
+from scipy.fft import fftn, ifftn, fftfreq, next_fast_len
 from scipy import ndimage as ndi
 
 from ._masked_phase_cross_correlation import _masked_phase_cross_correlation
@@ -198,6 +198,22 @@ def _disambiguate_shift(reference_image, moving_image, shift):
 
     return np.array(real_shift_acc)
 
+def _pad_to_fast(arr):
+    """Pad array to the next FFT-friendly size along each axis.
+
+    Parameters
+    ----------
+    arr : ndarray
+        Input array.
+
+    Returns
+    -------
+    ndarray
+        Zero-padded array whose shape is 5-smooth (composed of factors 2, 3, 5).
+    """
+    fast_shape = tuple(next_fast_len(s) for s in arr.shape)
+    pad_width = [(0, s - a) for a, s in zip(arr.shape, fast_shape)]
+    return np.pad(arr, pad_width, mode="constant")
 
 def phase_cross_correlation(
     reference_image,
@@ -332,8 +348,13 @@ def phase_cross_correlation(
         target_freq = moving_image
     # real data needs to be fft'd.
     elif space.lower() == 'real':
-        src_freq = fftn(reference_image)
-        target_freq = fftn(moving_image)
+        # Cast ints to float32 to prevent them being cast to float64
+        if np.isdtype(reference_image.dtype, 'integral'):
+            reference_image.astype(np.float32, copy=False)
+            moving_image.astype(np.float32, copy=False)
+        # Pad to fast shape
+        src_freq = fftn(_pad_to_fast(reference_image))
+        target_freq = fftn(_pad_to_fast(moving_image))
     else:
         raise ValueError('space argument must be "real" of "fourier"')
 
