@@ -914,7 +914,7 @@ def test_wavelet_threshold():
 @xfail_without_pywt
 @pytest.mark.parametrize(
     'rescale_sigma, method, ndim',
-    itertools.product([True, False], ['VisuShrink', 'BayesShrink'], range(1, 5)),
+    list(itertools.product([True, False], ['VisuShrink', 'BayesShrink'], range(1, 5))),
 )
 def test_wavelet_denoising_nd(rescale_sigma, method, ndim):
     rstate = np.random.RandomState(2098169547)
