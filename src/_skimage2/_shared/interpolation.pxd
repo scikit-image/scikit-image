@@ -349,6 +349,41 @@ cdef inline np_real_numeric get_pixel3d(np_real_numeric* image,
                      coord_map(cols, c, mode) * dims +
                      coord_map(dims, d, mode)]
 
+cdef inline np_real_numeric get_pixel4d(np_real_numeric* image,
+                                        Py_ssize_t rows, Py_ssize_t cols, Py_ssize_t depth,
+                                        Py_ssize_t dims, Py_ssize_t r,
+                                        Py_ssize_t c, Py_ssize_t z, Py_ssize_t d, char mode,
+                                        np_real_numeric cval) noexcept nogil:
+    """Get a pixel from the image, taking wrapping mode into consideration.
+
+    Parameters
+    ----------
+    image : numeric array
+        Input image.
+    rows, cols, depth, dims : int
+        Shape of image.
+    r, c, z, d : int
+        Position at which to get the pixel.
+    mode : {'C', 'W', 'S', 'E', 'R'}
+        Wrapping mode. Constant, Wrap, Symmetric, Edge or Reflect.
+    cval : numeric
+        Constant value to use for constant mode.
+
+    Returns
+    -------
+    out : np_real_numeric
+        Pixel value at given position.
+    """
+
+    if mode == b'C':
+        if (r < 0) or (r >= rows) or (c < 0) or (c >= cols) or (z < 0) or (z >= depth):
+            return cval
+        else:
+            return image[r * cols * depth * dims + c * depth * dims + z * dims + d]
+    else:
+        return image[coord_map(depth, r, mode) * cols * depth * dims + coord_map(rows, c, mode) * depth * dims +
+                     coord_map(cols, z, mode) * dims +
+                     coord_map(dims, d, mode)]
 
 cdef inline Py_ssize_t coord_map(Py_ssize_t dim, long coord, char mode) noexcept nogil:
     """Wrap a coordinate, according to a given mode.
