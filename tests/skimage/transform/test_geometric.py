@@ -1336,10 +1336,10 @@ def test_transform_order(tform_class, op_order):
 @pytest.mark.parametrize(
     'inp',
     (
-        dict(scale=5, dimensionality=3),
-        dict(scale=(5, 5, 5), dimensionality=3),
-        dict(scale=(5, 5, 5)),
-        dict(shear=(0.1, 0.2, 0.3)),
+        dict(scale=5, dimensionality=4),
+        dict(scale=(5, 5, 5), dimensionality=4),
+        dict(scale=(5, 5, 5, 5)),
+        dict(shear=(0.1, 0.2, 0.3, 0.21)),
         dict(rotation=(0.1, 0.2)),
         dict(translation=1),
         dict(translation=(1, 2, 3)),
@@ -1400,10 +1400,10 @@ def test_euler_angle_consistency():
     assert_array_almost_equal(euclid, similar)
 
 
-def test_2D_only_implementations():
+def test_2D_and_3D_only_implementations():
     with pytest.raises(NotImplementedError):
         _ = PolynomialTransform(dimensionality=3)
-    tf = AffineTransform(dimensionality=3)
+    tf = AffineTransform(dimensionality=4)
     with pytest.raises(NotImplementedError):
         _ = tf.rotation
     with pytest.raises(NotImplementedError):
