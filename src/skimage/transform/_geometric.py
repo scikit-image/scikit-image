@@ -1595,17 +1595,12 @@ class AffineTransform(ProjectiveTransform):
             sx, sy, sz = (scale, scale, scale) if np.isscalar(scale) else scale
             rotation = (0, 0, 0) if rotation is None else rotation
             rotation_x, rotation_y, rotation_z = (
-                (rotation, 0, 0) if np.isscalar(rotation) else rotation
+                (rotation, rotation, rotation) if np.isscalar(rotation) else rotation
             )
-            if len(rotation) == 2:
-                rotation_x, rotation_y = rotation
-                rotation_z = 0
             shear = (0, 0, 0) if shear is None else shear
             shear_xy, shear_xz, shear_yz = (
-                (shear, 0, 0) if np.isscalar(shear) else shear
+                (shear, shear, shear) if np.isscalar(shear) else shear
             )
-            if len(shear) == 2:
-                shear_xy, shear_xz, shear_yz = (shear, shear, 0)
             translation = (0, 0, 0) if translation is None else translation
             if np.isscalar(translation):
                 raise ValueError('translation must be length 3')
