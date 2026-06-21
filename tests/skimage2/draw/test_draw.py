@@ -240,8 +240,8 @@ def test_polygon_0d_input():
 
 def test_disk():
     img = np.zeros((15, 15), 'uint8')
-
-    rr, cc = disk((7, 7), 6)
+    with pytest.warns(FutureWarning):
+        rr, cc = disk((7, 7), 6)
     img[rr, cc] = 1
 
     img_ = np.array(
@@ -269,13 +269,15 @@ def test_disk():
 
 def test_circle_perimeter_bresenham():
     img = np.zeros((15, 15), 'uint8')
-    rr, cc = circle_perimeter(7, 7, 0, method='bresenham')
+    with pytest.warns(FutureWarning):
+        rr, cc = circle_perimeter(7, 7, 0, method='bresenham')
     img[rr, cc] = 1
     assert np.sum(img) == 1
     assert img[7][7] == 1
 
     img = np.zeros((17, 15), 'uint8')
-    rr, cc = circle_perimeter(7, 7, 7, method='bresenham')
+    with pytest.warns(FutureWarning):
+        rr, cc = circle_perimeter(7, 7, 7, method='bresenham')
     img[rr, cc] = 1
     img_ = np.array(
         [
@@ -303,24 +305,28 @@ def test_circle_perimeter_bresenham():
 
 def test_circle_perimeter_bresenham_shape():
     img = np.zeros((15, 20), 'uint8')
-    rr, cc = circle_perimeter(7, 10, 9, method='bresenham', shape=(15, 20))
+    with pytest.warns(FutureWarning):
+        rr, cc = circle_perimeter(7, 10, 9, method='bresenham', shape=(15, 20))
     img[rr, cc] = 1
     shift = 5
     img_ = np.zeros((15 + 2 * shift, 20), 'uint8')
-    rr, cc = circle_perimeter(7 + shift, 10, 9, method='bresenham', shape=None)
+    with pytest.warns(FutureWarning):
+        rr, cc = circle_perimeter(7 + shift, 10, 9, method='bresenham', shape=None)
     img_[rr, cc] = 1
     assert_array_equal(img, img_[shift:-shift, :])
 
 
 def test_circle_perimeter_andres():
     img = np.zeros((15, 15), 'uint8')
-    rr, cc = circle_perimeter(7, 7, 0, method='andres')
+    with pytest.warns(FutureWarning):
+        rr, cc = circle_perimeter(7, 7, 0, method='andres')
     img[rr, cc] = 1
     assert np.sum(img) == 1
     assert img[7][7] == 1
 
     img = np.zeros((17, 15), 'uint8')
-    rr, cc = circle_perimeter(7, 7, 7, method='andres')
+    with pytest.warns(FutureWarning):
+        rr, cc = circle_perimeter(7, 7, 7, method='andres')
     img[rr, cc] = 1
     img_ = np.array(
         [
@@ -348,13 +354,15 @@ def test_circle_perimeter_andres():
 
 def test_circle_perimeter_aa():
     img = np.zeros((15, 15), 'uint8')
-    rr, cc, val = circle_perimeter_aa(7, 7, 0)
+    with pytest.warns(FutureWarning):
+        rr, cc, val = circle_perimeter_aa(7, 7, 0)
     img[rr, cc] = 1
     assert np.sum(img) == 1
     assert img[7][7] == 1
 
     img = np.zeros((17, 17), 'uint8')
-    rr, cc, val = circle_perimeter_aa(8, 8, 7)
+    with pytest.warns(FutureWarning):
+        rr, cc, val = circle_perimeter_aa(8, 8, 7)
     img[rr, cc] = val * 255
     # fmt: off
     img_ = np.array(
@@ -382,25 +390,29 @@ def test_circle_perimeter_aa():
 
 def test_circle_perimeter_aa_shape():
     img = np.zeros((15, 20), 'uint8')
-    rr, cc, val = circle_perimeter_aa(7, 10, 9, shape=(15, 20))
+    with pytest.warns(FutureWarning):
+        rr, cc, val = circle_perimeter_aa(7, 10, 9, shape=(15, 20))
     img[rr, cc] = val * 255
 
     shift = 5
     img_ = np.zeros((15 + 2 * shift, 20), 'uint8')
-    rr, cc, val = circle_perimeter_aa(7 + shift, 10, 9, shape=None)
+    with pytest.warns(FutureWarning):
+        rr, cc, val = circle_perimeter_aa(7 + shift, 10, 9, shape=None)
     img_[rr, cc] = val * 255
     assert_array_equal(img, img_[shift:-shift, :])
 
 
 def test_ellipse_trivial():
     img = np.zeros((2, 2), 'uint8')
-    rr, cc = ellipse(0.5, 0.5, 0.5, 0.5)
+    with pytest.warns(FutureWarning):
+        rr, cc = ellipse(0.5, 0.5, 0.5, 0.5)
     img[rr, cc] = 1
     img_correct = np.array([[0, 0], [0, 0]])
     assert_array_equal(img, img_correct)
 
     img = np.zeros((2, 2), 'uint8')
-    rr, cc = ellipse(0.5, 0.5, 1.1, 1.1)
+    with pytest.warns(FutureWarning):
+        rr, cc = ellipse(0.5, 0.5, 1.1, 1.1)
     img[rr, cc] = 1
     img_correct = np.array(
         [
@@ -411,7 +423,8 @@ def test_ellipse_trivial():
     assert_array_equal(img, img_correct)
 
     img = np.zeros((3, 3), 'uint8')
-    rr, cc = ellipse(1, 1, 0.9, 0.9)
+    with pytest.warns(FutureWarning):
+        rr, cc = ellipse(1, 1, 0.9, 0.9)
     img[rr, cc] = 1
     img_correct = np.array(
         [
@@ -423,7 +436,8 @@ def test_ellipse_trivial():
     assert_array_equal(img, img_correct)
 
     img = np.zeros((3, 3), 'uint8')
-    rr, cc = ellipse(1, 1, 1.1, 1.1)
+    with pytest.warns(FutureWarning):
+        rr, cc = ellipse(1, 1, 1.1, 1.1)
     img[rr, cc] = 1
     img_correct = np.array(
         [
@@ -435,7 +449,8 @@ def test_ellipse_trivial():
     assert_array_equal(img, img_correct)
 
     img = np.zeros((3, 3), 'uint8')
-    rr, cc = ellipse(1, 1, 1.5, 1.5)
+    with pytest.warns(FutureWarning):
+        rr, cc = ellipse(1, 1, 1.5, 1.5)
     img[rr, cc] = 1
     img_correct = np.array(
         [
@@ -449,7 +464,8 @@ def test_ellipse_trivial():
 
 def test_ellipse_generic():
     img = np.zeros((4, 4), 'uint8')
-    rr, cc = ellipse(1.5, 1.5, 1.1, 1.7)
+    with pytest.warns(FutureWarning):
+        rr, cc = ellipse(1.5, 1.5, 1.1, 1.7)
     img[rr, cc] = 1
     img_ = np.array(
         [
@@ -462,7 +478,8 @@ def test_ellipse_generic():
     assert_array_equal(img, img_)
 
     img = np.zeros((5, 5), 'uint8')
-    rr, cc = ellipse(2, 2, 1.7, 1.7)
+    with pytest.warns(FutureWarning):
+        rr, cc = ellipse(2, 2, 1.7, 1.7)
     img[rr, cc] = 1
     img_ = np.array(
         [
@@ -476,7 +493,8 @@ def test_ellipse_generic():
     assert_array_equal(img, img_)
 
     img = np.zeros((10, 10), 'uint8')
-    rr, cc = ellipse(5, 5, 3, 4)
+    with pytest.warns(FutureWarning):
+        rr, cc = ellipse(5, 5, 3, 4)
     img[rr, cc] = 1
     img_ = np.array(
         [
@@ -495,7 +513,8 @@ def test_ellipse_generic():
     assert_array_equal(img, img_)
 
     img = np.zeros((10, 10), 'uint8')
-    rr, cc = ellipse(4.5, 5, 3.5, 4)
+    with pytest.warns(FutureWarning):
+        rr, cc = ellipse(4.5, 5, 3.5, 4)
     img[rr, cc] = 1
     img_ = np.array(
         [
@@ -514,7 +533,8 @@ def test_ellipse_generic():
     assert_array_equal(img, img_)
 
     img = np.zeros((15, 15), 'uint8')
-    rr, cc = ellipse(7, 7, 3, 7)
+    with pytest.warns(FutureWarning):
+        rr, cc = ellipse(7, 7, 3, 7)
     img[rr, cc] = 1
     img_ = np.array(
         [
@@ -541,7 +561,8 @@ def test_ellipse_generic():
 def test_ellipse_with_shape():
     img = np.zeros((15, 15), 'uint8')
 
-    rr, cc = ellipse(7, 7, 3, 10, shape=img.shape)
+    with pytest.warns(FutureWarning):
+        rr, cc = ellipse(7, 7, 3, 10, shape=img.shape)
     img[rr, cc] = 1
 
     img_ = np.array(
@@ -567,8 +588,8 @@ def test_ellipse_with_shape():
     assert_array_equal(img, img_)
 
     img = np.zeros((10, 9, 3), 'uint8')
-
-    rr, cc = ellipse(7, 7, 3, 10, shape=img.shape)
+    with pytest.warns(FutureWarning):
+        rr, cc = ellipse(7, 7, 3, 10, shape=img.shape)
     img[rr, cc, 0] = 1
 
     img_ = np.zeros_like(img)
@@ -591,7 +612,8 @@ def test_ellipse_with_shape():
 
 
 def test_ellipse_negative():
-    rr, cc = ellipse(-3, -3, 1.7, 1.7)
+    with pytest.warns(FutureWarning):
+        rr, cc = ellipse(-3, -3, 1.7, 1.7)
     rr_, cc_ = np.nonzero(
         np.array(
             [
@@ -613,10 +635,12 @@ def test_ellipse_rotation_symmetry():
     img2 = np.zeros((150, 150), dtype=np.uint8)
     for angle in range(0, 180, 15):
         img1.fill(0)
-        rr, cc = ellipse(80, 70, 60, 40, rotation=np.deg2rad(angle))
+        with pytest.warns(FutureWarning):
+            rr, cc = ellipse(80, 70, 60, 40, rotation=np.deg2rad(angle))
         img1[rr, cc] = 1
         img2.fill(0)
-        rr, cc = ellipse(80, 70, 60, 40, rotation=np.deg2rad(angle + 180))
+        with pytest.warns(FutureWarning):
+            rr, cc = ellipse(80, 70, 60, 40, rotation=np.deg2rad(angle + 180))
         img2[rr, cc] = 1
         assert_array_equal(img1, img2)
 
@@ -626,7 +650,8 @@ def test_ellipse_rotated():
     for rot in range(0, 180, 10):
         img.fill(0)
         angle = np.deg2rad(rot)
-        rr, cc = ellipse(500, 600, 200, 400, rotation=angle)
+        with pytest.warns(FutureWarning):
+            rr, cc = ellipse(500, 600, 200, 400, rotation=angle)
         img[rr, cc] = 1
         # estimate orientation of ellipse
         angle_estim_raw = regionprops(img)[0].orientation
@@ -637,7 +662,8 @@ def test_ellipse_rotated():
 def test_ellipse_perimeter_dot_zeroangle():
     # dot, angle == 0
     img = np.zeros((30, 15), 'uint8')
-    rr, cc = ellipse_perimeter(15, 7, 0, 0, 0)
+    with pytest.warns(FutureWarning):
+        rr, cc = ellipse_perimeter(15, 7, 0, 0, 0)
     img[rr, cc] = 1
     assert np.sum(img) == 1
     assert img[15][7] == 1
@@ -646,7 +672,8 @@ def test_ellipse_perimeter_dot_zeroangle():
 def test_ellipse_perimeter_dot_nzeroangle():
     # dot, angle != 0
     img = np.zeros((30, 15), 'uint8')
-    rr, cc = ellipse_perimeter(15, 7, 0, 0, 1)
+    with pytest.warns(FutureWarning):
+        rr, cc = ellipse_perimeter(15, 7, 0, 0, 1)
     img[rr, cc] = 1
     assert np.sum(img) == 1
     assert img[15][7] == 1
@@ -656,7 +683,8 @@ def test_ellipse_perimeter_flat_zeroangle():
     # flat ellipse
     img = np.zeros((20, 18), 'uint8')
     img_ = np.zeros((20, 18), 'uint8')
-    rr, cc = ellipse_perimeter(6, 7, 0, 5, 0)
+    with pytest.warns(FutureWarning):
+        rr, cc = ellipse_perimeter(6, 7, 0, 5, 0)
     img[rr, cc] = 1
     rr, cc = line(6, 2, 6, 12)
     img_[rr, cc] = 1
@@ -666,7 +694,8 @@ def test_ellipse_perimeter_flat_zeroangle():
 def test_ellipse_perimeter_zeroangle():
     # angle == 0
     img = np.zeros((30, 15), 'uint8')
-    rr, cc = ellipse_perimeter(15, 7, 14, 6, 0)
+    with pytest.warns(FutureWarning):
+        rr, cc = ellipse_perimeter(15, 7, 14, 6, 0)
     img[rr, cc] = 1
     img_ = np.array(
         [
@@ -709,7 +738,8 @@ def test_ellipse_perimeter_zeroangle():
 def test_ellipse_perimeter_nzeroangle():
     # angle != 0
     img = np.zeros((30, 25), 'uint8')
-    rr, cc = ellipse_perimeter(15, 11, 12, 6, 1.1)
+    with pytest.warns(FutureWarning):
+        rr, cc = ellipse_perimeter(15, 11, 12, 6, 1.1)
     img[rr, cc] = 1
     img_ = np.array(
         [
@@ -750,11 +780,13 @@ def test_ellipse_perimeter_nzeroangle():
 
 def test_ellipse_perimeter_shape():
     img = np.zeros((15, 20), 'uint8')
-    rr, cc = ellipse_perimeter(7, 10, 9, 9, 0, shape=(15, 20))
+    with pytest.warns(FutureWarning):
+        rr, cc = ellipse_perimeter(7, 10, 9, 9, 0, shape=(15, 20))
     img[rr, cc] = 1
     shift = 5
     img_ = np.zeros((15 + 2 * shift, 20), 'uint8')
-    rr, cc = ellipse_perimeter(7 + shift, 10, 9, 9, 0, shape=None)
+    with pytest.warns(FutureWarning):
+        rr, cc = ellipse_perimeter(7 + shift, 10, 9, 9, 0, shape=None)
     img_[rr, cc] = 1
     assert_array_equal(img, img_[shift:-shift, :])
 
@@ -818,7 +850,8 @@ def test_bezier_curve_straight():
     r0, c0 = 50, 50
     r1, c1 = 150, 50
     r2, c2 = 150, 150
-    rr, cc = bezier_curve(r0, c0, r1, c1, r2, c2, 0)
+    with pytest.warns(FutureWarning):
+        rr, cc = bezier_curve(r0, c0, r1, c1, r2, c2, 0)
     image[rr, cc] = 1
 
     image2 = np.zeros((200, 200), dtype=int)
@@ -832,7 +865,8 @@ def test_bezier_curved_weight_eq_1():
     r0, c0 = 1, 1
     r1, c1 = 11, 11
     r2, c2 = 21, 1
-    rr, cc = bezier_curve(r0, c0, r1, c1, r2, c2, 1)
+    with pytest.warns(FutureWarning):
+        rr, cc = bezier_curve(r0, c0, r1, c1, r2, c2, 1)
     img[rr, cc] = 1
     assert_equal(img[r0, c0], 1)
     assert_equal(img[r2, c2], 1)
@@ -871,7 +905,8 @@ def test_bezier_curved_weight_neq_1():
     r0, c0 = 1, 1
     r1, c1 = 11, 11
     r2, c2 = 21, 1
-    rr, cc = bezier_curve(r0, c0, r1, c1, r2, c2, 2)
+    with pytest.warns(FutureWarning):
+        rr, cc = bezier_curve(r0, c0, r1, c1, r2, c2, 2)
     img[rr, cc] = 1
     assert_equal(img[r0, c0], 1)
     assert_equal(img[r2, c2], 1)
@@ -910,14 +945,16 @@ def test_bezier_curve_shape():
     r0, c0 = 1, 5
     r1, c1 = 6, 11
     r2, c2 = 1, 14
-    rr, cc = bezier_curve(r0, c0, r1, c1, r2, c2, 2, shape=(15, 20))
+    with pytest.warns(FutureWarning):
+        rr, cc = bezier_curve(r0, c0, r1, c1, r2, c2, 2, shape=(15, 20))
     img[rr, cc] = 1
     shift = 5
     img_ = np.zeros((15 + 2 * shift, 20), 'uint8')
     r0, c0 = 1 + shift, 5
     r1, c1 = 6 + shift, 11
     r2, c2 = 1 + shift, 14
-    rr, cc = bezier_curve(r0, c0, r1, c1, r2, c2, 2, shape=None)
+    with pytest.warns(FutureWarning):
+        rr, cc = bezier_curve(r0, c0, r1, c1, r2, c2, 2, shape=None)
     img_[rr, cc] = 1
     assert_array_equal(img, img_[shift:-shift, :])
 
