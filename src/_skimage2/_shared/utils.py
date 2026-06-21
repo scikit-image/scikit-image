@@ -232,7 +232,7 @@ class deprecate_parameter:
 
     Parameters
     ----------
-    deprecated_name : str
+    deprecated_name : str or a sequence of str
         The name of the deprecated parameter.
     start_version : str
         The package version in which the warning was introduced.
@@ -312,8 +312,12 @@ class deprecate_parameter:
         new_name=None,
         modify_docstring=True,
         stacklevel=None,
+        multi=False,
     ):
-        self.deprecated_name = deprecated_name
+        if multi:
+            self.deprecated_name = tuple(deprecated_name)
+        else:
+            self.deprecated_name = deprecated_name
         self.new_name = new_name
         self.template = template
         self.start_version = start_version
