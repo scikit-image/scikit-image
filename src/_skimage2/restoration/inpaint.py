@@ -245,7 +245,7 @@ def inpaint_biharmonic(
     >>> mask[2, 2:] = 1
     >>> mask[1, 3:] = 1
     >>> mask[0, 4:] = 1
-    >>> out = inpaint_nharmonic(img, mask)
+    >>> out = inpaint_biharmonic(img, mask)
     """
 
     if image.ndim < 1:
