@@ -76,6 +76,7 @@ def integrate(ii, start, end):
 
     Examples
     --------
+    >>> from _skimage2.transform import integral_image
     >>> arr = np.ones((5, 6), dtype=float)
     >>> ii = integral_image(arr)
     >>> integrate(ii, (1, 0), (1, 2))  # sum from (1, 0) to (1, 2)

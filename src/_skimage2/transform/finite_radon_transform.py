@@ -98,6 +98,7 @@ def ifrt2(a):
 
     Apply the Finite Radon Transform:
 
+    >>> from _skimage2.transform import frt2
     >>> f = frt2(img)
 
     Apply the Inverse Finite Radon Transform to recover the input

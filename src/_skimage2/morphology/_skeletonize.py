@@ -140,6 +140,7 @@ def _skeletonize_zhang(image):
 
     Examples
     --------
+    >>> from _skimage2.morphology import skeletonize
     >>> X, Y = np.ogrid[0:9, 0:9]
     >>> ellipse = (1./3 * (X - 4)**2 + (Y - 4)**2 < 3**2).astype(bool)
     >>> ellipse.view(np.uint8)

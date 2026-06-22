@@ -82,6 +82,7 @@ def moments_coords_central(coords, center=None, order=3):
 
     Examples
     --------
+    >>> from _skimage2.measure import moments_coords
     >>> coords = np.array([[row, col]
     ...                    for row in range(13, 17)
     ...                    for col in range(14, 18)])
@@ -237,6 +238,7 @@ def moments_central(image, center=None, order=3, *, spacing=None, **kwargs):
 
     Examples
     --------
+    >>> from _skimage2.measure import moments
     >>> image = np.zeros((20, 20), dtype=np.float64)
     >>> image[13:17, 13:17] = 1
     >>> M = moments(image)
@@ -311,6 +313,7 @@ def moments_normalized(mu, order=3, spacing=None):
 
     Examples
     --------
+    >>> from _skimage2.measure import moments, moments_central
     >>> image = np.zeros((20, 20), dtype=np.float64)
     >>> image[13:17, 13:17] = 1
     >>> m = moments(image)
@@ -370,6 +373,7 @@ def moments_hu(nu):
 
     Examples
     --------
+    >>> from _skimage2.measure import moments_central, moments_normalized
     >>> image = np.zeros((20, 20), dtype=np.float64)
     >>> image[13:17, 13:17] = 0.5
     >>> image[10:12, 10:12] = 1

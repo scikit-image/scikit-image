@@ -963,6 +963,7 @@ def denoise_wavelet(
     Examples
     --------
     >>> from _skimage2 import color, data
+    >>> from _skimage2.util import img_as_float
     >>> img = img_as_float(data.astronaut())
     >>> img = color.rgb2gray(img)
     >>> rng = np.random.default_rng()

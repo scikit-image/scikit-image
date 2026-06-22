@@ -467,6 +467,8 @@ def area_closing(
     If a max-tree representation (parent and tree_traverser) are given to the
     function, they must be calculated from the inverted image for this
     function, i.e.:
+    >>> from _skimage2.morphology import diameter_closing, max_tree
+    >>> from _skimage2.util import invert
     >>> P, S = max_tree(invert(f))
     >>> closed = diameter_closing(f, 3, parent=P, tree_traverser=S)
     """
@@ -580,6 +582,8 @@ def diameter_closing(
     If a max-tree representation (parent and tree_traverser) are given to the
     function, they must be calculated from the inverted image for this
     function, i.e.:
+    >>> from _skimage2.morphology import max_tree
+    >>> from _skimage2.util import invert
     >>> P, S = max_tree(invert(f))
     >>> closed = diameter_closing(f, 3, parent=P, tree_traverser=S)
     """
