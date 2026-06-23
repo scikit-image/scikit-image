@@ -38,3 +38,7 @@ __all__ = [
     'make_offsets',
     'warn',
 ]
+
+from skimage._docutils import adapt_doctests
+
+adapt_doctests(globals())

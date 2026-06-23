@@ -7,3 +7,7 @@ __all__ = [
     'polygon_clip',
     'polygon_area',
 ]
+
+from skimage._docutils import adapt_doctests
+
+adapt_doctests(globals())

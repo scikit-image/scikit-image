@@ -7,3 +7,7 @@ __all__ = [
     'find_boundaries',
     'mark_boundaries',
 ]
+
+from skimage._docutils import adapt_doctests
+
+adapt_doctests(globals())

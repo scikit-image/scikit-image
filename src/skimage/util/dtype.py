@@ -21,3 +21,7 @@ __all__ = [
 ]
 
 from _skimage2.util.dtype import _convert, _integer_types, convert, dtype_range  # noqa: F401
+
+from skimage._docutils import adapt_doctests
+
+adapt_doctests(globals())

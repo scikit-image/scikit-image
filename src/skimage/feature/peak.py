@@ -235,3 +235,8 @@ def peak_local_max(
         p_norm=p_norm,
     )
     return coordinates
+
+
+from skimage._docutils import adapt_doctests  # noqa: E402
+
+adapt_doctests(globals())

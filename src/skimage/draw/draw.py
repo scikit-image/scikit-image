@@ -29,3 +29,7 @@ __all__ = [
     'rectangle_perimeter',
     'set_color',
 ]
+
+from skimage._docutils import adapt_doctests
+
+adapt_doctests(globals())

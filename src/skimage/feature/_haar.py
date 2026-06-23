@@ -11,3 +11,7 @@ __all__ = [
     'haar_like_feature_coord_wrapper',
     'haar_like_feature_wrapper',
 ]
+
+from skimage._docutils import adapt_doctests
+
+adapt_doctests(globals())

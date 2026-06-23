@@ -194,3 +194,8 @@ def structural_similarity(
         full=full,
         **kwargs,
     )
+
+
+from skimage._docutils import adapt_doctests  # noqa: E402
+
+adapt_doctests(globals())

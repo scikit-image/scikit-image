@@ -11,3 +11,7 @@ __all__ = [
     'manders_overlap_coeff',
     'intersection_coeff',
 ]
+
+from skimage._docutils import adapt_doctests
+
+adapt_doctests(globals())

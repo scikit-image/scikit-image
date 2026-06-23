@@ -23,3 +23,7 @@ __all__ = [
     'meijering',
     'sato',
 ]
+
+from skimage._docutils import adapt_doctests  # noqa: E402
+
+adapt_doctests(globals())

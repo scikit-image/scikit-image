@@ -48,3 +48,7 @@ __all__ = [
     'urfft2',
     'urfftn',
 ]
+
+from skimage._docutils import adapt_doctests
+
+adapt_doctests(globals())

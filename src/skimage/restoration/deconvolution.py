@@ -13,3 +13,7 @@ __all__ = [
     'unsupervised_wiener',
     'wiener',
 ]
+
+from skimage._docutils import adapt_doctests
+
+adapt_doctests(globals())

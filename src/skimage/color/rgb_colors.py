@@ -295,3 +295,7 @@ __all__ = [
     'yellow',
     'yellowgreen',
 ]
+
+from skimage._docutils import adapt_doctests
+
+adapt_doctests(globals())

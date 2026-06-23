@@ -22,3 +22,7 @@ __all__ = [
     'equalize_adapthist',
     'map_histogram',
 ]
+
+from skimage._docutils import adapt_doctests
+
+adapt_doctests(globals())

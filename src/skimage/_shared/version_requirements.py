@@ -11,3 +11,7 @@ __all__ = [
     'is_installed',
     'require',
 ]
+
+from skimage._docutils import adapt_doctests
+
+adapt_doctests(globals())

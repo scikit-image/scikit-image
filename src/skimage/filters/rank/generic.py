@@ -89,3 +89,7 @@ __all__ = [
 ]
 
 from _skimage2.filters.rank.generic import majority, sum, windowed_histogram  # noqa: F401
+
+from skimage._docutils import adapt_doctests
+
+adapt_doctests(globals())

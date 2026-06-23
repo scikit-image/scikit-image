@@ -15,3 +15,7 @@ __all__ = [
     'flood',
     'flood_fill',
 ]
+
+from skimage._docutils import adapt_doctests
+
+adapt_doctests(globals())

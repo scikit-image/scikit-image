@@ -7,3 +7,7 @@ __all__ = [
     'hausdorff_distance',
     'hausdorff_pair',
 ]
+
+from skimage._docutils import adapt_doctests
+
+adapt_doctests(globals())

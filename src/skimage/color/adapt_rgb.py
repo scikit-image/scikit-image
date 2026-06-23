@@ -9,3 +9,7 @@ __all__ = [
     'hsv_value',
     'each_channel',
 ]
+
+from skimage._docutils import adapt_doctests
+
+adapt_doctests(globals())

@@ -33,3 +33,7 @@ __all__ = [
     'signed_integer_types',
     'unsigned_integer_dtypes',
 ]
+
+from skimage._docutils import adapt_doctests
+
+adapt_doctests(globals())

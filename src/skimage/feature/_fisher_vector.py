@@ -39,3 +39,7 @@ __all__ = [
     'fisher_vector',
     'learn_gmm',
 ]
+
+from skimage._docutils import adapt_doctests
+
+adapt_doctests(globals())

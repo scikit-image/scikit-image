@@ -9,3 +9,7 @@ __all__ = [
     'apply_kernel_nan',
     'math',
 ]
+
+from skimage._docutils import adapt_doctests
+
+adapt_doctests(globals())

@@ -13,3 +13,7 @@ from _skimage2.io._plugins.pil_plugin import (  # noqa: F401
     ndarray_to_pil,
     pil_to_ndarray,
 )
+
+from skimage._docutils import adapt_doctests
+
+adapt_doctests(globals())

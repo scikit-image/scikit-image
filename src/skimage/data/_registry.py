@@ -7,3 +7,7 @@ __all__ = [
     'registry',
     'registry_urls',
 ]
+
+from skimage._docutils import adapt_doctests
+
+adapt_doctests(globals())

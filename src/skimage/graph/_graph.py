@@ -7,3 +7,7 @@ __all__ = [
     'central_pixel',
     'pixel_graph',
 ]
+
+from skimage._docutils import adapt_doctests
+
+adapt_doctests(globals())

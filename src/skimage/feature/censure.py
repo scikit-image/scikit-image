@@ -13,3 +13,7 @@ __all__ = [
     'STAR_FILTER_SHAPE',
     'STAR_SHAPE',
 ]
+
+from skimage._docutils import adapt_doctests
+
+adapt_doctests(globals())

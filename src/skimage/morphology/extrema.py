@@ -30,3 +30,7 @@ from _skimage2.morphology.extrema import (  # noqa: F401
     _add_constant_clip,
     _subtract_constant_clip,
 )
+
+from skimage._docutils import adapt_doctests
+
+adapt_doctests(globals())

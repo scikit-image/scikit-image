@@ -11,3 +11,7 @@ __all__ = [
     'imshow',
     'imshow_collection',
 ]
+
+from skimage._docutils import adapt_doctests
+
+adapt_doctests(globals())

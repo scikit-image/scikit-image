@@ -7,3 +7,7 @@ __all__ = [
     'integral_image',
     'integrate',
 ]
+
+from skimage._docutils import adapt_doctests
+
+adapt_doctests(globals())

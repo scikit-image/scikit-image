@@ -9,3 +9,7 @@ __all__ = [
     'img_as_float64',
     'warn',
 ]
+
+from skimage._docutils import adapt_doctests
+
+adapt_doctests(globals())

@@ -7,3 +7,7 @@ __all__ = [
     'imread',
     'imread_collection',
 ]
+
+from skimage._docutils import adapt_doctests
+
+adapt_doctests(globals())

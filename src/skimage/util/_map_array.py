@@ -7,3 +7,7 @@ __all__ = [
     'ArrayMap',
     'map_array',
 ]
+
+from skimage._docutils import adapt_doctests
+
+adapt_doctests(globals())

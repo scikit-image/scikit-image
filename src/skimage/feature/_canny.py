@@ -128,3 +128,8 @@ def canny(
         mode=mode,
         cval=cval,
     )
+
+
+from skimage._docutils import adapt_doctests  # noqa: E402
+
+adapt_doctests(globals())

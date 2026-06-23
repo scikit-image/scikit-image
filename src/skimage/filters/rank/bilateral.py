@@ -36,3 +36,7 @@ __all__ = [
     'pop_bilateral',
     'sum_bilateral',
 ]
+
+from skimage._docutils import adapt_doctests
+
+adapt_doctests(globals())
