@@ -169,6 +169,18 @@ def _sync_doctest_markers(
 
 def _with_adapted_doc(obj, adapted_doc: str, shim_module: str):
     if inspect.isroutine(obj):
+        if isinstance(obj, types.FunctionType):
+            new_func = types.FunctionType(
+                obj.__code__,
+                obj.__globals__,
+                obj.__name__,
+                obj.__defaults__,
+                obj.__closure__,
+            )
+            functools.update_wrapper(new_func, obj)
+            new_func.__doc__ = adapted_doc
+            new_func.__module__ = shim_module
+            return new_func
 
         @functools.wraps(obj)
         def wrapper(*args, **kwargs):

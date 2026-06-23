@@ -7,24 +7,10 @@ from _skimage2.transform._geometric import (
     PolynomialTransform as PolynomialTransform,
     ProjectiveTransform as ProjectiveTransform,
     SimilarityTransform as SimilarityTransform,
-    TRANSFORMS as TRANSFORMS,
+    TRANSFORMS as _SKI2_TRANSFORMS,
     estimate_transform as estimate_transform,
     matrix_transform as matrix_transform,
 )  # noqa: F401
-
-__all__ = [
-    'AffineTransform',
-    'EssentialMatrixTransform',
-    'EuclideanTransform',
-    'FundamentalMatrixTransform',
-    'PiecewiseAffineTransform',
-    'PolynomialTransform',
-    'ProjectiveTransform',
-    'SimilarityTransform',
-    'TRANSFORMS',
-    'estimate_transform',
-    'matrix_transform',
-]
 
 from _skimage2.transform._geometric import (  # noqa: F401
     _GeometricTransform,
@@ -39,3 +25,19 @@ from _skimage2.transform._geometric import (  # noqa: F401
 from skimage._docutils import adapt_doctests
 
 adapt_doctests(globals())
+
+TRANSFORMS = {k: globals()[v.__name__] for k, v in _SKI2_TRANSFORMS.items()}
+
+__all__ = [
+    'AffineTransform',
+    'EssentialMatrixTransform',
+    'EuclideanTransform',
+    'FundamentalMatrixTransform',
+    'PiecewiseAffineTransform',
+    'PolynomialTransform',
+    'ProjectiveTransform',
+    'SimilarityTransform',
+    'TRANSFORMS',
+    'estimate_transform',
+    'matrix_transform',
+]
