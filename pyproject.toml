@@ -225,6 +225,7 @@ xfail_strict = true
 filterwarnings = [
     "error",
     "ignore::skimage.util.PendingSkimage2Change",
+    "ignore::_skimage2.ExperimentalAPIWarning",
     "ignore:.*use `imageio` or other I/O packages directly.*:FutureWarning",
     # Passing win_size with gaussian_weights=True is deprecated
     "ignore:.*win_size.*gaussian_weights.*:FutureWarning",
