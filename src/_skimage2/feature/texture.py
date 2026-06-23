@@ -227,6 +227,7 @@ def graycoprops(P, prop='contrast'):
     ...                   [0, 0, 1, 1],
     ...                   [0, 2, 2, 2],
     ...                   [2, 2, 3, 3]], dtype=np.uint8)
+    >>> from _skimage2.feature import graycomatrix
     >>> g = graycomatrix(image, [1, 2], [0, np.pi/2], levels=4,
     ...                  normed=True, symmetric=True)
     >>> contrast = graycoprops(g, 'contrast')

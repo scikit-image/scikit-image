@@ -33,6 +33,7 @@ def _edge_generator_from_csr(csr_array):
     Examples
     --------
 
+    >>> from scipy import sparse
     >>> dense = np.eye(2, dtype=float)
     >>> csr = sparse.csr_array(dense)
     >>> edges = _edge_generator_from_csr(csr)

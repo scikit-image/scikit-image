@@ -1309,6 +1309,7 @@ def ransac(
 
     Generate ellipse data without tilt and add noise:
 
+    >>> from _skimage2.measure import EllipseModel
     >>> t = np.linspace(0, 2 * np.pi, 50)
     >>> xc, yc = 20, 30
     >>> a, b = 5, 10
