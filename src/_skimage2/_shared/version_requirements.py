@@ -132,13 +132,13 @@ def require(name, *, version=None):
     """
 
     def decorator(obj):
-        if not is_installed(name, version):
-            # Set pytest-doctestplus marker at module level to skip doctest
-            # if the required module (and version) is not available
-            module = inspect.getmodule(obj)
-            doctest_marker = getattr(module, "__doctest_requires__", {})
-            doctest_marker.setdefault(obj.__name__, []).append(name)
-            setattr(module, "__doctest_requires__", doctest_marker)
+        # Always register pytest-doctestplus marker at module level so shim
+        # modules can propagate skip metadata even when the dependency is
+        # already installed at import time.
+        module = inspect.getmodule(obj)
+        doctest_marker = getattr(module, "__doctest_requires__", {})
+        doctest_marker.setdefault(obj.__name__, []).append(name)
+        setattr(module, "__doctest_requires__", doctest_marker)
 
         @functools.wraps(obj)
         def func_wrapped(*args, **kwargs):
