@@ -44,19 +44,19 @@ jobs:
 
     steps:
       - name: Checkout scikit-image
-        uses: actions/checkout@v5
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
         with:
           persist-credentials: false
 
       - name: Setup Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
         with:
           python-version: ${{ inputs.python-version }}
           allow-prereleases: true
           cache: "pip"
           cache-dependency-path: "requirements/*.txt"
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         id: download
         with:
           name: skimage-linux-${{ inputs.python-version }}
