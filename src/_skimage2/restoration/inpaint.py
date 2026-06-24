@@ -16,11 +16,12 @@ def _get_neighborhood(nd_idx, radius, nd_shape):
     return bounds_lo, bounds_hi
 
 
-def _get_neigh_coef(shape, center, dtype=float):
-    # Create biharmonic coefficients ndarray
+def _get_neigh_coef(shape, center, n=2, dtype=float):
+    # Create nharmonic coefficients ndarray
     neigh_coef = np.zeros(shape, dtype=dtype)
     neigh_coef[center] = 1
-    neigh_coef = laplace(laplace(neigh_coef))
+    for _ in range(n):
+        neigh_coef = laplace(neigh_coef)
 
     # extract non-zero locations and values
     coef_idx = np.where(neigh_coef)
@@ -30,10 +31,10 @@ def _get_neigh_coef(shape, center, dtype=float):
     return neigh_coef, coef_idx, coef_vals
 
 
-def _inpaint_biharmonic_single_region(
-    image, mask, out, neigh_coef_full, coef_vals, raveled_offsets
+def _inpaint_nharmonic_single_region(
+    image, mask, n, out, neigh_coef_full, coef_vals, raveled_offsets
 ):
-    """Solve a (sparse) linear system corresponding to biharmonic inpainting.
+    """Solve a (sparse) linear system corresponding to harmonic inpainting.
 
     This function creates a linear system of the form:
 
@@ -46,8 +47,8 @@ def _inpaint_biharmonic_single_region(
     ``A`` is a sparse matrix of shape (n_mask, n_mask) where ``n_mask``
     corresponds to the number of non-zero values in ``mask`` (i.e. the number
     of pixels to be inpainted). Each row in A will have a number of non-zero
-    values equal to the number of non-zero values in the biharmonic kernel,
-    ``neigh_coef_full``. In practice, biharmonic kernels with reduced extent
+    values equal to the number of non-zero values in the n-harmonic kernel,
+    ``neigh_coef_full``. In practice, n-harmonic kernels with reduced extent
     are used at the image borders. This matrix, ``A`` is the same for all
     image channels (since the same inpainting mask is currently used for all
     channels).
@@ -56,9 +57,9 @@ def _inpaint_biharmonic_single_region(
     the vector of unknown values for each channel.
 
     ``b`` is a dense matrix of shape ``(n_mask, n_channels)`` and represents
-    the desired output of convolving the solution with the biharmonic kernel.
+    the desired output of convolving the solution with the n-harmonic kernel.
     At mask locations where there is no overlap with known values, ``b`` will
-    have a value of 0. This enforces the biharmonic smoothness constraint in
+    have a value of 0. This enforces the n-harmonic smoothness constraint in
     the interior of inpainting regions. For regions near the boundary that
     overlap with known values, the entries in ``b`` enforce boundary conditions
     designed to avoid discontinuity with the known values.
@@ -116,13 +117,13 @@ def _inpaint_biharmonic_single_region(
         # Get bounded neighborhood of selected radius
         b_lo, b_hi = _get_neighborhood(nd_idx, radius, mask.shape)
 
-        # Create (truncated) biharmonic coefficients ndarray
+        # Create (truncated) n-harmonic coefficients ndarray
         coef_shape = tuple(b_hi - b_lo)
         coef_center = tuple(nd_idx - b_lo)
         coef_idx, coefs = coef_cache.get((coef_shape, coef_center), (None, None))
         if coef_idx is None:
             _, coef_idx, coefs = _get_neigh_coef(
-                coef_shape, coef_center, dtype=out.dtype
+                coef_shape, coef_center, n, dtype=out.dtype
             )
             coef_cache[(coef_shape, coef_center)] = (coef_idx, coefs)
 
@@ -195,8 +196,10 @@ def _inpaint_biharmonic_single_region(
 
 
 @utils.channel_as_last_axis()
-def inpaint_biharmonic(image, mask, *, split_into_regions=False, channel_axis=None):
-    """Inpaint masked points in image with biharmonic equations.
+def inpaint_biharmonic(
+    image, mask, *, n=2, split_into_regions=False, channel_axis=None
+):
+    """Inpaint masked points in image with nharmonic equations.
 
     Parameters
     ----------
@@ -206,6 +209,7 @@ def inpaint_biharmonic(image, mask, *, split_into_regions=False, channel_axis=No
         Array of pixels to be inpainted. Have to be the same shape as one
         of the 'image' channels. Unknown pixels have to be represented with 1,
         known pixels - with 0.
+    n : order of the harmonic equation
     split_into_regions : bool, optional
         If True, inpainting is performed on a region-by-region basis. This is
         likely to be slower, but will have reduced memory requirements.
@@ -266,12 +270,12 @@ def inpaint_biharmonic(image, mask, *, split_into_regions=False, channel_axis=No
         image = image[..., np.newaxis]
     out = np.copy(image, order='C')
 
-    # Create biharmonic coefficients ndarray
-    radius = 2
+    # Create n-harmonic coefficients ndarray
+    radius = n
     coef_shape = (2 * radius + 1,) * mask.ndim
     coef_center = (radius,) * mask.ndim
     neigh_coef_full, coef_idx, coef_vals = _get_neigh_coef(
-        coef_shape, coef_center, dtype=out.dtype
+        coef_shape, coef_center, n, dtype=out.dtype
     )
 
     # stride for the last spatial dimension
@@ -294,7 +298,7 @@ def inpaint_biharmonic(image, mask, *, split_into_regions=False, channel_axis=No
         bbox_slices = ndi.find_objects(mask_labeled)
 
         for idx_region, bb_slice in enumerate(bbox_slices, 1):
-            # expand object bounding boxes by the biharmonic kernel radius
+            # expand object bounding boxes by the n-harmonic kernel radius
             roi_sl = tuple(
                 slice(max(sl.start - radius, 0), min(sl.stop + radius, size))
                 for sl, size in zip(bb_slice, mask_labeled.shape)
@@ -312,9 +316,10 @@ def inpaint_biharmonic(image, mask, *, split_into_regions=False, channel_axis=No
             )
             raveled_offsets = np.sum(offsets * ostrides[..., np.newaxis], axis=0)
 
-            _inpaint_biharmonic_single_region(
+            _inpaint_nharmonic_single_region(
                 image[roi_sl],
                 mask_region,
+                n,
                 otmp,
                 neigh_coef_full,
                 coef_vals,
@@ -327,8 +332,8 @@ def inpaint_biharmonic(image, mask, *, split_into_regions=False, channel_axis=No
         ostrides = np.array([s // channel_stride_bytes for s in out[..., 0].strides])
         raveled_offsets = np.sum(offsets * ostrides[..., np.newaxis], axis=0)
 
-        _inpaint_biharmonic_single_region(
-            image, mask, out, neigh_coef_full, coef_vals, raveled_offsets
+        _inpaint_nharmonic_single_region(
+            image, mask, n, out, neigh_coef_full, coef_vals, raveled_offsets
         )
 
     # Handle enormous values on a per-channel basis
