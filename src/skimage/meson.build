@@ -3,6 +3,8 @@ python_sources = [
   '__init__.pyi',
   'conftest.py',
   'py.typed',
+  '_docutils.py',
+  '_pickle_compat.py',
   '_migration.py'
 ]
 

@@ -7,3 +7,7 @@ __all__ = [
     'ellipsoid',
     'ellipsoid_stats',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

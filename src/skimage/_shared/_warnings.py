@@ -13,3 +13,7 @@ __all__ = [
     'warn_external',
     'ExperimentalAPIWarning',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

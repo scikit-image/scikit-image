@@ -101,6 +101,9 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: bash .github/scripts/check-run-all-tests-label.sh
 
+      - name: Audit pickle compatibility surface
+        run: python tools/audit_pickle_surface.py --strict
+
       - name: Run tests
         if: ${{ inputs.python-version != '3.14t' }}
         env:

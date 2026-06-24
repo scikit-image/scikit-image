@@ -11,3 +11,7 @@ __all__ = [
     'optical_flow_ilk',
     'optical_flow_tvl1',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

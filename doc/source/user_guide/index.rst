@@ -26,4 +26,5 @@ and more advanced topics.
    :caption: Other resources
 
    skimage2_migration
+   pickle_migration
    glossary

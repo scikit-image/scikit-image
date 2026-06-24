@@ -70,6 +70,10 @@ __all__ = [
     "measure",
     "metrics",
     "morphology",
+    "pickle_dump",
+    "pickle_dumps",
+    "pickle_load",
+    "pickle_loads",
     "registration",
     "restoration",
     "segmentation",
@@ -142,6 +146,14 @@ def _try_append_commit_info(version):
 if 'dev' in __version__:
     __version__ = _try_append_commit_info(__version__)
 
+
+# Load the pickle registry on ``import skimage`` so stdlib ``pickle.loads`` works.
+from skimage._pickle_compat import (
+    pickle_dump,
+    pickle_dumps,
+    pickle_load,
+    pickle_loads,
+)
 
 from _skimage2._shared.tester import PytestTester as _PytestTester
 

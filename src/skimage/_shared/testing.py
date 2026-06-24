@@ -41,3 +41,7 @@ __all__ = [
     'skipif',
     'xfail',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

@@ -62,3 +62,7 @@ __all__ = [
     'signed_int_types',
     'unsigned_int_types',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

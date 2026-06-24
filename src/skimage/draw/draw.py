@@ -29,3 +29,7 @@ __all__ = [
     'rectangle_perimeter',
     'set_color',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

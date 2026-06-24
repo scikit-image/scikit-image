@@ -99,3 +99,7 @@ __all__ = [
     'TILING8',
     'TILING9',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

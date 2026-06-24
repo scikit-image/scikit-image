@@ -11,3 +11,7 @@ __all__ = [
     'convex_hull_image',
     'convex_hull_object',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

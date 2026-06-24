@@ -13,3 +13,7 @@ __all__ = [
     'BinaryHeap',
     'FastUpdateBinaryHeap',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

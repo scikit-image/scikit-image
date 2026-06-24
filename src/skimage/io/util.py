@@ -9,3 +9,7 @@ __all__ = [
     'file_or_url_context',
     'is_url',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

@@ -7,3 +7,7 @@ __all__ = [
     'central_pixel',
     'pixel_graph',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

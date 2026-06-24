@@ -8,3 +8,7 @@ pixels have an identical rank order compared to the original image
 from _skimage2.filters._rank_order import rank_order as rank_order  # noqa: F401
 
 __all__ = ['rank_order']
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

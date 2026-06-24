@@ -7,3 +7,7 @@ __all__ = [
     'polygon_clip',
     'polygon_area',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

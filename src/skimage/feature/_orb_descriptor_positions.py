@@ -11,3 +11,7 @@ __all__ = [
     'POS1',
     'this_dir',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

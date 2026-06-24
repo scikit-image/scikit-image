@@ -11,3 +11,7 @@ __all__ = [
     'imshow',
     'imshow_collection',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

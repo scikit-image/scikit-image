@@ -29,3 +29,7 @@ from _skimage2.transform._warps import (  # noqa: F401
     _log_polar_mapping,
     _stackcopy,
 )
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

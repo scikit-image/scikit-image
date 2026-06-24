@@ -9,3 +9,7 @@ __all__ = [
     'push',
     'pop',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

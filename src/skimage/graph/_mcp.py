@@ -38,3 +38,7 @@ __all__ = [
     'make_offsets',
     'warn',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

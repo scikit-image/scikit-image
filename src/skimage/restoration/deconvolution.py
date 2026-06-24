@@ -13,3 +13,7 @@ __all__ = [
     'unsupervised_wiener',
     'wiener',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

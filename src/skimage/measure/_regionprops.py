@@ -23,3 +23,9 @@ from _skimage2.measure._regionprops import (  # noqa: F401
     _require_intensity_image,
     regionprops_table,
 )
+
+from skimage._docutils import bind_namespace
+from skimage._pickle_compat import apply_pickle_exports
+
+bind_namespace(globals())
+apply_pickle_exports(globals())
