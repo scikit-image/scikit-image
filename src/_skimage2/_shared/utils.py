@@ -671,7 +671,8 @@ class channel_as_last_axis:
                 new_args = args
 
             for name in self.kwarg_names:
-                kwargs[name] = np.moveaxis(kwargs[name], channel_axis[0], -1)
+                if name in kwargs:
+                    kwargs[name] = np.moveaxis(kwargs[name], channel_axis[0], -1)
 
             # now that we have moved the channels axis to the last position,
             # change the channel_axis argument to -1
