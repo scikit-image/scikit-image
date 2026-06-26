@@ -653,8 +653,12 @@ class channel_as_last_axis:
                     f"for array of dimension {ndim}"
                 )
                 raise ValueError(msg)
+            
+            # If the channel axis is already the last axis, no movement is needed.
+            if axis == ndim - 1:
+                return func(*args, **kwargs)
             channel_axis = (axis,)
-
+            
             if self.arg_positions:
                 new_args = []
                 for pos, arg in enumerate(args):
