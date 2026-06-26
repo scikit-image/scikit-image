@@ -653,7 +653,7 @@ class channel_as_last_axis:
                     f"for array of dimension {ndim}"
                 )
                 raise ValueError(msg)
-            
+
             # If the channel axis is already the last axis, no movement is needed.
             if axis == ndim - 1:
                 kwargs["channel_axis"] = -1
