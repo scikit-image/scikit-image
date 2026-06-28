@@ -264,7 +264,7 @@ class TestLBP:
 
     def test_uniform_platform_consistency_gh_8198(self):
         # Regression test for #8198: local_binary_pattern returned different
-        # results on x86 (no FMA) and ARM (FMA). The bilinear-interpolation
+        # results on x86 (no Fused Multiply-Add) and ARM (FMA). The bilinear-interpolation
         # threshold ``texture[i] - image[r, c] >= 0`` flipped on a sub-ULP delta
         # that one platform rounded to a tiny negative value and the other to 0.
         #
