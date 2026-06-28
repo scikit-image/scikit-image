@@ -272,8 +272,7 @@ class TestLBP:
         # (the case reported in #8198); the affected output is ``lbp[4][4:8]``.
         # With the old ``(1 - t) * v0 + t * v1`` interpolation this slice was
         # ``[11, 8, 11, 13]`` on x86 and ``[11, 9, 11, 13]`` on ARM; both now
-        # agree on ``[11, 9, 11, 13]``. The patch is inlined (no network/sklearn
-        # dependency) so the test is deterministic and offline.
+        # agree on ``[11, 9, 11, 13]``.
         image = np.array(
             [
                 [0, 41, 255, 216, 220, 219, 218, 219, 219, 219, 221],
