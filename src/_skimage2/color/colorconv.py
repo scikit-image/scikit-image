@@ -386,6 +386,7 @@ def hsv2rgb(hsv, *, channel_axis=-1):
     Examples
     --------
     >>> from _skimage2 import data
+    >>> from _skimage2.color import rgb2hsv
     >>> img = data.astronaut()
     >>> img_hsv = rgb2hsv(img)
     >>> img_rgb = hsv2rgb(img_hsv)

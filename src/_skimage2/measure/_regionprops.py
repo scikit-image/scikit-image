@@ -895,7 +895,7 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
     >>> from _skimage2 import data, util, measure
     >>> image = data.coins()
     >>> label_image = measure.label(image > 110, connectivity=image.ndim)
-    >>> proplist = regionprops(label_image, image)
+    >>> proplist = measure.regionprops(label_image, image)
     >>> props = _props_to_dict(proplist, properties=['label', 'inertia_tensor',
     ...                                              'inertia_tensor_eigvals'])
     >>> props  # doctest: +ELLIPSIS +SKIP

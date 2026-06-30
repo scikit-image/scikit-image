@@ -159,6 +159,7 @@ def uirfftn(inarray, dim=None, shape=None):
 
     Examples
     --------
+    >>> from _skimage2.restoration.uft import urfftn
     >>> input = np.ones((5, 5, 5))
     >>> output = uirfftn(urfftn(input), shape=input.shape)
     >>> np.allclose(input, output)
@@ -297,6 +298,7 @@ def uirfft2(inarray, shape=None):
 
     Examples
     --------
+    >>> from _skimage2.restoration.uft import uirfftn, urfftn
     >>> input = np.ones((10, 128, 128))
     >>> output = uirfftn(urfftn(input), shape=input.shape)
     >>> np.allclose(input, output)
@@ -326,6 +328,7 @@ def image_quad_norm(inarray):
 
     Examples
     --------
+    >>> from _skimage2.restoration.uft import ufft2, urfft2
     >>> input = np.ones((5, 5))
     >>> image_quad_norm(ufft2(input)) == np.sum(np.abs(input)**2)
     True
@@ -433,6 +436,7 @@ def laplacian(ndim, shape, is_real=True):
 
     Examples
     --------
+    >>> from _skimage2.restoration.uft import ir2tf
     >>> tf, ir = laplacian(2, (32, 32))
     >>> np.all(ir == np.array([[0, -1, 0], [-1, 4, -1], [0, -1, 0]]))
     True
