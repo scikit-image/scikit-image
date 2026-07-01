@@ -387,8 +387,8 @@ class deprecate_parameter:
                         )
 
             for i in range(len(self.deprecated_name)):
-                if self.deprecated_name in kwargs.keys():
-                    deprecated_value = kwargs[self.deprecated_name[i]]
+                if self.deprecated_name[i] in kwargs.keys():
+                    deprecated_value[i] = kwargs[self.deprecated_name[i]]
                     if self.new_name is not None:
                         kwargs[self.deprecated_name[i]] = DEPRECATED_GOT_VALUE
 
@@ -417,9 +417,12 @@ class deprecate_parameter:
                             f"only the latter to avoid conflicting values."
                         )
 
-            if self.new_name is not None:
-                # Assign old value to new one
-                kwargs[self.new_name] = deprecated_value
+            if self.new_name is not None and any(
+                v is not DEPRECATED for v in deprecated_value
+            ):
+                if self.new_name not in kwargs or kwargs[self.new_name] is None:
+                    # Assign old value to new value
+                    kwargs[self.new_name] = deprecated_value
 
             return func(*args, **kwargs)
 
