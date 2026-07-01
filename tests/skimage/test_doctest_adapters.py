@@ -173,11 +173,10 @@ def test_adapt_doctests_injects_np():
 
 
 def test_shim_draw_propagates_doctest_requires():
+    import _skimage2.draw.draw as ski2_draw_mod
     import skimage.draw.draw as draw_mod
 
-    requires = getattr(draw_mod, '__doctest_requires__', {})
-    assert 'rectangle_perimeter' in requires
-    assert 'matplotlib' in requires['rectangle_perimeter']
+    assert ski2_draw_mod.__doctest_requires__ == draw_mod.__doctest_requires__
 
 
 @pytest.mark.skipif(
