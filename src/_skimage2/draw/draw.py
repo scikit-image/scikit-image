@@ -232,16 +232,15 @@ def disk(center, radius, *, shape=None):
            [0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
     """
-    r, c = center
-    return ellipse(r, c, radius, radius, shape)
+    return ellipse(shape=shape, center=center, radius=(radius, radius))
 
 
-@deprecate_parameter(
-    ('r', 'c'), new_name='center', start_version=0.26, stop_version=0.28, multi=True
-)
 @require("matplotlib", version=">=3.3")
 def polygon_perimeter(
-    r=DEPRECATED, c=DEPRECATED, shape=None, clip=False, *, center=None
+    r,
+    c,
+    shape=None,
+    clip=False,
 ):
     """Generate polygon perimeter coordinates.
 
@@ -290,7 +289,6 @@ def polygon_perimeter(
            [0, 0, 0, 0, 1, 1, 1, 0, 0, 0]], dtype=uint8)
 
     """
-    r, c = center
     if clip:
         if shape is None:
             raise ValueError("Must specify clipping shape")
