@@ -27,11 +27,12 @@ from _skimage2.measure import regionprops
 def test_set_color():
     img = np.zeros((10, 10))
 
-    rr, cc = line(0, 0, 0, 30)
-    set_color(img, (rr, cc), 1)
+    with pytest.warns(FutureWarning, match="deprecated"):
+        rr, cc = line(0, 0, 0, 30)
+        set_color(img, (rr, cc), 1)
 
-    img_ = np.zeros((10, 10))
-    img_[0, :] = 1
+        img_ = np.zeros((10, 10))
+        img_[0, :] = 1
 
     assert_array_equal(img, img_)
 
@@ -39,28 +40,30 @@ def test_set_color():
 def test_set_color_with_alpha():
     img = np.zeros((10, 10))
 
-    rr, cc, alpha = line_aa(0, 0, 0, 30)
-    set_color(img, (rr, cc), 1, alpha=alpha)
+    with pytest.warns(FutureWarning, match="deprecated"):
+        rr, cc, alpha = line_aa(0, 0, 0, 30)
+        set_color(img, (rr, cc), 1, alpha=alpha)
 
-    # Wrong dimensionality color
-    with pytest.raises(ValueError):
-        set_color(img, (rr, cc), (255, 0, 0), alpha=alpha)
+        # Wrong dimensionality color
+        with pytest.raises(ValueError):
+            set_color(img, (rr, cc), (255, 0, 0), alpha=alpha)
 
-    img = np.zeros((10, 10, 3))
+        img = np.zeros((10, 10, 3))
 
-    rr, cc, alpha = line_aa(0, 0, 0, 30)
-    set_color(img, (rr, cc), (1, 0, 0), alpha=alpha)
+        rr, cc, alpha = line_aa(0, 0, 0, 30)
+        set_color(img, (rr, cc), (1, 0, 0), alpha=alpha)
 
 
 @run_in_parallel()
 def test_line_horizontal():
     img = np.zeros((10, 10))
 
-    rr, cc = line(0, 0, 0, 9)
-    img[rr, cc] = 1
+    with pytest.warns(FutureWarning, match="deprecated"):
+        rr, cc = line(0, 0, 0, 9)
+        img[rr, cc] = 1
 
-    img_ = np.zeros((10, 10))
-    img_[0, :] = 1
+        img_ = np.zeros((10, 10))
+        img_[0, :] = 1
 
     assert_array_equal(img, img_)
 
@@ -68,11 +71,12 @@ def test_line_horizontal():
 def test_line_vertical():
     img = np.zeros((10, 10))
 
-    rr, cc = line(0, 0, 9, 0)
-    img[rr, cc] = 1
+    with pytest.warns(FutureWarning, match="deprecated"):
+        rr, cc = line(0, 0, 9, 0)
+        img[rr, cc] = 1
 
-    img_ = np.zeros((10, 10))
-    img_[:, 0] = 1
+        img_ = np.zeros((10, 10))
+        img_[:, 0] = 1
 
     assert_array_equal(img, img_)
 
@@ -80,11 +84,12 @@ def test_line_vertical():
 def test_line_reverse():
     img = np.zeros((10, 10))
 
-    rr, cc = line(0, 9, 0, 0)
-    img[rr, cc] = 1
+    with pytest.warns(FutureWarning, match="deprecated"):
+        rr, cc = line(0, 9, 0, 0)
+        img[rr, cc] = 1
 
-    img_ = np.zeros((10, 10))
-    img_[0, :] = 1
+        img_ = np.zeros((10, 10))
+        img_[0, :] = 1
 
     assert_array_equal(img, img_)
 
@@ -92,10 +97,11 @@ def test_line_reverse():
 def test_line_diag():
     img = np.zeros((5, 5))
 
-    rr, cc = line(0, 0, 4, 4)
-    img[rr, cc] = 1
+    with pytest.warns(FutureWarning, match="deprecated"):
+        rr, cc = line(0, 0, 4, 4)
+        img[rr, cc] = 1
 
-    img_ = np.eye(5)
+        img_ = np.eye(5)
 
     assert_array_equal(img, img_)
 
@@ -103,11 +109,12 @@ def test_line_diag():
 def test_line_aa_horizontal():
     img = np.zeros((10, 10))
 
-    rr, cc, val = line_aa(0, 0, 0, 9)
-    set_color(img, (rr, cc), 1, alpha=val)
+    with pytest.warns(FutureWarning, match="deprecated"):
+        rr, cc, val = line_aa(0, 0, 0, 9)
+        set_color(img, (rr, cc), 1, alpha=val)
 
-    img_ = np.zeros((10, 10))
-    img_[0, :] = 1
+        img_ = np.zeros((10, 10))
+        img_[0, :] = 1
 
     assert_array_equal(img, img_)
 
@@ -115,11 +122,12 @@ def test_line_aa_horizontal():
 def test_line_aa_vertical():
     img = np.zeros((10, 10))
 
-    rr, cc, val = line_aa(0, 0, 9, 0)
-    img[rr, cc] = val
+    with pytest.warns(FutureWarning, match="deprecated"):
+        rr, cc, val = line_aa(0, 0, 9, 0)
+        img[rr, cc] = val
 
-    img_ = np.zeros((10, 10))
-    img_[:, 0] = 1
+        img_ = np.zeros((10, 10))
+        img_[:, 0] = 1
 
     assert_array_equal(img, img_)
 
@@ -127,27 +135,29 @@ def test_line_aa_vertical():
 def test_line_aa_diagonal():
     img = np.zeros((10, 10))
 
-    rr, cc, val = line_aa(0, 0, 9, 6)
-    img[rr, cc] = 1
+    with pytest.warns(FutureWarning, match="deprecated"):
+        rr, cc, val = line_aa(0, 0, 9, 6)
+        img[rr, cc] = 1
 
-    # Check that each pixel belonging to line,
-    # also belongs to line_aa
-    r, c = line(0, 0, 9, 6)
-    for r_i, c_i in zip(r, c):
-        assert_equal(img[r_i, c_i], 1)
+        # Check that each pixel belonging to line,
+        # also belongs to line_aa
+        r, c = line(0, 0, 9, 6)
+        for r_i, c_i in zip(r, c):
+            assert_equal(img[r_i, c_i], 1)
 
 
 def test_line_equal_aliasing_horizontally_vertically():
     img0 = np.zeros((25, 25))
     img1 = np.zeros((25, 25))
 
-    # Near-horizontal line
-    rr, cc, val = line_aa(10, 2, 12, 20)
-    img0[rr, cc] = val
+    with pytest.warns(FutureWarning, match="deprecated"):
+        # Near-horizontal line
+        rr, cc, val = line_aa(10, 2, 12, 20)
+        img0[rr, cc] = val
 
-    # Near-vertical (transpose of prior)
-    rr, cc, val = line_aa(2, 10, 20, 12)
-    img1[rr, cc] = val
+        # Near-vertical (transpose of prior)
+        rr, cc, val = line_aa(2, 10, 20, 12)
+        img1[rr, cc] = val
 
     # Difference - should be zero
     assert_array_equal(img0, img1.T)
@@ -685,10 +695,10 @@ def test_ellipse_perimeter_flat_zeroangle():
     img_ = np.zeros((20, 18), 'uint8')
     with pytest.warns(FutureWarning):
         rr, cc = ellipse_perimeter(6, 7, 0, 5, 0)
-    img[rr, cc] = 1
-    rr, cc = line(6, 2, 6, 12)
-    img_[rr, cc] = 1
-    assert_array_equal(img, img_)
+        img[rr, cc] = 1
+        rr, cc = line(6, 2, 6, 12)
+        img_[rr, cc] = 1
+        assert_array_equal(img, img_)
 
 
 def test_ellipse_perimeter_zeroangle():
@@ -793,15 +803,16 @@ def test_ellipse_perimeter_shape():
 
 def test_bezier_segment_straight():
     image = np.zeros((200, 200), dtype=int)
-    r0, r1, r2 = 50, 150, 150
-    c0, c1, c2 = 50, 50, 150
-    rr, cc = _bezier_segment(r0, c0, r1, c1, r2, c2, 0)
-    image[rr, cc] = 1
+    with pytest.warns(FutureWarning, match="deprecated"):
+        r0, r1, r2 = 50, 150, 150
+        c0, c1, c2 = 50, 50, 150
+        rr, cc = _bezier_segment(r0, c0, r1, c1, r2, c2, 0)
+        image[rr, cc] = 1
 
-    image2 = np.zeros((200, 200), dtype=int)
-    rr, cc = line(r0, c0, r2, c2)
-    image2[rr, cc] = 1
-    assert_array_equal(image, image2)
+        image2 = np.zeros((200, 200), dtype=int)
+        rr, cc = line(r0, c0, r2, c2)
+        image2[rr, cc] = 1
+        assert_array_equal(image, image2)
 
 
 def test_bezier_segment_curved():
@@ -847,17 +858,18 @@ def test_bezier_segment_curved():
 
 def test_bezier_curve_straight():
     image = np.zeros((200, 200), dtype=int)
-    r0, c0 = 50, 50
-    r1, c1 = 150, 50
-    r2, c2 = 150, 150
-    with pytest.warns(FutureWarning):
-        rr, cc = bezier_curve(r0, c0, r1, c1, r2, c2, 0)
-    image[rr, cc] = 1
+    with pytest.warns(FutureWarning, match="deprecated"):
+        r0, c0 = 50, 50
+        r1, c1 = 150, 50
+        r2, c2 = 150, 150
+        with pytest.warns(FutureWarning):
+            rr, cc = bezier_curve(r0, c0, r1, c1, r2, c2, 0)
+        image[rr, cc] = 1
 
-    image2 = np.zeros((200, 200), dtype=int)
-    rr, cc = line(r0, c0, r2, c2)
-    image2[rr, cc] = 1
-    assert_array_equal(image, image2)
+        image2 = np.zeros((200, 200), dtype=int)
+        rr, cc = line(r0, c0, r2, c2)
+        image2[rr, cc] = 1
+        assert_array_equal(image, image2)
 
 
 def test_bezier_curved_weight_eq_1():
@@ -964,27 +976,29 @@ def test_polygon_perimeter():
     expected = np.array([[1, 1, 1, 1], [1, 0, 0, 1], [1, 1, 1, 1]])
     out = np.zeros_like(expected)
 
-    rr, cc = polygon_perimeter([0, 2, 2, 0], [0, 0, 3, 3])
+    with pytest.warns(FutureWarning, match="deprecated"):
+        rr, cc = polygon_perimeter([0, 2, 2, 0], [0, 0, 3, 3])
 
-    out[rr, cc] = 1
-    assert_array_equal(out, expected)
+        out[rr, cc] = 1
+        assert_array_equal(out, expected)
 
-    out = np.zeros_like(expected)
-    rr, cc = polygon_perimeter(
-        [-1, -1, 3, 3], [-1, 4, 4, -1], shape=out.shape, clip=True
-    )
-    out[rr, cc] = 1
-    assert_array_equal(out, expected)
+        out = np.zeros_like(expected)
+        rr, cc = polygon_perimeter(
+            [-1, -1, 3, 3], [-1, 4, 4, -1], shape=out.shape, clip=True
+        )
+        out[rr, cc] = 1
+        assert_array_equal(out, expected)
 
-    with pytest.raises(ValueError):
-        polygon_perimeter([0], [1], clip=True)
+        with pytest.raises(ValueError):
+            polygon_perimeter([0], [1], clip=True)
 
 
 @uses_matplotlib
 def test_polygon_perimeter_outside_image():
-    rr, cc = polygon_perimeter([-1, -1, 3, 3], [-1, 4, 4, -1], shape=(3, 4))
-    assert_equal(len(rr), 0)
-    assert_equal(len(cc), 0)
+    with pytest.warns(FutureWarning, match="deprecated"):
+        rr, cc = polygon_perimeter([-1, -1, 3, 3], [-1, 4, 4, -1], shape=(3, 4))
+        assert_equal(len(rr), 0)
+        assert_equal(len(cc), 0)
 
 
 def test_rectangle_end():
@@ -1088,35 +1102,36 @@ def test_rectangle_extent():
 @uses_matplotlib
 def test_rectangle_extent_negative():
     # These two tests should be done together.
-    expected = np.array(
-        [
-            [0, 0, 0, 0, 0, 0],
-            [0, 0, 1, 1, 1, 1],
-            [0, 0, 1, 2, 2, 1],
-            [0, 0, 1, 1, 1, 1],
-            [0, 0, 0, 0, 0, 0],
-        ],
-        dtype=np.uint8,
-    )
+    with pytest.warns(FutureWarning, match="deprecated"):
+        expected = np.array(
+            [
+                [0, 0, 0, 0, 0, 0],
+                [0, 0, 1, 1, 1, 1],
+                [0, 0, 1, 2, 2, 1],
+                [0, 0, 1, 1, 1, 1],
+                [0, 0, 0, 0, 0, 0],
+            ],
+            dtype=np.uint8,
+        )
 
-    start = (3, 5)
-    extent = (-1, -2)
-    img = np.zeros(expected.shape, dtype=np.uint8)
-    rr, cc = rectangle_perimeter(start, extent=extent, shape=img.shape)
-    img[rr, cc] = 1
+        start = (3, 5)
+        extent = (-1, -2)
+        img = np.zeros(expected.shape, dtype=np.uint8)
+        rr, cc = rectangle_perimeter(start, extent=extent, shape=img.shape)
+        img[rr, cc] = 1
 
-    rr, cc = rectangle(start, extent=extent, shape=img.shape)
-    img[rr, cc] = 2
-    assert_array_equal(img, expected)
+        rr, cc = rectangle(start, extent=extent, shape=img.shape)
+        img[rr, cc] = 2
+        assert_array_equal(img, expected)
 
-    # Ensure that rr and cc have no overlap
-    img = np.zeros(expected.shape, dtype=np.uint8)
-    rr, cc = rectangle(start, extent=extent, shape=img.shape)
-    img[rr, cc] = 2
+        # Ensure that rr and cc have no overlap
+        img = np.zeros(expected.shape, dtype=np.uint8)
+        rr, cc = rectangle(start, extent=extent, shape=img.shape)
+        img[rr, cc] = 2
 
-    rr, cc = rectangle_perimeter(start, extent=extent, shape=img.shape)
-    img[rr, cc] = 1
-    assert_array_equal(img, expected)
+        rr, cc = rectangle_perimeter(start, extent=extent, shape=img.shape)
+        img[rr, cc] = 1
+        assert_array_equal(img, expected)
 
 
 @uses_matplotlib
@@ -1131,26 +1146,27 @@ def test_rectangle_perimiter():
         ],
         dtype=np.uint8,
     )
-    start = (2, 3)
-    end = (2, 4)
-    img = np.zeros(expected.shape, dtype=np.uint8)
-    # Test that the default parameter is indeed end
-    rr, cc = rectangle_perimeter(start, end, shape=img.shape)
-    img[rr, cc] = 1
-    assert_array_equal(img, expected)
+    with pytest.warns(FutureWarning, match="deprecated"):
+        start = (2, 3)
+        end = (2, 4)
+        img = np.zeros(expected.shape, dtype=np.uint8)
+        # Test that the default parameter is indeed end
+        rr, cc = rectangle_perimeter(start, end, shape=img.shape)
+        img[rr, cc] = 1
+        assert_array_equal(img, expected)
 
-    # Swap start and end
-    img = np.zeros(expected.shape, dtype=np.uint8)
-    rr, cc = rectangle_perimeter(end=start, start=end, shape=img.shape)
-    img[rr, cc] = 1
-    assert_array_equal(img, expected)
+        # Swap start and end
+        img = np.zeros(expected.shape, dtype=np.uint8)
+        rr, cc = rectangle_perimeter(end=start, start=end, shape=img.shape)
+        img[rr, cc] = 1
+        assert_array_equal(img, expected)
 
-    img = np.zeros(expected.shape, dtype=np.uint8)
-    start = (2, 3)
-    extent = (1, 2)
-    rr, cc = rectangle_perimeter(start, extent=extent, shape=img.shape)
-    img[rr, cc] = 1
-    assert_array_equal(img, expected)
+        img = np.zeros(expected.shape, dtype=np.uint8)
+        start = (2, 3)
+        extent = (1, 2)
+        rr, cc = rectangle_perimeter(start, extent=extent, shape=img.shape)
+        img[rr, cc] = 1
+        assert_array_equal(img, expected)
 
 
 @uses_matplotlib
@@ -1167,27 +1183,28 @@ def test_rectangle_perimiter_clip_bottom_right():
         dtype=np.uint8,
     )
     img = np.zeros((5, 5), dtype=np.uint8)
-    start = (2, 2)
-    extent = (10, 10)
-    rr, cc = rectangle_perimeter(start, extent=extent, shape=img.shape, clip=False)
-    img[rr, cc] = 1
-    assert_array_equal(img, expected)
+    with pytest.warns(FutureWarning, match="deprecated"):
+        start = (2, 2)
+        extent = (10, 10)
+        rr, cc = rectangle_perimeter(start, extent=extent, shape=img.shape, clip=False)
+        img[rr, cc] = 1
+        assert_array_equal(img, expected)
 
-    # clip=True
-    expected = np.array(
-        [
-            [0, 0, 0, 0, 0],
-            [0, 1, 1, 1, 1],
-            [0, 1, 0, 0, 1],
-            [0, 1, 0, 0, 1],
-            [0, 1, 1, 1, 1],
-        ],
-        dtype=np.uint8,
-    )
-    img = np.zeros((5, 5), dtype=np.uint8)
-    rr, cc = rectangle_perimeter(start, extent=extent, shape=img.shape, clip=True)
-    img[rr, cc] = 1
-    assert_array_equal(img, expected)
+        # clip=True
+        expected = np.array(
+            [
+                [0, 0, 0, 0, 0],
+                [0, 1, 1, 1, 1],
+                [0, 1, 0, 0, 1],
+                [0, 1, 0, 0, 1],
+                [0, 1, 1, 1, 1],
+            ],
+            dtype=np.uint8,
+        )
+        img = np.zeros((5, 5), dtype=np.uint8)
+        rr, cc = rectangle_perimeter(start, extent=extent, shape=img.shape, clip=True)
+        img[rr, cc] = 1
+        assert_array_equal(img, expected)
 
 
 @uses_matplotlib
@@ -1204,27 +1221,28 @@ def test_rectangle_perimiter_clip_top_left():
         dtype=np.uint8,
     )
     img = np.zeros((5, 5), dtype=np.uint8)
-    start = (-5, -5)
-    end = (2, 2)
-    rr, cc = rectangle_perimeter(start, end=end, shape=img.shape, clip=False)
-    img[rr, cc] = 1
-    assert_array_equal(img, expected)
+    with pytest.warns(FutureWarning, match="deprecated"):
+        start = (-5, -5)
+        end = (2, 2)
+        rr, cc = rectangle_perimeter(start, end=end, shape=img.shape, clip=False)
+        img[rr, cc] = 1
+        assert_array_equal(img, expected)
 
-    # clip=True
-    expected = np.array(
-        [
-            [1, 1, 1, 1, 0],
-            [1, 0, 0, 1, 0],
-            [1, 0, 0, 1, 0],
-            [1, 1, 1, 1, 0],
-            [0, 0, 0, 0, 0],
-        ],
-        dtype=np.uint8,
-    )
-    img = np.zeros((5, 5), dtype=np.uint8)
-    rr, cc = rectangle_perimeter(start, end=end, shape=img.shape, clip=True)
-    img[rr, cc] = 1
-    assert_array_equal(img, expected)
+        # clip=True
+        expected = np.array(
+            [
+                [1, 1, 1, 1, 0],
+                [1, 0, 0, 1, 0],
+                [1, 0, 0, 1, 0],
+                [1, 1, 1, 1, 0],
+                [0, 0, 0, 0, 0],
+            ],
+            dtype=np.uint8,
+        )
+        img = np.zeros((5, 5), dtype=np.uint8)
+        rr, cc = rectangle_perimeter(start, end=end, shape=img.shape, clip=True)
+        img[rr, cc] = 1
+        assert_array_equal(img, expected)
 
 
 @uses_matplotlib
@@ -1240,26 +1258,27 @@ def test_rectangle_perimiter_clip_top_right():
         dtype=np.uint8,
     )
     img = np.zeros((5, 5), dtype=np.uint8)
-    start = (-10, 2)
-    end = (2, 10)
-    rr, cc = rectangle_perimeter(start, end=end, shape=img.shape, clip=True)
-    img[rr, cc] = 1
-    assert_array_equal(img, expected)
+    with pytest.warns(FutureWarning, match="deprecated"):
+        start = (-10, 2)
+        end = (2, 10)
+        rr, cc = rectangle_perimeter(start, end=end, shape=img.shape, clip=True)
+        img[rr, cc] = 1
+        assert_array_equal(img, expected)
 
-    expected = np.array(
-        [
-            [0, 1, 0, 0, 0],
-            [0, 1, 0, 0, 0],
-            [0, 1, 0, 0, 0],
-            [0, 1, 1, 1, 1],
-            [0, 0, 0, 0, 0],
-        ],
-        dtype=np.uint8,
-    )
-    img = np.zeros((5, 5), dtype=np.uint8)
-    rr, cc = rectangle_perimeter(start, end=end, shape=img.shape, clip=False)
-    img[rr, cc] = 1
-    assert_array_equal(img, expected)
+        expected = np.array(
+            [
+                [0, 1, 0, 0, 0],
+                [0, 1, 0, 0, 0],
+                [0, 1, 0, 0, 0],
+                [0, 1, 1, 1, 1],
+                [0, 0, 0, 0, 0],
+            ],
+            dtype=np.uint8,
+        )
+        img = np.zeros((5, 5), dtype=np.uint8)
+        rr, cc = rectangle_perimeter(start, end=end, shape=img.shape, clip=False)
+        img[rr, cc] = 1
+        assert_array_equal(img, expected)
 
 
 @uses_matplotlib
@@ -1275,24 +1294,25 @@ def test_rectangle_perimiter_clip_bottom_left():
         dtype=np.uint8,
     )
     img = np.zeros((5, 5), dtype=np.uint8)
-    start = (2, -3)
-    end = (10, 1)
-    rr, cc = rectangle_perimeter(start, end=end, shape=img.shape, clip=True)
-    img[rr, cc] = 1
-    assert_array_equal(img, expected)
+    with pytest.warns(FutureWarning, match="deprecated"):
+        start = (2, -3)
+        end = (10, 1)
+        rr, cc = rectangle_perimeter(start, end=end, shape=img.shape, clip=True)
+        img[rr, cc] = 1
+        assert_array_equal(img, expected)
 
-    expected = np.array(
-        [
-            [0, 0, 0, 0, 0],
-            [1, 1, 1, 0, 0],
-            [0, 0, 1, 0, 0],
-            [0, 0, 1, 0, 0],
-            [0, 0, 1, 0, 0],
-        ],
-        dtype=np.uint8,
-    )
+        expected = np.array(
+            [
+                [0, 0, 0, 0, 0],
+                [1, 1, 1, 0, 0],
+                [0, 0, 1, 0, 0],
+                [0, 0, 1, 0, 0],
+                [0, 0, 1, 0, 0],
+            ],
+            dtype=np.uint8,
+        )
 
-    img = np.zeros((5, 5), dtype=np.uint8)
-    rr, cc = rectangle_perimeter(start, end=end, shape=img.shape, clip=False)
-    img[rr, cc] = 1
-    assert_array_equal(img, expected)
+        img = np.zeros((5, 5), dtype=np.uint8)
+        rr, cc = rectangle_perimeter(start, end=end, shape=img.shape, clip=False)
+        img[rr, cc] = 1
+        assert_array_equal(img, expected)
