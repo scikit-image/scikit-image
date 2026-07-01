@@ -15,6 +15,6 @@ from _skimage2.feature.util import (  # noqa: F401
     _prepare_grayscale_input_2D,
 )
 
-from skimage._docutils import adapt_doctests
+from skimage._doctest_adapters import adapt_doctests
 
 adapt_doctests(globals())

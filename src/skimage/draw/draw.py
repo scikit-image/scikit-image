@@ -30,6 +30,6 @@ __all__ = [
     'set_color',
 ]
 
-from skimage._docutils import adapt_doctests
+from skimage._doctest_adapters import adapt_doctests
 
 adapt_doctests(globals())

@@ -2,6 +2,6 @@ from _skimage2.measure._find_contours import find_contours as find_contours  # n
 
 __all__ = ['find_contours']
 
-from skimage._docutils import adapt_doctests
+from skimage._doctest_adapters import adapt_doctests
 
 adapt_doctests(globals())

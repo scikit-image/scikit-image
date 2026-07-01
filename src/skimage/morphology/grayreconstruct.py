@@ -2,6 +2,6 @@ from _skimage2.morphology.grayreconstruct import reconstruction as reconstructio
 
 __all__ = ['reconstruction']
 
-from skimage._docutils import adapt_doctests
+from skimage._doctest_adapters import adapt_doctests
 
 adapt_doctests(globals())

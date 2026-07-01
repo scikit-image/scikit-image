@@ -2,6 +2,6 @@ from _skimage2._shared._tempfile import temporary_file as temporary_file  # noqa
 
 __all__ = ['temporary_file']
 
-from skimage._docutils import adapt_doctests
+from skimage._doctest_adapters import adapt_doctests
 
 adapt_doctests(globals())

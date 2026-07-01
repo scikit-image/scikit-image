@@ -5,6 +5,6 @@ from _skimage2.filters._multiotsu import (  # noqa: F401
     _get_multiotsu_thresh_indices_lut,
 )
 
-from skimage._docutils import adapt_doctests
+from skimage._doctest_adapters import adapt_doctests
 
 adapt_doctests(globals())

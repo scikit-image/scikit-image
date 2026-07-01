@@ -3,7 +3,7 @@ python_sources = [
   '__init__.pyi',
   'conftest.py',
   'py.typed',
-  '_docutils.py',
+  '_doctest_adapters.py',
   '_migration.py'
 ]
 

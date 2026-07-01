@@ -4,6 +4,6 @@ from _skimage2.feature._basic_features import (
 
 __all__ = ['multiscale_basic_features']
 
-from skimage._docutils import adapt_doctests
+from skimage._doctest_adapters import adapt_doctests
 
 adapt_doctests(globals())

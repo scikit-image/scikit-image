@@ -2,6 +2,6 @@ from _skimage2.segmentation._clear_border import clear_border as clear_border  #
 
 __all__ = ['clear_border']
 
-from skimage._docutils import adapt_doctests
+from skimage._doctest_adapters import adapt_doctests
 
 adapt_doctests(globals())

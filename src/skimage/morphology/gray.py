@@ -647,6 +647,6 @@ def black_tophat(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     return out
 
 
-from skimage._docutils import adapt_doctests  # noqa: E402
+from skimage._doctest_adapters import adapt_doctests  # noqa: E402
 
 adapt_doctests(globals())

@@ -2,6 +2,6 @@ from _skimage2.segmentation._quickshift import quickshift as quickshift  # noqa:
 
 __all__ = ['quickshift']
 
-from skimage._docutils import adapt_doctests
+from skimage._doctest_adapters import adapt_doctests
 
 adapt_doctests(globals())

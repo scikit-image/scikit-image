@@ -7,6 +7,6 @@ from _skimage2.segmentation._watershed_cy import watershed_raveled as watershed_
 
 __all__ = ['watershed_raveled']
 
-from skimage._docutils import adapt_doctests
+from skimage._doctest_adapters import adapt_doctests
 
 adapt_doctests(globals())

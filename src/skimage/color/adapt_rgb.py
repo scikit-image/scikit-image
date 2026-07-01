@@ -10,6 +10,6 @@ __all__ = [
     'each_channel',
 ]
 
-from skimage._docutils import adapt_doctests
+from skimage._doctest_adapters import adapt_doctests
 
 adapt_doctests(globals())

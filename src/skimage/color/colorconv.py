@@ -213,6 +213,6 @@ __all__ = [
     'yuv_from_rgb',
 ]
 
-from skimage._docutils import adapt_doctests
+from skimage._doctest_adapters import adapt_doctests
 
 adapt_doctests(globals())

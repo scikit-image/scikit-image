@@ -20,6 +20,6 @@ __all__ = [
 
 from _skimage2.measure.fit import _dynamic_max_trials  # noqa: F401
 
-from skimage._docutils import adapt_doctests
+from skimage._doctest_adapters import adapt_doctests
 
 adapt_doctests(globals())

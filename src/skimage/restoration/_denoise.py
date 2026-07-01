@@ -16,6 +16,6 @@ __all__ = [
 
 from _skimage2.restoration._denoise import _wavelet_threshold  # noqa: F401
 
-from skimage._docutils import adapt_doctests
+from skimage._doctest_adapters import adapt_doctests
 
 adapt_doctests(globals())

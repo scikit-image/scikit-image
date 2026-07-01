@@ -4,6 +4,6 @@ __all__ = ['label']
 
 from _skimage2.measure._label import _label_bool  # noqa: F401
 
-from skimage._docutils import adapt_doctests
+from skimage._doctest_adapters import adapt_doctests
 
 adapt_doctests(globals())

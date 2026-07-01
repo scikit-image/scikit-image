@@ -21,6 +21,6 @@ from _skimage2.registration._masked_phase_cross_correlation import (  # noqa: F4
     _masked_phase_cross_correlation,
 )
 
-from skimage._docutils import adapt_doctests
+from skimage._doctest_adapters import adapt_doctests
 
 adapt_doctests(globals())

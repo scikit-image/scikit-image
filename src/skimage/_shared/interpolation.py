@@ -2,6 +2,6 @@ from _skimage2._shared.interpolation import coord_map_py as coord_map_py  # noqa
 
 __all__ = ['coord_map_py']
 
-from skimage._docutils import adapt_doctests
+from skimage._doctest_adapters import adapt_doctests
 
 adapt_doctests(globals())

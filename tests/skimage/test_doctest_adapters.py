@@ -6,7 +6,11 @@ from pathlib import Path
 
 import pytest
 
-from skimage._docutils import adapt_doctest_doc, adapt_obj_doctest, adapt_doctests
+from skimage._doctest_adapters import (
+    adapt_doctest_doc,
+    adapt_obj_doctest,
+    adapt_doctests,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 

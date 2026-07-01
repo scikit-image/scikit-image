@@ -381,6 +381,7 @@ SKIMAGE_FILE_TREE = {
     '_build_utils/gcc_build_bitness',
     '_build_utils/tempita',
     '_build_utils/version',
+    '_doctest_adapters',
     '_shared/__init__',
     '_shared/_dependency_checks',
     '_shared/_geometry',

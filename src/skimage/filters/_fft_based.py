@@ -4,6 +4,6 @@ __all__ = ['butterworth']
 
 from _skimage2.filters._fft_based import _get_nd_butterworth_filter  # noqa: F401
 
-from skimage._docutils import adapt_doctests
+from skimage._doctest_adapters import adapt_doctests
 
 adapt_doctests(globals())

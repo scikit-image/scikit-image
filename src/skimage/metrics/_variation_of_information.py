@@ -4,6 +4,6 @@ from _skimage2.metrics._variation_of_information import (
 
 __all__ = ['variation_of_information']
 
-from skimage._docutils import adapt_doctests
+from skimage._doctest_adapters import adapt_doctests
 
 adapt_doctests(globals())

@@ -4,6 +4,6 @@ from _skimage2.morphology._grayreconstruct import (
 
 __all__ = ['reconstruction_loop']
 
-from skimage._docutils import adapt_doctests
+from skimage._doctest_adapters import adapt_doctests
 
 adapt_doctests(globals())

@@ -4,6 +4,6 @@ from _skimage2.metrics._adapted_rand_error import (
 
 __all__ = ['adapted_rand_error']
 
-from skimage._docutils import adapt_doctests
+from skimage._doctest_adapters import adapt_doctests
 
 adapt_doctests(globals())

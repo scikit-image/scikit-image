@@ -9,6 +9,6 @@ from _skimage2.filters._rank_order import rank_order as rank_order  # noqa: F401
 
 __all__ = ['rank_order']
 
-from skimage._docutils import adapt_doctests
+from skimage._doctest_adapters import adapt_doctests
 
 adapt_doctests(globals())

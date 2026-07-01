@@ -14,6 +14,6 @@ __all__ = [
     'rgb2gray',
 ]
 
-from skimage._docutils import adapt_doctests
+from skimage._doctest_adapters import adapt_doctests
 
 adapt_doctests(globals())

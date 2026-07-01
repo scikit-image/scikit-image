@@ -2,6 +2,6 @@ from _skimage2.restoration.unwrap import unwrap_phase as unwrap_phase  # noqa: F
 
 __all__ = ['unwrap_phase']
 
-from skimage._docutils import adapt_doctests
+from skimage._doctest_adapters import adapt_doctests
 
 adapt_doctests(globals())
