@@ -58,35 +58,24 @@ def adapt_doctest_doc(doc: str | None) -> str | None:
     if not doc:
         return doc
 
+    lines: list[str] = doc.split('\n')
     out: list[str] = []
-    state: str = 'description'  # Can be 'description' or 'doctest-block'
-    block_indent: int = 0
-    block: list[str] = []
 
-    for line in doc.split('\n'):
-        if state == 'description':
-            if match := _DOCTEST_PROMPT_RE.match(line):
-                state = 'doctest-block'
-                # Start block.
-                block_indent = len(match.group('indent'))
-                block.append(line)
-            else:
-                out.append(line)
+    while lines:
+        line = lines.pop(0)
+        if not (match := _DOCTEST_PROMPT_RE.match(line)):
+            out.append(line)
             continue
+        n_block_indent: int = len(match.group('indent'))
+        out.append(_proc_line(line))
+        in_doctest_block: bool = True
 
-        assert state == 'doctest-block'
-        # Continuing doctest block depends only on indentation.
-        if line and (len(line) - len(line.lstrip())) >= block_indent:
-            block.append(line)
-            continue
-        # Terminate block, start description.
-        state = 'description'
-        out.extend(_proc_line(L) for L in block)
-        block = []
-        out.append(line)
+        while in_doctest_block and lines:
+            line = lines.pop(0)
+            n_indent = len(line) - len(line.lstrip())
+            in_doctest_block = line and (n_indent >= n_block_indent)
+            out.append(_proc_line(line) if in_doctest_block else line)
 
-    if state == 'doctest-block':
-        out.extend(_proc_line(L) for L in block)
     return '\n'.join(out)
 
 
