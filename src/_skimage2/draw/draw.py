@@ -65,8 +65,8 @@ def _ellipse_in_shape(shape, center, radii, rotation=0.0):
 def ellipse(
     r=DEPRECATED,
     c=DEPRECATED,
-    r_radius=None,
-    c_radius=None,
+    r_radius=DEPRECATED,
+    c_radius=DEPRECATED,
     shape=None,
     rotation=0.0,
     *,
@@ -140,8 +140,10 @@ def ellipse(
            [1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1]], dtype=uint8)
     """
 
-    center = np.array([r, c])
-    radii = np.array([r_radius, c_radius])
+    center = center
+    radii = radius
+    r, c = center
+    r_radius, c_radius = radii
     # allow just rotation with in range +/- 180 degree
     rotation %= np.pi
 
@@ -238,7 +240,9 @@ def disk(center, radius, *, shape=None):
     ('r', 'c'), new_name='center', start_version=0.26, stop_version=0.28, multi=True
 )
 @require("matplotlib", version=">=3.3")
-def polygon_perimeter(r, c, shape=None, clip=False, *, center=None):
+def polygon_perimeter(
+    r=DEPRECATED, c=DEPRECATED, shape=None, clip=False, *, center=None
+):
     """Generate polygon perimeter coordinates.
 
     Parameters
@@ -286,6 +290,7 @@ def polygon_perimeter(r, c, shape=None, clip=False, *, center=None):
            [0, 0, 0, 0, 1, 1, 1, 0, 0, 0]], dtype=uint8)
 
     """
+    r, c = center
     if clip:
         if shape is None:
             raise ValueError("Must specify clipping shape")
@@ -391,7 +396,15 @@ def set_color(image, coords, color, alpha=1):
 @deprecate_parameter(
     ('r1', 'c1'), new_name='end_pos', start_version=0.26, stop_version=0.28, multi=True
 )
-def line(r0, c0, r1, c1, *, start_pos=None, end_pos=None):
+def line(
+    r0=DEPRECATED,
+    c0=DEPRECATED,
+    r1=DEPRECATED,
+    c1=DEPRECATED,
+    *,
+    start_pos=None,
+    end_pos=None,
+):
     """Generate line pixel coordinates.
 
     Parameters
@@ -430,6 +443,8 @@ def line(r0, c0, r1, c1, *, start_pos=None, end_pos=None):
            [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
     """
+    r0, c0 = start_pos
+    r1, c1 = end_pos
     return _line(r0, c0, r1, c1)
 
 
@@ -443,7 +458,15 @@ def line(r0, c0, r1, c1, *, start_pos=None, end_pos=None):
 @deprecate_parameter(
     ('r1', 'c1'), new_name='end_pos', start_version=0.26, stop_version=0.28, multi=True
 )
-def line_aa(r0, c0, r1, c1, *, start_pos=None, end_pos=None):
+def line_aa(
+    r0=DEPRECATED,
+    c0=DEPRECATED,
+    r1=DEPRECATED,
+    c1=DEPRECATED,
+    *,
+    start_pos=None,
+    end_pos=None,
+):
     """Generate anti-aliased line pixel coordinates.
 
     Parameters
@@ -482,6 +505,8 @@ def line_aa(r0, c0, r1, c1, *, start_pos=None, end_pos=None):
            [  0,   0,   0,   0,   0,   0,   0,  74, 255,   0],
            [  0,   0,   0,   0,   0,   0,   0,   0,   0,   0]], dtype=uint8)
     """
+    r0, c0 = start_pos
+    r1, c1 = end_pos
     return _line_aa(r0, c0, r1, c1)
 
 
@@ -566,7 +591,15 @@ def polygon(r, c, shape=None):
 @deprecate_parameter(
     ('r', 'c'), new_name='center', start_version=0.26, stop_version=0.28, multi=True
 )
-def circle_perimeter(r, c, radius, method='bresenham', shape=None, *, center=None):
+def circle_perimeter(
+    r=DEPRECATED,
+    c=DEPRECATED,
+    radius=None,
+    method='bresenham',
+    shape=None,
+    *,
+    center=None,
+):
     """Generate circle perimeter coordinates.
 
     Parameters
@@ -626,13 +659,16 @@ def circle_perimeter(r, c, radius, method='bresenham', shape=None, *, center=Non
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
     """
+    r, c = center
     return _circle_perimeter(r, c, radius, method, shape)
 
 
 @deprecate_parameter(
     ('r', 'c'), new_name='center', start_version=0.26, stop_version=0.28, multi=True
 )
-def circle_perimeter_aa(r, c, radius, shape=None, *, center=None):
+def circle_perimeter_aa(
+    r=DEPRECATED, c=DEPRECATED, radius=None, shape=None, *, center=None
+):
     """Generate anti-aliased circle perimeter coordinates.
 
     Parameters
@@ -690,6 +726,7 @@ def circle_perimeter_aa(r, c, radius, shape=None, *, center=None):
     >>> rr, cc, val = draw.circle_perimeter_aa(r=100, c=100, radius=75)
     >>> draw.set_color(image, (rr, cc), [1, 0, 0], alpha=val)
     """
+    r, c = center
     return _circle_perimeter_aa(r, c, radius, shape)
 
 
@@ -704,7 +741,15 @@ def circle_perimeter_aa(r, c, radius, shape=None, *, center=None):
     multi=True,
 )
 def ellipse_perimeter(
-    r, c, r_radius, c_radius, orientation=0, shape=None, *, center=None, semi_axes=None
+    r=DEPRECATED,
+    c=DEPRECATED,
+    r_radius=DEPRECATED,
+    c_radius=DEPRECATED,
+    orientation=0,
+    shape=None,
+    *,
+    center=None,
+    semi_axes=None,
 ):
     """Generate ellipse perimeter coordinates.
 
@@ -773,6 +818,8 @@ def ellipse_perimeter(
            [0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
            [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]], dtype=uint8)
     """
+    r, c = center
+    r_radius, c_radius = semi_axes
     return _ellipse_perimeter(r, c, r_radius, c_radius, orientation, shape)
 
 
@@ -798,13 +845,13 @@ def ellipse_perimeter(
     multi=True,
 )
 def bezier_curve(
-    r0,
-    c0,
-    r1,
-    c1,
-    r2,
-    c2,
-    weight,
+    r0=DEPRECATED,
+    c0=DEPRECATED,
+    r1=DEPRECATED,
+    c1=DEPRECATED,
+    r2=DEPRECATED,
+    c2=DEPRECATED,
+    weight=None,
     shape=None,
     *,
     first_control_point=None,
@@ -864,6 +911,9 @@ def bezier_curve(
            [0, 0, 0, 0, 0, 0, 0, 1, 1, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
     """
+    r0, c0 = first_control_point
+    r1, c1 = middle_control_point
+    r2, c2 = last_control_point
     return _bezier_curve(r0, c0, r1, c1, r2, c2, weight, shape)
 
 
