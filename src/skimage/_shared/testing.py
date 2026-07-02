@@ -41,3 +41,7 @@ __all__ = [
     'skipif',
     'xfail',
 ]
+
+from skimage._doctest_adapters import adapt_doctests
+
+adapt_doctests(globals())

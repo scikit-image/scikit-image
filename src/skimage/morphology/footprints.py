@@ -29,3 +29,7 @@ __all__ = [
 ]
 
 from _skimage2.morphology._footprints import mirror_footprint, pad_footprint  # noqa: F401
+
+from skimage._doctest_adapters import adapt_doctests
+
+adapt_doctests(globals())

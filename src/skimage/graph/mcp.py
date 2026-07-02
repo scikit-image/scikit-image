@@ -13,3 +13,7 @@ __all__ = [
     'MCP_Geometric',
     'route_through_array',
 ]
+
+from skimage._doctest_adapters import adapt_doctests
+
+adapt_doctests(globals())

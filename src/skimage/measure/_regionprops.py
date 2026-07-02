@@ -23,3 +23,7 @@ from _skimage2.measure._regionprops import (  # noqa: F401
     _require_intensity_image,
     regionprops_table,
 )
+
+from skimage._doctest_adapters import adapt_doctests
+
+adapt_doctests(globals())

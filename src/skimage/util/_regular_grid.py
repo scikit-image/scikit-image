@@ -7,3 +7,7 @@ __all__ = [
     'regular_grid',
     'regular_seeds',
 ]
+
+from skimage._doctest_adapters import adapt_doctests
+
+adapt_doctests(globals())

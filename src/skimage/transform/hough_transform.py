@@ -17,3 +17,7 @@ __all__ = [
     'label_distant_points',
     'probabilistic_hough_line',
 ]
+
+from skimage._doctest_adapters import adapt_doctests
+
+adapt_doctests(globals())

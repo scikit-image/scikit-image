@@ -11,3 +11,7 @@ __all__ = [
     'get_min_ncut',
     'partition_by_cut',
 ]
+
+from skimage._doctest_adapters import adapt_doctests
+
+adapt_doctests(globals())

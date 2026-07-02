@@ -1,5 +1,4 @@
 from _skimage2.transform._warps import (
-    HOMOGRAPHY_TRANSFORMS as HOMOGRAPHY_TRANSFORMS,
     downscale_local_mean as downscale_local_mean,
     rescale as rescale,
     resize as resize,
@@ -10,6 +9,19 @@ from _skimage2.transform._warps import (
     warp_coords as warp_coords,
     warp_polar as warp_polar,
 )  # noqa: F401
+
+from skimage._doctest_adapters import adapt_doctests
+
+# We need the shim versions of these classes.
+from ._geometric import SimilarityTransform, AffineTransform, ProjectiveTransform
+
+from _skimage2.transform._warps import (  # noqa: F401
+    _linear_polar_mapping,
+    _log_polar_mapping,
+    _stackcopy,
+)
+
+HOMOGRAPHY_TRANSFORMS = (SimilarityTransform, AffineTransform, ProjectiveTransform)
 
 __all__ = [
     'HOMOGRAPHY_TRANSFORMS',
@@ -24,8 +36,4 @@ __all__ = [
     'warp_polar',
 ]
 
-from _skimage2.transform._warps import (  # noqa: F401
-    _linear_polar_mapping,
-    _log_polar_mapping,
-    _stackcopy,
-)
+adapt_doctests(globals())

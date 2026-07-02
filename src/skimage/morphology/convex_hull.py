@@ -11,3 +11,7 @@ __all__ = [
     'convex_hull_image',
     'convex_hull_object',
 ]
+
+from skimage._doctest_adapters import adapt_doctests
+
+adapt_doctests(globals())

@@ -9,3 +9,7 @@ __all__ = [
     'file_or_url_context',
     'is_url',
 ]
+
+from skimage._doctest_adapters import adapt_doctests
+
+adapt_doctests(globals())

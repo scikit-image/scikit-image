@@ -22,3 +22,7 @@ from _skimage2.morphology._flood_fill import flood as flood  # noqa: F401
 from _skimage2.morphology._flood_fill import flood_fill as flood_fill  # noqa: F401
 
 __all__ = ['watershed']
+
+from skimage._doctest_adapters import adapt_doctests
+
+adapt_doctests(globals())

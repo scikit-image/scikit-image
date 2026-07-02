@@ -19,3 +19,7 @@ __all__ = [
     'local_binary_pattern',
     'multiblock_lbp',
 ]
+
+from skimage._doctest_adapters import adapt_doctests
+
+adapt_doctests(globals())

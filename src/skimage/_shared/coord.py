@@ -66,3 +66,8 @@ def ensure_spacing(
         max_out=max_out,
         max_split_size=max_split_size,
     )
+
+
+from skimage._doctest_adapters import adapt_doctests  # noqa: E402
+
+adapt_doctests(globals())

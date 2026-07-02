@@ -9,3 +9,7 @@ __all__ = [
     'OFAST_UMAX',
     'ORB',
 ]
+
+from skimage._doctest_adapters import adapt_doctests
+
+adapt_doctests(globals())
