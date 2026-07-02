@@ -54,7 +54,6 @@ from warnings import warn
 import numpy as np
 from scipy import linalg
 
-
 from _skimage2._shared.utils import (
     _supported_float_type,
     channel_as_last_axis,
@@ -62,6 +61,7 @@ from _skimage2._shared.utils import (
     reshape_nd,
     slice_at_axis,
 )
+
 from ..util import dtype, dtype_limits
 
 # TODO: when minimum numpy dependency is 1.25 use:
@@ -634,9 +634,9 @@ hed_from_rgb = linalg.inv(rgb_from_hed)
 # Hematoxylin + Eosin
 # Hematoxylin vector is same as above from Ruifrok & Johnston
 # Eosin vector taken from QuPath source code
-# https://github.com/qupath/qupath/blob/main/qupath-core/src/main/java/qupath/lib/color/StainVector.java#L89
+# https://github.com/qupath/qupath/blob/v0.7.0/qupath-core/src/main/java/qupath/lib/color/StainVector.java#L89
 # "residual" is the cross product of H and E vectors (taken from QuPath)
-# https://github.com/qupath/qupath/blob/main/qupath-core/src/main/java/qupath/lib/color/StainVector.java#L305
+# https://github.com/qupath/qupath/blob/v0.7.0/qupath-core/src/main/java/qupath/lib/color/StainVector.java#L305
 # hematoxylin = [0.65, 0.70, 0.29]
 # eosin = [0.2159, 0.8012, 0.5581]
 # residual = np.cross(hematoxylin, eosin) = [ 0.1583, -0.3002,  0.3696]
@@ -1716,6 +1716,8 @@ def rgb2hex(rgb, *, channel_axis=-1):
 
     .. [3] https://github.com/scikit-image/scikit-image/pull/7983
 
+    .. [4] https://blog.bham.ac.uk/intellimic/g-landini-software/colour-deconvolution-2/
+
     Examples
     --------
     >>> from skimage import data
@@ -1759,6 +1761,8 @@ def hex2rgb(hex, *, channel_axis=-1):
 
     .. [2] Bankhead, P. et al. QuPath: Open source software for digital pathology
            image analysis. Scientific Reports (2017). https://doi.org/10.1038/s41598-017-17204-5
+
+    .. [3] https://blog.bham.ac.uk/intellimic/g-landini-software/colour-deconvolution-2/
 
     Examples
     --------
