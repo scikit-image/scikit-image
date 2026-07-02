@@ -1,8 +1,8 @@
 import numpy as np
 
-from .._shared._geometry import polygon_clip
-from .._shared.version_requirements import require
-from .._shared.compat import NP_COPY_IF_NEEDED
+from _skimage2._shared._geometry import polygon_clip
+from _skimage2._shared.version_requirements import require
+from _skimage2._shared.compat import NP_COPY_IF_NEEDED
 from ._draw import (
     _coords_inside_image,
     _line,
@@ -15,20 +15,17 @@ from ._draw import (
 )
 
 
-__doctest_requires__ = {("polygon_perimeter", "rectangle_perimeter"): ["matplotlib"]}
-
-
 def _ellipse_in_shape(shape, center, radii, rotation=0.0):
     """Generate coordinates of points within ellipse bounded by shape.
 
     Parameters
     ----------
-    shape :  iterable of ints
+    shape : Iterable of int(s)
         Shape of the input image.  Must be at least length 2. Only the first
         two values are used to determine the extent of the input image.
-    center : iterable of floats
+    center : Iterable of float(s)
         (row, column) position of center inside the given shape.
-    radii : iterable of floats
+    radii : Iterable of float(s)
         Size of two half axes (for row and column)
     rotation : float, optional
         Rotation of the ellipse defined by the above, in radians
@@ -216,7 +213,7 @@ def disk(center, radius, *, shape=None):
     return ellipse(r, c, radius, radius, shape)
 
 
-@require("matplotlib", ">=3.3")
+@require("matplotlib", version=">=3.3")
 def polygon_perimeter(r, c, shape=None, clip=False):
     """Generate polygon perimeter coordinates.
 
@@ -303,13 +300,13 @@ def set_color(image, coords, color, alpha=1):
 
     Parameters
     ----------
-    image : (M, N, C) ndarray
+    image : ndarray of shape (M, N, C)
         Image
-    coords : tuple of ((K,) ndarray, (K,) ndarray)
+    coords : tuple of (ndarray of shape (K,), ...)
         Row and column coordinates of pixels to be colored.
-    color : (C,) ndarray
+    color : ndarray of shape (C,)
         Color to be assigned to coordinates in the image.
-    alpha : scalar or (K,) ndarray
+    alpha : np.number or ndarray of dtype np.number and shape (K,)
         Alpha values used to blend color with image.  0 is transparent,
         1 is opaque.
 
@@ -869,7 +866,7 @@ def rectangle(start, end=None, extent=None, shape=None):
     return coords
 
 
-@require("matplotlib", ">=3.3")
+@require("matplotlib", version=">=3.3")
 def rectangle_perimeter(start, end=None, extent=None, shape=None, clip=False):
     """Generate coordinates of pixels that are exactly around a rectangle.
 
@@ -944,7 +941,7 @@ def _rectangle_slice(start, end=None, extent=None):
 
     Returns
     -------
-    (top_left, bottom_right)
+    slice : tuple of (int, int), corresponding to (top_left, bottom_right)
         The slice you would need to select the region in the rectangle defined
         by the parameters.
         Select it like:

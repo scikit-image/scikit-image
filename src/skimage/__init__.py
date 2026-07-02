@@ -46,7 +46,7 @@ util
     Generic utilities.
 """
 
-__version__ = '0.26.0rc3.dev0'
+__version__ = '0.26.1rc0.dev0'
 
 import lazy_loader as _lazy
 
@@ -143,6 +143,6 @@ if 'dev' in __version__:
     __version__ = _try_append_commit_info(__version__)
 
 
-from skimage._shared.tester import PytestTester as _PytestTester
+from _skimage2._shared.tester import PytestTester as _PytestTester
 
 test = _PytestTester(__name__)

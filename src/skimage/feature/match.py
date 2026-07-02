@@ -19,13 +19,12 @@ def match_descriptors(
 
     Parameters
     ----------
-    descriptors1 : (M, P) array
+    descriptors1 : ndarray of shape (M, P)
         Descriptors of size P about M keypoints in the first image.
-    descriptors2 : (N, P) array
+    descriptors2 : ndarray of shape (N, P)
         Descriptors of size P about N keypoints in the second image.
-    metric : {'euclidean', 'cityblock', 'minkowski', 'hamming', ...} , optional
-        The metric to compute the distance between two descriptors. See
-        `scipy.spatial.distance.cdist` for all possible types. The hamming
+    metric : str, see `metric` in :func:`scipy.spatial.distance.cdist`, optional
+        The metric to compute the distance between two descriptors. The Hamming
         distance should be used for binary descriptors. By default the L2-norm
         is used for all descriptors of dtype float or double and the Hamming
         distance is used for binary descriptors automatically.

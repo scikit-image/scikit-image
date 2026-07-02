@@ -95,7 +95,7 @@ def haar_like_feature(
 
     Parameters
     ----------
-    int_image : (M, N) ndarray
+    int_image : ndarray of shape (M, N)
         Integral image for which the features need to be computed.
     r : int
         Row-coordinate of top left corner of the detection window.
@@ -127,7 +127,7 @@ def haar_like_feature(
 
     Returns
     -------
-    haar_features : (n_features,) ndarray of int or float
+    haar_features : ndarray of shape (n_features,) and dtype (int or float)
         Resulting Haar-like features. Each value is equal to the subtraction of
         sums of the positive and negative rectangles. The data type depends of
         the data type of `int_image`: `int` when the data type of `int_image`
@@ -137,7 +137,7 @@ def haar_like_feature(
     Notes
     -----
     When extracting those features in parallel, be aware that the choice of the
-    backend (i.e. multiprocessing vs threading) will have an impact on the
+    backend (i.e., multiprocessing vs threading) will have an impact on the
     performance. The rule of thumb is as follows: use multiprocessing when
     extracting features for all possible ROI in an image; use threading when
     extracting the feature at specific location for a limited number of ROIs.
@@ -249,7 +249,7 @@ def draw_haar_like_feature(
 
     Parameters
     ----------
-    image : (M, N) ndarray
+    image : ndarray of shape (M, N)
         The region of an integral image for which the features need to be
         computed.
     r : int
@@ -288,7 +288,7 @@ def draw_haar_like_feature(
 
     Returns
     -------
-    features : (M, N), ndarray
+    features : ndarray of shape (M, N)
         An image in which the different features will be added.
 
     Examples

@@ -55,7 +55,7 @@ import numpy as np
 from scipy import linalg
 
 
-from .._shared.utils import (
+from _skimage2._shared.utils import (
     _supported_float_type,
     channel_as_last_axis,
     identity,
@@ -81,7 +81,7 @@ def convert_colorspace(arr, fromspace, tospace, *, channel_axis=-1):
 
     Parameters
     ----------
-    arr : (..., C=3, ...) array_like
+    arr : array_like of shape (..., C=3, ...)
         The image to convert. By default, the final dimension denotes
         channels.
     fromspace : str
@@ -97,7 +97,7 @@ def convert_colorspace(arr, fromspace, tospace, *, channel_axis=-1):
 
     Returns
     -------
-    out : (..., C=3, ...) ndarray
+    out : ndarray of shape (..., C=3, ...)
         The converted image. Same dimensions as input.
 
     Raises
@@ -1047,13 +1047,13 @@ def gray2rgb(image, *, channel_axis=-1):
 
     Returns
     -------
-    rgb : (..., C=3, ...) ndarray
+    rgb : ndarray of shape (..., C=3, ...)
         RGB image. A new dimension of length 3 is added to input image.
 
     Notes
     -----
     If the input is a 1-dimensional image of shape ``(M,)``, the output
-    will be shape ``(M, C=3)``.
+    will be of shape ``(M, C=3)``.
     """
     return np.stack(3 * (image,), axis=channel_axis)
 
@@ -1064,7 +1064,7 @@ def xyz2lab(xyz, illuminant="D65", observer="2", *, channel_axis=-1):
 
     Parameters
     ----------
-    xyz : (..., C=3, ...) array_like
+    xyz : array_like of shape (..., C=3, ...)
         The image in XYZ format. By default, the final dimension denotes
         channels.
     illuminant : {"A", "B", "C", "D50", "D55", "D65", "D75", "E"}, optional
@@ -1081,7 +1081,7 @@ def xyz2lab(xyz, illuminant="D65", observer="2", *, channel_axis=-1):
 
     Returns
     -------
-    out : (..., C=3, ...) ndarray
+    out : ndarray of shape (..., C=3, ...)
         The image in CIE-LAB format. Same dimensions as input.
 
     Raises
@@ -1141,7 +1141,7 @@ def lab2xyz(lab, illuminant="D65", observer="2", *, channel_axis=-1):
 
     Parameters
     ----------
-    lab : (..., C=3, ...) array_like
+    lab : array_like of shape (..., C=3, ...)
         The input image in CIE-LAB color space.
         Unless `channel_axis` is set, the final dimension denotes the CIE-LAB
         channels.
@@ -1160,7 +1160,7 @@ def lab2xyz(lab, illuminant="D65", observer="2", *, channel_axis=-1):
 
     Returns
     -------
-    out : (..., C=3, ...) ndarray
+    out : ndarray of shape (..., C=3, ...)
         The image in XYZ color space, of same shape as input.
 
     Raises
@@ -1207,7 +1207,7 @@ def _lab2xyz(lab, illuminant, observer):
 
     Returns
     -------
-    out : (..., C=3, ...) ndarray
+    out : ndarray of shape (..., C=3, ...)
         The image in XYZ format. Same dimensions as input.
     n_invalid : int
         Number of invalid pixels in the Z channel after conversion.
@@ -1247,7 +1247,7 @@ def rgb2lab(rgb, illuminant="D65", observer="2", *, channel_axis=-1):
 
     Parameters
     ----------
-    rgb : (..., C=3, ...) array_like
+    rgb : array_like of shape (..., C=3, ...)
         The image in RGB format. By default, the final dimension denotes
         channels.
     illuminant : {"A", "B", "C", "D50", "D55", "D65", "D75", "E"}, optional
@@ -1263,7 +1263,7 @@ def rgb2lab(rgb, illuminant="D65", observer="2", *, channel_axis=-1):
 
     Returns
     -------
-    out : (..., C=3, ...) ndarray
+    out : ndarray of shape (..., C=3, ...)
         The image in Lab format. Same dimensions as input.
 
     Raises
@@ -1295,7 +1295,7 @@ def lab2rgb(lab, illuminant="D65", observer="2", *, channel_axis=-1):
 
     Parameters
     ----------
-    lab : (..., C=3, ...) array_like
+    lab : array_like of shape (..., C=3, ...)
         The input image in CIE-LAB color space.
         Unless `channel_axis` is set, the final dimension denotes the CIE-LAB
         channels.
@@ -1314,7 +1314,7 @@ def lab2rgb(lab, illuminant="D65", observer="2", *, channel_axis=-1):
 
     Returns
     -------
-    out : (..., C=3, ...) ndarray
+    out : ndarray of shape (..., C=3, ...)
         The image in sRGB color space, of same shape as input.
 
     Raises
@@ -1354,7 +1354,7 @@ def xyz2luv(xyz, illuminant="D65", observer="2", *, channel_axis=-1):
 
     Parameters
     ----------
-    xyz : (..., C=3, ...) array_like
+    xyz : array_like of shape (..., C=3, ...)
         The image in XYZ format. By default, the final dimension denotes
         channels.
     illuminant : {"A", "B", "C", "D50", "D55", "D65", "D75", "E"}, optional
@@ -1370,7 +1370,7 @@ def xyz2luv(xyz, illuminant="D65", observer="2", *, channel_axis=-1):
 
     Returns
     -------
-    out : (..., C=3, ...) ndarray
+    out : ndarray of shape (..., C=3, ...)
         The image in CIE-Luv format. Same dimensions as input.
 
     Raises
@@ -1450,7 +1450,7 @@ def luv2xyz(luv, illuminant="D65", observer="2", *, channel_axis=-1):
 
     Parameters
     ----------
-    luv : (..., C=3, ...) array_like
+    luv : array_like of shape (..., C=3, ...)
         The image in CIE-Luv format. By default, the final dimension denotes
         channels.
     illuminant : {"A", "B", "C", "D50", "D55", "D65", "D75", "E"}, optional
@@ -1466,7 +1466,7 @@ def luv2xyz(luv, illuminant="D65", observer="2", *, channel_axis=-1):
 
     Returns
     -------
-    out : (..., C=3, ...) ndarray
+    out : ndarray of shape (..., C=3, ...)
         The image in XYZ format. Same dimensions as input.
 
     Raises
@@ -1527,7 +1527,7 @@ def rgb2luv(rgb, *, channel_axis=-1):
 
     Parameters
     ----------
-    rgb : (..., C=3, ...) array_like
+    rgb : array_like of shape (..., C=3, ...)
         The image in RGB format. By default, the final dimension denotes
         channels.
     channel_axis : int, optional
@@ -1539,7 +1539,7 @@ def rgb2luv(rgb, *, channel_axis=-1):
 
     Returns
     -------
-    out : (..., C=3, ...) ndarray
+    out : ndarray of shape (..., C=3, ...)
         The image in CIE Luv format. Same dimensions as input.
 
     Raises
@@ -1565,13 +1565,13 @@ def luv2rgb(luv, *, channel_axis=-1):
 
     Parameters
     ----------
-    luv : (..., C=3, ...) array_like
+    luv : array_like of shape (..., C=3, ...)
         The image in CIE Luv format. By default, the final dimension denotes
         channels.
 
     Returns
     -------
-    out : (..., C=3, ...) ndarray
+    out : ndarray of shape (..., C=3, ...)
         The image in RGB format. Same dimensions as input.
 
     Raises
@@ -1592,7 +1592,7 @@ def rgb2hed(rgb, *, channel_axis=-1):
 
     Parameters
     ----------
-    rgb : (..., C=3, ...) array_like
+    rgb : array_like of shape (..., C=3, ...)
         The image in RGB format. By default, the final dimension denotes
         channels.
     channel_axis : int, optional
@@ -1604,7 +1604,7 @@ def rgb2hed(rgb, *, channel_axis=-1):
 
     Returns
     -------
-    out : (..., C=3, ...) ndarray
+    out : ndarray of shape (..., C=3, ...)
         The image in HED format. Same dimensions as input.
 
     Raises
@@ -1635,7 +1635,7 @@ def hed2rgb(hed, *, channel_axis=-1):
 
     Parameters
     ----------
-    hed : (..., C=3, ...) array_like
+    hed : array_like of shape (..., C=3, ...)
         The image in the HED color space. By default, the final dimension
         denotes channels.
     channel_axis : int, optional
@@ -1647,7 +1647,7 @@ def hed2rgb(hed, *, channel_axis=-1):
 
     Returns
     -------
-    out : (..., C=3, ...) ndarray
+    out : ndarray of shape (..., C=3, ...)
         The image in RGB. Same dimensions as input.
 
     Raises
@@ -1777,7 +1777,7 @@ def separate_stains(rgb, conv_matrix, *, channel_axis=-1):
 
     Parameters
     ----------
-    rgb : (..., C=3, ...) array_like
+    rgb : array_like of shape (..., C=3, ...)
         The image in RGB format. By default, the final dimension denotes
         channels.
     conv_matrix : ndarray
@@ -1791,7 +1791,7 @@ def separate_stains(rgb, conv_matrix, *, channel_axis=-1):
 
     Returns
     -------
-    out : (..., C=3, ...) ndarray
+    out : ndarray of shape (..., C=3, ...)
         The image in stain color space. Same dimensions as input.
 
     Raises
@@ -1854,7 +1854,7 @@ def combine_stains(stains, conv_matrix, *, channel_axis=-1):
 
     Parameters
     ----------
-    stains : (..., C=3, ...) array_like
+    stains : array_like of shape (..., C=3, ...)
         The image in stain color space. By default, the final dimension denotes
         channels.
     conv_matrix : ndarray
@@ -1868,7 +1868,7 @@ def combine_stains(stains, conv_matrix, *, channel_axis=-1):
 
     Returns
     -------
-    out : (..., C=3, ...) ndarray
+    out : ndarray of shape (..., C=3, ...)
         The image in RGB format. Same dimensions as input.
 
     Raises
@@ -1930,7 +1930,7 @@ def lab2lch(lab, *, channel_axis=-1):
 
     Parameters
     ----------
-    lab : (..., C=3, ...) array_like
+    lab : array_like of shape (..., C=3, ...)
         The input image in CIE-LAB color space.
         Unless `channel_axis` is set, the final dimension denotes the CIE-LAB
         channels.
@@ -1945,7 +1945,7 @@ def lab2lch(lab, *, channel_axis=-1):
 
     Returns
     -------
-    out : (..., C=3, ...) ndarray
+    out : ndarray of shape (..., C=3, ...)
         The image in CIE-LCh color space, of same shape as input.
 
     Raises
@@ -2001,7 +2001,7 @@ def lch2lab(lch, *, channel_axis=-1):
 
     Parameters
     ----------
-    lch : (..., C=3, ...) array_like
+    lch : array_like of shape (..., C=3, ...)
         The input image in CIE-LCh color space.
         Unless `channel_axis` is set, the final dimension denotes the CIE-LAB
         channels.
@@ -2017,7 +2017,7 @@ def lch2lab(lch, *, channel_axis=-1):
 
     Returns
     -------
-    out : (..., C=3, ...) ndarray
+    out : ndarray of shape (..., C=3, ...)
         The image in CIE-LAB format, of same shape as input.
 
     Raises
@@ -2079,7 +2079,7 @@ def rgb2yuv(rgb, *, channel_axis=-1):
 
     Parameters
     ----------
-    rgb : (..., C=3, ...) array_like
+    rgb : array_like of shape (..., C=3, ...)
         The image in RGB format. By default, the final dimension denotes
         channels.
     channel_axis : int, optional
@@ -2091,7 +2091,7 @@ def rgb2yuv(rgb, *, channel_axis=-1):
 
     Returns
     -------
-    out : (..., C=3, ...) ndarray
+    out : ndarray of shape (..., C=3, ...)
         The image in YUV format. Same dimensions as input.
 
     Raises
@@ -2117,7 +2117,7 @@ def rgb2yiq(rgb, *, channel_axis=-1):
 
     Parameters
     ----------
-    rgb : (..., C=3, ...) array_like
+    rgb : array_like of shape (..., C=3, ...)
         The image in RGB format. By default, the final dimension denotes
         channels.
     channel_axis : int, optional
@@ -2129,7 +2129,7 @@ def rgb2yiq(rgb, *, channel_axis=-1):
 
     Returns
     -------
-    out : (..., C=3, ...) ndarray
+    out : ndarray of shape (..., C=3, ...)
         The image in YIQ format. Same dimensions as input.
 
     Raises
@@ -2146,7 +2146,7 @@ def rgb2ypbpr(rgb, *, channel_axis=-1):
 
     Parameters
     ----------
-    rgb : (..., C=3, ...) array_like
+    rgb : array_like of shape (..., C=3, ...)
         The image in RGB format. By default, the final dimension denotes
         channels.
     channel_axis : int, optional
@@ -2158,7 +2158,7 @@ def rgb2ypbpr(rgb, *, channel_axis=-1):
 
     Returns
     -------
-    out : (..., C=3, ...) ndarray
+    out : ndarray of shape (..., C=3, ...)
         The image in YPbPr format. Same dimensions as input.
 
     Raises
@@ -2179,7 +2179,7 @@ def rgb2ycbcr(rgb, *, channel_axis=-1):
 
     Parameters
     ----------
-    rgb : (..., C=3, ...) array_like
+    rgb : array_like of shape (..., C=3, ...)
         The image in RGB format. By default, the final dimension denotes
         channels.
     channel_axis : int, optional
@@ -2191,7 +2191,7 @@ def rgb2ycbcr(rgb, *, channel_axis=-1):
 
     Returns
     -------
-    out : (..., C=3, ...) ndarray
+    out : ndarray of shape (..., C=3, ...)
         The image in YCbCr format. Same dimensions as input.
 
     Raises
@@ -2221,7 +2221,7 @@ def rgb2ydbdr(rgb, *, channel_axis=-1):
 
     Parameters
     ----------
-    rgb : (..., C=3, ...) array_like
+    rgb : array_like of shape (..., C=3, ...)
         The image in RGB format. By default, the final dimension denotes
         channels.
     channel_axis : int, optional
@@ -2233,7 +2233,7 @@ def rgb2ydbdr(rgb, *, channel_axis=-1):
 
     Returns
     -------
-    out : (..., C=3, ...) ndarray
+    out : ndarray of shape (..., C=3, ...)
         The image in YDbDr format. Same dimensions as input.
 
     Raises
@@ -2260,13 +2260,13 @@ def yuv2rgb(yuv, *, channel_axis=-1):
 
     Parameters
     ----------
-    yuv : (..., C=3, ...) array_like
+    yuv : array_like of shape (..., C=3, ...)
         The image in YUV format. By default, the final dimension denotes
         channels.
 
     Returns
     -------
-    out : (..., C=3, ...) ndarray
+    out : ndarray of shape (..., C=3, ...)
         The image in RGB format. Same dimensions as input.
 
     Raises
@@ -2287,7 +2287,7 @@ def yiq2rgb(yiq, *, channel_axis=-1):
 
     Parameters
     ----------
-    yiq : (..., C=3, ...) array_like
+    yiq : array_like of shape (..., C=3, ...)
         The image in YIQ format. By default, the final dimension denotes
         channels.
     channel_axis : int, optional
@@ -2299,7 +2299,7 @@ def yiq2rgb(yiq, *, channel_axis=-1):
 
     Returns
     -------
-    out : (..., C=3, ...) ndarray
+    out : ndarray of shape (..., C=3, ...)
         The image in RGB format. Same dimensions as input.
 
     Raises
@@ -2316,7 +2316,7 @@ def ypbpr2rgb(ypbpr, *, channel_axis=-1):
 
     Parameters
     ----------
-    ypbpr : (..., C=3, ...) array_like
+    ypbpr : array_like of shape (..., C=3, ...)
         The image in YPbPr format. By default, the final dimension denotes
         channels.
     channel_axis : int, optional
@@ -2328,7 +2328,7 @@ def ypbpr2rgb(ypbpr, *, channel_axis=-1):
 
     Returns
     -------
-    out : (..., C=3, ...) ndarray
+    out : ndarray of shape (..., C=3, ...)
         The image in RGB format. Same dimensions as input.
 
     Raises
@@ -2349,7 +2349,7 @@ def ycbcr2rgb(ycbcr, *, channel_axis=-1):
 
     Parameters
     ----------
-    ycbcr : (..., C=3, ...) array_like
+    ycbcr : array_like of shape (..., C=3, ...)
         The image in YCbCr format. By default, the final dimension denotes
         channels.
     channel_axis : int, optional
@@ -2361,7 +2361,7 @@ def ycbcr2rgb(ycbcr, *, channel_axis=-1):
 
     Returns
     -------
-    out : (..., C=3, ...) ndarray
+    out : ndarray of shape (..., C=3, ...)
         The image in RGB format. Same dimensions as input.
 
     Raises
@@ -2391,7 +2391,7 @@ def ydbdr2rgb(ydbdr, *, channel_axis=-1):
 
     Parameters
     ----------
-    ydbdr : (..., C=3, ...) array_like
+    ydbdr : array_like of shape (..., C=3, ...)
         The image in YDbDr format. By default, the final dimension denotes
         channels.
     channel_axis : int, optional
@@ -2403,7 +2403,7 @@ def ydbdr2rgb(ydbdr, *, channel_axis=-1):
 
     Returns
     -------
-    out : (..., C=3, ...) ndarray
+    out : ndarray of shape (..., C=3, ...)
         The image in RGB format. Same dimensions as input.
 
     Raises
