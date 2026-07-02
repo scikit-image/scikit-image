@@ -427,8 +427,12 @@ class deprecate_parameter:
             return func(*args, **kwargs)
 
         if self.modify_docstring and func.__doc__ is not None:
+            deprecated_dict = {name: self.new_name for name in self.deprecated_name}
+
             newdoc = _docstring_add_deprecated(
-                func, {self.deprecated_name: self.new_name}, self.start_version
+                func,
+                deprecated_dict,
+                self.start_version,
             )
             fixed_func.__doc__ = newdoc
 
