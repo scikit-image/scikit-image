@@ -232,7 +232,7 @@ class deprecate_parameter:
 
     Parameters
     ----------
-    deprecated_name : str
+    deprecated_name : str or a sequence of str
         The name of the deprecated parameter.
     start_version : str
         The package version in which the warning was introduced.
@@ -312,21 +312,32 @@ class deprecate_parameter:
         new_name=None,
         modify_docstring=True,
         stacklevel=None,
+        multi=False,
     ):
-        self.deprecated_name = deprecated_name
+        if multi:
+            self.deprecated_name = tuple(deprecated_name)
+        else:
+            self.deprecated_name = (deprecated_name,)
         self.new_name = new_name
         self.template = template
         self.start_version = start_version
         self.stop_version = stop_version
         self.modify_docstring = modify_docstring
         self.stacklevel = stacklevel
+        self.multi = multi
 
     def __call__(self, func):
         parameters = inspect.signature(func).parameters
-        try:
-            deprecated_idx = list(parameters.keys()).index(self.deprecated_name)
-        except ValueError as e:
-            raise ValueError(f"{self.deprecated_name!r} not in parameters") from e
+        deprecated_idx = []
+
+        for i in range(len(self.deprecated_name)):
+            try:
+                idx = list(parameters.keys()).index(self.deprecated_name[i])
+                deprecated_idx.append(idx)
+            except ValueError as e:
+                raise ValueError(
+                    f"{self.deprecated_name[i]!r} not in parameters"
+                ) from e
 
         new_idx = False
         if self.new_name:
@@ -335,11 +346,12 @@ class deprecate_parameter:
             except ValueError as e:
                 raise ValueError(f"{self.new_name!r} not in parameters") from e
 
-        if parameters[self.deprecated_name].default is not DEPRECATED:
-            raise RuntimeError(
-                f"Expected `{self.deprecated_name}` to have the value {DEPRECATED!r} "
-                f"to indicate its status in the rendered signature."
-            )
+        for i in range(len(self.deprecated_name)):
+            if parameters[self.deprecated_name[i]].default is not DEPRECATED:
+                raise RuntimeError(
+                    f"Expected `{self.deprecated_name[i]}` to have the value {DEPRECATED!r} "
+                    f"to indicate its status in the rendered signature."
+                )
 
         if self.template is not None:
             template = self.template
@@ -357,23 +369,28 @@ class deprecate_parameter:
 
         @functools.wraps(func)
         def fixed_func(*args, **kwargs):
-            deprecated_value = DEPRECATED
+            deprecated_value = [DEPRECATED] * len(self.deprecated_name)
             new_value = DEPRECATED
 
             # Extract value of deprecated parameter and overwrite with
             # DEPRECATED_GOT_VALUE if replacement exists
-            if len(args) > deprecated_idx:
-                deprecated_value = args[deprecated_idx]
-                if self.new_name is not None:
-                    args = (
-                        args[:deprecated_idx]
-                        + (DEPRECATED_GOT_VALUE,)
-                        + args[deprecated_idx + 1 :]
-                    )
-            if self.deprecated_name in kwargs.keys():
-                deprecated_value = kwargs[self.deprecated_name]
-                if self.new_name is not None:
-                    kwargs[self.deprecated_name] = DEPRECATED_GOT_VALUE
+
+            for i in range(len(deprecated_idx)):
+                if len(args) > deprecated_idx[i]:
+                    val = args[deprecated_idx[i]]
+                    deprecated_value[i] = val
+                    if self.new_name is not None:
+                        args = (
+                            args[: deprecated_idx[i]]
+                            + (DEPRECATED_GOT_VALUE,)
+                            + args[deprecated_idx[i] + 1 :]
+                        )
+
+            for i in range(len(self.deprecated_name)):
+                if self.deprecated_name[i] in kwargs.keys():
+                    deprecated_value[i] = kwargs[self.deprecated_name[i]]
+                    if self.new_name is not None:
+                        kwargs[self.deprecated_name[i]] = DEPRECATED_GOT_VALUE
 
             # Extract value of new parameter (if present)
             if new_idx is not False and len(args) > new_idx:
@@ -381,31 +398,41 @@ class deprecate_parameter:
             if self.new_name and self.new_name in kwargs.keys():
                 new_value = kwargs[self.new_name]
 
-            if deprecated_value is not DEPRECATED:
-                stacklevel = (
-                    self.stacklevel
-                    if self.stacklevel is not None
-                    else _warning_stacklevel(func)
-                )
-                warnings.warn(
-                    warning_message, category=FutureWarning, stacklevel=stacklevel
-                )
-
-                if new_value is not DEPRECATED:
-                    raise ValueError(
-                        f"Both deprecated parameter `{self.deprecated_name}` "
-                        f"and new parameter `{self.new_name}` are used. Use "
-                        f"only the latter to avoid conflicting values."
+            for i in range(len(deprecated_value)):
+                deprecated = deprecated_value[i]
+                if deprecated is not DEPRECATED:
+                    stacklevel = (
+                        self.stacklevel
+                        if self.stacklevel is not None
+                        else _warning_stacklevel(func)
                     )
-                elif self.new_name is not None:
-                    # Assign old value to new one
+                    warnings.warn(
+                        warning_message, category=FutureWarning, stacklevel=stacklevel
+                    )
+
+                    if new_value is not DEPRECATED:
+                        raise ValueError(
+                            f"Both deprecated parameter `{self.deprecated_name[i]}` "
+                            f"and new parameter `{self.new_name}` are used. Use "
+                            f"only the latter to avoid conflicting values."
+                        )
+
+            if self.new_name is not None and any(
+                v is not DEPRECATED for v in deprecated_value
+            ):
+                if self.new_name not in kwargs or kwargs[self.new_name] is None:
+                    # Assign old value to new value
                     kwargs[self.new_name] = deprecated_value
 
             return func(*args, **kwargs)
 
         if self.modify_docstring and func.__doc__ is not None:
+            deprecated_dict = {name: self.new_name for name in self.deprecated_name}
+
             newdoc = _docstring_add_deprecated(
-                func, {self.deprecated_name: self.new_name}, self.start_version
+                func,
+                deprecated_dict,
+                self.start_version,
             )
             fixed_func.__doc__ = newdoc
 
