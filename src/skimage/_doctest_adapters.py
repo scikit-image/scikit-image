@@ -87,13 +87,25 @@ def _proc_line(line):
 
 def adapt_obj_doctest(obj, shim_module: str = None):
     """Return a shim-local view with adapted doctest examples."""
-    if not (inspect.isroutine(obj) or inspect.isclass(obj)):
-        return obj
     original_doc = getattr(obj, '__doc__', None)
     adapted_doc = adapt_doctest_doc(original_doc)
-    if adapted_doc == original_doc:
-        return obj
-    return _with_adapted_doc(obj, adapted_doc, shim_module)
+    doc_different = original_doc != adapted_doc
+    if inspect.isroutine(obj) and doc_different:
+        return _copy_callable(obj, adapted_doc, shim_module)
+    if inspect.isclass(obj):
+        # Make, modify, maybe return proxy if docstrings need adaptation.
+        proxy = types.new_class(
+            obj.__name__,
+            (obj,),
+            {},
+            lambda ns: ns.update({'__doc__': adapted_doc}),
+        )
+        proxy.__module__ = shim_module
+        proxy.__qualname__ = obj.__qualname__
+        # Modify proxy in place for any methods that need adaptation.
+        if _adapt_method_docs(proxy, obj, shim_module) or doc_different:
+            return proxy
+    return obj
 
 
 def adapt_doctests(
@@ -156,35 +168,63 @@ def _sync_doctest_markers(
         ns['__doctest_skip__'] = skip
 
 
-def _with_adapted_doc(obj, adapted_doc: str, shim_module: str):
-    if inspect.isroutine(obj):
-        if isinstance(obj, types.FunctionType):
-            new_func = types.FunctionType(
-                obj.__code__,
-                obj.__globals__,
-                obj.__name__,
-                obj.__defaults__,
-                obj.__closure__,
-            )
-            functools.update_wrapper(new_func, obj)
-            new_func.__doc__ = adapted_doc
-            new_func.__module__ = shim_module
-            return new_func
-
-        @functools.wraps(obj)
-        def wrapper(*args, **kwargs):
-            return obj(*args, **kwargs)
-
-        wrapper.__doc__ = adapted_doc
-        wrapper.__module__ = shim_module
-        return wrapper
-
-    proxy = types.new_class(
+def _copy_callable(obj, adapted_doc, module_name):
+    new_func = types.FunctionType(
+        obj.__code__,
+        obj.__globals__,
         obj.__name__,
-        (obj,),
-        {},
-        lambda ns: ns.update({'__doc__': adapted_doc}),
+        obj.__defaults__,
+        obj.__closure__,
     )
-    proxy.__module__ = shim_module
-    proxy.__qualname__ = obj.__qualname__
-    return proxy
+    functools.update_wrapper(new_func, obj)
+    new_func.__kwdefaults__ = obj.__kwdefaults__
+    new_func.__doc__ = adapted_doc
+    new_func.__module__ = module_name
+    return new_func
+
+
+def _get_callable(member):
+    """Return the underlying callable, or ``None`` for non-method members."""
+    if isinstance(member, (classmethod, staticmethod)):
+        return member.__func__
+    if isinstance(member, property):
+        return None
+    if inspect.isroutine(member):
+        return member
+    return None
+
+
+def _adapt_method_docs(proxy, impl_cls, shim_module):
+    """Override methods on *proxy* whose docstrings need adaptation.
+
+    Only directly-defined members of *impl_cls* (not inherited ones) are
+    inspected.  When a method's ``__doc__`` contains ``_skimage2`` /
+    ``skimage2`` references that the doctest adapters would rewrite, a copy
+    with the adapted docstring is set on *proxy*.  The original class and its
+    methods are never mutated.
+    """
+    modified = False
+    for name, member in vars(impl_cls).items():
+        if name.startswith('__') and name != '__init__':
+            continue
+
+        if (unwrapped := _get_callable(member)) is None:
+            continue
+
+        original_doc = getattr(unwrapped, '__doc__', None)
+        if not original_doc:
+            continue
+
+        adapted_doc = adapt_doctest_doc(original_doc)
+        if adapted_doc == original_doc:
+            continue
+
+        modified = True
+        new_func = _copy_callable(unwrapped, adapted_doc, shim_module)
+        if isinstance(member, classmethod):
+            new_func = classmethod(new_func)
+        elif isinstance(member, staticmethod):
+            new_func = staticmethod(new_func)
+        setattr(proxy, name, new_func)
+
+    return modified
