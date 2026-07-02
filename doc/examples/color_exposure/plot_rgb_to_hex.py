@@ -70,7 +70,7 @@ for a in ax.ravel():
 fig.tight_layout()
 
 ######################################################################
-# Now we can easily manipulate the hematoxylin and eosin channels:
+# Now we can manipulate the hematoxylin and eosin channels conveniently:
 
 from skimage.exposure import rescale_intensity
 
