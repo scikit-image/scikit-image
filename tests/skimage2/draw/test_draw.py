@@ -322,8 +322,9 @@ def test_circle_perimeter_bresenham_shape(call_new_api):
         rr, cc = circle_perimeter(
             radius=9, center=(7, 10), method='bresenham', shape=(15, 20)
         )
-    with pytest.warns(FutureWarning):
-        rr, cc = circle_perimeter(7, 10, 9, method='bresenham', shape=(15, 20))
+    else:
+        with pytest.warns(FutureWarning):
+            rr, cc = circle_perimeter(7, 10, 9, method='bresenham', shape=(15, 20))
     img[rr, cc] = 1
     shift = 5
     img_ = np.zeros((15 + 2 * shift, 20), 'uint8')
@@ -338,15 +339,19 @@ def test_circle_perimeter_andres(call_new_api):
     img = np.zeros((15, 15), 'uint8')
     if call_new_api:
         rr, cc = circle_perimeter(radius=0, center=(7, 7), method='andres')
-    with pytest.warns(FutureWarning):
-        rr, cc = circle_perimeter(7, 7, 0, method='andres')
+    else:
+        with pytest.warns(FutureWarning):
+            rr, cc = circle_perimeter(7, 7, 0, method='andres')
     img[rr, cc] = 1
     assert np.sum(img) == 1
     assert img[7][7] == 1
 
     img = np.zeros((17, 15), 'uint8')
-    with pytest.warns(FutureWarning):
-        rr, cc = circle_perimeter(7, 7, 7, method='andres')
+    if call_new_api:
+        rr, cc = circle_perimeter(radius=7, center=(7, 7), method='andres')
+    else:
+        with pytest.warns(FutureWarning):
+            rr, cc = circle_perimeter(7, 7, 7, method='andres')
     img[rr, cc] = 1
     img_ = np.array(
         [
@@ -377,15 +382,19 @@ def test_circle_perimeter_aa(call_new_api):
     img = np.zeros((15, 15), 'uint8')
     if call_new_api:
         rr, cc, val = circle_perimeter_aa(radius=0, center=(7, 7))
-    with pytest.warns(FutureWarning):
-        rr, cc, val = circle_perimeter_aa(7, 7, 0)
+    else:
+        with pytest.warns(FutureWarning):
+            rr, cc, val = circle_perimeter_aa(7, 7, 0)
     img[rr, cc] = 1
     assert np.sum(img) == 1
     assert img[7][7] == 1
 
     img = np.zeros((17, 17), 'uint8')
-    with pytest.warns(FutureWarning):
-        rr, cc, val = circle_perimeter_aa(8, 8, 7)
+    if call_new_api:
+        rr, cc, val = circle_perimeter_aa(radius=7, center=(8, 8))
+    else:
+        with pytest.warns(FutureWarning):
+            rr, cc, val = circle_perimeter_aa(8, 8, 7)
     img[rr, cc] = val * 255
     # fmt: off
     img_ = np.array(
@@ -416,14 +425,18 @@ def test_circle_perimeter_aa_shape(call_new_api):
     img = np.zeros((15, 20), 'uint8')
     if call_new_api:
         rr, cc, val = circle_perimeter_aa(radius=9, center=(7, 10), shape=(15, 20))
-    with pytest.warns(FutureWarning):
-        rr, cc, val = circle_perimeter_aa(7, 10, 9, shape=(15, 20))
+    else:
+        with pytest.warns(FutureWarning):
+            rr, cc, val = circle_perimeter_aa(7, 10, 9, shape=(15, 20))
     img[rr, cc] = val * 255
 
     shift = 5
     img_ = np.zeros((15 + 2 * shift, 20), 'uint8')
-    with pytest.warns(FutureWarning):
-        rr, cc, val = circle_perimeter_aa(7 + shift, 10, 9, shape=None)
+    if call_new_api:
+        rr, cc, val = circle_perimeter_aa(radius=9, center=(7 + shift, 10), shape=None)
+    else:
+        with pytest.warns(FutureWarning):
+            rr, cc, val = circle_perimeter_aa(7 + shift, 10, 9, shape=None)
     img_[rr, cc] = val * 255
     assert_array_equal(img, img_[shift:-shift, :])
 
@@ -433,15 +446,19 @@ def test_ellipse_trivial(call_new_api):
     img = np.zeros((2, 2), 'uint8')
     if call_new_api:
         rr, cc = ellipse(center=(0.5, 0.5), radius=(0.5, 0.5))
-    with pytest.warns(FutureWarning):
-        rr, cc = ellipse(0.5, 0.5, 0.5, 0.5)
+    else:
+        with pytest.warns(FutureWarning):
+            rr, cc = ellipse(0.5, 0.5, 0.5, 0.5)
     img[rr, cc] = 1
     img_correct = np.array([[0, 0], [0, 0]])
     assert_array_equal(img, img_correct)
 
     img = np.zeros((2, 2), 'uint8')
-    with pytest.warns(FutureWarning):
-        rr, cc = ellipse(0.5, 0.5, 1.1, 1.1)
+    if call_new_api:
+        rr, cc = ellipse(center=(0.5, 0.5), radius=(1.1, 1.1))
+    else:
+        with pytest.warns(FutureWarning):
+            rr, cc = ellipse(0.5, 0.5, 1.1, 1.1)
     img[rr, cc] = 1
     img_correct = np.array(
         [
@@ -452,8 +469,11 @@ def test_ellipse_trivial(call_new_api):
     assert_array_equal(img, img_correct)
 
     img = np.zeros((3, 3), 'uint8')
-    with pytest.warns(FutureWarning):
-        rr, cc = ellipse(1, 1, 0.9, 0.9)
+    if call_new_api:
+        rr, cc = ellipse(center=(1, 1), radius=(0.9, 0.9))
+    else:
+        with pytest.warns(FutureWarning):
+            rr, cc = ellipse(1, 1, 0.9, 0.9)
     img[rr, cc] = 1
     img_correct = np.array(
         [
@@ -465,8 +485,11 @@ def test_ellipse_trivial(call_new_api):
     assert_array_equal(img, img_correct)
 
     img = np.zeros((3, 3), 'uint8')
-    with pytest.warns(FutureWarning):
-        rr, cc = ellipse(1, 1, 1.1, 1.1)
+    if call_new_api:
+        rr, cc = ellipse(center=(1, 1), radius=(1.1, 1.1))
+    else:
+        with pytest.warns(FutureWarning):
+            rr, cc = ellipse(1, 1, 1.1, 1.1)
     img[rr, cc] = 1
     img_correct = np.array(
         [
@@ -478,8 +501,11 @@ def test_ellipse_trivial(call_new_api):
     assert_array_equal(img, img_correct)
 
     img = np.zeros((3, 3), 'uint8')
-    with pytest.warns(FutureWarning):
-        rr, cc = ellipse(1, 1, 1.5, 1.5)
+    if call_new_api:
+        rr, cc = ellipse(center=(1, 1), radius=(1.5, 1.5))
+    else:
+        with pytest.warns(FutureWarning):
+            rr, cc = ellipse(1, 1, 1.5, 1.5)
     img[rr, cc] = 1
     img_correct = np.array(
         [
@@ -496,8 +522,9 @@ def test_ellipse_generic(call_new_api):
     img = np.zeros((4, 4), 'uint8')
     if call_new_api:
         rr, cc = ellipse(center=(1.5, 1.5), radius=(1.1, 1.7))
-    with pytest.warns(FutureWarning):
-        rr, cc = ellipse(1.5, 1.5, 1.1, 1.7)
+    else:
+        with pytest.warns(FutureWarning):
+            rr, cc = ellipse(1.5, 1.5, 1.1, 1.7)
     img[rr, cc] = 1
     img_ = np.array(
         [
@@ -510,8 +537,11 @@ def test_ellipse_generic(call_new_api):
     assert_array_equal(img, img_)
 
     img = np.zeros((5, 5), 'uint8')
-    with pytest.warns(FutureWarning):
-        rr, cc = ellipse(2, 2, 1.7, 1.7)
+    if call_new_api:
+        rr, cc = ellipse(center=(2, 2), radius=(1.7, 1.7))
+    else:
+        with pytest.warns(FutureWarning):
+            rr, cc = ellipse(2, 2, 1.7, 1.7)
     img[rr, cc] = 1
     img_ = np.array(
         [
@@ -525,8 +555,11 @@ def test_ellipse_generic(call_new_api):
     assert_array_equal(img, img_)
 
     img = np.zeros((10, 10), 'uint8')
-    with pytest.warns(FutureWarning):
-        rr, cc = ellipse(5, 5, 3, 4)
+    if call_new_api:
+        rr, cc = ellipse(center=(5, 5), radius=(3, 4))
+    else:
+        with pytest.warns(FutureWarning):
+            rr, cc = ellipse(5, 5, 3, 4)
     img[rr, cc] = 1
     img_ = np.array(
         [
@@ -545,8 +578,11 @@ def test_ellipse_generic(call_new_api):
     assert_array_equal(img, img_)
 
     img = np.zeros((10, 10), 'uint8')
-    with pytest.warns(FutureWarning):
-        rr, cc = ellipse(4.5, 5, 3.5, 4)
+    if call_new_api:
+        rr, cc = ellipse(center=(4.5, 5), radius=(3.5, 4))
+    else:
+        with pytest.warns(FutureWarning):
+            rr, cc = ellipse(4.5, 5, 3.5, 4)
     img[rr, cc] = 1
     img_ = np.array(
         [
@@ -565,8 +601,11 @@ def test_ellipse_generic(call_new_api):
     assert_array_equal(img, img_)
 
     img = np.zeros((15, 15), 'uint8')
-    with pytest.warns(FutureWarning):
-        rr, cc = ellipse(7, 7, 3, 7)
+    if call_new_api:
+        rr, cc = ellipse(center=(7, 7), radius=(3, 7))
+    else:
+        with pytest.warns(FutureWarning):
+            rr, cc = ellipse(7, 7, 3, 7)
     img[rr, cc] = 1
     img_ = np.array(
         [
@@ -595,9 +634,10 @@ def test_ellipse_with_shape(call_new_api):
     img = np.zeros((15, 15), 'uint8')
 
     if call_new_api:
-        rr, cc = ellipse(center=(7, 7), radius=(7, 10), shape=img.shape)
-    with pytest.warns(FutureWarning):
-        rr, cc = ellipse(7, 7, 3, 10, shape=img.shape)
+        rr, cc = ellipse(center=(7, 7), radius=(3, 10), shape=img.shape)
+    else:
+        with pytest.warns(FutureWarning):
+            rr, cc = ellipse(7, 7, 3, 10, shape=img.shape)
     img[rr, cc] = 1
 
     img_ = np.array(
@@ -623,8 +663,11 @@ def test_ellipse_with_shape(call_new_api):
     assert_array_equal(img, img_)
 
     img = np.zeros((10, 9, 3), 'uint8')
-    with pytest.warns(FutureWarning):
-        rr, cc = ellipse(7, 7, 3, 10, shape=img.shape)
+    if call_new_api:
+        rr, cc = ellipse(center=(7, 7), radius=(3, 10), shape=img.shape)
+    else:
+        with pytest.warns(FutureWarning):
+            rr, cc = ellipse(7, 7, 3, 10, shape=img.shape)
     img[rr, cc, 0] = 1
 
     img_ = np.zeros_like(img)
@@ -650,8 +693,9 @@ def test_ellipse_with_shape(call_new_api):
 def test_ellipse_negative(call_new_api):
     if call_new_api:
         rr, cc = ellipse(center=(-3, -3), radius=(1.7, 1.7))
-    with pytest.warns(FutureWarning):
-        rr, cc = ellipse(-3, -3, 1.7, 1.7)
+    else:
+        with pytest.warns(FutureWarning):
+            rr, cc = ellipse(-3, -3, 1.7, 1.7)
     rr_, cc_ = np.nonzero(
         np.array(
             [
@@ -678,16 +722,18 @@ def test_ellipse_rotation_symmetry(call_new_api):
             rr, cc = ellipse(
                 center=(80, 70), radius=(60, 40), rotation=np.deg2rad(angle)
             )
-        with pytest.warns(FutureWarning):
-            rr, cc = ellipse(80, 70, 60, 40, rotation=np.deg2rad(angle))
+        else:
+            with pytest.warns(FutureWarning):
+                rr, cc = ellipse(80, 70, 60, 40, rotation=np.deg2rad(angle))
         img1[rr, cc] = 1
         img2.fill(0)
         if call_new_api:
             rr, cc = ellipse(
                 center=(80, 70), radius=(60, 40), rotation=np.deg2rad(angle + 180)
             )
-        with pytest.warns(FutureWarning):
-            rr, cc = ellipse(80, 70, 60, 40, rotation=np.deg2rad(angle + 180))
+        else:
+            with pytest.warns(FutureWarning):
+                rr, cc = ellipse(80, 70, 60, 40, rotation=np.deg2rad(angle + 180))
         img2[rr, cc] = 1
         assert_array_equal(img1, img2)
 
@@ -699,9 +745,10 @@ def test_ellipse_rotated(call_new_api):
         img.fill(0)
         angle = np.deg2rad(rot)
         if call_new_api:
-            rr, cc = ellipse(center=(800, 600), radius=(200, 400), rotation=angle)
-        with pytest.warns(FutureWarning):
-            rr, cc = ellipse(500, 600, 200, 400, rotation=angle)
+            rr, cc = ellipse(center=(500, 600), radius=(200, 400), rotation=angle)
+        else:
+            with pytest.warns(FutureWarning):
+                rr, cc = ellipse(500, 600, 200, 400, rotation=angle)
         img[rr, cc] = 1
         # estimate orientation of ellipse
         angle_estim_raw = regionprops(img)[0].orientation
@@ -715,8 +762,9 @@ def test_ellipse_perimeter_dot_zeroangle(call_new_api):
     img = np.zeros((30, 15), 'uint8')
     if call_new_api:
         rr, cc = ellipse_perimeter(center=(15, 7), semi_axes=(0, 0), orientation=1)
-    with pytest.warns(FutureWarning):
-        rr, cc = ellipse_perimeter(15, 7, 0, 0, 0)
+    else:
+        with pytest.warns(FutureWarning):
+            rr, cc = ellipse_perimeter(15, 7, 0, 0, 0)
     img[rr, cc] = 1
     assert np.sum(img) == 1
     assert img[15][7] == 1
@@ -728,8 +776,9 @@ def test_ellipse_perimeter_dot_nzeroangle(call_new_api):
     img = np.zeros((30, 15), 'uint8')
     if call_new_api:
         rr, cc = ellipse_perimeter(center=(15, 7), semi_axes=(0, 0), orientation=0)
-    with pytest.warns(FutureWarning):
-        rr, cc = ellipse_perimeter(15, 7, 0, 0, 1)
+    else:
+        with pytest.warns(FutureWarning):
+            rr, cc = ellipse_perimeter(15, 7, 0, 0, 1)
     img[rr, cc] = 1
     assert np.sum(img) == 1
     assert img[15][7] == 1
@@ -742,13 +791,15 @@ def test_ellipse_perimeter_flat_zeroangle(call_new_api):
     img_ = np.zeros((20, 18), 'uint8')
     if call_new_api:
         rr, cc = ellipse_perimeter(center=(6, 7), semi_axes=(0, 5), orientation=0)
-    with pytest.warns(FutureWarning):
-        rr, cc = ellipse_perimeter(6, 7, 0, 5, 0)
+    else:
+        with pytest.warns(FutureWarning):
+            rr, cc = ellipse_perimeter(6, 7, 0, 5, 0)
     img[rr, cc] = 1
     if call_new_api:
         rr, cc = line(start_pos=(6, 2), end_pos=(6, 12))
-    with pytest.warns(FutureWarning):
-        rr, cc = line(6, 2, 6, 12)
+    else:
+        with pytest.warns(FutureWarning):
+            rr, cc = line(6, 2, 6, 12)
     img_[rr, cc] = 1
     assert_array_equal(img, img_)
 
@@ -759,8 +810,9 @@ def test_ellipse_perimeter_zeroangle(call_new_api):
     img = np.zeros((30, 15), 'uint8')
     if call_new_api:
         rr, cc = ellipse_perimeter(center=(15, 7), semi_axes=(14, 6), orientation=0)
-    with pytest.warns(FutureWarning):
-        rr, cc = ellipse_perimeter(15, 7, 14, 6, 0)
+    else:
+        with pytest.warns(FutureWarning):
+            rr, cc = ellipse_perimeter(15, 7, 14, 6, 0)
     img[rr, cc] = 1
     img_ = np.array(
         [
@@ -806,8 +858,9 @@ def test_ellipse_perimeter_nzeroangle(call_new_api):
     img = np.zeros((30, 25), 'uint8')
     if call_new_api:
         rr, cc = ellipse_perimeter(center=(15, 11), semi_axes=(12, 6), orientation=1.1)
-    with pytest.warns(FutureWarning):
-        rr, cc = ellipse_perimeter(15, 11, 12, 6, 1.1)
+    else:
+        with pytest.warns(FutureWarning):
+            rr, cc = ellipse_perimeter(15, 11, 12, 6, 1.1)
     img[rr, cc] = 1
     img_ = np.array(
         [
@@ -853,8 +906,9 @@ def test_ellipse_perimeter_shape(call_new_api):
         rr, cc = ellipse_perimeter(
             center=(7, 10), semi_axes=(9, 9), orientation=0, shape=(15, 20)
         )
-    with pytest.warns(FutureWarning):
-        rr, cc = ellipse_perimeter(7, 10, 9, 9, 0, shape=(15, 20))
+    else:
+        with pytest.warns(FutureWarning):
+            rr, cc = ellipse_perimeter(7, 10, 9, 9, 0, shape=(15, 20))
     img[rr, cc] = 1
     shift = 5
     img_ = np.zeros((15 + 2 * shift, 20), 'uint8')
@@ -862,8 +916,9 @@ def test_ellipse_perimeter_shape(call_new_api):
         rr, cc = ellipse_perimeter(
             center=(7 + shift, 10), semi_axes=(9, 9), orientation=0, shape=None
         )
-    with pytest.warns(FutureWarning):
-        rr, cc = ellipse_perimeter(7 + shift, 10, 9, 9, 0, shape=None)
+    else:
+        with pytest.warns(FutureWarning):
+            rr, cc = ellipse_perimeter(7 + shift, 10, 9, 9, 0, shape=None)
     img_[rr, cc] = 1
     assert_array_equal(img, img_[shift:-shift, :])
 
@@ -877,8 +932,11 @@ def test_bezier_segment_straight(call_new_api):
     image[rr, cc] = 1
 
     image2 = np.zeros((200, 200), dtype=int)
-    with pytest.warns(FutureWarning, match="deprecated"):
-        rr, cc = line(r0, c0, r2, c2)
+    if call_new_api:
+        rr, cc = line(start_pos=(r0, c0), end_pos=(r2, c2))
+    else:
+        with pytest.warns(FutureWarning, match="deprecated"):
+            rr, cc = line(r0, c0, r2, c2)
     image2[rr, cc] = 1
     assert_array_equal(image, image2)
 
@@ -930,15 +988,24 @@ def test_bezier_curve_straight(call_new_api):
     r0, c0 = 50, 50
     r1, c1 = 150, 50
     r2, c2 = 150, 150
-    with pytest.warns(FutureWarning):
-        rr, cc = bezier_curve(r0, c0, r1, c1, r2, c2, 0)
+    if call_new_api:
+        rr, cc = bezier_curve(
+            first_control_point=(r0, c0),
+            middle_control_point=(r1, c1),
+            last_control_point=(r2, c2),
+            weight=0,
+        )
+    else:
+        with pytest.warns(FutureWarning):
+            rr, cc = bezier_curve(r0, c0, r1, c1, r2, c2, 0)
     image[rr, cc] = 1
 
     image2 = np.zeros((200, 200), dtype=int)
     if call_new_api:
         rr, cc = line(start_pos=(r0, c0), end_pos=(r2, c2))
-    with pytest.warns(FutureWarning, match="deprecated"):
-        rr, cc = line(r0, c0, r2, c2)
+    else:
+        with pytest.warns(FutureWarning, match="deprecated"):
+            rr, cc = line(r0, c0, r2, c2)
     image2[rr, cc] = 1
     assert_array_equal(image, image2)
 
@@ -956,8 +1023,16 @@ def test_bezier_curved_weight_eq_1(call_new_api):
             last_control_point=(r2, c2),
             weight=1,
         )
-    with pytest.warns(FutureWarning):
-        rr, cc = bezier_curve(r0, c0, r1, c1, r2, c2, 1)
+    if call_new_api:
+        rr, cc = bezier_curve(
+            first_control_point=(r0, c0),
+            middle_control_point=(r1, c1),
+            last_control_point=(r2, c2),
+            weight=1,
+        )
+    else:
+        with pytest.warns(FutureWarning):
+            rr, cc = bezier_curve(r0, c0, r1, c1, r2, c2, 1)
     img[rr, cc] = 1
     assert_equal(img[r0, c0], 1)
     assert_equal(img[r2, c2], 1)
@@ -1004,8 +1079,9 @@ def test_bezier_curved_weight_neq_1(call_new_api):
             last_control_point=(r2, c2),
             weight=2,
         )
-    with pytest.warns(FutureWarning):
-        rr, cc = bezier_curve(r0, c0, r1, c1, r2, c2, 2)
+    else:
+        with pytest.warns(FutureWarning):
+            rr, cc = bezier_curve(r0, c0, r1, c1, r2, c2, 2)
     img[rr, cc] = 1
     assert_equal(img[r0, c0], 1)
     assert_equal(img[r2, c2], 1)
@@ -1053,8 +1129,9 @@ def test_bezier_curve_shape(call_new_api):
             weight=2,
             shape=(15, 20),
         )
-    with pytest.warns(FutureWarning):
-        rr, cc = bezier_curve(r0, c0, r1, c1, r2, c2, 2, shape=(15, 20))
+    else:
+        with pytest.warns(FutureWarning):
+            rr, cc = bezier_curve(r0, c0, r1, c1, r2, c2, 2, shape=(15, 20))
     img[rr, cc] = 1
     shift = 5
     img_ = np.zeros((15 + 2 * shift, 20), 'uint8')
@@ -1069,8 +1146,9 @@ def test_bezier_curve_shape(call_new_api):
             weight=2,
             shape=None,
         )
-    with pytest.warns(FutureWarning):
-        rr, cc = bezier_curve(r0, c0, r1, c1, r2, c2, 2, shape=None)
+    else:
+        with pytest.warns(FutureWarning):
+            rr, cc = bezier_curve(r0, c0, r1, c1, r2, c2, 2, shape=None)
     img_[rr, cc] = 1
     assert_array_equal(img, img_[shift:-shift, :])
 
@@ -1080,17 +1158,15 @@ def test_polygon_perimeter():
     expected = np.array([[1, 1, 1, 1], [1, 0, 0, 1], [1, 1, 1, 1]])
     out = np.zeros_like(expected)
 
-    with pytest.warns(FutureWarning, match="deprecated"):
-        rr, cc = polygon_perimeter([0, 2, 2, 0], [0, 0, 3, 3])
+    rr, cc = polygon_perimeter([0, 2, 2, 0], [0, 0, 3, 3])
 
     out[rr, cc] = 1
     assert_array_equal(out, expected)
 
     out = np.zeros_like(expected)
-    with pytest.warns(FutureWarning, match="deprecated"):
-        rr, cc = polygon_perimeter(
-            [-1, -1, 3, 3], [-1, 4, 4, -1], shape=out.shape, clip=True
-        )
+    rr, cc = polygon_perimeter(
+        [-1, -1, 3, 3], [-1, 4, 4, -1], shape=out.shape, clip=True
+    )
     out[rr, cc] = 1
     assert_array_equal(out, expected)
 
@@ -1100,8 +1176,7 @@ def test_polygon_perimeter():
 
 @uses_matplotlib
 def test_polygon_perimeter_outside_image():
-    with pytest.warns(FutureWarning, match="deprecated"):
-        rr, cc = polygon_perimeter([-1, -1, 3, 3], [-1, 4, 4, -1], shape=(3, 4))
+    rr, cc = polygon_perimeter([-1, -1, 3, 3], [-1, 4, 4, -1], shape=(3, 4))
     assert_equal(len(rr), 0)
     assert_equal(len(cc), 0)
 
@@ -1221,8 +1296,7 @@ def test_rectangle_extent_negative():
     start = (3, 5)
     extent = (-1, -2)
     img = np.zeros(expected.shape, dtype=np.uint8)
-    with pytest.warns(FutureWarning, match="deprecated"):
-        rr, cc = rectangle_perimeter(start, extent=extent, shape=img.shape)
+    rr, cc = rectangle_perimeter(start, extent=extent, shape=img.shape)
     img[rr, cc] = 1
 
     rr, cc = rectangle(start, extent=extent, shape=img.shape)
@@ -1233,8 +1307,7 @@ def test_rectangle_extent_negative():
     img = np.zeros(expected.shape, dtype=np.uint8)
     rr, cc = rectangle(start, extent=extent, shape=img.shape)
     img[rr, cc] = 2
-    with pytest.warns(FutureWarning, match="deprecated"):
-        rr, cc = rectangle_perimeter(start, extent=extent, shape=img.shape)
+    rr, cc = rectangle_perimeter(start, extent=extent, shape=img.shape)
     img[rr, cc] = 1
     assert_array_equal(img, expected)
 
@@ -1255,23 +1328,20 @@ def test_rectangle_perimiter():
     end = (2, 4)
     img = np.zeros(expected.shape, dtype=np.uint8)
     # Test that the default parameter is indeed end
-    with pytest.warns(FutureWarning, match="deprecated"):
-        rr, cc = rectangle_perimeter(start, end, shape=img.shape)
+    rr, cc = rectangle_perimeter(start, end, shape=img.shape)
     img[rr, cc] = 1
     assert_array_equal(img, expected)
 
     # Swap start and end
     img = np.zeros(expected.shape, dtype=np.uint8)
-    with pytest.warns(FutureWarning, match="deprecated"):
-        rr, cc = rectangle_perimeter(end=start, start=end, shape=img.shape)
+    rr, cc = rectangle_perimeter(end=start, start=end, shape=img.shape)
     img[rr, cc] = 1
     assert_array_equal(img, expected)
 
     img = np.zeros(expected.shape, dtype=np.uint8)
     start = (2, 3)
     extent = (1, 2)
-    with pytest.warns(FutureWarning, match="deprecated"):
-        rr, cc = rectangle_perimeter(start, extent=extent, shape=img.shape)
+    rr, cc = rectangle_perimeter(start, extent=extent, shape=img.shape)
     img[rr, cc] = 1
     assert_array_equal(img, expected)
 
@@ -1292,8 +1362,7 @@ def test_rectangle_perimiter_clip_bottom_right():
     img = np.zeros((5, 5), dtype=np.uint8)
     start = (2, 2)
     extent = (10, 10)
-    with pytest.warns(FutureWarning, match="deprecated"):
-        rr, cc = rectangle_perimeter(start, extent=extent, shape=img.shape, clip=False)
+    rr, cc = rectangle_perimeter(start, extent=extent, shape=img.shape, clip=False)
     img[rr, cc] = 1
     assert_array_equal(img, expected)
 
@@ -1309,8 +1378,7 @@ def test_rectangle_perimiter_clip_bottom_right():
         dtype=np.uint8,
     )
     img = np.zeros((5, 5), dtype=np.uint8)
-    with pytest.warns(FutureWarning, match="deprecated"):
-        rr, cc = rectangle_perimeter(start, extent=extent, shape=img.shape, clip=True)
+    rr, cc = rectangle_perimeter(start, extent=extent, shape=img.shape, clip=True)
     img[rr, cc] = 1
     assert_array_equal(img, expected)
 
@@ -1331,8 +1399,7 @@ def test_rectangle_perimiter_clip_top_left():
     img = np.zeros((5, 5), dtype=np.uint8)
     start = (-5, -5)
     end = (2, 2)
-    with pytest.warns(FutureWarning, match="deprecated"):
-        rr, cc = rectangle_perimeter(start, end=end, shape=img.shape, clip=False)
+    rr, cc = rectangle_perimeter(start, end=end, shape=img.shape, clip=False)
     img[rr, cc] = 1
     assert_array_equal(img, expected)
 
@@ -1348,8 +1415,7 @@ def test_rectangle_perimiter_clip_top_left():
         dtype=np.uint8,
     )
     img = np.zeros((5, 5), dtype=np.uint8)
-    with pytest.warns(FutureWarning, match="deprecated"):
-        rr, cc = rectangle_perimeter(start, end=end, shape=img.shape, clip=True)
+    rr, cc = rectangle_perimeter(start, end=end, shape=img.shape, clip=True)
     img[rr, cc] = 1
     assert_array_equal(img, expected)
 
@@ -1369,8 +1435,7 @@ def test_rectangle_perimiter_clip_top_right():
     img = np.zeros((5, 5), dtype=np.uint8)
     start = (-10, 2)
     end = (2, 10)
-    with pytest.warns(FutureWarning, match="deprecated"):
-        rr, cc = rectangle_perimeter(start, end=end, shape=img.shape, clip=True)
+    rr, cc = rectangle_perimeter(start, end=end, shape=img.shape, clip=True)
     img[rr, cc] = 1
     assert_array_equal(img, expected)
 
@@ -1385,8 +1450,7 @@ def test_rectangle_perimiter_clip_top_right():
         dtype=np.uint8,
     )
     img = np.zeros((5, 5), dtype=np.uint8)
-    with pytest.warns(FutureWarning, match="deprecated"):
-        rr, cc = rectangle_perimeter(start, end=end, shape=img.shape, clip=False)
+    rr, cc = rectangle_perimeter(start, end=end, shape=img.shape, clip=False)
     img[rr, cc] = 1
     assert_array_equal(img, expected)
 
@@ -1406,8 +1470,7 @@ def test_rectangle_perimiter_clip_bottom_left():
     img = np.zeros((5, 5), dtype=np.uint8)
     start = (2, -3)
     end = (10, 1)
-    with pytest.warns(FutureWarning, match="deprecated"):
-        rr, cc = rectangle_perimeter(start, end=end, shape=img.shape, clip=True)
+    rr, cc = rectangle_perimeter(start, end=end, shape=img.shape, clip=True)
     img[rr, cc] = 1
     assert_array_equal(img, expected)
 
@@ -1423,7 +1486,6 @@ def test_rectangle_perimiter_clip_bottom_left():
     )
 
     img = np.zeros((5, 5), dtype=np.uint8)
-    with pytest.warns(FutureWarning, match="deprecated"):
-        rr, cc = rectangle_perimeter(start, end=end, shape=img.shape, clip=False)
+    rr, cc = rectangle_perimeter(start, end=end, shape=img.shape, clip=False)
     img[rr, cc] = 1
     assert_array_equal(img, expected)
