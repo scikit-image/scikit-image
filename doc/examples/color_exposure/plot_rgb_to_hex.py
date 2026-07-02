@@ -32,20 +32,20 @@ your own specific images, which is not performed by this library.
 .. [3] https://qupath.readthedocs.io/en/stable/docs/tutorials/separating_stains.html#brightfield-images
 """
 
-from skimage import data
-from skimage.color import rgb2hex, hex2rgb
 import matplotlib.pyplot as plt
 import numpy as np
 
-# Load HE image of skin histology from skimage.data
-img = data.skin()
+import skimage as ski
 
-img_hex = rgb2hex(img)
+# Load HE image of skin histology from skimage.data
+img = ski.data.skin()
+
+img_hex = ski.color.rgb2hex(img)
 # Create an RGB image for each of the stains
 null = np.zeros_like(img_hex[:, :, 0])
-img_h = hex2rgb(np.stack((img_hex[:, :, 0], null, null), axis=-1))
-img_e = hex2rgb(np.stack((null, img_hex[:, :, 1], null), axis=-1))
-img_r = hex2rgb(np.stack((null, null, img_hex[:, :, 2]), axis=-1))
+img_h = ski.color.hex2rgb(np.stack((img_hex[:, :, 0], null, null), axis=-1))
+img_e = ski.color.hex2rgb(np.stack((null, img_hex[:, :, 1], null), axis=-1))
+img_r = ski.color.hex2rgb(np.stack((null, null, img_hex[:, :, 2]), axis=-1))
 
 # Display
 fig, axes = plt.subplots(2, 2, figsize=(7, 6), sharex=True, sharey=True)
@@ -72,15 +72,13 @@ fig.tight_layout()
 ######################################################################
 # Now we can manipulate the hematoxylin and eosin channels conveniently:
 
-from skimage.exposure import rescale_intensity
-
 # Rescale hematoxylin and eosin channels and give them a fluorescence look
-h = rescale_intensity(
+h = ski.exposure.rescale_intensity(
     img_hex[:, :, 0],
     out_range=(0, 1),
     in_range=(0, np.percentile(img_hex[:, :, 0], 99)),
 )
-e = rescale_intensity(
+e = ski.exposure.rescale_intensity(
     img_hex[:, :, 1],
     out_range=(0, 1),
     in_range=(0, np.percentile(img_hex[:, :, 1], 99)),
