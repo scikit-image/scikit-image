@@ -1678,7 +1678,7 @@ def rgb2hex(rgb, *, channel_axis=-1):
     """RGB to Hematoxylin + Eosin (HEX) color space conversion.
     X represents the residual channel.
 
-    Eosin stain vector taken from QuPath. See discussion[3].
+    Eosin stain vector taken from QuPath. See discussion [3]_.
     It is important to note that the authors of QuPath do not recommend using these color deconvolved
     stain channels for quantitative interpretation. The function described here uses default
     stain vector values for hematoxylin and eosin, whereas in practice, there is high variability in
