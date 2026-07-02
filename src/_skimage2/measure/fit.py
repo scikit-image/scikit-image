@@ -43,16 +43,6 @@ _PARAMS_DEP_START = '0.26'
 _PARAMS_DEP_STOP = '2.2'
 
 
-class BaseModel:
-    def __init_subclass__(self):
-        warn(
-            f'`BaseModel` deprecated since version {_PARAMS_DEP_START} and '
-            f'will be removed in version {_PARAMS_DEP_STOP}',
-            category=FutureWarning,
-            stacklevel=2,
-        )
-
-
 class _BaseModel:
     """Implement common methods for model classes.
 
