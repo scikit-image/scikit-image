@@ -236,12 +236,7 @@ def disk(center, radius, *, shape=None):
 
 
 @require("matplotlib", version=">=3.3")
-def polygon_perimeter(
-    r,
-    c,
-    shape=None,
-    clip=False,
-):
+def polygon_perimeter(r, c, shape=None, clip=False):
     """Generate polygon perimeter coordinates.
 
     Parameters
@@ -306,7 +301,7 @@ def polygon_perimeter(
     # Construct line segments
     rr, cc = [], []
     for i in range(len(r) - 1):
-        line_r, line_c = line(r[i], c[i], r[i + 1], c[i + 1])
+        line_r, line_c = line(start_pos=(r[i], c[i]), end_pos=(r[i + 1], c[i + 1]))
         rr.extend(line_r)
         cc.extend(line_c)
 
