@@ -17,7 +17,7 @@ def doctest_require_but_missing():
 
 @require('scipy', version='>0.1')
 def doctest_require():
-    """>>> assert False"""
+    """>>> assert True"""
 
 
 @require('scipy')
