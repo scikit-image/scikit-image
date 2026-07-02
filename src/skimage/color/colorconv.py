@@ -635,7 +635,7 @@ hed_from_rgb = linalg.inv(rgb_from_hed)
 # Hematoxylin vector is same as above from Ruifrok & Johnston
 # Eosin vector taken from QuPath source code
 # https://github.com/qupath/qupath/blob/main/qupath-core/src/main/java/qupath/lib/color/StainVector.java#L89
-# "residual" is the cross prodcut of H and E vectors (taken from QuPath)
+# "residual" is the cross product of H and E vectors (taken from QuPath)
 # https://github.com/qupath/qupath/blob/main/qupath-core/src/main/java/qupath/lib/color/StainVector.java#L305
 # hematoxylin = [0.65, 0.70, 0.29]
 # eosin = [0.2159, 0.8012, 0.5581]
