@@ -5,8 +5,9 @@ _skimage2 import data``. `skimage` shims call :func:`adapt_doctests` so
 ``skimage`` users see and run ``skimage`` examples instead.
 
 :func:`adapt_obj_doctest` never mutates implementation objects from
-``_skimage2``. Functions get thin wrappers; classes get a local subclass proxy
-whose ``__module__`` is the shim path (for pytest doctest collection).
+``_skimage2``. Functions get thin wrappers; we replace classes with a local
+subclass of the `_skimage2 original, whose ``__module__`` is the shim path (for
+pytest doctest collection).
 
 :func:`adapt_doctests` also copies ``__doctest_requires__`` and
 ``__doctest_skip__`` from ``_skimage2`` implementation modules onto the shim
@@ -35,7 +36,8 @@ _DOCTEST_PROMPT_RE = re.compile(
     ''',
     flags=re.VERBOSE,
 )
-# Seearch / replace pairs.
+
+# Search / replace pairs.
 _SEARCH_REP_PAIRS = (
     (re.compile(r'import _?skimage2 as ski2'), 'import skimage as ski'),
     (re.compile(r'ski2\.'), 'ski.'),
@@ -85,26 +87,42 @@ def _proc_line(line):
     return line
 
 
+def _make_inheritor(old_class, doc, mod_name):
+    """Return new class that inherits from `old_class`
+
+    Parameters
+    ----------
+    old_class: type
+        Input class
+    doc: str
+        Class docstring for new class.
+    mod_name: str
+        Module name for new class.
+
+    Returns
+    -------
+    new_class: type
+        A class that inherits from `old_class`
+    """
+    new_class = types.new_class(
+        old_class.__name__,
+        (old_class,),  # Inherits from original.
+        {},
+    )
+    new_class.__doc__ = doc
+    new_class.__module__ = mod_name
+    new_class.__qualname__ = old_class.__qualname__
+    return new_class
+
+
 def adapt_obj_doctest(obj, shim_module: str = None):
     """Return a shim-local view with adapted doctest examples."""
     original_doc = getattr(obj, '__doc__', None)
     adapted_doc = adapt_doctest_doc(original_doc)
-    doc_different = original_doc != adapted_doc
-    if inspect.isroutine(obj) and doc_different:
+    if inspect.isroutine(obj) and original_doc != adapted_doc:
         return _copy_callable(obj, adapted_doc, shim_module)
     if inspect.isclass(obj):
-        # Make, modify, maybe return proxy if docstrings need adaptation.
-        proxy = types.new_class(
-            obj.__name__,
-            (obj,),
-            {},
-            lambda ns: ns.update({'__doc__': adapted_doc}),
-        )
-        proxy.__module__ = shim_module
-        proxy.__qualname__ = obj.__qualname__
-        # Modify proxy in place for any methods that need adaptation.
-        if _adapt_method_docs(proxy, obj, shim_module) or doc_different:
-            return proxy
+        return _adapt_class(obj, adapted_doc, shim_module)
     return obj
 
 
@@ -183,32 +201,47 @@ def _copy_callable(obj, adapted_doc, module_name):
     return new_func
 
 
-def _get_callable(member):
-    """Return the underlying callable, or ``None`` for non-method members."""
-    if isinstance(member, (classmethod, staticmethod)):
-        return member.__func__
-    if isinstance(member, property):
-        return None
-    if inspect.isroutine(member):
-        return member
-    return None
+def _adapt_class(old_class, class_doc, mod_name):
+    """Return new inherited class if docstrings adapted else `old_class`
 
+    If `class_doc` differs from ``__doc__`` for `old_class` or any of the
+    methods of `old_class` need docstring modifications, return ``new_class``
+    that inherits from `old_class`, and that has modified docstrings. Otherwise
+    return unmodified `old_class`.
 
-def _adapt_method_docs(proxy, impl_cls, shim_module):
-    """Override methods on *proxy* whose docstrings need adaptation.
-
-    Only directly-defined members of *impl_cls* (not inherited ones) are
+    Only directly-defined members of `old_class` (not inherited ones) are
     inspected.  When a method's ``__doc__`` contains ``_skimage2`` /
     ``skimage2`` references that the doctest adapters would rewrite, a copy
-    with the adapted docstring is set on *proxy*.  The original class and its
-    methods are never mutated.
+    with the adapted docstring is set on `new_class`.  The original class and
+    its methods are never mutated.
+
+    Parameters
+    ----------
+    old_class : type
+    class_doc : str or None
+        Desired docstring for output class.
+    mod_name : str
+        Module name for any new class.
+
+    Returns
+    -------
+    out : type
+        If docstrings need modification for `old_class`, return ``new_class``
+        that inherits from `old_class`, but with modified docstrings, and
+        `mod_name` set to ``out.__module__``.  Otherwise return `old_class`.
     """
-    modified = False
-    for name, member in vars(impl_cls).items():
+    out = old_class
+    if class_doc != getattr(old_class, '__doc__', None):
+        out = _make_inheritor(old_class, class_doc, mod_name)
+    for name, member in vars(old_class).items():
         if name.startswith('__') and name != '__init__':
             continue
 
-        if (unwrapped := _get_callable(member)) is None:
+        if isinstance(member, (staticmethod, classmethod)):
+            unwrapped = member.__func__
+        elif inspect.isroutine(member):
+            unwrapped = member
+        else:  # Not a (class-, static-, ordinary-) method.
             continue
 
         original_doc = getattr(unwrapped, '__doc__', None)
@@ -219,12 +252,11 @@ def _adapt_method_docs(proxy, impl_cls, shim_module):
         if adapted_doc == original_doc:
             continue
 
-        modified = True
-        new_func = _copy_callable(unwrapped, adapted_doc, shim_module)
-        if isinstance(member, classmethod):
-            new_func = classmethod(new_func)
-        elif isinstance(member, staticmethod):
-            new_func = staticmethod(new_func)
-        setattr(proxy, name, new_func)
+        if out is old_class:  # Now we must modify.
+            out = _make_inheritor(old_class, class_doc, mod_name)
+        new_func = _copy_callable(unwrapped, adapted_doc, mod_name)
+        if isinstance(member, (staticmethod, classmethod)):
+            new_func = type(member)(new_func)
+        setattr(out, name, new_func)
 
-    return modified
+    return out
