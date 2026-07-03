@@ -800,6 +800,7 @@ SKIMAGE_API = {
     'skimage.data:coins()',
     'skimage.data:colorwheel()',
     'skimage.data:data_dir',
+    'skimage.data:legacy_data_dir',
     'skimage.data:download_all(directory=None)',
     'skimage.data:eagle()',
     "skimage.data:file_hash(fname, alg='sha256')",
