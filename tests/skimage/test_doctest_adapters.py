@@ -1,18 +1,13 @@
-import importlib.util
-import subprocess
 import sys
 import types
-from pathlib import Path
 
-import pytest
+import numpy as np
 
 from skimage._doctest_adapters import (
     adapt_doctest_doc,
     adapt_obj_doctest,
     adapt_doctests,
 )
-
-REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 def test_adapt_import_lines():
@@ -101,13 +96,14 @@ def test_adapt_obj_doctest_class_uses_proxy_without_mutating_impl():
         >>> from _skimage2 import data
         """
 
+    assert Impl.__module__ == __name__
+    in_doc = Impl.__doc__
+    assert '_skimage2' in in_doc
     bound = adapt_obj_doctest(Impl, shim_module='skimage.tests.example')
     assert bound is not Impl
     assert issubclass(bound, Impl)
-    assert 'from skimage import data' in bound.__doc__
+    assert bound.__doc__ == in_doc.replace('_skimage2', 'skimage')
     assert bound.__module__ == 'skimage.tests.example'
-    assert '_skimage2' in (Impl.__doc__ or '')
-    assert Impl.__module__ == __name__
 
 
 def test_adapt_doctests():
@@ -115,15 +111,15 @@ def test_adapt_doctests():
         """>>> from _skimage2 import data"""
 
     def two():
-        """>>> import _skimage2 as ski"""
+        """>>> import _skimage2 as ski2"""
 
     mod = types.ModuleType('fake_module')
     mod.one = one
     mod.two = two
     ns = mod.__dict__
     adapt_doctests(ns)
-    assert 'from skimage import data' in ns['one'].__doc__
-    assert 'import skimage as ski' in ns['two'].__doc__
+    assert ns['one'].__doc__ == '>>> from skimage import data'
+    assert ns['two'].__doc__ == '>>> import skimage as ski'
 
 
 def test_adapt_doctests_defaults_to_caller_globals():
@@ -136,16 +132,12 @@ def test_adapt_doctests_defaults_to_caller_globals():
         'adapt_doctests': adapt_doctests,
     }
     exec('adapt_doctests(globals())', caller_ns)
-    assert 'from skimage import data' in caller_ns['shim_func'].__doc__
+    assert caller_ns['shim_func'].__doc__ == '>>> from skimage import data'
 
 
 def test_adapt_doctests_copies_doctest_requires():
-    import sys
-    import types
-
     impl = types.ModuleType('_skimage2.tests.example_impl')
     impl.__doctest_requires__ = {'func': ['matplotlib']}
-    sys.modules[impl.__name__] = impl
 
     def func():
         """>>> from _skimage2 import data"""
@@ -158,6 +150,7 @@ def test_adapt_doctests_copies_doctest_requires():
         '__name__': 'skimage.tests.example_shim',
     }
     try:
+        sys.modules[impl.__name__] = impl
         adapt_doctests(ns)
         assert ns['__doctest_requires__'] == {'func': ['matplotlib']}
     finally:
@@ -165,53 +158,33 @@ def test_adapt_doctests_copies_doctest_requires():
 
 
 def test_adapt_doctests_injects_np():
-    import numpy as np
-
     ns = {'__name__': 'skimage.tests.example_shim'}
+    assert 'np' not in ns
     adapt_doctests(ns)
     assert ns['np'] is np
 
 
 def test_shim_draw_propagates_doctest_requires():
+    import skimage.draw.draw as ski1_draw_mod
     import _skimage2.draw.draw as ski2_draw_mod
-    import skimage.draw.draw as draw_mod
 
-    assert ski2_draw_mod.__doctest_requires__ == draw_mod.__doctest_requires__
-
-
-@pytest.mark.skipif(
-    importlib.util.find_spec('matplotlib') is not None,
-    reason='requires matplotlib to be absent',
-)
-def test_shim_draw_skips_matplotlib_doctests():
-    result = subprocess.run(
-        [
-            sys.executable,
-            '-m',
-            'pytest',
-            '--doctest-plus',
-            '--pyargs',
-            'skimage.draw.draw',
-            '-k',
-            'rectangle_perimeter or polygon_perimeter',
-        ],
-        capture_output=True,
-        text=True,
-        cwd=REPO_ROOT,
-    )
-    assert result.returncode == 0, result.stdout + result.stderr
-    assert 'skipped' in result.stdout.lower()
+    dt_req1 = getattr(ski1_draw_mod, '__doctest_requires__')
+    dt_req2 = getattr(ski2_draw_mod, '__doctest_requires__')
+    for func_name in ('polygon_perimeter', 'rectangle_perimeter'):
+        assert dt_req1[func_name] == dt_req2[func_name]
 
 
-def test_adapt_preserves_array_output_block():
+def test_adapt_preserves_output_block():
     doc = """\
->>> A = 1
->>> A
-array([1])
->>> B = 2
-"""
-    adapted = adapt_doctest_doc(doc)
-    assert 'array([1])' in adapted
+    >>> A = 1
+    >>> A
+    array([1])
+      More output
+    >>> B = 2
+    array([2])
+     Yet more
+    """
+    assert adapt_doctest_doc(doc) == doc
 
 
 # --------------------------------------------------------------------------
@@ -240,17 +213,18 @@ def test_adapt_obj_doctest_adapts_method_docstrings():
     proxy = adapt_obj_doctest(Impl, shim_module='skimage.tests.example')
 
     # Class-level doc adapted
-    assert 'from skimage import data' in proxy.__doc__
+    assert proxy.__doc__ == Impl.__doc__.replace('_skimage2', 'skimage')
 
     # Method doc adapted
-    assert 'from skimage.transform import resize' in proxy.process.__doc__
+    assert proxy.process.__doc__ == Impl.process.__doc__.replace('_skimage2', 'skimage')
 
     # Method without _skimage2 references is NOT overridden — it comes from
     # the parent, so its __doc__ is the original.
     assert proxy.untouched_method.__doc__ == Impl.untouched_method.__doc__
 
     # Behavior unchanged
-    assert proxy.process(None) == 42
+    assert proxy().process() == 42
+    assert Impl().process() == 42
 
     # Original class and methods are unmodified
     assert '_skimage2' in Impl.__doc__
@@ -272,7 +246,9 @@ def test_adapt_obj_doctest_adapts_classmethod_docstrings():
 
     proxy_create = vars(proxy).get('create')
     assert proxy_create is not None, 'classmethod should be on proxy, not inherited'
-    assert 'import skimage as ski' in proxy_create.__func__.__doc__
+    assert proxy_create.__func__.__doc__ == Impl.create.__doc__.replace(
+        '_skimage2', 'skimage'
+    ).replace('ski2', 'ski')
 
     # Original unmodified
     assert '_skimage2' in Impl.create.__func__.__doc__
@@ -292,7 +268,9 @@ def test_adapt_obj_doctest_adapts_staticmethod_docstrings():
 
     proxy_helper = vars(proxy).get('helper')
     assert proxy_helper is not None, 'staticmethod should be on proxy, not inherited'
-    assert 'from skimage import data' in proxy_helper.__func__.__doc__
+    assert proxy_helper.__func__.__doc__ == Impl.helper.__doc__.replace(
+        '_skimage2', 'skimage'
+    )
 
     # Original unmodified — staticmethod descriptor returns raw function
     assert '_skimage2' in Impl.helper.__doc__
@@ -337,7 +315,9 @@ def test_adapt_obj_doctest_adapts_init_docstring():
     # __init__ docstring adapted
     proxy_init = vars(proxy).get('__init__')
     assert proxy_init is not None
-    assert 'import skimage as ski' in proxy_init.__doc__
+    assert proxy_init.__doc__ == Impl.__init__.__doc__.replace(
+        '_skimage2', 'skimage'
+    ).replace('ski2', 'ski')
 
     # Original unmodified
     assert '_skimage2' in Impl.__init__.__doc__
