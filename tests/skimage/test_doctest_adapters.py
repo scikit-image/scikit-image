@@ -149,6 +149,7 @@ def test_adapt_doctests_copies_doctest_requires():
         'func': func,
         '__name__': 'skimage.tests.example_shim',
     }
+
     try:
         sys.modules[impl.__name__] = impl
         adapt_doctests(ns)
