@@ -377,6 +377,18 @@ def test_li_astro_image():
     assert ce_actual < _cross_entropy(image, threshold - 1)
 
 
+def test_li_astro_image_no_zeros():
+    # threshold with the minimal cross-entropy depends
+    # non-linearly on means of the thresholded image.
+    image = util.img_as_ubyte(data.astronaut())
+    image[image < 50] = 50
+    threshold = threshold_li(image)
+    ce_actual = _cross_entropy(image, threshold, np.max(image))
+    assert 112 < threshold < 113
+    assert ce_actual < _cross_entropy(image, threshold + 1)
+    assert ce_actual < _cross_entropy(image, threshold - 1)
+
+
 def test_li_nan_image():
     image = np.full((5, 5), np.nan)
     assert np.isnan(threshold_li(image))
