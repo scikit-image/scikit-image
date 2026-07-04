@@ -945,6 +945,11 @@ def test_union():
     assert_almost_equal(tform.params, tform3.params)
     assert tform.__class__ == ProjectiveTransform
 
+    # Test the other way round.
+    tform = tform2 + tform1
+    assert_almost_equal(tform.params, tform3.params)
+    assert isinstance(tform, ProjectiveTransform)
+
     tform = AffineTransform(scale=(0.1, 0.1), rotation=0.3)
     assert_almost_equal((tform + tform.inverse).params, np.eye(3))
 

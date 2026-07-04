@@ -1208,17 +1208,15 @@ class ProjectiveTransform(_HMatrixTransform):
 
     def __add__(self, other):
         """Combine this transformation with another."""
-        # Get defining (rather than calling) class.
-        generic_projective_class = super().__thisclass__
-        if isinstance(other, generic_projective_class):
-            # combination of the same types result in a transformation of this
-            # type again, otherwise the generic projective transform.
-            tform_class = (
-                type(self) if type(self) == type(other) else generic_projective_class
-            )
-            return tform_class(other.params @ self.params)
-        else:
-            raise TypeError("Cannot combine transformations of differing " "types.")
+        # Is the other a projective instance?
+        if not hasattr(other, 'generic_projective_class'):
+            raise TypeError("Cannot combine transformations of non-projective types.")
+        # Combination of the same types result in a transformation of this
+        # type again, otherwise the generic projective transform.
+        tform_class = (
+            type(self) if type(self) == type(other) else self.generic_projective_class
+        )
+        return tform_class(other.params @ self.params)
 
     def __nice__(self):
         """common 'paramstr' used by __str__ and __repr__"""
@@ -1323,6 +1321,12 @@ class ProjectiveTransform(_HMatrixTransform):
 
         """
         return self._estimate(src, dst, weights) is None
+
+
+# generic_projective_class defines output class when adding two transform
+# instances that are not of the same type.  By its presence, the attribute
+# defines this class as being of projective type.
+ProjectiveTransform.generic_projective_class = ProjectiveTransform
 
 
 @_update_from_estimate_docstring
