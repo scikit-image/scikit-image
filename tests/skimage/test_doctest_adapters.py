@@ -9,6 +9,15 @@ from skimage._doctest_adapters import (
     adapt_doctests,
 )
 
+import pytest
+
+
+def skip_if_pyopt2(func):
+    return pytest.mark.skipif(
+        sys.flags.optimize >= 2,
+        reason='PYTHONOPTIMIZE=2 strips docstrings',
+    )(func)
+
 
 def test_adapt_import_lines():
     doc = """\
@@ -63,6 +72,7 @@ _skimage2.util.regular_grid
     )
 
 
+@skip_if_pyopt2
 def test_prose_outside_doctests_unchanged():
     doc = """\
 See :func:`skimage2.util.img_as_float` for details.
@@ -75,6 +85,7 @@ Examples
     assert adapted == doc.replace('from _skimage2', 'from skimage')
 
 
+@skip_if_pyopt2
 def test_adapt_obj_doctest_sets_doc():
     def func():
         """Example
@@ -89,6 +100,7 @@ def test_adapt_obj_doctest_sets_doc():
     assert bound() == 1
 
 
+@skip_if_pyopt2
 def test_adapt_obj_doctest_class_uses_proxy_without_mutating_impl():
     class Impl:
         """Example
@@ -106,6 +118,7 @@ def test_adapt_obj_doctest_class_uses_proxy_without_mutating_impl():
     assert bound.__module__ == 'skimage.tests.example'
 
 
+@skip_if_pyopt2
 def test_adapt_doctests():
     def one():
         """>>> from _skimage2 import data"""
@@ -122,6 +135,7 @@ def test_adapt_doctests():
     assert ns['two'].__doc__ == '>>> import skimage as ski'
 
 
+@skip_if_pyopt2
 def test_adapt_doctests_defaults_to_caller_globals():
     def shim_func():
         """>>> from _skimage2 import data"""
@@ -135,6 +149,7 @@ def test_adapt_doctests_defaults_to_caller_globals():
     assert caller_ns['shim_func'].__doc__ == '>>> from skimage import data'
 
 
+@skip_if_pyopt2
 def test_adapt_doctests_copies_doctest_requires():
     impl = types.ModuleType('_skimage2.tests.example_impl')
     impl.__doctest_requires__ = {'func': ['matplotlib']}
@@ -193,6 +208,7 @@ def test_adapt_preserves_output_block():
 # --------------------------------------------------------------------------
 
 
+@skip_if_pyopt2
 def test_adapt_obj_doctest_adapts_method_docstrings():
     class Impl:
         """Example class.
@@ -233,6 +249,7 @@ def test_adapt_obj_doctest_adapts_method_docstrings():
     assert Impl.__module__ == __name__
 
 
+@skip_if_pyopt2
 def test_adapt_obj_doctest_adapts_classmethod_docstrings():
     class Impl:
         @classmethod
@@ -255,6 +272,7 @@ def test_adapt_obj_doctest_adapts_classmethod_docstrings():
     assert '_skimage2' in Impl.create.__func__.__doc__
 
 
+@skip_if_pyopt2
 def test_adapt_obj_doctest_adapts_staticmethod_docstrings():
     class Impl:
         @staticmethod
@@ -277,6 +295,7 @@ def test_adapt_obj_doctest_adapts_staticmethod_docstrings():
     assert '_skimage2' in Impl.helper.__doc__
 
 
+@skip_if_pyopt2
 def test_adapt_obj_doctest_class_method_without_skimage_ref_not_copied():
     """Methods without _skimage2 references stay inherited, not overridden."""
 
@@ -297,6 +316,7 @@ def test_adapt_obj_doctest_class_method_without_skimage_ref_not_copied():
     assert proxy.plain.__doc__ == 'No namespace references.'
 
 
+@skip_if_pyopt2
 def test_adapt_obj_doctest_adapts_init_docstring():
     class Impl:
         """Example class.
