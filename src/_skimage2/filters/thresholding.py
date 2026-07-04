@@ -724,12 +724,13 @@ def threshold_li(image, *, tolerance=None, initial_guess=None, iter_callback=Non
         t_next = initial_guess(image)
     elif np.isscalar(initial_guess):  # convert to new, positive image range
         t_next = initial_guess - float(image_min)
-        image_max = np.max(image) + image_min
-        if not 0 < t_next < np.max(image):
+        actual_min = np.min(image) + image_min
+        actual_max = np.max(image) + image_min
+        if not np.min(image) < t_next < np.max(image):
             msg = (
                 f'The initial guess for threshold_li must be within the '
                 f'range of the image. Got {initial_guess} for image min '
-                f'{image_min} and max {image_max}.'
+                f'{actual_min} and max {actual_max}.'
             )
             raise ValueError(msg)
         t_next = image.dtype.type(t_next)
