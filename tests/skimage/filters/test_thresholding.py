@@ -383,7 +383,7 @@ def test_li_astro_image_no_zeros():
     image = util.img_as_ubyte(data.astronaut())
     image[image < 50] = 50
     threshold = threshold_li(image)
-    ce_actual = _cross_entropy(image, threshold, np.max(image))
+    ce_actual = _cross_entropy(image, threshold)
     assert 112 < threshold < 113
     assert ce_actual < _cross_entropy(image, threshold + 1)
     assert ce_actual < _cross_entropy(image, threshold - 1)
