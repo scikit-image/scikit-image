@@ -1,9 +1,12 @@
-This directory contains sample data from scikit-image.
+This is scikit-image's download cache for its example datasets.
 
-By default, it only contains a small subset of the entire dataset.
+Files are downloaded here on demand, the first time a function like
+`skimage.data.astronaut()` is called. The optional `scikit-image-data`
+package (installed via `pip install scikit-image[data]`) bundles a curated
+subset of commonly-used datasets directly in its own install location, so
+those specific files are never downloaded at all.
 
-The full detaset can be downloaded by using the following commands from
-a python console.
+To download every dataset ahead of time, from a Python console:
 
   >>> from _skimage2.data import download_all
   >>> download_all()

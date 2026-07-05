@@ -18,8 +18,7 @@ import os.path as osp
 import os
 import sys
 
-_LEGACY_DATA_DIR = osp.dirname(__file__)
-_DISTRIBUTION_DIR = osp.dirname(_LEGACY_DATA_DIR)
+_HERE = osp.dirname(__file__)
 
 try:
     # Optional companion package (see gitlab.com/scikit-image/data) that
@@ -112,8 +111,8 @@ def _create_image_fetcher(prefix=None):
             retry = {'retry_if_failed': 3}
     except ImportError:
         # Without pooch, there's no way to download data files -- just
-        # resolve the cache location pooch would have used, so already-
-        # cached or legacy-bundled files are still found.
+        # resolve the cache location pooch would have used, so an
+        # already-cached file is still found.
         return None, osp.join(_default_cache_dir(), 'data')
 
     # Pooch expects a `+` to exist in development versions.
@@ -213,7 +212,7 @@ def _ensure_cache_dir(*, target_dir):
                     └─ README.txt
     """
     os.makedirs(osp.join(target_dir, "data"), exist_ok=True)
-    readme_src = osp.join(_DISTRIBUTION_DIR, "data/README.txt")
+    readme_src = osp.join(_HERE, "README.txt")
     readme_dest = osp.join(target_dir, "data/README.txt")
     if not osp.exists(readme_dest):
         shutil.copy2(readme_src, readme_dest)
@@ -244,10 +243,10 @@ def _fetch(data_filename, prefix=None):
 
     ModuleNotFoundError:
         If pooch is not installed and the file isn't otherwise available
-        locally (bundled with the optional ``scikit-image-data`` package,
-        already cached, or a legacy bundled file). Installing scikit-image's
-        ``data`` extra (``pip install scikit-image[data]``) resolves this
-        either way, by installing pooch, ``scikit-image-data``, or both.
+        locally (bundled with the optional ``scikit-image-data`` package or
+        already cached). Installing scikit-image's ``data`` extra
+        (``pip install scikit-image[data]``) resolves this either way, by
+        installing pooch, ``scikit-image-data``, or both.
 
     ConnectionError:
         If scikit-image is unable to connect to the internet but the
@@ -280,12 +279,7 @@ def _fetch(data_filename, prefix=None):
         # Nothing to be done, file is where it is expected to be
         return cached_file_path
 
-    # Case 2: file is present in `legacy_data_dir`
-    legacy_file_path = osp.join(_DISTRIBUTION_DIR, data_filename)
-    if _has_hash(legacy_file_path, expected_hash):
-        return legacy_file_path
-
-    # Case 3: file is not present locally
+    # Case 2: file is not present locally
     if _image_fetcher is None:
         # Under pytest (e.g. the WASM CI leg), always skip rather than
         # erroring -- pooch is deliberately unavailable there.
