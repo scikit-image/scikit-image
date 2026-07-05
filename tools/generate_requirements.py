@@ -34,7 +34,10 @@ def generate_environment_yml(req_sections: dict[str, list[str]]) -> None:
         'astropy': 'astropy-base',
         'matplotlib': 'matplotlib-base',
     }
-    pip_only = ['docstub']
+    # scikit-image-data isn't on conda-forge yet, and even once it is, a
+    # direct URL/VCS reference (as used temporarily below) could never be a
+    # plain conda dependency line regardless -- it must go under `pip:`.
+    pip_only = ['docstub', 'scikit-image-data']
 
     lines = ["name: skimage-dev", "channels:", "  - conda-forge", "dependencies:"]
     pip_section = {None: []}
@@ -52,7 +55,12 @@ def generate_environment_yml(req_sections: dict[str, list[str]]) -> None:
             # Remove platform specifiers such as `; sys_platform != "emscripten"`
             dep = re.sub('; .*', '', dep)
 
-            pkgname = re.split('[>=]', dep)[0]
+            # Split on the first version/URL-reference marker (">", "=", "@")
+            # or whitespace, so a PEP 508 direct reference like
+            # "name @ git+https://..." yields just "name", not the whole
+            # string (a plain "pooch>=1.6.0"-style specifier still works,
+            # since none of these characters appear before its version).
+            pkgname = re.split(r'[>=@\s]', dep)[0]
 
             if section and pkgname in pip_only:
                 if dep not in pip_section[None]:

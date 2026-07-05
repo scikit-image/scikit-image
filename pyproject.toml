@@ -60,7 +60,17 @@ build = [
 # so they work with no download at all. Without either, `skimage.data`
 # raises a clear error for any dataset that isn't already cached or legacy-
 # bundled (see `_skimage2/data/_fetchers.py`); both remain fully optional.
-data = ['pooch>=1.6.0', 'scikit-image-data']
+#
+# TEMPORARY: scikit-image-data isn't published to PyPI yet, so it's pinned
+# to the personal GitLab fork branch used to validate this migration.
+# Before merging/releasing, repoint at the plain PyPI name below --
+# a git direct-reference dependency like this makes a package unpublishable
+# to PyPI (upload validation rejects direct-URL Requires-Dist entries).
+#   data = ['pooch>=1.6.0', 'scikit-image-data']
+data = [
+    'pooch>=1.6.0',
+    'scikit-image-data @ git+https://gitlab.com/stevesilvester1073/data.git@v1',
+]
 developer = [
     'pre-commit',
     'ipython',

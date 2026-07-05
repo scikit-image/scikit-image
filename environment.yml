@@ -21,7 +21,6 @@ dependencies:
   - python-build>=1.2.1
   # data
   - pooch>=1.6.0
-  - scikit-image-data
   # developer
   - pre-commit
   - ipython
@@ -72,4 +71,5 @@ dependencies:
   # pypa-only packages
   - pip
   - pip:
+      - scikit-image-data @ git+https://gitlab.com/stevesilvester1073/data.git@v1
       - docstub==0.7.0rc0
