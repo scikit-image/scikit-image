@@ -76,12 +76,22 @@ your Python is older, pip will find the most recent compatible version.
   # Install scikit-image
   python -m pip install -U scikit-image
 
-Some additional dependencies are required to access all example
-datasets in ``skimage.data``. Install them using:
+``skimage.data``'s example datasets (used throughout our
+`gallery examples <https://scikit-image.org/docs/stable/auto_examples/>`_)
+are not installed by default -- without the additional dependencies below,
+calling e.g. ``skimage.data.astronaut()`` raises an error. Install them
+using:
 
 .. code-block:: sh
 
    python -m pip install -U scikit-image[data]
+
+This installs both `pooch <https://www.fatiando.org/pooch/>`_, which
+downloads and caches datasets on first access, and ``scikit-image-data``,
+which bundles a curated subset of commonly-used datasets (including
+``astronaut``, ``camera``, and ``coins``) directly, so those specific ones
+work with no download at all. Less commonly used datasets still require a
+one-time download via pooch.
 
 To install optional scientific Python packages that expand
 ``scikit-image``'s capabilities to include, e.g., parallel processing,
@@ -125,10 +135,10 @@ not provided by the package manager.
 Downloading all demo datasets
 ------------------------------------------------------------------------------
 
-Some of our example images (in ``skimage.data``) are hosted online and are
-not installed by default. These images are downloaded upon first
-access. If you prefer to download all demo datasets, so they can be
-accessed offline, ensure that ``pooch`` is installed, then run:
+Most of our example images (in ``skimage.data``) are hosted online, and are
+downloaded and cached upon first access (see :ref:`install-via-pip` above).
+If you prefer to download every dataset ahead of time, so they're all
+available offline, ensure that ``pooch`` is installed, then run:
 
 .. code-block:: sh
 

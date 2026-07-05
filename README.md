@@ -17,6 +17,10 @@
 - **pip:** `pip install scikit-image`
 - **conda:** `conda install -c conda-forge scikit-image`
 
+To also use `skimage.data`'s example datasets (e.g. to run the
+[gallery examples](https://scikit-image.org/docs/stable/auto_examples/)
+locally), install the `data` extra instead: `pip install scikit-image[data]`.
+
 Also see [installing `scikit-image`](https://github.com/scikit-image/scikit-image/blob/main/INSTALL.rst).
 
 ## License
