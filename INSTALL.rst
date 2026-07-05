@@ -91,7 +91,7 @@ downloads and caches datasets on first access, and ``scikit-image-data``,
 which bundles a curated subset of commonly-used datasets (including
 ``astronaut``, ``camera``, and ``coins``) directly, so those specific ones
 work with no download at all. Less commonly used datasets still require a
-one-time download via pooch.
+one-time download using pooch.
 
 To install optional scientific Python packages that expand
 ``scikit-image``'s capabilities to include, e.g., parallel processing,
