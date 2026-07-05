@@ -11,3 +11,10 @@ applications in tutorial form.
 
     Check out our :ref:`user_guide` for a narrative
     introduction to key library conventions and basic image manipulation.
+
+.. note::
+
+    Most examples below load images via ``skimage.data`` (e.g.
+    ``data.astronaut()``). To run them locally, install scikit-image with
+    the ``data`` extra: ``pip install scikit-image[data]`` -- see
+    :ref:`install-via-pip`.
