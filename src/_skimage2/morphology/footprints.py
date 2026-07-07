@@ -1,9 +1,9 @@
 import os
-import warnings
 
 import numpy as np
 
 from ._footprints import _footprint_is_sequence
+from .._shared._warnings import warn_external
 from .._shared.utils import deprecate_func
 from ..draw.draw import ellipse as _draw_ellipse
 from ._grayscale_operators import dilation
@@ -73,8 +73,50 @@ def footprint_from_sequence(footprints):
     return dilation(imag, footprints)
 
 
-def footprint_rectangle(shape, *, dtype=np.uint8, decomposition=None):
-    """Generate a rectangular or hyper-rectangular footprint.
+def footprint_rectangle(shape, *, dtype=np.uint8):
+    """Generate a (hyper-)rectangular footprint.
+
+    This is a convenience wrapper around :func:`numpy.ones`. Depending on the
+    requested `shape`, it generates a square, rectangle, cube, cuboid, or even
+    higher-dimensional version of these shapes.
+
+    Parameters
+    ----------
+    shape : tuple[int, ...]
+        The length of the footprint in each dimension. The length of the
+        sequence determines the number of dimensions of the footprint.
+    dtype : dtype-like, optional
+        The data type of the footprint.
+
+    Returns
+    -------
+    footprint : array or tuple[tuple[ndarray, int], ...]
+        A footprint consisting only of ones, i.e. every pixel belongs to the
+        neighborhood.
+
+    See Also
+    --------
+    footprint_rectangle_decompose
+
+    Examples
+    --------
+    >>> import _skimage2 as ski2
+    >>> ski2.morphology.footprint_rectangle((3, 5))
+    array([[1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 1]], dtype=uint8)
+
+    Generate a 5-dimensional hypercube with 3 samples in each dimension
+
+    >>> ski2.morphology.footprint_rectangle((3,) * 5).shape
+    (3, 3, 3, 3, 3)
+    """
+    footprint = np.ones(shape, dtype=dtype)
+    return footprint
+
+
+def footprint_rectangle_decompose(shape, *, method="separable", dtype=np.uint8):
+    """Generate a (hyper-)rectangular decomposed footprint.
 
     Generates, depending on the length and dimensions requested with `shape`,
     a square, rectangle, cube, cuboid, or even higher-dimensional versions
@@ -85,79 +127,75 @@ def footprint_rectangle(shape, *, dtype=np.uint8, decomposition=None):
     shape : tuple[int, ...]
         The length of the footprint in each dimension. The length of the
         sequence determines the number of dimensions of the footprint.
-    dtype : dtype-like, optional
+    dtype : data-type, optional
         The data type of the footprint.
-    decomposition : {None, 'separable', 'sequence'}, optional
-        If None, a single array is returned. For 'sequence', a tuple of smaller
-        footprints is returned. Applying this series of smaller footprints will
-        give an identical result to a single, larger footprint, but often with
-        better computational performance. See Notes for more details.
-        With 'separable', this function uses separable 1D footprints for each
-        axis. Whether 'sequence' or 'separable' is computationally faster may
-        be architecture-dependent.
+    method : {'separable', 'sequence'}, optional
+        With `separable' (the default), this function generates separable 1D
+        footprints for each axis. 'sequence' will try to decompose into
+        a sequence of more compact footprints. It is only supported for
+        footprints with an odd length in each dimension and will fallback to
+        'separable'. Whether 'sequence' or 'separable' is computationally
+        faster may be architecture-dependent.
 
     Returns
     -------
-    footprint : array or tuple[tuple[ndarray, int], ...]
-        A footprint consisting only of ones, i.e. every pixel belongs to the
-        neighborhood. When `decomposition` is None, this is just an array.
-        Otherwise, this will be a tuple whose length is equal to the number of
-        unique structuring elements to apply (see Examples for more detail).
+    footprint : tuple[tuple[ndarray, int], ...]
+        A footprint consisting a tuple whose length is equal to the number of
+        unique structuring elements to apply. Each entry of the tuple is another
+        2-element tuple containing a footprint followed by the number of times
+        it should be applied.
+
+    See Also
+    --------
+    footprint_rectangle
 
     Examples
     --------
-    >>> import _skimage2 as ski2
-    >>> ski2.morphology.footprint_rectangle((3, 5))
-    array([[1, 1, 1, 1, 1],
-           [1, 1, 1, 1, 1],
-           [1, 1, 1, 1, 1]], dtype=uint8)
-
     Decomposition will return multiple footprints that combine into a simple
     footprint of the requested shape.
 
-    >>> ski2.morphology.footprint_rectangle((9, 9), decomposition="sequence")
+    >>> import _skimage2 as ski2
+    >>> ski2.morphology.footprint_rectangle_decompose((9, 9), method="sequence")
     ((array([[1, 1, 1],
              [1, 1, 1],
              [1, 1, 1]], dtype=uint8),
       4),)
 
-    `"sequence"` makes sure that the decomposition only returns 1D footprints.
+    >>> ski2.morphology.footprint_rectangle_decompose((3, 5), method="sequence")
+    ((array([[1, 1, 1],
+             [1, 1, 1],
+             [1, 1, 1]], dtype=uint8),
+      1),
+     (array([[1, 1, 1]], dtype=uint8), 1))
 
-    >>> ski2.morphology.footprint_rectangle((3, 5), decomposition="separable")
+    `"separable"` makes sure that the decomposition only returns 1D footprints.
+
+    >>> ski2.morphology.footprint_rectangle_decompose((3, 5), method="separable")
     ((array([[1],
              [1],
              [1]], dtype=uint8),
       1),
      (array([[1, 1, 1, 1, 1]], dtype=uint8), 1))
-
-    Generate a 5-dimensional hypercube with 3 samples in each dimension
-
-    >>> ski2.morphology.footprint_rectangle((3,) * 5).shape
-    (3, 3, 3, 3, 3)
     """
     has_even_width = any(width % 2 == 0 for width in shape)
-    if decomposition == "sequence" and has_even_width:
-        warnings.warn(
-            "decomposition='sequence' is only supported for uneven footprints, "
-            "falling back to decomposition='separable'",
-            stacklevel=2,
+    if method == "sequence" and has_even_width:
+        warn_external(
+            "method='sequence' is only supported for uneven footprints, "
+            "falling back to method='separable'",
         )
-        decomposition = "sequence_fallback"
+        return footprint_rectangle_decompose(shape, dtype=dtype, method="separable")
 
     def partial_footprint(dim, width):
         shape_ = (1,) * dim + (width,) + (1,) * (len(shape) - dim - 1)
         fp = (np.ones(shape_, dtype=dtype), 1)
         return fp
 
-    if decomposition is None:
-        footprint = np.ones(shape, dtype=dtype)
-
-    elif decomposition in ("separable", "sequence_fallback"):
+    if method == "separable":
         footprint = tuple(
             partial_footprint(dim, width) for dim, width in enumerate(shape)
         )
 
-    elif decomposition == "sequence":
+    elif method == "sequence":
         min_width = min(shape)
         sq_reps = _decompose_size(min_width, 3)
         footprint = [(np.ones((3,) * len(shape), dtype=dtype), sq_reps)]
@@ -169,7 +207,7 @@ def footprint_rectangle(shape, *, dtype=np.uint8, decomposition=None):
         footprint = tuple(footprint)
 
     else:
-        raise ValueError(f"Unrecognized decomposition: {decomposition}")
+        raise ValueError(f"Unrecognized decomposition: {method}")
 
     return footprint
 
@@ -960,7 +998,7 @@ def octagon(m, n, dtype=np.uint8, *, decomposition=None):
         sequence = []
         if m > 1:
             sequence += list(
-                footprint_rectangle((m, m), dtype=dtype, decomposition='sequence')
+                footprint_rectangle_decompose((m, m), dtype=dtype, method='sequence')
             )
         if n > 0:
             sequence += [(diamond(1, dtype=dtype, decomposition=None), n)]
