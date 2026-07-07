@@ -8,7 +8,7 @@ from _skimage2.morphology.footprints import (
     ellipse as ellipse,
     footprint_from_sequence as footprint_from_sequence,
     footprint_rectangle as _sk2_footprint_rectangle,
-    footprint_rectangle_decompose as _sk2_footprint_rectangle_decompose,
+    footprint_rectangle_decomposed as _sk2_footprint_rectangle_decompose,
     octagon as octagon,
     octahedron as octahedron,
     rectangle as rectangle,
@@ -39,11 +39,11 @@ from .._migration import ski2_migration_decorator
 @ski2_migration_decorator(
     """\
 `%(qname_old)s` is deprecated in favor of
-`%(qname_new)s` and `skimage2.morphology.footprint_rectangle_decompose`.
+`%(qname_new)s` and `skimage2.morphology.footprint_rectangle_decomposed`.
 
 * `skimage2.morphology.footprint_rectangle` no longer accepts the ``decompose``
   parameter and will return the footprint as a simple array.
-* `skimage2.morphology.footprint_rectangle_decompose` uses the new parameter
+* `skimage2.morphology.footprint_rectangle_decomposed` uses the new parameter
   ``method``, which accepts the values of the old ``decomposition`` parameter.
 
 To keep the old behavior when switching to `skimage2`, update your call
@@ -71,7 +71,7 @@ Other keyword parameters can be left unchanged.
 >>> fp1 = ski1.morphology.footprint_rectangle(
 ...     (3, 3, 3), decomposition="sequence"
 ... )
->>> fp2 = ski2.morphology.footprint_rectangle_decompose(
+>>> fp2 = ski2.morphology.footprint_rectangle_decomposed(
 ...     (3, 3, 3), method="sequence"
 ... )
 >>> assert np.all(fp1 == fp2)

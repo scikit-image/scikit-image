@@ -6,7 +6,7 @@ from _skimage2._shared.testing import fetch, assert_stacklevel
 from _skimage2.morphology import (
     footprints,
     footprint_rectangle,
-    footprint_rectangle_decompose,
+    footprint_rectangle_decomposed,
     footprint_from_sequence,
     pad_footprint,
     mirror_footprint,
@@ -157,7 +157,7 @@ def test_footprint_dtype(function, args, supports_sequence_decomposition, dtype)
 
 @pytest.mark.parametrize(
     'function, args',
-    [(footprints.footprint_rectangle_decompose, ((3, 5),))],
+    [(footprints.footprint_rectangle_decomposed, ((3, 5),))],
 )
 @pytest.mark.parametrize("dtype", [np.uint8, np.float64])
 def test_decomposed_footprint_dtype(function, args, dtype):
@@ -278,21 +278,21 @@ class Test_footprint_rectangle:
         assert_equal(actual, desired)
 
 
-class Test_footprint_rectangle_decompose:
+class Test_footprint_rectangle_decomposed:
     @pytest.mark.parametrize("shape", [(3,), (5, 5), (5, 5, 7)])
     @pytest.mark.parametrize("method", ["separable", "sequence"])
     def test_compare(self, shape, method):
         regular = footprint_rectangle(shape)
-        decomposed = footprint_rectangle_decompose(shape, method=method)
+        decomposed = footprint_rectangle_decomposed(shape, method=method)
         recomposed = footprint_from_sequence(decomposed)
         assert_equal(recomposed, regular)
 
     @pytest.mark.parametrize("shape", [(2,), (3, 4)])
     def test_uneven_sequence_warning(self, shape):
         """Should fall back to decomposition="separable" for uneven footprint size."""
-        desired = footprint_rectangle_decompose(shape, method="separable")
+        desired = footprint_rectangle_decomposed(shape, method="separable")
         regex = "method='sequence' is only supported for uneven footprints"
         with pytest.warns(UserWarning, match=regex) as record:
-            actual = footprint_rectangle_decompose(shape, method="sequence")
+            actual = footprint_rectangle_decomposed(shape, method="sequence")
         assert_stacklevel(record)
         assert_equal(actual, desired)

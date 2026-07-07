@@ -6,7 +6,7 @@ from numpy.testing import assert_allclose, assert_array_equal
 import _skimage2 as ski2
 from _skimage2.morphology import (
     footprint_rectangle,
-    footprint_rectangle_decompose,
+    footprint_rectangle_decomposed,
     mirror_footprint,
     pad_footprint,
 )
@@ -444,7 +444,7 @@ def test_rectangle_decomposition(cam_image, func, nrows, ncols, method):
     comparison is made to the case without decomposition.
     """
     footprint_ndarray = footprint_rectangle((nrows, ncols))
-    footprint = footprint_rectangle_decompose((nrows, ncols), method=method)
+    footprint = footprint_rectangle_decomposed((nrows, ncols), method=method)
     expected = func(cam_image, footprint=footprint_ndarray)
     out = func(cam_image, footprint=footprint)
     assert_array_equal(expected, out)
@@ -495,7 +495,7 @@ def test_cube_decomposition(cell3d_image, func, shape, method):
     comparison is made to the case without decomposition.
     """
     footprint_ndarray = footprint_rectangle(shape)
-    footprint = footprint_rectangle_decompose(shape, method=method)
+    footprint = footprint_rectangle_decomposed(shape, method=method)
     expected = func(cell3d_image, footprint=footprint_ndarray)
     out = func(cell3d_image, footprint=footprint)
     assert_array_equal(expected, out)
