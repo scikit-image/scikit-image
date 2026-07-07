@@ -2,8 +2,6 @@
 Binary morphological operations
 """
 
-import warnings
-
 import numpy as np
 from scipy import ndimage as ndi
 
@@ -310,14 +308,8 @@ def binary_opening(image, footprint=None, out=None, *, mode='ignore'):
     skimage.morphology.isotropic_opening
 
     """
-    with warnings.catch_warnings():
-        warnings.filterwarnings(
-            action="ignore",
-            message="`binary_(dilation|erosion)` is deprecated",
-            category=FutureWarning,
-        )
-        tmp = binary_erosion(image, footprint, mode=mode)
-        out = binary_dilation(tmp, footprint, out=out, mode=mode)
+    tmp = binary_erosion(image, footprint, mode=mode)
+    out = binary_dilation(tmp, footprint, out=out, mode=mode)
     return out
 
 
@@ -382,12 +374,6 @@ def binary_closing(image, footprint=None, out=None, *, mode='ignore'):
     skimage.morphology.isotropic_closing
 
     """
-    with warnings.catch_warnings():
-        warnings.filterwarnings(
-            action="ignore",
-            message="`binary_(dilation|erosion)` is deprecated",
-            category=FutureWarning,
-        )
-        tmp = binary_dilation(image, footprint, mode=mode)
-        out = binary_erosion(tmp, footprint, out=out, mode=mode)
+    tmp = binary_dilation(image, footprint, mode=mode)
+    out = binary_erosion(tmp, footprint, out=out, mode=mode)
     return out
