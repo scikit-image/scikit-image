@@ -408,7 +408,7 @@ def astronaut():
     1995. She retired in 2006 after spending a total of 38 days, 8 hours
     and 10 minutes in outer space.
 
-    This image was downloaded from the NASA Great Images database
+    This image was downloaded from the `NASA Great Images database
     <https://flic.kr/p/r9qvLn>`__.
 
     No known copyright restrictions, released into the public domain.
