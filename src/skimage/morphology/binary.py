@@ -12,7 +12,43 @@ from _skimage2.morphology._footprints import (
     _footprint_is_sequence,
     pad_footprint,
 )
-from _skimage2._shared.utils import deprecate_func
+
+from .._migration import ski2_migration_decorator
+
+
+_SKIMAGE2_MIGRATION_NOTE_TEMPLATE = """\
+``%(qname_old)s`` is deprecated in favor of
+``%(qname_new)s``.
+
+To keep the old behavior when switching to `skimage2`, you can use the new
+function as is. But if you use an asymmetric footprints (even length in any
+dimension or not symmetric around center) you need to pad the footprint
+with `skimage2.morphology.pad_footprint` (use default ``pad_end=True``).
+
+<!--- cond-start: doc -->
+
+>>> import numpy as np
+>>> import skimage2 as ski2
+>>> import skimage as ski1
+...
+>>> image = ski1.data.camera()
+>>> image = ski1.filters.threshold_li(image) > image
+...
+>>> asymmetric = np.ones((2, 2), dtype=bool)  # Example
+>>> patched = ski2.morphology.pad_footprint(asymmetric)
+...
+>>> res1 = ski1.morphology.binary_{operation}(image, footprint=asymmetric)
+>>> res2 = ski2.morphology.{operation}(image, footprint=patched)
+>>> assert np.all(res1 == res2)
+
+For the default (or any symmetric) footprint, the new function is equivalent
+
+>>> res1 = ski1.morphology.binary_{operation}(image)
+>>> res2 = ski2.morphology.{operation}(image)
+>>> assert np.all(res1 == res2)
+
+<!--- cond-end -->
+"""
 
 
 def _iterate_binary_func(binary_func, image, footprint, out, border_value):
@@ -39,16 +75,12 @@ def _iterate_binary_func(binary_func, image, footprint, out, border_value):
     return out
 
 
-# The _default_footprint decorator provides a diamond footprint as
-# default with the same dimension as the input image and size 3 along each
-# axis.
-@_default_footprint
-@deprecate_func(
-    deprecated_version="0.26",
-    removed_version="0.28",
-    hint="Use `skimage.morphology.erosion` instead. "
-    "Note the pixel shift by 1 for even-sized footprints (see docstring notes).",
+@ski2_migration_decorator(
+    _SKIMAGE2_MIGRATION_NOTE_TEMPLATE.format(operation="erosion"),
+    qname_old='skimage.morphology.binary_erosion',
+    qname_new='skimage2.morphology.erosion',
 )
+@_default_footprint
 def binary_erosion(image, footprint=None, out=None, *, mode='ignore'):
     """Return fast binary morphological erosion of an image.
 
@@ -130,13 +162,12 @@ def binary_erosion(image, footprint=None, out=None, *, mode='ignore'):
     return out
 
 
-@_default_footprint
-@deprecate_func(
-    deprecated_version="0.26",
-    removed_version="0.28",
-    hint="Use `skimage.morphology.dilation` instead. "
-    "Note the lack of mirroring for non-symmetric footprints (see docstring notes).",
+@ski2_migration_decorator(
+    _SKIMAGE2_MIGRATION_NOTE_TEMPLATE.format(operation="dilation"),
+    qname_old='skimage.morphology.binary_dilation',
+    qname_new='skimage2.morphology.dilation',
 )
+@_default_footprint
 def binary_dilation(image, footprint=None, out=None, *, mode='ignore'):
     """Return fast binary morphological dilation of an image.
 
@@ -218,12 +249,12 @@ def binary_dilation(image, footprint=None, out=None, *, mode='ignore'):
     return out
 
 
-@_default_footprint
-@deprecate_func(
-    deprecated_version="0.26",
-    removed_version="0.28",
-    hint="Use `skimage.morphology.opening` instead.",
+@ski2_migration_decorator(
+    _SKIMAGE2_MIGRATION_NOTE_TEMPLATE.format(operation="opening"),
+    qname_old='skimage.morphology.binary_opening',
+    qname_new='skimage2.morphology.opening',
 )
+@_default_footprint
 def binary_opening(image, footprint=None, out=None, *, mode='ignore'):
     """Return fast binary morphological opening of an image.
 
@@ -290,12 +321,12 @@ def binary_opening(image, footprint=None, out=None, *, mode='ignore'):
     return out
 
 
-@_default_footprint
-@deprecate_func(
-    deprecated_version="0.26",
-    removed_version="0.28",
-    hint="Use `skimage.morphology.closing` instead.",
+@ski2_migration_decorator(
+    _SKIMAGE2_MIGRATION_NOTE_TEMPLATE.format(operation="closing"),
+    qname_old='skimage.morphology.binary_closing',
+    qname_new='skimage2.morphology.closing',
 )
+@_default_footprint
 def binary_closing(image, footprint=None, out=None, *, mode='ignore'):
     """Return fast binary morphological closing of an image.
 

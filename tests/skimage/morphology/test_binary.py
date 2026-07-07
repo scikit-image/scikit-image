@@ -6,19 +6,12 @@ from scipy import ndimage as ndi
 from skimage import data, color, morphology
 from skimage.util import img_as_bool
 from skimage.morphology import binary, footprints, gray, footprint_rectangle
-from _skimage2._shared.testing import assert_stacklevel
+
+import _skimage2 as ski2
 
 
 img = color.rgb2gray(data.astronaut())
 bw_img = img > 100 / 255.0
-
-
-pytestmark = pytest.mark.filterwarnings(
-    "ignore:"
-    "`binary_(dilation|erosion|opening|closing)` is deprecated.*"
-    "Use `skimage.morphology.(dilation|erosion|opening|closing)` instead"
-    ":FutureWarning"
-)
 
 
 def test_non_square_image():
@@ -358,16 +351,49 @@ def test_binary_output_3d():
     assert_equal(int_closed.dtype, np.uint8)
 
 
+@pytest.mark.parametrize("operation", ["erosion", "dilation", "opening", "closing"])
 @pytest.mark.parametrize(
-    "func_name",
-    ["binary_erosion", "binary_dilation", "binary_opening", "binary_closing"],
+    "footprint",
+    [
+        np.ones((3, 3), dtype=bool),
+        np.array([[1, 0, 1]], dtype=bool),
+        ndi.generate_binary_structure(2, 1),
+    ],
 )
-def test_deprecation_warning(func_name):
-    func = getattr(binary, func_name)
-    footprint = footprint_rectangle((3, 3))
+def test_migration_advice_for_symmetric(operation, footprint):
+    bin_func = getattr(morphology, f"binary_{operation}")
+    gray_func = getattr(ski2.morphology, operation)
 
-    regex = f"`{func_name}` is deprecated"
-    with pytest.warns(FutureWarning, match=regex) as record:
-        func(bw_img, footprint)
-    assert_stacklevel(record)
-    assert len(record) == 1
+    rng = np.random.default_rng(202607071622320200)
+    image = rng.integers(0, 2, size=(100, 10), dtype=bool)
+
+    res1 = bin_func(image, footprint=footprint)
+    res2 = gray_func(image, footprint=footprint)
+
+    np.testing.assert_equal(res1, res2)
+    assert res1.dtype == res2.dtype
+
+
+@pytest.mark.parametrize("operation", ["erosion", "dilation", "opening", "closing"])
+@pytest.mark.parametrize(
+    "footprint",
+    [
+        np.ones((2, 2), dtype=bool),
+        np.array([[1, 0]], dtype=bool),
+        np.array([[1, 1, 0, 1], [1, 0, 1, 0]], dtype=bool),
+    ],
+)
+def test_migration_advice_for_asymmetric(operation, footprint):
+    bin_func = getattr(morphology, f"binary_{operation}")
+    gray_func = getattr(ski2.morphology, operation)
+
+    rng = np.random.default_rng(202607071622320200)
+    image = rng.integers(0, 2, size=(100, 10), dtype=bool)
+
+    patched = ski2.morphology.pad_footprint(footprint)
+
+    res1 = bin_func(image, footprint=footprint)
+    res2 = gray_func(image, footprint=patched)
+
+    np.testing.assert_equal(res1, res2)
+    assert res1.dtype == res2.dtype
