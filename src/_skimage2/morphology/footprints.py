@@ -90,7 +90,7 @@ def footprint_rectangle(shape, *, dtype=np.uint8):
 
     Returns
     -------
-    footprint : array or tuple[tuple[ndarray, int], ...]
+    footprint : array
         A footprint consisting only of ones, i.e. every pixel belongs to the
         neighborhood.
 
@@ -130,17 +130,17 @@ def footprint_rectangle_decomposed(shape, *, method="separable", dtype=np.uint8)
     dtype : data-type, optional
         The data type of the footprint.
     method : {'separable', 'sequence'}, optional
-        With `separable' (the default), this function generates separable 1D
+        With 'separable' (the default), this function generates separable 1D
         footprints for each axis. 'sequence' will try to decompose into
         a sequence of more compact footprints. It is only supported for
-        footprints with an odd length in each dimension and will fallback to
+        footprints with an odd length in each dimension and will fall back to
         'separable'. Whether 'sequence' or 'separable' is computationally
         faster may be architecture-dependent.
 
     Returns
     -------
     footprint : tuple[tuple[ndarray, int], ...]
-        A footprint consisting a tuple whose length is equal to the number of
+        A footprint consisting of a tuple whose length is equal to the number of
         unique structuring elements to apply. Each entry of the tuple is another
         2-element tuple containing a footprint followed by the number of times
         it should be applied.
