@@ -207,7 +207,7 @@ def footprint_rectangle_decomposed(shape, *, method="separable", dtype=np.uint8)
         footprint = tuple(footprint)
 
     else:
-        raise ValueError(f"Unrecognized decomposition: {method}")
+        raise ValueError(f"Unrecognized decomposition method: {method}")
 
     return footprint
 
