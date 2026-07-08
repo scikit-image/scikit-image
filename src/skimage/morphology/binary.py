@@ -15,8 +15,8 @@ from .._migration import ski2_migration_decorator
 
 
 _SKIMAGE2_MIGRATION_NOTE_TEMPLATE = """\
-``%(qname_old)s`` is deprecated in favor of
-``%(qname_new)s``.
+`%(qname_old)s` is deprecated in favor of
+`%(qname_new)s`.
 
 To keep the old behavior when switching to `skimage2`, you can use the new
 function as is. But if you use an asymmetric footprint (even length in any
