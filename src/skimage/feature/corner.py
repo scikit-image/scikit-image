@@ -1,3 +1,6 @@
+import numpy as np
+from scipy import spatial
+
 from _skimage2.feature.corner import (
     corner_fast as corner_fast,
     corner_foerstner as corner_foerstner,
@@ -14,6 +17,9 @@ from _skimage2.feature.corner import (
     structure_tensor as structure_tensor,
     structure_tensor_eigenvalues as structure_tensor_eigenvalues,
 )  # noqa: F401
+
+from .peak import peak_local_max
+
 
 __all__ = [
     'corner_fast',
@@ -34,8 +40,6 @@ __all__ = [
 ]
 
 import numpy as np
-
-from _skimage2.feature.corner import corner_peaks as ski2_corner_peaks
 
 from skimage._migration import ski2_migration_decorator
 
@@ -123,22 +127,53 @@ def corner_peaks(
     array([[2, 2]])
 
     """
-    # Allow exclude_border=True|False
-    exclude_border = (
-        0
-        if exclude_border is False
-        else (int(np.floor(min_distance)) if exclude_border is True else exclude_border)
-    )
-    return ski2_corner_peaks(
+    if np.isinf(num_peaks):
+        num_peaks = None
+    if np.isinf(num_peaks_per_label):
+        num_peaks_per_label = None
+
+    # Get the coordinates of the detected peaks
+    coords = peak_local_max(
         image,
         min_distance=min_distance,
         threshold_abs=threshold_abs,
         threshold_rel=threshold_rel,
         exclude_border=exclude_border,
-        indices=indices,
-        num_peaks=num_peaks,
+        num_peaks=None,  # Limiting to `num_peaks` is done in this function
         footprint=footprint,
         labels=labels,
         num_peaks_per_label=num_peaks_per_label,
         p_norm=p_norm,
     )
+
+    if len(coords):
+        # Use KDtree to find the peaks that are too close to each other
+        tree = spatial.cKDTree(coords)
+
+        rejected_peaks_indices = set()
+        for idx, point in enumerate(coords):
+            if idx not in rejected_peaks_indices:
+                candidates = tree.query_ball_point(point, r=min_distance, p=p_norm)
+                candidates.remove(idx)
+                rejected_peaks_indices.update(candidates)
+
+        # Remove the peaks that are too close to each other
+        coords = np.delete(coords, tuple(rejected_peaks_indices), axis=0)
+
+        if num_peaks is not None and len(coords) > num_peaks:
+            # Sort by intensity (highest first) before applying the `num_peaks` limit.
+            # Without labels, `peak_local_max` already returns peaks in intensity order,
+            # but with labels the peaks are grouped per label, so taking the first
+            # `num_peaks` would bias toward the lowest label IDs.
+            intensities = image[tuple(coords.T)]
+            order = np.argsort(-intensities, stable=True)
+            order = order[:num_peaks]
+            coords = coords[order, :]
+
+    if indices:
+        return coords
+
+    peaks = np.zeros_like(image, dtype=bool)
+    peaks[tuple(coords.T)] = True
+
+    return peaks
