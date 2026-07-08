@@ -18,6 +18,7 @@ from _skimage2.feature.corner import (
     structure_tensor_eigenvalues as structure_tensor_eigenvalues,
 )  # noqa: F401
 
+from .._migration import ski2_migration_decorator
 from .peak import peak_local_max
 
 
@@ -39,17 +40,114 @@ __all__ = [
     'structure_tensor_eigenvalues',
 ]
 
-import numpy as np
-
-from skimage._migration import ski2_migration_decorator
-
 
 @ski2_migration_decorator(
-    """\
-``%(qname_old)s`` will be removed in scikit-image 2. Please use
-``skimage2.feature.peak_local_max`` instead.
-""",
+    r"""
+    ``%(qname_old)s`` is deprecated in favor of
+    ``%(qname_new)s`` with new behavior:
+
+    * Peaks are removed when `< min_distance`, was `<= min_distance`
+    * Parameter `indices` is removed
+    * Parameter `p_norm` defaults to 2 (Euclidean distance),
+      was `numpy.inf` (Chebyshev distance)
+    * Parameter `exclude_border` defaults to 1, was ``True``
+    * Parameter `exclude_border` no longer accepts `False` and `True`,
+      pass 0 instead of `False`, or the value of `min_distance` instead of `True`
+    * Parameters after `image` are keyword-only
+
+    To keep the old behavior when switching to `skimage2`, update your call
+    according to the following cases:
+
+    <!--- cond-start: warning -->
+    * `min_distance` not passed, use `min_distance=np.nextafter(1, np.inf)
+    * `min_distance=<number>`, use `min_distance=np.nextafter(<number>, np.inf)
+    * `exclude_border` not passed, use `exclude_border=<value_of_min_distance>`
+    * `exclude_border=True`, same as above
+    * `exclude_border=False`, use `exclude_border=0`
+    * `exclude_border=<int>`, no change necessary
+    * `p_norm` not passed, use `p_norm=numpy.inf`
+    * `p_norm=<float>`, no change necessary
+    * `indices=True` or not passed, no change necessary
+    * `indices=False`, boolean mask with:
+          coords = ski2.feature.peak_local_max(...)
+          peaks = np.zeros_like(image, dtype=bool)
+          peaks[tuple(coords.T)] = True
+    <!--- cond-end -->
+    <!--- cond-start: doc -->
+    .. list-table::
+        :header-rows: 1
+
+        - - In `skimage`
+          - In `skimage2`
+
+        - - `min_distance` not passed (default)
+          - Use ``min_distance=numpy.nextafter(1, numpy.inf)``
+
+        - - ``min_distance=<number>``
+          - Use ``min_distance=numpy.nextafter(<number>, numpy.inf)``
+
+        - - `exclude_border` not passed (default)
+          - Assign it the same value as `min_distance` which may be its default
+            value ``1``. If `min_distance` is a float,
+            use ``int(np.floor(min_distance))``
+
+        - - ``exclude_border=True``
+          - Same as above in the default case.
+
+        - - ``exclude_border=False``
+          - Use ``min_distance=0``.
+
+        - - ``exclude_border=<int>``
+          - No change necessary.
+
+        - - ``p_norm`` not passed (default)
+          - Pass the Skimage 1 default explicitly with ``p_norm=numpy.inf``.
+
+        - - ``p_norm=<float>``
+          - No change necessary.
+
+        - - ``indices=True`` or not passed (default)
+          - No change necessary.
+
+        - - ``indices=False``
+          - Reconstruct peak mask with::
+
+               coords = ski2.feature.peak_local_max(...)
+               peaks = np.zeros_like(image, dtype=bool)
+               peaks[tuple(coords.T)] = True
+
+    Other keyword parameters can be left unchanged.
+
+    >>> import numpy as np
+    >>> import skimage as ski1
+    >>> import skimage2 as ski2
+
+    >>> image = ski2.data.camera()
+
+    >>> res1 = ski1.feature.corner_peaks(image)
+    >>> res2 = ski2.feature.peak_local_max(
+    ...     image,
+    ...     min_distance=np.nextafter(1, np.inf),
+    ...     exclude_border=1,
+    ...     p_norm=np.inf,
+    ... )
+    >>> np.testing.assert_equal(res1, res2)
+
+    >>> res1 = ski1.feature.corner_peaks(image, min_distance=10, indices=False)
+    >>> coords2 = ski2.feature.peak_local_max(
+    ...     image,
+    ...     min_distance=np.nextafter(10, np.inf),
+    ...     exclude_border=10,
+    ...     p_norm=np.inf
+    ... )
+    >>> res2 = np.zeros_like(image, dtype=bool)
+    >>> res2[tuple(coords2.T)] = True
+    >>> np.testing.assert_equal(res1, res2)
+
+    <!--- cond-end -->
+    """,
     qname_old='skimage.feature.corner_peaks',
+    qname_new='skimage2.feature.peak_local_max',
 )
 def corner_peaks(
     image,
