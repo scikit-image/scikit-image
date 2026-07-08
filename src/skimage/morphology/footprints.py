@@ -65,7 +65,7 @@ Other keyword parameters can be left unchanged.
 ...
 >>> fp1 = ski1.morphology.footprint_rectangle((3, 3, 3))
 >>> fp2 = ski2.morphology.footprint_rectangle((3, 3, 3))
->>> assert np.all(fp1 == fp2)
+>>> np.testing.assert_equal(fp1, fp2)
 ...
 
 >>> fp1 = ski1.morphology.footprint_rectangle(
@@ -74,7 +74,7 @@ Other keyword parameters can be left unchanged.
 >>> fp2 = ski2.morphology.footprint_rectangle_decomposed(
 ...     (3, 3, 3), method="sequence"
 ... )
->>> assert np.all(fp1 == fp2)
+>>> np.testing.assert_equal(fp1, fp2)
 
 <!--- cond-end -->
 """,
