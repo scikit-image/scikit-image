@@ -2,7 +2,6 @@ import numpy as np
 
 from _skimage2.morphology.footprints import (
     ball as ball,
-    cube as cube,
     diamond as diamond,
     disk as disk,
     ellipse as ellipse,
@@ -11,10 +10,12 @@ from _skimage2.morphology.footprints import (
     footprint_rectangle_decomposed as _sk2_footprint_rectangle_decompose,
     octagon as octagon,
     octahedron as octahedron,
-    rectangle as rectangle,
-    square as square,
     star as star,
 )  # noqa: F401
+from _skimage2.morphology._footprints import mirror_footprint, pad_footprint  # noqa: F401
+
+from .._migration import ski2_migration_decorator
+
 
 __all__ = [
     'ball',
@@ -31,15 +32,12 @@ __all__ = [
     'star',
 ]
 
-from _skimage2.morphology._footprints import mirror_footprint, pad_footprint  # noqa: F401
-
-from .._migration import ski2_migration_decorator
-
 
 @ski2_migration_decorator(
     """\
 `%(qname_old)s` is deprecated in favor of
-`%(qname_new)s` and `skimage2.morphology.footprint_rectangle_decomposed`.
+`skimage2.morphology.footprint_rectangle` and
+`skimage2.morphology.footprint_rectangle_decomposed`.
 
 * `skimage2.morphology.footprint_rectangle` no longer accepts the ``decompose``
   parameter and will return the footprint as a simple array.
@@ -62,13 +60,12 @@ Other keyword parameters can be left unchanged.
 >>> import numpy as np
 >>> import skimage as ski1
 >>> import skimage2 as ski2
-...
->>> fp1 = ski1.morphology.footprint_rectangle((3, 3, 3))
+
+>>> fp1 = ski1.morphology.%(qual)s((3, 3, 3))
 >>> fp2 = ski2.morphology.footprint_rectangle((3, 3, 3))
 >>> np.testing.assert_equal(fp1, fp2)
-...
 
->>> fp1 = ski1.morphology.footprint_rectangle(
+>>> fp1 = ski1.morphology.%(qual)s(
 ...     (3, 3, 3), decomposition="sequence"
 ... )
 >>> fp2 = ski2.morphology.footprint_rectangle_decomposed(
@@ -153,6 +150,54 @@ def footprint_rectangle(shape, *, dtype=np.uint8, decomposition=None):
     return footprint
 
 
+@ski2_migration_decorator(
+    """\
+`%(qname_old)s` is deprecated in favor of
+`skimage2.morphology.footprint_rectangle` and
+`skimage2.morphology.footprint_rectangle_decomposed`.
+
+* The new functions expect to be given a ``shape`` instead of the parameters
+  ``nrows`` and ``ncols``.
+* `skimage2.morphology.footprint_rectangle` no longer accepts the ``decompose``
+  parameter and will return the footprint as a simple array.
+* `skimage2.morphology.footprint_rectangle_decomposed` uses the new parameter
+  ``method``, which accepts the values of the old ``decomposition`` parameter.
+
+To keep the old behavior when switching to `skimage2`, update your call
+according to the following cases:
+
+* Pass the desired shape of the footprint as a 2-element tuple
+  ``(nrows, ncols)`` of the formerly used parameters.
+* ``decomposition`` not passed, use `skimage2.morphology.footprint_rectangle`
+  with same signature.
+* ``decomposition='sequence'`` or ``decomposition='separable'``, use
+  `skimage2.morphology.footprint_rectangle_decomposed` and pass the old value
+  of ``decomposition`` to the new parameter ``method``.
+
+Other keyword parameters can be left unchanged.
+
+<!--- cond-start: doc -->
+
+>>> import numpy as np
+>>> import skimage as ski1
+>>> import skimage2 as ski2
+
+>>> fp1 = ski1.morphology.%(qual)s(3, 3)
+>>> fp2 = ski2.morphology.footprint_rectangle((3, 3))
+>>> np.testing.assert_equal(fp1, fp2)
+
+>>> fp1 = ski1.morphology.%(qual)s(
+...     3, 3, decomposition="sequence"
+... )
+>>> fp2 = ski2.morphology.footprint_rectangle_decomposed(
+...     (3, 3), method="sequence"
+... )
+>>> np.testing.assert_equal(fp1, fp2)
+
+<!--- cond-end -->
+""",
+    qname_old="skimage.morphology.rectangle",
+)
 def rectangle(nrows, ncols, dtype=np.uint8, *, decomposition=None):
     """Generates a flat, rectangular-shaped footprint.
 
@@ -214,6 +259,54 @@ def rectangle(nrows, ncols, dtype=np.uint8, *, decomposition=None):
     return footprint
 
 
+@ski2_migration_decorator(
+    """\
+`%(qname_old)s` is deprecated in favor of
+`skimage2.morphology.footprint_rectangle` and
+`skimage2.morphology.footprint_rectangle_decomposed`.
+
+* The new functions expect to be given a ``shape`` instead of the parameter
+  ``width``.
+* `skimage2.morphology.footprint_rectangle` no longer accepts the ``decompose``
+  parameter and will return the footprint as a simple array.
+* `skimage2.morphology.footprint_rectangle_decomposed` uses the new parameter
+  ``method``, which accepts the values of the old ``decomposition`` parameter.
+
+To keep the old behavior when switching to `skimage2`, update your call
+according to the following cases:
+
+* Pass the desired shape of the footprint as a 2-element tuple ``(w, w)``
+  where ``w`` is the former ``width`` that was used.
+* ``decomposition`` not passed, use `skimage2.morphology.footprint_rectangle`
+  with same signature.
+* ``decomposition='sequence'`` or ``decomposition='separable'``, use
+  `skimage2.morphology.footprint_rectangle_decomposed` and pass the old value
+  of ``decomposition`` to the new parameter ``method``.
+
+Other keyword parameters can be left unchanged.
+
+<!--- cond-start: doc -->
+
+>>> import numpy as np
+>>> import skimage as ski1
+>>> import skimage2 as ski2
+
+>>> fp1 = ski1.morphology.%(qual)s(3)
+>>> fp2 = ski2.morphology.footprint_rectangle((3, 3))
+>>> np.testing.assert_equal(fp1, fp2)
+
+>>> fp1 = ski1.morphology.%(qual)s(
+...     3, decomposition="sequence"
+... )
+>>> fp2 = ski2.morphology.footprint_rectangle_decomposed(
+...     (3, 3), method="sequence"
+... )
+>>> np.testing.assert_equal(fp1, fp2)
+
+<!--- cond-end -->
+""",
+    qname_old="skimage.morphology.square",
+)
 def square(width, dtype=np.uint8, *, decomposition=None):
     """Generates a flat, square-shaped footprint.
 
@@ -270,6 +363,54 @@ def square(width, dtype=np.uint8, *, decomposition=None):
     return footprint
 
 
+@ski2_migration_decorator(
+    """\
+`%(qname_old)s` is deprecated in favor of
+`skimage2.morphology.footprint_rectangle` and
+`skimage2.morphology.footprint_rectangle_decomposed`.
+
+* The new functions expect to be given a ``shape`` instead of the parameter
+  ``width``.
+* `skimage2.morphology.footprint_rectangle` no longer accepts the ``decompose``
+  parameter and will return the footprint as a simple array.
+* `skimage2.morphology.footprint_rectangle_decomposed` uses the new parameter
+  ``method``, which accepts the values of the old ``decomposition`` parameter.
+
+To keep the old behavior when switching to `skimage2`, update your call
+according to the following cases:
+
+* Pass the desired shape of the footprint as a 3-element tuple ``(w, w, w)``
+  where ``w`` is the former ``width`` that was used.
+* ``decomposition`` not passed, use `skimage2.morphology.footprint_rectangle`
+  with same signature.
+* ``decomposition='sequence'`` or ``decomposition='separable'``, use
+  `skimage2.morphology.footprint_rectangle_decomposed` and pass the old value
+  of ``decomposition`` to the new parameter ``method``.
+
+Other keyword parameters can be left unchanged.
+
+<!--- cond-start: doc -->
+
+>>> import numpy as np
+>>> import skimage as ski1
+>>> import skimage2 as ski2
+
+>>> fp1 = ski1.morphology.%(qual)s(3)
+>>> fp2 = ski2.morphology.footprint_rectangle((3, 3, 3))
+>>> np.testing.assert_equal(fp1, fp2)
+
+>>> fp1 = ski1.morphology.%(qual)s(
+...     3, decomposition="sequence"
+... )
+>>> fp2 = ski2.morphology.footprint_rectangle_decomposed(
+...     (3, 3, 3), method="sequence"
+... )
+>>> np.testing.assert_equal(fp1, fp2)
+
+<!--- cond-end -->
+""",
+    qname_old="skimage.morphology.cube",
+)
 def cube(width, dtype=np.uint8, *, decomposition=None):
     """Generates a cube-shaped footprint.
 
