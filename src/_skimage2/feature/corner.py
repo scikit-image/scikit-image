@@ -4,7 +4,7 @@ from itertools import combinations_with_replacement
 
 import numpy as np
 from scipy import ndimage as ndi
-from scipy import spatial, stats
+from scipy import stats
 
 from ..filters._gaussian import gaussian
 from _skimage2._shared.utils import _supported_float_type, safe_as_int, warn
@@ -693,7 +693,7 @@ def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
 
     Examples
     --------
-    >>> from _skimage2.feature import corner_harris, corner_peaks
+    >>> from _skimage2.feature import corner_harris, peak_local_max
     >>> square = np.zeros([10, 10])
     >>> square[2:8, 2:8] = 1
     >>> square.astype(int)
@@ -707,7 +707,7 @@ def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
            [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
-    >>> corner_peaks(corner_harris(square), min_distance=1)
+    >>> peak_local_max(corner_harris(square), min_distance=1.1)
     array([[2, 2],
            [2, 7],
            [7, 2],
@@ -762,7 +762,7 @@ def corner_shi_tomasi(image, sigma=1):
 
     Examples
     --------
-    >>> from _skimage2.feature import corner_shi_tomasi, corner_peaks
+    >>> from _skimage2.feature import corner_shi_tomasi, peak_local_max
     >>> square = np.zeros([10, 10])
     >>> square[2:8, 2:8] = 1
     >>> square.astype(int)
@@ -776,7 +776,7 @@ def corner_shi_tomasi(image, sigma=1):
            [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
-    >>> corner_peaks(corner_shi_tomasi(square), min_distance=1)
+    >>> peak_local_max(corner_shi_tomasi(square), min_distance=1.1)
     array([[2, 2],
            [2, 7],
            [7, 2],
@@ -832,7 +832,7 @@ def corner_foerstner(image, sigma=1):
 
     Examples
     --------
-    >>> from _skimage2.feature import corner_foerstner, corner_peaks
+    >>> from _skimage2.feature import corner_foerstner, peak_local_max
     >>> square = np.zeros([10, 10])
     >>> square[2:8, 2:8] = 1
     >>> square.astype(int)
@@ -850,7 +850,7 @@ def corner_foerstner(image, sigma=1):
     >>> accuracy_thresh = 0.5
     >>> roundness_thresh = 0.3
     >>> foerstner = (q > roundness_thresh) * (w > accuracy_thresh) * w
-    >>> corner_peaks(foerstner, min_distance=1)
+    >>> peak_local_max(foerstner, min_distance=1.1)
     array([[2, 2],
            [2, 7],
            [7, 2],
@@ -911,7 +911,7 @@ def corner_fast(image, n=12, threshold=0.15):
 
     Examples
     --------
-    >>> from _skimage2.feature import corner_fast, corner_peaks
+    >>> from _skimage2.feature import corner_fast, peak_local_max
     >>> square = np.zeros((12, 12))
     >>> square[3:9, 3:9] = 1
     >>> square.astype(int)
@@ -927,7 +927,7 @@ def corner_fast(image, n=12, threshold=0.15):
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
-    >>> corner_peaks(corner_fast(square, 9), min_distance=1)
+    >>> peak_local_max(corner_fast(square, 9), min_distance=1.1)
     array([[3, 3],
            [3, 8],
            [8, 3],
@@ -978,7 +978,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
 
     Examples
     --------
-    >>> from _skimage2.feature import corner_harris, corner_peaks, corner_subpix
+    >>> from _skimage2.feature import corner_harris, peak_local_max, corner_subpix
     >>> img = np.zeros((10, 10))
     >>> img[:5, :5] = 1
     >>> img[5:, 5:] = 1
@@ -993,7 +993,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1]])
-    >>> coords = corner_peaks(corner_harris(img), min_distance=2)
+    >>> coords = peak_local_max(corner_harris(img), min_distance=2.1)
     >>> coords_subpix = corner_subpix(img, coords, window_size=7)
     >>> coords_subpix
     array([[4.5, 4.5]])
@@ -1207,8 +1207,8 @@ def corner_orientations(image, corners, mask):
     Examples
     --------
     >>> from _skimage2.morphology import octagon
-    >>> from _skimage2.feature import (corner_fast, corner_peaks,
-    ...                              corner_orientations)
+    >>> from _skimage2.feature import (corner_fast, peak_local_max,
+    ...                                corner_orientations)
     >>> square = np.zeros((12, 12))
     >>> square[3:9, 3:9] = 1
     >>> square.astype(int)
@@ -1224,7 +1224,7 @@ def corner_orientations(image, corners, mask):
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
-    >>> corners = corner_peaks(corner_fast(square, 9), min_distance=1)
+    >>> corners = peak_local_max(corner_fast(square, 9), min_distance=1.1)
     >>> corners
     array([[3, 3],
            [3, 8],

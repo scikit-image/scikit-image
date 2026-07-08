@@ -650,6 +650,67 @@ class TestPeakLocalMax:
         peaks = peak_local_max(image, min_distance=2.83, p_norm=2)
         assert_equal(peaks, [[2, 2]])
 
+    def test_legacy_corner_peaks(self):
+        # Formerly a test for `corner_peaks` which wasn't carried over to
+        # skimage2. Instead, `peak_local_max` is meant to replace that function
+        # and its behavior fully. So that function is tested here instead.
+
+        response = np.zeros((10, 10))
+        response[2:5, 2:5] = 1
+        response[8:10, 0:2] = 1
+
+        corners = peak_local_max(
+            response,
+            exclude_border=False,
+            min_distance=np.nextafter(10, np.inf),
+            threshold_rel=0,
+        )
+        assert corners.shape == (1, 2)
+
+        corners = peak_local_max(
+            response,
+            exclude_border=0,
+            min_distance=np.nextafter(5, np.inf),
+            threshold_rel=0,
+        )
+        assert corners.shape == (2, 2)
+
+        corners = peak_local_max(
+            response,
+            exclude_border=0,
+            min_distance=np.nextafter(1, np.inf),
+            p_norm=np.inf,
+        )
+        assert corners.shape == (5, 2)
+
+        corners = peak_local_max(
+            response,
+            exclude_border=0,
+            min_distance=np.nextafter(1, np.inf),
+            p_norm=np.inf,
+        )
+        corners_mask = np.zeros_like(response, dtype=bool)
+        corners_mask[tuple(corners.T)] = True
+        assert np.sum(corners_mask) == 5
+
+    def test_legacy_corner_peaks_num_peaks_with_labels(self):
+        # Formerly a test for `corner_peaks` which wasn't carried over to
+        # skimage2. Instead, `peak_local_max` is meant to replace that function
+        # and its behavior fully. So that function is tested here instead.
+
+        # `num_peaks` with `labels` should pick the globally brightest peaks,
+        # not just the first ones in label order.
+        img = np.zeros((6, 6))
+        img[1, 1] = 1
+        img[2, 3] = 2
+        img[4, 4] = 3
+
+        labels = measure.label(img > 0)
+
+        corners = peak_local_max(img, num_peaks=2, labels=labels, num_peaks_per_label=1)
+        expected = np.array([[4, 4], [2, 3]])
+        assert_equal(corners, expected)
+
 
 @pytest.mark.parametrize(
     ["indices"],
