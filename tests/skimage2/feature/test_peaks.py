@@ -7,6 +7,7 @@ from numpy.testing import assert_equal, assert_allclose
 from scipy.spatial.distance import pdist, minkowski
 from scipy import ndimage as ndi
 
+import _skimage2 as ski2
 from _skimage2.feature._peaks import peak_local_max, _ensure_spacing, _prominent_peaks
 from _skimage2._shared.testing import assert_stacklevel
 
@@ -723,7 +724,7 @@ class TestPeakLocalMax:
         img[2, 3] = 2
         img[4, 4] = 3
 
-        labels = measure.label(img > 0)
+        labels = ski2.measure.label(img > 0)
 
         corners = peak_local_max(img, num_peaks=2, labels=labels, num_peaks_per_label=1)
         expected = np.array([[4, 4], [2, 3]])

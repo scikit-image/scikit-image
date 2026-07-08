@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from numpy.testing import assert_almost_equal, assert_array_equal, assert_equal
 
-from _skimage2 import data, draw, img_as_float, measure
+from _skimage2 import data, draw, img_as_float
 from _skimage2._shared.testing import run_in_parallel
 from _skimage2._shared.utils import _supported_float_type
 from _skimage2.color import rgb2gray
