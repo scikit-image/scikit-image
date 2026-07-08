@@ -19,7 +19,7 @@ _SKIMAGE2_MIGRATION_NOTE_TEMPLATE = """\
 ``%(qname_new)s``.
 
 To keep the old behavior when switching to `skimage2`, you can use the new
-function as is. But if you use an asymmetric footprints (even length in any
+function as is. But if you use an asymmetric footprint (even length in any
 dimension or not symmetric around center) you need to pad the footprint
 with `skimage2.morphology.pad_footprint` (use default ``pad_end=True``).
 
