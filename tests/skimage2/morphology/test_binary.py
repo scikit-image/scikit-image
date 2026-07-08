@@ -1,12 +1,17 @@
+# This file used to test binary variants of morphological operators
+# (`binary_erosion`, `binary_dilation`, `binary_opening`, `binary_closing`)
+# which aren't ported to skimage2. Instead, the tests were updated to test that
+# the grayscale variants work as replacements for the deprecated functions.
+# TODO this file and test_grayscale_operators.py should probably be consolidated.
+
 import numpy as np
 import pytest
-from numpy.testing import assert_array_equal, assert_equal
+from numpy.testing import assert_array_equal
 from scipy import ndimage as ndi
 
 from _skimage2 import data, color, morphology
 from _skimage2.util import img_as_bool
 from _skimage2.morphology import (
-    binary,
     footprints,
     footprint_rectangle,
     erosion,
@@ -14,7 +19,6 @@ from _skimage2.morphology import (
     closing,
     opening,
 )
-from _skimage2._shared.testing import assert_stacklevel
 
 
 img = color.rgb2gray(data.astronaut())
@@ -31,66 +35,66 @@ pytestmark = pytest.mark.filterwarnings(
 
 def test_non_square_image():
     footprint = footprint_rectangle((3, 3))
-    binary_res = binary.binary_erosion(bw_img[:100, :200], footprint)
+    binary_res = erosion(bw_img[:100, :200], footprint)
     gray_res = img_as_bool(erosion(bw_img[:100, :200], footprint))
     assert_array_equal(binary_res, gray_res)
 
 
-def test_binary_erosion():
+def test_erosion():
     footprint = footprint_rectangle((3, 3))
-    binary_res = binary.binary_erosion(bw_img, footprint)
+    binary_res = erosion(bw_img, footprint)
     gray_res = img_as_bool(erosion(bw_img, footprint))
     assert_array_equal(binary_res, gray_res)
 
 
-def test_binary_dilation():
+def test_dilation():
     footprint = footprint_rectangle((3, 3))
-    binary_res = binary.binary_dilation(bw_img, footprint)
+    binary_res = dilation(bw_img, footprint)
     gray_res = img_as_bool(dilation(bw_img, footprint))
     assert_array_equal(binary_res, gray_res)
 
 
-def test_binary_closing():
+def test_closing():
     footprint = footprint_rectangle((3, 3))
-    binary_res = binary.binary_closing(bw_img, footprint)
+    binary_res = closing(bw_img, footprint)
     gray_res = img_as_bool(closing(bw_img, footprint))
     assert_array_equal(binary_res, gray_res)
 
 
-def test_binary_closing_extensive():
+def test_closing_extensive():
     footprint = np.array([[0, 0, 1], [0, 1, 1], [1, 1, 1]])
 
-    result_default = binary.binary_closing(bw_img, footprint=footprint)
+    result_default = closing(bw_img, footprint=footprint)
     assert np.all(result_default >= bw_img)
 
     # mode="min" is expected to be not extensive
-    result_min = binary.binary_closing(img, footprint=footprint, mode="min")
+    result_min = closing(img, footprint=footprint, mode="min")
     assert not np.all(result_min >= bw_img)
 
 
-def test_binary_opening():
+def test_opening():
     footprint = footprint_rectangle((3, 3))
-    binary_res = binary.binary_opening(bw_img, footprint)
+    binary_res = opening(bw_img, footprint)
     gray_res = img_as_bool(opening(bw_img, footprint))
     assert_array_equal(binary_res, gray_res)
 
 
-def test_binary_opening_anti_extensive():
+def test_opening_anti_extensive():
     footprint = np.array([[0, 0, 1], [0, 1, 1], [1, 1, 1]])
 
-    result_default = binary.binary_opening(bw_img, footprint=footprint)
+    result_default = opening(bw_img, footprint=footprint)
     assert np.all(result_default <= bw_img)
 
     # mode="max" is expected to be not extensive
-    result_max = binary.binary_opening(bw_img, footprint=footprint, mode="max")
+    result_max = opening(bw_img, footprint=footprint, mode="max")
     assert not np.all(result_max <= bw_img)
 
 
 def _get_decomp_test_data(function, ndim=2):
-    if function == 'binary_erosion':
+    if function == '_erosion':
         img = np.ones((17,) * ndim, dtype=np.uint8)
         img[8, 8] = 0
-    elif function == 'binary_dilation':
+    elif function == 'dilation':
         img = np.zeros((17,) * ndim, dtype=np.uint8)
         img[8, 8] = 1
     else:
@@ -100,7 +104,7 @@ def _get_decomp_test_data(function, ndim=2):
 
 @pytest.mark.parametrize(
     "function",
-    ["binary_erosion", "binary_dilation", "binary_closing", "binary_opening"],
+    ["erosion", "dilation", "closing", "opening"],
 )
 @pytest.mark.parametrize("nrows", (3, 7, 11))
 @pytest.mark.parametrize("ncols", (3, 7, 11))
@@ -113,7 +117,7 @@ def test_rectangle_decomposition(function, nrows, ncols, decomposition):
     footprint_ndarray = footprint_rectangle((nrows, ncols), decomposition=None)
     footprint = footprint_rectangle((nrows, ncols), decomposition=decomposition)
     img = _get_decomp_test_data(function)
-    func = getattr(binary, function)
+    func = getattr(morphology, function)
     expected = func(img, footprint=footprint_ndarray)
     out = func(img, footprint=footprint)
     assert_array_equal(expected, out)
@@ -121,7 +125,7 @@ def test_rectangle_decomposition(function, nrows, ncols, decomposition):
 
 @pytest.mark.parametrize(
     "function",
-    ["binary_erosion", "binary_dilation", "binary_closing", "binary_opening"],
+    ["erosion", "dilation", "closing", "opening"],
 )
 @pytest.mark.parametrize("m", (0, 1, 2, 3, 4, 5))
 @pytest.mark.parametrize("n", (0, 1, 2, 3, 4, 5))
@@ -141,7 +145,7 @@ def test_octagon_decomposition(function, m, n, decomposition):
         footprint_ndarray = footprints.octagon(m, n, decomposition=None)
         footprint = footprints.octagon(m, n, decomposition=decomposition)
         img = _get_decomp_test_data(function)
-        func = getattr(binary, function)
+        func = getattr(morphology, function)
         expected = func(img, footprint=footprint_ndarray)
         out = func(img, footprint=footprint)
         assert_array_equal(expected, out)
@@ -149,7 +153,7 @@ def test_octagon_decomposition(function, m, n, decomposition):
 
 @pytest.mark.parametrize(
     "function",
-    ["binary_erosion", "binary_dilation", "binary_closing", "binary_opening"],
+    ["erosion", "dilation", "closing", "opening"],
 )
 @pytest.mark.parametrize("radius", (1, 2, 5))
 @pytest.mark.parametrize("decomposition", ['sequence'])
@@ -161,7 +165,7 @@ def test_diamond_decomposition(function, radius, decomposition):
     footprint_ndarray = footprints.diamond(radius, decomposition=None)
     footprint = footprints.diamond(radius, decomposition=decomposition)
     img = _get_decomp_test_data(function)
-    func = getattr(binary, function)
+    func = getattr(morphology, function)
     expected = func(img, footprint=footprint_ndarray)
     out = func(img, footprint=footprint)
     assert_array_equal(expected, out)
@@ -169,7 +173,7 @@ def test_diamond_decomposition(function, radius, decomposition):
 
 @pytest.mark.parametrize(
     "function",
-    ["binary_erosion", "binary_dilation", "binary_closing", "binary_opening"],
+    ["erosion", "dilation", "closing", "opening"],
 )
 @pytest.mark.parametrize("shape", [(3, 3, 3), (3, 4, 5)])
 @pytest.mark.parametrize("decomposition", ['separable', 'sequence'])
@@ -184,7 +188,7 @@ def test_cube_decomposition(function, shape, decomposition):
     footprint_ndarray = footprint_rectangle(shape, decomposition=None)
     footprint = footprint_rectangle(shape, decomposition=decomposition)
     img = _get_decomp_test_data(function, ndim=3)
-    func = getattr(binary, function)
+    func = getattr(morphology, function)
     expected = func(img, footprint=footprint_ndarray)
     out = func(img, footprint=footprint)
     assert_array_equal(expected, out)
@@ -192,7 +196,7 @@ def test_cube_decomposition(function, shape, decomposition):
 
 @pytest.mark.parametrize(
     "function",
-    ["binary_erosion", "binary_dilation", "binary_closing", "binary_opening"],
+    ["erosion", "dilation", "closing", "opening"],
 )
 @pytest.mark.parametrize("radius", (1, 2, 3))
 @pytest.mark.parametrize("decomposition", ['sequence'])
@@ -204,7 +208,7 @@ def test_octahedron_decomposition(function, radius, decomposition):
     footprint_ndarray = footprints.octahedron(radius, decomposition=None)
     footprint = footprints.octahedron(radius, decomposition=decomposition)
     img = _get_decomp_test_data(function, ndim=3)
-    func = getattr(binary, function)
+    func = getattr(morphology, function)
     expected = func(img, footprint=footprint_ndarray)
     out = func(img, footprint=footprint)
     assert_array_equal(expected, out)
@@ -214,13 +218,13 @@ def test_footprint_overflow():
     footprint = np.ones((17, 17), dtype=np.uint8)
     img = np.zeros((20, 20), dtype=bool)
     img[2:19, 2:19] = True
-    binary_res = binary.binary_erosion(img, footprint)
+    binary_res = erosion(img, footprint)
     gray_res = img_as_bool(erosion(img, footprint))
     assert_array_equal(binary_res, gray_res)
 
 
 def test_out_argument():
-    for func in (binary.binary_erosion, binary.binary_dilation):
+    for func in (erosion, dilation):
         footprint = np.ones((3, 3), dtype=np.uint8)
         img = np.ones((10, 10))
         out = np.zeros_like(img)
@@ -231,10 +235,10 @@ def test_out_argument():
 
 
 binary_functions = [
-    binary.binary_erosion,
-    binary.binary_dilation,
-    binary.binary_opening,
-    binary.binary_closing,
+    erosion,
+    dilation,
+    opening,
+    closing,
 ]
 
 
@@ -246,7 +250,7 @@ def test_supported_mode(func, mode):
 
 
 @pytest.mark.parametrize("func", binary_functions)
-@pytest.mark.parametrize("mode", ["reflect", 3, None])
+@pytest.mark.parametrize("mode", [3, None])
 def test_unsupported_mode(func, mode):
     img = np.ones((10, 10))
     with pytest.raises(ValueError, match="unsupported mode"):
@@ -284,7 +288,7 @@ def test_3d_fallback_default_footprint():
     image = np.zeros((7, 7, 7), bool)
     image[2:-2, 2:-2, 2:-2] = 1
 
-    opened = binary.binary_opening(image)
+    opened = opening(image)
 
     # expect a "hyper-cross" centered in the 5x5x5:
     image_expected = np.zeros((7, 7, 7), dtype=bool)
@@ -292,7 +296,7 @@ def test_3d_fallback_default_footprint():
     assert_array_equal(opened, image_expected)
 
 
-binary_3d_fallback_functions = [binary.binary_opening, binary.binary_closing]
+binary_3d_fallback_functions = [opening, closing]
 
 
 @pytest.mark.parametrize("function", binary_3d_fallback_functions)
@@ -307,14 +311,22 @@ def test_3d_fallback_cube_footprint(function):
     assert_array_equal(new_image, image)
 
 
-def test_2d_ndimage_equivalence():
-    image = np.zeros((9, 9), np.uint16)
+@pytest.mark.parametrize("input_dtype", [np.uint16, bool])
+def test_2d_ndimage_equivalence(input_dtype):
+    image = np.zeros((9, 9), dtype=input_dtype)
     image[2:-2, 2:-2] = 2**14
     image[3:-3, 3:-3] = 2**15
     image[4, 4] = 2**16 - 1
 
-    bin_opened = binary.binary_opening(image)
-    bin_closed = binary.binary_closing(image)
+    bin_opened = opening(image)
+    bin_closed = closing(image)
+
+    if input_dtype != bool:
+        # If non-boolean input was given, the result should still be equivalent
+        # if converted to `bool` (not sure if this would be true for floats with
+        # floating-point errors)
+        bin_opened = bin_opened.astype(bool)
+        bin_closed = bin_closed.astype(bool)
 
     footprint = ndi.generate_binary_structure(2, 1)
     ndimage_opened = ndi.binary_opening(image, structure=footprint)
@@ -324,58 +336,43 @@ def test_2d_ndimage_equivalence():
     assert_array_equal(bin_closed, ndimage_closed)
 
 
-def test_binary_output_2d():
+def test_out_param_with_different_dtype_2d():
     image = np.zeros((9, 9), np.uint16)
     image[2:-2, 2:-2] = 2**14
     image[3:-3, 3:-3] = 2**15
     image[4, 4] = 2**16 - 1
 
-    bin_opened = binary.binary_opening(image)
-    bin_closed = binary.binary_closing(image)
+    opened = opening(image)
+    closed = closing(image)
 
-    int_opened = np.empty_like(image, dtype=np.uint8)
-    int_closed = np.empty_like(image, dtype=np.uint8)
-    binary.binary_opening(image, out=int_opened)
-    binary.binary_closing(image, out=int_closed)
+    out_opened = np.empty_like(image, dtype=np.uint8)
+    out_closed = np.empty_like(image, dtype=np.uint8)
+    opening(image, out=out_opened)
+    closing(image, out=out_closed)
 
-    assert_equal(bin_opened.dtype, bool)
-    assert_equal(bin_closed.dtype, bool)
+    assert opened.dtype == np.uint16
+    assert closed.dtype == np.uint16
 
-    assert_equal(int_opened.dtype, np.uint8)
-    assert_equal(int_closed.dtype, np.uint8)
+    assert out_opened.dtype == np.uint8
+    assert out_closed.dtype == np.uint8
 
 
-def test_binary_output_3d():
+def test_out_param_with_different_dtype_3d():
     image = np.zeros((9, 9, 9), np.uint16)
     image[2:-2, 2:-2, 2:-2] = 2**14
     image[3:-3, 3:-3, 3:-3] = 2**15
     image[4, 4, 4] = 2**16 - 1
 
-    bin_opened = binary.binary_opening(image)
-    bin_closed = binary.binary_closing(image)
+    opened = opening(image)
+    closed = closing(image)
 
-    int_opened = np.empty_like(image, dtype=np.uint8)
-    int_closed = np.empty_like(image, dtype=np.uint8)
-    binary.binary_opening(image, out=int_opened)
-    binary.binary_closing(image, out=int_closed)
+    out_opened = np.empty_like(image, dtype=np.uint8)
+    out_closed = np.empty_like(image, dtype=np.uint8)
+    opening(image, out=out_opened)
+    closing(image, out=out_closed)
 
-    assert_equal(bin_opened.dtype, bool)
-    assert_equal(bin_closed.dtype, bool)
+    assert opened.dtype == np.uint16
+    assert closed.dtype == np.uint16
 
-    assert_equal(int_opened.dtype, np.uint8)
-    assert_equal(int_closed.dtype, np.uint8)
-
-
-@pytest.mark.parametrize(
-    "func_name",
-    ["binary_erosion", "binary_dilation", "binary_opening", "binary_closing"],
-)
-def test_deprecation_warning(func_name):
-    func = getattr(binary, func_name)
-    footprint = footprint_rectangle((3, 3))
-
-    regex = f"`{func_name}` is deprecated"
-    with pytest.warns(FutureWarning, match=regex) as record:
-        func(bw_img, footprint)
-    assert_stacklevel(record)
-    assert len(record) == 1
+    assert out_opened.dtype == np.uint8
+    assert out_closed.dtype == np.uint8
