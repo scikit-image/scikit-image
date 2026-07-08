@@ -4,7 +4,6 @@ import numpy as np
 
 from ._footprints import _footprint_is_sequence
 from .._shared._warnings import warn_external
-from .._shared.utils import deprecate_func
 from ..draw.draw import ellipse as _draw_ellipse
 from ._grayscale_operators import dilation
 
