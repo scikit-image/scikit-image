@@ -9,7 +9,6 @@ from .isotropic import (
 
 from .footprints import (
     ball,
-    cube,
     diamond,
     disk,
     ellipse,
@@ -18,8 +17,6 @@ from .footprints import (
     footprint_rectangle_decomposed,
     octagon,
     octahedron,
-    rectangle,
-    square,
     star,
 )
 
