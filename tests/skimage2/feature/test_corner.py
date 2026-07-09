@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from numpy.testing import assert_almost_equal, assert_array_equal, assert_equal
 
-from _skimage2 import data, draw, img_as_float, measure
+from _skimage2 import data, draw, img_as_float
 from _skimage2._shared.testing import run_in_parallel
 from _skimage2._shared.utils import _supported_float_type
 from _skimage2.color import rgb2gray
@@ -13,7 +13,6 @@ from _skimage2.feature import (
     corner_kitchen_rosenfeld,
     corner_moravec,
     corner_orientations,
-    corner_peaks,
     corner_shi_tomasi,
     corner_subpix,
     hessian_matrix,
@@ -644,7 +643,13 @@ def test_subpix_border():
     img = np.zeros((50, 50))
     img[1:25, 1:25] = 255
     img[25:-1, 25:-1] = 255
-    corner = corner_peaks(corner_harris(img), threshold_rel=0)
+    corner = peak_local_max(
+        corner_harris(img),
+        min_distance=np.nextafter(1, np.inf),
+        exclude_border=1,
+        threshold_rel=0,
+        p_norm=np.inf,
+    )
     subpix = corner_subpix(img, corner, window_size=11)
     ref = np.array(
         [
@@ -677,46 +682,6 @@ def test_num_peaks():
             img_corners, min_distance=10, threshold_rel=0, num_peaks=n
         )
         assert results.shape[0] == n
-
-
-def test_corner_peaks():
-    response = np.zeros((10, 10))
-    response[2:5, 2:5] = 1
-    response[8:10, 0:2] = 1
-
-    corners = corner_peaks(
-        response, exclude_border=False, min_distance=10, threshold_rel=0
-    )
-    assert corners.shape == (1, 2)
-
-    corners = corner_peaks(
-        response, exclude_border=False, min_distance=5, threshold_rel=0
-    )
-    assert corners.shape == (2, 2)
-
-    corners = corner_peaks(response, exclude_border=False, min_distance=1)
-    assert corners.shape == (5, 2)
-
-    corners = corner_peaks(
-        response, exclude_border=False, min_distance=1, indices=False
-    )
-    assert np.sum(corners) == 5
-
-
-def test_corner_peaks_num_peaks_with_labels():
-    """`num_peaks` with `labels` should pick the globally brightest peaks,
-    not just the first ones in label order.
-    """
-    img = np.zeros((6, 6))
-    img[1, 1] = 1
-    img[2, 3] = 2
-    img[4, 4] = 3
-
-    labels = measure.label(img > 0)
-
-    corners = corner_peaks(img, num_peaks=2, labels=labels, num_peaks_per_label=1)
-    expected = np.array([[4, 4], [2, 3]])
-    assert_equal(corners, expected)
 
 
 def test_blank_image_nans():
@@ -789,8 +754,11 @@ def test_corner_fast_astronaut():
             [223, 375],
         ]
     )
-    actual = corner_peaks(
-        corner_fast(img, 12, 0.3), exclude_border=10, min_distance=10, threshold_rel=0
+    actual = peak_local_max(
+        corner_fast(img, 12, 0.3),
+        exclude_border=10,
+        min_distance=np.nextafter(10, np.inf),
+        threshold_rel=0,
     )
     assert_array_equal(actual, expected)
 
@@ -810,10 +778,10 @@ def test_corner_orientations_even_shape_error():
 @run_in_parallel()
 def test_corner_orientations_astronaut():
     img = rgb2gray(data.astronaut())
-    corners = corner_peaks(
+    corners = peak_local_max(
         corner_fast(img, 11, 0.35),
         exclude_border=10,
-        min_distance=10,
+        min_distance=np.nextafter(10, np.inf),
         threshold_abs=0,
         threshold_rel=0.1,
     )
@@ -865,7 +833,9 @@ def test_corner_orientations_astronaut():
 def test_corner_orientations_square(dtype):
     square = np.zeros((12, 12), dtype=dtype)
     square[3:9, 3:9] = 1
-    corners = corner_peaks(corner_fast(square, 9), min_distance=1, threshold_rel=0)
+    corners = peak_local_max(
+        corner_fast(square, 9), min_distance=np.nextafter(1, np.inf), threshold_rel=0
+    )
     actual_orientations = corner_orientations(square, corners, octagon(3, 2))
     assert actual_orientations.dtype == _supported_float_type(dtype)
     actual_orientations_degrees = np.rad2deg(actual_orientations)

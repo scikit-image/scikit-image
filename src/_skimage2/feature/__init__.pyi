@@ -24,7 +24,6 @@ __all__ = [
     'corner_shi_tomasi',
     'corner_foerstner',
     'corner_subpix',
-    'corner_peaks',
     'corner_moravec',
     'corner_fast',
     'corner_orientations',
@@ -58,13 +57,12 @@ from .texture import (
     draw_multiblock_lbp,
 )
 from ._peaks import peak_local_max
-from .corner import (
+from ._corner import (
     corner_kitchen_rosenfeld,
     corner_harris,
     corner_shi_tomasi,
     corner_foerstner,
     corner_subpix,
-    corner_peaks,
     corner_fast,
     structure_tensor,
     structure_tensor_eigenvalues,

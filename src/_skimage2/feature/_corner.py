@@ -4,7 +4,7 @@ from itertools import combinations_with_replacement
 
 import numpy as np
 from scipy import ndimage as ndi
-from scipy import spatial, stats
+from scipy import stats
 
 from ..filters._gaussian import gaussian
 from _skimage2._shared.utils import _supported_float_type, safe_as_int, warn
@@ -693,7 +693,7 @@ def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
 
     Examples
     --------
-    >>> from _skimage2.feature import corner_harris, corner_peaks
+    >>> from _skimage2.feature import corner_harris, peak_local_max
     >>> square = np.zeros([10, 10])
     >>> square[2:8, 2:8] = 1
     >>> square.astype(int)
@@ -707,7 +707,7 @@ def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
            [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
-    >>> corner_peaks(corner_harris(square), min_distance=1)
+    >>> peak_local_max(corner_harris(square), min_distance=1.1)
     array([[2, 2],
            [2, 7],
            [7, 2],
@@ -762,7 +762,7 @@ def corner_shi_tomasi(image, sigma=1):
 
     Examples
     --------
-    >>> from _skimage2.feature import corner_shi_tomasi, corner_peaks
+    >>> from _skimage2.feature import corner_shi_tomasi, peak_local_max
     >>> square = np.zeros([10, 10])
     >>> square[2:8, 2:8] = 1
     >>> square.astype(int)
@@ -776,7 +776,7 @@ def corner_shi_tomasi(image, sigma=1):
            [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
-    >>> corner_peaks(corner_shi_tomasi(square), min_distance=1)
+    >>> peak_local_max(corner_shi_tomasi(square), min_distance=1.1)
     array([[2, 2],
            [2, 7],
            [7, 2],
@@ -832,7 +832,7 @@ def corner_foerstner(image, sigma=1):
 
     Examples
     --------
-    >>> from _skimage2.feature import corner_foerstner, corner_peaks
+    >>> from _skimage2.feature import corner_foerstner, peak_local_max
     >>> square = np.zeros([10, 10])
     >>> square[2:8, 2:8] = 1
     >>> square.astype(int)
@@ -850,7 +850,7 @@ def corner_foerstner(image, sigma=1):
     >>> accuracy_thresh = 0.5
     >>> roundness_thresh = 0.3
     >>> foerstner = (q > roundness_thresh) * (w > accuracy_thresh) * w
-    >>> corner_peaks(foerstner, min_distance=1)
+    >>> peak_local_max(foerstner, min_distance=1.1)
     array([[2, 2],
            [2, 7],
            [7, 2],
@@ -911,7 +911,7 @@ def corner_fast(image, n=12, threshold=0.15):
 
     Examples
     --------
-    >>> from _skimage2.feature import corner_fast, corner_peaks
+    >>> from _skimage2.feature import corner_fast, peak_local_max
     >>> square = np.zeros((12, 12))
     >>> square[3:9, 3:9] = 1
     >>> square.astype(int)
@@ -927,7 +927,7 @@ def corner_fast(image, n=12, threshold=0.15):
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
-    >>> corner_peaks(corner_fast(square, 9), min_distance=1)
+    >>> peak_local_max(corner_fast(square, 9), min_distance=1.1)
     array([[3, 3],
            [3, 8],
            [8, 3],
@@ -978,7 +978,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
 
     Examples
     --------
-    >>> from _skimage2.feature import corner_harris, corner_peaks, corner_subpix
+    >>> from _skimage2.feature import corner_harris, peak_local_max, corner_subpix
     >>> img = np.zeros((10, 10))
     >>> img[:5, :5] = 1
     >>> img[5:, 5:] = 1
@@ -993,7 +993,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1]])
-    >>> coords = corner_peaks(corner_harris(img), min_distance=2)
+    >>> coords = peak_local_max(corner_harris(img), min_distance=2.1)
     >>> coords_subpix = corner_subpix(img, coords, window_size=7)
     >>> coords_subpix
     array([[4.5, 4.5]])
@@ -1122,137 +1122,6 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
     return corners_subpix
 
 
-def corner_peaks(
-    image,
-    min_distance=1,
-    threshold_abs=None,
-    threshold_rel=None,
-    exclude_border=1,
-    indices=True,
-    num_peaks=np.inf,
-    footprint=None,
-    labels=None,
-    *,
-    num_peaks_per_label=np.inf,
-    p_norm=np.inf,
-):
-    """Find peaks in corner measure response image.
-
-    This differs from `skimage.feature.peak_local_max` in that it suppresses
-    multiple connected peaks with the same accumulator value.
-
-    Parameters
-    ----------
-    image : ndarray of shape (M, N)
-        Input image.
-    min_distance : int, optional
-        The minimal allowed distance separating peaks.
-    * : *
-        See :py:meth:`skimage.feature.peak_local_max`.
-    p_norm : float
-        Which Minkowski p-norm to use. Should be in the range [1, inf].
-        A finite large p may cause a ValueError if overflow can occur.
-        ``inf`` corresponds to the Chebyshev distance and 2 to the
-        Euclidean distance.
-
-    Returns
-    -------
-    output : ndarray or ndarray of bools
-
-        * If `indices = True`  : (row, column, ...) coordinates of peaks.
-        * If `indices = False` : Boolean array shaped like `image`, with peaks
-          represented by True values.
-
-    See also
-    --------
-    skimage.feature.peak_local_max
-
-    Notes
-    -----
-    .. versionchanged:: 0.18
-        The default value of `threshold_rel` has changed to None, which
-        corresponds to letting `skimage.feature.peak_local_max` decide on the
-        default. This is equivalent to `threshold_rel=0`.
-
-    The `num_peaks` limit is applied before suppression of connected peaks.
-    To limit the number of peaks after suppression, set `num_peaks=np.inf` and
-    post-process the output of this function.
-
-    Examples
-    --------
-    >>> from _skimage2.feature import peak_local_max
-    >>> response = np.zeros((5, 5))
-    >>> response[2:4, 2:4] = 1
-    >>> response
-    array([[0., 0., 0., 0., 0.],
-           [0., 0., 0., 0., 0.],
-           [0., 0., 1., 1., 0.],
-           [0., 0., 1., 1., 0.],
-           [0., 0., 0., 0., 0.]])
-    >>> peak_local_max(response)
-    array([[2, 2],
-           [2, 3],
-           [3, 2],
-           [3, 3]])
-    >>> corner_peaks(response)
-    array([[2, 2]])
-
-    """
-    if np.isinf(num_peaks):
-        num_peaks = None
-    if np.isinf(num_peaks_per_label):
-        num_peaks_per_label = None
-
-    # Avoid circular import
-    from ._peaks import peak_local_max
-
-    # Get the coordinates of the detected peaks
-    coords = peak_local_max(
-        image,
-        min_distance=min_distance,
-        threshold_abs=threshold_abs,
-        threshold_rel=threshold_rel,
-        exclude_border=exclude_border,
-        num_peaks=None,  # Limiting to `num_peaks` is done in this function
-        footprint=footprint,
-        labels=labels,
-        num_peaks_per_label=num_peaks_per_label,
-        p_norm=p_norm,
-    )
-
-    if len(coords):
-        # Use KDtree to find the peaks that are too close to each other
-        tree = spatial.cKDTree(coords)
-
-        rejected_peaks_indices = set()
-        for idx, point in enumerate(coords):
-            if idx not in rejected_peaks_indices:
-                candidates = tree.query_ball_point(point, r=min_distance, p=p_norm)
-                candidates.remove(idx)
-                rejected_peaks_indices.update(candidates)
-
-        # Remove the peaks that are too close to each other
-        coords = np.delete(coords, tuple(rejected_peaks_indices), axis=0)
-
-        if num_peaks is not None and len(coords) > num_peaks:
-            # Sort by intensity (highest first) before applying the `num_peaks` limit.
-            # Without labels, `peak_local_max` already returns peaks in intensity order,
-            # but with labels the peaks are grouped per label, so taking the first
-            # `num_peaks` would bias toward the lowest label IDs.
-            intensities = image[tuple(coords.T)]
-            order = np.argsort(-intensities, stable=True)
-            order = order[:num_peaks]
-            coords = coords[order, :]
-
-    if indices:
-        return coords
-
-    peaks = np.zeros_like(image, dtype=bool)
-    peaks[tuple(coords.T)] = True
-
-    return peaks
-
-
 def corner_moravec(image, window_size=1):
     """Compute Moravec corner measure response image.
 
@@ -1338,8 +1207,8 @@ def corner_orientations(image, corners, mask):
     Examples
     --------
     >>> from _skimage2.morphology import octagon
-    >>> from _skimage2.feature import (corner_fast, corner_peaks,
-    ...                              corner_orientations)
+    >>> from _skimage2.feature import (corner_fast, peak_local_max,
+    ...                                corner_orientations)
     >>> square = np.zeros((12, 12))
     >>> square[3:9, 3:9] = 1
     >>> square.astype(int)
@@ -1355,7 +1224,7 @@ def corner_orientations(image, corners, mask):
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
-    >>> corners = corner_peaks(corner_fast(square, 9), min_distance=1)
+    >>> corners = peak_local_max(corner_fast(square, 9), min_distance=1.1)
     >>> corners
     array([[3, 3],
            [3, 8],

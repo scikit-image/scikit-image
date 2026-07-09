@@ -7,10 +7,11 @@ from ..feature.util import (
     _prepare_grayscale_input_2D,
 )
 
-from .corner import corner_fast, corner_orientations, corner_peaks, corner_harris
+from ._peaks import peak_local_max
+from ._corner import corner_fast, corner_orientations, corner_harris
 from ..transform.pyramids import pyramid_gaussian
-from _skimage2._shared.utils import check_nD
-from _skimage2._shared.compat import NP_COPY_IF_NEEDED
+from .._shared.utils import check_nD
+from .._shared.compat import NP_COPY_IF_NEEDED
 
 from .orb_cy import _orb_loop
 
@@ -150,7 +151,12 @@ class ORB(FeatureDetector, DescriptorExtractor):
         dtype = octave_image.dtype
         # Extract keypoints for current octave
         fast_response = corner_fast(octave_image, self.fast_n, self.fast_threshold)
-        keypoints = corner_peaks(fast_response, min_distance=1)
+        keypoints = peak_local_max(
+            fast_response,
+            min_distance=np.nextafter(1, np.inf),
+            exclude_border=1,
+            p_norm=np.inf,
+        )
 
         if len(keypoints) == 0:
             return (
