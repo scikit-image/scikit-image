@@ -23,7 +23,6 @@ def docs(*, parent_callback, install_deps, **kwargs):
     # `spin.cmds.meson.docs`. So we provide our own `clean_dirs`
     kwargs["clean_dirs"] = kwargs.get("clean_dirs", []) + [
         "./doc/build/",
-        "./doc/build/",
         "./doc/source/api/",
         "./doc/source/api2/",
         "./doc/source/auto_examples/",
