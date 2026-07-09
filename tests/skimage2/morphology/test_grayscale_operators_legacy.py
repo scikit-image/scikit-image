@@ -21,19 +21,10 @@ from _skimage2.morphology import (
 )
 
 
-img = color.rgb2gray(data.astronaut())
-bw_img = img > 100 / 255.0
-
-
-pytestmark = pytest.mark.filterwarnings(
-    "ignore:"
-    "`binary_(dilation|erosion|opening|closing)` is deprecated.*"
-    "Use `skimage.morphology.(dilation|erosion|opening|closing)` instead"
-    ":FutureWarning"
-)
-
-
 def test_non_square_image():
+    img = color.rgb2gray(data.astronaut())
+    bw_img = img > 100 / 255.0
+
     footprint = footprint_rectangle((3, 3))
     binary_res = erosion(bw_img[:100, :200], footprint)
     gray_res = img_as_bool(erosion(bw_img[:100, :200], footprint))
@@ -41,6 +32,9 @@ def test_non_square_image():
 
 
 def test_erosion():
+    img = color.rgb2gray(data.astronaut())
+    bw_img = img > 100 / 255.0
+
     footprint = footprint_rectangle((3, 3))
     binary_res = erosion(bw_img, footprint)
     gray_res = img_as_bool(erosion(bw_img, footprint))
@@ -48,6 +42,9 @@ def test_erosion():
 
 
 def test_dilation():
+    img = color.rgb2gray(data.astronaut())
+    bw_img = img > 100 / 255.0
+
     footprint = footprint_rectangle((3, 3))
     binary_res = dilation(bw_img, footprint)
     gray_res = img_as_bool(dilation(bw_img, footprint))
@@ -55,6 +52,9 @@ def test_dilation():
 
 
 def test_closing():
+    img = color.rgb2gray(data.astronaut())
+    bw_img = img > 100 / 255.0
+
     footprint = footprint_rectangle((3, 3))
     binary_res = closing(bw_img, footprint)
     gray_res = img_as_bool(closing(bw_img, footprint))
@@ -62,6 +62,9 @@ def test_closing():
 
 
 def test_closing_extensive():
+    img = color.rgb2gray(data.astronaut())
+    bw_img = img > 100 / 255.0
+
     footprint = np.array([[0, 0, 1], [0, 1, 1], [1, 1, 1]])
 
     result_default = closing(bw_img, footprint=footprint)
@@ -73,6 +76,9 @@ def test_closing_extensive():
 
 
 def test_opening():
+    img = color.rgb2gray(data.astronaut())
+    bw_img = img > 100 / 255.0
+
     footprint = footprint_rectangle((3, 3))
     binary_res = opening(bw_img, footprint)
     gray_res = img_as_bool(opening(bw_img, footprint))
@@ -80,6 +86,9 @@ def test_opening():
 
 
 def test_opening_anti_extensive():
+    img = color.rgb2gray(data.astronaut())
+    bw_img = img > 100 / 255.0
+
     footprint = np.array([[0, 0, 1], [0, 1, 1], [1, 1, 1]])
 
     result_default = opening(bw_img, footprint=footprint)
@@ -234,22 +243,30 @@ def test_out_argument():
         assert_array_equal(out, func(img, footprint))
 
 
-binary_functions = [
-    erosion,
-    dilation,
-    opening,
-    closing,
-]
-
-
-@pytest.mark.parametrize("func", binary_functions)
+@pytest.mark.parametrize(
+    "func",
+    [
+        erosion,
+        dilation,
+        opening,
+        closing,
+    ],
+)
 @pytest.mark.parametrize("mode", ['max', 'min', 'ignore'])
 def test_supported_mode(func, mode):
     img = np.ones((10, 10), dtype=bool)
     func(img, mode=mode)
 
 
-@pytest.mark.parametrize("func", binary_functions)
+@pytest.mark.parametrize(
+    "func",
+    [
+        erosion,
+        dilation,
+        opening,
+        closing,
+    ],
+)
 @pytest.mark.parametrize("mode", [3, None])
 def test_unsupported_mode(func, mode):
     img = np.ones((10, 10))
@@ -257,7 +274,15 @@ def test_unsupported_mode(func, mode):
         func(img, mode=mode)
 
 
-@pytest.mark.parametrize("function", binary_functions)
+@pytest.mark.parametrize(
+    "function",
+    [
+        erosion,
+        dilation,
+        opening,
+        closing,
+    ],
+)
 def test_default_footprint(function):
     footprint = morphology.diamond(radius=1)
     image = np.array(
@@ -296,10 +321,7 @@ def test_3d_fallback_default_footprint():
     assert_array_equal(opened, image_expected)
 
 
-binary_3d_fallback_functions = [opening, closing]
-
-
-@pytest.mark.parametrize("function", binary_3d_fallback_functions)
+@pytest.mark.parametrize("function", [opening, closing])
 def test_3d_fallback_cube_footprint(function):
     # 3x3x3 cube inside a 7x7x7 image:
     image = np.zeros((7, 7, 7), bool)
