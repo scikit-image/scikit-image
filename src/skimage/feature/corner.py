@@ -1,7 +1,7 @@
 import numpy as np
 from scipy import spatial
 
-from _skimage2.feature.corner import (
+from _skimage2.feature._corner import (
     corner_fast as corner_fast,
     corner_foerstner as corner_foerstner,
     corner_harris as corner_harris,

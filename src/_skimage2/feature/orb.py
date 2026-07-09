@@ -8,7 +8,7 @@ from ..feature.util import (
 )
 
 from ._peaks import peak_local_max
-from .corner import corner_fast, corner_orientations, corner_harris
+from ._corner import corner_fast, corner_orientations, corner_harris
 from ..transform.pyramids import pyramid_gaussian
 from .._shared.utils import check_nD
 from .._shared.compat import NP_COPY_IF_NEEDED

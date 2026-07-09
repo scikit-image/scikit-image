@@ -67,7 +67,7 @@ def meijering(
         :DOI:`10.1002/cyto.a.20022`
     """
     # Avoid circular import
-    from ..feature.corner import hessian_matrix, hessian_matrix_eigvals
+    from ..feature._corner import hessian_matrix, hessian_matrix_eigvals
 
     image = image.astype(_supported_float_type(image.dtype), copy=False)
     if not black_ridges:  # Normalize to black ridges.
@@ -148,7 +148,7 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True, mode='reflect', cval=
         :DOI:`10.1016/S1361-8415(98)80009-1`
     """
     # Avoid circular import
-    from ..feature.corner import hessian_matrix, hessian_matrix_eigvals
+    from ..feature._corner import hessian_matrix, hessian_matrix_eigvals
 
     check_nD(image, [2, 3])  # Check image dimensions.
     image = image.astype(_supported_float_type(image.dtype), copy=False)
@@ -264,7 +264,7 @@ def frangi(
     .. [3] Ellis, D. G.: https://github.com/ellisdg/frangi3d/tree/master/frangi
     """
     # Avoid circular import
-    from ..feature.corner import hessian_matrix, hessian_matrix_eigvals
+    from ..feature._corner import hessian_matrix, hessian_matrix_eigvals
 
     if scale_range is not None and scale_step is not None:
         warn(
