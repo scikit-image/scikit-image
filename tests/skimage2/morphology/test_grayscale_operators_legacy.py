@@ -91,7 +91,7 @@ def test_opening_anti_extensive():
 
 
 def _get_decomp_test_data(function, ndim=2):
-    if function == '_erosion':
+    if function == 'erosion':
         img = np.ones((17,) * ndim, dtype=np.uint8)
         img[8, 8] = 0
     elif function == 'dilation':
