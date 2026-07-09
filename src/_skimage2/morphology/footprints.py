@@ -1,3 +1,5 @@
+# TODO merge contents of this file into _footprints.py
+
 import os
 
 import numpy as np
