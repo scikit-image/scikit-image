@@ -103,3 +103,8 @@ def binary_blobs(
         rng=rng,
         boundary_mode=boundary_mode,
     )
+
+
+from skimage._docutils import bind_namespace  # noqa: E402
+
+bind_namespace(globals())

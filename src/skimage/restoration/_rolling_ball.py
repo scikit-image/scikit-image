@@ -9,3 +9,7 @@ __all__ = [
     'ellipsoid_kernel',
     'rolling_ball',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

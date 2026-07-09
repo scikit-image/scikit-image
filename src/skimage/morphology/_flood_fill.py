@@ -15,3 +15,7 @@ __all__ = [
     'flood',
     'flood_fill',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

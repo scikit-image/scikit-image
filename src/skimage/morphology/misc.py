@@ -17,3 +17,7 @@ __all__ = [
     'remove_small_objects',
     'skimage2ndimage',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

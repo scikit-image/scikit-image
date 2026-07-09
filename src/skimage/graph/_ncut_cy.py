@@ -7,3 +7,7 @@ __all__ = [
     'argmin2',
     'cut_cost',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

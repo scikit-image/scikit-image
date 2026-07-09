@@ -13,3 +13,7 @@ __all__ = [
     'STAR_FILTER_SHAPE',
     'STAR_SHAPE',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

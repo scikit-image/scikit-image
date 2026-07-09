@@ -7,3 +7,7 @@ __all__ = [
     'registry',
     'registry_urls',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

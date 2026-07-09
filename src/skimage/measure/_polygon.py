@@ -9,3 +9,7 @@ __all__ = [
 ]
 
 from _skimage2.measure._polygon import _SUBDIVISION_MASKS  # noqa: F401
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

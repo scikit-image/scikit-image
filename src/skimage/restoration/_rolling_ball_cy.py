@@ -9,3 +9,7 @@ __all__ = [
     'apply_kernel_nan',
     'math',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

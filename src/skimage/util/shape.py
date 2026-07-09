@@ -7,3 +7,7 @@ __all__ = [
     'view_as_blocks',
     'view_as_windows',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

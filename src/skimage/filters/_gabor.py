@@ -9,3 +9,7 @@ __all__ = [
 ]
 
 from _skimage2.filters._gabor import _sigma_prefactor  # noqa: F401
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

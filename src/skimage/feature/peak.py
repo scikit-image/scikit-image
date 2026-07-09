@@ -235,3 +235,8 @@ def peak_local_max(
         p_norm=p_norm,
     )
     return coordinates
+
+
+from skimage._docutils import bind_namespace  # noqa: E402
+
+bind_namespace(globals())

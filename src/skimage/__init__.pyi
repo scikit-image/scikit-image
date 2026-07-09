@@ -18,7 +18,15 @@ _submodules = [
     'util',
 ]
 
-__all__ = _submodules + ['__version__']  # noqa: F822
+__all__ = _submodules + [
+    '__version__',
+    'pickle_dump',
+    'pickle_dumps',
+    'pickle_load',
+    'pickle_loads',
+]
+
+__version__: str
 
 from . import (
     color,
@@ -53,3 +61,9 @@ from .util.dtype import (
 )
 from .util.lookfor import lookfor
 from .data import data_dir
+from ._pickle_compat import (
+    pickle_dump as pickle_dump,
+    pickle_dumps as pickle_dumps,
+    pickle_load as pickle_load,
+    pickle_loads as pickle_loads,
+)

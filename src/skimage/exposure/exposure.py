@@ -19,3 +19,7 @@ __all__ = [
 ]
 
 from _skimage2.exposure.exposure import intensity_range, is_low_contrast  # noqa: F401
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

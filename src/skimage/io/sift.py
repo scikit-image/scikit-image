@@ -7,3 +7,7 @@ __all__ = [
     'load_sift',
     'load_surf',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

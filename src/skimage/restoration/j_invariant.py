@@ -7,3 +7,7 @@ __all__ = [
     'calibrate_denoiser',
     'denoise_invariant',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

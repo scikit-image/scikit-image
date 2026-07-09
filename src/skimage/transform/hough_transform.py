@@ -17,3 +17,7 @@ __all__ = [
     'label_distant_points',
     'probabilistic_hough_line',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

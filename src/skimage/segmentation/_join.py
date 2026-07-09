@@ -7,3 +7,7 @@ __all__ = [
     'join_segmentations',
     'relabel_sequential',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

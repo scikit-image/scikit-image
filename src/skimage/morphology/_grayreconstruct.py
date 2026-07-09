@@ -3,3 +3,7 @@ from _skimage2.morphology._grayreconstruct import (
 )  # noqa: F401
 
 __all__ = ['reconstruction_loop']
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

@@ -17,3 +17,7 @@ __all__ = [
     'binary_erosion',
     'binary_opening',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

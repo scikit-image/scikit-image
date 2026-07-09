@@ -9,3 +9,7 @@ __all__ = [
     'label2rgb',
     'DEFAULT_COLORS',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

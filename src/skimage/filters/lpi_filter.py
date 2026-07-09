@@ -18,3 +18,7 @@ __all__ = [
     'filter_inverse',
     'wiener',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

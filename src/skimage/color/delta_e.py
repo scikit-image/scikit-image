@@ -35,3 +35,7 @@ __all__ = [
     'deltaE_cmc',
     'get_dH2',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

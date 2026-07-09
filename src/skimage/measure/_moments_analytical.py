@@ -13,3 +13,7 @@ from _skimage2.measure._moments_analytical import (
 )  # noqa: F401
 
 __all__ = ['moments_raw_to_central']
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

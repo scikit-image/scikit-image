@@ -7,3 +7,7 @@ __all__ = [
     'integral_image',
     'integrate',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

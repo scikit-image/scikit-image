@@ -13,3 +13,7 @@ __all__ = [
     'rag_mean_color',
     'show_rag',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

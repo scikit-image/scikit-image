@@ -23,3 +23,7 @@ __all__ = [
 from _skimage2.morphology._skeletonize import (  # noqa: F401
     _generate_thin_luts,
 )
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

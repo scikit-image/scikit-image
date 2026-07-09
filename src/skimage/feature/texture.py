@@ -19,3 +19,7 @@ __all__ = [
     'local_binary_pattern',
     'multiblock_lbp',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

@@ -97,3 +97,7 @@ __all__ = [
 ]
 
 from _skimage2.data._fetchers import _image_fetcher  # noqa: F401
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

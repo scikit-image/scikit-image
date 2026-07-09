@@ -9,3 +9,7 @@ __all__ = [
     'SHAPE_GENERATORS',
     'random_shapes',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

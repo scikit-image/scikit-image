@@ -7,3 +7,7 @@ __all__ = [
     'ArrayMap',
     'map_array',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

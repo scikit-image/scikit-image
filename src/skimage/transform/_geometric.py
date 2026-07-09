@@ -35,3 +35,9 @@ from _skimage2.transform._geometric import (  # noqa: F401
     _center_and_normalize_points,
     _euler_rotation_matrix,
 )
+
+from skimage._docutils import bind_namespace
+from skimage._pickle_compat import apply_pickle_exports
+
+bind_namespace(globals())
+apply_pickle_exports(globals())

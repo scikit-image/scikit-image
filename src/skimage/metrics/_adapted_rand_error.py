@@ -3,3 +3,7 @@ from _skimage2.metrics._adapted_rand_error import (
 )  # noqa: F401
 
 __all__ = ['adapted_rand_error']
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

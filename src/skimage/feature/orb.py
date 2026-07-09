@@ -9,3 +9,7 @@ __all__ = [
     'OFAST_UMAX',
     'ORB',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

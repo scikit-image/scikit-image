@@ -47,3 +47,7 @@ __all__ = [
 ]
 
 from _skimage2.filters.rank._percentile import sum_percentile  # noqa: F401
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

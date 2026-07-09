@@ -142,3 +142,8 @@ def corner_peaks(
         num_peaks_per_label=num_peaks_per_label,
         p_norm=p_norm,
     )
+
+
+from skimage._docutils import bind_namespace  # noqa: E402
+
+bind_namespace(globals())

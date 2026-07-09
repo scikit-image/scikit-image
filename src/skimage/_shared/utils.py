@@ -27,3 +27,7 @@ __all__ = [
     'deprecate_parameter',
     'DEPRECATED',
 ]
+
+from skimage._docutils import bind_namespace  # noqa: E402
+
+bind_namespace(globals())

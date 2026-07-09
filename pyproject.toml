@@ -214,9 +214,12 @@ addopts = [
 # Pytest doesn't expect the doctest's sources and installation to be
 # different. Instead, we use `--pyargs` in the `addopts` field so that pytest
 # can find docstests by importing.
+#
+# ``skimage`` collects public, shim-adapted doctests (examples use ``skimage``
+# imports). ``_skimage2`` keeps the internal implementation doctests.
 testpaths = [
     "skimage",
-    "_skimage2",  # Exclude `skimage2` and its raised `ExperimentalAPIWarning`
+    "_skimage2",
     "./tests/",
 ]
 

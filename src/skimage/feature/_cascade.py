@@ -13,3 +13,7 @@ __all__ = [
     'math',
     'rgb2gray',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

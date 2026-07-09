@@ -7,3 +7,7 @@ __all__ = [
     'DW_matrices',
     'ncut_cost',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

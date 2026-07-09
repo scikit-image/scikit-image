@@ -243,3 +243,8 @@ def manual_lasso_segmentation(image, alpha=0.4, return_all=False):
         return np.stack(labels)
     else:
         return reduce(np.maximum, labels, np.broadcast_to(0, image.shape[:2]))
+
+
+from skimage._docutils import bind_namespace  # noqa: E402
+
+bind_namespace(globals())

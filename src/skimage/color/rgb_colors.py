@@ -295,3 +295,7 @@ __all__ = [
     'yellow',
     'yellowgreen',
 ]
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())

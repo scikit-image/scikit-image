@@ -13,3 +13,7 @@ __all__ = [
 ]
 
 from _skimage2.transform.pyramids import _check_factor  # noqa: F401
+
+from skimage._docutils import bind_namespace
+
+bind_namespace(globals())
