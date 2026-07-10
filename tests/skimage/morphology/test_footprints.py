@@ -9,6 +9,7 @@ import numpy as np
 import pytest
 from numpy.testing import assert_equal
 
+import _skimage2 as ski2
 from _skimage2._shared.testing import fetch, assert_stacklevel
 from skimage.morphology import footprints
 from skimage.morphology import footprint_rectangle, footprint_from_sequence
@@ -47,6 +48,13 @@ class TestFootprints:
         """Test disk footprints"""
         self.strel_worker("data/disk-matlab-output.npz", footprints.disk)
 
+    @pytest.mark.parametrize("radius", list(np.arange(100)))
+    def test_footprint_disk_backwards_compatibility(self, radius):
+        shape = (radius * 2 + 1,) * 2
+        old = footprints.disk(radius)
+        new = ski2.morphology.footprint_ellipse(shape, _legacy_sphere_compatible=True)
+        np.testing.assert_equal(old, new)
+
     def test_footprint_diamond(self):
         """Test diamond footprints"""
         self.strel_worker("data/diamond-matlab-output.npz", footprints.diamond)
@@ -54,6 +62,13 @@ class TestFootprints:
     def test_footprint_ball(self):
         """Test ball footprints"""
         self.strel_worker_3d("data/disk-matlab-output.npz", footprints.ball)
+
+    @pytest.mark.parametrize("radius", list(np.arange(50)))
+    def test_footprint_ball_backwards_compatibility(self, radius):
+        shape = (radius * 2 + 1,) * 3
+        old = footprints.ball(radius)
+        new = ski2.morphology.footprint_ellipse(shape, _legacy_sphere_compatible=True)
+        np.testing.assert_equal(old, new)
 
     def test_footprint_octahedron(self):
         """Test octahedron footprints"""
@@ -104,6 +119,25 @@ class TestFootprints:
         assert_equal(expected_mask2, actual_mask2)
         assert_equal(expected_mask1, footprints.ellipse(3, 5).T)
         assert_equal(expected_mask2, footprints.ellipse(1, 1).T)
+
+    @pytest.mark.parametrize("width", list(np.arange(10) ** 2))
+    @pytest.mark.parametrize("height", list(np.arange(10) ** 2))
+    def test_footprint_ellipse_backwards_compatibility(self, width, height):
+        shape = (height * 2 + 1, width * 2 + 1)
+        old = footprints.ellipse(width, height)
+        new = ski2.morphology.footprint_ellipse(
+            shape, adjust_radii=1, compare_func=np.less
+        )
+        np.testing.assert_equal(old, new)
+
+    @pytest.mark.parametrize("radius", list(np.arange(500)))
+    def test_footprint_ellipse_backwards_compatibility_sphere(self, radius):
+        shape = (radius * 2 + 1,) * 2
+        old = footprints.ellipse(radius, radius)
+        new = ski2.morphology.footprint_ellipse(
+            shape, adjust_radii=1, compare_func=np.less
+        )
+        np.testing.assert_equal(old, new)
 
     def test_footprint_star(self):
         """Test star footprints"""

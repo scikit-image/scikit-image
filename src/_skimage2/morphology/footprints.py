@@ -693,6 +693,125 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
     return sequence
 
 
+def footprint_ellipse(
+    shape,
+    *,
+    compare_func=np.less_equal,
+    adjust_radii=0,
+    dtype=np.uint8,
+    _legacy_sphere_compatible=False,
+):
+    """Generates an elliptical or spherical footprint.
+
+    This function generates ellipsoids with any number of desired dimensions,
+    including spherical footprints. Use this function to generate shapes such
+    as a disk, an ellipse (2D), or a ball (3D).
+
+    Parameters
+    ----------
+    shape : sequence of ints
+        Shape of the new footprint, e.g., ``(2, 3)``.
+    compare_func : func, optional
+        Comparison function used to evaluate the ellipsis equation. By default,
+        pixels that are less or equal in value to the cutoff, belong to the
+        footprint.
+    adjust_radii : float or Sequence of float(s), optional
+        Adjust ellipse size within the footprint. Positive values will increase
+        the axes of the ellipse. With 0, the border of the ellipsis will touch
+        the border of the generated footprint.
+    dtype : data-type, optional
+        The data type of the footprint.
+    _legacy_sphere_compatible : bool, optional
+        Compatibility flag that controls how floating errors compound.
+        If ``False`` (default), enables compatibility with
+        `skimage.morphology.ellipse`.
+        If ``True``, renables compatibility with `skimage.morphology.disk` and
+        `skimage.morphology.ball`.
+
+    Returns
+    -------
+    footprint : ndarray
+        The footprint where elements of the neighborhood are 1 and 0 otherwise.
+
+    Notes
+    -----
+    This function uses the ellipsis equation
+
+    .. math:: \\sum_{k=1}^{n} \\frac{x_k^2}{a_k^2} \\lt 1
+
+    to determine which pixels are assigned 1 in the `footprint`. `border`
+    controls the comparison with the right-hand side. ``border=False``
+    corresponds to :math:`< 1`.
+
+    Examples
+    --------
+    >>> import _skimage2 as ski2
+    >>> ski2.morphology.footprint_ellipse((4, 7))
+    array([[0, 0, 0, 1, 0, 0, 0],
+           [0, 1, 1, 1, 1, 1, 0],
+           [0, 1, 1, 1, 1, 1, 0],
+           [0, 0, 0, 1, 0, 0, 0]], dtype=uint8)
+    >>> ski2.morphology.footprint_ellipse((4, 7), compare_func=np.less)
+    array([[0, 0, 0, 0, 0, 0, 0],
+           [0, 1, 1, 1, 1, 1, 0],
+           [0, 1, 1, 1, 1, 1, 0],
+           [0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
+    """
+    if np.isscalar(adjust_radii):
+        adjust_radii = (adjust_radii,) * len(shape)
+
+    elif len(shape) != len(adjust_radii):
+        msg = (
+            "`adjust_radii` must be scalar or sequence matching `shape` in length, "
+            f"got shape={shape!r} and adjust_radii={adjust_radii!r}"
+        )
+        raise ValueError(msg)
+
+    is_symmetric = np.all(np.diff(shape) == 0) and np.all(np.diff(adjust_radii) == 0)
+
+    footprint = np.zeros(shape, dtype=float)
+    for dim, (length, adjust_radius) in enumerate(zip(shape, adjust_radii)):
+        if length == 1:
+            continue
+
+        radius = length // 2
+        coords = np.linspace(-radius, radius, num=length, endpoint=True)
+        coords = coords.reshape((1,) * dim + (length,) + (1,) * (len(shape) - dim - 1))
+
+        # For spheres – ellipsoids with the same length in each dimension –
+        # there are two ways to compute which pixels are inside the sphere:
+        #
+        #   (a) Divide `coords` by radius before squaring and summing,
+        #       then compare with 1.
+        #   (b) Square and sum `coords`, then compare with `radius` squared.
+        #
+        # We could always use (a) as it works for spheres and ellipsoids.
+        # But it seems that returns slightly different results than legacy
+        # implementations of `disk` and `ball` in `skimage`. I'm guessing that
+        # is because of floating errors compounding differently  / breaking the
+        # associative property.
+        #
+        # Since we want to replace all these functions under the hood with
+        # one algorithm, we branch depending on whether the requested footprint
+        # `is_symmetric` or not.
+        if not (is_symmetric and _legacy_sphere_compatible):
+            # Method (a)
+            adjusted_radius = radius + adjust_radius
+            coords /= adjusted_radius
+
+        footprint += coords**2
+
+    if not (is_symmetric and _legacy_sphere_compatible):
+        cutoff = 1
+    else:
+        cutoff = (shape[0] // 2 + adjust_radii[0]) ** 2
+
+    footprint = compare_func(footprint, cutoff)
+    footprint = footprint.astype(dtype)
+
+    return footprint
+
+
 @deprecate_func(
     deprecated_version="0.25",
     removed_version="0.27",
@@ -877,7 +996,7 @@ def ball(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
         s = X**2 + Y**2 + Z**2
         if not strict_radius:
             radius += 0.5
-        return np.array(s <= radius * radius, dtype=dtype)
+        return np.array(s <= radius**2, dtype=dtype)
     elif decomposition == 'sequence':
         sequence = _nsphere_series_decomposition(radius, ndim=3, dtype=dtype)
     else:
