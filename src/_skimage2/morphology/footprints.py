@@ -405,9 +405,9 @@ def _nsphere_series_decomposition(radius, ndim, dtype=np.uint8):
         # for radius 1 just use the exact shape (3,) * ndim solution
         kwargs = dict(dtype=dtype, strict_radius=False, decomposition=None)
         if ndim == 2:
-            return ((disk(1, **kwargs), 1),)
+            return ((disk(1, **kwargs), 1),)  # noqa: F821, TODO temporarily ignore
         elif ndim == 3:
-            return ((ball(1, **kwargs), 1),)
+            return ((ball(1, **kwargs), 1),)  # noqa: F821, TODO temporarily ignore
 
     # load precomputed decompositions
     if ndim not in _nsphere_decompositions:

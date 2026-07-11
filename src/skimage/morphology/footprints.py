@@ -115,19 +115,19 @@ def _nsphere_series_decomposition(radius, ndim, dtype=np.uint8):
     ``%(qname_new)s`` with a new signature and behavior:
 
     * ``width`` and ``height`` are combined into a single ``shape`` parameter
-    * New ``adjust_radii`` and ``compare`` parameters to control the size of the 
+    * New ``adjust_radii`` and ``compare`` parameters to control the size of the
       generated ellipse relative to the ``shape``
 
     To keep the old (``skimage``, v1.x) behavior after switching to
     ``skimage2``, pass the following parameter to the new function:
-    
+
     * ``shape = (height * 2 + 1, width * 2 + 1)``
     * ``adjust_radii=1``
     * ``compare=numpy.less``.
 
     <!--- cond-start: doc -->
     For example:
-    
+
     >>> import numpy as np
     >>> import skimage as ski
     >>> import _skimage2 as ski2
@@ -225,19 +225,19 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
     ``%(qname_new)s`` with a new signature and behavior:
 
     * ``radius`` is replaced by the ``shape`` parameter
-    * New ``compare`` parameter to control the size of the 
+    * New ``compare`` parameter to control the size of the
       generated disk relative to the ``shape``
       (replace removed ``strict_radius`` parameter)
-      
+
     WARNING: The new underlying algorithm is slightly different and compounding
-    float errors may lead to a few pixels at the footprints edge being 0 
-    instead of 1. If you need pixel-perfect compatibility try increasing 
+    float errors may lead to a few pixels at the footprints edge being 0
+    instead of 1. If you need pixel-perfect compatibility try increasing
     ``adjust_radii`` slightly (like +0.001) or check out the full migration guide
     for a function to vendor.
 
     To approximate the old (``skimage``, v1.x) behavior after switching to
     ``skimage2``:
-    
+
     * Use ``shape = (radius * 2 + 1,) * 2``
     * ``strict_radius=True`` (default), no change required
     * ``strict_radius=False``, use ``adjust_radii=0.5``
@@ -262,9 +262,9 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
 
     .. admonition:: Reproduce exact results of old implementation
         :class: note dropdown
-        
+
         Use/vendor the following function:
-        
+
         .. code:: python
 
             def disk(radius, strict_radius=True):
@@ -273,7 +273,7 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
                 if not strict_radius:
                     radius += 0.5
                 return np.array((X**2 + Y**2) <= radius**2, dtype=dtype)
-    
+
     <!--- cond-end -->
 
     Other keyword parameters can be left unchanged.
@@ -380,13 +380,13 @@ def disk(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
     ``%(qname_new)s`` with a new signature and behavior:
 
     * ``radius`` is replaced by the ``shape`` parameter
-    * New ``compare`` parameter to control the size of the 
+    * New ``compare`` parameter to control the size of the
       generated disk relative to the ``shape``
       (replace removed ``strict_radius`` parameter)
 
     WARNING: The new underlying algorithm is slightly different and compounding
-    float errors may lead to a few pixels at the footprints edge being 0 
-    instead of 1. If you need pixel-perfect compatibility try increasing 
+    float errors may lead to a few pixels at the footprints edge being 0
+    instead of 1. If you need pixel-perfect compatibility try increasing
     ``adjust_radii`` slightly (like +0.001) or check out the full migration guide
     for a function to vendor.
 
