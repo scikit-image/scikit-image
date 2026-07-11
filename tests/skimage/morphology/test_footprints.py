@@ -49,10 +49,14 @@ class TestFootprints:
         self.strel_worker("data/disk-matlab-output.npz", footprints.disk)
 
     @pytest.mark.parametrize("radius", list(np.arange(100)))
-    def test_footprint_disk_backwards_compatibility(self, radius):
+    @pytest.mark.parametrize("strict_radius", [True, False])
+    def test_footprint_disk_sk1_compatibility(self, radius, strict_radius):
         shape = (radius * 2 + 1,) * 2
-        old = footprints.disk(radius)
-        new = ski2.morphology.footprint_ellipse(shape, _legacy_sphere_compatible=True)
+        # Reproduction isn't pixel perfect in some cases but should be close
+        adjust_radii = 0.001 if strict_radius else 0.5
+
+        old = footprints.disk(radius, strict_radius=strict_radius)
+        new = ski2.morphology.footprint_ellipse(shape, adjust_radii=adjust_radii)
         np.testing.assert_equal(old, new)
 
     def test_footprint_diamond(self):
@@ -64,10 +68,12 @@ class TestFootprints:
         self.strel_worker_3d("data/disk-matlab-output.npz", footprints.ball)
 
     @pytest.mark.parametrize("radius", list(np.arange(50)))
-    def test_footprint_ball_backwards_compatibility(self, radius):
+    @pytest.mark.parametrize("strict_radius", [True, False])
+    def test_footprint_ball_sk1_compatibility(self, radius, strict_radius):
         shape = (radius * 2 + 1,) * 3
-        old = footprints.ball(radius)
-        new = ski2.morphology.footprint_ellipse(shape, _legacy_sphere_compatible=True)
+        adjust_radii = 0.001 if strict_radius else 0.5
+        old = footprints.ball(radius, strict_radius=strict_radius)
+        new = ski2.morphology.footprint_ellipse(shape, adjust_radii=adjust_radii)
         np.testing.assert_equal(old, new)
 
     def test_footprint_octahedron(self):
