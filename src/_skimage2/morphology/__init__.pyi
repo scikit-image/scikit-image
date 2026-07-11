@@ -8,11 +8,8 @@ from .isotropic import (
 )
 
 from .footprints import (
-    ball,
     cube,
     diamond,
-    disk,
-    ellipse,
     footprint_ellipse,
     footprint_from_sequence,
     footprint_rectangle,
@@ -54,7 +51,6 @@ def label(label_image, background=None, return_num=False, connectivity=None): ..
 __all__ = [
     'area_closing',
     'area_opening',
-    'ball',
     'black_tophat',
     'closing',
     'convex_hull_image',
@@ -63,8 +59,6 @@ __all__ = [
     'diameter_opening',
     'diamond',
     'dilation',
-    'disk',
-    'ellipse',
     'erosion',
     'flood',
     'flood_fill',
