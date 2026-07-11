@@ -8,6 +8,7 @@ from _skimage2.measure.fit import (
     ransac as ransac,
 )  # noqa: F401
 
+
 __all__ = [
     'BaseModel',
     'CircleModel',
@@ -18,4 +19,10 @@ __all__ = [
     'ransac',
 ]
 
-from _skimage2.measure.fit import _dynamic_max_trials  # noqa: F401
+from _skimage2.measure.fit import (  # noqa: F401
+    _dynamic_max_trials,
+)
+
+from skimage._doctest_adapters import adapt_doctests
+
+adapt_doctests(globals())

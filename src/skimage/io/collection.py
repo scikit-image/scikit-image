@@ -17,3 +17,7 @@ __all__ = [
 ]
 
 from _skimage2.io.collection import alphanumeric_key  # noqa: F401
+
+from skimage._doctest_adapters import adapt_doctests
+
+adapt_doctests(globals())

@@ -128,31 +128,28 @@ def require(name, *, version=None):
     -----
     This also adds a `__doctest_requires__` marker to the decorated objects
     module, which instructs pytest-doctestplus to skip this doctest if the
-    requirement set by `name` isn't fulfilled.
+    requirement set by `name`  and `version` isn't fulfilled.
     """
 
     def decorator(obj):
-        if not is_installed(name, version):
-            # Set pytest-doctestplus marker at module level to skip doctest
-            # if the required module (and version) is not available
-            module = inspect.getmodule(obj)
-            doctest_marker = getattr(module, "__doctest_requires__", {})
-            doctest_marker.setdefault(obj.__name__, []).append(name)
-            setattr(module, "__doctest_requires__", doctest_marker)
+        module = inspect.getmodule(obj)
+        doctest_marker = getattr(module, "__doctest_requires__", {})
+        requirement = name + (version if version else '')
+        doctest_marker.setdefault(obj.__name__, []).append(requirement)
+        setattr(module, "__doctest_requires__", doctest_marker)
 
         @functools.wraps(obj)
         def func_wrapped(*args, **kwargs):
             if is_installed(name, version):
                 return obj(*args, **kwargs)
-            else:
-                requirement = name
-                if version is not None:
-                    requirement += f" {version}"
-                msg = (
-                    f'`{obj.__qualname__}` in `{obj.__module__}` requires '
-                    f'`{requirement}`. Please ensure it is installed.'
-                )
-                raise ImportError(msg)
+            requirement = name
+            if version is not None:
+                requirement += f" {version}"
+            msg = (
+                f'`{obj.__qualname__}` in `{obj.__module__}` requires '
+                f'`{requirement}`. Please ensure it is installed.'
+            )
+            raise ImportError(msg)
 
         return func_wrapped
 

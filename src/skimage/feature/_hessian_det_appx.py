@@ -5,3 +5,7 @@ from _skimage2.feature._hessian_det_appx import _hessian_matrix_det  # noqa: F40
 __all__ = [
     '_hessian_matrix_det',
 ]
+
+from skimage._doctest_adapters import adapt_doctests
+
+adapt_doctests(globals())

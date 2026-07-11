@@ -7,3 +7,7 @@ __all__ = [
     'load_sift',
     'load_surf',
 ]
+
+from skimage._doctest_adapters import adapt_doctests
+
+adapt_doctests(globals())
