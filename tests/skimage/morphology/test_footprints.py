@@ -51,6 +51,7 @@ class TestFootprints:
     @pytest.mark.parametrize("radius", list(np.arange(100)))
     @pytest.mark.parametrize("strict_radius", [True, False])
     def test_footprint_disk_sk1_compatibility(self, radius, strict_radius):
+        """Compare ski2's `footprint_ellipse` to ski's legacy `disk`."""
         shape = (radius * 2 + 1,) * 2
         # Reproduction isn't pixel perfect in some cases but should be close
         adjust_radii = 0.001 if strict_radius else 0.5
@@ -70,6 +71,7 @@ class TestFootprints:
     @pytest.mark.parametrize("radius", list(np.arange(50)))
     @pytest.mark.parametrize("strict_radius", [True, False])
     def test_footprint_ball_sk1_compatibility(self, radius, strict_radius):
+        """Compare ski2's `footprint_ellipse` to ski's legacy `ball`."""
         shape = (radius * 2 + 1,) * 3
         adjust_radii = 0.001 if strict_radius else 0.5
         old = footprints.ball(radius, strict_radius=strict_radius)
@@ -129,6 +131,7 @@ class TestFootprints:
     @pytest.mark.parametrize("width", list(np.arange(10) ** 2))
     @pytest.mark.parametrize("height", list(np.arange(10) ** 2))
     def test_footprint_ellipse_sk1_compatibility(self, width, height):
+        """Compare ski2's `footprint_ellipse` to ski's legacy `ellipse`."""
         shape = (height * 2 + 1, width * 2 + 1)
         old = footprints.ellipse(width, height)
         new = ski2.morphology.footprint_ellipse(shape, adjust_radii=1, compare=np.less)

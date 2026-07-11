@@ -572,7 +572,8 @@ def footprint_ellipse(
     with 1 to determine which pixels belong to the footprint. `compare` controls
     the kind of comparison that is used. In each dimension :math:`k`, the
     coordinates are scaled by :math:`r_k` by the adjusted radius
-    (`shape[k] + adjust_radii[k]`).
+    ``shape[k] // 2 + adjust_radii[k]`` (after normalizing `adjust_radii` to a
+    tuple).
 
     Examples
     --------
@@ -599,23 +600,23 @@ def footprint_ellipse(
         raise ValueError(msg)
 
     # Compute left side of elliptic equation
-    _implicit_field = np.zeros(shape, dtype=float)
+    _ellipse_field = np.zeros(shape, dtype=float)
     for dim, (length, adjust_radius) in enumerate(zip(shape, adjust_radii)):
         if length == 1:
             continue
 
-        radius = length // 2
-        coords = np.linspace(-radius, radius, num=length, endpoint=True)
-
-        # Reshape to have long-axis in current dimension
+        # Create coordinate space along current dimension
+        radius = length // 2  # Integer division for legacy compatibility
+        coords = np.linspace(-radius, radius, num=length, endpoint=True, dtype=float)
         coords = coords.reshape((1,) * dim + (length,) + (1,) * (len(shape) - dim - 1))
 
-        # Scale by adjusted radius
-        coords /= radius + adjust_radius
+        # Scale coords by by adjusted radius
+        adjusted = radius + adjust_radius
+        coords /= adjusted
 
-        _implicit_field += coords**2
+        _ellipse_field += coords**2
 
-    footprint = compare(_implicit_field, 1)
+    footprint = compare(_ellipse_field, 1)
     footprint = footprint.astype(dtype)
     return footprint
 
