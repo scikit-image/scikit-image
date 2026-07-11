@@ -612,6 +612,10 @@ def footprint_ellipse(
 
         # Scale coords by by adjusted radius
         adjusted = radius + adjust_radius
+        if adjusted == 0:
+            # Avoid division by zero warning and return would be result early
+            # Values close to zero will lead to the same result
+            return np.zeros(shape, dtype=dtype)
         coords /= adjusted
 
         _ellipse_field += coords**2

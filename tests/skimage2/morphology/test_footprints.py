@@ -6,6 +6,7 @@ from _skimage2._shared.testing import fetch, assert_stacklevel
 from _skimage2.morphology import (
     footprints,
     footprint_rectangle,
+    footprint_ellipse,
     footprint_from_sequence,
     pad_footprint,
     mirror_footprint,
@@ -102,6 +103,10 @@ class TestFootprints:
         assert_equal(expected_mask2, actual_mask2)
         assert_equal(expected_mask1, footprints.ellipse(3, 5).T)
         assert_equal(expected_mask2, footprints.ellipse(1, 1).T)
+
+    def test_footprint_ellipse_zero_radius(self):
+        footprint = footprint_ellipse((5, 6), adjust_radii=(0, -3))
+        np.testing.assert_equal(footprint, 0)
 
     def test_footprint_star(self):
         """Test star footprints"""
