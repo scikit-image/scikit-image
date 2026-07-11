@@ -128,21 +128,10 @@ class TestFootprints:
 
     @pytest.mark.parametrize("width", list(np.arange(10) ** 2))
     @pytest.mark.parametrize("height", list(np.arange(10) ** 2))
-    def test_footprint_ellipse_backwards_compatibility(self, width, height):
+    def test_footprint_ellipse_sk1_compatibility(self, width, height):
         shape = (height * 2 + 1, width * 2 + 1)
         old = footprints.ellipse(width, height)
-        new = ski2.morphology.footprint_ellipse(
-            shape, adjust_radii=1, compare_func=np.less
-        )
-        np.testing.assert_equal(old, new)
-
-    @pytest.mark.parametrize("radius", list(np.arange(500)))
-    def test_footprint_ellipse_backwards_compatibility_sphere(self, radius):
-        shape = (radius * 2 + 1,) * 2
-        old = footprints.ellipse(radius, radius)
-        new = ski2.morphology.footprint_ellipse(
-            shape, adjust_radii=1, compare_func=np.less
-        )
+        new = ski2.morphology.footprint_ellipse(shape, adjust_radii=1, compare=np.less)
         np.testing.assert_equal(old, new)
 
     def test_footprint_star(self):
