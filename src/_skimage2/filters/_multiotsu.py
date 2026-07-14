@@ -10,7 +10,7 @@ try:
 except ImportError:
     exec(
         """
-class _cython:
+class cython:
     compiled = False
     class _nogil:
         def __call__(self, f):
@@ -28,7 +28,7 @@ class _cython:
     def cfunc(f):
         return f
         """, globals())
-    
+
 
 import numpy as np
 
