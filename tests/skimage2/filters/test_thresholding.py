@@ -783,8 +783,8 @@ def test_multiotsu_first_bin_zero_weight():
     # zero to the first-order moment; it used to be weighted by 1 instead,
     # shifting low thresholds on histograms with a heavily populated
     # first bin.
+    # fmt: off
     counts = np.array(
-        # fmt: off
         [
             14807, 2152, 1241, 806, 410, 198, 250, 142, 68, 108, 66, 72,
             48, 6, 66, 84, 30, 66, 83, 109, 12, 0, 0, 6, 0, 6, 24, 24, 12,
@@ -792,9 +792,9 @@ def test_multiotsu_first_bin_zero_weight():
             42, 38, 66, 84, 30, 54, 42, 24, 28, 72, 84, 30, 30, 31, 13,
             48, 334, 302,
         ],
-        # fmt: on
         dtype=float,
     )
+    # fmt: on
     nbins = len(counts)
     bin_centers = (np.arange(nbins) + 0.5) / nbins
 
@@ -802,8 +802,9 @@ def test_multiotsu_first_bin_zero_weight():
     assert_array_equal(thresholds, [0.0390625, 0.1796875, 0.5078125, 0.8359375])
 
     data = np.repeat(bin_centers, counts.astype(int))
-    assert threshold_otsu(data, nbins=nbins) == (
-        threshold_multiotsu(data, classes=2, nbins=nbins)[0]
+    assert (
+        threshold_otsu(data, nbins=nbins)
+        == (threshold_multiotsu(data, classes=2, nbins=nbins)[0])
     )
 
 
