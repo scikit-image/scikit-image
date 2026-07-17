@@ -27,3 +27,4 @@ plt.figure(figsize=(4, 4))
 plt.imshow(camera, cmap='gray')
 plt.axis('off')
 plt.show()
+
