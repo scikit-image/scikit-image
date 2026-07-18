@@ -330,7 +330,7 @@ def _validate_image_histogram(image, hist, nbins=None, normalize=False):
     return counts.astype('float32', copy=False), bin_centers
 
 
-def threshold_otsu(image=None, nbins=256, *, hist=None):
+def threshold_otsu(image=None, nbins=256, *, hist=None, mask=None):
     """Return threshold value based on Otsu's method.
 
     Either image or hist must be provided. If hist is provided, the actual
@@ -347,7 +347,11 @@ def threshold_otsu(image=None, nbins=256, *, hist=None):
         Histogram from which to determine the threshold, and optionally a
         corresponding array of bin center intensities. If no hist provided,
         this function will compute it from the image.
-
+    mask : ndarray of bools, optional
+        Array of the same shape as `image`. Only pixels where `mask` is
+        ``True`` are used to compute the threshold; pixels outside the mask
+        are excluded from the histogram entirely. Mutually exclusive with
+        `hist`.
 
     Returns
     -------
@@ -376,6 +380,16 @@ def threshold_otsu(image=None, nbins=256, *, hist=None):
             f'grayscale images; image shape {image.shape} looks like '
             f'that of an RGB image.'
         )
+
+    if mask is not None:
+        if hist is not None:
+            raise ValueError('mask and hist cannot both be provided.')
+        if image is None:
+            raise ValueError('mask requires image to be provided.')
+        mask = np.asarray(mask, dtype=bool)
+        if mask.shape != image.shape:
+            raise ValueError('image and mask must have the same shape.')
+        image = image[mask]
 
     # Check if the image has more than one intensity value; if not, return that
     # value

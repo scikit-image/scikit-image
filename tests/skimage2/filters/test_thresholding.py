@@ -340,6 +340,46 @@ def test_otsu_one_color_image_3d():
     assert threshold_otsu(img) == 1
 
 
+def test_otsu_masked_image():
+    image = np.zeros((10, 10), dtype=np.uint8)
+    image[:, 5:] = 200
+    image[:4, :] = 50  # artefact region that should be excluded by the mask
+    mask = np.ones((10, 10), dtype=bool)
+    mask[:4, :] = False
+
+    assert threshold_otsu(image, mask=mask) == threshold_otsu(image[mask])
+    assert threshold_otsu(image, mask=mask) != threshold_otsu(image)
+
+
+def test_otsu_masked_uniform_region():
+    image = np.zeros((10, 10), dtype=np.uint8)
+    image[:, 5:] = 200
+    mask = np.zeros((10, 10), dtype=bool)
+    mask[:, :5] = True  # masked region is uniformly 0, full image is not
+
+    assert threshold_otsu(image, mask=mask) == 0
+
+
+def test_otsu_mask_and_hist_raises():
+    image = np.ones((10, 10), dtype=np.uint8)
+    mask = np.ones((10, 10), dtype=bool)
+    with pytest.raises(ValueError):
+        threshold_otsu(image, hist=np.bincount(image.ravel()), mask=mask)
+
+
+def test_otsu_mask_shape_mismatch_raises():
+    image = np.ones((10, 10), dtype=np.uint8)
+    mask = np.ones((5, 5), dtype=bool)
+    with pytest.raises(ValueError):
+        threshold_otsu(image, mask=mask)
+
+
+def test_otsu_mask_without_image_raises():
+    mask = np.ones((10, 10), dtype=bool)
+    with pytest.raises(ValueError):
+        threshold_otsu(mask=mask)
+
+
 def test_li_camera_image():
     image = util.img_as_ubyte(data.camera())
     threshold = threshold_li(image)
