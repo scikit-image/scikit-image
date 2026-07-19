@@ -380,6 +380,13 @@ def test_otsu_mask_without_image_raises():
         threshold_otsu(mask=mask)
 
 
+def test_otsu_all_false_mask_raises():
+    image = np.ones((10, 10), dtype=np.uint8)
+    mask = np.zeros((10, 10), dtype=bool)
+    with pytest.raises(ValueError):
+        threshold_otsu(image, mask=mask)
+
+
 def test_li_camera_image():
     image = util.img_as_ubyte(data.camera())
     threshold = threshold_li(image)

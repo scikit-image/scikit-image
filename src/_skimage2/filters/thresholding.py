@@ -390,6 +390,10 @@ def threshold_otsu(image=None, nbins=256, *, hist=None, mask=None):
         if mask.shape != image.shape:
             raise ValueError('image and mask must have the same shape.')
         image = image[mask]
+        if image.size == 0:
+            raise ValueError(
+                'mask selects no pixels; it must contain at least one True value.'
+            )
 
     # Check if the image has more than one intensity value; if not, return that
     # value
