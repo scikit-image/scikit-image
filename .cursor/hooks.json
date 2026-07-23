@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeShellExecution": [
+      {
+        "command": "python3 .cursor/hooks/before-shell.py",
+        "failClosed": true
+      }
+    ],
+    "preToolUse": [
+      {
+        "command": "python3 .cursor/hooks/protect-paths.py",
+        "matcher": "Write|StrReplace|Delete",
+        "failClosed": true
+      }
+    ],
+    "beforeMCPExecution": [
+      {
+        "command": "python3 .cursor/hooks/before-mcp.py",
+        "failClosed": true
+      }
+    ]
+  }
+}

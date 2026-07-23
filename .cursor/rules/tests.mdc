@@ -1,0 +1,58 @@
+---
+description: scikit-image test conventions
+globs: tests/**
+alwaysApply: false
+---
+
+# scikit-image tests
+
+## Layout
+
+- `tests/skimage/` — public `skimage` API behavior
+- `tests/skimage2/` — `_skimage2` implementation tests
+- Mirror the package structure under the matching test directory
+- Behavior changes require tests in the matching tree (`tests/skimage/` or `tests/skimage2/`)
+
+## Assertions and helpers
+
+Prefer `_skimage2._shared.testing` over plain `assert`:
+
+```python
+from _skimage2._shared import testing
+
+testing.assert_equal(a, b)
+testing.assert_allclose(a, b)
+```
+
+Use `expected_warnings` and `assert_stacklevel` when testing warnings.
+
+## Random numbers
+
+Use fixed-seed `RandomState`, not the global RNG or `default_rng`:
+
+```python
+def test_something():
+    rng = np.random.RandomState(2376609660)
+```
+
+Comment when a test depends on a specific seed.
+
+## Warnings and threading
+
+- Warnings are treated as errors in CI; fix or use `expected_warnings` deliberately
+- Avoid global state (global RNG, module-level mutation, shared temp files)
+- Use the `tmp_path` fixture for file I/O
+- Mark tests that mutate global/plugin state:
+
+```python
+@pytest.mark.thread_unsafe(reason="Test mutates global plugin state")
+def test_plugins():
+    ...
+```
+
+## Running tests
+
+```bash
+spin test -- tests/skimage/measure
+spin test --test-modified
+```

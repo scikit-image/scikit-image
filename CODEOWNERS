@@ -1,0 +1,13 @@
+# Security-sensitive paths — require maintainer review on pull requests.
+# Replace @scikit-image/core with a valid GitHub team or maintainer handles.
+# Takes effect when branch protection requires CODEOWNERS review.
+
+/.cursor/                          @scikit-image/core
+/.cursor/hooks.json                @scikit-image/core
+/.cursor/hooks/                    @scikit-image/core
+/.cursor/rules/security.mdc        @scikit-image/core
+/AGENTS.md                         @scikit-image/core
+/CODEOWNERS                        @scikit-image/core
+/.pre-commit-config.yaml           @scikit-image/core
+/.gitignore                        @scikit-image/core
+/.github/workflows/                @scikit-image/core

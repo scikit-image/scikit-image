@@ -1,0 +1,47 @@
+---
+description: Security and destructive-action guardrails for agents and developers
+alwaysApply: true
+---
+
+# Security guardrails
+
+Project hooks in `.cursor/hooks.json` enforce these rules. Do not weaken or remove them unless the user explicitly asks.
+
+## Git
+
+- Never run `git push --force` (including `-f`, `--force-with-lease`) to `main`, `master`, or any shared branch.
+- Never run `git reset --hard`, `git clean -fdx`, or other history/worktree-destructive commands unless the user explicitly requested recovery from a named state.
+- Never run `git config` (local or global).
+- Never use `--no-verify` or `--no-gpg-sign` to skip hooks.
+- Do not `git commit`, `git push`, `git tag`, or create PRs unless the user explicitly asked.
+- Do not amend a commit that has been pushed.
+
+## Shell
+
+- Never run `rm -rf` on repo root, parent paths, or system paths.
+- Never pipe remote scripts into a shell (`curl … | sh`, etc.).
+- Prefer `spin` commands over raw `pytest`/`meson` (see AGENTS.md).
+
+## Network
+
+- Do not run direct network commands (`curl`, `wget`, browser/fetch MCP tools) unless the user explicitly asked.
+- Indirect network via tools like `pip install` or `git pull` is out of scope for hooks; still avoid unless needed.
+
+## Protected paths
+
+Do not edit these unless the user explicitly asked:
+
+- `.cursor/hooks.json`, `.cursor/hooks/*`, `.cursor/rules/security.mdc`
+- `AGENTS.md`, `CODEOWNERS`, `.pre-commit-config.yaml`, `.gitignore`
+- `.github/workflows/*`
+- `pyproject.toml`, `requirements/*`
+
+## Secrets
+
+- Never commit tokens, keys, passwords, or `.env` files.
+- Never paste secrets into chat, commits, or CI configs.
+
+## CI / release
+
+- Do not modify GitHub Actions workflows unless the user explicitly asked.
+- Do not merge PRs or cut releases.

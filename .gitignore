@@ -43,3 +43,17 @@ skimage/morphology/_skeletonize_lee_cy.pyx
 stubs/
 # pyenv virtualenv environment marker.
 .python-version
+
+# Secrets and local credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+secrets.json
+
+# Local Cursor audit trail (never commit)
+.cursor/audit/

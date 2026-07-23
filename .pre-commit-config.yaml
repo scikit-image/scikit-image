@@ -14,6 +14,7 @@ repos:
         args: [--allow-multiple-documents]
       - id: check-json
       - id: check-added-large-files
+      - id: detect-private-key
 
   - repo: https://github.com/rbubley/mirrors-prettier
     rev: bc7af46104f0f5368b95878decf720f9f00c2559 # frozen: v3.4.2
@@ -42,6 +43,12 @@ repos:
         language: system
         entry: python tools/generate_requirements.py
         files: "pyproject.toml|requirements/.*\\.txt|tools/generate_requirements.py"
+      - id: check-secrets
+        name: check obvious secrets in staged files
+        language: system
+        entry: python3 tools/check_secrets.py
+        types: [text]
+        exclude: ^tools/check_secrets\.py$
 
   - repo: https://github.com/woodruffw/zizmor-pre-commit
     rev: a0912e39df36b50365d8cdfb123c0e013dc6e50d # v1.3.0
