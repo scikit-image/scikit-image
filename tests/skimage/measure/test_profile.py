@@ -1,6 +1,6 @@
 import numpy as np
 
-from skimage._shared.testing import assert_equal, assert_almost_equal
+from _skimage2._shared.testing import assert_equal, assert_almost_equal
 from skimage.measure.profile import profile_line
 
 image = np.arange(100).reshape((10, 10)).astype(float)

@@ -12,7 +12,7 @@ import numbers
 
 import numpy as np
 
-from .._shared.utils import _supported_float_type
+from _skimage2._shared.utils import _supported_float_type
 from ..color.adapt_rgb import adapt_rgb, hsv_value
 from .exposure import rescale_intensity
 from ..util import img_as_uint

@@ -1,9 +1,9 @@
 import numpy as np
 
 from skimage import data, img_as_float
-from skimage._shared import testing
-from skimage._shared.testing import assert_allclose
-from skimage._shared.utils import _supported_float_type
+from _skimage2._shared import testing
+from _skimage2._shared.testing import assert_allclose
+from _skimage2._shared.utils import _supported_float_type
 from skimage.color import rgb2gray
 from skimage.metrics import mean_squared_error, normalized_root_mse
 from skimage.morphology import dilation, disk
@@ -151,7 +151,7 @@ def test_inpaint_nrmse(dtype, order, channel_axis, split_into_regions):
     mask[365:368, 60:130] = 1
 
     # add randomly positioned small point-like defects
-    rstate = np.random.default_rng(0)
+    rstate = np.random.RandomState(3534647791)
     for radius in [0, 2, 4]:
         # larger defects are less common
         thresh = 3.25 + 0.25 * radius  # larger defects less common

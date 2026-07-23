@@ -44,11 +44,14 @@ Other
   `scipy.linalg.eigsh` is available everywhere, remove the compatibility logic in
   `skimage/graph/_graph_cut.py::_ncut_relabel` and the `xfail` mark in
   `tests/skimage/graph/test_rag.py::test_reproducibility`.
+* Once SciPy 1.18 is minimal required version, remove minkowski
+  distance branching from `src/skimage/measure/fit.py`.
 
-Post Python 3.11
+Post Python 3.12
 ----------------
-* Remove or simplify `skimage._shared._warnings::warn_external` to use only
-  `skip_file_prefixes`. Remove corresponding license code in LICENSE.txt (if possible).
+* Remove `sys.version_info` checks in
+  `src/_skimage2/_shared/utils.py::deprecate_func.__call__`
+  `scikit-image/tests/skimage2/_shared/test_utils.py::test_deprecate_func`
 
 Post numpy 2
 ------------

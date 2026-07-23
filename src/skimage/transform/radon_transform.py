@@ -5,7 +5,7 @@ from scipy.constants import golden_ratio
 from scipy.fft import fft, ifft, fftfreq, fftshift
 from ._warps import warp
 from ._radon_transform import sart_projection_update
-from .._shared.utils import convert_to_float
+from _skimage2._shared.utils import convert_to_float
 from warnings import warn
 from functools import partial
 

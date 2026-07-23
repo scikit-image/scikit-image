@@ -4,7 +4,7 @@ import numpy as np
 from scipy import ndimage as ndi
 from scipy.spatial import cKDTree
 
-from .._shared.utils import warn, deprecate_parameter, DEPRECATED
+from _skimage2._shared.utils import warn, deprecate_parameter, DEPRECATED
 from ._misc_cy import _remove_objects_by_distance
 
 

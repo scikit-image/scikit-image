@@ -15,7 +15,7 @@ import numpy as np
 import scipy.fft as fftmodule
 from scipy.fft import next_fast_len
 
-from .._shared.utils import _supported_float_type
+from _skimage2._shared.utils import _supported_float_type
 
 
 def _masked_phase_cross_correlation(

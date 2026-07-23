@@ -11,7 +11,7 @@ from .safe_openmp cimport have_openmp
 from libc.stdlib cimport malloc, free
 from libcpp.vector cimport vector
 
-from skimage._shared.interpolation cimport round, fmax, fmin
+from _skimage2._shared.interpolation cimport round, fmax, fmin
 
 from cython.parallel import prange
 from ..color import rgb2gray

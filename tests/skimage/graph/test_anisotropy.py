@@ -1,7 +1,7 @@
 import numpy as np
 import skimage.graph.mcp as mcp
 
-from skimage._shared.testing import assert_array_equal
+from _skimage2._shared.testing import assert_array_equal
 
 
 a = np.ones((8, 8), dtype=np.float32)

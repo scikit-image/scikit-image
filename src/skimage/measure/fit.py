@@ -5,9 +5,10 @@ from warnings import warn, catch_warnings
 
 import numpy as np
 from numpy.linalg import inv
-from scipy import optimize, spatial
+from packaging import version
+import scipy
 
-from .._shared.utils import (
+from _skimage2._shared.utils import (
     _deprecate_estimate,
     FailedEstimation,
     deprecate_parameter,
@@ -158,7 +159,9 @@ def _deprecate_model_params(func):
         stop_version=_PARAMS_DEP_STOP,
         modify_docstring=False,
     )(func)
-    func.__doc__ = func.__doc__.replace('{{ start_version }}', _PARAMS_DEP_START)
+    # `if` necessary in optimized mode, where docstrings may be missing
+    if func.__doc__:
+        func.__doc__ = func.__doc__.replace('{{ start_version }}', _PARAMS_DEP_START)
     return func
 
 
@@ -620,8 +623,13 @@ class CircleModel(_BaseModel):
                 warn_only=warn_only,
             )
 
+        # Compute the Euclidean distances from the center.
         center = C[0:2]
-        distances = spatial.minkowski_distance(center, data)
+        # Can remove once SciPy 1.18 is the default
+        if version.parse(scipy.__version__) >= version.parse('1.18.0dev0'):
+            distances = scipy.spatial.distance.minkowski(center, data)
+        else:
+            distances = scipy.spatial.minkowski_distance(center, data)
         r = np.sqrt(np.mean(distances**2))
 
         # Revert normalization and set init params.
@@ -1033,7 +1041,7 @@ class EllipseModel(_BaseModel):
             xi = x[i]
             yi = y[i]
             # faster without Dfun, because of the python overhead
-            t, _ = optimize.leastsq(fun, t0[i], args=(xi, yi))
+            t, _ = scipy.optimize.leastsq(fun, t0[i], args=(xi, yi))
             residuals[i] = np.sqrt(fun(t, xi, yi))
 
         return residuals
@@ -1087,7 +1095,6 @@ class EllipseModel(_BaseModel):
         -------
         success : bool
             True, if model estimation succeeds.
-
 
         References
         ----------

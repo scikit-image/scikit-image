@@ -2,8 +2,8 @@ import numpy as np
 import pytest
 from skimage.segmentation import quickshift
 
-from skimage._shared import testing
-from skimage._shared.testing import (
+from _skimage2._shared import testing
+from _skimage2._shared.testing import (
     assert_greater,
     run_in_parallel,
     assert_equal,
@@ -14,7 +14,7 @@ from skimage._shared.testing import (
 @run_in_parallel()
 @testing.parametrize('dtype', [np.float32, np.float64])
 def test_grey(dtype):
-    rng = np.random.default_rng(0)
+    rng = np.random.RandomState(1734481917)
     img = np.zeros((20, 21))
     img[:10, 10:] = 0.2
     img[10:, :10] = 0.4
@@ -34,6 +34,7 @@ def test_grey(dtype):
 @testing.parametrize('dtype', [np.float32, np.float64])
 @testing.parametrize('channel_axis', [-3, -2, -1, 0, 1, 2])
 def test_color(dtype, channel_axis):
+    # test result depends on this seed and RNG
     rng = np.random.default_rng(583428449)
     img = np.zeros((20, 21, 3))
     img[:10, :10, 0] = 1

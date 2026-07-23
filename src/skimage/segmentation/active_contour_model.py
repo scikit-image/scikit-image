@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.interpolate import RectBivariateSpline
 
-from .._shared.utils import _supported_float_type
+from _skimage2._shared.utils import _supported_float_type
 from ..util import img_as_float
 from ..filters import sobel
 

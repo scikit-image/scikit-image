@@ -1,6 +1,6 @@
 import numpy as np
 
-from .._shared import utils
+from _skimage2._shared import utils
 
 
 def _match_cumulative_cdf(source, template):

@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.sparse as sparse
 from ._contingency_table import contingency_table
-from .._shared.utils import check_shape_equality
+from _skimage2._shared.utils import check_shape_equality
 
 __all__ = ['variation_of_information']
 
