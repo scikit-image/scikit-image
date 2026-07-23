@@ -395,26 +395,25 @@ class StudholmeAffineSolver(_AffineSolver):
         matrix[-1, :] = 0
         matrix[-1, -1] = 1
 
-        # print(matrix)
-
         # Transform each channel of the image and weights
         moving_image_warp = [
             np.stack([ndi.affine_transform(plane, matrix) for plane in image])
             for image in moving_image
         ]
 
-        # Compute the weights as the product of the weigts
-        weights = reference_image[1] * moving_image_warp[1]
+        # Compute weight as the product of the two weights
+        weight = reference_image[1] * moving_image_warp[1]
 
-        # Weights can become very small leading to NaNs
-        if weights.mean() < 0.25:
-            raise ValueError("Error")
+        if weight.mean() < 0.25:
+            raise ValueError(
+                "Mean weight below 0.25: images may have insufficient overlap."
+            )
 
         # Compute the cost
-        f = self._cost_function(reference_image[0], moving_image_warp[0], weights)
+        f = self._cost_function(reference_image[0], moving_image_warp[0], weight)
 
         if np.isnan(f):
-            raise ValueError("Error")
+            raise ValueError("Cost function returned NaN.")
         return f
 
     def estimate_affine(
