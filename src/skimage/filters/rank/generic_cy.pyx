@@ -10,7 +10,7 @@ from .core_cy cimport dtype_t, dtype_t_out, _core
 
 from .core_cy_3d cimport _core_3D
 
-from ..._shared.interpolation cimport round
+from _skimage2._shared.interpolation cimport round
 
 cnp.import_array()
 

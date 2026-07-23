@@ -7,7 +7,7 @@ import numpy as np
 cimport numpy as cnp
 from libc.math cimport M_PI
 
-from .._shared.fused_numerics cimport np_floats
+from _skimage2._shared.fused_numerics cimport np_floats
 
 
 cpdef _ori_distances(np_floats[::1] ori_bins,

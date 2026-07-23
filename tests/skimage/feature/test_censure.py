@@ -1,20 +1,20 @@
 import numpy as np
-from skimage._shared.testing import assert_array_equal
+from _skimage2._shared.testing import assert_array_equal
 from skimage.data import moon
 from skimage.feature import CENSURE
-from skimage._shared.testing import run_in_parallel
-from skimage._shared import testing
+from _skimage2._shared.testing import run_in_parallel
+from _skimage2._shared import testing
 from skimage.transform import rescale
 
 
 img = moon()
-np.random.seed(0)
 
 
 def test_censure_on_rectangular_images():
     """Censure feature detector should work on 2D image of any shape."""
-    rect_image = np.random.rand(300, 200)
-    square_image = np.random.rand(200, 200)
+    rng = np.random.RandomState(1727908739)
+    rect_image = rng.rand(300, 200)
+    square_image = rng.rand(200, 200)
     CENSURE().detect(square_image)
     CENSURE().detect(rect_image)
 

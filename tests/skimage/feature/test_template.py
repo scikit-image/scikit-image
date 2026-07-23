@@ -1,10 +1,10 @@
 import numpy as np
-from skimage._shared.testing import assert_almost_equal, assert_equal
+from _skimage2._shared.testing import assert_almost_equal, assert_equal
 
 from skimage import data, img_as_float
 from skimage.morphology import diamond
 from skimage.feature import match_template, peak_local_max
-from skimage._shared import testing
+from _skimage2._shared import testing
 
 
 @testing.parametrize('dtype', [np.float32, np.float64])
@@ -17,8 +17,8 @@ def test_template(dtype):
     target_positions = [(50, 50), (200, 200)]
     for x, y in target_positions:
         image[x : x + size, y : y + size] = target
-    np.random.seed(1)
-    image += 0.1 * np.random.uniform(size=(400, 400)).astype(dtype, copy=False)
+    rng = np.random.RandomState(971876736)
+    image += 0.1 * rng.uniform(size=(400, 400)).astype(dtype, copy=False)
 
     result = match_template(image, target)
     assert result.dtype == dtype
@@ -82,8 +82,8 @@ def test_no_nans():
     cause a subtraction inside of a square root to go negative (without an
     explicit check that was added to `match_template`).
     """
-    np.random.seed(1)
-    image = 0.5 + 1e-9 * np.random.normal(size=(20, 20))
+    rng = np.random.RandomState(2813589124)
+    image = 0.5 + 1e-9 * rng.normal(size=(20, 20))
     template = np.ones((6, 6))
     template[:3, :] = 0
     result = match_template(image, template)
@@ -127,8 +127,8 @@ def test_pad_input():
 
 
 def test_3d():
-    np.random.seed(1)
-    template = np.random.rand(3, 3, 3)
+    rng = np.random.RandomState(3113877123)
+    template = rng.rand(3, 3, 3)
     image = np.zeros((12, 12, 12))
 
     image[3:6, 5:8, 4:7] = template
@@ -140,8 +140,8 @@ def test_3d():
 
 
 def test_3d_pad_input():
-    np.random.seed(1)
-    template = np.random.rand(3, 3, 3)
+    rng = np.random.RandomState(3122599642)
+    template = rng.rand(3, 3, 3)
     image = np.zeros((12, 12, 12))
 
     image[3:6, 5:8, 4:7] = template

@@ -1,4 +1,4 @@
-from .._shared.utils import check_shape_equality
+from _skimage2._shared.utils import check_shape_equality
 from ._contingency_table import contingency_table
 
 __all__ = ['adapted_rand_error']

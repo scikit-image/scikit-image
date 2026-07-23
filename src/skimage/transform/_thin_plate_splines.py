@@ -1,9 +1,9 @@
 from typing import Self
 
 import numpy as np
-from scipy.spatial import distance_matrix
+from scipy.spatial.distance import cdist
 
-from .._shared.utils import check_nD, _deprecate_estimate, FailedEstimation
+from _skimage2._shared.utils import check_nD, _deprecate_estimate, FailedEstimation
 
 
 class ThinPlateSplineTransform:
@@ -180,7 +180,7 @@ class ThinPlateSplineTransform:
         self.src = src
         n, d = src.shape
 
-        dist = distance_matrix(src, src)
+        dist = cdist(src, src)
         K = self._radial_basis_kernel(dist)
         P = np.hstack([np.ones((n, 1)), src])
         n_plus_3 = n + 3
@@ -197,7 +197,7 @@ class ThinPlateSplineTransform:
 
     def _radial_distance(self, coords):
         """Compute the radial distance between input points and source points."""
-        dists = distance_matrix(coords, self.src)
+        dists = cdist(coords, self.src)
         return self._radial_basis_kernel(dists)
 
     def _spline_function(self, coords, radial_dist):

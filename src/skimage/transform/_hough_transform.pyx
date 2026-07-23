@@ -12,7 +12,7 @@ from libc.math cimport fabs, sqrt, ceil, atan2, M_PI
 
 from ..draw import circle_perimeter
 
-from .._shared.interpolation cimport round
+from _skimage2._shared.interpolation cimport round
 
 cnp.import_array()
 

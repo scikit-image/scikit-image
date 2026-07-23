@@ -5,9 +5,9 @@ import pytest
 from scipy import ndimage as ndi
 
 from skimage import draw
-from skimage._shared import testing
-from skimage._shared.testing import assert_allclose, assert_almost_equal, assert_equal
-from skimage._shared.utils import _supported_float_type
+from _skimage2._shared import testing
+from _skimage2._shared.testing import assert_allclose, assert_almost_equal, assert_equal
+from _skimage2._shared.utils import _supported_float_type
 from skimage.measure import (
     centroid,
     inertia_tensor,
@@ -232,11 +232,11 @@ def test_analytical_moments_calculation(dtype, order, ndim):
         shape = (64, 64, 64)
     else:
         shape = (16,) * ndim
-    rng = np.random.default_rng(1234)
+    rng = np.random.RandomState(786654189)
     if np.dtype(dtype).kind in 'iu':
-        x = rng.integers(0, 256, shape, dtype=dtype)
+        x = rng.randint(0, 256, shape, dtype=dtype)
     else:
-        x = rng.standard_normal(shape, dtype=dtype)
+        x = rng.randn(*shape).astype(dtype)
     # setting center=None will use the analytical expressions
     m1 = moments_central(x, center=None, order=order)
     # providing explicit centroid will bypass the analytical code path

@@ -7,7 +7,7 @@ for use with data on a n-dimensional lattice.
 import cython
 import numpy as np
 from . import heap
-from .._shared.utils import warn, deprecate_parameter, DEPRECATED
+from _skimage2._shared.utils import warn, deprecate_parameter, DEPRECATED
 
 cimport numpy as cnp
 from . cimport heap

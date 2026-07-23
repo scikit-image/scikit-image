@@ -11,10 +11,11 @@ from skimage.metrics import (
 )
 
 
-np.random.seed(5)
+# test results depend on this seed
+MODULE_RNG = np.random.RandomState(5)
 cam = data.camera()
 sigma = 20.0
-cam_noisy = np.clip(cam + sigma * np.random.randn(*cam.shape), 0, 255)
+cam_noisy = np.clip(cam + sigma * MODULE_RNG.randn(*cam.shape), 0, 255)
 cam_noisy = cam_noisy.astype(cam.dtype)
 
 
@@ -128,7 +129,7 @@ def test_nmi_different_sizes():
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_nmi_random(dtype):
-    rng = np.random.default_rng()
+    rng = np.random.RandomState(153810841)
     random1 = rng.random((100, 100)).astype(dtype)
     random2 = rng.random((100, 100)).astype(dtype)
     nmi = normalized_mutual_information(random1, random2, bins=10)
@@ -137,7 +138,8 @@ def test_nmi_random(dtype):
 
 
 def test_nmi_random_3d():
-    random1, random2 = np.random.random((2, 10, 100, 100))
+    rng = np.random.RandomState(3521998880)
+    random1, random2 = rng.random((2, 10, 100, 100))
     assert_almost_equal(
         normalized_mutual_information(random1, random2, bins=10),
         1,

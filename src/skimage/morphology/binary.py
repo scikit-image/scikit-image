@@ -12,8 +12,7 @@ from _skimage2.morphology._footprints import (
     _footprint_is_sequence,
     pad_footprint,
 )
-
-from .._shared.utils import deprecate_func
+from _skimage2._shared.utils import deprecate_func
 
 
 def _iterate_binary_func(binary_func, image, footprint, out, border_value):
@@ -102,7 +101,7 @@ def binary_erosion(image, footprint=None, out=None, *, mode='ignore'):
 
     For even-sized footprints, :func:`skimage.morphology.erosion` and
     this function produce an output that differs: one is shifted by one pixel
-    compared to the other. :func:`skimage.morphology.pad_footprint´ is available
+    compared to the other. :func:`skimage.morphology.pad_footprint` is available
     to account for this.
 
     See also

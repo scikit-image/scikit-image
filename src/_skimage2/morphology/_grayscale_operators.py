@@ -153,7 +153,7 @@ def erosion(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     computational cost. Most of the built-in footprints such as
     :func:`skimage2.morphology.disk` provide an option to automatically generate
     a footprint sequence of this type. Refer to the example
-    :ref:`sphx_glr_download_auto_examples_numpy_operations_plot_footprint_decompositions.py`
+    :ref:`sphx_glr_auto_examples_numpy_operations_plot_footprint_decompositions.py`
     for more insights.
 
     If `footprint` contains even-sized dimensions, they are padded with zeros to
@@ -254,7 +254,7 @@ def dilation(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     computational cost. Most of the built-in footprints such as
     :func:`skimage2.morphology.disk` provide an option to automatically generate
     a footprint sequence of this type. Refer to the example
-    :ref:`sphx_glr_download_auto_examples_numpy_operations_plot_footprint_decompositions.py`
+    :ref:`sphx_glr_auto_examples_numpy_operations_plot_footprint_decompositions.py`
     for more insights.
 
     If `footprint` contains even-sized dimensions, they are padded with zeros to
@@ -353,7 +353,7 @@ def opening(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     computational cost. Most of the built-in footprints such as
     :func:`skimage2.morphology.disk` provide an option to automatically generate
     a footprint sequence of this type. Refer to the example
-    :ref:`sphx_glr_download_auto_examples_numpy_operations_plot_footprint_decompositions.py`
+    :ref:`sphx_glr_auto_examples_numpy_operations_plot_footprint_decompositions.py`
     for more insights.
 
     If `footprint` contains even-sized dimensions, they are padded with zeros to
@@ -432,7 +432,7 @@ def closing(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     computational cost. Most of the built-in footprints such as
     :func:`skimage2.morphology.disk` provide an option to automatically generate
     a footprint sequence of this type. Refer to the example
-    :ref:`sphx_glr_download_auto_examples_numpy_operations_plot_footprint_decompositions.py`
+    :ref:`sphx_glr_auto_examples_numpy_operations_plot_footprint_decompositions.py`
     for more insights.
 
     If `footprint` contains even-sized dimensions, they are padded with zeros to
@@ -511,7 +511,7 @@ def white_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     computational cost. Most of the built-in footprints such as
     :func:`skimage2.morphology.disk` provide an option to automatically generate
     a footprint sequence of this type. Refer to the example
-    :ref:`sphx_glr_download_auto_examples_numpy_operations_plot_footprint_decompositions.py`
+    :ref:`sphx_glr_auto_examples_numpy_operations_plot_footprint_decompositions.py`
     for more insights.
 
     If `footprint` contains even-sized dimensions, they are padded with zeros to
@@ -606,7 +606,7 @@ def black_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     computational cost. Most of the built-in footprints such as
     :func:`skimage2.morphology.disk` provide an option to automatically generate
     a footprint sequence of this type. Refer to the example
-    :ref:`sphx_glr_download_auto_examples_numpy_operations_plot_footprint_decompositions.py`
+    :ref:`sphx_glr_auto_examples_numpy_operations_plot_footprint_decompositions.py`
     for more insights.
 
     If `footprint` contains even-sized dimensions, they are padded with zeros to
