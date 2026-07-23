@@ -33,8 +33,7 @@ class TranslationTransform(AffineTransform):
 
 
 def target_registration_error(shape, matrix):
-    """
-    Compute the displacement norm of the transform at each pixel.
+    """Compute the displacement norm of the transform at each pixel.
 
     Parameters
     ----------
@@ -48,7 +47,7 @@ def target_registration_error(shape, matrix):
     error : ndarray
         Norm of the displacement given by the transform.
     """
-    # Create a regular set of points on the grid
+    # create a regular set of points on the grid
     slc = [slice(0, n) for n in shape]
     N = np.prod(shape)
     points = np.stack([*[x.ravel() for x in np.mgrid[slc]], np.ones(N)])
@@ -65,7 +64,7 @@ def _shuffle_axes_and_unpack_weights_if_necessary(image, channel_axis):
     ----------
     image : ndarray or tuple of ndarray
         The input image or a tuple of the input image and weights.
-    channel_axis : int
+    channel_axis : int, optional
         The index of the channel axis.
 
     Returns
@@ -74,13 +73,13 @@ def _shuffle_axes_and_unpack_weights_if_necessary(image, channel_axis):
         A 2-tuple of the image and weights.
     """
 
-    # Create a tuple and broadcast shapes if needed
+    # create a tuple and broadcast shapes if needed
     if isinstance(image, (list, tuple)):
         new_image = np.broadcast_arrays(*image)
     else:
         new_image = (image, np.ones(image.shape))
 
-    # Add a channel axes in first axes if needed
+    # add or move channel axis to first axis
     if channel_axis is None:
         new_image = [np.expand_dims(x, 0) for x in new_image]
     elif channel_axis != 0:
@@ -389,7 +388,6 @@ class StudholmeAffineSolver(_AffineSolver):
             The value of the cost function.
         """
         ndim = reference_image[0].ndim - 1
-        # print(parameters)
         matrix = self._parameter_vector_to_matrix(parameters, ndim)
         matrix = self._invert_center_and_normalize(matrix, reference_image[0].shape)
         matrix[-1, :] = 0
