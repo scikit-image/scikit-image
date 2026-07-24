@@ -11,10 +11,14 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from audit_log import emit
 
+# Match git even when prefixed (env vars, cd &&, /usr/bin/git, git -C).
+_GIT = r"(?:^|[;&|]\s*|\b)(?:/\S+/)?git(?:\s+-[CKc]\s+\S+|\s+--[\w-]+)*\s+"
+
 DENY_PATTERNS: list[tuple[str, re.Pattern[str]]] = [
-    ("force push", re.compile(r"git push .*--force")),
-    ("force push", re.compile(r"git push .*--force-with-lease")),
-    ("force push", re.compile(r"git push -f\b")),
+    # --force / --force-with-lease anywhere after push
+    ("force push", re.compile(_GIT + r"push\b[^;&|\n]*--force(?:-with-lease)?\b")),
+    # -f inside a short-flag cluster (-f, -fu, -uf, …)
+    ("force push", re.compile(_GIT + r"push\b[^;&|\n]*\s-[a-zA-Z]*f[a-zA-Z]*\b")),
     ("hard reset", re.compile(r"git reset --hard")),
     ("git clean", re.compile(r"git clean -[a-z]*x")),
     ("checkout discard", re.compile(r"git checkout -- \.")),
@@ -25,8 +29,14 @@ DENY_PATTERNS: list[tuple[str, re.Pattern[str]]] = [
     ("rm -rf .", re.compile(r"rm -rf \.")),
     ("rm -rf ..", re.compile(r"rm -rf \.\.")),
     ("chmod 777", re.compile(r"chmod 777")),
-    ("curl pipe sh", re.compile(r"curl .* \| *(ba)?sh")),
-    ("wget pipe sh", re.compile(r"wget .* \| *(ba)?sh")),
+    (
+        "curl pipe sh",
+        re.compile(r"curl\b.*\|\s*(?:sudo\s+)?(?:(?:/usr)?/bin/)?(?:ba|z|da)?sh\b"),
+    ),
+    (
+        "wget pipe sh",
+        re.compile(r"wget\b.*\|\s*(?:sudo\s+)?(?:(?:/usr)?/bin/)?(?:ba|z|da)?sh\b"),
+    ),
 ]
 
 BYPASS_PATTERNS: list[tuple[str, re.Pattern[str]]] = [
@@ -35,14 +45,14 @@ BYPASS_PATTERNS: list[tuple[str, re.Pattern[str]]] = [
 ]
 
 ASK_GIT_PATTERNS: list[re.Pattern[str]] = [
-    re.compile(r"^git commit"),
-    re.compile(r"^git push"),
-    re.compile(r"^git tag"),
-    re.compile(r"^git revert"),
-    re.compile(r"^git rebase"),
-    re.compile(r"^git merge"),
-    re.compile(r"^git cherry-pick"),
-    re.compile(r"^git stash (drop|clear|pop)"),
+    re.compile(_GIT + r"commit\b"),
+    re.compile(_GIT + r"push\b"),
+    re.compile(_GIT + r"tag\b"),
+    re.compile(_GIT + r"revert\b"),
+    re.compile(_GIT + r"rebase\b"),
+    re.compile(_GIT + r"merge\b"),
+    re.compile(_GIT + r"cherry-pick\b"),
+    re.compile(_GIT + r"stash\s+(drop|clear|pop)\b"),
 ]
 
 ASK_CLEAN_PATTERNS: list[re.Pattern[str]] = [

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import fnmatch
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -35,8 +36,25 @@ ALWAYS_DENY = (
 _OUTCOME = {"deny": "denied", "ask": "approval_requested"}
 
 
-def _matches(path: str, patterns: tuple[str, ...]) -> bool:
-    norm = path.replace("\\", "/").lstrip("./")
+def _repo_relative(path: str, cwd: str) -> str:
+    """Normalize to a repo-relative POSIX path for portable pattern matching.
+
+    Absolute paths from different machines (e.g. /Users/.../AGENTS.md vs
+    /home/ci/.../AGENTS.md) both collapse to AGENTS.md when under cwd.
+    """
+    root = Path(cwd).resolve()
+    p = Path(path)
+    try:
+        if p.is_absolute():
+            return p.resolve().relative_to(root).as_posix()
+        return (root / p).resolve().relative_to(root).as_posix()
+    except ValueError:
+        # Outside the repo — keep POSIX form; will not match relative patterns.
+        return p.resolve().as_posix() if p.is_absolute() else p.as_posix()
+
+
+def _matches(path: str, patterns: tuple[str, ...], *, cwd: str) -> bool:
+    norm = _repo_relative(path, cwd)
     for pat in patterns:
         if fnmatch.fnmatch(norm, pat) or fnmatch.fnmatch(norm, pat.rstrip("/")):
             return True
@@ -90,9 +108,10 @@ def main() -> int:
     payload = json.load(sys.stdin)
     tool = payload.get("tool_name") or payload.get("tool") or ""
     paths = _extract_paths(payload)
+    cwd = payload.get("cwd") or os.getcwd()
 
     for path in paths:
-        if _matches(path, ALWAYS_DENY):
+        if _matches(path, ALWAYS_DENY, cwd=cwd):
             _log_and_respond(
                 "deny",
                 f"Blocked edit to git internals: {path}",
@@ -104,7 +123,7 @@ def main() -> int:
                 rule={"source": "protect-paths.py", "id": "git_internals"},
             )
             return 0
-        if _matches(path, PROTECTED):
+        if _matches(path, PROTECTED, cwd=cwd):
             _log_and_respond(
                 "ask",
                 f"Protected path edit requires approval: {path}",
