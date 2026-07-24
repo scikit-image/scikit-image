@@ -32,9 +32,16 @@ Project hooks in `.cursor/hooks.json` enforce these rules. Do not weaken or remo
 Do not edit these unless the user explicitly asked:
 
 - `.cursor/hooks.json`, `.cursor/hooks/*`, `.cursor/rules/security.mdc`
+- `.cursor/rules/persona.mdc`, `.cursor/rules/first-contribution.mdc`
+- `.cursor/skills/**` (persona and workflow skills)
 - `AGENTS.md`, `CODEOWNERS`, `.pre-commit-config.yaml`, `.gitignore`
 - `.github/workflows/*`
 - `pyproject.toml`, `requirements/*`
+
+## Audit logs
+
+- You may read files under `.cursor/audit/` for debugging and review.
+- Do not modify or delete audit files; the trail is append-only (hooks write automatically).
 
 ## Secrets
 
