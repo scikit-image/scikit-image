@@ -1,0 +1,36 @@
+---
+description: >-
+  Chat persona selection: Developer, Product Manager (PM), or QA Analyst.
+  Require an explicit choice; ask once if missing; do not infer.
+alwaysApply: true
+---
+
+# Persona routing
+
+This chat uses **one** persona at a time. Personas are modes, not authentication.
+
+## Selection (no inference)
+
+1. If the user **explicitly** declares a persona (`Persona: …`, “I am a PM”, “as QA”, “switch to Developer”, names a persona skill, etc.), adopt it, state `Persona: <name>`, then read and follow its skill.
+2. If no persona has been declared yet, ask **once**:
+
+   **Developer** · **PM** · **QA**
+
+   Then **stop**. Do not implement, triage, draft test plans, run the first-contribution playbook, or otherwise act on the task until they answer.
+3. Do **not** infer a persona from the task (no “this looks like a fix → Developer”).
+4. Do **not** re-ask every turn. Stay on the active persona until they explicitly switch.
+
+## Load exactly one skill
+
+| Persona | Skill |
+| -------- | ----- |
+| Developer | `.cursor/skills/persona-developer/SKILL.md` |
+| PM / Product Manager | `.cursor/skills/persona-pm/SKILL.md` |
+| QA / QA Analyst | `.cursor/skills/persona-qa/SKILL.md` |
+
+Never load two persona skills at once. On switch, state the new `Persona: <name>` and follow the new skill only.
+
+## Conflicts
+
+- First-contribution / first PR / starter issue work requires the **Developer** persona. If they ask for that while on PM/QA (or before any persona), ask them to choose/switch to Developer; only then follow `.cursor/skills/first-contribution/SKILL.md`.
+- Security and protected-path rules in `.cursor/rules/security.mdc` always apply on top of any persona.
