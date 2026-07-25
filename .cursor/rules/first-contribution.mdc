@@ -7,11 +7,9 @@ alwaysApply: false
 
 # First contribution routing
 
-When helping with a **first contribution**, **first PR**, **starter issue**, or **newcomer onboarding**:
+For **first contribution**, **first PR**, **starter issue**, or **newcomer onboarding**:
 
-1. Require the **Developer** persona first (see `.cursor/rules/persona.mdc`). If unset or PM/QA, ask them to choose/switch to Developer; do not start this playbook until then.
-2. Read and follow `.cursor/skills/first-contribution/SKILL.md`
-3. Prefer open GitHub issues labeled `:beginner: Good first issue`
-4. If the user points at an unlabeled (or differently labeled) issue: strongly recommend labeled alternatives (`gh issue list --label ":beginner: Good first issue" --state open`), explain why, and **wait for explicit confirmation** before implementing their off-label choice — do not refuse outright if they confirm
+1. Require **Developer** persona (`.cursor/rules/persona.mdc` § Conflicts); do not start until then.
+2. Read and follow `.cursor/skills/first-contribution/SKILL.md` — do not substitute a custom onboarding path.
 
-Do not substitute a custom onboarding path. Deeper norms stay in `CONTRIBUTING.md` / `AGENTS.md`.
+Issue selection, verify, and handoff live in the skill. Deeper norms: `CONTRIBUTING.md` / `AGENTS.md`.

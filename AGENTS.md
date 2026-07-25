@@ -68,6 +68,7 @@ Before finishing a task:
 
 - Run the narrowest relevant check (`spin test -- …`, `spin build` after Cython/meson changes)
 - Before opening a PR, run `./tools/cursor/validate-contribution.sh` (see `.cursor/skills/pre-pr-gate/SKILL.md`)
+- When adding or strengthening tests, use `.cursor/skills/scaffold-test/SKILL.md` (conventions while editing: `.cursor/rules/skimage-tests.mdc`)
 - Report what you ran and the outcome
 - Do not claim tests pass unless you ran them
 
@@ -86,3 +87,4 @@ Before finishing a task:
 - [Gallery](CONTRIBUTING.md#gallery) — new feature examples
 - [Benchmarks](CONTRIBUTING.md#benchmarks) — performance PRs
 - [Cursor framework maintainer guide](.cursor/README.md) — rules, skills, hooks, and how to extend `.cursor/`
+- [Pre-PR validate script](tools/cursor/README.md) — `validate-contribution.sh` options and heuristics

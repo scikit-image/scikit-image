@@ -13,6 +13,7 @@ PROTECTED: tuple[str, ...] = (
     ".cursor/rules/security.mdc",
     ".cursor/rules/persona.mdc",
     ".cursor/rules/first-contribution.mdc",
+    ".cursor/rules/pre-pr-gate.mdc",
     "AGENTS.md",
     ".github/workflows/*",
     ".github/workflows/**",

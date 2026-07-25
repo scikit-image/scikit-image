@@ -36,7 +36,7 @@ Do not edit these unless the user explicitly asked. The canonical glob list is
 Summary:
 
 - `.cursor/hooks.json`, `.cursor/hooks/*`, `.cursor/rules/security.mdc`
-- `.cursor/rules/persona.mdc`, `.cursor/rules/first-contribution.mdc`
+- `.cursor/rules/persona.mdc`, `.cursor/rules/first-contribution.mdc`, `.cursor/rules/pre-pr-gate.mdc`
 - `.cursor/skills/**` (persona and workflow skills)
 - `AGENTS.md`, `CODEOWNERS`, `.pre-commit-config.yaml`, `.gitignore`
 - `.github/workflows/*`

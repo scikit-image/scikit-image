@@ -7,10 +7,8 @@ alwaysApply: false
 
 # Pre-PR gate routing
 
-When the user wants to **validate before a PR**, **run pre-PR checks**, or says the branch is **ready for review/opening a PR**:
+When the user wants **validate before a PR**, **pre-PR checks**, or the branch **ready for review/opening a PR**:
 
-1. Read and follow `.cursor/skills/pre-pr-gate/SKILL.md`
-2. Run `tools/cursor/validate-contribution.sh` from the repo root unless the user scoped a narrower check
-3. Do not claim checks passed without running the script (or equivalent commands) and reporting output
+1. Read and follow `.cursor/skills/pre-pr-gate/SKILL.md` (script, heuristics, PR checklist).
 
-First-time contributors may reach this via `.cursor/skills/first-contribution/SKILL.md` § Verify — same skill and script.
+First contribution: same path via `first-contribution/SKILL.md` § Verify.
