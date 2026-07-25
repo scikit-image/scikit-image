@@ -66,18 +66,17 @@ Entire `.cursor/skills/**` tree is hook-protected (approval to edit).
 
 ### Tools and hooks
 
-| Path                                                                              | Purpose                                               |
-| --------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| [tools/cursor/validate-contribution.sh](../tools/cursor/validate-contribution.sh) | Heuristics + pre-commit + `spin test --test-modified` |
-| [tools/cursor/README.md](../tools/cursor/README.md)                               | Script options and examples                           |
-| [hooks.json](hooks.json)                                                          | Registers shell, preToolUse, MCP hooks                |
-| [hooks/protected_paths.py](hooks/protected_paths.py)                              | **Canonical** `PROTECTED` / `ALWAYS_DENY` globs       |
-| [hooks/protect-paths.py](hooks/protect-paths.py)                                  | preToolUse: Write / StrReplace / Delete               |
-| [hooks/before-shell.py](hooks/before-shell.py)                                    | beforeShellExecution                                  |
-| [hooks/before-mcp.py](hooks/before-mcp.py)                                        | beforeMCPExecution                                    |
-| [hooks/repo_paths.py](hooks/repo_paths.py)                                        | Path normalize, `matches()`, `is_skill_path()`        |
-| [hooks/audit_log.py](hooks/audit_log.py)                                          | Append-only [audit/](audit/audit.jsonl)               |
-| [audit/](audit/)                                                                  | Do not modify (hook deny)                             |
+| Path                                                                              | Purpose                                                         |
+| --------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| [tools/cursor/validate-contribution.sh](../tools/cursor/validate-contribution.sh) | Heuristics + pre-commit + `spin test --test-modified`           |
+| [tools/cursor/README.md](../tools/cursor/README.md)                               | Script options and examples                                     |
+| [hooks.json](hooks.json)                                                          | Registers shell, preToolUse, MCP hooks                          |
+| [hooks/protected_paths.py](hooks/protected_paths.py)                              | **Canonical** `PROTECTED` / `ALWAYS_DENY` globs                 |
+| [hooks/protect-paths.py](hooks/protect-paths.py)                                  | preToolUse: Write / StrReplace / Delete; path normalize + globs |
+| [hooks/before-shell.py](hooks/before-shell.py)                                    | beforeShellExecution                                            |
+| [hooks/before-mcp.py](hooks/before-mcp.py)                                        | beforeMCPExecution                                              |
+| [hooks/audit_log.py](hooks/audit_log.py)                                          | Append-only [audit/](audit/audit.jsonl)                         |
+| [audit/](audit/)                                                                  | Do not modify (hook deny)                                       |
 
 ## Layer contract (where to put changes)
 
@@ -101,7 +100,7 @@ paragraphs. Keep procedural checklists in skills; keep edit-time rules in `.mdc`
 | Concern                                            | Canonical (behavior)                                                                        | Agent summary                                                      |
 | -------------------------------------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
 | Edits to high-risk paths                           | [protected_paths.py](hooks/protected_paths.py) + [protect-paths.py](hooks/protect-paths.py) | [security.mdc](rules/security.mdc) § Protected paths               |
-| Skills tree                                        | [is_skill_path()](hooks/repo_paths.py) in protect-paths                                     | Same §                                                             |
+| Skills tree                                        | `_is_skill_path()` in [protect-paths.py](hooks/protect-paths.py)                            | Same §                                                             |
 | Destructive / git shell                            | [before-shell.py](hooks/before-shell.py)                                                    | [security.mdc](rules/security.mdc) § Git / Shell                   |
 | MCP execution                                      | [before-mcp.py](hooks/before-mcp.py)                                                        | [security.mdc](rules/security.mdc) § Network                       |
 | Pre-PR test/src pairing, TODO.txt for deprecations | [validate-contribution.sh](../tools/cursor/validate-contribution.sh)                        | [pre-pr-gate](skills/pre-pr-gate/SKILL.md) + AGENTS § Verification |
@@ -125,7 +124,7 @@ Flow for a file edit:
 ```text
 Agent Write/StrReplace/Delete
   → protect-paths.py (paths from tool_input)
-  → repo-relative path (repo_paths)
+  → repo-relative path (_repo_relative in protect-paths.py)
   → audit path? → deny
   → .git/* ? → deny
   → skill path or PROTECTED glob? → ask (user approval card)

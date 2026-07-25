@@ -31,4 +31,4 @@ ALWAYS_DENY: tuple[str, ...] = (
     ".git/**",
 )
 
-# Entire `.cursor/skills/**` tree is protected via repo_paths.is_skill_path().
+# Entire `.cursor/skills/**` tree is protected via _is_skill_path() in protect-paths.py.
