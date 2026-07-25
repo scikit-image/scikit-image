@@ -29,7 +29,11 @@ Project hooks in `.cursor/hooks.json` enforce these rules. Do not weaken or remo
 
 ## Protected paths
 
-Do not edit these unless the user explicitly asked:
+Do not edit these unless the user explicitly asked. The canonical glob list is
+[`.cursor/hooks/protected_paths.py`](../hooks/protected_paths.py) (enforced by
+`protect-paths.py`); `.cursor/skills/**` is also protected.
+
+Summary:
 
 - `.cursor/hooks.json`, `.cursor/hooks/*`, `.cursor/rules/security.mdc`
 - `.cursor/rules/persona.mdc`, `.cursor/rules/first-contribution.mdc`

@@ -1,0 +1,42 @@
+---
+description: scikit-image source conventions (skimage / _skimage2)
+globs: src/**
+alwaysApply: false
+---
+
+# scikit-image source
+
+Layout: [AGENTS.md](../../AGENTS.md) § Package layout. Stylistic policy: [CONTRIBUTING.md](../../CONTRIBUTING.md) § Stylistic guidelines.
+
+## Imports and style
+
+```python
+import numpy as np
+import scipy as sp
+import skimage as ski
+```
+
+- In `_skimage2`: relative imports (`from .._shared import xyz`), not `from _skimage2._shared`
+- NumPy dtypes (`np.uint8`), not strings (`"uint8"`)
+- Arrays: `image : ndarray of shape (M, N)`; plane/row/column, not x/y/z
+- Accept all input image dtypes; use helpers like `img_as_float`
+- Numpydoc docstrings; maintain `__all__` on public modules
+
+## API changes
+
+- Do not change public behavior without tests
+- When changing `_skimage2`, check `skimage` wrappers and both test trees
+- Do not remove or rename symbols in `__all__` without deprecation
+
+## Warnings and deprecations
+
+- `warn_external` from `_skimage2._shared._warnings` for user-facing warnings
+- `deprecate_func` / `deprecate_parameter` from `_skimage2._shared.utils`
+- 3-release deprecation cycle; add a `TODO.txt` entry for the target version
+
+## Cython (`.pyx` / `.pxd`)
+
+- `Py_ssize_t` for indices, shapes, and sizes
+- Release the GIL with `with nogil:` where possible
+- Expose Cython through a pure-Python public API wrapper
+- Register new files in the module's `meson.build`; rebuild with `spin build`

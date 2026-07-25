@@ -84,3 +84,4 @@ Before finishing a task:
 - [Testing](CONTRIBUTING.md#testing) — coverage, RNG, multithreading
 - [Gallery](CONTRIBUTING.md#gallery) — new feature examples
 - [Benchmarks](CONTRIBUTING.md#benchmarks) — performance PRs
+- [Cursor framework maintainer guide](.cursor/README.md) — rules, skills, hooks, and how to extend `.cursor/`

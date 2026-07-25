@@ -11,6 +11,8 @@ description: >-
 
 Help someone land a **first** scikit-image PR. Stay inside this playbook; do not invent a parallel onboarding path.
 
+Norms for layout, `spin`, pre-commit, and PR policy: **AGENTS.md** (always applied). Deep reference: **CONTRIBUTING.md** — link, do not paste.
+
 ## Issue selection
 
 **Default:** open issues labeled `:beginner: Good first issue` (list with `gh` below). Prefer these strongly for a first PR.
@@ -33,7 +35,7 @@ Copy and track:
 First contribution:
 - [ ] List / pick an issue (prefer :beginner: Good first issue)
 - [ ] If off-label: strongly suggest labeled alternatives; get explicit confirmation
-- [ ] Dev setup (if needed)
+- [ ] Dev setup (if needed) — AGENTS.md § Build and test
 - [ ] Branch from up-to-date main
 - [ ] Implement only what the issue asks
 - [ ] Run the narrowest spin test (or docs check)
@@ -78,27 +80,7 @@ Many clones use `origin` as the fork and add `upstream` separately. Inspect with
 
 SSH help: https://help.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh
 
-**Install and hooks:**
-
-```bash
-spin install -v
-pip install pre-commit
-pre-commit install
-```
-
-Use `spin`, not raw `pytest` / `meson`. Prefer an existing editable install if the environment already works. Pre-commit runs on `git commit` (ruff, formatters, cython-lint); do not use `--no-verify`.
-
-Other useful commands:
-
-```bash
-spin build --clean           # after adding/removing source or Cython files
-spin test -- <path-or-node>  # narrowest relevant tests
-spin test --test-modified    # changed subpackages (PR-CI style)
-spin docs                    # only if the issue is documentation
-```
-
-- Do not pass `src/` as a pytest path; use `tests/skimage/...` or package names.
-- After adding/removing files under `src/`, update the relevant `meson.build` and rebuild.
+**Install, hooks, and spin commands:** follow **AGENTS.md** § Build and test (e.g. `spin install -v`, `pre-commit install`, `spin test -- …`, `spin build --clean` when adding Cython/source files).
 
 ### 3. Branch and implement
 
@@ -112,12 +94,12 @@ git switch -c first-contribution-<issue-number>
 If there is no `upstream` remote, use the project's primary remote for `main` (often `origin` on a fresh fork clone). Match remotes to how this clone is set up; do not rewrite git config.
 
 - Read the issue and the files it points at before editing.
-- Follow package layout: implementations in `src/_skimage2/`, public wrappers in `src/skimage/` when needed; tests under `tests/skimage/` or `tests/skimage2/` as appropriate.
+- Follow **AGENTS.md** § Package layout and **Read before edit**.
 - Match surrounding style. Change only what the issue requires.
 
 ### 4. Verify
 
-Run the **narrowest** check implied by the issue, for example:
+Run the **narrowest** check implied by the issue (see **AGENTS.md** § Verification), for example:
 
 ```bash
 spin test -- tests/skimage/<subpackage>
@@ -135,7 +117,7 @@ When summarizing for the user, include:
 - Issue link (`Fixes #N` or `Closes #N` when appropriate)
 - What changed (files + intent)
 - Commands run and results
-- Concise PR title; disclose generative tools per the AI policy in `CONTRIBUTING.md`
+- Concise PR title; disclose generative tools per **AGENTS.md** § Pull requests / CONTRIBUTING AI policy
 - Reminder: CI fails on new PRs until a maintainer adds a category label (expected for newcomers)
 - Do not merge; core team handles review/merge
 
@@ -152,5 +134,3 @@ Point the user at:
 - Proactively hunting unlabeled "looks easy" work (only consider off-label issues when the user asks for a specific one)
 - Cython/API design/deprecation work unless the chosen issue explicitly requires it
 - Editing protected paths (see `.cursor/rules/security.mdc`)
-
-For deeper contributor norms, point at `CONTRIBUTING.md` and `AGENTS.md` — do not paste them in full.

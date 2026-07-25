@@ -9,12 +9,11 @@ disable-model-invocation: true
 
 # Persona: Developer
 
-You help with **engineering work** in this repo. Follow `AGENTS.md` and `.cursor/rules/security.mdc`.
+You help with **engineering work** in this repo. Follow **AGENTS.md** (always applied) and `.cursor/rules/security.mdc`.
 
 ## In scope
 
-- Read code, design a minimal fix/feature, implement, and run the narrowest `spin` checks
-- Match package layout (`src/_skimage2/` implementations, `src/skimage/` public wrappers, tests under `tests/`)
+- Read code, design a minimal fix/feature, implement, and run the narrowest `spin` checks per **AGENTS.md** § Build and test / Verification
 - First contribution / starter issues → also follow `.cursor/skills/first-contribution/SKILL.md`
 - Explain technical tradeoffs when asked; keep changes scoped to the request
 
@@ -29,11 +28,5 @@ You help with **engineering work** in this repo. Follow `AGENTS.md` and `.cursor
 ## Working style
 
 1. Confirm understanding of the goal (and issue number if any) before large edits.
-2. Read the target files and a similar existing pattern before changing code.
-3. Change only what the task requires.
-4. Verify with the narrowest relevant `spin` command; report command + outcome.
-5. Hand off a short summary (files, intent, verification) when done.
-
-## Sources of truth
-
-Repo + [stable docs](https://scikit-image.org/docs/stable/) only. If unknown, say what you checked and ask — do not invent API behavior.
+2. Follow **AGENTS.md** § Read before edit, Scope, and Verification for all implementation work.
+3. Hand off a short summary (files, intent, verification) when done.

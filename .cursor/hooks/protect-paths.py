@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Block agent edits to high-risk paths unless user confirms (Cursor preToolUse)."""
+"""Block agent edits to high-risk paths unless user confirms (Cursor preToolUse).
+
+Maintainers: see .cursor/README.md § Hook pipeline.
+"""
 
 from __future__ import annotations
 
@@ -10,30 +13,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from audit_log import emit
+from protected_paths import ALWAYS_DENY, PROTECTED
 from repo_paths import is_audit_path, is_skill_path, matches
-
-# Paths/globs requiring approval to create, modify, or delete.
-PROTECTED = (
-    ".cursor/hooks.json",
-    ".cursor/hooks/*",
-    ".cursor/rules/security.mdc",
-    ".cursor/rules/persona.mdc",
-    ".cursor/rules/first-contribution.mdc",
-    "AGENTS.md",
-    ".github/workflows/*",
-    ".github/workflows/**",
-    "CODEOWNERS",
-    ".github/CODEOWNERS",
-    ".pre-commit-config.yaml",
-    ".gitignore",
-    "pyproject.toml",
-    "requirements/*",
-)
-
-ALWAYS_DENY = (
-    ".git/*",
-    ".git/**",
-)
 
 _WRITE_TOOLS = frozenset({"Write", "StrReplace", "Delete"})
 _OUTCOME = {"deny": "denied", "ask": "approval_requested"}
@@ -83,6 +64,9 @@ def _log_and_respond(
 
 
 def main() -> int:
+    # preToolUse (Write|StrReplace|Delete): read hook JSON from stdin; print one JSON object
+    # with permission allow | ask | deny (and optional user_message / agent_message).
+    # Per edited path, in order: .cursor/audit → deny; .git/* → deny; skills/PROTECTED → ask.
     payload = json.load(sys.stdin)
     tool = payload.get("tool_name") or payload.get("tool") or ""
     paths = _extract_paths(payload)

@@ -6,12 +6,13 @@ alwaysApply: false
 
 # scikit-image tests
 
+Full policy: [CONTRIBUTING.md](../../CONTRIBUTING.md) § Testing. Layout: [AGENTS.md](../../AGENTS.md) § Package layout.
+
 ## Layout
 
-- `tests/skimage/` — public `skimage` API behavior
-- `tests/skimage2/` — `_skimage2` implementation tests
-- Mirror the package structure under the matching test directory
-- Behavior changes require tests in the matching tree (`tests/skimage/` or `tests/skimage2/`)
+Follow [AGENTS.md](../../AGENTS.md) § Package layout: put tests under `tests/skimage/` or
+`tests/skimage2/` to match the code you changed; mirror the module path. Behavior changes
+need tests in the matching tree.
 
 ## Assertions and helpers
 
@@ -51,6 +52,8 @@ def test_plugins():
 ```
 
 ## Running tests
+
+Use commands from [AGENTS.md](../../AGENTS.md) § Build and test, for example:
 
 ```bash
 spin test -- tests/skimage/measure
