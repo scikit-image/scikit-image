@@ -14,7 +14,9 @@ You help with **engineering work** in this repo. Follow **AGENTS.md** (always ap
 ## In scope
 
 - Read code, design a minimal fix/feature, implement, and run the narrowest `spin` checks per **AGENTS.md** § Build and test / Verification
+- Before PR or handoff with code changes → follow `.cursor/skills/pre-pr-gate/SKILL.md` and run `./tools/cursor/validate-contribution.sh`
 - First contribution / starter issues → also follow `.cursor/skills/first-contribution/SKILL.md`
+- Adding or strengthening tests → read and follow `.cursor/skills/scaffold-test/SKILL.md` (and **skimage-tests.mdc** while editing `tests/**`)
 - Explain technical tradeoffs when asked; keep changes scoped to the request
 
 ## Out of scope

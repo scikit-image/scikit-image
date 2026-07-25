@@ -6,24 +6,28 @@ project policy: [CONTRIBUTING.md](../CONTRIBUTING.md).
 
 ## File map
 
-| Path                                                                     | Applies when                         | Purpose                                                 |
-| ------------------------------------------------------------------------ | ------------------------------------ | ------------------------------------------------------- |
-| [AGENTS.md](../AGENTS.md)                                                | Always (workspace)                   | Routing, sources of truth, layout, `spin`, PR/AI policy |
-| [rules/persona.mdc](rules/persona.mdc)                                   | Every chat                           | Developer / PM / QA selection                           |
-| [rules/security.mdc](rules/security.mdc)                                 | Every chat                           | Git, shell, secrets, protected paths summary            |
-| [rules/first-contribution.mdc](rules/first-contribution.mdc)             | First PR / onboarding intents        | Route to `first-contribution` skill                     |
-| [rules/skimage-source.mdc](rules/skimage-source.mdc)                     | Editing `src/**`                     | Source, API, deprecation, Cython conventions            |
-| [rules/skimage-tests.mdc](rules/skimage-tests.mdc)                       | Editing `tests/**`                   | Test layout, assertions, RNG, threading                 |
-| [skills/first-contribution/SKILL.md](skills/first-contribution/SKILL.md) | Invoked for first PR workflow        | Issue pick, branch, verify, handoff                     |
-| [skills/persona-developer/SKILL.md](skills/persona-developer/SKILL.md)   | Developer persona                    | Engineering scope and working style                     |
-| [skills/persona-pm/SKILL.md](skills/persona-pm/SKILL.md)                 | PM persona                           | Issues, acceptance criteria, no code                    |
-| [skills/persona-qa/SKILL.md](skills/persona-qa/SKILL.md)                 | QA persona                           | Test plans, verification checklists                     |
-| [hooks.json](hooks.json)                                                 | Agent tool use                       | Shell guardrails, protected-path approval, audit        |
-| [hooks/protected_paths.py](hooks/protected_paths.py)                     | Hook enforcement                     | **Canonical** list of protected path globs              |
-| [hooks/protect-paths.py](hooks/protect-paths.py)                         | preToolUse (Write/StrReplace/Delete) | Enforces protected paths + skills tree                  |
-| [hooks/before-shell.py](hooks/before-shell.py)                           | beforeShellExecution                 | Destructive shell deny-list                             |
-| [hooks/before-mcp.py](hooks/before-mcp.py)                               | beforeMCPExecution                   | MCP guardrails                                          |
-| [audit/](audit/)                                                         | —                                    | Append-only audit trail (do not edit)                   |
+| Path                                                                              | Applies when                         | Purpose                                                 |
+| --------------------------------------------------------------------------------- | ------------------------------------ | ------------------------------------------------------- |
+| [AGENTS.md](../AGENTS.md)                                                         | Always (workspace)                   | Routing, sources of truth, layout, `spin`, PR/AI policy |
+| [rules/persona.mdc](rules/persona.mdc)                                            | Every chat                           | Developer / PM / QA selection                           |
+| [rules/security.mdc](rules/security.mdc)                                          | Every chat                           | Git, shell, secrets, protected paths summary            |
+| [rules/first-contribution.mdc](rules/first-contribution.mdc)                      | First PR / onboarding intents        | Route to `first-contribution` skill                     |
+| [rules/pre-pr-gate.mdc](rules/pre-pr-gate.mdc)                                    | Pre-PR / validate branch intents     | Route to `pre-pr-gate` skill                            |
+| [rules/skimage-source.mdc](rules/skimage-source.mdc)                              | Editing `src/**`                     | Source, API, deprecation, Cython conventions            |
+| [rules/skimage-tests.mdc](rules/skimage-tests.mdc)                                | Editing `tests/**`                   | Test layout, assertions, RNG, threading                 |
+| [skills/first-contribution/SKILL.md](skills/first-contribution/SKILL.md)          | Invoked for first PR workflow        | Issue pick, branch, verify, handoff                     |
+| [skills/scaffold-test/SKILL.md](skills/scaffold-test/SKILL.md)                    | Adding or updating tests             | Test scaffold procedure + weak-test checklist           |
+| [skills/pre-pr-gate/SKILL.md](skills/pre-pr-gate/SKILL.md)                        | Pre-PR / branch validation           | validate-contribution.sh + PR metadata checklist        |
+| [tools/cursor/validate-contribution.sh](../tools/cursor/validate-contribution.sh) | Pre-PR (human or agent)              | pre-commit + `spin test --test-modified`                |
+| [skills/persona-developer/SKILL.md](skills/persona-developer/SKILL.md)            | Developer persona                    | Engineering scope and working style                     |
+| [skills/persona-pm/SKILL.md](skills/persona-pm/SKILL.md)                          | PM persona                           | Issues, acceptance criteria, no code                    |
+| [skills/persona-qa/SKILL.md](skills/persona-qa/SKILL.md)                          | QA persona                           | Test plans, verification checklists                     |
+| [hooks.json](hooks.json)                                                          | Agent tool use                       | Shell guardrails, protected-path approval, audit        |
+| [hooks/protected_paths.py](hooks/protected_paths.py)                              | Hook enforcement                     | **Canonical** list of protected path globs              |
+| [hooks/protect-paths.py](hooks/protect-paths.py)                                  | preToolUse (Write/StrReplace/Delete) | Enforces protected paths + skills tree                  |
+| [hooks/before-shell.py](hooks/before-shell.py)                                    | beforeShellExecution                 | Destructive shell deny-list                             |
+| [hooks/before-mcp.py](hooks/before-mcp.py)                                        | beforeMCPExecution                   | MCP guardrails                                          |
+| [audit/](audit/)                                                                  | —                                    | Append-only audit trail (do not edit)                   |
 
 ## Layer contract (where to put changes)
 
@@ -86,14 +90,14 @@ Shared helpers:
 
 ## When the project changes
 
-| Event                                    | Update                                                                            |
-| ---------------------------------------- | --------------------------------------------------------------------------------- |
-| Stylistic / API / deprecation policy     | CONTRIBUTING.md → then `skimage-source.mdc` if agents need it at edit time        |
-| Package layout (`_skimage2`, test trees) | AGENTS.md § Package layout → skim `skimage-source.mdc` / `skimage-tests.mdc`      |
-| CI / local test commands                 | AGENTS.md § Build and test → `first-contribution` verify step if workflow changes |
-| Beginner issue policy or labels          | `first-contribution/SKILL.md` + `first-contribution.mdc`                          |
-| New persona                              | `persona.mdc` table + new `skills/persona-*/SKILL.md` + this README map           |
-| New protected path                       | `hooks/protected_paths.py` → summary in `security.mdc` → note here                |
+| Event                                    | Update                                                                        |
+| ---------------------------------------- | ----------------------------------------------------------------------------- |
+| Stylistic / API / deprecation policy     | CONTRIBUTING.md → then `skimage-source.mdc` if agents need it at edit time    |
+| Package layout (`_skimage2`, test trees) | AGENTS.md § Package layout → skim `skimage-source.mdc` / `skimage-tests.mdc`  |
+| CI / local test commands                 | AGENTS.md § Build and test → `validate-contribution.sh` / `pre-pr-gate` skill |
+| Beginner issue policy or labels          | `first-contribution/SKILL.md` + `first-contribution.mdc`                      |
+| New persona                              | `persona.mdc` table + new `skills/persona-*/SKILL.md` + this README map       |
+| New protected path                       | `hooks/protected_paths.py` → summary in `security.mdc` → note here            |
 
 ## Changing guardrails safely
 

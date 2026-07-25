@@ -38,7 +38,8 @@ First contribution:
 - [ ] Dev setup (if needed) — AGENTS.md § Build and test
 - [ ] Branch from up-to-date main
 - [ ] Implement only what the issue asks
-- [ ] Run the narrowest spin test (or docs check)
+- [ ] Add or update tests — read and follow [scaffold-test](../scaffold-test/SKILL.md)
+- [ ] Verify — [pre-pr-gate skill](../pre-pr-gate/SKILL.md) / `./tools/cursor/validate-contribution.sh`
 - [ ] Summarize for PR (link issue, AI disclosure)
 ```
 
@@ -97,16 +98,26 @@ If there is no `upstream` remote, use the project's primary remote for `main` (o
 - Follow **AGENTS.md** § Package layout and **Read before edit**.
 - Match surrounding style. Change only what the issue requires.
 
+### Tests
+
+If the issue changes code under `src/`, **read and follow** **[scaffold-test](../scaffold-test/SKILL.md)** (scaffold from peer tests, weak-test checklist). While editing test files, **skimage-tests.mdc** applies automatically.
+
+Doc-only issues: skip unless the issue requires tests.
+
 ### 4. Verify
 
-Run the **narrowest** check implied by the issue (see **AGENTS.md** § Verification), for example:
+Follow **[pre-pr-gate](../pre-pr-gate/SKILL.md)**:
 
-```bash
-spin test -- tests/skimage/<subpackage>
-spin test --test-modified
-```
+1. Complete the **weak-test checklist** in [scaffold-test](../scaffold-test/SKILL.md) when tests were added or changed.
+2. Run from the repository root:
 
-Do not claim tests passed unless you ran them. Report the command and outcome.
+   ```bash
+   ./tools/cursor/validate-contribution.sh
+   ```
+
+3. Complete the PR metadata checklist in the pre-pr-gate skill before handoff.
+
+Do not claim checks passed unless the script (or equivalent steps) succeeded. Report commands and outcomes.
 
 ### 5. Hand off for PR
 

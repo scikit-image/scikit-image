@@ -67,6 +67,7 @@ spin docs                    # build documentation
 Before finishing a task:
 
 - Run the narrowest relevant check (`spin test -- …`, `spin build` after Cython/meson changes)
+- Before opening a PR, run `./tools/cursor/validate-contribution.sh` (see `.cursor/skills/pre-pr-gate/SKILL.md`)
 - Report what you ran and the outcome
 - Do not claim tests pass unless you ran them
 
