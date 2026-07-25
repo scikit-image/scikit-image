@@ -10,6 +10,7 @@
 /.cursor/rules/first-contribution.mdc @scikit-image/core
 /.cursor/skills/                   @scikit-image/core
 /.cursor/audit/                    @scikit-image/core
+/tools/cursor/                     @scikit-image/core
 /AGENTS.md                         @scikit-image/core
 /CODEOWNERS                        @scikit-image/core
 /.pre-commit-config.yaml           @scikit-image/core

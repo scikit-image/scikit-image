@@ -97,6 +97,9 @@ echo "==> validate-contribution (base: $BASE, merge-base: ${MERGE_BASE:0:12}…)
 
 if [[ ${#CHANGED[@]} -eq 0 ]]; then
   echo "==> no changed files detected vs $BASE (including working tree)"
+  echo "==> pre-commit and spin skipped (nothing to validate)"
+  echo "==> validate-contribution: OK"
+  exit 0
 else
   echo "==> changed files (${#CHANGED[@]}):"
   printf '    %s\n' "${CHANGED[@]}"
@@ -175,8 +178,7 @@ if [[ "$SKIP_PRECOMMIT" -eq 0 ]]; then
     [[ -f "$f" ]] && EXISTING+=("$f")
   done
   if [[ ${#EXISTING[@]} -eq 0 ]]; then
-    echo "==> pre-commit: no existing changed files; running on all files"
-    pre-commit run --all-files
+    echo "==> pre-commit: skipped (no existing files among changes; e.g. deletions only)"
   else
     echo "==> pre-commit run --files (${#EXISTING[@]} files)"
     pre-commit run --files "${EXISTING[@]}"
