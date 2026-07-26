@@ -99,3 +99,7 @@ __all__ = [
     'TILING8',
     'TILING9',
 ]
+
+from skimage._doctest_adapters import adapt_doctests
+
+adapt_doctests(globals())

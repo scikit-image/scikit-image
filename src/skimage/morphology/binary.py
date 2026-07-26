@@ -14,6 +14,14 @@ from _skimage2.morphology._footprints import (
 from .._migration import ski2_migration_decorator
 
 
+__all__ = [
+    'binary_closing',
+    'binary_dilation',
+    'binary_erosion',
+    'binary_opening',
+]
+
+
 _SKIMAGE2_MIGRATION_NOTE_TEMPLATE = """\
 `%(qname_old)s` is deprecated in favor of
 `%(qname_new)s`.

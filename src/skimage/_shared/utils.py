@@ -27,3 +27,7 @@ __all__ = [
     'deprecate_parameter',
     'DEPRECATED',
 ]
+
+from skimage._doctest_adapters import adapt_doctests  # noqa: E402
+
+adapt_doctests(globals())

@@ -1208,16 +1208,13 @@ class ProjectiveTransform(_HMatrixTransform):
 
     def __add__(self, other):
         """Combine this transformation with another."""
-        if isinstance(other, ProjectiveTransform):
-            # combination of the same types result in a transformation of this
-            # type again, otherwise use general projective transformation
-            if type(self) == type(other):
-                tform = self.__class__
-            else:
-                tform = ProjectiveTransform
-            return tform(other.params @ self.params)
-        else:
-            raise TypeError("Cannot combine transformations of differing " "types.")
+        # Is the other a projective instance?
+        if not isinstance(other, ProjectiveTransform):
+            raise TypeError("Cannot combine transformations of non-projective types.")
+        # Combination of the same types result in a transformation of this
+        # type again, otherwise the generic projective transform.
+        tform_class = type(self) if type(self) == type(other) else ProjectiveTransform
+        return tform_class(other.params @ self.params)
 
     def __nice__(self):
         """common 'paramstr' used by __str__ and __repr__"""
