@@ -11,3 +11,7 @@ __all__ = [
     'POS1',
     'this_dir',
 ]
+
+from skimage._doctest_adapters import adapt_doctests
+
+adapt_doctests(globals())

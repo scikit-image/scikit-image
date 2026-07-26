@@ -16,6 +16,10 @@ from _skimage2.morphology._footprints import mirror_footprint, pad_footprint  # 
 
 from .._migration import ski2_migration_decorator
 
+from skimage._doctest_adapters import adapt_doctests
+
+adapt_doctests(globals())
+
 
 __all__ = [
     'ball',

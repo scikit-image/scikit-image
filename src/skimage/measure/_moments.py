@@ -21,3 +21,7 @@ __all__ = [
     'moments_hu',
     'moments_normalized',
 ]
+
+from skimage._doctest_adapters import adapt_doctests
+
+adapt_doctests(globals())

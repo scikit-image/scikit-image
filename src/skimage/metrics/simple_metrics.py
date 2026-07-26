@@ -16,3 +16,7 @@ from ..util._backends import dispatchable_shim as _dshim
 
 mean_squared_error = _dshim(ski2_sm.mean_squared_error, module=__name__)
 normalized_root_mse = _dshim(ski2_sm.normalized_root_mse, module=__name__)
+
+from skimage._doctest_adapters import adapt_doctests  # noqa: E402
+
+adapt_doctests(globals())
