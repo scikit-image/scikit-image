@@ -18,7 +18,13 @@ from .._migration import ski2_migration_decorator
 
 from skimage._doctest_adapters import adapt_doctests
 
-adapt_doctests(globals())
+adapt_doctests(
+    globals(),
+    skip_names=(
+        "_sk2_footprint_rectangle",
+        "_sk2_footprint_rectangle_decompose",
+    ),
+)
 
 
 __all__ = [
