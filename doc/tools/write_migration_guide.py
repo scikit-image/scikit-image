@@ -11,7 +11,7 @@ from pathlib import Path
 
 from jinja2 import Template
 
-from migration_utils import TrackerDict, get_doc_dicts, run_doctests
+from migration_utils import get_doc_dicts, run_doctests
 
 
 def write_migration(in_tpl, doc_dict, out_path=None):
@@ -20,15 +20,13 @@ def write_migration(in_tpl, doc_dict, out_path=None):
         out_path = in_tpl.with_name(in_tpl.name.replace('.tpl', ''))
     out_path = Path(out_path)
     tpl = Template(in_tpl.read_text())
-    render_dict = TrackerDict(doc_dict)
-    out_str = tpl.render(d=render_dict)
+    render_dict = doc_dict.copy()
+    out_str = tpl.render(advice_map=render_dict)
     # Check all keys have been consumed.
-    if render_dict.not_accessed_keys:
-        raise RuntimeError(
-            'These keys not used in template:'
-            + ', '.join(render_dict.not_accessed_keys)
-        )
+    if render_dict:
+        raise RuntimeError('These keys not used in template:' + ', '.join(render_dict))
     Path(out_path).write_text(out_str)
+    return out_path
 
 
 def get_parser():
@@ -48,7 +46,10 @@ def main():
     parser = get_parser()
     args = parser.parse_args()
     doc_dict, extra_dict = get_doc_dicts()
-    write_migration(args.migration_tpl, {**doc_dict, **extra_dict}, args.out_rst)
+    out_path = write_migration(
+        args.migration_tpl, {**doc_dict, **extra_dict}, args.out_rst
+    )
+    print(f"Wrote to '{out_path}'")
     if args.doctest:
         success, msg = run_doctests(doc_dict)
         print(msg)

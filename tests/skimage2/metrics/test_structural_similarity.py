@@ -5,7 +5,7 @@ from numpy.testing import assert_equal, assert_almost_equal
 from _skimage2.metrics import structural_similarity
 from _skimage2._shared.utils import _supported_float_type
 
-from skimage import data
+from _skimage2 import data
 
 np.random.seed(5)
 cam = data.camera()
@@ -85,8 +85,9 @@ def test_structural_similarity_grad(seed, dtype):
 )
 def test_structural_similarity_dtype(dtype):
     N = 30
-    X = np.random.rand(N, N)
-    Y = np.random.rand(N, N)
+    rng = np.random.default_rng(1234)
+    X = rng.random((N, N))
+    Y = rng.random((N, N))
     if np.dtype(dtype).kind in 'iub':
         data_range = 255.0
         X = (X * 255).astype(dtype)
@@ -216,7 +217,7 @@ def test_gaussian_structural_similarity_vs_IPOL():
     -----
     To generate mssim_IPOL, we need a local copy of cam_noisy::
 
-      from skimage import io
+      from _skimage2 import io
       io.imsave('/tmp/cam_noisy.png', cam_noisy)
 
     Then, we use the following command:

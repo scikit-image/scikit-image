@@ -1,18 +1,3 @@
-extensions = [
-  '_multiotsu'
-]
-
-foreach ext: extensions
-  py3.extension_module(ext,
-    cython_gen.process(ext + '.pyx'),
-    c_args: cython_c_args,
-    include_directories: ['../../_skimage2/_shared'],
-    dependencies: [np_dep],
-    install: true,
-    subdir: 'skimage/filters'
-  )
-endforeach
-
 python_sources = [
   '__init__.py',
   '__init__.pyi',
@@ -27,12 +12,13 @@ python_sources = [
   'edges.py',
   'lpi_filter.py',
   'ridges.py',
-  'thresholding.py'
+  'thresholding.py',
+  '_multiotsu.py',
 ]
 
 py3.install_sources(
   python_sources,
-  pure: false,             # Will be installed next to binaries
+  pure: false,          # Will be installed next to binaries
   subdir: 'skimage/filters'  # Folder relative to site-packages to install to
 )
 

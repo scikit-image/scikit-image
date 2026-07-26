@@ -24,7 +24,6 @@ dependencies:
   # developer
   - pre-commit
   - ipython
-  - docstub==0.7.0rc0
   # asv
   - asv
   # docs
@@ -69,3 +68,7 @@ dependencies:
   - pytest-localserver
   - pytest-faulthandler
   - pytest-doctestplus>=1.6.0
+  # pypa-only packages
+  - pip
+  - pip:
+      - docstub==0.7.0rc0

@@ -237,6 +237,9 @@ filterwarnings = [
     "ignore:.*(parseString|resetCache|enablePackrat|oneOf).*:DeprecationWarning:matplotlib",
     # tifffile (v2025.12.20) uses deprecated NumPy API
     "ignore:Setting the shape on a NumPy array:DeprecationWarning:tifffile",
+    # SimpleITK (< 3.0) uses deprecated NumPy API; fixed in SimpleITK 3.0
+    # TODO: remove once SimpleITK >= 3.0 is required
+    "ignore:Setting the shape on a NumPy array:DeprecationWarning:SimpleITK",
     # pytest warning when running under PYTHONOPTIMIZE=2 (assertions are stripped)
     "ignore:assertions not in test modules or plugins:pytest.PytestConfigWarning",
 ]

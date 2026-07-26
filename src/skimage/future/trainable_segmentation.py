@@ -1,4 +1,6 @@
-from skimage.feature import multiscale_basic_features
+from ..feature import multiscale_basic_features
+from .._migration import ski2_migration_decorator
+from . import _PENDING_SKIMAGE2_NO_FUTURE
 
 try:
     from sklearn.exceptions import NotFittedError
@@ -12,6 +14,10 @@ except ImportError:
         pass
 
 
+@ski2_migration_decorator(
+    _PENDING_SKIMAGE2_NO_FUTURE,
+    qname_old='skimage.future.TrainableSegmenter',
+)
 class TrainableSegmenter:
     """Estimator for classifying pixels.
 
@@ -87,6 +93,10 @@ class TrainableSegmenter:
         return predict_segmenter(features, self.clf)
 
 
+@ski2_migration_decorator(
+    _PENDING_SKIMAGE2_NO_FUTURE,
+    qname_old='skimage.future.fit_segmenter',
+)
 def fit_segmenter(labels, features, clf):
     """Segmentation using labeled parts of the image and a classifier.
 
@@ -119,6 +129,10 @@ def fit_segmenter(labels, features, clf):
     return clf
 
 
+@ski2_migration_decorator(
+    _PENDING_SKIMAGE2_NO_FUTURE,
+    qname_old='skimage.future.predict_segmenter',
+)
 def predict_segmenter(features, clf):
     """Segmentation of images using a pretrained classifier.
 

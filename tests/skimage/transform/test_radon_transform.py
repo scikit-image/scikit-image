@@ -143,10 +143,12 @@ circles_for_test_iradon_center = [False, True]
 
 @pytest.mark.parametrize(
     "size, theta, circle",
-    itertools.product(
-        sizes_for_test_iradon_center,
-        thetas_for_test_iradon_center,
-        circles_for_test_iradon_center,
+    list(
+        itertools.product(
+            sizes_for_test_iradon_center,
+            thetas_for_test_iradon_center,
+            circles_for_test_iradon_center,
+        )
     ),
 )
 def test_iradon_center(size, theta, circle):
@@ -252,7 +254,7 @@ def generate_test_data_for_radon_iradon_minimal(shapes):
 
 
 @pytest.mark.parametrize(
-    "shape, coordinate", generate_test_data_for_radon_iradon_minimal(shapes)
+    "shape, coordinate", list(generate_test_data_for_radon_iradon_minimal(shapes))
 )
 def test_radon_iradon_minimal(shape, coordinate):
     check_radon_iradon_minimal(shape, coordinate)
@@ -373,7 +375,7 @@ output_sizes = (
 
 @pytest.mark.parametrize(
     "shape, interpolation, output_size",
-    itertools.product(shapes_radon_iradon_circle, interpolations, output_sizes),
+    list(itertools.product(shapes_radon_iradon_circle, interpolations, output_sizes)),
 )
 def test_radon_iradon_circle(shape, interpolation, output_size):
     check_radon_iradon_circle(interpolation, shape, output_size)

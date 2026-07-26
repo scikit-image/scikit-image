@@ -1,8 +1,12 @@
 """Utilities for migration from ``skimage`` to ``skimage2``"""
 
 from functools import wraps
+import inspect
 import re
+import sys
 from textwrap import dedent
+
+from _skimage2._shared._warnings import warn_external  # noqa: F401
 
 
 # URL to migration page.
@@ -88,18 +92,86 @@ def _select_blocks(doc, *, context_name):
     return context
 
 
+def _public_skimage_api_names(obj):
+    """Find the name(s) as advertised by ``__all__`` in ``skimage``.
+
+    .. warning:: Only looks for names in ``skimage``, not ``skimage2``!
+
+    scikit-image advertises its public API with the help of ``__all__`` in its
+    modules. At the point at which any given module is being instantiated, its
+    parent modules will have already defined their ``__all__`` attributes. This
+    function looks for its own ``__qualname__`` in the ``__all__`` entries of
+    its parent modules.
+
+    Parameters
+    ----------
+    obj : Any
+
+    Returns
+    -------
+    public_matches : list of str
+        Full dotted paths to the given `obj` that are advertised and reachable
+        through ``__all__`` in parent modules.
+
+    Examples
+    --------
+    >>> from skimage.data._binary_blobs import binary_blobs
+    >>> _public_skimage_api_names(binary_blobs)
+    ['skimage.data.binary_blobs']
+
+    >>> from skimage.filters.rank import autolevel
+    >>> _public_skimage_api_names(autolevel)
+    ['skimage.filters.rank.autolevel', 'skimage.filters.rank.generic.autolevel']
+
+    Will always look for ``skimage`` equivalent to work with shims that use
+    functions from ``skimage2``.
+
+    >>> from _skimage2.filters import gaussian
+    >>> _public_skimage_api_names(gaussian)
+    ['skimage.filters.gaussian']
+    """
+    qualname = obj.__qualname__
+    base_name_in_module, *_ = qualname.partition(".")
+    root, *sub_modules = obj.__module__.split(".")
+    # If implemented in _skimage2, point to skimage equivalent.
+    if root == '_skimage2':
+        root = 'skimage'
+
+    matches = []
+    parts = []
+    for parent in [root] + sub_modules:
+        if parent.startswith('_'):  # Can't be public API.
+            break
+        parts.append(parent)
+        # `obj` is passed, so its parents should be loaded
+        module = sys.modules['.'.join(parts)]
+
+        dunder_all = getattr(module, "__all__", None)
+        if dunder_all is None:
+            # Module doesn't advertise any public API, abort
+            break
+
+        if base_name_in_module in dunder_all:
+            public_name = f"{module.__name__}.{qualname}"
+            matches.append(public_name)
+
+    return matches
+
+
 class Skimage2Migration:
     """Class to decorate ``skimage`` routines with migration messages
 
-    Migration messages are in Markdown format.  You can specify which parts of
-    the message become the emitted warning, and go to the migration document,
-    using *conditional inclusion* start and end markers, of form ``<!---
-    cond-start: warning>`` followed by text for the warning only, followed by
-    ``<!--- cond-end -->``.
+    Migration messages are in ReST format.  You can specify which parts of the
+    message become the emitted warning, and which go into the migration
+    document, using *conditional inclusion* start and end markers. To include
+    the text in the emitted warning, but not the document, use markers of form
+    ``<!--- cond-start: warning>`` followed by text for the warning only,
+    followed by ``<!--- cond-end -->``.
 
-    Similarly, you can specify text that will only go in the migration document
-    by using ``<!--- cond-start: doc>`` followed by text for the migration
-    document only, followed by ``<!--- cond-end -->``.
+    Similarly, you can specify text that will only go in the migration
+    document, and not in the warning, by using ``<!--- cond-start: doc>``
+    followed by text for the migration document only, followed by ``<!---
+    cond-end -->``.
 
     The text may use old-style formatting markers, with the following values
     defined:
@@ -141,7 +213,7 @@ class Skimage2Migration:
         return (s % params for s in (w_str, m_str))
 
     def _parse_migration_doc(self, doc, func_uri=None):
-        """Parse Markdown migration string to give warning and doc fragment"""
+        """Parse ReST migration string to give warning and doc fragment"""
 
         # Select blocks for "warning" context
         warn_msg = _select_blocks(doc, context_name="warning")
@@ -168,26 +240,52 @@ class Skimage2Migration:
                 )
         return warn_msg, doc_rep
 
-    def _get_func_params(self, func, qname_old=None, qname_new=None):
-        """Compile dictionary of parameters from input `func`
+    def _get_func_params(self, func_or_class, qname_old=None, qname_new=None):
+        """Compile substitution parameters for a decorated callable.
 
         Parameters
         ----------
-        func : function
+        func_or_class : Any
+            The object being decorated.
         qname_old : None or str
-            If specified, use as the input original (pre-migration) name.
+            Canonical ``skimage`` name. If None, inferred from public API
+            registration; must be unambiguous.
         qname_new : None or str
-            If specified, use as the input migrated (post-migration) name.
+            Matching ``skimage2`` name. If None, derived from ``qname_old``.
 
         Returns
         -------
         params : dict
-            Dictionary of parameters.
+            Keys used to format migration warning and doc fragments.
         """
-        qualname, modname = func.__qualname__, func.__module__
+        qualname, modname = (func_or_class.__qualname__, func_or_class.__module__)
 
         if qname_old is None:
-            qname_old = f'{modname}.{qualname}'
+            # Not given, try to guess if not ambiguous
+            candidates = _public_skimage_api_names(func_or_class)
+            if not candidates:
+                msg = (
+                    f"could not determine for {func_or_class!r}, "
+                    "set `qname_old` explicitly"
+                )
+                raise RuntimeError(msg)
+            if len(candidates) > 1:
+                msg = (
+                    f"multiple candidates for {func_or_class!r},"
+                    f"set `qname_old` explicitly: {candidates=}"
+                )
+                raise RuntimeError(msg)
+            qname_old = candidates[0]
+
+        # At this point `qname_old` should contain the name of the given callable,
+        # no private prefixes, and no references to local scopes
+        assert func_or_class.__qualname__ in qname_old, (
+            func_or_class.__qualname__,
+            qname_old,
+        )
+        assert "._" not in qname_old, qname_old
+        assert "<locals>" not in qname_old, qname_old
+
         if qname_new is None:
             qname_new = _SKI1PREFIX_RE.sub(r'skimage2.', qname_old)
 
@@ -202,6 +300,27 @@ class Skimage2Migration:
             migration_url=self.migration_url,
         )
 
+    def _wrap_callable_with_warning(self, func, warn_msg, warning_cls=None):
+        """Return a wrapper that emits a migration warning, then calls `func`.
+
+        Parameters
+        ----------
+        func : callable
+            Target function or method (for example ``__init__``).
+        warn_msg : str
+            Pre-formatted warning message. Must be non-empty.
+        warning_cls : type[Warning] or None
+            Warning category. Defaults to ``PendingSkimage2Change``.
+        """
+        from skimage.util import PendingSkimage2Change
+
+        @wraps(func)
+        def wrapped(*args, **kwargs):
+            warn_external(warn_msg, category=warning_cls or PendingSkimage2Change)
+            return func(*args, **kwargs)
+
+        return wrapped
+
     def __call__(
         self, migration_doc, *, qname_old=None, qname_new=None, warning_cls=None
     ):
@@ -210,11 +329,11 @@ class Skimage2Migration:
         Parameters
         ----------
         migration_doc : str
-            Markdown document that may have contain conditional inclusion start
-            and end markers.
+            ReST document that may have contain conditional inclusion start and
+            end markers.
         qname_old : None or str, optional
             The canonical full (qualified) name in the ``skimage`` namespace,
-            including the ``skimage`` prefix. If None, use the functions full
+            including the ``skimage`` prefix. If None, use the callable's fully
             qualified name.
         qname_new : None or str, optional
             The matching canonical full (qualified) name in the ``skimage2``
@@ -222,34 +341,38 @@ class Skimage2Migration:
             from `qname_old`, replacing initial ``skimage.`` with ``skimage2.``.
         warning_cls : type[Warning], optional
             The warning class to use. Defaults to
-            :obj:`~.PendingSkimage2Change` if not given.
+            :obj:`~skimage.util.PendingSkimage2Change` if not given.
 
         Returns
         -------
         decorator : Callable
-            A decorator to apply to callables.
+            A decorator to apply to functions or classes.
         """
 
-        def decorator(func):
-            """Decorate `func`"""
-            func_params = self._get_func_params(func, qname_old, qname_new)
+        def decorator(func_or_class):
+            """Register migration docs and optionally wrap with a warning.
+
+            When ``warn_msg`` is empty, returns ``func_or_class`` unchanged
+            (identity decoration). For classes, only ``__init__`` is wrapped.
+            """
+            func_params = self._get_func_params(func_or_class, qname_old, qname_new)
             warn_msg, doc = self._filled_docs(migration_doc, func_params)
             if doc:
                 self.migration_docs[func_params['qname_old']] = doc
 
-            @wraps(func)
-            def decorated(*args, **kwargs):
-                from _skimage2._shared._warnings import warn_external
-                from skimage.util import PendingSkimage2Change
+            if not warn_msg:
+                # Identity decorator
+                return func_or_class
 
-                if warn_msg:
-                    warn_external(
-                        warn_msg, category=warning_cls or PendingSkimage2Change
-                    )
+            if inspect.isclass(func_or_class):
+                func_or_class.__init__ = self._wrap_callable_with_warning(
+                    func_or_class.__init__, warn_msg, warning_cls
+                )
+                return func_or_class
 
-                return func(*args, **kwargs)
-
-            return decorated
+            return self._wrap_callable_with_warning(
+                func_or_class, warn_msg, warning_cls
+            )
 
         return decorator
 

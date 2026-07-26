@@ -39,7 +39,9 @@ def _verify_range(msg, x, vmin, vmax, dtype):
     assert x.dtype == dtype
 
 
-@parametrize("dtype, f_and_dt", itertools.product(dtype_range, img_funcs_and_types))
+@parametrize(
+    "dtype, f_and_dt", list(itertools.product(dtype_range, img_funcs_and_types))
+)
 def test_range(dtype, f_and_dt):
     imin, imax = dtype_range[dtype]
     x = np.linspace(imin, imax, 10).astype(dtype)

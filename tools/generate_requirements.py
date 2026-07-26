@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Generate requirements/*.txt files from pyproject.toml.
 
-Also builda a conda environment.yml
+Also builds a conda environment.yml
 """
 
 import re
@@ -34,9 +34,17 @@ def generate_environment_yml(req_sections: dict[str, list[str]]) -> None:
         'astropy': 'astropy-base',
         'matplotlib': 'matplotlib-base',
     }
+    pip_only = ['docstub']
+
     lines = ["name: skimage-dev", "channels:", "  - conda-forge", "dependencies:"]
-    for section in req_sections:
-        lines.append(f"  # {section}")
+    pip_section = {None: []}
+
+    def _section_to_lst(
+        section: str | None, req_sections: dict[str, list[str]], lines, offset=0
+    ):
+        tab = offset * " "
+        if section:
+            lines.append(tab + f"  # {section}")
         for dep in req_sections[section]:
             # Remove optional specifiers such as `[parallel]`
             dep = re.sub('\\[.*?\\]', '', dep)
@@ -45,15 +53,31 @@ def generate_environment_yml(req_sections: dict[str, list[str]]) -> None:
             dep = re.sub('; .*', '', dep)
 
             pkgname = re.split('[>=]', dep)[0]
+
+            if section and pkgname in pip_only:
+                if dep not in pip_section[None]:
+                    pip_section[None].append(dep)
+                continue
+
             dep = dep.replace(pkgname, rename_idx.get(pkgname, pkgname))
             if dep == "scikit-image":
                 continue
 
-            lines.append(f"  - {dep}")
+            lines.append(tab + f"  - {dep}")
 
             # Strip duplicates
-            if re.split('[>=]', lines[-2])[0] == re.split('[>=]', lines[-1])[0]:
-                lines = lines[:-1]
+            if len(lines) > 1 and lines[-2].startswith(tab + "  - "):
+                if re.split('[>=]', lines[-2])[0] == re.split('[>=]', lines[-1])[0]:
+                    lines.pop()
+
+    for section in req_sections:
+        _section_to_lst(section, req_sections, lines)
+
+    if pip_section[None]:
+        lines.append('  # pypa-only packages')
+        lines.append('  - pip')
+        lines.append('  - pip:')
+        _section_to_lst(None, pip_section, lines, offset=4)
 
     with open("environment.yml", "w") as f:
         f.writelines(f"{line}\n" for line in lines)

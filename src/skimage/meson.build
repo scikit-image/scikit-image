@@ -3,6 +3,7 @@ python_sources = [
   '__init__.pyi',
   'conftest.py',
   'py.typed',
+  '_doctest_adapters.py',
   '_migration.py'
 ]
 
@@ -12,7 +13,7 @@ py3.install_sources(
   subdir: 'skimage'
 )
 
-subdir('_vendored')
+subdir('_shared')
 subdir('color')
 subdir('data')
 subdir('draw')
