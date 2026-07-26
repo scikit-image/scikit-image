@@ -114,14 +114,13 @@ class ImageCollection:
         of numbers. In this case, each item will be passed independently to
         `load_func` and will represent an item in the collection.
     conserve_memory : bool, optional
-        By default, `ImageCollection` does not keep more than one in memory at a
-        specific time. But if ``False`` is given, images are cached once
-        accessed.
-    load_func : callable, optional
-        Load images with a custom callable that accepts a single argument.
+        ``True`` by default: `ImageCollection` does not keep more than one image in
+        memory at any given time. If ``False``, images are cached once accessed.
+    load_func : Callable, optional
+        Custom callable to load images. It takes `load_pattern` as its (first) argument.
         Defaults to :func:`skimage.io.imread`.
     **load_func_kwargs : dict, optional
-        Passed to `load_func` as additional keyword arguments on each call.
+        Possible additional keyword arguments passed to `load_func` on each call.
 
     Attributes
     ----------
