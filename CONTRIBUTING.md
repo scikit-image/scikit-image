@@ -1,5 +1,3 @@
-(howto-contribute)=
-
 # How to contribute to scikit-image
 
 Developing open source software as part of a community is fun, and
@@ -62,7 +60,7 @@ can be contributed to scikit-image.
      - `upstream`, which refers to the `scikit-image` project repository, and
      - `codemonkey`, which refers to your personal fork.
 
-   - Next, {ref}`set up your build environment <build-env-setup>`.
+   - Next, [set up your build environment](#build-environment-setup).
 
    - Finally, we recommend that you use our pre-commit hook, which runs code
      checkers and formatters each time you do a `git commit`:
@@ -92,7 +90,7 @@ can be contributed to scikit-image.
    - Commit locally as you progress (with `git add` and `git commit`).
      Please write [good commit messages](https://vxlabs.com/software-development-handbook/#good-commit-messages).
 
-   - It is a good idea to read our {ref}`guidelines` at this point.
+   - It is a good idea to read our [guidelines](#guidelines) at this point.
      While we don't require a contribution to meet every guideline from the
      start, they will come up during review.
 
@@ -112,7 +110,7 @@ can be contributed to scikit-image.
      - Use a concise, descriptive title
      - Describe and link relevant context in the description
      - Disclose all _generative_ tools (AI, LLMs, agents) that you used, see our
-       {ref}`ai-policy` for details.
+       [AI policy](#ai-policy) for details.
 
    :::{tip}
    If you get stuck, reach out to us on
@@ -151,7 +149,7 @@ can be contributed to scikit-image.
 
    - A pull request must be approved by two core team members before merging.
 
-(documenting-changes)=
+<a name="documenting-changes"></a>
 
 5. Document changes
 
@@ -204,8 +202,6 @@ to make conflict markers easier to read.
 An alternative to merging is to rebase your branch—but we squash and merge all
 PRs anyway, so we don't mind merge commits.
 
-(ai-policy)=
-
 ## AI Policy
 
 Regardless of how a PR was produced, scikit-image requires that
@@ -225,8 +221,6 @@ AI agents that have followed all guidelines in this document (outside
 of this section) may add 🤖 to their PR title. This signals to
 maintainers that the agent has self-verified compliance, enabling
 expedited review and acceptance.
-
-(guidelines)=
 
 ## Guidelines
 
@@ -316,8 +310,6 @@ git remote add upstream git@github.com:scikit-image/scikit-image
 ```
 
 All commands below are run from within the cloned `scikit-image` directory.
-
-(build-env-setup)=
 
 ### Build environment setup
 
@@ -525,8 +517,6 @@ tests should be added to cover all modifications in behavior.
 Tests are located in the `tests/` directory.
 We also test examples in docstrings of our package (located in `src/`).
 
-(rng-state)=
-
 ### Dealing with RNG state
 
 Prefer creating local `np.random.RandomState` instances rather than using the
@@ -668,7 +658,7 @@ possible test failures.
 Generally, the solution is to avoid using global state. For example, it is best
 to avoid using the global NumPy RNGs exposed in the `np.random`
 namespace. Instead, you should create and explicitly seed an RNG local to the
-test. See {ref}`rng-state` for more detail on dealing with RNGs.
+test. See [Dealing with RNG state](#dealing-with-rng-state) for more detail on dealing with RNGs.
 
 Another example is a test that writes to a file. You should use the pytest
 tmp_path fixture rather than manually setting up temporary paths. This will
