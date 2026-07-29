@@ -568,98 +568,133 @@ def _cross_decomposition(footprint, dtype=np.uint8):
     )
     return decomposed
 
-def footprint_ellipse(
-    shape,
-    *,
-    adjust_radii=0,
-    compare=np.less_equal,
-    dtype=np.uint8,
-):
+
+def footprint_ellipse(shape, *, radii=None, compare=np.less_equal, dtype=np.uint8):
     """Generates an elliptical or spherical footprint.
 
     This function generates ellipsoids with any number of desired dimensions,
     including spherical footprints. Use this function to generate shapes such
-    as a disk, an ellipse (2D), or a ball (3D).
+    as a disk (2D), an ellipse (2D), or a ball (3D).
 
     Parameters
     ----------
     shape : Sequence of int(s)
-        Shape of the new footprint.
+        Shape of the new footprint. Note that by default, `radii` are derived
+        from this `shape` such that the resulting ellipse is slightly larger
+        (``radii=tuple(s // 2 + .5 for s in shape)``). In general, this leads
+        to "rounder" looking shapes and avoids the edge case where the ellipse
+        has a single pixel on its side [1]_.
+    radii : float or Sequence of float(s), optional
+        Override the default radii derived from `shape`.
+        If you want an ellipse that touches the border exactly,
+        use ``radii=tuple(s // 2 for s in shape)``.
     compare : Callable, optional
         Comparison function used to evaluate the ellipsis equation. By default,
         pixels that are less or equal in value to 1, belong to the footprint.
         Expects a function that matches the signature of :func:`numpy.less_equal`.
-    adjust_radii : float or Sequence of float(s), optional
-        Adjust ellipse size within the footprint. Positive values will increase
-        the axes of the ellipse. With 0, the border of the ellipsis will touch
-        the border of the generated footprint.
     dtype : data-type, optional
         The data type of the footprint.
 
     Returns
     -------
     footprint : ndarray
-        The footprint where elements of the neighborhood are 1 and 0 otherwise.
+        The footprint where elements. Depending on the requested `dtype`,
+        pixels that belong to the ellipse are *truthy* otherwise *falsy*.
+
+    See Also
+    --------
+    cross_decompose_footprint
+        Decompose a symmetric convex 2D-footprint into cross-shaped elements
+        (may increase performance for larger footprints).
+    footprint_decomposed_disk
+        Approximate a disk (2D) or ball (3D) with a decomposed footprint
+        (may increase performance for larger footprints).
 
     Notes
     -----
-    This function compares the left side of the ellipsis equation
+    This function compares the left side of the equation
 
-    .. math:: \\sum_{k=1}^{n} \\frac{x_k^2}{r_k^2} \\le 1
+    .. math:: \\sum_{n=1}^{N} \\frac{x_n^2}{r_n^2} \\le 1
 
-    with 1 to determine which pixels belong to the footprint. `compare` controls
-    the kind of comparison that is used. In each dimension :math:`k`, the
-    coordinates are scaled by :math:`r_k` by the adjusted radius
-    ``shape[k] // 2 + adjust_radii[k]`` (after normalizing `adjust_radii` to a
-    tuple).
+    with 1 to determine which pixels belong to the footprint. :math:`x_n` is a
+    vector of evenly spaced numbers matching the requested length of the
+    respective dimension :math:`n \\in N`. Its minimum and maximum are derived
+    from `shape` with ``tuple(s // 2 for s in shape)`` for each dimension.
+
+    To approximate the results of `disk` and `ball` in legacy `skimage`, and
+    that of other libraries [2]_, try ``radii=tuple(s // 2 for s in shape)``.
+    The underlying calculation in this function is different which may result in
+    floating errors compounding in a different way. Depending on the platform
+    and used precision you may need to increase the radii slightly (like +0.001)
+    to get pixel-perfect reproductions.
+
+    References
+    ----------
+    .. [1] https://usage.imagemagick.org/morphology/#disk, 2026-07-12
+    .. [2] https://www.mathworks.com/help/images/ref/strel.html, 2026-07-13
 
     Examples
     --------
     >>> import _skimage2 as ski2
-    >>> ski2.morphology.footprint_ellipse((4, 7))
-    array([[0, 0, 0, 1, 0, 0, 0],
-           [0, 1, 1, 1, 1, 1, 0],
-           [0, 1, 1, 1, 1, 1, 0],
-           [0, 0, 0, 1, 0, 0, 0]], dtype=uint8)
-    >>> ski2.morphology.footprint_ellipse((4, 7), compare=np.less)
-    array([[0, 0, 0, 0, 0, 0, 0],
-           [0, 1, 1, 1, 1, 1, 0],
-           [0, 1, 1, 1, 1, 1, 0],
-           [0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
+    >>> ski2.morphology.footprint_ellipse((4, 5))
+    array([[0, 1, 1, 1, 0],
+           [1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 1],
+           [0, 1, 1, 1, 0]], dtype=uint8)
+    >>> ski2.morphology.footprint_ellipse((5, 5), radii=(2, 2))
+    array([[0, 0, 1, 0, 0],
+           [0, 1, 1, 1, 0],
+           [1, 1, 1, 1, 1],
+           [0, 1, 1, 1, 0],
+           [0, 0, 1, 0, 0]], dtype=uint8)
+    >>> ski2.morphology.footprint_ellipse((3, 4, 11))[:2]
+    array([[[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+            [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
+    <BLANKLINE>
+           [[0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0]]], dtype=uint8)
     """
-    if np.isscalar(adjust_radii):
-        adjust_radii = (adjust_radii,) * len(shape)
-
-    elif len(shape) != len(adjust_radii):
+    if radii is None:
+        radii = tuple(s // 2 + 0.5 for s in shape)
+    elif np.isscalar(radii):
+        radii = (radii,) * len(shape)
+    elif len(shape) != len(radii):
         msg = (
             "`adjust_radii` must be scalar or sequence matching `shape` in length, "
-            f"got shape={shape!r} and adjust_radii={adjust_radii!r}"
+            f"got shape={shape!r} and {radii=!r}"
         )
         raise ValueError(msg)
+    for radius in radii:
+        if radius < 0:
+            msg = f"got negative radius: {radii=!r}"
+            raise ValueError(msg)
 
-    # Compute left side of elliptic equation
+    # Compute left side of the ellipsis equation (compare Notes)
     _ellipse_field = np.zeros(shape, dtype=float)
-    for dim, (length, adjust_radius) in enumerate(zip(shape, adjust_radii)):
+
+    for dim, (length, radius) in enumerate(zip(shape, radii)):
         if length == 1:
             continue
 
         # Create coordinate space along current dimension
-        radius = length // 2  # Integer division for legacy compatibility
-        coords = np.linspace(-radius, radius, num=length, endpoint=True, dtype=float)
+        # We use integer division to determine value of the border pixels
+        # because that is what legacy skimage and other libraries
+        # (like MATLAB, imagemagick) did or seem to be doing. It makes it easier
+        # to approximate their results.
+        coord_max = length // 2
+        coords = np.linspace(-coord_max, coord_max, num=length, endpoint=True)
         coords = coords.reshape((1,) * dim + (length,) + (1,) * (len(shape) - dim - 1))
 
-        # Scale coords by by adjusted radius
-        adjusted = radius + adjust_radius
-        if adjusted == 0:
-            # Avoid division by zero warning and return would be result early
-            # Values close to zero will lead to the same result
-            return np.zeros(shape, dtype=dtype)
-        coords /= adjusted
-
+        with np.errstate(all="ignore"):
+            coords /= radius
         _ellipse_field += coords**2
 
     footprint = compare(_ellipse_field, 1)
-    footprint = footprint.astype(dtype)
+    footprint = footprint.astype(dtype, copy=False)
     return footprint
 
 

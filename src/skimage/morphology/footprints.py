@@ -118,15 +118,15 @@ def _nsphere_series_decomposition(radius, ndim, dtype=np.uint8):
     ``%(qname_old)s`` is deprecated in favor of
     ``%(qname_new)s`` with a new signature and behavior:
 
-    * ``width`` and ``height`` are combined into a single ``shape`` parameter
-    * New ``adjust_radii`` and ``compare`` parameters to control the size of the
-      generated ellipse relative to the ``shape``
+    * ``width`` and ``height`` are replaced by 
+      the parameters ``shape`` and ``radii``
+    * ``compare`` parameter to control how the underlying equation is evaluated
 
     To keep the old (``skimage``, v1.x) behavior after switching to
     ``skimage2``, pass the following parameter to the new function:
 
     * ``shape = (height * 2 + 1, width * 2 + 1)``
-    * ``adjust_radii=1``
+    * ``radii= tuple(s // 2 + 1 for s in shape)``
     * ``compare=numpy.less``.
 
     <!--- cond-start: doc -->
@@ -139,10 +139,11 @@ def _nsphere_series_decomposition(radius, ndim, dtype=np.uint8):
     >>> width = 4
     >>> height = 9
     >>> shape = (height * 2 + 1, width * 2 + 1)
+    >>> radii = tuple(s // 2 + 1 for s in shape)
 
     >>> fp1 = ski.morphology.ellipse(width, height)
     >>> fp2 = ski2.morphology.footprint_ellipse(
-    ...     shape, adjust_radii=1, compare=np.less
+    ...     shape, radii=radii, compare=np.less
     ... )
     >>> np.testing.assert_equal(fp1, fp2)
     <!--- cond-end -->
@@ -200,7 +201,7 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
 
     Examples
     --------
-    >>> from _skimage2.morphology import footprints
+    >>> from skimage.morphology import footprints
     >>> footprints.ellipse(5, 3)
     array([[0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -228,23 +229,22 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
     ``%(qname_old)s`` is deprecated in favor of
     ``%(qname_new)s`` with a new signature and behavior:
 
-    * ``radius`` is replaced by the ``shape`` parameter
-    * New ``compare`` parameter to control the size of the
-      generated disk relative to the ``shape``
-      (replace removed ``strict_radius`` parameter)
+    * ``radius`` and ``strict_radius`` are replaced by 
+      the parameters ``shape`` and ``radii``
+    * ``compare`` parameter to control how the underlying equation is evaluated
 
     WARNING: The new underlying algorithm is slightly different and compounding
     float errors may lead to a few pixels at the footprints edge being 0
     instead of 1. If you need pixel-perfect compatibility try increasing
-    ``adjust_radii`` slightly (like +0.001) or check out the full migration guide
+    ``radii`` slightly (like +0.001) or check out the full migration guide
     for a function to vendor.
 
     To approximate the old (``skimage``, v1.x) behavior after switching to
     ``skimage2``:
 
     * Use ``shape = (radius * 2 + 1,) * 2``
-    * ``strict_radius=True`` (default), no change required
-    * ``strict_radius=False``, use ``adjust_radii=0.5``
+    * ``strict_radius=True`` (default), use ``radii=(radius + .001,) * 2``
+    * ``strict_radius=False``, no change required
 
     <!--- cond-start: doc -->
     For example:
@@ -257,11 +257,11 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
     >>> shape = (radius * 2 + 1,) * 2
 
     >>> fp1 = ski.morphology.disk(radius)
-    >>> fp2 = ski2.morphology.footprint_ellipse(shape)
+    >>> fp2 = ski2.morphology.footprint_ellipse(shape, radii=(radius + .001,) * 2)
     >>> np.testing.assert_equal(fp1, fp2)
 
     >>> fp1 = ski.morphology.disk(radius, strict_radius=False)
-    >>> fp2 = ski2.morphology.footprint_ellipse(shape, adjust_radii=0.5)
+    >>> fp2 = ski2.morphology.footprint_ellipse(shape)
     >>> np.testing.assert_equal(fp1, fp2)
 
     .. admonition:: Reproduce exact results of old implementation
@@ -383,23 +383,22 @@ def disk(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
     ``%(qname_old)s`` is deprecated in favor of
     ``%(qname_new)s`` with a new signature and behavior:
 
-    * ``radius`` is replaced by the ``shape`` parameter
-    * New ``compare`` parameter to control the size of the
-      generated disk relative to the ``shape``
-      (replace removed ``strict_radius`` parameter)
+    * ``radius`` and ``strict_radius`` are replaced by 
+      the parameters ``shape`` and ``radii``
+    * ``compare`` parameter to control how the underlying equation is evaluated
 
     WARNING: The new underlying algorithm is slightly different and compounding
     float errors may lead to a few pixels at the footprints edge being 0
     instead of 1. If you need pixel-perfect compatibility try increasing
-    ``adjust_radii`` slightly (like +0.001) or check out the full migration guide
+    ``radii`` slightly (like +0.001) or check out the full migration guide
     for a function to vendor.
 
     To approximate the old (``skimage``, v1.x) behavior after switching to
     ``skimage2``:
 
-    * Use ``shape = (radius * 2 + 1,) * 2``
-    * ``strict_radius=True`` (default), no change required
-    * ``strict_radius=False``, use ``adjust_radii=0.5``
+    * Use ``shape = (radius * 2 + 1,) * 3``
+    * ``strict_radius=True`` (default), use ``radii=(radius + .001,) * 3``
+    * ``strict_radius=False``, no change required
 
     <!--- cond-start: doc -->
     For example:
@@ -412,11 +411,11 @@ def disk(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
     >>> shape = (radius * 2 + 1,) * 3
 
     >>> fp1 = ski.morphology.ball(radius)
-    >>> fp2 = ski2.morphology.footprint_ellipse(shape)
+    >>> fp2 = ski2.morphology.footprint_ellipse(shape, radii=(radius + .001,) * 2)
     >>> np.testing.assert_equal(fp1, fp2)
 
     >>> fp1 = ski.morphology.ball(radius, strict_radius=False)
-    >>> fp2 = ski2.morphology.footprint_ellipse(shape, adjust_radii=0.5)
+    >>> fp2 = ski2.morphology.footprint_ellipse(shape)
     >>> np.testing.assert_equal(fp1, fp2)
 
     .. admonition:: Reproduce exact results of old implementation
