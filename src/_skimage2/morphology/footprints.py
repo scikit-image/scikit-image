@@ -1,5 +1,5 @@
-import os
 import warnings
+from pathlib import Path
 
 import numpy as np
 
@@ -13,14 +13,11 @@ from ._grayscale_operators import dilation
 # the array. The values at a given radius corresponds to the number of
 # repetitions of 3 different types elementary of structuring elements.
 #
-# See _nsphere_series_decomposition for full details.
-_nsphere_decompositions = {}
-_nsphere_decompositions[2] = np.load(
-    os.path.join(os.path.dirname(__file__), 'disk_decompositions.npy')
-)
-_nsphere_decompositions[3] = np.load(
-    os.path.join(os.path.dirname(__file__), 'ball_decompositions.npy')
-)
+# See `footprint_decomposed_disk` for full details.
+_nsphere_decompositions = {
+    2: np.load(Path(__file__).parent / 'disk_decompositions.npy'),  # shape (251, 3)
+    3: np.load(Path(__file__).parent / 'ball_decompositions.npy'),  # shape (101, 3)
+}
 
 
 def _shape_from_sequence(footprints, require_odd_size=False):
@@ -377,9 +374,35 @@ def diamond(radius, dtype=np.uint8, *, decomposition=None):
     return footprint
 
 
-def _nsphere_series_decomposition(radius, ndim, dtype=np.uint8):
-    """Generate a sequence of footprints approximating an n-sphere.
+def footprint_decomposed_disk(radius, *, ndim=2, dtype=np.uint8):
+    """Approximate a disk (2D) or ball (3D) with a decomposed footprint.
 
+    Approximate the footprint of a disk or ball with a series of smaller
+    pre-computed footprints of length 3 in each dimension.
+
+    Parameters
+    ----------
+    radius : int
+        The radius of the disk or ball.
+    ndim : {2, 3}, optional
+        The dimensionality of the footprint. Only 2D and 3D are supported.
+    dtype : data-type, optional
+        The data type of the footprint.
+
+    Returns
+    -------
+    decomposed :
+        Each element of the decomposed `footprint` tuple is a 2-tuple of the
+        form ``(ndarray, num_iter)`` that specifies a footprint array and the
+        number of iterations it is to be applied.
+
+    See Also
+    --------
+    cross_decompose_footprint
+        Decompose a symmetric convex 2D-footprint into cross-shaped elements.
+
+    Notes
+    -----
     Morphological operations with an n-sphere (hypersphere) footprint can be
     approximated by applying a series of smaller footprints of extent 3 along
     each axis. Specific solutions for this are given in [1]_ for the case of
@@ -392,7 +415,8 @@ def _nsphere_series_decomposition(radius, ndim, dtype=np.uint8):
     (in 2D) or ball (in 3D) computed with ``decomposition=None``.
 
     The approach can be extended to higher dimensions, but we have only stored
-    results for 2D and 3D at this point.
+    results for 2D and 3D at this point. These results only cover radii from
+    0 to 250 for the 2D case, and from 0 to 100 for the 3D case.
 
     Empirically, the shapes at large radius approach a hexadecagon
     (16-sides [2]_) in 2D and a rhombicuboctahedron (26-faces, [3]_) in 3D.
@@ -406,15 +430,28 @@ def _nsphere_series_decomposition(radius, ndim, dtype=np.uint8):
            https://www.iwaenc.org/proceedings/1997/nsip97/pdf/scan/ns970226.pdf
     .. [2] https://en.wikipedia.org/wiki/Hexadecagon
     .. [3] https://en.wikipedia.org/wiki/Rhombicuboctahedron
-    """
 
+    Examples
+    --------
+    >>> footprint_decomposed_disk(radius=20)
+    ((array([[1, 1, 1],
+            [0, 1, 0],
+            [0, 1, 0]], dtype=uint8), 3), (array([[1, 0, 0],
+            [1, 1, 1],
+            [1, 0, 0]], dtype=uint8), 3), (array([[0, 1, 0],
+            [0, 1, 0],
+            [1, 1, 1]], dtype=uint8), 3), (array([[0, 0, 1],
+            [1, 1, 1],
+            [0, 0, 1]], dtype=uint8), 3), (array([[0, 1, 0],
+            [1, 1, 1],
+            [0, 1, 0]], dtype=uint8), 6), (array([[1, 1, 1],
+            [1, 1, 1],
+            [1, 1, 1]], dtype=uint8), 2))
+    """
     if radius == 1:
         # for radius 1 just use the exact shape (3,) * ndim solution
-        kwargs = dict(dtype=dtype, strict_radius=False, decomposition=None)
-        if ndim == 2:
-            return ((disk(1, **kwargs), 1),)  # noqa: F821, TODO temporarily ignore
-        elif ndim == 3:
-            return ((ball(1, **kwargs), 1),)  # noqa: F821, TODO temporarily ignore
+        footprint = footprint_ellipse((3,) * ndim, dtype=dtype)
+        return ((footprint, 1),)
 
     # load precomputed decompositions
     if ndim not in _nsphere_decompositions:
