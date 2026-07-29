@@ -42,17 +42,21 @@ class TestFootprints:
             assert_equal(expected_mask, actual_mask[:, :, c])
             k = k + 1
 
-    def test_footprint_disk(self):
-        """Test disk footprints"""
-        self.strel_worker("data/disk-matlab-output.npz", footprints.disk)
-
     def test_footprint_diamond(self):
         """Test diamond footprints"""
         self.strel_worker("data/diamond-matlab-output.npz", footprints.diamond)
 
-    def test_footprint_ball(self):
-        """Test ball footprints"""
-        self.strel_worker_3d("data/disk-matlab-output.npz", footprints.ball)
+    def test_footprint_ellipse_compare_matlab(self):
+        """Compare behavior to Matlab."""
+        file = "data/disk-matlab-output.npz"
+        matlab_masks = np.load(fetch(file))
+        for radius, name in enumerate(sorted(matlab_masks)):
+            expected = matlab_masks[name]
+            if expected.shape == (1,):
+                expected = expected[:, np.newaxis]
+            radii = (radius + .001,) * 2
+            actual = footprint_ellipse(expected.shape, radii=radii)
+            assert_equal(expected, actual)
 
     def test_footprint_octahedron(self):
         """Test octahedron footprints"""
@@ -82,9 +86,8 @@ class TestFootprints:
         assert_equal(expected_mask1, actual_mask1)
         assert_equal(expected_mask2, actual_mask2)
 
-    def test_footprint_ellipse(self):
-        """Test ellipse footprints"""
-        expected_mask1 = np.array(
+    def test_footprint_ellipse_explicit_5_3(self):
+        expected = np.array(
             [
                 [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
                 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -96,17 +99,38 @@ class TestFootprints:
             ],
             dtype=np.uint8,
         )
-        actual_mask1 = footprints.ellipse(5, 3)
-        expected_mask2 = np.array([[1, 1, 1], [1, 1, 1], [1, 1, 1]], dtype=np.uint8)
-        actual_mask2 = footprints.ellipse(1, 1)
-        assert_equal(expected_mask1, actual_mask1)
-        assert_equal(expected_mask2, actual_mask2)
-        assert_equal(expected_mask1, footprints.ellipse(3, 5).T)
-        assert_equal(expected_mask2, footprints.ellipse(1, 1).T)
+        actual = footprint_ellipse((7, 11), radii=(4, 6), compare=np.less)
+        assert_equal(expected, actual)
 
-    def test_footprint_ellipse_zero_radius(self):
-        footprint = footprint_ellipse((5, 6), adjust_radii=(0, -3))
+        # Switching dimensions makes no difference
+        actual = footprint_ellipse((11, 7), radii=(6, 4), compare=np.less)
+        assert_equal(expected, actual.T)
+
+        # Large shape with same radii, can be croped to original result
+        actual = footprint_ellipse((9, 15), radii=(4, 6), compare=np.less)
+        actual = actual[1:-1, 2:-2]
+        assert_equal(expected, actual)
+
+    def test_footprint_ellipse_explicit(self):
+        expected = np.ones((3, 3), dtype=np.uint8)
+        actual = footprint_ellipse((3, 3))
+
+        assert_equal(expected, actual)
+        # assert_equal(expected, footprints.ellipse(3, 5).T)
+        # assert_equal(expected, footprints.ellipse(1, 1).T)
+
+    @pytest.mark.parametrize("shape", [(5, 7), (6, 6)])
+    def test_footprint_ellipse_zero_radius(self, shape):
+        footprint = footprint_ellipse(shape, radii=(2, 0))
         np.testing.assert_equal(footprint, 0)
+
+        # For small non-zero radii the result depends on the "evenness" of
+        # the dimension: if odd, the central column will always be 1, else 0
+        expected = np.zeros(shape, dtype=np.uint8)
+        if shape[1] % 2 == 1:
+            expected[:, shape[1] // 2] = 1  # Central axis of 1 only in odd case
+        footprint = footprint_ellipse(shape, radii=(2, np.nextafter(0, 1)))
+        np.testing.assert_equal(footprint, expected)
 
     def test_footprint_star(self):
         """Test star footprints"""
@@ -138,12 +162,9 @@ class TestFootprints:
 @pytest.mark.parametrize(
     'function, args, supports_sequence_decomposition',
     [
-        (footprints.disk, (3,), True),
-        (footprints.ball, (3,), True),
         (footprints.diamond, (3,), True),
         (footprints.octahedron, (3,), True),
         (footprint_rectangle, ((3, 5),), True),
-        (footprints.ellipse, (3, 4), False),
         (footprints.octagon, (3, 4), True),
         (footprints.star, (3,), False),
     ],
