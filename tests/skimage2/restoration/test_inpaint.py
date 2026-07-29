@@ -6,7 +6,7 @@ from _skimage2._shared.testing import assert_allclose
 from _skimage2._shared.utils import _supported_float_type
 from _skimage2.color import rgb2gray
 from _skimage2.metrics import mean_squared_error, normalized_root_mse
-from _skimage2.morphology import dilation, disk
+from _skimage2.morphology import dilation, footprint_ellipse
 from _skimage2.restoration import inpaint
 
 
@@ -157,7 +157,8 @@ def test_inpaint_nrmse(dtype, order, channel_axis, split_into_regions):
         thresh = 3.25 + 0.25 * radius  # larger defects less common
         tmp_mask = rstate.standard_normal(image_orig.shape[:-1]) > thresh
         if radius > 0:
-            tmp_mask = dilation(tmp_mask, disk(radius, dtype=bool))
+            footprint = footprint_ellipse((radius * 2 + 1,) * 2, dtype=bool)
+            tmp_mask = dilation(tmp_mask, footprint)
         mask[tmp_mask] = 1
 
     # Defect image over the same region in each color channel
