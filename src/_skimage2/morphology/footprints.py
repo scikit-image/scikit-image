@@ -485,20 +485,44 @@ def _t_shaped_element_series(ndim=2, dtype=np.uint8):
     return tuple(all_t)
 
 
-def _cross(r0, r1, dtype=np.uint8):
-    """Cross-shaped structuring element of shape (r0, r1).
+def _footprint_cross(shape, *, dtype=np.uint8):
+    """Generate a cross-shaped n-dimensional footprint.
 
-    Only the central row and column are ones.
+    Only the central axis are one.
+
+    Parameters
+    ----------
+    shape : Sequence of int(s)
+        Shape of the new footprint.
+    dtype : data-type, optional
+        The data type of the footprint.
+
+    Returns
+    -------
+    footprint : ndarray
+        The footprint where elements. Depending on the requested `dtype`,
+        pixels that belong to the ellipse are *truthy* otherwise *falsy*.
+
+    Examples
+    --------
+    >>> _footprint_cross((3, 5))
+    array([[0, 0, 1, 0, 0],
+           [1, 1, 1, 1, 1],
+           [0, 0, 1, 0, 0]], dtype=uint8)
     """
-    s0 = int(2 * r0 + 1)
-    s1 = int(2 * r1 + 1)
-    c = np.zeros((s0, s1), dtype=dtype)
-    if r1 != 0:
-        c[r0, :] = 1
-    if r0 != 0:
-        c[:, r1] = 1
-    return c
+    if np.any(np.array(shape) % 2 == 0):
+        msg = (
+            f"only footprints with odd length in each dimension are supported, "
+            f" got {shape=}"
+        )
+        raise ValueError(msg)
 
+    footprint = np.zeros(shape, dtype=dtype)
+    for axis, length in enumerate(shape):
+        radius = length // 2
+        sl = (slice(None),) * axis + (radius,)
+        footprint[sl] = 1
+    return footprint
 
 def _cross_decomposition(footprint, dtype=np.uint8):
     """Decompose a symmetric convex footprint into cross-shaped elements.
@@ -513,6 +537,9 @@ def _cross_decomposition(footprint, dtype=np.uint8):
            Image Processing, (1 November 1990).
            :DOI:`10.1117/12.23608`
     """
+    if dtype is None:
+        dtype = footprint.dtype
+
     quadrant = footprint[footprint.shape[0] // 2 :, footprint.shape[1] // 2 :]
     col_sums = quadrant.sum(0, dtype=int)
     col_sums = np.concatenate((col_sums, np.asarray([0], dtype=int)))
@@ -534,8 +561,12 @@ def _cross_decomposition(footprint, dtype=np.uint8):
     if n > 0:
         key = (n, 0)
         idx[key] = idx.get(key, 0) + 1
-    return tuple([(_cross(r0, r1, dtype), n) for (r0, r1), n in idx.items()])
 
+    cross_shapes = tuple(((r0 * 2 + 1, r1 * 2 + 1), n) for (r0, r1), n in idx.items())
+    decomposed = tuple(
+        [(_footprint_cross(shape, dtype=dtype), n) for shape, n in cross_shapes]
+    )
+    return decomposed
 
 def footprint_ellipse(
     shape,
