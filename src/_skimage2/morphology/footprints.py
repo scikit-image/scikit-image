@@ -48,12 +48,12 @@ def _shape_from_sequence(footprints, require_odd_size=False):
     return tuple(shape)
 
 
-def footprint_from_sequence(footprints):
+def footprint_from_sequence(decomposed, *, dtype=None):
     """Convert a footprint sequence into an equivalent ndarray.
 
     Parameters
     ----------
-    footprints : tuple of 2-tuples
+    decomposed : tuple of 2-tuples
         A sequence of footprint tuples where the first element of each tuple
         is an array corresponding to a footprint and the second element is the
         number of times it is to be applied. Currently, all footprints should
@@ -64,12 +64,19 @@ def footprint_from_sequence(footprints):
     footprint : ndarray
         An single array equivalent to applying the sequence of ``footprints``.
     """
+    if not _footprint_is_sequence(decomposed):
+        msg = f"expected decomposed footprint, got {decomposed=!r}"
+        raise ValueError(msg)
+
+    if dtype is None:
+        dtype = decomposed[0][0].dtype
 
     # Create a single pixel image of sufficient size and apply binary dilation.
-    shape = _shape_from_sequence(footprints)
-    imag = np.zeros(shape, dtype=bool)
-    imag[tuple(s // 2 for s in shape)] = 1
-    return dilation(imag, footprints)
+    shape = _shape_from_sequence(decomposed)
+    composed = np.zeros(shape, dtype=dtype)
+    composed[tuple(s // 2 for s in shape)] = 1
+    dilation(composed, decomposed, out=composed)
+    return composed
 
 
 def footprint_rectangle(shape, *, dtype=np.uint8, decomposition=None):
