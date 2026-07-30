@@ -55,7 +55,7 @@ class TestFootprints:
         shape = (radius * 2 + 1,) * 2
         # Reproduction isn't pixel perfect in some cases but should be close
         if strict_radius:
-            radii = (radius + .001,) * 2
+            radii = (radius + 0.001,) * 2
         else:
             radii = None
 
@@ -78,7 +78,7 @@ class TestFootprints:
         shape = (radius * 2 + 1,) * 3
         # Reproduction isn't pixel perfect in some cases but should be close
         if strict_radius:
-            radii = (radius + .001,) * 3
+            radii = (radius + 0.001,) * 3
         else:
             radii = None
 
@@ -238,7 +238,7 @@ def test_disk_cross_decomposition_sk1_compatibility(radius, strict_radius):
     shape = (radius * 2 + 1,) * 2
     # Reproduction isn't pixel perfect in some cases but should be close
     if strict_radius:
-        radii = (radius + .001,) * 2
+        radii = (radius + 0.001,) * 2
     else:
         radii = None
 

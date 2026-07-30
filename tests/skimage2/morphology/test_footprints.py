@@ -56,7 +56,7 @@ class TestFootprints:
             expected = matlab_masks[name]
             if expected.shape == (1,):
                 expected = expected[:, np.newaxis]
-            radii = (radius + .001,) * 2
+            radii = (radius + 0.001,) * 2
             actual = footprint_ellipse(expected.shape, radii=radii)
             assert_equal(expected, actual)
 

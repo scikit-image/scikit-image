@@ -44,7 +44,7 @@ adapt_doctests(globals())
     ``%(qname_old)s`` is deprecated in favor of
     ``%(qname_new)s`` with a new signature and behavior:
 
-    * ``width`` and ``height`` are replaced by 
+    * ``width`` and ``height`` are replaced by
       the parameters ``shape`` and ``radii``
     * ``compare`` parameter to control how the underlying equation is evaluated
     * ``decomposition`` parameter is removed
@@ -163,7 +163,7 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
     ``%(qname_old)s`` is deprecated in favor of
     ``%(qname_new)s`` with a new signature and behavior:
 
-    * ``radius`` and ``strict_radius`` are replaced by 
+    * ``radius`` and ``strict_radius`` are replaced by
       the parameters ``shape`` and ``radii``
     * ``compare`` parameter to control how the underlying equation is evaluated
 
@@ -317,7 +317,7 @@ def disk(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
     ``%(qname_old)s`` is deprecated in favor of
     ``%(qname_new)s`` with a new signature and behavior:
 
-    * ``radius`` and ``strict_radius`` are replaced by 
+    * ``radius`` and ``strict_radius`` are replaced by
       the parameters ``shape`` and ``radii``
     * ``compare`` parameter to control how the underlying equation is evaluated
 
