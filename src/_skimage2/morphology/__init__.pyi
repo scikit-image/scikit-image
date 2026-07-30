@@ -9,6 +9,7 @@ from .isotropic import (
 
 from .footprints import (
     cube,
+    cross_decompose_footprint,
     diamond,
     footprint_ellipse,
     footprint_decomposed_disk,
@@ -56,6 +57,7 @@ __all__ = [
     'closing',
     'convex_hull_image',
     'convex_hull_object',
+    'cross_decompose_footprint',
     'diameter_closing',
     'diameter_opening',
     'diamond',

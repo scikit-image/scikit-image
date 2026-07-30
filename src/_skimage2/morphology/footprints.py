@@ -3,7 +3,7 @@ from pathlib import Path
 
 import numpy as np
 
-from ._footprints import _footprint_is_sequence
+from ._footprints import _footprint_is_sequence, mirror_footprint
 from .._shared.utils import deprecate_func
 from ._grayscale_operators import dilation
 
@@ -561,19 +561,68 @@ def _footprint_cross(shape, *, dtype=np.uint8):
         footprint[sl] = 1
     return footprint
 
-def _cross_decomposition(footprint, dtype=np.uint8):
-    """Decompose a symmetric convex footprint into cross-shaped elements.
 
+def cross_decompose_footprint(footprint, *, dtype=None):
+    """Decompose a symmetric convex 2D-footprint into cross-shaped elements.
+
+    Parameters
+    ----------
+    footprint : ndarray
+        A 2-dimensional footprint that is symmetric and convex along each
+        dimension. That is, slices of the footprint along any dimension and
+        index must never contain gaps, must be of odd length, and must be
+        symmetric.
+    dtype : data-type, optional
+        The data type of the footprint, defaults to the dtype of `footprint`.
+
+    Returns
+    -------
+    decomposed :
+        Each element of the decomposed `footprint` tuple is a 2-tuple of the
+        form ``(ndarray, num_iter)`` that specifies a footprint array and the
+        number of iterations it is to be applied.
+
+    See Also
+    --------
+    footprint_decomposed_disk
+        Approximate a disk (2D) or ball (3D) with a decomposed footprint.
+
+    Notes
+    -----
     This is a decomposition of the footprint into a sequence of
     (possibly asymmetric) cross-shaped elements. This technique was proposed in
     [1]_ and corresponds roughly to algorithm 1 of that publication (some
     details had to be modified to get reliable operation).
 
+    References
+    ----------
     .. [1] Li, D. and Ritter, G.X. Decomposition of Separable and Symmetric
            Convex Templates. Proc. SPIE 1350, Image Algebra and Morphological
            Image Processing, (1 November 1990).
            :DOI:`10.1117/12.23608`
+
+    Examples
+    --------
+    >>> footprint = footprint_ellipse((5, 7))
+    >>> cross_decompose_footprint(footprint)
+    ((array([[1, 1, 1, 1, 1]], dtype=uint8), 1), (array([[0, 1, 0],
+            [1, 1, 1],
+            [0, 1, 0]], dtype=uint8), 1), (array([[1],
+            [1],
+            [1]], dtype=uint8), 1))
     """
+    if footprint.ndim != 2:
+        msg = f"footprint is not 2-dimensional, go {footprint.shape=}"
+        raise ValueError(msg)
+    if np.any(np.array(footprint.shape) % 2 == 0):
+        msg = f"footprint is not of uneven length, got {footprint.shape=}"
+        raise ValueError(msg)
+    # If entire footprint symmetric then we only need to check convexitivity
+    # for one quadrant later
+    is_symmetric = np.all(footprint == mirror_footprint(footprint))
+    if not is_symmetric:
+        raise ValueError("footprint is not symmetric along each dimension")
+
     if dtype is None:
         dtype = footprint.dtype
 
@@ -594,6 +643,11 @@ def _cross_decomposition(footprint, dtype=np.uint8):
             else:
                 idx[key] += 1
             i_prev = i
+        elif col_sums[i] < col_sums[i + 1]:
+            at_index = footprint.shape[0] + i
+            msg = f"footprint is not convex at [{at_index}:{at_index + 1}, :]"
+            raise ValueError(msg)
+
     n = quadrant.shape[0] - 1 - sum0
     if n > 0:
         key = (n, 0)
