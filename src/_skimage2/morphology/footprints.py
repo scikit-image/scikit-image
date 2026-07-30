@@ -314,8 +314,8 @@ def rectangle(nrows, ncols, dtype=np.uint8, *, decomposition=None):
     return footprint
 
 
-def diamond(radius, dtype=np.uint8, *, decomposition=None):
-    """Generates a flat, diamond-shaped footprint.
+def footprint_diamond(shape, *, dtype=np.uint8):
+    """Generates a diamond-shaped footprint.
 
     A pixel is part of the neighborhood (i.e. labeled 1) if
     the city block/Manhattan distance between it and the center of
@@ -323,52 +323,73 @@ def diamond(radius, dtype=np.uint8, *, decomposition=None):
 
     Parameters
     ----------
-    radius : int
-        The radius of the diamond-shaped footprint.
-
-    Other Parameters
-    ----------------
-    dtype : dtype-like, optional
+    shape : Sequence of int(s)
+        Shape of the new footprint.
+    dtype : data-type, optional
         The data type of the footprint.
-    decomposition : {None, 'sequence'}, optional
-        If None, a single array is returned. For 'sequence', a tuple of smaller
-        footprints is returned. Applying this series of smaller footprints will
-        given an identical result to a single, larger footprint, but with
-        better computational performance. See Notes for more details.
 
     Returns
     -------
-    footprint : ndarray or tuple
-        The footprint where elements of the neighborhood are 1 and 0 otherwise.
-        When `decomposition` is None, this is just a numpy.ndarray. Otherwise,
-        this will be a tuple whose length is equal to the number of unique
-        structuring elements to apply (see Notes for more detail)
+    footprint : ndarray
+        The footprint where elements. Depending on the requested `dtype`,
+        pixels that belong to the diamond are *truthy* otherwise *falsy*.
 
     Notes
     -----
-    When `decomposition` is not None, each element of the `footprint`
-    tuple is a 2-tuple of the form ``(ndarray, num_iter)`` that specifies a
-    footprint array and the number of iterations it is to be applied.
-
     For either binary or grayscale morphology, using
     ``decomposition='sequence'`` was observed to have a performance benefit,
     with the magnitude of the benefit increasing with increasing footprint
     size.
-
     """
-    if decomposition is None:
-        L = np.arange(0, radius * 2 + 1)
-        I, J = np.meshgrid(L, L)
-        footprint = np.array(
-            np.abs(I - radius) + np.abs(J - radius) <= radius, dtype=dtype
-        )
-    elif decomposition == 'sequence':
-        fp = diamond(1, dtype=dtype, decomposition=None)
-        nreps = _decompose_size(2 * radius + 1, fp.shape[0])
-        footprint = ((fp, nreps),)
-    else:
-        raise ValueError(f"Unrecognized decomposition: {decomposition}")
+    _diamond_field = np.zeros(shape, dtype=float)
+
+    for dim, length in enumerate(shape):
+        coords = np.linspace(-1, 1, num=length, endpoint=True)
+        coords = coords.reshape((1,) * dim + (length,) + (1,) * (len(shape) - dim - 1))
+        _diamond_field += np.abs(coords)
+
+    footprint = _diamond_field <= 1
+    footprint = footprint.astype(dtype, copy=False)
     return footprint
+
+
+def footprint_decomposed_diamond(shape, *, dtype=np.uint8):
+    """Generates a decomposed diamond-shaped footprint.
+
+    A pixel is part of the neighborhood (i.e. labeled 1) if
+    the city block/Manhattan distance between it and the center of
+    the neighborhood is no greater than radius.
+
+    Parameters
+    ----------
+    shape : Sequence of int(s)
+        Shape of the new footprint.
+    dtype : data-type, optional
+        The data type of the footprint.
+
+    Returns
+    -------
+    footprint : ndarray
+        The footprint where elements. Depending on the requested `dtype`,
+        pixels that belong to the diamond are *truthy* otherwise *falsy*.
+
+    Notes
+    -----
+    For either binary or grayscale morphology, using
+    ``decomposition='sequence'`` was observed to have a performance benefit,
+    with the magnitude of the benefit increasing with increasing footprint
+    size.
+    """
+    if shape != (shape[0],) * len(shape):
+        msg = (
+            f"decomposition is only supported for shapes with equal-sized "
+            f"dimensions, got {shape=}"
+        )
+        raise ValueError(msg)
+    footprint = footprint_diamond((3,) * len(shape), dtype=dtype)
+    repetitions = _decompose_size(shape[0], footprint.shape[0])
+    decomposed = ((footprint, repetitions),)
+    return decomposed
 
 
 def _nsphere_series_decomposition(radius, ndim, dtype=np.uint8):
@@ -748,67 +769,6 @@ def cube(width, dtype=np.uint8, *, decomposition=None):
     footprint = footprint_rectangle(
         shape=(width, width, width), dtype=dtype, decomposition=decomposition
     )
-    return footprint
-
-
-def octahedron(radius, dtype=np.uint8, *, decomposition=None):
-    """Generates a octahedron-shaped footprint.
-
-    This is the 3D equivalent of a diamond.
-    A pixel is part of the neighborhood (i.e. labeled 1) if
-    the city block/Manhattan distance between it and the center of
-    the neighborhood is no greater than radius.
-
-    Parameters
-    ----------
-    radius : int
-        The radius of the octahedron-shaped footprint.
-
-    Other Parameters
-    ----------------
-    dtype : dtype-like, optional
-        The data type of the footprint.
-    decomposition : {None, 'sequence'}, optional
-        If None, a single array is returned. For 'sequence', a tuple of smaller
-        footprints is returned. Applying this series of smaller footprints will
-        given an identical result to a single, larger footprint, but with
-        better computational performance. See Notes for more details.
-
-    Returns
-    -------
-    footprint : ndarray or tuple
-        The footprint where elements of the neighborhood are 1 and 0 otherwise.
-        When `decomposition` is None, this is just a numpy.ndarray. Otherwise,
-        this will be a tuple whose length is equal to the number of unique
-        structuring elements to apply (see Notes for more detail)
-
-    Notes
-    -----
-    When `decomposition` is not None, each element of the `footprint`
-    tuple is a 2-tuple of the form ``(ndarray, num_iter)`` that specifies a
-    footprint array and the number of iterations it is to be applied.
-
-    For either binary or grayscale morphology, using
-    ``decomposition='sequence'`` was observed to have a performance benefit,
-    with the magnitude of the benefit increasing with increasing footprint
-    size.
-    """
-    # note that in contrast to diamond(), this method allows non-integer radii
-    if decomposition is None:
-        n = 2 * radius + 1
-        Z, Y, X = np.mgrid[
-            -radius : radius : n * 1j,
-            -radius : radius : n * 1j,
-            -radius : radius : n * 1j,
-        ]
-        s = np.abs(X) + np.abs(Y) + np.abs(Z)
-        footprint = np.array(s <= radius, dtype=dtype)
-    elif decomposition == 'sequence':
-        fp = octahedron(1, dtype=dtype, decomposition=None)
-        nreps = _decompose_size(2 * radius + 1, fp.shape[0])
-        footprint = ((fp, nreps),)
-    else:
-        raise ValueError(f"Unrecognized decomposition: {decomposition}")
     return footprint
 
 
