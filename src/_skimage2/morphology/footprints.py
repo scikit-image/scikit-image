@@ -461,7 +461,7 @@ def footprint_decomposed_disk(radius, *, ndim=2, dtype=np.uint8):
         )
     precomputed_decompositions = _nsphere_decompositions[ndim]
     max_radius = precomputed_decompositions.shape[0]
-    if radius > max_radius:
+    if radius >= max_radius:
         raise ValueError(
             f"precomputed {ndim}D decomposition unavailable for radius > {max_radius}"
         )
