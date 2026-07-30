@@ -755,7 +755,7 @@ def footprint_ellipse(shape, *, radii=None, compare=np.less_equal, dtype=np.uint
         radii = (radii,) * len(shape)
     elif len(shape) != len(radii):
         msg = (
-            "`adjust_radii` must be scalar or sequence matching `shape` in length, "
+            "`radii` must be scalar or sequence matching `shape` in length, "
             f"got shape={shape!r} and {radii=!r}"
         )
         raise ValueError(msg)
