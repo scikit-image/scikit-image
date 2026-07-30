@@ -39,7 +39,6 @@ from skimage._doctest_adapters import adapt_doctests
 adapt_doctests(globals())
 
 
-# TODO decomposition case
 @ski2_migration_decorator(
     """\
     ``%(qname_old)s`` is deprecated in favor of
@@ -48,13 +47,17 @@ adapt_doctests(globals())
     * ``width`` and ``height`` are replaced by 
       the parameters ``shape`` and ``radii``
     * ``compare`` parameter to control how the underlying equation is evaluated
+    * ``decomposition`` parameter is removed
 
     To keep the old (``skimage``, v1.x) behavior after switching to
-    ``skimage2``, pass the following parameter to the new function:
+    ``skimage2``, pass the following parameters to the new function:
 
     * ``shape = (height * 2 + 1, width * 2 + 1)``
     * ``radii= tuple(s // 2 + 1 for s in shape)``
     * ``compare=numpy.less``.
+
+    If you used ``decomposition='crosses'``, apply the new function
+    `skimage2.morphology.cross_decompose_footprint` to the generated footprint.
 
     <!--- cond-start: doc -->
     For example:
@@ -73,6 +76,10 @@ adapt_doctests(globals())
     ...     shape, radii=radii, compare=np.less
     ... )
     >>> np.testing.assert_equal(fp1, fp2)
+
+    >>> fp1_decomp = ski.morphology.ellipse(width, height, decomposition='crosses')
+    >>> fp2_decomp = ski2.morphology.cross_decompose_footprint(fp2)
+    >>> np.testing.assert_equal(fp1_decomp, fp2_decomp)
     <!--- cond-end -->
 
     Other keyword parameters can be left unchanged.
@@ -338,7 +345,7 @@ def disk(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
     >>> shape = (radius * 2 + 1,) * 3
 
     >>> fp1 = ski.morphology.ball(radius)
-    >>> fp2 = ski2.morphology.footprint_ellipse(shape, radii=(radius + .001,) * 2)
+    >>> fp2 = ski2.morphology.footprint_ellipse(shape, radii=(radius + .001,) * 3)
     >>> np.testing.assert_equal(fp1, fp2)
 
     >>> fp1 = ski.morphology.ball(radius, strict_radius=False)
