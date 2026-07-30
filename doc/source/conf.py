@@ -385,3 +385,5 @@ myst_enable_extensions = [
     # Enable fencing directives with `:::`
     "colon_fence",
 ]
+# Auto-generate heading anchors up to depth
+myst_heading_anchors = 3

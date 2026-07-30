@@ -18,7 +18,11 @@ import os.path as osp
 import os
 import sys
 
-_HERE = osp.dirname(__file__)
+# Tracked as a stable public attribute by tests/skimage/test_migration.py
+# (skimage.data:legacy_data_dir) and _skimage2/data/__init__.pyi -- keep
+# this exact name even though the Case 2 "legacy_data_dir fallback" it
+# used to back has been removed (see `_create_image_fetcher` below).
+legacy_data_dir = osp.dirname(__file__)
 
 try:
     # Optional companion package (see gitlab.com/scikit-image/data) that
@@ -36,17 +40,21 @@ except ModuleNotFoundError:
     def file_hash(fname, alg="sha256"):
         """
         Calculate the hash of a given file.
+
         Useful for checking if a file has changed or been corrupted.
+
         Parameters
         ----------
         fname : str
             The name of the file.
         alg : str
             The type of the hashing algorithm
+
         Returns
         -------
         hash : str
             The hash of the file.
+
         Examples
         --------
         >>> fname = "test-file-for-hash.txt"
@@ -54,6 +62,7 @@ except ModuleNotFoundError:
         ...     __ = f.write("content of the file")
         >>> print(file_hash(fname))
         0fc74468e6a9a829f103d069aeb2bb4f8646bad58bf146bb0e3379b759ec4a00
+
         >>> import os
         >>> os.remove(fname)
         """
@@ -212,7 +221,7 @@ def _ensure_cache_dir(*, target_dir):
                     └─ README.txt
     """
     os.makedirs(osp.join(target_dir, "data"), exist_ok=True)
-    readme_src = osp.join(_HERE, "README.txt")
+    readme_src = osp.join(legacy_data_dir, "README.txt")
     readme_dest = osp.join(target_dir, "data/README.txt")
     if not osp.exists(readme_dest):
         shutil.copy2(readme_src, readme_dest)

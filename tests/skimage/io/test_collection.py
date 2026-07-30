@@ -71,7 +71,11 @@ def test_imagecollection_input():
 
 
 class TestImageCollection:
-    pics = [fetch('data/brick.png'), fetch('data/color.png'), fetch('data/moon.png')]
+    # All three bundled by scikit-image-data (unlike e.g. color.png), so they
+    # resolve to the same install directory -- ImageCollection sorts inputs
+    # by full path, and mixing bundled/pooch-cached files here would sort
+    # them out of the order this fixture assumes.
+    pics = [fetch('data/brick.png'), fetch('data/chelsea.png'), fetch('data/moon.png')]
     pattern = pics[:2]
     pattern_same_shape = pics[::2]
 

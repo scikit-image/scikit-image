@@ -142,3 +142,8 @@ def gaussian(
         out=out,
     )
     return filtered_image
+
+
+from skimage._doctest_adapters import adapt_doctests  # noqa: E402
+
+adapt_doctests(globals())

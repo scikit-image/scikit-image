@@ -31,3 +31,7 @@ __all__ = [
     'marching_cubes',
     'remove_degenerate_faces',
 ]
+
+from skimage._doctest_adapters import adapt_doctests
+
+adapt_doctests(globals())
