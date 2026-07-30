@@ -2,8 +2,8 @@ import numpy as np
 
 from _skimage2.morphology.footprints import (
     _nsphere_decompositions,
-    _cross_decomposition,
     _t_shaped_element_series,
+    cross_decompose_footprint,
     cube as cube,
     diamond as diamond,
     footprint_from_sequence as footprint_from_sequence,
@@ -219,7 +219,7 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
         return footprint
     elif decomposition == 'crosses':
         fp = ellipse(width, height, dtype, decomposition=None)
-        sequence = _cross_decomposition(fp)
+        sequence = cross_decompose_footprint(fp)
     return sequence
 
 
@@ -373,7 +373,7 @@ def disk(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
         sequence = _nsphere_series_decomposition(radius, ndim=2, dtype=dtype)
     elif decomposition == 'crosses':
         fp = disk(radius, dtype, strict_radius=strict_radius, decomposition=None)
-        sequence = _cross_decomposition(fp)
+        sequence = cross_decompose_footprint(fp)
     return sequence
 
 

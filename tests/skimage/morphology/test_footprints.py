@@ -54,10 +54,13 @@ class TestFootprints:
         """Compare ski2's `footprint_ellipse` to ski's legacy `disk`."""
         shape = (radius * 2 + 1,) * 2
         # Reproduction isn't pixel perfect in some cases but should be close
-        adjust_radii = 0.001 if strict_radius else 0.5
+        if strict_radius:
+            radii = (radius + .001,) * 2
+        else:
+            radii = None
 
         old = footprints.disk(radius, strict_radius=strict_radius)
-        new = ski2.morphology.footprint_ellipse(shape, adjust_radii=adjust_radii)
+        new = ski2.morphology.footprint_ellipse(shape, radii=radii)
         np.testing.assert_equal(old, new)
 
     def test_footprint_diamond(self):
@@ -73,9 +76,14 @@ class TestFootprints:
     def test_footprint_ball_sk1_compatibility(self, radius, strict_radius):
         """Compare ski2's `footprint_ellipse` to ski's legacy `ball`."""
         shape = (radius * 2 + 1,) * 3
-        adjust_radii = 0.001 if strict_radius else 0.5
+        # Reproduction isn't pixel perfect in some cases but should be close
+        if strict_radius:
+            radii = (radius + .001,) * 3
+        else:
+            radii = None
+
         old = footprints.ball(radius, strict_radius=strict_radius)
-        new = ski2.morphology.footprint_ellipse(shape, adjust_radii=adjust_radii)
+        new = ski2.morphology.footprint_ellipse(shape, radii=radii)
         np.testing.assert_equal(old, new)
 
     def test_footprint_octahedron(self):
@@ -133,8 +141,9 @@ class TestFootprints:
     def test_footprint_ellipse_sk1_compatibility(self, width, height):
         """Compare ski2's `footprint_ellipse` to ski's legacy `ellipse`."""
         shape = (height * 2 + 1, width * 2 + 1)
+        radii = tuple(s // 2 + 1 for s in shape)
         old = footprints.ellipse(width, height)
-        new = ski2.morphology.footprint_ellipse(shape, adjust_radii=1, compare=np.less)
+        new = ski2.morphology.footprint_ellipse(shape, radii=radii, compare=np.less)
         np.testing.assert_equal(old, new)
 
     def test_footprint_star(self):
@@ -223,6 +232,24 @@ def test_disk_crosses_approximation(radius, strict_radius):
     assert error / expected.size <= max_error
 
 
+@pytest.mark.parametrize("radius", [1, 2, 3, 4, 5, 10, 20, 50, 75])
+@pytest.mark.parametrize("strict_radius", [False, True])
+def test_disk_cross_decomposition_sk1_compatibility(radius, strict_radius):
+    shape = (radius * 2 + 1,) * 2
+    # Reproduction isn't pixel perfect in some cases but should be close
+    if strict_radius:
+        radii = (radius + .001,) * 2
+    else:
+        radii = None
+
+    fp1 = footprints.disk(radius, strict_radius=strict_radius, decomposition="crosses")
+
+    fp2 = ski2.morphology.footprint_ellipse(shape, radii=radii)
+    fp2 = ski2.morphology.cross_decompose_footprint(fp2)
+
+    np.testing.assert_equal(fp1, fp2)
+
+
 @pytest.mark.parametrize("width", [3, 8, 20, 50])
 @pytest.mark.parametrize("height", [3, 8, 20, 50])
 def test_ellipse_crosses_approximation(width, height):
@@ -236,6 +263,20 @@ def test_ellipse_crosses_approximation(width, height):
     error = np.sum(np.abs(expected.astype(int) - approximate.astype(int)))
     max_error = 0.05
     assert error / expected.size <= max_error
+
+
+@pytest.mark.parametrize("width", [3, 8, 20, 50])
+@pytest.mark.parametrize("height", [3, 8, 20, 50])
+def test_decomposed_ellipse_crosses_sk1_compatibility(width, height):
+    shape = (height * 2 + 1, width * 2 + 1)
+    radii = tuple(s // 2 + 1 for s in shape)
+
+    fp1 = footprints.ellipse(width, height, decomposition="crosses")
+
+    fp2 = ski2.morphology.footprint_ellipse(shape, radii=radii, compare=np.less)
+    fp2 = ski2.morphology.cross_decompose_footprint(fp2)
+
+    np.testing.assert_equal(fp1, fp2)
 
 
 def test_disk_series_approximation_unavailable():
