@@ -5,6 +5,7 @@ import pytest
 from _skimage2._shared.testing import fetch, assert_stacklevel
 from _skimage2.morphology import (
     footprints,
+    cross_decompose_footprint,
     footprint_rectangle,
     footprint_ellipse,
     footprint_from_sequence,
@@ -180,13 +181,13 @@ def test_footprint_dtype(function, args, supports_sequence_decomposition, dtype)
         assert all([fp_tuple[0].dtype == dtype for fp_tuple in sequence])
 
 
-@pytest.mark.parametrize("function", ["disk", "ball"])
+@pytest.mark.parametrize("ndim", [2, 3])
 @pytest.mark.parametrize("radius", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20])
-def test_nsphere_series_approximation(function, radius):
-    fp_func = getattr(footprints, function)
-    expected = fp_func(radius, strict_radius=False, decomposition=None)
-    footprint_sequence = fp_func(radius, strict_radius=False, decomposition="sequence")
-    approximate = footprints.footprint_from_sequence(footprint_sequence)
+def test_nsphere_series_approximation(ndim, radius):
+    shape = (radius * 2 + 1,) * ndim
+    expected = footprint_ellipse(shape)
+    decomposed = footprint_decomposed_disk(radius, ndim=ndim)
+    approximate = footprints.footprint_from_sequence(decomposed)
     assert approximate.shape == expected.shape
 
     # verify that maximum error does not exceed some fraction of the size
@@ -194,40 +195,60 @@ def test_nsphere_series_approximation(function, radius):
     if radius == 1:
         assert error == 0
     else:
-        max_error = 0.1 if function == "disk" else 0.15
+        max_error = 0.1 if ndim == 2 else 0.15
         assert error / expected.size <= max_error
 
 
 @pytest.mark.parametrize("radius", [1, 2, 3, 4, 5, 10, 20, 50, 75])
-@pytest.mark.parametrize("strict_radius", [False, True])
-def test_disk_crosses_approximation(radius, strict_radius):
-    fp_func = footprints.disk
-    expected = fp_func(radius, strict_radius=strict_radius, decomposition=None)
-    footprint_sequence = fp_func(
-        radius, strict_radius=strict_radius, decomposition="crosses"
-    )
-    approximate = footprints.footprint_from_sequence(footprint_sequence)
+@pytest.mark.parametrize("dtype", [bool, np.uint8, int, float])
+def test_ellipse_crosses_approximation_(radius, dtype):
+    shape = (radius * 2 + 1,) * 2
+    expected = footprint_ellipse(shape, dtype=dtype)
+    decomposed = cross_decompose_footprint(expected)
+    approximate = footprint_from_sequence(decomposed)
     assert approximate.shape == expected.shape
+    assert approximate.dtype == dtype
 
     # verify that maximum error does not exceed some fraction of the size
     error = np.sum(np.abs(expected.astype(int) - approximate.astype(int)))
-    max_error = 0.05
+    max_error = 0.01
     assert error / expected.size <= max_error
 
 
 @pytest.mark.parametrize("width", [3, 8, 20, 50])
-@pytest.mark.parametrize("height", [3, 8, 20, 50])
+@pytest.mark.parametrize("height", [1, 2, 9, 21, 51])
 def test_ellipse_crosses_approximation(width, height):
-    fp_func = footprints.ellipse
-    expected = fp_func(width, height, decomposition=None)
-    footprint_sequence = fp_func(width, height, decomposition="crosses")
-    approximate = footprints.footprint_from_sequence(footprint_sequence)
+    shape = (width * 2 + 1, height * 2 + 1)
+    expected = footprint_ellipse(shape)
+    decomposed = cross_decompose_footprint(expected)
+    approximate = footprint_from_sequence(decomposed)
     assert approximate.shape == expected.shape
 
     # verify that maximum error does not exceed some fraction of the size
     error = np.sum(np.abs(expected.astype(int) - approximate.astype(int)))
-    max_error = 0.05
+    max_error = 0.01
     assert error / expected.size <= max_error
+
+
+def test_cross_decompose_footprint_asymmetric():
+    asymmetric = np.ones((3, 3), dtype=bool)
+    asymmetric[0, :] = 0  # Still concave
+    with pytest.raises(ValueError, match=r"footprint is not symmetric"):
+        cross_decompose_footprint(asymmetric)
+
+
+def test_cross_decompose_footprint_concave():
+    concave = np.ones((3, 3), dtype=bool)
+    concave[0, 1] = 0
+    concave[-1, 1] = 0  # Still symmetric
+    with pytest.raises(ValueError, match=r"footprint is not convex"):
+        cross_decompose_footprint(concave)
+
+
+def test_cross_decompose_footprint_even():
+    even = np.ones((4, 3), dtype=bool)
+    with pytest.raises(ValueError, match=r"footprint is not of uneven length"):
+        cross_decompose_footprint(even)
 
 
 def test_disk_series_approximation_unavailable():
