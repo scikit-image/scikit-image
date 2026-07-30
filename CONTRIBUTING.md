@@ -477,16 +477,6 @@ sudo apt-get install build-essential
    :literal:
 ```
 
-**Data Requirements**
-
-The full selection of demo datasets is only available with the
-following installed:
-
-```{eval-rst}
-.. include:: ../../../requirements/data.txt
-   :literal:
-```
-
 **Optional Requirements**
 
 You can use `scikit-image` with the basic requirements listed above, but some

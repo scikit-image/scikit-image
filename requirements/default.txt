@@ -9,3 +9,5 @@ imageio>=2.33,!=2.35.0
 tifffile>=2025.1.10
 packaging>=24
 lazy-loader>=0.5
+pooch>=1.6.0; sys_platform != "emscripten"
+scikit-image-data @ git+https://gitlab.com/stevesilvester1073/data.git@v1 ; sys_platform != "emscripten"

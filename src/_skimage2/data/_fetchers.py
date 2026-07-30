@@ -25,9 +25,11 @@ import sys
 legacy_data_dir = osp.dirname(__file__)
 
 try:
-    # Optional companion package (see gitlab.com/scikit-image/data) that
-    # bundles a curated subset of frequently-used datasets, so they're
-    # available locally without a runtime download.
+    # Companion package (see gitlab.com/scikit-image/data) that bundles a
+    # curated subset of frequently-used datasets, so they're available
+    # locally without a runtime download. A hard dependency for now (see
+    # pyproject.toml), but still guarded here since it isn't installed on
+    # emscripten, and to keep this module importable standalone.
     import skimage_data
 except ImportError:
     skimage_data = None
@@ -252,10 +254,10 @@ def _fetch(data_filename, prefix=None):
 
     ModuleNotFoundError:
         If pooch is not installed and the file isn't otherwise available
-        locally (bundled with the optional ``scikit-image-data`` package or
-        already cached). Installing scikit-image's ``data`` extra
-        (``pip install scikit-image[data]``) resolves this either way, by
-        installing pooch, ``scikit-image-data``, or both.
+        locally (bundled with ``scikit-image-data`` or already cached).
+        Pooch is a normal dependency of scikit-image, so this should only
+        happen on a platform where it isn't available (e.g. Pyodide) or
+        after manually uninstalling it; ``pip install pooch`` resolves it.
 
     ConnectionError:
         If scikit-image is unable to connect to the internet but the
@@ -274,7 +276,8 @@ def _fetch(data_filename, prefix=None):
     else:
         cache_dir = str(_image_fetcher.abspath)
 
-    # Case 0: file is bundled with the optional `scikit-image-data` package
+    # Case 0: file is bundled with `scikit-image-data` (a hard dependency
+    # for now, but still guarded since it isn't installed on emscripten)
     if skimage_data is not None:
         bundled_file_path = osp.join(
             str(skimage_data.data_dir), osp.basename(data_filename)
@@ -295,11 +298,10 @@ def _fetch(data_filename, prefix=None):
         _skip_pytest_case_requiring_pooch(data_filename)
         raise ModuleNotFoundError(
             f'Unable to locate {data_filename!r} locally, and downloading '
-            "scikit-image datasets requires the optional pooch dependency. "
-            "Install scikit-image's 'data' extra "
-            '(`pip install scikit-image[data]`), which also bundles a '
-            'curated subset of commonly-used datasets so they work with no '
-            'download at all, or `pip install pooch` directly; see '
+            'scikit-image datasets requires pooch, which is missing '
+            "(unusual, since it's a normal scikit-image dependency -- "
+            'this can happen on platforms like Pyodide, or after manually '
+            'uninstalling pooch). `pip install pooch` resolves it; see '
             'https://scikit-image.org/docs/stable/user_guide/install.html'
         )
     # Download the data with pooch which caches it automatically
@@ -317,6 +319,52 @@ def _fetch(data_filename, prefix=None):
             'future, try `_skimage2.data.download_all()` when you are '
             'connected to the internet.'
         ) from err
+
+
+def fetch(data_filename):
+    """Fetch a scikit-image example dataset file, returning its local path.
+
+    Resolves ``data_filename`` to a path on disk: a bundled copy from the
+    optional ``scikit-image-data`` package, an already-cached download, or
+    a fresh download using pooch, in that order. This is the same
+    machinery every ``fetch_*()`` convenience function
+    (e.g. :func:`fetch_astronaut`) uses internally -- call this directly
+    for datasets that don't have one, or when you want the file path
+    itself rather than a loaded array.
+
+    Parameters
+    ----------
+    data_filename : str
+        Registry key of the file, e.g. ``'data/astronaut.png'`` or
+        ``'data/kidney.tif'`` -- see the keys of
+        ``_skimage2.data._registry.registry`` for the full list.
+
+    Returns
+    -------
+    file_path : str
+        Path of the local file.
+
+    Raises
+    ------
+    KeyError:
+        If ``data_filename`` is not known to the scikit-image distribution.
+
+    ModuleNotFoundError:
+        If pooch is not installed and the file isn't otherwise available
+        locally (bundled with ``scikit-image-data`` or already cached).
+        Pooch is a normal dependency of scikit-image, so this should only
+        happen on a platform where it isn't available (e.g. Pyodide) or
+        after manually uninstalling it; ``pip install pooch`` resolves it.
+
+    ConnectionError:
+        If scikit-image is unable to connect to the internet but the
+        dataset has not been downloaded yet.
+
+    ValueError:
+        If a file is downloaded but its hash does not match the expected
+        value.
+    """
+    return _fetch(data_filename)
 
 
 def download_all(directory=None):
@@ -1329,3 +1377,50 @@ def vortex():
         _load('data/pivchallenge-B-B001_1.tif'),
         _load('data/pivchallenge-B-B001_2.tif'),
     )
+
+
+# skimage2's public dataset accessors use sklearn's fetch_*() naming
+# convention (e.g. sklearn.datasets.fetch_lfw_people) to make explicit that
+# calling them may need pooch and a network connection -- see `fetch()`
+# above. These are plain aliases: skimage1's bare-name functions above
+# (astronaut(), camera(), etc.) already implement the exact same behavior,
+# and are kept as-is since skimage1's shim imports them directly from this
+# module, bypassing _skimage2.data's public surface.
+fetch_astronaut = astronaut
+fetch_brain = brain
+fetch_brick = brick
+fetch_camera = camera
+fetch_cat = cat
+fetch_cell = cell
+fetch_cells3d = cells3d
+fetch_checkerboard = checkerboard
+fetch_chelsea = chelsea
+fetch_clock = clock
+fetch_coffee = coffee
+fetch_coins = coins
+fetch_colorwheel = colorwheel
+fetch_eagle = eagle
+fetch_grass = grass
+fetch_gravel = gravel
+fetch_horse = horse
+fetch_hubble_deep_field = hubble_deep_field
+fetch_human_mitosis = human_mitosis
+fetch_immunohistochemistry = immunohistochemistry
+fetch_kidney = kidney
+fetch_lbp_frontal_face_cascade_filename = lbp_frontal_face_cascade_filename
+fetch_lfw_subset = lfw_subset
+fetch_lily = lily
+fetch_logo = logo
+fetch_microaneurysms = microaneurysms
+fetch_moon = moon
+fetch_nickel_solidification = nickel_solidification
+fetch_page = page
+fetch_palisades_of_vogt = palisades_of_vogt
+fetch_protein_transport = protein_transport
+fetch_retina = retina
+fetch_rocket = rocket
+fetch_shepp_logan_phantom = shepp_logan_phantom
+fetch_skin = skin
+fetch_stereo_motorcycle = stereo_motorcycle
+fetch_text = text
+fetch_vortex = vortex

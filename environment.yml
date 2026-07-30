@@ -11,6 +11,7 @@ dependencies:
   - tifffile>=2025.1.10
   - packaging>=24
   - lazy-loader>=0.5
+  - pooch>=1.6.0
   # build
   - meson-python>=0.16
   - ninja>=1.11.1.1
@@ -19,8 +20,6 @@ dependencies:
   - numpy>=2.0
   - spin>=0.13
   - python-build>=1.2.1
-  # data
-  - pooch>=1.6.0
   # developer
   - pre-commit
   - ipython
@@ -36,7 +35,6 @@ dependencies:
   - dask>=2025.1.0
   - pandas>=2.0
   - seaborn>=0.11
-  - pooch>=1.6
   - tifffile>=2025.1.10
   - myst-parser
   - intersphinx-registry>=0.2411.14
@@ -57,11 +55,9 @@ dependencies:
   - astropy-base>=6.1
   - dask>=2025.1.0
   - matplotlib-base>=3.10
-  - pooch>=1.6.0
   - PyWavelets>=1.7
   # test
   - numpydoc>=1.7
-  - pooch>=1.6.0
   - pytest>=9
   - pytest-cov>=2.11.0
   - pytest-pretty

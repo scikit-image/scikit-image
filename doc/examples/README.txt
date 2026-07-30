@@ -15,6 +15,6 @@ applications in tutorial form.
 .. note::
 
     Most examples below load images using ``skimage.data`` (e.g.
-    ``data.astronaut()``). To run them locally, install scikit-image with
-    the ``data`` extra: ``pip install scikit-image[data]`` -- see
-    :ref:`install-via-pip`.
+    ``data.astronaut()``). Commonly-used datasets are bundled with no
+    download needed; a few larger or less common ones are downloaded and
+    cached the first time you run an example locally.

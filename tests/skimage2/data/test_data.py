@@ -41,34 +41,34 @@ def test_download_all_with_pooch():
 
 def test_astronaut():
     """Test that "astronaut" image can be loaded."""
-    astronaut = data.astronaut()
+    astronaut = data.fetch_astronaut()
     assert_equal(astronaut.shape, (512, 512, 3))
 
 
 def test_camera():
     """Test that "camera" image can be loaded."""
-    cameraman = data.camera()
+    cameraman = data.fetch_camera()
     assert_equal(cameraman.ndim, 2)
 
 
 def test_checkerboard():
     """Test that "checkerboard" image can be loaded."""
-    data.checkerboard()
+    data.fetch_checkerboard()
 
 
 def test_chelsea():
     """Test that "chelsea" image can be loaded."""
-    data.chelsea()
+    data.fetch_chelsea()
 
 
 def test_clock():
     """Test that "clock" image can be loaded."""
-    data.clock()
+    data.fetch_clock()
 
 
 def test_coffee():
     """Test that "coffee" image can be loaded."""
-    data.coffee()
+    data.fetch_coffee()
 
 
 def test_eagle():
@@ -76,63 +76,63 @@ def test_eagle():
     # Fetching the data through the testing module will
     # cause the test to skip if pooch isn't installed.
     fetch('data/eagle.png')
-    eagle = data.eagle()
+    eagle = data.fetch_eagle()
     assert_equal(eagle.ndim, 2)
     assert_equal(eagle.dtype, np.dtype('uint8'))
 
 
 def test_horse():
     """Test that "horse" image can be loaded."""
-    horse = data.horse()
+    horse = data.fetch_horse()
     assert_equal(horse.ndim, 2)
     assert_equal(horse.dtype, np.dtype('bool'))
 
 
 def test_hubble():
     """Test that "Hubble" image can be loaded."""
-    data.hubble_deep_field()
+    data.fetch_hubble_deep_field()
 
 
 def test_immunohistochemistry():
     """Test that "immunohistochemistry" image can be loaded."""
-    data.immunohistochemistry()
+    data.fetch_immunohistochemistry()
 
 
 def test_logo():
     """Test that "logo" image can be loaded."""
-    logo = data.logo()
+    logo = data.fetch_logo()
     assert_equal(logo.ndim, 3)
     assert_equal(logo.shape[2], 4)
 
 
 def test_moon():
     """Test that "moon" image can be loaded."""
-    data.moon()
+    data.fetch_moon()
 
 
 def test_page():
     """Test that "page" image can be loaded."""
-    data.page()
+    data.fetch_page()
 
 
 def test_rocket():
     """Test that "rocket" image can be loaded."""
-    data.rocket()
+    data.fetch_rocket()
 
 
 def test_text():
     """Test that "text" image can be loaded."""
-    data.text()
+    data.fetch_text()
 
 
 def test_stereo_motorcycle():
     """Test that "stereo_motorcycle" image can be loaded."""
-    data.stereo_motorcycle()
+    data.fetch_stereo_motorcycle()
 
 
 def test_lfw_subset():
     """Test that "lfw_subset" can be loaded."""
-    data.lfw_subset()
+    data.fetch_lfw_subset()
 
 
 def test_skin():
@@ -140,13 +140,13 @@ def test_skin():
 
     Needs internet connection.
     """
-    skin = data.skin()
+    skin = data.fetch_skin()
     assert skin.ndim == 3
 
 
 def test_cell():
     """Test that "cell" image can be loaded."""
-    data.cell()
+    data.fetch_cell()
 
 
 def test_cells3d():
@@ -169,7 +169,7 @@ def test_kidney_3d_multichannel():
     Needs internet connection.
     """
     fetch('data/kidney.tif')
-    kidney = data.kidney()
+    kidney = data.fetch_kidney()
     assert kidney.shape == (16, 512, 512, 3)
 
 
@@ -179,14 +179,14 @@ def test_lily_multichannel():
     Needs internet connection.
     """
     fetch('data/lily.tif')
-    lily = data.lily()
+    lily = data.fetch_lily()
     assert lily.shape == (922, 922, 4)
 
 
 def test_vortex():
     fetch('data/pivchallenge-B-B001_1.tif')
     fetch('data/pivchallenge-B-B001_2.tif')
-    image0, image1 = data.vortex()
+    image0, image1 = data.fetch_vortex()
     for image in [image0, image1]:
         assert image.shape == (512, 512)
 
@@ -194,6 +194,7 @@ def test_vortex():
 @pytest.mark.parametrize(
     'function_name',
     [
+        'fetch',
         'file_hash',
     ],
 )
@@ -208,8 +209,8 @@ def test_skip_pytest_case_requiring_pooch_fires_during_collection(monkeypatch):
     """``PYTEST_VERSION`` is set for the whole session (including collection),
     unlike ``PYTEST_CURRENT_TEST`` (only set while a test's call/setup/teardown
     phase runs). Module- and class-level data fetches (e.g. ``IMG =
-    data.astronaut()``) execute during collection, so the guard must also
-    fire on ``PYTEST_VERSION`` alone."""
+    data.fetch_astronaut()``) execute during collection, so the guard must
+    also fire on ``PYTEST_VERSION`` alone."""
     monkeypatch.delenv('PYTEST_CURRENT_TEST', raising=False)
     monkeypatch.setenv('PYTEST_VERSION', '9.0.0')
     with pytest.raises(pytest.skip.Exception):

@@ -9,7 +9,6 @@ matplotlib>=3.10
 dask[array]>=2025.1.0
 pandas>=2.0
 seaborn>=0.11
-pooch>=1.6
 tifffile>=2025.1.10
 myst-parser
 intersphinx-registry>=0.2411.14

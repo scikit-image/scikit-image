@@ -46,14 +46,15 @@ def generate_environment_yml(req_sections: dict[str, list[str]]) -> None:
         section: str | None, req_sections: dict[str, list[str]], lines, offset=0
     ):
         tab = offset * " "
-        if section:
-            lines.append(tab + f"  # {section}")
+        header_added = False
         for dep in req_sections[section]:
             # Remove optional specifiers such as `[parallel]`
             dep = re.sub('\\[.*?\\]', '', dep)
 
             # Remove platform specifiers such as `; sys_platform != "emscripten"`
-            dep = re.sub('; .*', '', dep)
+            # (PEP 508 requires a space before ";" after a direct URL
+            # reference, e.g. "name @ url ; marker", so strip that too).
+            dep = re.sub(r'\s*; .*', '', dep)
 
             # Split on the first version/URL-reference marker (">", "=", "@")
             # or whitespace, so a PEP 508 direct reference like
@@ -70,6 +71,14 @@ def generate_environment_yml(req_sections: dict[str, list[str]]) -> None:
             dep = dep.replace(pkgname, rename_idx.get(pkgname, pkgname))
             if dep == "scikit-image":
                 continue
+
+            # Only emit the section header once we know it has at least one
+            # conda-installable entry -- otherwise (e.g. a section made up
+            # entirely of pip_only packages) it'd be a dangling comment with
+            # nothing under it.
+            if section and not header_added:
+                lines.append(tab + f"  # {section}")
+                header_added = True
 
             lines.append(tab + f"  - {dep}")
 
