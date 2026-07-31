@@ -348,6 +348,9 @@ def footprint_diamond(shape, *, dtype=np.uint8):
     which is bounded by a hyperrectangle. The contained footprint touches each
     face of this hyperrectangle at its center.
 
+    When a footprint with an even-sized dimension is requested, the diameter of
+    the rhombus in that direction is slightly enlarged.
+
     References
     ----------
     .. [1] https://en.wikipedia.org/wiki/Rhombus, 2026-07-30
@@ -404,7 +407,7 @@ def footprint_diamond(shape, *, dtype=np.uint8):
             # Skipping these, creates an array of all ones (because
             # `diamond_field` never exceeds the `cutoff`). This preserves
             # compatibility of for this edge-case with legacy `skimage` and
-            # MATLAB
+            # MATLAB.
             continue
 
         # Create coordinate space along current dimension
@@ -413,10 +416,11 @@ def footprint_diamond(shape, *, dtype=np.uint8):
 
         coords = np.abs(coords)
         # For even dimensions, we want to increase the diameter by decreasing
-        # the contribution of this dimension to the scalar field slightly. This
-        # ensures that the rhombus touches the edge everywhere.
-        if length % 2 == 0:
-            coords -= coords.min()
+        # the contribution of this dimension to the scalar field by one "step"
+        # of the linear space. This ensures that the rhombus touches the edge
+        # everywhere.
+        # if length % 2 == 0:
+        #     coords -= coords.min()
         diamond_field += coords.astype(diamond_field.dtype)
 
     footprint = diamond_field - .5 <= cutoff
