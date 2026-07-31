@@ -314,7 +314,7 @@ def rectangle(nrows, ncols, dtype=np.uint8, *, decomposition=None):
     return footprint
 
 
-def footprint_diamond(shape, *, dtype=np.uint8):
+def footprint_diamond(shape, *, radii=None, dtype=np.uint8):
     """Generate a rhombus-shaped footprint.
 
     In 2D, generates a square-shaped footprint that has been rotated by 45°. If
@@ -325,8 +325,11 @@ def footprint_diamond(shape, *, dtype=np.uint8):
     Parameters
     ----------
     shape : Sequence of int(s)
-        Shape of the new footprint and also the diameter of the contained
-        rhombus.
+        Shape of the new footprint.
+    radii : float or Sequence of float(s), optional
+        The radii determine the diameter of the rhombus in each dimension.
+        If not provided explicitly, they are derived from the given `shape`
+        with ``tuple(s / 2 for s in shape)``. See also *Notes*.
     dtype : data-type, optional
         The data type of the footprint.
 
@@ -348,8 +351,10 @@ def footprint_diamond(shape, *, dtype=np.uint8):
     which is bounded by a hyperrectangle. The contained footprint touches each
     face of this hyperrectangle at its center.
 
-    When a footprint with an even-sized dimension is requested, the diameter of
-    the rhombus in that direction is slightly enlarged.
+    In practice, when a `shape` containing an even-size is requested, the
+    sampling of the footprint does not always ensure that the rhombus stretches
+    the entire diameter of the returned array. Increasing the `radii` manually
+    can alleviate this.
 
     References
     ----------
@@ -365,65 +370,50 @@ def footprint_diamond(shape, *, dtype=np.uint8):
            [0, 1, 1, 1, 0],
            [0, 0, 1, 0, 0]], dtype=uint8)
 
-    >>> footprint_diamond((5, 9))
-    array([[0, 0, 0, 0, 1, 0, 0, 0, 0],
-           [0, 0, 1, 1, 1, 1, 1, 0, 0],
-           [1, 1, 1, 1, 1, 1, 1, 1, 1],
-           [0, 0, 1, 1, 1, 1, 1, 0, 0],
-           [0, 0, 0, 0, 1, 0, 0, 0, 0]], dtype=uint8)
-
-    >>> footprint_diamond((4, 9))
-    array([[0, 0, 0, 1, 1, 1, 0, 0, 0],
-           [1, 1, 1, 1, 1, 1, 1, 1, 1],
-           [1, 1, 1, 1, 1, 1, 1, 1, 1],
-           [0, 0, 0, 1, 1, 1, 0, 0, 0]], dtype=uint8)
+    >>> footprint_diamond((5, 10), radii=(3, 5))
+    array([[0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+           [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+           [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 0, 0, 1, 1, 0, 0, 0, 0]], dtype=uint8)
     """
-    # A scalar field that determines which pixels are part of the diamond. We
-    # compute the scalar field with integer arithmetic because the comparison
-    # is particularly sensitive to floating-point errors at the edge.
-    diamond_field = np.zeros(shape, dtype=np.uint64)
-
-    # We need a number `c` that allows us to create a linear space `[-c, c]` for
-    # each dimension with full integer steps. For even dimensions of length `s`
-    # the smallest number allowing this is `s - 1`. For uneven dimensions the
-    # smallest number is `s // 2`. `c` is then the lowest common multiple of
-    # each of these factors.
-    factors = [s // 2 if s % 2 == 1 else s - 1 for s in shape]
-    cutoff = np.lcm.reduce(factors)
-
-    # Check that diamond_field can hold the largest possible value. Probably
-    # irrelevant in practice, but this avoids silent overflow errors.
-    if cutoff * len(shape) > np.iinfo(diamond_field.dtype).max:
+    if radii is None:
+        radii = tuple(s / 2 for s in shape)
+    elif np.isscalar(radii):
+        radii = (radii,) * len(shape)
+    elif len(shape) != len(radii):
         msg = (
-            "cannot compute footprint of this size with integer arithmetic, "
-            "for regular shapes, try using `footprint_decomposed_diamond`"
-            "instead"
+            "`radii` must be scalar or sequence matching `shape` in length, "
+            f"got shape={shape!r} and {radii=!r}"
         )
         raise ValueError(msg)
+    for radius in radii:
+        if radius < 0:
+            msg = f"got negative radius: {radii=!r}"
+            raise ValueError(msg)
 
-    for dim, length in enumerate(shape):
-        if length <= 2:
-            # Dimensions smaller 3 don't really allow representing a diamond.
+    # A scalar field that determines which pixels are part of the diamond.
+    diamond_field = np.zeros(shape)
+
+    for dim, (length, radius) in enumerate(zip(shape, radii)):
+        if length <= 2 and radius > 0:
+            # This configuration doesn't really allow representing a diamond.
             # Skipping these, creates an array of all ones (because
             # `diamond_field` never exceeds the `cutoff`). This preserves
-            # compatibility of for this edge-case with legacy `skimage` and
-            # MATLAB.
+            # compatibility for this edge-case with legacy `skimage` and MATLAB.
             continue
 
         # Create coordinate space along current dimension
-        coords = np.linspace(-cutoff, cutoff, num=length, endpoint=True, dtype=np.int64)
+        coord_max = length / 2
+        coords = np.linspace(-coord_max, coord_max, num=length, endpoint=True)
         coords = coords.reshape((1,) * dim + (length,) + (1,) * (len(shape) - dim - 1))
 
-        coords = np.abs(coords)
-        # For even dimensions, we want to increase the diameter by decreasing
-        # the contribution of this dimension to the scalar field by one "step"
-        # of the linear space. This ensures that the rhombus touches the edge
-        # everywhere.
-        # if length % 2 == 0:
-        #     coords -= coords.min()
-        diamond_field += coords.astype(diamond_field.dtype)
+        with np.errstate(all="ignore"):
+            coords /= radius
 
-    footprint = diamond_field - .5 <= cutoff
+        diamond_field += np.abs(coords)
+
+    footprint = diamond_field <= 1
     footprint = footprint.astype(dtype, copy=False)
     return footprint
 
@@ -437,7 +427,8 @@ def footprint_decomposed_diamond(shape, *, dtype=np.uint8):
     Parameters
     ----------
     shape : Sequence of int(s)
-        Shape of the new footprint.
+        Shape of the new footprint. Each dimension must have the same length
+        and must be of odd size.
     dtype : data-type, optional
         The data type of the footprint.
 
@@ -459,10 +450,24 @@ def footprint_decomposed_diamond(shape, *, dtype=np.uint8):
     returned by this function was observed to have a performance benefit over
     :func:`footprint_diamond`. The magnitude of the benefit increased with
     increasing footprint size.
+
+    Examples
+    --------
+    >>> footprint_decomposed_diamond((31, 31))
+    ((array([[0, 1, 0],
+             [1, 1, 1],
+             [0, 1, 0]], dtype=uint8),
+      15),)
     """
     if shape != (shape[0],) * len(shape):
         msg = (
             f"decomposition is only supported for shapes with equal-sized "
+            f"dimensions, got {shape=}"
+        )
+        raise ValueError(msg)
+    if np.any([s % 2 == 0 for s in shape]):
+        msg = (
+            f"decomposition is only supported for shapes with odd-sized "
             f"dimensions, got {shape=}"
         )
         raise ValueError(msg)
