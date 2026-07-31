@@ -317,15 +317,16 @@ def rectangle(nrows, ncols, dtype=np.uint8, *, decomposition=None):
 def footprint_diamond(shape, *, dtype=np.uint8):
     """Generate a rhombus-shaped footprint.
 
-    Generates a square-shaped footprint that has been rotated by 45°. If
+    In 2D, generates a square-shaped footprint that has been rotated by 45°. If
     dimensions with different lengths are requested, this generates a
-    Rhombus [1]_. A three-dimensional shape will yield an Octahedron.
-    For higher dimensions this returns a cross-polytope [2]_.
+    Rhombus [1]_. A three-dimensional shape will yield an Octahedron. For higher
+    dimensions this returns a cross-polytope [2]_.
 
     Parameters
     ----------
     shape : Sequence of int(s)
-        Shape of the new footprint.
+        Shape of the new footprint and also the diameter of the contained
+        rhombus.
     dtype : data-type, optional
         The data type of the footprint.
 
@@ -351,10 +352,32 @@ def footprint_diamond(shape, *, dtype=np.uint8):
     ----------
     .. [1] https://en.wikipedia.org/wiki/Rhombus, 2026-07-30
     .. [2] https://en.wikipedia.org/wiki/Cross-polytope, 2026-07-31
+
+    Examples
+    --------
+    >>> footprint_diamond((5, 5))
+    array([[0, 0, 1, 0, 0],
+           [0, 1, 1, 1, 0],
+           [1, 1, 1, 1, 1],
+           [0, 1, 1, 1, 0],
+           [0, 0, 1, 0, 0]], dtype=uint8)
+
+    >>> footprint_diamond((5, 9))
+    array([[0, 0, 0, 0, 1, 0, 0, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 0, 0],
+           [1, 1, 1, 1, 1, 1, 1, 1, 1],
+           [0, 0, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 0, 0, 1, 0, 0, 0, 0]], dtype=uint8)
+
+    >>> footprint_diamond((4, 9))
+    array([[0, 0, 0, 1, 1, 1, 0, 0, 0],
+           [1, 1, 1, 1, 1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 1, 1, 1, 1, 1],
+           [0, 0, 0, 1, 1, 1, 0, 0, 0]], dtype=uint8)
     """
-    # A scalar field that determines which pixels are part of the diamond
-    # We compute the scalar field with integer arithmetic because the comparison
-    # is particularly sensitive at the edge
+    # A scalar field that determines which pixels are part of the diamond. We
+    # compute the scalar field with integer arithmetic because the comparison
+    # is particularly sensitive to floating-point errors at the edge.
     diamond_field = np.zeros(shape, dtype=np.uint64)
 
     # We need a number `c` that allows us to create a linear space `[-c, c]` for
@@ -365,20 +388,38 @@ def footprint_diamond(shape, *, dtype=np.uint8):
     factors = [s // 2 if s % 2 == 1 else s - 1 for s in shape]
     cutoff = np.lcm.reduce(factors)
 
+    # Check that diamond_field can hold the largest possible value. Probably
+    # irrelevant in practice, but this avoids silent overflow errors.
+    if cutoff * len(shape) > np.iinfo(diamond_field.dtype).max:
+        msg = (
+            "cannot compute footprint of this size with integer arithmetic, "
+            "for regular shapes, try using `footprint_decomposed_diamond`"
+            "instead"
+        )
+        raise ValueError(msg)
+
     for dim, length in enumerate(shape):
-        if length < 3:
-            # Dimensions of length 1 don't contribute to `diamond_field`
-            # This preserves compatibility of for this edge-case with
-            # legacy `skimage` and MATLAB
+        if length <= 2:
+            # Dimensions smaller 3 don't really allow representing a diamond.
+            # Skipping these, creates an array of all ones (because
+            # `diamond_field` never exceeds the `cutoff`). This preserves
+            # compatibility of for this edge-case with legacy `skimage` and
+            # MATLAB
             continue
 
         # Create coordinate space along current dimension
-        coords = np.linspace(-cutoff, cutoff, num=length, endpoint=True, dtype=int)
+        coords = np.linspace(-cutoff, cutoff, num=length, endpoint=True, dtype=np.int64)
         coords = coords.reshape((1,) * dim + (length,) + (1,) * (len(shape) - dim - 1))
 
-        diamond_field += np.abs(coords).astype(np.uint64)
+        coords = np.abs(coords)
+        # For even dimensions, we want to increase the diameter by decreasing
+        # the contribution of this dimension to the scalar field slightly. This
+        # ensures that the rhombus touches the edge everywhere.
+        if length % 2 == 0:
+            coords -= coords.min()
+        diamond_field += coords.astype(diamond_field.dtype)
 
-    footprint = diamond_field <= cutoff
+    footprint = diamond_field - .5 <= cutoff
     footprint = footprint.astype(dtype, copy=False)
     return footprint
 
@@ -958,7 +999,7 @@ def octagon(m, n, dtype=np.uint8, *, decomposition=None):
                 footprint_rectangle((m, m), dtype=dtype, decomposition='sequence')
             )
         if n > 0:
-            sequence += [(diamond(1, dtype=dtype, decomposition=None), n)]
+            sequence += [(footprint_diamond((3, 3), dtype=dtype), n)]
         footprint = tuple(sequence)
     else:
         raise ValueError(f"Unrecognized decomposition: {decomposition}")
