@@ -132,6 +132,28 @@ class TestFootprints:
         assert_equal(expected_mask2, actual_mask2)
 
 
+@pytest.mark.parametrize("func", [footprints.footprint_diamond])
+@pytest.mark.parametrize(
+    "shape",
+    [(2, 2), (3, 3), (11, 11), (41, 32), (5, 5, 5), (21, 21, 10)],
+)
+def test_symmetric_convex_footprints(func, shape):
+    footprint = func(shape)
+    mirrored = footprints.mirror_footprint(footprint)
+    assert_equal(footprint, mirrored, err_msg="not symmetric")
+
+    sl = tuple(slice(s // 2, None) for s in footprint.shape)
+    quadrant = footprint[sl]
+    quadrant = quadrant.astype(int)
+
+    for axis in range(footprint.ndim):
+        sum_other_axes = np.apply_over_axes(
+            np.sum, quadrant, axes=[ax for ax in range(footprint.ndim) if ax != axis]
+        )
+        increases = np.diff(sum_other_axes.ravel()) > 0
+        assert not np.any(increases), "not convex"
+
+
 @pytest.mark.parametrize(
     'function, args, supports_sequence_decomposition',
     [

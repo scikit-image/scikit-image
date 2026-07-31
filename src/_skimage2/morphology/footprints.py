@@ -315,11 +315,12 @@ def rectangle(nrows, ncols, dtype=np.uint8, *, decomposition=None):
 
 
 def footprint_diamond(shape, *, dtype=np.uint8):
-    """Generates a diamond-shaped footprint.
+    """Generate a rhombus-shaped footprint.
 
-    A pixel is part of the neighborhood (i.e. labeled 1) if
-    the city block/Manhattan distance between it and the center of
-    the neighborhood is no greater than radius.
+    Generates a square-shaped footprint that has been rotated by 45°. If
+    dimensions with different lengths are requested, this generates a
+    Rhombus [1]_. A three-dimensional shape will yield an Octahedron.
+    For higher dimensions this returns a cross-polytope [2]_.
 
     Parameters
     ----------
@@ -331,34 +332,62 @@ def footprint_diamond(shape, *, dtype=np.uint8):
     Returns
     -------
     footprint : ndarray
-        The footprint where elements. Depending on the requested `dtype`,
+        An array containing the footprint. Depending on the requested `dtype`,
         pixels that belong to the diamond are *truthy* otherwise *falsy*.
+
+    See Also
+    --------
+    footprint_decomposed_diamond
+        Decomposed version of this function.
 
     Notes
     -----
-    For either binary or grayscale morphology, using
-    ``decomposition='sequence'`` was observed to have a performance benefit,
-    with the magnitude of the benefit increasing with increasing footprint
-    size.
+    This function generalizes the shape of a Rhombus or Octahedron for any
+    number dimensions. The generated footprint forms a cross-polytope [2]_,
+    which is bounded by a hyperrectangle. The contained footprint touches each
+    face of this hyperrectangle at its center.
+
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/Rhombus, 2026-07-30
+    .. [2] https://en.wikipedia.org/wiki/Cross-polytope, 2026-07-31
     """
-    _diamond_field = np.zeros(shape, dtype=float)
+    # A scalar field that determines which pixels are part of the diamond
+    # We compute the scalar field with integer arithmetic because the comparison
+    # is particularly sensitive at the edge
+    diamond_field = np.zeros(shape, dtype=np.uint64)
+
+    # We need a number `c` that allows us to create a linear space `[-c, c]` for
+    # each dimension with full integer steps. For even dimensions of length `s`
+    # the smallest number allowing this is `s - 1`. For uneven dimensions the
+    # smallest number is `s // 2`. `c` is then the lowest common multiple of
+    # each of these factors.
+    factors = [s // 2 if s % 2 == 1 else s - 1 for s in shape]
+    cutoff = np.lcm.reduce(factors)
 
     for dim, length in enumerate(shape):
-        coords = np.linspace(-1, 1, num=length, endpoint=True)
-        coords = coords.reshape((1,) * dim + (length,) + (1,) * (len(shape) - dim - 1))
-        _diamond_field += np.abs(coords)
+        if length < 3:
+            # Dimensions of length 1 don't contribute to `diamond_field`
+            # This preserves compatibility of for this edge-case with
+            # legacy `skimage` and MATLAB
+            continue
 
-    footprint = _diamond_field <= 1
+        # Create coordinate space along current dimension
+        coords = np.linspace(-cutoff, cutoff, num=length, endpoint=True, dtype=int)
+        coords = coords.reshape((1,) * dim + (length,) + (1,) * (len(shape) - dim - 1))
+
+        diamond_field += np.abs(coords).astype(np.uint64)
+
+    footprint = diamond_field <= cutoff
     footprint = footprint.astype(dtype, copy=False)
     return footprint
 
 
 def footprint_decomposed_diamond(shape, *, dtype=np.uint8):
-    """Generates a decomposed diamond-shaped footprint.
+    """Generate a decomposed rhombus-shaped footprint.
 
-    A pixel is part of the neighborhood (i.e. labeled 1) if
-    the city block/Manhattan distance between it and the center of
-    the neighborhood is no greater than radius.
+    Generates a decomposed footprint that is equivalent to the "dense" footprint
+    returned by :func:`footprint_diamond`.
 
     Parameters
     ----------
@@ -369,16 +398,22 @@ def footprint_decomposed_diamond(shape, *, dtype=np.uint8):
 
     Returns
     -------
-    footprint : ndarray
-        The footprint where elements. Depending on the requested `dtype`,
-        pixels that belong to the diamond are *truthy* otherwise *falsy*.
+    decomposed : tuple[tuple[ndarray, int], ...]
+        A tuple forming the decomposed `footprint` tuple. Each item is a 2-tuple
+        of the form ``(ndarray, num_iter)`` that specifies a footprint array and
+        the number of iterations it is to be applied.
+
+    See Also
+    --------
+    footprint_diamond
+        Dense version of this function.
 
     Notes
     -----
-    For either binary or grayscale morphology, using
-    ``decomposition='sequence'`` was observed to have a performance benefit,
-    with the magnitude of the benefit increasing with increasing footprint
-    size.
+    For either binary or grayscale morphology, using the decomposed footprint
+    returned by this function was observed to have a performance benefit over
+    :func:`footprint_diamond`. The magnitude of the benefit increased with
+    increasing footprint size.
     """
     if shape != (shape[0],) * len(shape):
         msg = (
