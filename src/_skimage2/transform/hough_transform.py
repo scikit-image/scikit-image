@@ -37,7 +37,10 @@ def hough_line_peaks(
         Minimum angle separating lines (maximum filter size for second
         dimension of hough space).
     threshold : float, optional
-        Minimum intensity of peaks. Default is `0.5 * max(hspace)`.
+        Minimum intensity of peaks. If `None`, the threshold is set to `0.5 * max(hspace)`. This
+        global threshold can exclude shorter but valid lines when a longer line produces a
+        strong peak. To keep more candidates, set an explicit lower threshold and use
+        `num_peaks`, `min_distance`, or `min_angle` to limit the results.
     num_peaks : int, optional
         Maximum number of peaks. When the number of peaks exceeds `num_peaks`,
         return `num_peaks` coordinates based on peak intensity.
