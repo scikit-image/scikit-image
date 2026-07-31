@@ -943,7 +943,12 @@ def test_union():
     tform3 = SimilarityTransform(scale=0.1**2, rotation=0.3 + 0.9)
     tform = tform1 + tform2
     assert_almost_equal(tform.params, tform3.params)
-    assert tform.__class__ == ProjectiveTransform
+    assert isinstance(tform, ProjectiveTransform)
+
+    # Test the other way round.
+    tform = tform2 + tform1
+    assert_almost_equal(tform.params, tform3.params)
+    assert isinstance(tform, ProjectiveTransform)
 
     tform = AffineTransform(scale=(0.1, 0.1), rotation=0.3)
     assert_almost_equal((tform + tform.inverse).params, np.eye(3))
@@ -1002,7 +1007,7 @@ def test_inverse_all_transforms(tform):
 
 @pytest.mark.parametrize('tform_class', TRANSFORMS.values())
 def test_identity(tform_class):
-    if tform_class is PiecewiseAffineTransform:
+    if tform_class.__name__ == 'PiecewiseAffineTransform':
         return  # Identity transform unusable.
     rng = np.random.RandomState(3083558688)
     allows_nd = tform_class in HMAT_TFORMS_ND

@@ -17,8 +17,8 @@ from .. import __version__
 import os.path as osp
 import os
 
-_LEGACY_DATA_DIR = osp.dirname(__file__)
-_DISTRIBUTION_DIR = osp.dirname(_LEGACY_DATA_DIR)
+legacy_data_dir = osp.dirname(__file__)
+_DISTRIBUTION_DIR = osp.dirname(legacy_data_dir)
 
 try:
     from pooch import file_hash
@@ -28,17 +28,21 @@ except ModuleNotFoundError:
     def file_hash(fname, alg="sha256"):
         """
         Calculate the hash of a given file.
+
         Useful for checking if a file has changed or been corrupted.
+
         Parameters
         ----------
         fname : str
             The name of the file.
         alg : str
             The type of the hashing algorithm
+
         Returns
         -------
         hash : str
             The hash of the file.
+
         Examples
         --------
         >>> fname = "test-file-for-hash.txt"
@@ -46,6 +50,7 @@ except ModuleNotFoundError:
         ...     __ = f.write("content of the file")
         >>> print(file_hash(fname))
         0fc74468e6a9a829f103d069aeb2bb4f8646bad58bf146bb0e3379b759ec4a00
+
         >>> import os
         >>> os.remove(fname)
         """
@@ -83,7 +88,7 @@ def _create_image_fetcher(prefix=None):
     except ImportError:
         # Without pooch, fallback on the standard data directory
         # which for now, includes a few limited data samples
-        return None, _LEGACY_DATA_DIR
+        return None, legacy_data_dir
 
     # Pooch expects a `+` to exist in development versions.
     # Since scikit-image doesn't follow that convention, we have to manually

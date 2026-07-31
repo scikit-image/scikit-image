@@ -16,3 +16,7 @@ from _skimage2.transform.radon_transform import (  # noqa: F401
     _sinogram_circle_to_square,
     _get_fourier_filter,
 )
+
+from skimage._doctest_adapters import adapt_doctests
+
+adapt_doctests(globals())

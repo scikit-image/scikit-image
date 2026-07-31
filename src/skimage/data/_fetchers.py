@@ -23,6 +23,7 @@ from _skimage2.data._fetchers import (
     coins as coins,
     colorwheel as colorwheel,
     data_dir as data_dir,
+    legacy_data_dir as legacy_data_dir,
     download_all as download_all,
     eagle as eagle,
     file_hash as file_hash,
@@ -67,6 +68,7 @@ __all__ = [
     'coins',
     'colorwheel',
     'data_dir',
+    'legacy_data_dir',
     'download_all',
     'eagle',
     'file_hash',
@@ -97,3 +99,7 @@ __all__ = [
 ]
 
 from _skimage2.data._fetchers import _image_fetcher  # noqa: F401
+
+from skimage._doctest_adapters import adapt_doctests
+
+adapt_doctests(globals())
