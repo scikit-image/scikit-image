@@ -89,12 +89,14 @@ def resize(
     Parameters
     ----------
     image : ndarray
-        Input image.
+        Input image. The input can have any number of dimensions. The last
+        axis is treated as a channel axis only when it is omitted from
+        ``output_shape``.
     output_shape : iterable
-        Size of the generated output image `(rows, cols[, ...][, dim])`. If
-        `dim` is not provided, the number of channels is preserved. In case the
-        number of input channels does not equal the number of output channels a
-        n-dimensional interpolation is applied.
+        Size of the generated output image ``(rows, cols[, ...[, dim]])``. If
+        ``output_shape`` has one fewer entries than ``image.ndim``, the size of
+        the last input axis is preserved. To resize every axis, including the
+        last one, provide one output size for each axis.
 
     Returns
     -------
