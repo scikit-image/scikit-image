@@ -396,7 +396,10 @@ def footprint_diamond(shape, *, radii=None, dtype=np.uint8):
     diamond_field = np.zeros(shape)
 
     for dim, (length, radius) in enumerate(zip(shape, radii)):
-        if length <= 2 and radius > 0:
+        if radius == 0:
+            diamond_field += np.inf
+            continue
+        if length <= 2:
             # This configuration doesn't really allow representing a diamond.
             # Skipping these, creates an array of all ones (because
             # `diamond_field` never exceeds the `cutoff`). This preserves
@@ -413,7 +416,14 @@ def footprint_diamond(shape, *, radii=None, dtype=np.uint8):
 
         diamond_field += np.abs(coords)
 
-    footprint = diamond_field <= 1
+    # Compare with tolerance derived from `np.isclose` here, otherwise
+    # floating point errors can lead to unexpected results, an asymmetric
+    # footprint even. For example `np.linspace` may not yield an even sampled
+    # coordinate space:
+    #   coords = np.linspace(-5.5, 5.5, num=11, endpoint=True)
+    #   coords = np.abs(coords / 5.5)
+    #   assert np.all(coords == np.flip(coords))  # Should pass but fails
+    footprint = diamond_field <= 1 + 1.e-8
     footprint = footprint.astype(dtype, copy=False)
     return footprint
 

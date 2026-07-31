@@ -135,7 +135,10 @@ class TestFootprints:
 @pytest.mark.parametrize("func", [footprints.footprint_diamond])
 @pytest.mark.parametrize(
     "shape",
-    [(2, 2), (3, 3), (11, 11), (41, 32), (5, 5, 5), (21, 21, 10)],
+    [(2, 2), (3, 3), (41, 32), (22, 21, 10)]
+    + [(s,) * 2 for s in range(200)]
+    + [(s,) * 3 for s in range(100)]
+    + [(s,) * 4 for s in range(20)],
 )
 def test_symmetric_convex_footprints(func, shape):
     footprint = func(shape)
