@@ -3,6 +3,9 @@ name: Benchmark
 on:
   pull_request:
     types: [labeled]
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 concurrency:
@@ -12,10 +15,14 @@ concurrency:
 
 permissions:
   contents: read
+  issues: write
 
 jobs:
   benchmark:
-    if: contains(github.event.label.name, 'benchmark') || github.event_name == 'workflow_dispatch'
+    if: >-
+      contains(github.event.label.name, 'benchmark') ||
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/main')
     name: Linux
     runs-on: ubuntu-latest
     env:
