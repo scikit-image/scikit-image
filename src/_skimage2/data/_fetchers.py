@@ -201,7 +201,7 @@ def _skip_pytest_case_requiring_pooch(data_filename):
     #
     # `PYTEST_CURRENT_TEST` is only set while a specific test's call/setup/
     # teardown phase is executing, so it misses module- and class-level data
-    # fetches (e.g. `IMG = data.astronaut()` at import time), which run
+    # fetches (e.g. `IMG = data.fetch_astronaut()` at import time), which run
     # during collection. `PYTEST_VERSION` (pytest>=8) is set for the whole
     # session, including collection, so check both.
     if 'PYTEST_CURRENT_TEST' in os.environ or 'PYTEST_VERSION' in os.environ:
@@ -325,7 +325,7 @@ def fetch(data_filename):
     """Fetch a scikit-image example dataset file, returning its local path.
 
     Resolves ``data_filename`` to a path on disk: a bundled copy from the
-    optional ``scikit-image-data`` package, an already-cached download, or
+    ``scikit-image-data`` package, an already-cached download, or
     a fresh download using pooch, in that order. This is the same
     machinery every ``fetch_*()`` convenience function
     (e.g. :func:`fetch_astronaut`) uses internally -- call this directly
@@ -374,8 +374,9 @@ def download_all(directory=None):
     This allows us to use higher quality datasets, while keeping the
     library download size small.
 
-    This function requires the installation of an optional dependency, pooch,
-    to download the full dataset. Follow installation instruction found at
+    This function requires pooch (a normal scikit-image dependency, missing
+    only on unusual platforms like Pyodide, or after manually uninstalling
+    it) to download the full dataset. Follow installation instruction found at
 
         https://scikit-image.org/docs/stable/user_guide/install.html
 
@@ -402,8 +403,7 @@ def download_all(directory=None):
 
     if _image_fetcher is None:
         raise ModuleNotFoundError(
-            "To download all package data, scikit-image needs an optional "
-            "dependency, pooch."
+            "To download all package data, scikit-image needs pooch."
             "To install pooch, follow our installation instructions found at "
             "https://scikit-image.org/docs/stable/user_guide/install.html"
         )
