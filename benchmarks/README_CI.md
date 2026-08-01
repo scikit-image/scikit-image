@@ -8,11 +8,11 @@
 
 The `asv` suite can be run for any PR on GitHub Actions (check workflow `.github/workflows/benchmarks.yaml`) by adding a label containing `benchmark` (e.g. `run-benchmark`) to said PR. This will trigger a job that will run the benchmarking suite for the current PR head (merged commit) against the PR base (usually `main`).
 
-The suite also runs automatically on every merge to `main` (comparing the new commit against the commit `main` pointed to immediately before the merge), and can be triggered manually via `workflow_dispatch` from the `Actions` tab. If a run on `main` detects a regression, it opens (or updates, if one is already open) a `CI failure`-labeled GitHub issue using the same convention as the repo's other main-branch CI checks.
+The suite also runs automatically on every merge to `main` (comparing the new commit against the commit `main` pointed to immediately before the merge), and can be triggered manually via `workflow_dispatch` from the `Actions` tab (which compares the current commit against its immediate parent commit, same as the automatic push-to-main comparison). If a run on `main` fails (including a detected regression), it opens (or updates, if one is already open) a `CI failure`-labeled GitHub issue using the same convention as the repo's other main-branch CI checks.
 
 We use `asv continuous` to run the job, which runs a relative performance measurement. This means that there's no state to be saved and that regressions are only caught in terms of performance ratio (absolute numbers are available but they are not useful since we do not use stable hardware over time). `asv continuous` will:
 
-- Compile `scikit-image` for _both_ commits. We use `ccache` to speed up the process, and `mamba` is used to create the build environments.
+- Compile `scikit-image` for _both_ commits. We use `ccache` to speed up the process, and `virtualenv` is used to create the build environments.
 - Run the benchmark suite for both commits, _twice_ (since `processes=2` by default).
 - Generate a report table with performance ratios:
   - `ratio=1.0` -> performance didn't change.

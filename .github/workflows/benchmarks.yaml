@@ -88,22 +88,27 @@ jobs:
             baseline_sha="$PR_BASE_SHA"
             baseline_label="$PR_BASE_LABEL"
             contender_label="$PR_HEAD_LABEL"
+            asv_factor="1.5"
           elif [ "$EVENT_NAME" = "push" ]; then
             before="$PUSH_BEFORE_SHA"
-            if [ -z "$before" ] || [ "$before" = "0000000000000000000000000000000000000000" ]; then
+            if [ -z "$before" ] || [ "$before" = "0000000000000000000000000000000000000000" ] \
+               || ! git cat-file -e "$before^{commit}" 2>/dev/null; then
               before=$(git rev-parse "$GITHUB_SHA~1")
             fi
             baseline_sha="$before"
             baseline_label="$before"
             contender_label="$GITHUB_SHA"
+            asv_factor="3.0"
           else
             baseline_sha=$(git rev-parse "$GITHUB_SHA~1")
             baseline_label="$baseline_sha"
             contender_label="$GITHUB_SHA"
+            asv_factor="1.5"
           fi
           echo "baseline_sha=$baseline_sha" >> "$GITHUB_OUTPUT"
           echo "baseline_label=$baseline_label" >> "$GITHUB_OUTPUT"
           echo "contender_label=$contender_label" >> "$GITHUB_OUTPUT"
+          echo "asv_factor=$asv_factor" >> "$GITHUB_OUTPUT"
 
       - name: Run benchmarks
         shell: bash -l {0}
@@ -112,7 +117,7 @@ jobs:
           OPENBLAS_NUM_THREADS: 1
           MKL_NUM_THREADS: 1
           OMP_NUM_THREADS: 1
-          ASV_FACTOR: 1.5
+          ASV_FACTOR: "${{ steps.commits.outputs.asv_factor }}"
           ASV_SKIP_SLOW: 1
           # Escape user controlled variables
           BASELINE_SHA: "${{ steps.commits.outputs.baseline_sha }}"
@@ -134,9 +139,10 @@ jobs:
           asv continuous $ASV_OPTIONS $BASELINE_SHA $GITHUB_SHA \
               | sed "/Traceback \|failed$\|PERFORMANCE DECREASED/ s/^/::error::/" \
               | tee benchmarks.log
+          asv_status=${PIPESTATUS[0]}
 
           # Report and export results for subsequent steps
-          if grep "Traceback \|failed\|PERFORMANCE DECREASED" benchmarks.log > /dev/null ; then
+          if [ "$asv_status" -ne 0 ] || grep "Traceback \|failed\|PERFORMANCE DECREASED" benchmarks.log > /dev/null ; then
               exit 1
           fi
 
@@ -147,7 +153,9 @@ jobs:
 
       - name: Add instructions to artifact
         if: always()
-        run: cp benchmarks/README_CI.md benchmarks.log .asv/results/
+        run: |
+          mkdir -p .asv/results
+          cp benchmarks/README_CI.md benchmarks.log .asv/results/
 
       - uses: actions/upload-artifact@v4
         if: always()
