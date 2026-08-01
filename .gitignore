@@ -43,3 +43,4 @@ skimage/morphology/_skeletonize_lee_cy.pyx
 stubs/
 # pyenv virtualenv environment marker.
 .python-version
+.superpowers/
