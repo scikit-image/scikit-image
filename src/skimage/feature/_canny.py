@@ -18,7 +18,7 @@ the old (``skimage``, v1.x) behavior, add an explicit ``mode='constant'``:
 >>> import skimage as ski1
 >>> import skimage2 as ski2
 >>>
->>> img = ski1.data.checkerboard()
+>>> img = ski1.data.camera()
 >>> res1 = ski1.feature.canny(img)  # ski1 default is mode='constant'
 >>> res2 = ski2.feature.canny(img, mode='constant')
 >>> assert np.all(res1 == res2)
