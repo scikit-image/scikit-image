@@ -1001,7 +1001,7 @@ class ProjectiveTransform(_HMatrixTransform):
 
     Apply the transformation to some image data.
 
-    >>> img = ski2.data.astronaut()
+    >>> img = ski2.data.fetch_astronaut()
     >>> warped = ski2.transform.warp(img, inverse_map=tform.inverse)
 
     The estimation can fail - for example, if all the input or output points
@@ -1437,7 +1437,7 @@ class AffineTransform(ProjectiveTransform):
 
     Apply the transformation to some image data.
 
-    >>> img = ski2.data.astronaut()
+    >>> img = ski2.data.fetch_astronaut()
     >>> warped = ski2.transform.warp(img, inverse_map=tform.inverse)
 
     The estimation can fail - for example, if all the input or output points
@@ -1901,7 +1901,7 @@ class EuclideanTransform(ProjectiveTransform):
 
     Apply the transformation to some image data.
 
-    >>> img = ski2.data.astronaut()
+    >>> img = ski2.data.fetch_astronaut()
     >>> warped = ski2.transform.warp(img, inverse_map=tform.inverse)
 
     The estimation can fail - for example, if all the input or output points
@@ -2157,7 +2157,7 @@ class SimilarityTransform(EuclideanTransform):
 
     Apply the transformation to some image data.
 
-    >>> img = ski2.data.astronaut()
+    >>> img = ski2.data.fetch_astronaut()
     >>> warped = ski2.transform.warp(img, inverse_map=tform.inverse)
 
     The estimation can fail - for example, if all the input or output points
@@ -2624,7 +2624,7 @@ def estimate_transform(ttype, src, dst, *args, **kwargs):
     True
 
     >>> # warp image using the estimated transformation
-    >>> image = ski2.data.camera()
+    >>> image = ski2.data.fetch_camera()
 
     >>> ski2.transform.warp(image, inverse_map=tform.inverse) # doctest: +SKIP
 

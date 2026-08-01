@@ -236,7 +236,7 @@ def histogram(
     Examples
     --------
     >>> from _skimage2 import data, exposure, img_as_float
-    >>> image = img_as_float(data.camera())
+    >>> image = img_as_float(data.fetch_camera())
     >>> np.histogram(image, bins=2)
     (array([ 93585, 168559]), array([0. , 0.5, 1. ]))
     >>> exposure.histogram(image, nbins=2)
@@ -339,7 +339,7 @@ def cumulative_distribution(image, nbins=256):
     Examples
     --------
     >>> from _skimage2 import data, exposure, img_as_float
-    >>> image = img_as_float(data.camera())
+    >>> image = img_as_float(data.fetch_camera())
     >>> hi = exposure.histogram(image)
     >>> cdf = exposure.cumulative_distribution(image)
     >>> all(cdf[0] == np.cumsum(hi[0])/float(image.size))
@@ -664,7 +664,7 @@ def adjust_gamma(image, gamma=1, gain=1):
     Examples
     --------
     >>> import _skimage2 as ski2
-    >>> image = ski2.util.img_as_float(ski2.data.moon())
+    >>> image = ski2.util.img_as_float(ski2.data.fetch_moon())
     >>> gamma_corrected = ski2.exposure.adjust_gamma(image, 2)
     >>> # Output is darker for gamma > 1
     >>> image.mean() > gamma_corrected.mean()

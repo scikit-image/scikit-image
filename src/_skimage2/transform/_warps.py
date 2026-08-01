@@ -162,7 +162,7 @@ def resize(
     --------
     >>> from _skimage2 import data
     >>> from _skimage2.transform import resize
-    >>> image = data.camera()
+    >>> image = data.fetch_camera()
     >>> resize(image, (100, 100)).shape
     (100, 100)
 
@@ -309,7 +309,7 @@ def rescale(
     --------
     >>> from _skimage2 import data
     >>> from _skimage2.transform import rescale
-    >>> image = data.camera()
+    >>> image = data.fetch_camera()
     >>> rescale(image, 0.1).shape
     (51, 51)
     >>> rescale(image, 0.5).shape
@@ -411,7 +411,7 @@ def rotate(
     --------
     >>> from _skimage2 import data
     >>> from _skimage2.transform import rotate
-    >>> image = data.camera()
+    >>> image = data.fetch_camera()
     >>> rotate(image, 2).shape
     (512, 512)
     >>> rotate(image, 2, resize=True).shape
@@ -684,7 +684,7 @@ def warp_coords(coord_map, shape, dtype=np.float64):
     >>> def shift_up10_left20(xy):
     ...     return xy - np.array([-20, 10])[None, :]
     >>>
-    >>> image = data.astronaut().astype(np.float32)
+    >>> image = data.fetch_astronaut().astype(np.float32)
     >>> coords = warp_coords(shift_up10_left20, image.shape)
     >>> warped_image = map_coordinates(image, coords)
 
@@ -875,7 +875,7 @@ def warp(
     --------
     >>> from _skimage2.transform import warp
     >>> from _skimage2 import data
-    >>> image = data.camera()
+    >>> image = data.fetch_camera()
 
     The following image warps are all equal but differ substantially in
     execution time. The image is shifted to the bottom.
@@ -1169,7 +1169,7 @@ def warp_polar(
 
     >>> from _skimage2 import data
     >>> from _skimage2.transform import warp_polar
-    >>> image = data.checkerboard()
+    >>> image = data.fetch_checkerboard()
     >>> warped = warp_polar(image)
 
     Perform a log-polar warp on a grayscale image:
@@ -1184,7 +1184,7 @@ def warp_polar(
 
     Perform a log-polar warp on a color image:
 
-    >>> image = data.astronaut()
+    >>> image = data.fetch_astronaut()
     >>> warped = warp_polar(image, scaling='log', channel_axis=-1)
     """
     multichannel = channel_axis is not None
@@ -1351,7 +1351,7 @@ def resize_local_mean(
     --------
     >>> from _skimage2 import data
     >>> from _skimage2.transform import resize_local_mean
-    >>> image = data.camera()
+    >>> image = data.fetch_camera()
     >>> resize_local_mean(image, (100, 100)).shape
     (100, 100)
 

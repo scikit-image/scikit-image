@@ -11,12 +11,12 @@ from _skimage2._shared.testing import fetch
 
 @pytest.fixture
 def cam_image():
-    return np.ascontiguousarray(ski2.data.camera()[64:112, 64:96])
+    return np.ascontiguousarray(ski2.data.fetch_camera()[64:112, 64:96])
 
 
 @pytest.fixture
 def cell3d_image():
-    return np.ascontiguousarray(ski2.data.cells3d()[30:48, 0, 20:36, 20:32])
+    return np.ascontiguousarray(ski2.data.fetch_cells3d()[30:48, 0, 20:36, 20:32])
 
 
 gray_operators = (
@@ -56,7 +56,7 @@ class TestMorphology:
     def test_reproduce_skimage_data_not_mirrored(self, footprint_args, size, func):
         # Test that `erosion`, `opening`, and `white_tophat` can
         # reproduce data in `gray_morph_output.npz`
-        image = ski2.color.rgb2gray(ski2.data.coffee())
+        image = ski2.color.rgb2gray(ski2.data.fetch_coffee())
         image = ski2.transform.downscale_local_mean(image, (20, 20))
         image = ski2.util.img_as_ubyte(image)
 
@@ -90,7 +90,7 @@ class TestMorphology:
     def test_reproduce_skimage_data_mirrored(self, footprint_args, size, func):
         # Test that `dilation`, `closing`, and `black_tophat` can
         # reproduce data in `gray_morph_output.npz`
-        image = ski2.color.rgb2gray(ski2.data.coffee())
+        image = ski2.color.rgb2gray(ski2.data.fetch_coffee())
         image = ski2.transform.downscale_local_mean(image, (20, 20))
         image = ski2.util.img_as_ubyte(image)
 
@@ -108,7 +108,7 @@ class TestMorphology:
         np.testing.assert_equal(result, expected)
 
     def test_gray_closing_extensive(self):
-        img = ski2.data.coins()
+        img = ski2.data.fetch_coins()
         footprint = np.array([[0, 0, 1], [0, 1, 1], [1, 1, 1]])
 
         # mode="ignore" (new v2 default) is extensive
@@ -122,7 +122,7 @@ class TestMorphology:
         assert not np.all(result_default >= img)
 
     def test_gray_opening_anti_extensive(self):
-        img = ski2.data.coins()
+        img = ski2.data.fetch_coins()
         footprint = np.array([[0, 0, 1], [0, 1, 1], [1, 1, 1]])
 
         # mode="ignore" (new v2 default) is anti-extensive
@@ -139,7 +139,7 @@ class TestMorphology:
     def test_gray_morphology_ignore_default_edge_behavior(self, func):
         # mode='ignore' (new v2 default) differs
         # from mode='reflect' (old v1 default) at edges.
-        img = ski2.data.coins()
+        img = ski2.data.fetch_coins()
         footprint = np.array([[0, 0, 1], [0, 1, 1], [1, 1, 1]])
         result_ignore = func(img, footprint=footprint)
         result_reflect = func(img, footprint=footprint, mode="reflect")

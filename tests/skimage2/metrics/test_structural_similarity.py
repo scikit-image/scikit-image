@@ -8,7 +8,7 @@ from _skimage2._shared.utils import _supported_float_type
 from _skimage2 import data
 
 np.random.seed(5)
-cam = data.camera()
+cam = data.fetch_camera()
 sigma = 20.0
 cam_noisy = np.clip(cam + sigma * np.random.randn(*cam.shape), 0, 255)
 cam_noisy = cam_noisy.astype(cam.dtype)
@@ -171,7 +171,7 @@ def test_structural_similarity_nD(dtype, ndim):
 
 def test_structural_similarity_multichannel_chelsea():
     # color image example
-    Xc = data.chelsea()
+    Xc = data.fetch_chelsea()
     sigma = 15.0
     Yc = np.clip(Xc + sigma * np.random.randn(*Xc.shape), 0, 255)
     Yc = Yc.astype(Xc.dtype)
@@ -223,7 +223,7 @@ def test_gaussian_structural_similarity_vs_IPOL():
     Then, we use the following command:
     $ ./imdiff -m mssim <path to camera.png>/camera.png /tmp/cam_noisy.png
 
-    Values for current data.camera() calculated by Gregory Lee on Sep, 2020.
+    Values for current data.fetch_camera() calculated by Gregory Lee on Sep, 2020.
     Available at:
     https://github.com/scikit-image/scikit-image/pull/4913#issuecomment-700653165
     """
