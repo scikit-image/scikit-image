@@ -218,13 +218,14 @@ your work.
 scikit-image is technically complex, key infrastructure; therefore, we
 place a high premium on correctness, and on avoiding technical
 complexity that may affect maintainability. If you want to make use of
-LLMs in a significant way, it is a good idea to **check in with us
-first**. Regardless, **always declare tool usage**.
+LLMs in a significant way, we recommend that you **check in with us
+first** to discuss your strategy.
 
-AI agents that have followed all guidelines in this document (outside
-of this section) may add 🤖 to their PR title. This signals to
-maintainers that the agent has self-verified compliance, enabling
-expedited review and acceptance.
+**Always declare tool usage**. We recommend using an `Assisted-by:`
+tag in the commit message, as recommended by the [Linux
+kernel](https://docs.kernel.org/process/coding-assistants.html).
+`Co-authored-by:` lines, the default in many coding CLIs, are also
+acceptable.
 
 (guidelines)=
 
