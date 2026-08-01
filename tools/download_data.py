@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
-"""Download scikit-image's example datasets without any third-party dependencies.
+"""Download every one of scikit-image's CDN-hosted example datasets.
 
-This is a fallback for environments that can't or don't want to depend on
-``pooch`` (e.g. Linux distribution packaging). It downloads every data file
-that scikit-image's public ``skimage.data`` functions can fetch, verifying
-each file's sha256 hash against the registry in
-``src/_skimage2/data/_registry.py``.
+For offline/air-gapped builds or Linux distribution packaging: pre-populates
+a local cache of every data file that scikit-image's public ``skimage.data``
+functions can fetch, verifying each file's sha256 hash against the registry
+in ``src/_skimage2/data/_registry.py``.
+
+Depends only on ``pooch`` -- scikit-image itself does not need to be
+installed to run this script (the registry is parsed directly out of its
+source file, not imported).
 
 Note: this does not download files used only internally by scikit-image's
 test suite (files with no entry in ``registry_urls``); those are fetched
@@ -16,11 +19,10 @@ not needed to use the public ``skimage.data`` API.
 import argparse
 import ast
 import concurrent.futures
-import hashlib
 import sys
-import urllib.error
-import urllib.request
 from pathlib import Path
+
+import pooch
 
 _HERE = Path(__file__).resolve().parent
 _REGISTRY_PATH = _HERE.parent / 'src' / '_skimage2' / 'data' / '_registry.py'
@@ -53,45 +55,29 @@ def _load_registry():
     return namespace['registry'], namespace['registry_urls']
 
 
-def _file_hash(path, chunk_size=65536):
-    hasher = hashlib.sha256()
-    with open(path, 'rb') as fh:
-        for chunk in iter(lambda: fh.read(chunk_size), b''):
-            hasher.update(chunk)
-    return hasher.hexdigest()
-
-
 def _download_one(data_filename, url, expected_hash, dest_dir, force):
     dest_path = dest_dir / data_filename
-    if not force and dest_path.exists() and _file_hash(dest_path) == expected_hash:
-        return data_filename, 'cached', None
+    if force:
+        dest_path.unlink(missing_ok=True)
+    already_correct = dest_path.exists() and pooch.file_hash(dest_path) == expected_hash
 
-    dest_path.parent.mkdir(parents=True, exist_ok=True)
-    tmp_path = Path(f'{dest_path}.part')
     try:
-        with urllib.request.urlopen(url, timeout=30) as response:
-            with open(tmp_path, 'wb') as fh:
-                while chunk := response.read(65536):
-                    fh.write(chunk)
-    except (urllib.error.URLError, TimeoutError) as err:
-        tmp_path.unlink(missing_ok=True)
-        return data_filename, 'error', str(err)
-
-    actual_hash = _file_hash(tmp_path)
-    if actual_hash != expected_hash:
-        tmp_path.unlink(missing_ok=True)
-        return (
-            data_filename,
-            'error',
-            f'hash mismatch (expected {expected_hash}, got {actual_hash})',
+        pooch.retrieve(
+            url,
+            known_hash=f'sha256:{expected_hash}',
+            fname=data_filename,
+            path=dest_dir,
+            progressbar=False,
         )
-
-    tmp_path.replace(dest_path)
-    return data_filename, 'downloaded', None
+    except Exception as err:  # noqa: BLE001 -- pooch raises a mix of exception types
+        return data_filename, 'error', str(err)
+    return data_filename, 'cached' if already_correct else 'downloaded', None
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     parser.add_argument(
         '--dest',
         required=True,
@@ -121,6 +107,13 @@ def main(argv=None):
         )
 
     args.dest.mkdir(parents=True, exist_ok=True)
+    # Pre-create every subdirectory the registry needs up front: pooch's own
+    # directory creation isn't safe against concurrent calls for the same
+    # path, so leaving this to the parallel downloads below races and
+    # intermittently raises FileExistsError.
+    for key in registry_urls:
+        if key in registry:
+            (args.dest / key).parent.mkdir(parents=True, exist_ok=True)
 
     results = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=args.jobs) as pool:
