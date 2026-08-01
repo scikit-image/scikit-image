@@ -1,12 +1,14 @@
 # Benchmark CI
 
 <!-- Author: @jaimergp -->
-<!-- Last updated: 2021.07.06 -->
+<!-- Last updated: 2026.08.01 -->
 <!-- Describes the work done as part of https://github.com/scikit-image/scikit-image/pull/5424 -->
 
 ## How it works
 
-The `asv` suite can be run for any PR on GitHub Actions (check workflow `.github/workflows/benchmarks.yml`) by adding a `run-benchmark` label to said PR. This will trigger a job that will run the benchmarking suite for the current PR head (merged commit) against the PR base (usually `main`).
+The `asv` suite can be run for any PR on GitHub Actions (check workflow `.github/workflows/benchmarks.yaml`) by adding a label containing `benchmark` (e.g. `run-benchmark`) to said PR. This will trigger a job that will run the benchmarking suite for the current PR head (merged commit) against the PR base (usually `main`).
+
+The suite also runs automatically on every merge to `main` (comparing the new commit against the commit `main` pointed to immediately before the merge), and can be triggered manually via `workflow_dispatch` from the `Actions` tab. If a run on `main` detects a regression, it opens (or updates, if one is already open) a `CI failure`-labeled GitHub issue using the same convention as the repo's other main-branch CI checks.
 
 We use `asv continuous` to run the job, which runs a relative performance measurement. This means that there's no state to be saved and that regressions are only caught in terms of performance ratio (absolute numbers are available but they are not useful since we do not use stable hardware over time). `asv continuous` will:
 
@@ -21,7 +23,7 @@ Due to the sensitivity of the test, we cannot guarantee that false positives are
 
 ## Running the benchmarks on GitHub Actions
 
-1. On a PR, add the label `run-benchmark`.
+1. On a PR, add a label whose name contains `benchmark` (e.g. `run-benchmark`).
 2. The CI job will be started. Checks will appear in the usual dashboard panel above the comment box.
 3. If more commits are added, the label checks will be grouped with the last commit checks _before_ you added the label.
 4. Alternatively, you can always go to the `Actions` tab in the repo and [filter for `workflow:Benchmark`](https://github.com/scikit-image/scikit-image/actions?query=workflow%3ABenchmark). Your username will be assigned to the `actor` field, so you can also filter the results with that if you need it.
