@@ -154,3 +154,13 @@ jobs:
         with:
           name: asv-benchmark-results-${{ runner.os }}
           path: .asv/results
+
+      - name: "Job has failed: reporting"
+        if: ${{ failure() && github.ref == 'refs/heads/main' }}
+        uses: JasonEtco/create-an-issue@1b14a70e4d8dc185e5cc76d3bec9eab20257b2c5 # v2.9.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BUILD_TYPE: "benchmark"
+        with:
+          filename: .github/MAIN_FAIL_TEMPLATE.md
+          update_existing: true
