@@ -283,3 +283,94 @@ def test_fetch_downloads_file_not_in_scikit_image_data_package(
     cached_path = tmp_path / 'data' / '_test_not_in_scikit_image_data.bin'
     assert Path(result_path) == cached_path
     assert cached_path.read_bytes() == content
+
+
+# --- public fetch()/fetch_<name>() API matrix ---
+
+
+FETCH_FUNCTION_NAMES = [
+    'fetch_astronaut',
+    'fetch_brain',
+    'fetch_brick',
+    'fetch_camera',
+    'fetch_cat',
+    'fetch_cell',
+    'fetch_cells3d',
+    'fetch_checkerboard',
+    'fetch_chelsea',
+    'fetch_clock',
+    'fetch_coffee',
+    'fetch_coins',
+    'fetch_colorwheel',
+    'fetch_eagle',
+    'fetch_grass',
+    'fetch_gravel',
+    'fetch_horse',
+    'fetch_hubble_deep_field',
+    'fetch_human_mitosis',
+    'fetch_immunohistochemistry',
+    'fetch_kidney',
+    'fetch_lbp_frontal_face_cascade_filename',
+    'fetch_lfw_subset',
+    'fetch_lily',
+    'fetch_logo',
+    'fetch_microaneurysms',
+    'fetch_moon',
+    'fetch_nickel_solidification',
+    'fetch_page',
+    'fetch_palisades_of_vogt',
+    'fetch_protein_transport',
+    'fetch_retina',
+    'fetch_rocket',
+    'fetch_shepp_logan_phantom',
+    'fetch_skin',
+    'fetch_stereo_motorcycle',
+    'fetch_text',
+    'fetch_vortex',
+]
+
+
+@pytest.mark.parametrize('function_name', FETCH_FUNCTION_NAMES)
+def test_fetch_functions_are_public_and_bare_names_are_not(function_name):
+    """Every dataset getter is only reachable as fetch_<name>() -- the old
+    bare name (e.g. astronaut() for fetch_astronaut()) must not resolve on
+    _skimage2.data, even though the underlying function of that name still
+    exists in _fetchers.py for skimage1's shim to import directly."""
+    assert hasattr(data, function_name)
+    assert not hasattr(data, function_name.removeprefix('fetch_'))
+
+
+@pytest.mark.thread_unsafe(reason="monkeypatches shared fetcher module state")
+@pytest.mark.parametrize('scikit_image_data_available', [True, False])
+@pytest.mark.parametrize(
+    'fetch_name, expected_shape',
+    [
+        ('fetch_astronaut', (512, 512, 3)),
+        ('fetch_camera', (512, 512)),
+    ],
+)
+def test_fetch_name_matrix_with_and_without_scikit_image_data(
+    fetch_name, expected_shape, scikit_image_data_available, tmp_path, monkeypatch
+):
+    """fetch_<name>() functions bundled by scikit-image-data return correct
+    data whether or not that package is actually installed -- served from
+    the bundle when available, downloaded via pooch and cached otherwise."""
+    pytest.importorskip('skimage_data')
+    if not scikit_image_data_available:
+        monkeypatch.setattr(_fetchers, 'skimage_data', None)
+    monkeypatch.setattr(_fetchers._image_fetcher, 'path', tmp_path)
+
+    result = getattr(data, fetch_name)()
+
+    assert result.shape == expected_shape
+    basename = fetch_name.removeprefix('fetch_') + '.png'
+    cached_path = tmp_path / 'data' / basename
+    assert cached_path.exists() == (not scikit_image_data_available)
+
+
+@pytest.mark.thread_unsafe(reason="monkeypatches shared fetcher module state")
+def test_fetch_public_wrapper_matches_internal_fetch(tmp_path, monkeypatch):
+    """The public fetch() is a thin wrapper: it must resolve to the exact
+    same path _fetch() would for the same registry key."""
+    monkeypatch.setattr(_fetchers._image_fetcher, 'path', tmp_path)
+    assert data.fetch('data/camera.png') == _fetchers._fetch('data/camera.png')
