@@ -40,23 +40,23 @@ def data_3d():
 
 
 def create_matrix(shape, model):
-    """Create a homogeneous test matrix
+    """Create a homogeneous test matrix.
 
     Parameters
     ----------
-    shape:
+    shape : tuple
         Shape of the reference image.
-    model: {translation,euclidean,affine}
-        Model of affine deformation
+    model : {translation, euclidean, affine}
+        Model of the affine deformation.
 
     Returns
     -------
-    transform: ndarray
-        Affine transformation matrix
+    transform : ndarray
+        Affine transformation matrix.
     """
     rng = np.random.default_rng(42)
     ndim = len(shape)
-    # Center the transformations
+    # center the transformations
     T = np.eye(ndim + 1, dtype=np.float64)
     T[:ndim, -1] = -np.array(shape) / 2
     matrix = np.eye(ndim + 1, dtype=np.float64)
@@ -66,7 +66,7 @@ def create_matrix(shape, model):
         model == ski.registration.EuclideanTransform
         or model == ski.registration.AffineTransform
     ):
-        # Rotations for each planes
+        # rotations for each planes
         for a in combinations(range(ndim), 2):
             R = np.eye(ndim + 1, dtype=np.float64)
             r = np.random.uniform(-np.pi / 10, np.pi / 10)
@@ -78,13 +78,13 @@ def create_matrix(shape, model):
             matrix = matrix @ R
 
     if model == ski.registration.AffineTransform:
-        # Shear for each plane
+        # shear for each plane
         for a in combinations(range(ndim), 2):
             r = rng.uniform(-0.01, 0.01)
             S = np.eye(ndim + 1)
             S[a[0], a[1]] = r
             matrix = S @ matrix
-        # Zoom
+        # zoom
         Z = np.eye(ndim + 1)
         for k in range(ndim):
             Z[k, k] = r = rng.uniform(0.9, 1.1)
