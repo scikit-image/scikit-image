@@ -368,6 +368,7 @@ def test_fetch_name_matrix_with_and_without_scikit_image_data(
     assert cached_path.exists() == (not scikit_image_data_available)
 
 
+@pytest.mark.skipif(is_wasm, reason="pooch is unavailable on WASM")
 @pytest.mark.thread_unsafe(reason="monkeypatches shared fetcher module state")
 def test_fetch_public_wrapper_matches_internal_fetch(tmp_path, monkeypatch):
     """The public fetch() is a thin wrapper: it must resolve to the exact

@@ -51,6 +51,10 @@ _SEARCH_REP_PAIRS = (
         r'\g<fi> skimage\g<connect>',
     ),
     (re.compile(r'_?skimage2\.'), 'skimage.'),
+    # skimage2's data fetchers are named `fetch_<name>` (e.g. `fetch_astronaut`),
+    # but skimage (v1) keeps the old bare names (e.g. `astronaut`) for backwards
+    # compatibility, so strip the prefix for adapted doctests.
+    (re.compile(r'\bfetch_(\w+)\b'), r'\1'),
 )
 
 

@@ -178,16 +178,15 @@ class ImageCollection:
 
     Examples
     --------
+    >>> import os
     >>> import tempfile
     >>> import imageio.v3 as iio3
     >>> import _skimage2.io as io
-    >>> from _skimage2.data import binary_blobs
-    >>> from _skimage2.util import img_as_ubyte
 
     # Save a couple of sample images to load as a collection
     >>> tmp_dir = tempfile.mkdtemp()
     >>> for i in range(2):
-    ...     img = img_as_ubyte(binary_blobs((200, 200), 10, rng=i))
+    ...     img = np.random.default_rng(i).integers(0, 256, (200, 200), dtype=np.uint8)
     ...     iio3.imwrite(os.path.join(tmp_dir, f'chess{i}.png'), img)
 
     >>> coll = io.ImageCollection(os.path.join(tmp_dir, 'chess*.png'))
@@ -478,6 +477,7 @@ class MultiImage(ImageCollection):
 
     Examples
     --------
+    >>> import os
     >>> import tempfile
     >>> import imageio.v3 as iio3
     >>> from _skimage2.io import ImageCollection
