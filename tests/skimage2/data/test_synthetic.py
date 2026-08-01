@@ -10,6 +10,11 @@ SEED = 3  # Pin randomness of tests
 
 
 class Test_binary_blobs:
+    def test_required_args_positional(self):
+        blobs_kw = binary_blobs(shape=(32, 32), blob_size=5, rng=SEED)
+        blobs_pos = binary_blobs((32, 32), 5, rng=SEED)
+        np.testing.assert_array_equal(blobs_kw, blobs_pos)
+
     def test_volume_fraction(self):
         blobs = binary_blobs(shape=(128, 128), blob_size=13, rng=SEED)
         assert_almost_equal(blobs.mean(), 0.5, decimal=1)

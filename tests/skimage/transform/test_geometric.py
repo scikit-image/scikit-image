@@ -327,14 +327,21 @@ def test_affine_shear():
 
 @pytest.mark.parametrize(
     'pts, params',
-    product(
-        (SRC, DST),
-        (
-            dict(scale=(4, 5), shear=(1.4, 1.8), rotation=0.4, translation=(10, 12)),
-            dict(
-                scale=(-0.5, 3), shear=(-0.3, -0.1), rotation=1.4, translation=(-4, 3)
+    list(
+        product(
+            (SRC, DST),
+            (
+                dict(
+                    scale=(4, 5), shear=(1.4, 1.8), rotation=0.4, translation=(10, 12)
+                ),
+                dict(
+                    scale=(-0.5, 3),
+                    shear=(-0.3, -0.1),
+                    rotation=1.4,
+                    translation=(-4, 3),
+                ),
             ),
-        ),
+        )
     ),
 )
 def test_affine_params(pts, params):

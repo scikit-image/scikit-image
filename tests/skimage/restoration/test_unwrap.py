@@ -53,8 +53,13 @@ def test_unwrap_1d():
     image = np.linspace(0, 10 * np.pi, 100)
     check_unwrap(image)
     # Masked arrays are not allowed in 1D
-    with testing.raises(ValueError):
+    with testing.raises(ValueError, match='1D masked images cannot'):
         check_unwrap(image, True)
+    # Arrays with NaN not allowed in 1D
+    nan_image = image.copy()
+    nan_image[50] = np.nan
+    with testing.raises(ValueError, match='1D images with NaNs cannot'):
+        check_unwrap(nan_image, None)
     # wrap_around is not allowed in 1D
     with testing.raises(ValueError):
         unwrap_phase(image, True, rng=0)
@@ -71,6 +76,19 @@ def test_unwrap_2d(check_with_mask):
     check_unwrap(image, mask)
 
 
+def test_unwrap_2d_nan():
+    x, y = np.ogrid[:8, :16]
+    image = 2 * np.pi * (x * 0.2 + y * 0.1)
+    image_wrapped = np.angle(np.exp(1j * image))
+    mask = np.zeros(image.shape, dtype=bool)
+    mask[4:6, 4:8] = True
+    image_wrapped_masked = np.ma.array(image_wrapped, mask=mask, fill_value=0.5)
+    mask_res = unwrap_phase(image_wrapped_masked, rng=0)
+    image_wrapped_nans = image_wrapped.copy()
+    image_wrapped_nans[mask] = np.nan
+    np.testing.assert_equal(mask_res, unwrap_phase(image_wrapped_nans, rng=0))
+
+
 @testing.parametrize("check_with_mask", (False, True))
 def test_unwrap_3d(check_with_mask):
     mask = None
@@ -80,6 +98,20 @@ def test_unwrap_3d(check_with_mask):
         mask = np.zeros(image.shape, dtype=bool)
         mask[4:6, 4:6, 1:3] = True
     check_unwrap(image, mask)
+
+
+def test_unwrap_3d_nan():
+    x, y, z = np.ogrid[:8, :12, :16]
+    image = 2 * np.pi * (x * 0.2 + y * 0.1 + z * 0.05)
+    image_wrapped = np.angle(np.exp(1j * image))
+    mask = np.zeros(image.shape, dtype=bool)
+    mask[4:6, 4:6, 1:3] = True
+    image_wrapped_masked = np.ma.array(image_wrapped, mask=mask, fill_value=0.5)
+    mask_res = unwrap_phase(image_wrapped_masked, rng=0)
+    image_wrapped_nans = image_wrapped.copy()
+    image_wrapped_nans[mask] = np.nan
+    masked_nan = unwrap_phase(image_wrapped_nans, rng=0)
+    np.testing.assert_equal(mask_res, masked_nan)
 
 
 def check_wrap_around(ndim, axis):
