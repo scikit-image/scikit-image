@@ -244,7 +244,12 @@ def test_fetch_without_pooch_raises_clear_error(monkeypatch):
 
 # --- optional `scikit-image-data` package (bundles a curated data subset) ---
 
+requires_pooch = pytest.mark.skipif(
+    _image_fetcher is None, reason="pooch is not installed / unavailable"
+)
 
+
+@requires_pooch
 @pytest.mark.thread_unsafe(reason="monkeypatches shared fetcher module state")
 def test_fetch_prefers_scikit_image_data_package(tmp_path, monkeypatch):
     """When installed, `scikit-image-data` is used instead of downloading --
@@ -258,6 +263,7 @@ def test_fetch_prefers_scikit_image_data_package(tmp_path, monkeypatch):
     assert not (tmp_path / 'data' / 'astronaut.png').exists()
 
 
+@requires_pooch
 @pytest.mark.thread_unsafe(reason="monkeypatches shared fetcher module state")
 @pytest.mark.skipif(is_wasm, reason="no access to pytest-localserver")
 def test_fetch_downloads_file_not_in_scikit_image_data_package(
@@ -340,6 +346,7 @@ def test_fetch_functions_are_public_and_bare_names_are_not(function_name):
     assert not hasattr(data, function_name.removeprefix('fetch_'))
 
 
+@requires_pooch
 @pytest.mark.thread_unsafe(reason="monkeypatches shared fetcher module state")
 @pytest.mark.parametrize('scikit_image_data_available', [True, False])
 @pytest.mark.parametrize(
@@ -368,7 +375,7 @@ def test_fetch_name_matrix_with_and_without_scikit_image_data(
     assert cached_path.exists() == (not scikit_image_data_available)
 
 
-@pytest.mark.skipif(is_wasm, reason="pooch is unavailable on WASM")
+@requires_pooch
 @pytest.mark.thread_unsafe(reason="monkeypatches shared fetcher module state")
 def test_fetch_public_wrapper_matches_internal_fetch(tmp_path, monkeypatch):
     """The public fetch() is a thin wrapper: it must resolve to the exact

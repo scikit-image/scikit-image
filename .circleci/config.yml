@@ -31,7 +31,7 @@ jobs:
           command: |
             python3 -m pip install --upgrade pip
             python3 -m pip install -r requirements/build.txt
-            python3 -m pip install -vv --no-build-isolation .
+            python3 -m pip install -vv --no-build-isolation --no-deps .
             # Ensure build succeeds without runtime requirements
             python3 -m pip install -r requirements/default.txt
             python3 -m pip install -r requirements/docs.txt
