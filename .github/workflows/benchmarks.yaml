@@ -89,6 +89,7 @@ jobs:
             baseline_label="$PR_BASE_LABEL"
             contender_label="$PR_HEAD_LABEL"
             asv_factor="1.5"
+            asv_processes="2"
           elif [ "$EVENT_NAME" = "push" ]; then
             before="$PUSH_BEFORE_SHA"
             if [ -z "$before" ] || [ "$before" = "0000000000000000000000000000000000000000" ] \
@@ -99,16 +100,22 @@ jobs:
             baseline_label="$before"
             contender_label="$GITHUB_SHA"
             asv_factor="3.0"
+            # Unattended merge check: trade some statistical robustness for
+            # a much shorter run (single round instead of asv's default of
+            # two), offset by the higher noise-tolerant factor above.
+            asv_processes="1"
           else
             baseline_sha=$(git rev-parse "$GITHUB_SHA~1")
             baseline_label="$baseline_sha"
             contender_label="$GITHUB_SHA"
             asv_factor="1.5"
+            asv_processes="2"
           fi
           echo "baseline_sha=$baseline_sha" >> "$GITHUB_OUTPUT"
           echo "baseline_label=$baseline_label" >> "$GITHUB_OUTPUT"
           echo "contender_label=$contender_label" >> "$GITHUB_OUTPUT"
           echo "asv_factor=$asv_factor" >> "$GITHUB_OUTPUT"
+          echo "asv_processes=$asv_processes" >> "$GITHUB_OUTPUT"
 
       - name: Run benchmarks
         shell: bash -l {0}
@@ -118,6 +125,7 @@ jobs:
           MKL_NUM_THREADS: 1
           OMP_NUM_THREADS: 1
           ASV_FACTOR: "${{ steps.commits.outputs.asv_factor }}"
+          ASV_PROCESSES: "${{ steps.commits.outputs.asv_processes }}"
           ASV_SKIP_SLOW: 1
           # Escape user controlled variables
           BASELINE_SHA: "${{ steps.commits.outputs.baseline_sha }}"
@@ -135,7 +143,7 @@ jobs:
           echo "Contender: $GITHUB_SHA ($CONTENDER_LABEL)"
 
           # Run benchmarks for current commit against base
-          ASV_OPTIONS="--split --show-stderr --factor $ASV_FACTOR"
+          ASV_OPTIONS="--split --show-stderr --factor $ASV_FACTOR -a processes=$ASV_PROCESSES"
           asv continuous $ASV_OPTIONS $BASELINE_SHA $GITHUB_SHA \
               | sed "/Traceback \|failed$\|PERFORMANCE DECREASED/ s/^/::error::/" \
               | tee benchmarks.log

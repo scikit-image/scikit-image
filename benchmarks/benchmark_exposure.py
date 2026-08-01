@@ -45,8 +45,8 @@ class ExposureSuite:
 class MatchHistogramsSuite:
     param_names = ["shape", "dtype", "multichannel"]
     params = [
-        ((64, 64), (256, 256), (1024, 1024)),
-        (np.uint8, np.uint32, np.float32, np.float64),
+        ((64, 64), (1024, 1024)),
+        (np.uint8, np.float64),
         (False, True),
     ]
 

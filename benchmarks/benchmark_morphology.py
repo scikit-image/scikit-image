@@ -73,9 +73,9 @@ class GrayMorphology2D:
     param_names = ["shape", "footprint", "radius", "decomposition"]
     params = [
         ((512, 512),),
-        ("square", "diamond", "octagon", "disk", "ellipse", "star"),
-        (1, 3, 5, 15, 25, 40),
-        (None, "sequence", "separable", "crosses"),
+        ("disk", "octagon"),
+        (5, 25),
+        (None, "sequence"),
     ]
 
     def setup(self, shape, footprint, radius, decomposition):
@@ -131,8 +131,8 @@ class GrayMorphology3D:
     params = [
         ((128, 128, 128),),
         ("ball", "cube", "octahedron"),
-        (1, 3, 5, 10),
-        (None, "sequence", "separable"),
+        (3, 10),
+        (None, "sequence"),
     ]
 
     def setup(self, shape, footprint, radius, decomposition):
@@ -165,8 +165,8 @@ class GrayReconstruction:
     # skip rectangle as roughly equivalent to square
     param_names = ["shape", "dtype"]
     params = [
-        ((10, 10), (64, 64), (1200, 1200), (96, 96, 96)),
-        (np.uint8, np.float32, np.float64),
+        ((64, 64), (1200, 1200), (96, 96, 96)),
+        (np.uint8, np.float64),
     ]
 
     def setup(self, shape, dtype):

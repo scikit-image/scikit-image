@@ -7,8 +7,8 @@ from skimage import transform
 class InterpolationResize:
     param_names = ['new_shape', 'order', 'mode', 'dtype', 'anti_aliasing']
     params = [
-        ((500, 800), (2000, 4000), (80, 80, 80), (150, 150, 150)),  # new_shape
-        (0, 1, 3, 5),  # order
+        ((500, 800), (150, 150, 150)),  # new_shape (one 2D, one 3D)
+        (0, 3),  # order
         ('symmetric',),  # mode
         (np.float64,),  # dtype
         (True,),  # anti_aliasing

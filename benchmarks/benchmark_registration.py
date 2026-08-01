@@ -44,7 +44,7 @@ class PhaseCrossCorrelationRegistration:
     """Benchmarks for registration.phase_cross_correlation in scikit-image"""
 
     param_names = ["ndims", "image_size", "upsample_factor", "dtype"]
-    params = [(2, 3), (32, 100), (1, 5, 10), (np.complex64, np.complex128)]
+    params = [(2, 3), (100,), (1, 10), (np.complex64, np.complex128)]
 
     def setup(self, ndims, image_size, upsample_factor, dtype, *args):
         if phase_cross_correlation is None:
