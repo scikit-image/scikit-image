@@ -124,8 +124,8 @@ to:
 
 - [ ] **Step 4: Validate YAML syntax**
 
-Run: `python -c "import yaml; yaml.safe_load(open('.github/workflows/benchmarks.yaml'))"`
-Expected: no output, exit code 0 (no exception raised).
+Run: `pre-commit run check-yaml --files .github/workflows/benchmarks.yaml`
+Expected: `Passed` (exit 0). The ambient environment has no `pyyaml` installed, so use this hook — which runs in its own isolated venv — rather than `python -c "import yaml"`.
 
 - [ ] **Step 5: Run zizmor lint**
 
@@ -226,8 +226,8 @@ Do not change anything else in this step (the `run:` script body stays as-is).
 
 - [ ] **Step 3: Validate YAML syntax**
 
-Run: `python -c "import yaml; yaml.safe_load(open('.github/workflows/benchmarks.yaml'))"`
-Expected: no output, exit code 0.
+Run: `pre-commit run check-yaml --files .github/workflows/benchmarks.yaml`
+Expected: `Passed` (exit 0). The ambient environment has no `pyyaml` installed, so use this hook — which runs in its own isolated venv — rather than `python -c "import yaml"`.
 
 - [ ] **Step 4: Run zizmor lint**
 
@@ -270,8 +270,8 @@ In `.github/workflows/benchmarks.yaml`, add this as the last step in the `benchm
 
 - [ ] **Step 2: Validate YAML syntax**
 
-Run: `python -c "import yaml; yaml.safe_load(open('.github/workflows/benchmarks.yaml'))"`
-Expected: no output, exit code 0.
+Run: `pre-commit run check-yaml --files .github/workflows/benchmarks.yaml`
+Expected: `Passed` (exit 0). The ambient environment has no `pyyaml` installed, so use this hook — which runs in its own isolated venv — rather than `python -c "import yaml"`.
 
 - [ ] **Step 3: Run zizmor lint**
 
