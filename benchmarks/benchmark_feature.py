@@ -21,7 +21,7 @@ class FeatureSuite:
 
     def time_glcm(self):
         pi = np.pi
-        feature.greycomatrix(
+        feature.graycomatrix(
             self.image_ubyte, distances=[1, 2], angles=[0, pi / 4, pi / 2, 3 * pi / 4]
         )
 
