@@ -145,6 +145,11 @@ jobs:
           OPENBLAS_NUM_THREADS: 1
           MKL_NUM_THREADS: 1
           OMP_NUM_THREADS: 1
+          # asv installs each matrix requirement via its own separate pip
+          # invocation; prefer an existing wheel over a much slower source
+          # build if a package's very latest release doesn't have full
+          # wheel coverage yet.
+          PIP_PREFER_BINARY: 1
           ASV_FACTOR: "${{ needs.resolve-commits.outputs.asv_factor }}"
           ASV_PROCESSES: "${{ needs.resolve-commits.outputs.asv_processes }}"
           ASV_SKIP_SLOW: 1

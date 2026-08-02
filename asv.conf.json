@@ -18,8 +18,8 @@
     "pythons": ["3.12"],
     "matrix": {
          "virtualenv": [],
-         "numpy": [],
-         "scipy": [],
+         "numpy": ["2.4.6"],
+         "scipy": ["1.17.1"],
          "pooch": []
     },
 
