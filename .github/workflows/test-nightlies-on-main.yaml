@@ -49,6 +49,8 @@ jobs:
 
       - name: Build and install
         run: |
+          # TODO: --no-deps only needed while scikit-image-data is an
+          # unpublished git dependency (no wheel); drop once it's on PyPI.
           pip install -v --no-build-isolation --no-deps .
 
       - name: Setup test dependencies
