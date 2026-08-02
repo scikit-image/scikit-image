@@ -11,9 +11,17 @@ installed to run this script (the registry is parsed directly out of its
 source file, not imported).
 
 Note: this does not download files used only internally by scikit-image's
-test suite (files with no entry in ``registry_urls``); those are fetched
-directly from the scikit-image GitHub repository by the test runner and are
-not needed to use the public ``skimage.data`` API.
+test suite (files with no entry in ``registry_urls``); those are checked
+into the ``tests/`` tree directly and are not needed to use the public
+``skimage.data`` API.
+
+Repackager/tester workflow for offline test runs: run this script to
+pre-populate the cache, then run the test suite with the
+``SKIMAGE_TEST_OFFLINE`` environment variable set (to any value) to confirm
+nothing else unexpectedly needs the network -- any test that would
+otherwise attempt a download skips instead if the file isn't already
+available locally (bundled with ``scikit-image-data`` or cached by this
+script).
 """
 
 import argparse
@@ -135,7 +143,7 @@ def main(argv=None):
     if skipped:
         print(
             f'{len(skipped)} test-only fixtures skipped (not part of the public '
-            'skimage.data API; fetched by the test suite from GitHub directly)'
+            'skimage.data API; checked into the tests/ tree directly)'
         )
     for key, _status, err in errors:
         print(f'  FAILED {key}: {err}', file=sys.stderr)

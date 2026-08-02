@@ -104,7 +104,7 @@ def test_masked_registration_random_masks_non_equal_sizes():
     assert_equal(measured_shift, -np.array(shift))
 
 
-def test_masked_registration_padfield_data(test_root_dir):
+def test_masked_registration_padfield_data(local_data_path):
     """Masked translation registration should behave like in the original
     publication"""
     # Test translated from MATLABimplementation `MaskedFFTRegistrationTest`
@@ -114,9 +114,9 @@ def test_masked_registration_padfield_data(test_root_dir):
     shifts = [(75, 75), (-130, 130), (130, 130)]
     for xi, yi in shifts:
         fname = f'registration/data/OriginalX{xi}Y{yi}.png'
-        fixed_image = imread(test_root_dir / fname)
+        fixed_image = imread(local_data_path(fname))
         fname = f'registration/data/TransformedX{xi}Y{yi}.png'
-        moving_image = imread(test_root_dir / fname)
+        moving_image = imread(local_data_path(fname))
 
         # Valid pixels are 1
         fixed_mask = fixed_image != 0

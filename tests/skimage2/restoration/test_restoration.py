@@ -28,7 +28,7 @@ def _get_rtol_atol(dtype):
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 @pytest.mark.parametrize('ndim', [1, 2, 3])
-def test_wiener(dtype, ndim, test_root_dir):
+def test_wiener(dtype, ndim, local_data_path):
     """
     currently only performs pixelwise comparison to
     precomputed result in 2d case.
@@ -52,7 +52,7 @@ def test_wiener(dtype, ndim, test_root_dir):
 
     if ndim == 2:
         rtol, atol = _get_rtol_atol(dtype)
-        path = test_root_dir / 'restoration/camera_wiener.npy'
+        path = local_data_path('restoration/camera_wiener.npy')
         np.testing.assert_allclose(deconvolved, np.load(path), rtol=rtol, atol=atol)
 
     _, laplacian = uft.laplacian(ndim, data.shape)
@@ -67,7 +67,7 @@ def test_wiener(dtype, ndim, test_root_dir):
 
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
-def test_unsupervised_wiener(dtype, test_root_dir):
+def test_unsupervised_wiener(dtype, local_data_path):
     psf = np.ones((5, 5), dtype=dtype) / 25
     data = convolve2d(test_img, psf, 'same')
     seed = 16829302
@@ -82,7 +82,7 @@ def test_unsupervised_wiener(dtype, test_root_dir):
     assert deconvolved.dtype == float_type
 
     rtol, atol = _get_rtol_atol(dtype)
-    path = test_root_dir / 'restoration/camera_unsup.npy'
+    path = local_data_path('restoration/camera_unsup.npy')
     np.testing.assert_allclose(deconvolved, np.load(path), rtol=rtol, atol=atol)
 
     _, laplacian = uft.laplacian(2, data.shape)
@@ -101,7 +101,7 @@ def test_unsupervised_wiener(dtype, test_root_dir):
         rng=seed,
     )[0]
     assert deconvolved2.real.dtype == float_type
-    path = test_root_dir / 'restoration/camera_unsup2.npy'
+    path = local_data_path('restoration/camera_unsup2.npy')
     np.testing.assert_allclose(
         np.real(deconvolved2), np.load(path), rtol=rtol, atol=atol
     )
@@ -146,7 +146,7 @@ def test_image_shape():
 
 
 @pytest.mark.parametrize('ndim', [1, 2, 3])
-def test_richardson_lucy(ndim, test_root_dir):
+def test_richardson_lucy(ndim, local_data_path):
     psf = np.ones([5] * ndim, dtype=float) / 5**ndim
     # fails with different seeds?
     rng = np.random.RandomState(0)
@@ -160,7 +160,7 @@ def test_richardson_lucy(ndim, test_root_dir):
     deconvolved = restoration.richardson_lucy(data, psf, num_iter=5)
 
     if ndim == 2:
-        path = test_root_dir / 'restoration/camera_rl.npy'
+        path = local_data_path('restoration/camera_rl.npy')
         np.testing.assert_allclose(deconvolved, np.load(path), rtol=1e-3)
 
 

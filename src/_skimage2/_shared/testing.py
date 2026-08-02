@@ -227,6 +227,32 @@ def fetch(data_filename, prefix=None):
         pytest.skip(f'Unable to download {data_filename}', allow_module_level=True)
 
 
+def local_data_path(path):
+    """Resolve a path to a git-tracked test-data file, skipping the test
+    if it's missing.
+
+    Unlike `fetch`, this never touches pooch or the network -- it's for
+    fixture files committed directly in the `tests/` tree (e.g. via the
+    `test_root_dir` fixture). Those are normally present in a source
+    checkout or sdist, but not necessarily in every downstream
+    packaging/install scenario (e.g. a test run against an installed
+    wheel, which doesn't ship the `tests/` directory).
+
+    Parameters
+    ----------
+    path : pathlib.Path
+        Path to the test-data file.
+
+    Returns
+    -------
+    path : pathlib.Path
+        The same path, unchanged, if it exists.
+    """
+    if not path.exists():
+        pytest.skip(f'Test data file not found: {path}')
+    return path
+
+
 # Ref: about the lack of threading support in WASM, please see
 # https://github.com/pyodide/pyodide/issues/237
 def run_in_parallel(workers=2, warnings_matching=None):

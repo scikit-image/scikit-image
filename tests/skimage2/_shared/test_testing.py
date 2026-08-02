@@ -10,6 +10,7 @@ from _skimage2._shared.testing import (
     doctest_skip_parser,
     run_in_parallel,
     assert_stacklevel,
+    local_data_path,
 )
 from _skimage2._shared import testing
 from _skimage2._shared._dependency_checks import is_wasm
@@ -79,6 +80,18 @@ def test_skipper():
         doctest_skip_parser(f)
     with testing.raises(NameError):
         doctest_skip_parser(c)
+
+
+def test_local_data_path_returns_existing_path_unchanged(tmp_path):
+    existing = tmp_path / 'exists.txt'
+    existing.write_text('data')
+    assert local_data_path(existing) == existing
+
+
+def test_local_data_path_skips_when_missing(tmp_path):
+    missing = tmp_path / 'does_not_exist.txt'
+    with pytest.raises(pytest.skip.Exception):
+        local_data_path(missing)
 
 
 @pytest.mark.thread_unsafe(reason="test is explicitly multithreaded")

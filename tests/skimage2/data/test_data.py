@@ -279,9 +279,12 @@ def test_fetch_downloads_file_not_in_scikit_image_data_package(
     test_key = 'data/_test_not_in_scikit_image_data.bin'
     monkeypatch.setitem(_fetchers.registry, test_key, expected_hash)
     monkeypatch.setitem(_fetchers.registry_urls, test_key, httpserver.url)
-    # `Pooch.urls` is copied at `pooch.create()` time, unlike `Pooch.registry`
-    # (kept as the same dict object) -- so it needs patching separately.
+    # `Pooch.urls` is copied at `pooch.create()` time. `Pooch.registry` is
+    # also a separate dict now (filtered down to only CDN-hosted keys,
+    # rather than being the same object as `_registry.py`'s `registry`) --
+    # so both need patching separately from the module-level dicts above.
     monkeypatch.setitem(_fetchers._image_fetcher.urls, test_key, httpserver.url)
+    monkeypatch.setitem(_fetchers._image_fetcher.registry, test_key, expected_hash)
     monkeypatch.setattr(_fetchers._image_fetcher, 'path', tmp_path)
 
     result_path = _fetchers._fetch(test_key)
@@ -382,3 +385,109 @@ def test_fetch_public_wrapper_matches_internal_fetch(tmp_path, monkeypatch):
     same path _fetch() would for the same registry key."""
     monkeypatch.setattr(_fetchers._image_fetcher, 'path', tmp_path)
     assert data.fetch('data/camera.png') == _fetchers._fetch('data/camera.png')
+
+
+# --- SKIMAGE_TEST_OFFLINE: opt-in test-time skip for un-cached fetches ---
+
+
+@requires_pooch
+@pytest.mark.thread_unsafe(reason="mutates process-wide environment variables")
+def test_fetch_offline_env_var_skips_when_not_local(monkeypatch, tmp_path):
+    """With SKIMAGE_TEST_OFFLINE set, _fetch() must skip (not attempt a
+    download) for a file that isn't bundled or already cached, even though
+    pooch itself is installed and available."""
+    monkeypatch.setenv('SKIMAGE_TEST_OFFLINE', '1')
+    monkeypatch.setattr(_fetchers, 'skimage_data', None)
+    monkeypatch.setattr(_fetchers._image_fetcher, 'path', tmp_path)
+    test_key = 'data/_test_offline_not_local.bin'
+    monkeypatch.setitem(_fetchers.registry, test_key, '0' * 64)
+
+    with pytest.raises(pytest.skip.Exception):
+        _fetchers._fetch(test_key)
+
+
+@requires_pooch
+@pytest.mark.thread_unsafe(
+    reason="mutates process-wide environment variables and shared fetcher state"
+)
+def test_download_all_ignores_offline_toggle(monkeypatch, tmp_path):
+    """download_all() is an explicit request to download everything -- it
+    must ignore SKIMAGE_TEST_OFFLINE, unlike implicit per-dataset fetches."""
+    monkeypatch.setenv('SKIMAGE_TEST_OFFLINE', '1')
+    monkeypatch.setattr(_fetchers, 'skimage_data', None)
+    test_key = 'data/_test_download_all_offline.bin'
+    monkeypatch.setitem(_fetchers.registry, test_key, '0' * 64)
+    monkeypatch.setattr(_fetchers._image_fetcher, 'registry', {test_key: '0' * 64})
+    monkeypatch.setattr(_fetchers._image_fetcher, 'path', tmp_path)
+    fake_path = tmp_path / 'data' / '_test_download_all_offline.bin'
+    fake_path.parent.mkdir(parents=True, exist_ok=True)
+    fake_path.write_bytes(b'x')
+    monkeypatch.setattr(_fetchers._image_fetcher, 'fetch', lambda name: str(fake_path))
+
+    # Should not raise/skip -- proves _force_online=True bypassed the toggle.
+    _fetchers.download_all()
+
+
+def test_local_only_registry_files_are_present():
+    """Regression guard for scikit-image's own CI (which always checks out
+    the full repo, so `tests/` is always present regardless of whether the
+    package itself is installed from a wheel or sdist -- see
+    `.github/workflows/_test_linux_for_python_x.yaml` etc., which all run
+    `actions/checkout` before installing/testing).
+
+    Every registry key with no `registry_urls` (CDN) entry is a test-only
+    fixture expected to be tracked in git and read directly off disk (via
+    `test_root_dir`/`local_data_path`, not `fetch()`) -- see the "Part 3"
+    design doc. `local_data_path` skips gracefully when such a file is
+    missing, which is the *correct* behavior for a downstream repackager
+    testing against an installed wheel without `tests/`. This test guards
+    the other case: a fixture going missing or corrupted by accident in an
+    environment (like our own CI) that's supposed to have it, where a
+    silent skip would hide a real regression.
+
+    Only `tests/skimage2/` is checked: `tests/skimage/conftest.py`'s own
+    `test_root_dir` fixture redirects there too (there's a single shared
+    copy of these fixtures, not one per test suite -- confirmed by reading
+    that fixture's implementation, not assumed).
+    """
+    test_root = Path(__file__).resolve().parents[2] / 'skimage2'
+    local_only_keys = sorted(set(_fetchers.registry) - set(_fetchers.registry_urls))
+    assert local_only_keys, 'sanity check: expected some local-only registry keys'
+
+    missing = [
+        key
+        for key in local_only_keys
+        if not _fetchers._has_hash(test_root / key, _fetchers.registry[key])
+    ]
+    assert (
+        not missing
+    ), f'{test_root}: missing or corrupted local test-data file(s): {missing}'
+
+
+# --- no GitHub raw-URL fallback: pooch only ever knows about CDN keys ---
+
+
+@requires_pooch
+def test_image_fetcher_registry_is_restricted_to_cdn_keys():
+    """`_image_fetcher` must only know about registry keys that have a CDN
+    url -- never the full registry -- so nothing can silently fall back to
+    the (removed) GitHub raw-URL base_url for internal test-only fixtures.
+    This also fixes download_all(), since it iterates
+    `_image_fetcher.registry`."""
+    assert set(_fetchers._image_fetcher.registry) == set(_fetchers.registry_urls)
+
+
+@requires_pooch
+@pytest.mark.thread_unsafe(reason="mutates shared fetcher module state")
+def test_fetch_non_cdn_key_raises_pooch_registry_error_not_github(
+    monkeypatch, tmp_path
+):
+    """Fetching a key with no CDN url must fail with pooch's own clear
+    registry-membership error, not silently attempt (and possibly
+    succeed at) a GitHub raw-URL download."""
+    monkeypatch.setattr(_fetchers, 'skimage_data', None)
+    monkeypatch.setattr(_fetchers._image_fetcher, 'path', tmp_path)
+    non_cdn_key = next(iter(set(_fetchers.registry) - set(_fetchers.registry_urls)))
+
+    with pytest.raises(ValueError, match='not in the registry'):
+        _fetchers._fetch(non_cdn_key)

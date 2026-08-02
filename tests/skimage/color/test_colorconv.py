@@ -422,7 +422,7 @@ class TestColorconv:
     # test matrices for xyz2lab and lab2xyz generated using
     # http://www.easyrgb.com/index.php?X=CALC
     # Note: easyrgb website displays xyz*100
-    def test_xyz2lab(self, test_root_dir):
+    def test_xyz2lab(self, local_data_path):
         assert_array_almost_equal(xyz2lab(self.xyz_array), self.lab_array, decimal=3)
 
         # Test the conversion with the rest of the illuminants.
@@ -431,13 +431,13 @@ class TestColorconv:
             for obs in ["2", "10", "R"]:
                 obs = obs.lower()
                 fname = f'color/data/lab_array_{I}_{obs}.npy'
-                lab_array_I_obs = np.load(test_root_dir / fname)
+                lab_array_I_obs = np.load(local_data_path(fname))
                 assert_array_almost_equal(
                     lab_array_I_obs, xyz2lab(self.xyz_array, I, obs), decimal=2
                 )
         for I in ["d75", "e"]:
             fname = f'color/data/lab_array_{I}_2.npy'
-            lab_array_I_obs = np.load(test_root_dir / fname)
+            lab_array_I_obs = np.load(local_data_path(fname))
             assert_array_almost_equal(
                 lab_array_I_obs, xyz2lab(self.xyz_array, I, "2"), decimal=2
             )
@@ -457,7 +457,7 @@ class TestColorconv:
         assert xyz2lab(img).dtype == img.dtype
         assert xyz2lab(img32).dtype == img32.dtype
 
-    def test_lab2xyz(self, test_root_dir):
+    def test_lab2xyz(self, local_data_path):
         assert_array_almost_equal(lab2xyz(self.lab_array), self.xyz_array, decimal=3)
 
         # Test the conversion with the rest of the illuminants.
@@ -466,13 +466,13 @@ class TestColorconv:
             for obs in ["2", "10", "R"]:
                 obs = obs.lower()
                 fname = f'color/data/lab_array_{I}_{obs}.npy'
-                lab_array_I_obs = np.load(test_root_dir / fname)
+                lab_array_I_obs = np.load(local_data_path(fname))
                 assert_array_almost_equal(
                     lab2xyz(lab_array_I_obs, I, obs), self.xyz_array, decimal=3
                 )
         for I in ["d75", "e"]:
             fname = f'color/data/lab_array_{I}_2.npy'
-            lab_array_I_obs = np.load(test_root_dir / fname)
+            lab_array_I_obs = np.load(local_data_path(fname))
             assert_array_almost_equal(
                 lab2xyz(lab_array_I_obs, I, "2"), self.xyz_array, decimal=3
             )
@@ -549,7 +549,7 @@ class TestColorconv:
     # test matrices for xyz2luv and luv2xyz generated using
     # http://www.easyrgb.com/index.php?X=CALC
     # Note: easyrgb website displays xyz*100
-    def test_xyz2luv(self, test_root_dir):
+    def test_xyz2luv(self, local_data_path):
         assert_array_almost_equal(xyz2luv(self.xyz_array), self.luv_array, decimal=3)
 
         # Test the conversion with the rest of the illuminants.
@@ -558,13 +558,13 @@ class TestColorconv:
             for obs in ["2", "10", "R"]:
                 obs = obs.lower()
                 fname = f'color/data/luv_array_{I}_{obs}.npy'
-                luv_array_I_obs = np.load(test_root_dir / fname)
+                luv_array_I_obs = np.load(local_data_path(fname))
                 assert_array_almost_equal(
                     luv_array_I_obs, xyz2luv(self.xyz_array, I, obs), decimal=2
                 )
         for I in ["d75", "e"]:
             fname = f'color/data/luv_array_{I}_2.npy'
-            luv_array_I_obs = np.load(test_root_dir / fname)
+            luv_array_I_obs = np.load(local_data_path(fname))
             assert_array_almost_equal(
                 luv_array_I_obs, xyz2luv(self.xyz_array, I, "2"), decimal=2
             )
@@ -584,7 +584,7 @@ class TestColorconv:
         assert xyz2luv(img).dtype == img.dtype
         assert xyz2luv(img32).dtype == img32.dtype
 
-    def test_luv2xyz(self, test_root_dir):
+    def test_luv2xyz(self, local_data_path):
         assert_array_almost_equal(luv2xyz(self.luv_array), self.xyz_array, decimal=3)
 
         # Test the conversion with the rest of the illuminants.
@@ -593,13 +593,13 @@ class TestColorconv:
             for obs in ["2", "10", "R"]:
                 obs = obs.lower()
                 fname = f'color/data/luv_array_{I}_{obs}.npy'
-                luv_array_I_obs = np.load(test_root_dir / fname)
+                luv_array_I_obs = np.load(local_data_path(fname))
                 assert_array_almost_equal(
                     luv2xyz(luv_array_I_obs, I, obs), self.xyz_array, decimal=3
                 )
         for I in ["d75", "e"]:
             fname = f'color/data/luv_array_{I}_2.npy'
-            luv_array_I_obs = np.load(test_root_dir / fname)
+            luv_array_I_obs = np.load(local_data_path(fname))
             assert_array_almost_equal(
                 luv2xyz(luv_array_I_obs, I, "2"), self.xyz_array, decimal=3
             )

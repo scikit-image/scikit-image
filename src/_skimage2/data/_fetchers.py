@@ -111,7 +111,7 @@ def _default_cache_dir():
     return osp.join(base, 'scikit-image')
 
 
-def _create_image_fetcher(prefix=None):
+def _create_image_fetcher():
     try:
         import pooch
 
@@ -136,28 +136,14 @@ def _create_image_fetcher(prefix=None):
     else:
         skimage_version_for_pooch = __version__.replace('.dev', '+')
 
-    if '+' in skimage_version_for_pooch:
-        if prefix is not None:
-            url = (
-                "https://github.com/scikit-image/scikit-image/raw/"
-                "{version}/tests/skimage2/"
-            )
-        else:
-            url = (
-                "https://github.com/scikit-image/scikit-image/raw/"
-                "{version}/src/_skimage2/"
-            )
-    else:
-        if prefix is not None:
-            url = (
-                "https://github.com/scikit-image/scikit-image/raw/"
-                "v{version}/tests/skimage2/"
-            )
-        else:
-            url = (
-                "https://github.com/scikit-image/scikit-image/raw/"
-                "v{version}/src/_skimage2/"
-            )
+    # Only CDN-hosted keys (those with a `registry_urls` entry) are handed
+    # to pooch -- every other registered key (internal test-only fixtures,
+    # never part of the public dataset API) is deliberately excluded, so
+    # attempting to fetch one raises pooch's own clear registry-membership
+    # error instead of silently falling back to some other source.
+    cdn_registry = {
+        key: value for key, value in registry.items() if key in registry_urls
+    }
 
     # Create a new friend to manage your sample data storage
     image_fetcher = pooch.create(
@@ -168,11 +154,13 @@ def _create_image_fetcher(prefix=None):
         # '$HOME/.cache/scikit-image'
         # With a version qualifier
         path=pooch.os_cache("scikit-image"),
-        base_url=url,
+        # Every key in `cdn_registry` always has a `urls` override below, so
+        # this is never actually used to construct a download URL.
+        base_url="unused://scikit-image-data-is-always-in-urls",
         version=skimage_version_for_pooch,
         version_dev="main",
         env="SKIMAGE_DATADIR",
-        registry=registry,
+        registry=cdn_registry,
         urls=registry_urls,
         # Note: this should read `retry_if_failed=3,`, but we generate that
         # dynamically at import time above, in case installed pooch is a less
@@ -184,7 +172,7 @@ def _create_image_fetcher(prefix=None):
     return image_fetcher, data_dir
 
 
-_image_fetcher, data_dir = _create_image_fetcher(prefix='tests')
+_image_fetcher, data_dir = _create_image_fetcher()
 
 
 def _skip_pytest_case_requiring_pooch(data_filename):
@@ -229,7 +217,7 @@ def _ensure_cache_dir(*, target_dir):
         shutil.copy2(readme_src, readme_dest)
 
 
-def _fetch(data_filename, prefix=None):
+def _fetch(data_filename, prefix=None, *, _force_online=False):
     """Fetch a given data file from either the local cache or the repository.
 
     This function provides the path location of the data file given
@@ -258,6 +246,11 @@ def _fetch(data_filename, prefix=None):
         Pooch is a normal dependency of scikit-image, so this should only
         happen on a platform where it isn't available (e.g. Pyodide) or
         after manually uninstalling it; ``pip install pooch`` resolves it.
+
+    RuntimeError:
+        If the ``SKIMAGE_TEST_OFFLINE`` environment variable is set and the
+        file isn't otherwise available locally. See ``tools/download_data.py``
+        for the intended repackager/tester workflow around this variable.
 
     ConnectionError:
         If scikit-image is unable to connect to the internet but the
@@ -292,17 +285,25 @@ def _fetch(data_filename, prefix=None):
         return cached_file_path
 
     # Case 2: file is not present locally
-    if _image_fetcher is None:
-        # Under pytest (e.g. the WASM CI leg), always skip rather than
-        # erroring -- pooch is deliberately unavailable there.
+    offline = not _force_online and 'SKIMAGE_TEST_OFFLINE' in os.environ
+    if _image_fetcher is None or offline:
+        # Under pytest (e.g. the WASM CI leg, or SKIMAGE_TEST_OFFLINE set by
+        # a repackager/tester), always skip rather than erroring.
         _skip_pytest_case_requiring_pooch(data_filename)
-        raise ModuleNotFoundError(
-            f'Unable to locate {data_filename!r} locally, and downloading '
-            'scikit-image datasets requires pooch, which is missing '
-            "(unusual, since it's a normal scikit-image dependency -- "
-            'this can happen on platforms like Pyodide, or after manually '
-            'uninstalling pooch). `pip install pooch` resolves it; see '
-            'https://scikit-image.org/docs/stable/user_guide/install.html'
+        if _image_fetcher is None:
+            raise ModuleNotFoundError(
+                f'Unable to locate {data_filename!r} locally, and downloading '
+                'scikit-image datasets requires pooch, which is missing '
+                "(unusual, since it's a normal scikit-image dependency -- "
+                'this can happen on platforms like Pyodide, or after manually '
+                'uninstalling pooch). `pip install pooch` resolves it; see '
+                'https://scikit-image.org/docs/stable/user_guide/install.html'
+            )
+        raise RuntimeError(
+            f'Unable to locate {data_filename!r} locally, and '
+            'SKIMAGE_TEST_OFFLINE is set, so scikit-image will not attempt '
+            'a download. Unset SKIMAGE_TEST_OFFLINE, or pre-populate the '
+            'cache with `tools/download_data.py`, to resolve this.'
         )
     # Download the data with pooch which caches it automatically
     _ensure_cache_dir(target_dir=cache_dir)
@@ -416,7 +417,7 @@ def download_all(directory=None):
         _ensure_cache_dir(target_dir=_image_fetcher.path)
 
         for data_filename in _image_fetcher.registry:
-            file_path = _fetch(data_filename)
+            file_path = _fetch(data_filename, _force_online=True)
 
             # Copy to `directory` or implicit cache if it is not already there
             if not file_path.startswith(str(_image_fetcher.path)):
