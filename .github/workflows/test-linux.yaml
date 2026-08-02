@@ -99,6 +99,9 @@ jobs:
   # TODO: point this at the production scikit-image/data repo/tag once the
   # GitLab CDN migration lands there; this currently installs from a
   # personal fork used to validate the packaging/CI work in gitlab.com/data#26.
+  # TODO: remove this job once scikit-image-data is published to PyPI --
+  # it's now a hard dependency, so every other test-linux-* job already
+  # installs and exercises it via the normal wheel install.
   test-scikit-image-data-integration:
     name: test-scikit-image-data-integration
     needs: [build-linux-312]
