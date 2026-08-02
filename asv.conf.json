@@ -12,7 +12,7 @@
     "show_commit_url": "https://github.com/scikit-image/scikit-image/commit/",
 
     "build_command": [
-        "CC='ccache gcc' CXX='ccache g++' python -m build --wheel -o {build_cache_dir} {build_dir}"
+        "CC='ccache gcc' CXX='ccache g++' python -m build --wheel --no-isolation -o {build_cache_dir} {build_dir}"
     ],
 
     "pythons": ["3.12"],
@@ -22,7 +22,9 @@
          "pythran": [],
          "numpy": [],
          "scipy": [],
-         "pooch": []
+         "pooch": [],
+         "meson-python": [],
+         "lazy_loader": []
     },
 
     "env_dir": ".asv/env",
