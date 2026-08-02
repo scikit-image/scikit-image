@@ -138,19 +138,6 @@ jobs:
           name: benchmark-wheel-contender
           path: .benchmark-wheels/${{ github.sha }}
 
-      - name: Prepare wheel cache
-        shell: bash
-        env:
-          BASELINE_SHA: ${{ needs.resolve-commits.outputs.baseline_sha }}
-        run: |
-          set -e
-          for sha in "$BASELINE_SHA" "$GITHUB_SHA"; do
-            dir=".benchmark-wheels/$sha"
-            whl=$(ls "$dir"/*.whl)
-            mv "$whl" "$dir/wheel.whl"
-            rm -f "$dir"/*.tar.gz
-          done
-
       - name: Run benchmarks
         shell: bash
         id: benchmark

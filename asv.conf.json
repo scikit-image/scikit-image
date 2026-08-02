@@ -12,7 +12,7 @@
     "show_commit_url": "https://github.com/scikit-image/scikit-image/commit/",
 
     "build_command": [
-        "/usr/bin/cp {conf_dir}/.benchmark-wheels/{commit}/wheel.whl {build_cache_dir}/wheel.whl"
+        "/bin/bash -c 'cp {conf_dir}/.benchmark-wheels/{commit}/*.whl {build_cache_dir}/'"
     ],
 
     "pythons": ["3.12"],
