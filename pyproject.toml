@@ -34,11 +34,11 @@ dependencies = [
     'tifffile>=2025.1.10',
     'packaging>=24',
     'lazy-loader>=0.5',
-    # pooch downloads and caches example datasets on demand -- a hard
+    # pooch downloads and caches example datasets on demand, a hard
     # dependency since skimage2's fetch()/fetch_*() API needs it. scikit-
     # image-data is also hard for now: skimage1's data.astronaut() and
     # friends no longer bundle any files in the wheel, so that package is
-    # what actually backs them -- see the `data` extra below for why this
+    # what actually backs them; see the `data` extra below for why this
     # is expected to change once skimage1 is eventually dropped. Neither is
     # available on Pyodide/emscripten (pooch needs stack switching there);
     # `skimage.data` calls that would otherwise fetch are skipped under
@@ -48,7 +48,7 @@ dependencies = [
     # TEMPORARY: scikit-image-data isn't published to PyPI yet, so it's
     # pinned to the personal GitLab fork branch used to validate this
     # migration. Before merging/releasing, repoint at the plain PyPI name
-    # below -- a git direct-reference dependency like this makes a package
+    # below: a git direct-reference dependency like this makes a package
     # unpublishable to PyPI (upload validation rejects direct-URL
     # Requires-Dist entries).
     #   'scikit-image-data; sys_platform != "emscripten"',
@@ -76,9 +76,9 @@ build = [
     'build>=1.2.1',
 ]
 # scikit-image-data is a hard dependency above (see its comment there) for
-# as long as skimage1 exists. This extra is a currently-redundant no-op --
-# `pip install scikit-image[data]` already gets you scikit-image-data via
-# the hard dependency either way -- kept so the install command stays
+# as long as skimage1 exists. This extra is a currently-redundant no-op:
+# `pip install scikit-image[data]` already gets you scikit-image-data using
+# the hard dependency either way, kept so the install command stays
 # valid and documented for when skimage1 is eventually dropped and
 # scikit-image-data can move from a hard dependency back to being purely
 # optional (an offline/no-download convenience for skimage2's fetch_*()).

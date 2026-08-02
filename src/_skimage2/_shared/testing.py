@@ -231,8 +231,8 @@ def local_data_path(path):
     """Resolve a path to a git-tracked test-data file, skipping the test
     if it's missing.
 
-    Unlike `fetch`, this never touches pooch or the network -- it's for
-    fixture files committed directly in the `tests/` tree (e.g. via the
+    Unlike `fetch`, this never touches pooch or the network: it's for
+    fixture files committed directly in the `tests/` tree (e.g. using the
     `test_root_dir` fixture). Those are normally present in a source
     checkout or sdist, but not necessarily in every downstream
     packaging/install scenario (e.g. a test run against an installed

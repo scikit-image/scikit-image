@@ -78,7 +78,7 @@ your Python is older, pip will find the most recent compatible version.
 
 ``skimage.data``'s example datasets (used throughout our
 `gallery examples <https://scikit-image.org/docs/stable/auto_examples/>`_)
-work out of the box -- a curated subset of commonly-used ones (including
+work out of the box: a curated subset of commonly-used ones (including
 ``astronaut``, ``camera``, and ``coins``) is bundled directly with no
 download needed, and the rest are downloaded and cached the first time you
 use them, using `pooch <https://www.fatiando.org/pooch/>`_.

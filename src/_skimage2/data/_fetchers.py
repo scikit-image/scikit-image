@@ -19,7 +19,7 @@ import os
 import sys
 
 # Tracked as a stable public attribute by tests/skimage/test_migration.py
-# (skimage.data:legacy_data_dir) and _skimage2/data/__init__.pyi -- keep
+# (skimage.data:legacy_data_dir) and _skimage2/data/__init__.pyi, so keep
 # this exact name even though the Case 2 "legacy_data_dir fallback" it
 # used to back has been removed (see `_create_image_fetcher` below).
 legacy_data_dir = osp.dirname(__file__)
@@ -96,7 +96,7 @@ def _default_cache_dir():
     Mirrors ``pooch.os_cache("scikit-image")`` closely enough for standalone
     use, and honors the same ``SKIMAGE_DATADIR`` override, so a file already
     cached from a previous session (e.g. before pooch was uninstalled) is
-    still found. There is no download mechanism without pooch -- see
+    still found. There is no download mechanism without pooch; see
     ``_fetch``'s ``ModuleNotFoundError`` case.
     """
     env_dir = os.environ.get('SKIMAGE_DATADIR')
@@ -121,7 +121,7 @@ def _create_image_fetcher():
         else:
             retry = {'retry_if_failed': 3}
     except ImportError:
-        # Without pooch, there's no way to download data files -- just
+        # Without pooch, there's no way to download data files. Just
         # resolve the cache location pooch would have used, so an
         # already-cached file is still found.
         return None, osp.join(_default_cache_dir(), 'data')
@@ -137,7 +137,7 @@ def _create_image_fetcher():
         skimage_version_for_pooch = __version__.replace('.dev', '+')
 
     # Only CDN-hosted keys (those with a `registry_urls` entry) are handed
-    # to pooch -- every other registered key (internal test-only fixtures,
+    # to pooch. Every other registered key (internal test-only fixtures,
     # never part of the public dataset API) is deliberately excluded, so
     # attempting to fetch one raises pooch's own clear registry-membership
     # error instead of silently falling back to some other source.
@@ -294,7 +294,7 @@ def _fetch(data_filename, prefix=None, *, _force_online=False):
             raise ModuleNotFoundError(
                 f'Unable to locate {data_filename!r} locally, and downloading '
                 'scikit-image datasets requires pooch, which is missing '
-                "(unusual, since it's a normal scikit-image dependency -- "
+                "(unusual, since it's a normal scikit-image dependency; "
                 'this can happen on platforms like Pyodide, or after manually '
                 'uninstalling pooch). `pip install pooch` resolves it; see '
                 'https://scikit-image.org/docs/stable/user_guide/install.html'
@@ -329,7 +329,7 @@ def fetch(data_filename):
     ``scikit-image-data`` package, an already-cached download, or
     a fresh download using pooch, in that order. This is the same
     machinery every ``fetch_*()`` convenience function
-    (e.g. :func:`fetch_astronaut`) uses internally -- call this directly
+    (e.g. :func:`fetch_astronaut`) uses internally; call this directly
     for datasets that don't have one, or when you want the file path
     itself rather than a loaded array.
 
@@ -337,7 +337,7 @@ def fetch(data_filename):
     ----------
     data_filename : str
         Registry key of the file, e.g. ``'data/astronaut.png'`` or
-        ``'data/kidney.tif'`` -- see the keys of
+        ``'data/kidney.tif'``; see the keys of
         ``_skimage2.data._registry.registry`` for the full list.
 
     Returns
@@ -1382,7 +1382,7 @@ def vortex():
 
 # skimage2's public dataset accessors use sklearn's fetch_*() naming
 # convention (e.g. sklearn.datasets.fetch_lfw_people) to make explicit that
-# calling them may need pooch and a network connection -- see `fetch()`
+# calling them may need pooch and a network connection; see `fetch()`
 # above. These are plain aliases: skimage1's bare-name functions above
 # (astronaut(), camera(), etc.) already implement the exact same behavior,
 # and are kept as-is since skimage1's shim imports them directly from this
