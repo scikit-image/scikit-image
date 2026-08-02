@@ -31,6 +31,7 @@ jobs:
       CCACHE_COMPRESS: true
       CCACHE_COMPRESSLEVEL: 6
       CCACHE_MAXSIZE: 400M
+      CCACHE_SLOPPINESS: "pch_defines,time_macros"
 
     steps:
       # We need the full repo to avoid this issue
