@@ -314,7 +314,7 @@ def rectangle(nrows, ncols, dtype=np.uint8, *, decomposition=None):
     return footprint
 
 
-def footprint_diamond(shape, *, radii=None, dtype=np.uint8):
+def footprint_diamond(radii, *, dtype=np.uint8):
     """Generate a rhombus-shaped footprint.
 
     In 2D, generates a square-shaped footprint that has been rotated by 45°. If
@@ -324,14 +324,8 @@ def footprint_diamond(shape, *, radii=None, dtype=np.uint8):
 
     Parameters
     ----------
-    shape : Sequence of int(s)
-        Shape of the new footprint.
     radii : float or Sequence of float(s), optional
-        The radii determine the diameter of the rhombus in each dimension.
-        If not provided explicitly, they are derived from the given `shape`
-        with ``tuple(s / 2 for s in shape)``. See also *Notes*.
     dtype : data-type, optional
-        The data type of the footprint.
 
     Returns
     -------
@@ -377,20 +371,14 @@ def footprint_diamond(shape, *, radii=None, dtype=np.uint8):
            [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 0, 0, 1, 1, 0, 0, 0, 0]], dtype=uint8)
     """
-    if radii is None:
-        radii = tuple(s / 2 for s in shape)
-    elif np.isscalar(radii):
-        radii = (radii,) * len(shape)
-    elif len(shape) != len(radii):
-        msg = (
-            "`radii` must be scalar or sequence matching `shape` in length, "
-            f"got shape={shape!r} and {radii=!r}"
-        )
-        raise ValueError(msg)
+    if np.isscalar(radii):
+        radii = (radii,) * 2
     for radius in radii:
         if radius < 0:
             msg = f"got negative radius: {radii=!r}"
             raise ValueError(msg)
+
+    shape = tuple(radius * 2 + 1 for radius in radii)
 
     # A scalar field that determines which pixels are part of the diamond.
     diamond_field = np.zeros(shape)
@@ -411,8 +399,8 @@ def footprint_diamond(shape, *, radii=None, dtype=np.uint8):
         coords = np.linspace(-coord_max, coord_max, num=length, endpoint=True)
         coords = coords.reshape((1,) * dim + (length,) + (1,) * (len(shape) - dim - 1))
 
-        with np.errstate(all="ignore"):
-            coords /= radius
+        # We add 0.5 because this compensates for the center pixel.
+        coords /= radius + 0.5
 
         diamond_field += np.abs(coords)
 
@@ -423,7 +411,7 @@ def footprint_diamond(shape, *, radii=None, dtype=np.uint8):
     #   coords = np.linspace(-5.5, 5.5, num=11, endpoint=True)
     #   coords = np.abs(coords / 5.5)
     #   assert np.all(coords == np.flip(coords))  # Should pass but fails
-    footprint = diamond_field <= 1 + 1.e-8
+    footprint = diamond_field <= 1 + 1.0e-8
     footprint = footprint.astype(dtype, copy=False)
     return footprint
 
