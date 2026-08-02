@@ -11,6 +11,14 @@ on:
         required: false
         type: string
         default: ""
+      ref:
+        required: false
+        type: string
+        default: ""
+      artifact-name:
+        required: false
+        type: string
+        default: ""
 
 jobs:
   build-skimage-spin:
@@ -29,6 +37,7 @@ jobs:
       - name: Checkout scikit-image
         uses: actions/checkout@v5
         with:
+          ref: ${{ inputs.ref || github.sha }}
           persist-credentials: false
 
       - name: Setup Python
@@ -72,7 +81,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: skimage-linux-${{ inputs.python-version }}
+          name: ${{ inputs.artifact-name || format('skimage-linux-{0}', inputs.python-version) }}
           path: |
             ./dist/*.whl
             ./dist/*.tar.gz

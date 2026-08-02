@@ -10,10 +10,12 @@ The `asv` suite can be run for any PR on GitHub Actions (check workflow `.github
 
 The suite also runs automatically on every merge to `main` (comparing the new commit against the commit `main` pointed to immediately before the merge), and can be triggered manually via `workflow_dispatch` from the `Actions` tab (which compares the current commit against its immediate parent commit, same as the automatic push-to-main comparison). If a run on `main` fails (including a detected regression), it opens (or updates, if one is already open) a `CI failure`-labeled GitHub issue using the same convention as the repo's other main-branch CI checks.
 
-We use `asv continuous` to run the job, which runs a relative performance measurement. This means that there's no state to be saved and that regressions are only caught in terms of performance ratio (absolute numbers are available but they are not useful since we do not use stable hardware over time). `asv continuous` will:
+We use `asv continuous` to run the job, which runs a relative performance measurement. This means that there's no state to be saved and that regressions are only caught in terms of performance ratio (absolute numbers are available but they are not useful since we do not use stable hardware over time).
 
-- Compile `scikit-image` for _both_ commits. We use `ccache` to speed up the process, and `virtualenv` is used to create the build environments.
-- Run the benchmark suite for both commits, _twice_ (since `processes=2` by default).
+Before `asv` runs, the baseline and contender commits are built as wheels in two parallel jobs (`build-baseline`/`build-contender` in `.github/workflows/benchmarks.yaml`), reusing the repo's own `_build_linux_for_python_x.yaml` build workflow (the same one `test-linux.yaml` uses), rather than compiling sequentially inside `asv` itself. `asv`'s own `build_command` just copies the matching prebuilt wheel into place; `virtualenv` is still used to create the per-environment install targets. `asv continuous` then:
+
+- Installs the appropriate prebuilt wheel for each commit.
+- Runs the benchmark suite for both commits. This happens _twice_ per commit (`processes=2`) for PR-label and manually-dispatched runs, trading run time for statistical robustness on runs a human reviews directly; automatic runs on merge to `main` use `processes=1` (a single pass) to keep the unattended check fast, offset by a higher noise-tolerance factor (see `asv_factor`/`asv_processes` in the `resolve-commits` job).
 - Generate a report table with performance ratios:
   - `ratio=1.0` -> performance didn't change.
   - `ratio<1.0` -> PR made it slower.

@@ -12,20 +12,15 @@
     "show_commit_url": "https://github.com/scikit-image/scikit-image/commit/",
 
     "build_command": [
-        "CC='ccache gcc' CXX='ccache g++' python -m build --wheel --no-isolation --skip-dependency-check -o {build_cache_dir} {build_dir}"
+        "cp {conf_dir}/.benchmark-wheels/{commit}/wheel.whl {build_cache_dir}/wheel.whl"
     ],
 
     "pythons": ["3.12"],
     "matrix": {
          "virtualenv": [],
-         "cython": [],
-         "pythran": [],
          "numpy": [],
          "scipy": [],
-         "pooch": [],
-         "meson-python": [],
-         "ninja": [],
-         "lazy_loader": []
+         "pooch": []
     },
 
     "env_dir": ".asv/env",
