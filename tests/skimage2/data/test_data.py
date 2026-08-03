@@ -454,10 +454,25 @@ def test_local_only_registry_files_are_present():
     local_only_keys = sorted(set(_fetchers.registry) - set(_fetchers.registry_urls))
     assert local_only_keys, 'sanity check: expected some local-only registry keys'
 
+    def matches(path, expected_hash):
+        if _fetchers._has_hash(path, expected_hash):
+            return True
+        if not path.exists():
+            return False
+        # A plain-text fixture checked out on Windows may have git's
+        # core.autocrlf normalize LF to CRLF, changing its hash without
+        # changing its actual content; retry against the LF-normalized
+        # bytes before declaring it corrupted.
+        content = path.read_bytes()
+        normalized = content.replace(b'\r\n', b'\n')
+        if normalized == content:
+            return False
+        return hashlib.sha256(normalized).hexdigest() == expected_hash
+
     missing = [
         key
         for key in local_only_keys
-        if not _fetchers._has_hash(test_root / key, _fetchers.registry[key])
+        if not matches(test_root / key, _fetchers.registry[key])
     ]
     assert (
         not missing
