@@ -11,7 +11,7 @@ try:
     from skimage.morphology import disk
 except ImportError:
     from skimage.morphology import circle as disk
-from . import _channel_kwarg, _skip_slow
+from . import _channel_kwarg, _full_params, _skip_slow
 
 # inspect signature to automatically handle API changes across versions
 if 'num_iter' in inspect.signature(restoration.richardson_lucy).parameters:
@@ -184,7 +184,7 @@ class RollingBall:
     def time_rollingball(self, radius):
         restoration.rolling_ball(data.coins(), radius=radius)
 
-    time_rollingball.params = [25, 200]
+    time_rollingball.params = _full_params(reduced=[25, 200], full=[25, 50, 100, 200])
     time_rollingball.param_names = ["radius"]
 
     def peakmem_reference(self, *args):
@@ -206,7 +206,9 @@ class RollingBall:
     def peakmem_rollingball(self, radius):
         restoration.rolling_ball(data.coins(), radius=radius)
 
-    peakmem_rollingball.params = [25, 200]
+    peakmem_rollingball.params = _full_params(
+        reduced=[25, 200], full=[25, 50, 100, 200]
+    )
     peakmem_rollingball.param_names = ["radius"]
 
     def time_rollingball_nan(self, radius):
@@ -215,7 +217,9 @@ class RollingBall:
         image[pos, pos] = np.nan
         restoration.rolling_ball(image, radius=radius, nansafe=True)
 
-    time_rollingball_nan.params = [25, 200]
+    time_rollingball_nan.params = _full_params(
+        reduced=[25, 200], full=[25, 50, 100, 200]
+    )
     time_rollingball_nan.param_names = ["radius"]
 
     def time_rollingball_ndim(self):
@@ -230,7 +234,7 @@ class RollingBall:
     def time_rollingball_parallel(self, workers):
         restoration.rolling_ball(data.coins(), radius=100, workers=workers)
 
-    time_rollingball_parallel.params = (0, 4)
+    time_rollingball_parallel.params = _full_params(reduced=(0, 4), full=(0, 2, 4, 8))
     time_rollingball_parallel.param_names = ["workers"]
 
 

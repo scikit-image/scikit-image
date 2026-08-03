@@ -27,3 +27,24 @@ def _skip_slow():
     """
     if os.environ.get("ASV_SKIP_SLOW", "0") == "1":
         raise NotImplementedError("Skipping this test...")
+
+
+def _full_params(reduced, full):
+    """
+    Pick between a reduced (fast CI) and full (nightly) parameter list.
+
+    Controlled by the ASV_FULL_PARAMS environment variable. Use this to
+    wrap one axis of a benchmark class's ``params`` where the reduced
+    set trims a heavily-parametrized suite for fast CI runs, while
+    nightly runs (ASV_FULL_PARAMS=1) exercise the full original
+    parameter space.
+
+    For example:
+
+    >>> from . import _full_params
+    >>> class Suite:
+    ...     params = [_full_params(reduced=[1, 2], full=[1, 2, 3, 4, 5])]
+    """
+    if os.environ.get("ASV_FULL_PARAMS", "0") == "1":
+        return full
+    return reduced
