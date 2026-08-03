@@ -219,7 +219,7 @@ def test_skip_pytest_case_requiring_pooch_fires_during_collection(monkeypatch):
 
 @pytest.mark.thread_unsafe(reason="mutates process-wide environment variables")
 def test_skip_pytest_case_requiring_pooch_noop_outside_pytest(monkeypatch):
-    """Without any pytest marker env var, the guard must not skip -- it
+    """Without any pytest marker env var, the guard must not skip; it
     should only intervene when actually running under pytest."""
     monkeypatch.delenv('PYTEST_CURRENT_TEST', raising=False)
     monkeypatch.delenv('PYTEST_VERSION', raising=False)
@@ -341,7 +341,7 @@ FETCH_FUNCTION_NAMES = [
 
 @pytest.mark.parametrize('function_name', FETCH_FUNCTION_NAMES)
 def test_fetch_functions_are_public_and_bare_names_are_not(function_name):
-    """Every dataset getter is only reachable as fetch_<name>() -- the old
+    """Every dataset getter is only reachable as fetch_<name>(); the old
     bare name (e.g. astronaut() for fetch_astronaut()) must not resolve on
     _skimage2.data, even though the underlying function of that name still
     exists in _fetchers.py for skimage1's shim to import directly."""
@@ -363,8 +363,8 @@ def test_fetch_name_matrix_with_and_without_scikit_image_data(
     fetch_name, expected_shape, scikit_image_data_available, tmp_path, monkeypatch
 ):
     """fetch_<name>() functions bundled by scikit-image-data return correct
-    data whether or not that package is actually installed -- served from
-    the bundle when available, downloaded via pooch and cached otherwise."""
+    data whether or not that package is actually installed: served from
+    the bundle when available, downloaded using pooch and cached otherwise."""
     pytest.importorskip('skimage_data')
     if not scikit_image_data_available:
         monkeypatch.setattr(_fetchers, 'skimage_data', None)
@@ -411,7 +411,7 @@ def test_fetch_offline_env_var_skips_when_not_local(monkeypatch, tmp_path):
     reason="mutates process-wide environment variables and shared fetcher state"
 )
 def test_download_all_ignores_offline_toggle(monkeypatch, tmp_path):
-    """download_all() is an explicit request to download everything -- it
+    """download_all() is an explicit request to download everything; it
     must ignore SKIMAGE_TEST_OFFLINE, unlike implicit per-dataset fetches."""
     monkeypatch.setenv('SKIMAGE_TEST_OFFLINE', '1')
     monkeypatch.setattr(_fetchers, 'skimage_data', None)
@@ -424,30 +424,30 @@ def test_download_all_ignores_offline_toggle(monkeypatch, tmp_path):
     fake_path.write_bytes(b'x')
     monkeypatch.setattr(_fetchers._image_fetcher, 'fetch', lambda name: str(fake_path))
 
-    # Should not raise/skip -- proves _force_online=True bypassed the toggle.
+    # Should not raise/skip: proves _force_online=True bypassed the toggle.
     _fetchers.download_all()
 
 
 def test_local_only_registry_files_are_present():
     """Regression guard for scikit-image's own CI (which always checks out
     the full repo, so `tests/` is always present regardless of whether the
-    package itself is installed from a wheel or sdist -- see
+    package itself is installed from a wheel or sdist; see
     `.github/workflows/_test_linux_for_python_x.yaml` etc., which all run
     `actions/checkout` before installing/testing).
 
     Every registry key with no `registry_urls` (CDN) entry is a test-only
-    fixture expected to be tracked in git and read directly off disk (via
-    `test_root_dir`/`local_data_path`, not `fetch()`) -- see the "Part 3"
-    design doc. `local_data_path` skips gracefully when such a file is
-    missing, which is the *correct* behavior for a downstream repackager
-    testing against an installed wheel without `tests/`. This test guards
-    the other case: a fixture going missing or corrupted by accident in an
-    environment (like our own CI) that's supposed to have it, where a
-    silent skip would hide a real regression.
+    fixture expected to be tracked in git and read directly off disk (using
+    `test_root_dir`/`local_data_path`, not `fetch()`). `local_data_path`
+    skips gracefully when such a file is missing, which is the *correct*
+    behavior for a downstream repackager testing against an installed
+    wheel without `tests/`. This test guards the other case: a fixture
+    going missing or corrupted by accident in an environment (like our own
+    CI) that's supposed to have it, where a silent skip would hide a real
+    regression.
 
     Only `tests/skimage2/` is checked: `tests/skimage/conftest.py`'s own
     `test_root_dir` fixture redirects there too (there's a single shared
-    copy of these fixtures, not one per test suite -- confirmed by reading
+    copy of these fixtures, not one per test suite; confirmed by reading
     that fixture's implementation, not assumed).
     """
     test_root = Path(__file__).resolve().parents[2] / 'skimage2'
@@ -470,7 +470,7 @@ def test_local_only_registry_files_are_present():
 @requires_pooch
 def test_image_fetcher_registry_is_restricted_to_cdn_keys():
     """`_image_fetcher` must only know about registry keys that have a CDN
-    url -- never the full registry -- so nothing can silently fall back to
+    url, never the full registry, so nothing can silently fall back to
     the (removed) GitHub raw-URL base_url for internal test-only fixtures.
     This also fixes download_all(), since it iterates
     `_image_fetcher.registry`."""

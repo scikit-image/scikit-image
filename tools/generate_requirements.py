@@ -36,7 +36,7 @@ def generate_environment_yml(req_sections: dict[str, list[str]]) -> None:
     }
     # scikit-image-data isn't on conda-forge yet, and even once it is, a
     # direct URL/VCS reference (as used temporarily below) could never be a
-    # plain conda dependency line regardless -- it must go under `pip:`.
+    # plain conda dependency line regardless; it must go under `pip:`.
     pip_only = ['docstub', 'scikit-image-data']
 
     lines = ["name: skimage-dev", "channels:", "  - conda-forge", "dependencies:"]
@@ -73,7 +73,7 @@ def generate_environment_yml(req_sections: dict[str, list[str]]) -> None:
                 continue
 
             # Only emit the section header once we know it has at least one
-            # conda-installable entry -- otherwise (e.g. a section made up
+            # conda-installable entry; otherwise (e.g. a section made up
             # entirely of pip_only packages) it'd be a dangling comment with
             # nothing under it.
             if section and not header_added:

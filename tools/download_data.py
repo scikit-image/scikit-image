@@ -6,7 +6,7 @@ a local cache of every data file that scikit-image's public ``skimage.data``
 functions can fetch, verifying each file's sha256 hash against the registry
 in ``src/_skimage2/data/_registry.py``.
 
-Depends only on ``pooch`` -- scikit-image itself does not need to be
+Depends only on ``pooch``; scikit-image itself does not need to be
 installed to run this script (the registry is parsed directly out of its
 source file, not imported).
 
@@ -18,7 +18,7 @@ into the ``tests/`` tree directly and are not needed to use the public
 Repackager/tester workflow for offline test runs: run this script to
 pre-populate the cache, then run the test suite with the
 ``SKIMAGE_TEST_OFFLINE`` environment variable set (to any value) to confirm
-nothing else unexpectedly needs the network -- any test that would
+nothing else unexpectedly needs the network: any test that would
 otherwise attempt a download skips instead if the file isn't already
 available locally (bundled with ``scikit-image-data`` or cached by this
 script).
@@ -42,7 +42,7 @@ def _load_registry():
     Only evaluates simple top-level ``name = <expr>`` assignments (building
     up a namespace of just those names as it goes, e.g. so an f-string like
     ``registry_urls``'s values can reference an already-assigned URL
-    constant) -- any other statement (imports, function/class defs, etc.) is
+    constant); any other statement (imports, function/class defs, etc.) is
     skipped rather than executed, so this keeps working even if the registry
     module gains code unrelated to the two dicts this script needs.
     """
@@ -77,7 +77,7 @@ def _download_one(data_filename, url, expected_hash, dest_dir, force):
             path=dest_dir,
             progressbar=False,
         )
-    except Exception as err:  # noqa: BLE001 -- pooch raises a mix of exception types
+    except Exception as err:  # noqa: BLE001 (pooch raises a mix of exception types)
         return data_filename, 'error', str(err)
     return data_filename, 'cached' if already_correct else 'downloaded', None
 
