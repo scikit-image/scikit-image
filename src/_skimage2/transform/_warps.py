@@ -81,7 +81,7 @@ def resize(
 ):
     """Resize image to match a certain size.
 
-    Performs interpolation to up-size or down-size N-dimensional images. Note
+    Performs interpolation to up-size or down-size n-dimensional images. Note
     that anti-aliasing should be enabled when down-sizing images to avoid
     aliasing artifacts. For downsampling with an integer factor also see
     `skimage.transform.downscale_local_mean`.
@@ -243,7 +243,7 @@ def rescale(
 ):
     """Scale image by a certain factor.
 
-    Performs interpolation to up-scale or down-scale N-dimensional images.
+    Performs interpolation to up-scale or down-scale n-dimensional images.
     Note that anti-aliasing should be enabled when down-sizing images to avoid
     aliasing artifacts. For down-sampling with an integer factor also see
     `skimage.transform.downscale_local_mean`.
@@ -472,7 +472,7 @@ def rotate(
 
 
 def downscale_local_mean(image, factors, cval=0, clip=True):
-    """Down-sample N-dimensional image by local averaging.
+    """Down-sample n-dimensional image by local averaging.
 
     The image is padded with `cval` if it is not perfectly divisible by the
     integer factors.
