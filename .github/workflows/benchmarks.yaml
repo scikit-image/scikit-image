@@ -145,6 +145,7 @@ jobs:
           OPENBLAS_NUM_THREADS: 1
           MKL_NUM_THREADS: 1
           OMP_NUM_THREADS: 1
+          PYTHONUNBUFFERED: 1
           # asv installs each matrix requirement via its own separate pip
           # invocation; prefer an existing wheel over a much slower source
           # build if a package's very latest release doesn't have full
@@ -169,9 +170,14 @@ jobs:
           echo "Contender: $GITHUB_SHA ($CONTENDER_LABEL)"
 
           # Run benchmarks for current commit against base
-          ASV_OPTIONS="--split --show-stderr --factor $ASV_FACTOR -a processes=$ASV_PROCESSES"
+          # --verbose (DEBUG-level logging) so env-creation/pip-install
+          # progress is actually visible instead of one large silent gap;
+          # `sed -u` (unbuffered) so that output streams through the
+          # pipeline in real time rather than waiting on sed's default
+          # block buffering when its stdout isn't a terminal.
+          ASV_OPTIONS="--verbose --split --show-stderr --factor $ASV_FACTOR -a processes=$ASV_PROCESSES"
           asv continuous $ASV_OPTIONS $BASELINE_SHA $GITHUB_SHA \
-              | sed "/Traceback \|failed$\|PERFORMANCE DECREASED/ s/^/::error::/" \
+              | sed -u "/Traceback \|failed$\|PERFORMANCE DECREASED/ s/^/::error::/" \
               | tee benchmarks.log
           asv_status=${PIPESTATUS[0]}
 
