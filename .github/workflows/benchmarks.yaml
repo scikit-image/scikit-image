@@ -2,10 +2,11 @@ name: Benchmark
 
 on:
   pull_request:
-    types: [labeled]
-  push:
-    branches:
-      - main
+    types: [opened, synchronize, reopened, labeled]
+  schedule:
+    # Full, untrimmed benchmark suite nightly - see the "schedule" branch
+    # in .github/scripts/resolve-benchmark-commits.sh.
+    - cron: "0 7 * * *"
   workflow_dispatch:
 
 concurrency:
@@ -19,16 +20,25 @@ permissions:
 jobs:
   resolve-commits:
     if: >-
-      contains(github.event.label.name, 'benchmark') ||
+      github.event_name == 'pull_request' ||
       github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'push' && github.ref == 'refs/heads/main')
+      github.event_name == 'schedule'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # For the nightly-baseline `gh run list` lookup in
+      # resolve-benchmark-commits.sh (event_name == 'schedule').
+      actions: read
     outputs:
+      should_run: ${{ steps.commits.outputs.should_run }}
       baseline_sha: ${{ steps.commits.outputs.baseline_sha }}
       baseline_label: ${{ steps.commits.outputs.baseline_label }}
       contender_label: ${{ steps.commits.outputs.contender_label }}
       asv_factor: ${{ steps.commits.outputs.asv_factor }}
       asv_processes: ${{ steps.commits.outputs.asv_processes }}
+      asv_skip_slow: ${{ steps.commits.outputs.asv_skip_slow }}
+      asv_full_params: ${{ steps.commits.outputs.asv_full_params }}
+      bench_filter: ${{ steps.commits.outputs.bench_filter }}
     steps:
       # We need the full repo to avoid this issue
       # https://github.com/actions/checkout/issues/23
@@ -39,53 +49,22 @@ jobs:
 
       - name: Determine comparison commits
         id: commits
-        shell: bash
         env:
           EVENT_NAME: ${{ github.event_name }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
           PR_BASE_LABEL: ${{ github.event.pull_request.base.label }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           PR_HEAD_LABEL: ${{ github.event.pull_request.head.label }}
-          PUSH_BEFORE_SHA: ${{ github.event.before }}
-        run: |
-          set -e
-          if [ "$EVENT_NAME" = "pull_request" ]; then
-            baseline_sha="$PR_BASE_SHA"
-            baseline_label="$PR_BASE_LABEL"
-            contender_label="$PR_HEAD_LABEL"
-            asv_factor="1.5"
-            asv_processes="2"
-          elif [ "$EVENT_NAME" = "push" ]; then
-            before="$PUSH_BEFORE_SHA"
-            if [ -z "$before" ] || [ "$before" = "0000000000000000000000000000000000000000" ] \
-               || ! git cat-file -e "$before^{commit}" 2>/dev/null; then
-              before=$(git rev-parse "$GITHUB_SHA~1")
-            fi
-            baseline_sha="$before"
-            baseline_label="$before"
-            contender_label="$GITHUB_SHA"
-            asv_factor="3.0"
-            # Unattended merge check: trade some statistical robustness for
-            # a much shorter run (single round instead of asv's default of
-            # two), offset by the higher noise-tolerant factor above.
-            asv_processes="1"
-          else
-            baseline_sha=$(git rev-parse "$GITHUB_SHA~1")
-            baseline_label="$baseline_sha"
-            contender_label="$GITHUB_SHA"
-            asv_factor="1.5"
-            asv_processes="2"
-          fi
-          echo "baseline_sha=$baseline_sha" >> "$GITHUB_OUTPUT"
-          echo "baseline_label=$baseline_label" >> "$GITHUB_OUTPUT"
-          echo "contender_label=$contender_label" >> "$GITHUB_OUTPUT"
-          echo "asv_factor=$asv_factor" >> "$GITHUB_OUTPUT"
-          echo "asv_processes=$asv_processes" >> "$GITHUB_OUTPUT"
+        run: bash .github/scripts/resolve-benchmark-commits.sh
 
   # Build the baseline and contender wheels in parallel, reusing the
   # repo's proven, ccache-tuned build workflow instead of asv's own
   # from-scratch (and much slower, sequential) build_command.
   build-baseline:
     needs: resolve-commits
+    if: needs.resolve-commits.outputs.should_run == 'true'
     uses: ./.github/workflows/_build_linux_for_python_x.yaml
     with:
       python-version: "3.12"
@@ -94,6 +73,7 @@ jobs:
 
   build-contender:
     needs: resolve-commits
+    if: needs.resolve-commits.outputs.should_run == 'true'
     uses: ./.github/workflows/_build_linux_for_python_x.yaml
     with:
       python-version: "3.12"
@@ -102,6 +82,7 @@ jobs:
 
   benchmark:
     needs: [resolve-commits, build-baseline, build-contender]
+    if: needs.resolve-commits.outputs.should_run == 'true'
     name: Linux
     runs-on: ubuntu-latest
     permissions:
@@ -153,38 +134,14 @@ jobs:
           PIP_PREFER_BINARY: 1
           ASV_FACTOR: "${{ needs.resolve-commits.outputs.asv_factor }}"
           ASV_PROCESSES: "${{ needs.resolve-commits.outputs.asv_processes }}"
-          ASV_SKIP_SLOW: 1
+          ASV_SKIP_SLOW: "${{ needs.resolve-commits.outputs.asv_skip_slow }}"
+          ASV_FULL_PARAMS: "${{ needs.resolve-commits.outputs.asv_full_params }}"
           # Escape user controlled variables
           BASELINE_SHA: "${{ needs.resolve-commits.outputs.baseline_sha }}"
           BASELINE_LABEL: "${{ needs.resolve-commits.outputs.baseline_label }}"
           CONTENDER_LABEL: "${{ needs.resolve-commits.outputs.contender_label }}"
-        run: |
-          set -x
-
-          python -m pip install virtualenv
-
-          # ID this runner
-          asv machine --yes
-
-          echo "Baseline: $BASELINE_SHA ($BASELINE_LABEL)"
-          echo "Contender: $GITHUB_SHA ($CONTENDER_LABEL)"
-
-          # Run benchmarks for current commit against base
-          # --verbose (DEBUG-level logging) so env-creation/pip-install
-          # progress is actually visible instead of one large silent gap;
-          # `sed -u` (unbuffered) so that output streams through the
-          # pipeline in real time rather than waiting on sed's default
-          # block buffering when its stdout isn't a terminal.
-          ASV_OPTIONS="--verbose --split --show-stderr --factor $ASV_FACTOR -a processes=$ASV_PROCESSES"
-          asv continuous $ASV_OPTIONS $BASELINE_SHA $GITHUB_SHA \
-              | sed -u "/Traceback \|failed$\|PERFORMANCE DECREASED/ s/^/::error::/" \
-              | tee benchmarks.log
-          asv_status=${PIPESTATUS[0]}
-
-          # Report and export results for subsequent steps
-          if [ "$asv_status" -ne 0 ] || grep "Traceback \|failed\|PERFORMANCE DECREASED" benchmarks.log > /dev/null ; then
-              exit 1
-          fi
+          BENCH_FILTER: "${{ needs.resolve-commits.outputs.bench_filter }}"
+        run: bash .github/scripts/run-benchmarks.sh
 
       - name: Add instructions to artifact
         if: always()

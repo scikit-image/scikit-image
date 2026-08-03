@@ -1,21 +1,21 @@
 # Benchmark CI
 
 <!-- Author: @jaimergp -->
-<!-- Last updated: 2026.08.01 -->
+<!-- Last updated: 2026.08.02 -->
 <!-- Describes the work done as part of https://github.com/scikit-image/scikit-image/pull/5424 -->
 
 ## How it works
 
-The `asv` suite can be run for any PR on GitHub Actions (check workflow `.github/workflows/benchmarks.yaml`) by adding a label containing `benchmark` (e.g. `run-benchmark`) to said PR. This will trigger a job that will run the benchmarking suite for the current PR head (merged commit) against the PR base (usually `main`).
+The `asv` suite runs automatically on every PR, scoped to whichever benchmark module(s) cover the `skimage` subpackage(s) the PR touches (see `.github/scripts/resolve-benchmark-commits.sh`). A PR touching only `skimage/restoration/` runs just `benchmark_restoration.py`; a PR touching no mapped subpackage (docs, CI config, a subpackage with no benchmark file, etc.) doesn't run benchmarks at all. Adding a label whose name contains `benchmark` (e.g. `run-benchmark`) to a PR overrides this and always runs the full suite, regardless of which paths changed - useful when a change to shared/core code could affect benchmarks outside the touched subpackage's own module.
 
-The suite also runs automatically on every merge to `main` (comparing the new commit against the commit `main` pointed to immediately before the merge), and can be triggered manually via `workflow_dispatch` from the `Actions` tab (which compares the current commit against its immediate parent commit, same as the automatic push-to-main comparison). If a run on `main` fails (including a detected regression), it opens (or updates, if one is already open) a `CI failure`-labeled GitHub issue using the same convention as the repo's other main-branch CI checks.
+The suite also runs nightly at 07:00 UTC against `main`, using the full, untrimmed benchmark suite (see "Full nightly runs" below), and can be triggered manually from the `workflow_dispatch` entry point on the `Actions` tab (which compares the current commit against its immediate parent commit). Merges to `main` don't trigger a benchmark run on their own - the nightly run covers that ground, without paying the CI cost on every single merge. If a nightly or manually-dispatched run on `main` fails (including a detected regression), it opens (or updates, if one is already open) a `CI failure`-labeled GitHub issue using the same convention as the repo's other main-branch CI checks.
 
 We use `asv continuous` to run the job, which runs a relative performance measurement. This means that there's no state to be saved and that regressions are only caught in terms of performance ratio (absolute numbers are available but they are not useful since we do not use stable hardware over time).
 
 Before `asv` runs, the baseline and contender commits are built as wheels in two parallel jobs (`build-baseline`/`build-contender` in `.github/workflows/benchmarks.yaml`), reusing the repo's own `_build_linux_for_python_x.yaml` build workflow (the same one `test-linux.yaml` uses), rather than compiling sequentially inside `asv` itself. `asv`'s own `build_command` just copies the matching prebuilt wheel into place; `virtualenv` is still used to create the per-environment install targets. `asv continuous` then:
 
 - Installs the appropriate prebuilt wheel for each commit.
-- Runs the benchmark suite for both commits. This happens _twice_ per commit (`processes=2`) for PR-label and manually-dispatched runs, trading run time for statistical robustness on runs a human reviews directly; automatic runs on merge to `main` use `processes=1` (a single pass) to keep the unattended check fast, offset by a higher noise-tolerance factor (see `asv_factor`/`asv_processes` in the `resolve-commits` job).
+- Runs the benchmark suite for both commits, _twice_ per commit (`processes=2`), trading run time for statistical robustness (see `asv_factor`/`asv_processes` in the `resolve-commits` job).
 - Generate a report table with performance ratios:
   - `ratio=1.0` -> performance didn't change.
   - `ratio<1.0` -> PR made it slower.
@@ -25,10 +25,13 @@ Due to the sensitivity of the test, we cannot guarantee that false positives are
 
 ## Running the benchmarks on GitHub Actions
 
-1. On a PR, add a label whose name contains `benchmark` (e.g. `run-benchmark`).
-2. The CI job will be started. Checks will appear in the usual dashboard panel above the comment box.
-3. If more commits are added, the label checks will be grouped with the last commit checks _before_ you added the label.
-4. Alternatively, you can always go to the `Actions` tab in the repo and [filter for `workflow:Benchmark`](https://github.com/scikit-image/scikit-image/actions?query=workflow%3ABenchmark). Your username will be assigned to the `actor` field, so you can also filter the results with that if you need it.
+1. Opening or updating a PR that touches a `skimage` subpackage with a matching `benchmarks/benchmark_*.py` module runs that module's benchmarks automatically - no action needed. Checks appear in the usual dashboard panel above the comment box.
+2. To force the full suite regardless of which paths changed, add a label whose name contains `benchmark` (e.g. `run-benchmark`) to the PR. This stays in effect for that PR's subsequent runs too, not just the run triggered by adding the label.
+3. You can always go to the `Actions` tab in the repo and [filter for `workflow:Benchmark`](https://github.com/scikit-image/scikit-image/actions?query=workflow%3ABenchmark). Your username will be assigned to the `actor` field, so you can also filter the results with that if you need it.
+
+## Full nightly runs
+
+Every night at 07:00 UTC, a scheduled run compares the current `main` tip against the commit compared by the last successful nightly run (not just its immediate parent, so a busy day of merges is covered cumulatively rather than only the single most recent one) using the complete, untrimmed benchmark suite: `ASV_SKIP_SLOW=0` (benchmarks marked with the `_skip_slow` helper in `benchmarks/__init__.py` run too) and `ASV_FULL_PARAMS=1` (classes wrapped with the `_full_params` helper use their full parameter matrices instead of the smaller sets used elsewhere to keep PR checks within a reasonable time budget). This isn't path-scoped or time-boxed, so it's the place to look for regressions a fast, trimmed PR check could miss - including regressions introduced by merges to `main` themselves, which don't trigger a benchmark run of their own.
 
 ## The artifacts
 
