@@ -9,7 +9,7 @@ from _skimage2.morphology import (
     binary,
     footprints,
     footprint_rectangle,
-    footprint_rectangle_decomposed,
+    footprint_decomposed_rectangle,
     erosion,
     dilation,
     closing,
@@ -112,7 +112,7 @@ def test_rectangle_decomposition(function, nrows, ncols, method):
     comparison is made to the case without decomposition.
     """
     footprint_ndarray = footprint_rectangle((nrows, ncols))
-    footprint = footprint_rectangle_decomposed((nrows, ncols), method=method)
+    footprint = footprint_decomposed_rectangle((nrows, ncols), method=method)
     img = _get_decomp_test_data(function)
     func = getattr(binary, function)
     expected = func(img, footprint=footprint_ndarray)
@@ -179,7 +179,7 @@ def test_cube_decomposition(function, shape, method):
     comparison is made to the case without decomposition.
     """
     footprint_ndarray = footprint_rectangle(shape)
-    footprint = footprint_rectangle_decomposed(shape, method=method)
+    footprint = footprint_decomposed_rectangle(shape, method=method)
     img = _get_decomp_test_data(function, ndim=3)
     func = getattr(binary, function)
     expected = func(img, footprint=footprint_ndarray)

@@ -97,7 +97,10 @@ def footprint_rectangle(shape, *, dtype=np.uint8):
 
     See Also
     --------
-    footprint_rectangle_decomposed
+    numpy.ones
+        Upstream version of this function.
+    footprint_decomposed_rectangle
+        Alternate version that creates a decomposed footprint.
 
     Examples
     --------
@@ -116,7 +119,7 @@ def footprint_rectangle(shape, *, dtype=np.uint8):
     return footprint
 
 
-def footprint_rectangle_decomposed(shape, *, method="separable", dtype=np.uint8):
+def footprint_decomposed_rectangle(shape, *, method="separable", dtype=np.uint8):
     """Generate a (hyper-)rectangular decomposed footprint.
 
     Generates, depending on the length and dimensions requested with `shape`,
@@ -149,6 +152,9 @@ def footprint_rectangle_decomposed(shape, *, method="separable", dtype=np.uint8)
     See Also
     --------
     footprint_rectangle
+        Alternate version that creates a "dense" footprint.
+    numpy.ones
+        Upstream version that creates a "dense" footprint.
 
     Examples
     --------
@@ -156,13 +162,13 @@ def footprint_rectangle_decomposed(shape, *, method="separable", dtype=np.uint8)
     footprint of the requested shape.
 
     >>> import _skimage2 as ski2
-    >>> ski2.morphology.footprint_rectangle_decomposed((9, 9), method="sequence")
+    >>> ski2.morphology.footprint_decomposed_rectangle((9, 9), method="sequence")
     ((array([[1, 1, 1],
              [1, 1, 1],
              [1, 1, 1]], dtype=uint8),
       4),)
 
-    >>> ski2.morphology.footprint_rectangle_decomposed((3, 5), method="sequence")
+    >>> ski2.morphology.footprint_decomposed_rectangle((3, 5), method="sequence")
     ((array([[1, 1, 1],
              [1, 1, 1],
              [1, 1, 1]], dtype=uint8),
@@ -171,7 +177,7 @@ def footprint_rectangle_decomposed(shape, *, method="separable", dtype=np.uint8)
 
     `"separable"` makes sure that the decomposition only returns 1D footprints.
 
-    >>> ski2.morphology.footprint_rectangle_decomposed((3, 5), method="separable")
+    >>> ski2.morphology.footprint_decomposed_rectangle((3, 5), method="separable")
     ((array([[1],
              [1],
              [1]], dtype=uint8),
@@ -184,7 +190,7 @@ def footprint_rectangle_decomposed(shape, *, method="separable", dtype=np.uint8)
             "method='sequence' is only supported for uneven footprints, "
             "falling back to method='separable'",
         )
-        return footprint_rectangle_decomposed(shape, dtype=dtype, method="separable")
+        return footprint_decomposed_rectangle(shape, dtype=dtype, method="separable")
 
     def partial_footprint(dim, width):
         shape_ = (1,) * dim + (width,) + (1,) * (len(shape) - dim - 1)
@@ -814,7 +820,7 @@ def octagon(m, n, dtype=np.uint8, *, decomposition=None):
         sequence = []
         if m > 1:
             sequence += list(
-                footprint_rectangle_decomposed((m, m), dtype=dtype, method='sequence')
+                footprint_decomposed_rectangle((m, m), dtype=dtype, method='sequence')
             )
         if n > 0:
             sequence += [(diamond(1, dtype=dtype, decomposition=None), n)]

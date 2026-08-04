@@ -6,8 +6,7 @@ from _skimage2.morphology.footprints import (
     disk as disk,
     ellipse as ellipse,
     footprint_from_sequence as footprint_from_sequence,
-    footprint_rectangle as _sk2_footprint_rectangle,
-    footprint_rectangle_decomposed as _sk2_footprint_rectangle_decompose,
+    footprint_decomposed_rectangle as _sk2_footprint_decomposed_rectangle,
     octagon as octagon,
     octahedron as octahedron,
     star as star,
@@ -47,11 +46,11 @@ __all__ = [
     """\
 `%(qname_old)s` is deprecated in favor of
 `skimage2.morphology.footprint_rectangle` and
-`skimage2.morphology.footprint_rectangle_decomposed`.
+`skimage2.morphology.footprint_decomposed_rectangle`.
 
 * `skimage2.morphology.footprint_rectangle` no longer accepts the ``decompose``
   parameter and will return the footprint as a simple array.
-* `skimage2.morphology.footprint_rectangle_decomposed` uses the new parameter
+* `skimage2.morphology.footprint_decomposed_rectangle` uses the new parameter
   ``method``, which accepts the values of the old ``decomposition`` parameter.
 
 To keep the old behavior when switching to `skimage2`, update your call
@@ -60,7 +59,7 @@ according to the following cases:
 * ``decomposition`` not passed, use `skimage2.morphology.footprint_rectangle`
   with same signature.
 * ``decomposition='sequence'`` or ``decomposition='separable'``, use
-  `skimage2.morphology.footprint_rectangle_decomposed` and pass the old value
+  `skimage2.morphology.footprint_decomposed_rectangle` and pass the old value
   of ``decomposition`` to the new parameter ``method``.
 
 Other keyword parameters can be left unchanged.
@@ -78,7 +77,7 @@ Other keyword parameters can be left unchanged.
 >>> fp1 = ski1.morphology.%(qual)s(
 ...     (3, 3, 3), decomposition="sequence"
 ... )
->>> fp2 = ski2.morphology.footprint_rectangle_decomposed(
+>>> fp2 = ski2.morphology.footprint_decomposed_rectangle(
 ...     (3, 3, 3), method="sequence"
 ... )
 >>> np.testing.assert_equal(fp1, fp2)
@@ -150,9 +149,9 @@ def footprint_rectangle(shape, *, dtype=np.uint8, decomposition=None):
     (3, 3, 3, 3, 3)
     """
     if decomposition is None:
-        footprint = _sk2_footprint_rectangle(shape=shape, dtype=dtype)
+        footprint = np.ones(shape, dtype=dtype)
     else:
-        footprint = _sk2_footprint_rectangle_decompose(
+        footprint = _sk2_footprint_decomposed_rectangle(
             shape=shape,
             dtype=dtype,
             method=decomposition,
@@ -164,13 +163,13 @@ def footprint_rectangle(shape, *, dtype=np.uint8, decomposition=None):
     """\
 `%(qname_old)s` is deprecated in favor of
 `skimage2.morphology.footprint_rectangle` and
-`skimage2.morphology.footprint_rectangle_decomposed`.
+`skimage2.morphology.footprint_decomposed_rectangle`.
 
 * The new functions expect to be given a ``shape`` instead of the parameters
   ``nrows`` and ``ncols``.
 * `skimage2.morphology.footprint_rectangle` no longer accepts the ``decompose``
   parameter and will return the footprint as a simple array.
-* `skimage2.morphology.footprint_rectangle_decomposed` uses the new parameter
+* `skimage2.morphology.footprint_decomposed_rectangle` uses the new parameter
   ``method``, which accepts the values of the old ``decomposition`` parameter.
 
 To keep the old behavior when switching to `skimage2`, update your call
@@ -181,7 +180,7 @@ according to the following cases:
 * ``decomposition`` not passed, use `skimage2.morphology.footprint_rectangle`
   with same signature.
 * ``decomposition='sequence'`` or ``decomposition='separable'``, use
-  `skimage2.morphology.footprint_rectangle_decomposed` and pass the old value
+  `skimage2.morphology.footprint_decomposed_rectangle` and pass the old value
   of ``decomposition`` to the new parameter ``method``.
 
 Other keyword parameters can be left unchanged.
@@ -199,7 +198,7 @@ Other keyword parameters can be left unchanged.
 >>> fp1 = ski1.morphology.%(qual)s(
 ...     3, 3, decomposition="sequence"
 ... )
->>> fp2 = ski2.morphology.footprint_rectangle_decomposed(
+>>> fp2 = ski2.morphology.footprint_decomposed_rectangle(
 ...     (3, 3), method="sequence"
 ... )
 >>> np.testing.assert_equal(fp1, fp2)
@@ -273,13 +272,13 @@ def rectangle(nrows, ncols, dtype=np.uint8, *, decomposition=None):
     """\
 `%(qname_old)s` is deprecated in favor of
 `skimage2.morphology.footprint_rectangle` and
-`skimage2.morphology.footprint_rectangle_decomposed`.
+`skimage2.morphology.footprint_decomposed_rectangle`.
 
 * The new functions expect to be given a ``shape`` instead of the parameter
   ``width``.
 * `skimage2.morphology.footprint_rectangle` no longer accepts the ``decompose``
   parameter and will return the footprint as a simple array.
-* `skimage2.morphology.footprint_rectangle_decomposed` uses the new parameter
+* `skimage2.morphology.footprint_decomposed_rectangle` uses the new parameter
   ``method``, which accepts the values of the old ``decomposition`` parameter.
 
 To keep the old behavior when switching to `skimage2`, update your call
@@ -290,7 +289,7 @@ according to the following cases:
 * ``decomposition`` not passed, use `skimage2.morphology.footprint_rectangle`
   with same signature.
 * ``decomposition='sequence'`` or ``decomposition='separable'``, use
-  `skimage2.morphology.footprint_rectangle_decomposed` and pass the old value
+  `skimage2.morphology.footprint_decomposed_rectangle` and pass the old value
   of ``decomposition`` to the new parameter ``method``.
 
 Other keyword parameters can be left unchanged.
@@ -308,7 +307,7 @@ Other keyword parameters can be left unchanged.
 >>> fp1 = ski1.morphology.%(qual)s(
 ...     3, decomposition="sequence"
 ... )
->>> fp2 = ski2.morphology.footprint_rectangle_decomposed(
+>>> fp2 = ski2.morphology.footprint_decomposed_rectangle(
 ...     (3, 3), method="sequence"
 ... )
 >>> np.testing.assert_equal(fp1, fp2)
@@ -377,13 +376,13 @@ def square(width, dtype=np.uint8, *, decomposition=None):
     """\
 `%(qname_old)s` is deprecated in favor of
 `skimage2.morphology.footprint_rectangle` and
-`skimage2.morphology.footprint_rectangle_decomposed`.
+`skimage2.morphology.footprint_decomposed_rectangle`.
 
 * The new functions expect to be given a ``shape`` instead of the parameter
   ``width``.
 * `skimage2.morphology.footprint_rectangle` no longer accepts the ``decompose``
   parameter and will return the footprint as a simple array.
-* `skimage2.morphology.footprint_rectangle_decomposed` uses the new parameter
+* `skimage2.morphology.footprint_decomposed_rectangle` uses the new parameter
   ``method``, which accepts the values of the old ``decomposition`` parameter.
 
 To keep the old behavior when switching to `skimage2`, update your call
@@ -394,7 +393,7 @@ according to the following cases:
 * ``decomposition`` not passed, use `skimage2.morphology.footprint_rectangle`
   with same signature.
 * ``decomposition='sequence'`` or ``decomposition='separable'``, use
-  `skimage2.morphology.footprint_rectangle_decomposed` and pass the old value
+  `skimage2.morphology.footprint_decomposed_rectangle` and pass the old value
   of ``decomposition`` to the new parameter ``method``.
 
 Other keyword parameters can be left unchanged.
@@ -412,7 +411,7 @@ Other keyword parameters can be left unchanged.
 >>> fp1 = ski1.morphology.%(qual)s(
 ...     3, decomposition="sequence"
 ... )
->>> fp2 = ski2.morphology.footprint_rectangle_decomposed(
+>>> fp2 = ski2.morphology.footprint_decomposed_rectangle(
 ...     (3, 3, 3), method="sequence"
 ... )
 >>> np.testing.assert_equal(fp1, fp2)
