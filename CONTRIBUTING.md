@@ -221,11 +221,9 @@ complexity that may affect maintainability. If you want to make use of
 LLMs in a significant way, we recommend that you **check in with us
 first** to discuss your strategy.
 
-**Always declare tool usage**. We recommend using an `Assisted-by:`
-tag in the commit message, as recommended by the [Linux
-kernel](https://docs.kernel.org/process/coding-assistants.html).
-`Co-authored-by:` lines, the default in many coding CLIs, are also
-acceptable.
+**Always declare tool usage**. Use an `Assisted-by:` tag in the commit
+message, as recommended by the
+[Linux kernel](https://docs.kernel.org/process/coding-assistants.html).
 
 (guidelines)=
 
