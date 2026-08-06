@@ -14,6 +14,8 @@ import pytest
 
 
 try:
+    import pooch  # noqa: F401
+
     has_pooch = True
 except ModuleNotFoundError:
     has_pooch = False
@@ -57,13 +59,13 @@ def test_imagecollection_input():
     -----
         If correct, `images` will receive three images.
     """
-    # Ensure that these images are part of the legacy datasets
-    # this means they will always be available in the user's install
-    # regardless of the availability of pooch
+    # All three are bundled by scikit-image-data, so they are available in
+    # the user's install regardless of the availability of pooch. Keep one
+    # RGB PNG, one grayscale PNG, and one JPEG when changing this list.
     pics = [
         fetch('data/coffee.png'),
-        fetch('data/chessboard_GRAY.png'),
-        fetch('data/rocket.jpg'),
+        fetch('data/camera.png'),
+        fetch('data/retina.jpg'),
     ]
     pattern = [os.path.join(data_dir, pic) for pic in pics]
     images = ImageCollection(pattern)
