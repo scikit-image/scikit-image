@@ -15,6 +15,8 @@
 #   PR_BASE_LABEL:     github.event.pull_request.base.label
 #   PR_HEAD_SHA:       github.event.pull_request.head.sha
 #   PR_HEAD_LABEL:     github.event.pull_request.head.label
+#   DISPATCH_BASELINE: github.event.inputs.baseline (workflow_dispatch
+#                       only; "parent-commit" or "previous-nightly")
 #
 # Writes should_run, baseline_sha, baseline_label, contender_label,
 # asv_factor, asv_processes, asv_skip_slow, asv_full_params, and
@@ -47,6 +49,13 @@ bench_modules_for_path_changes() {
     fi
   done
   echo "$modules"
+}
+
+# The commit compared by the last successful nightly (schedule) run of
+# this workflow, or empty if none exists yet.
+last_nightly_sha() {
+  gh run list --repo "$GITHUB_REPOSITORY" --workflow=benchmarks.yaml \
+    --event=schedule --status=success --limit=1 --json headSha --jq '.[0].headSha // empty'
 }
 
 if [ "$EVENT_NAME" = "pull_request" ]; then
@@ -87,8 +96,7 @@ elif [ "$EVENT_NAME" = "schedule" ]; then
   # not just the single most recent one. Falls back to the immediate
   # parent if no prior successful nightly run exists yet (e.g. the very
   # first time this schedule fires).
-  prev_sha=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow=benchmarks.yaml \
-    --event=schedule --status=success --limit=1 --json headSha --jq '.[0].headSha // empty')
+  prev_sha=$(last_nightly_sha)
   if [ -z "$prev_sha" ] || ! git cat-file -e "$prev_sha^{commit}" 2>/dev/null; then
     prev_sha=$(git rev-parse "$GITHUB_SHA~1")
   fi
@@ -102,8 +110,19 @@ elif [ "$EVENT_NAME" = "schedule" ]; then
   should_run="true"
   bench_filter=""
 else
-  # workflow_dispatch
-  baseline_sha=$(git rev-parse "$GITHUB_SHA~1")
+  # workflow_dispatch: compare against either the immediate parent
+  # commit (default) or the commit compared by the last successful
+  # nightly run, per the "baseline" dispatch input. Falls back to the
+  # immediate parent if "previous-nightly" is requested but no prior
+  # successful nightly run exists yet.
+  if [ "${DISPATCH_BASELINE:-parent-commit}" = "previous-nightly" ]; then
+    baseline_sha=$(last_nightly_sha)
+    if [ -z "$baseline_sha" ] || ! git cat-file -e "$baseline_sha^{commit}" 2>/dev/null; then
+      baseline_sha=$(git rev-parse "$GITHUB_SHA~1")
+    fi
+  else
+    baseline_sha=$(git rev-parse "$GITHUB_SHA~1")
+  fi
   baseline_label="$baseline_sha"
   contender_label="$GITHUB_SHA"
   asv_factor="1.5"

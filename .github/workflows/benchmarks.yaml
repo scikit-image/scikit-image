@@ -8,6 +8,15 @@ on:
     # in .github/scripts/resolve-benchmark-commits.sh.
     - cron: "0 7 * * *"
   workflow_dispatch:
+    inputs:
+      baseline:
+        description: "Baseline commit to compare against"
+        required: false
+        type: choice
+        default: parent-commit
+        options:
+          - parent-commit
+          - previous-nightly
 
 concurrency:
   # Cancel previous workflows of the same PR, but only for PRs
@@ -57,6 +66,7 @@ jobs:
           PR_BASE_LABEL: ${{ github.event.pull_request.base.label }}
           PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           PR_HEAD_LABEL: ${{ github.event.pull_request.head.label }}
+          DISPATCH_BASELINE: ${{ github.event.inputs.baseline }}
         run: bash .github/scripts/resolve-benchmark-commits.sh
 
   # Build the baseline and contender wheels in parallel, reusing the
