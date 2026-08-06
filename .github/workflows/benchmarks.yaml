@@ -127,7 +127,7 @@ jobs:
           MKL_NUM_THREADS: 1
           OMP_NUM_THREADS: 1
           PYTHONUNBUFFERED: 1
-          # asv installs each matrix requirement via its own separate pip
+          # asv installs each matrix requirement with its own separate pip
           # invocation; prefer an existing wheel over a much slower source
           # build if a package's very latest release doesn't have full
           # wheel coverage yet.
