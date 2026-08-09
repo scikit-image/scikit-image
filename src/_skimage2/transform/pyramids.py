@@ -34,6 +34,18 @@ def _check_factor(factor):
         raise ValueError('scale factor must be greater than 1')
 
 
+def _pyramid_expand(image, out_shape, sigma, order, mode, cval, channel_axis):
+    resized = resize(
+        image,
+        out_shape,
+        order=order,
+        mode=mode,
+        cval=cval,
+        anti_aliasing=False,
+    )
+    return _smooth(resized, sigma, mode, cval, channel_axis)
+
+
 def pyramid_reduce(
     image,
     downscale=2,
@@ -179,12 +191,7 @@ def pyramid_expand(
         # automatically determine sigma which covers > 99% of distribution
         sigma = 2 * upscale / 6.0
 
-    resized = resize(
-        image, out_shape, order=order, mode=mode, cval=cval, anti_aliasing=False
-    )
-    out = _smooth(resized, sigma, mode, cval, channel_axis)
-
-    return out
+    return _pyramid_expand(image, out_shape, sigma, order, mode, cval, channel_axis)
 
 
 def pyramid_gaussian(
@@ -303,16 +310,17 @@ def pyramid_laplacian(
 ):
     """Yield images of the laplacian pyramid formed by the input image.
 
-    Each layer contains the difference between the downsampled and the
-    downsampled, smoothed image::
+    Each layer except the last contains the difference between a Gaussian
+    pyramid layer and the expanded subsequent Gaussian layer::
 
-        layer = resize(prev_layer) - smooth(resize(prev_layer))
+        layer = prev_layer - expand(next_layer)
 
-    Note that the first image of the pyramid will be the difference between the
-    original, unscaled image and its smoothed version. The total number of
-    images is `max_layer + 1`. In case all layers are computed, the last image
-    is either a one-pixel image or the image where the reduction does not
-    change its shape.
+    The last layer is the coarsest Gaussian pyramid layer. This residual allows
+    the original image to be reconstructed by recursively expanding each layer
+    and adding the corresponding difference image. The total number of images
+    is `max_layer + 1`. In case all layers are computed, the last image is
+    either a one-pixel image or the image where the reduction does not change
+    its shape.
 
     Parameters
     ----------
@@ -367,42 +375,30 @@ def pyramid_laplacian(
         # automatically determine sigma which covers > 99% of distribution
         sigma = 2 * downscale / 6.0
 
-    current_shape = image.shape
+    gaussian_pyramid = pyramid_gaussian(
+        image,
+        max_layer,
+        downscale,
+        sigma,
+        order,
+        mode,
+        cval,
+        preserve_range=True,
+        channel_axis=channel_axis,
+    )
+    prev_layer_image = next(gaussian_pyramid)
 
-    smoothed_image = _smooth(image, sigma, mode, cval, channel_axis)
-    yield image - smoothed_image
-
-    if channel_axis is not None:
-        channel_axis = channel_axis % image.ndim
-        shape_without_channels = list(current_shape)
-        shape_without_channels.pop(channel_axis)
-        shape_without_channels = tuple(shape_without_channels)
-    else:
-        shape_without_channels = current_shape
-
-    # build downsampled images until max_layer is reached or downscale process
-    # does not change image size
-    if max_layer == -1:
-        max_layer = math.ceil(math.log(max(shape_without_channels), downscale))
-
-    for layer in range(max_layer):
-        if channel_axis is not None:
-            out_shape = tuple(
-                math.ceil(d / float(downscale)) if ax != channel_axis else d
-                for ax, d in enumerate(current_shape)
-            )
-        else:
-            out_shape = tuple(math.ceil(d / float(downscale)) for d in current_shape)
-
-        resized_image = resize(
-            smoothed_image,
-            out_shape,
-            order=order,
-            mode=mode,
-            cval=cval,
-            anti_aliasing=False,
+    for layer_image in gaussian_pyramid:
+        expanded_image = _pyramid_expand(
+            layer_image,
+            prev_layer_image.shape,
+            sigma,
+            order,
+            mode,
+            cval,
+            channel_axis,
         )
-        smoothed_image = _smooth(resized_image, sigma, mode, cval, channel_axis)
-        current_shape = resized_image.shape
+        yield prev_layer_image - expanded_image
+        prev_layer_image = layer_image
 
-        yield resized_image - smoothed_image
+    yield prev_layer_image

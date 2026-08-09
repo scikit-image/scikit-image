@@ -3,7 +3,12 @@ import warnings
 
 import pytest
 import numpy as np
-from numpy.testing import assert_almost_equal, assert_array_equal, assert_equal
+from numpy.testing import (
+    assert_allclose,
+    assert_almost_equal,
+    assert_array_equal,
+    assert_equal,
+)
 
 from _skimage2 import data
 from _skimage2._shared.utils import _supported_float_type
@@ -147,6 +152,52 @@ def test_build_laplacian_pyramid_nd():
         for layer, out in enumerate(pyramid):
             layer_shape = original_shape / 2**layer
             assert_array_equal(out.shape, layer_shape)
+
+
+@pytest.mark.parametrize(
+    'shape, channel_axis',
+    [((31,), None), ((31, 27), None), ((31, 27, 3), -1)],
+)
+def test_laplacian_pyramid_reconstruction(shape, channel_axis):
+    rng = np.random.RandomState(1053218495)
+    image = rng.random_sample(shape)
+    downscale = 2
+    sigma = 2 * downscale / 6.0
+    max_layer = 4
+
+    gaussian = list(
+        pyramids.pyramid_gaussian(
+            image,
+            max_layer=max_layer,
+            downscale=downscale,
+            channel_axis=channel_axis,
+        )
+    )
+    laplacian = list(
+        pyramids.pyramid_laplacian(
+            image,
+            max_layer=max_layer,
+            downscale=downscale,
+            channel_axis=channel_axis,
+        )
+    )
+
+    assert_allclose(laplacian[-1], gaussian[-1])
+
+    reconstructed = laplacian[-1]
+    for layer in reversed(laplacian[:-1]):
+        reconstructed = pyramids._pyramid_expand(
+            reconstructed,
+            layer.shape,
+            sigma,
+            order=1,
+            mode='reflect',
+            cval=0,
+            channel_axis=channel_axis,
+        )
+        reconstructed += layer
+
+    assert_allclose(reconstructed, image)
 
 
 @pytest.mark.parametrize('channel_axis', [0, 1, 2, -1, -2, -3])
