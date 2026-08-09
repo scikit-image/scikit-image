@@ -16,6 +16,23 @@ def test_marching_cubes_isotropic():
     # Test within 1% tolerance for isotropic. Will always underestimate.
     assert surf > surf_calc and surf_calc > surf * 0.99
 
+
+def test_marching_cubes_level_equal_to_voxel_value():
+    """Equal-valued cube corners use a consistent triangulation."""
+    volume = np.array(
+        [
+            [[1, 1, 1], [1, 1, 1], [1, 1, -1]],
+            [[-1, 1, 1], [-1, 0, 1], [1, 1, -1]],
+            [[-1, -1, -1], [1, -1, -1], [1, 1, -1]],
+        ],
+        dtype=float,
+    )
+
+    vertices, faces, _, _ = marching_cubes(volume, level=0)
+
+    assert vertices.shape == (18, 3)
+    assert faces.shape == (18, 3)
+
     # Lewiner
     verts, faces = marching_cubes(ellipsoid_isotropic, 0.0)[:2]
     surf_calc = mesh_surface_area(verts, faces)
