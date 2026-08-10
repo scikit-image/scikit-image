@@ -19,8 +19,8 @@
 #                       only; "parent-commit" or "previous-nightly")
 #
 # Writes should_run, baseline_sha, baseline_label, contender_label,
-# asv_factor, asv_processes, asv_skip_slow, asv_full_params, and
-# bench_filter to $GITHUB_OUTPUT.
+# asv_factor, asv_processes, asv_skip_slow, asv_full_params,
+# bench_filter, and python_version to $GITHUB_OUTPUT.
 
 set -euo pipefail
 
@@ -142,3 +142,8 @@ echo "asv_processes=$asv_processes" >> "$GITHUB_OUTPUT"
 echo "asv_skip_slow=$asv_skip_slow" >> "$GITHUB_OUTPUT"
 echo "asv_full_params=$asv_full_params" >> "$GITHUB_OUTPUT"
 echo "bench_filter=$bench_filter" >> "$GITHUB_OUTPUT"
+
+# Single source of truth for the Python version used to build and run
+# the benchmarks, so it can't drift out of sync with asv's own config.
+python_version=$(jq -r '.pythons[0]' asv.conf.json)
+echo "python_version=$python_version" >> "$GITHUB_OUTPUT"

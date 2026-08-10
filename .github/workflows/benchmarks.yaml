@@ -48,6 +48,7 @@ jobs:
       asv_skip_slow: ${{ steps.commits.outputs.asv_skip_slow }}
       asv_full_params: ${{ steps.commits.outputs.asv_full_params }}
       bench_filter: ${{ steps.commits.outputs.bench_filter }}
+      python_version: ${{ steps.commits.outputs.python_version }}
     steps:
       # We need the full repo to avoid this issue
       # https://github.com/actions/checkout/issues/23
@@ -77,7 +78,7 @@ jobs:
     if: needs.resolve-commits.outputs.should_run == 'true'
     uses: ./.github/workflows/_build_linux_for_python_x.yaml
     with:
-      python-version: "3.12"
+      python-version: ${{ needs.resolve-commits.outputs.python_version }}
       ref: ${{ needs.resolve-commits.outputs.baseline_sha }}
       artifact-name: benchmark-wheel-baseline
 
@@ -86,7 +87,7 @@ jobs:
     if: needs.resolve-commits.outputs.should_run == 'true'
     uses: ./.github/workflows/_build_linux_for_python_x.yaml
     with:
-      python-version: "3.12"
+      python-version: ${{ needs.resolve-commits.outputs.python_version }}
       ref: ${{ github.sha }}
       artifact-name: benchmark-wheel-contender
 
@@ -110,7 +111,7 @@ jobs:
       - uses: actions/setup-python@v6
         name: Install Python
         with:
-          python-version: "3.12"
+          python-version: ${{ needs.resolve-commits.outputs.python_version }}
           cache: "pip"
           cache-dependency-path: "requirements/*.txt"
 

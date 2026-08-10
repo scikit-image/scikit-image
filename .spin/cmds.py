@@ -1,3 +1,4 @@
+import json
 import os
 import subprocess
 import sys
@@ -37,6 +38,25 @@ jobs_param = next(p for p in docs.params if p.name == 'jobs')
 jobs_param.default = 1
 
 
+def _check_asv_python_version():
+    """Fail fast (with a clear message) if the active Python isn't one
+    of the versions asv.conf.json declares support for - asv itself
+    would otherwise fail deep inside env creation with a much more
+    cryptic "no such python" error.
+    """
+    with open(os.path.join(_REPO_ROOT, "asv.conf.json")) as f:
+        pythons = json.load(f)["pythons"]
+
+    current = f"{sys.version_info.major}.{sys.version_info.minor}"
+    if current not in pythons:
+        print(
+            f"Active Python is {current}, but asv.conf.json only declares "
+            f"support for {pythons}. Rebuild with one of those versions "
+            "before running `spin asv`."
+        )
+        sys.exit(1)
+
+
 @click.command()
 @click.argument("asv_args", nargs=-1)
 @spin.cmds.meson.build_dir_option
@@ -49,6 +69,8 @@ def asv(asv_args, build_dir):
 
     Please see CONTRIBUTING.txt
     """
+    _check_asv_python_version()
+
     site_path = spin.cmds.meson._get_site_packages(build_dir)
     if site_path is None:
         print("No built scikit-image found; run `spin build` first.")
