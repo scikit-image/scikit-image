@@ -3,8 +3,13 @@
 A curated set of general purpose and scientific images used in tests, examples,
 and documentation.
 
-Newer datasets are no longer included as part of the package, but are
-downloaded on demand. To make data available offline, use :func:`download_all`.
+No image files ship inside this package. The most frequently used ones come
+from the ``scikit-image-data`` package, which is installed alongside
+scikit-image and needs no download. Every other dataset is downloaded on
+demand and cached in ``data_dir``, so ``data_dir`` holds only what has been
+downloaded so far. To make every dataset available offline, use
+:func:`download_all`, which also copies the ``scikit-image-data`` images into
+``data_dir``.
 
 """
 
