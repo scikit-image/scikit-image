@@ -1,7 +1,6 @@
 __all__ = [
     'binary_blobs',
     'data_dir',
-    'legacy_data_dir',
     'download_all',
     'fetch',
     'fetch_astronaut',
@@ -48,7 +47,6 @@ __all__ = [
 from ._synthetic import binary_blobs
 from ._fetchers import (
     data_dir,
-    legacy_data_dir,
     download_all,
     fetch,
     fetch_astronaut,

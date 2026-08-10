@@ -18,10 +18,12 @@ import os.path as osp
 import os
 import sys
 
-# Tracked as a stable public attribute by tests/skimage/test_migration.py
-# (skimage.data:legacy_data_dir) and _skimage2/data/__init__.pyi, so keep
-# this exact name even though the Case 2 "legacy_data_dir fallback" it
-# used to back has been removed (see `_create_image_fetcher` below).
+# Kept under this exact name because skimage1 re-exports it as the frozen
+# public attribute `skimage.data:legacy_data_dir` (see
+# tests/skimage/test_migration.py), importing it straight from this module.
+# It is deliberately absent from _skimage2/data/__init__.pyi: no data files
+# ship in this directory anymore, so the name would only mislead in the new
+# API. The one remaining use is locating README.txt in `_ensure_cache_dir`.
 legacy_data_dir = osp.dirname(__file__)
 
 try:
