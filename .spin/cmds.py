@@ -38,6 +38,18 @@ jobs_param = next(p for p in docs.params if p.name == 'jobs')
 jobs_param.default = 1
 
 
+def _asv_builds_declared_environment(asv_args):
+    """Whether this asv invocation builds an environment matching
+    asv.conf.json's declared `pythons`, as opposed to running against
+    whatever Python is already active (`check`, `dev`, or an explicit
+    `-E`/`--environment existing`) - which works with any Python and
+    shouldn't be gated on matching asv.conf.json.
+    """
+    if asv_args and asv_args[0] in {"check", "dev"}:
+        return False
+    return not any(arg == "existing" or arg.endswith("=existing") for arg in asv_args)
+
+
 def _check_asv_python_version():
     """Fail fast (with a clear message) if the active Python isn't one
     of the versions asv.conf.json declares support for - asv itself
@@ -69,7 +81,8 @@ def asv(asv_args, build_dir):
 
     Please see CONTRIBUTING.txt
     """
-    _check_asv_python_version()
+    if _asv_builds_declared_environment(asv_args):
+        _check_asv_python_version()
 
     site_path = spin.cmds.meson._get_site_packages(build_dir)
     if site_path is None:

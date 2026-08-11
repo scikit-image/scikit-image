@@ -130,6 +130,17 @@ jobs:
           name: benchmark-wheel-contender
           path: .benchmark-wheels/${{ github.sha }}
 
+      # asv.conf.json's checked-in build_command does a real build, so
+      # local runs (spin asv -- continuous ...) work out of the box.
+      # This job already has both commits' wheels prebuilt above, so
+      # swap in a copy-only build_command just for this run instead of
+      # rebuilding from source a second time.
+      - name: Use prebuilt wheels for asv's build step
+        run: |
+          jq --arg cmd "/bin/bash -c 'cp {conf_dir}/.benchmark-wheels/{commit}/*.whl {build_cache_dir}/'" \
+             '.build_command = [$cmd]' asv.conf.json > asv.conf.json.tmp
+          mv asv.conf.json.tmp asv.conf.json
+
       - name: Run benchmarks
         shell: bash
         id: benchmark
