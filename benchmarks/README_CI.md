@@ -15,7 +15,7 @@ We use `asv continuous` to run the job, which runs a relative performance measur
 Before `asv` runs, the baseline and contender commits are built as wheels in two parallel jobs (`build-baseline`/`build-contender` in `.github/workflows/benchmarks.yaml`), reusing the repo's own `_build_linux_for_python_x.yaml` build workflow (the same one `test-linux.yaml` uses), rather than compiling sequentially inside `asv` itself. `asv`'s own `build_command` just copies the matching prebuilt wheel into place; `virtualenv` is still used to create the per-environment install targets. `asv continuous` then:
 
 - Installs the appropriate prebuilt wheel for each commit.
-- Runs the benchmark suite for both commits, _twice_ per commit (`processes=2`), trading run time for statistical robustness (see `asv_factor`/`asv_processes` in the `resolve-commits` job).
+- Runs the benchmark suite for both commits, _twice_ per commit (`processes=2`), trading run time for statistical robustness (see `asv_factor`/`asv_processes` in the `resolve-params` job).
 - Generate a report table with performance ratios:
   - `ratio=1.0` -> performance didn't change.
   - `ratio<1.0` -> PR made it slower.

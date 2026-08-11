@@ -27,7 +27,7 @@ permissions:
   contents: read
 
 jobs:
-  resolve-commits:
+  resolve-params:
     if: >-
       github.event_name == 'pull_request' ||
       github.event_name == 'workflow_dispatch' ||
@@ -39,16 +39,16 @@ jobs:
       # resolve-benchmark-params.sh (event_name == 'schedule').
       actions: read
     outputs:
-      should_run: ${{ steps.commits.outputs.should_run }}
-      baseline_sha: ${{ steps.commits.outputs.baseline_sha }}
-      baseline_label: ${{ steps.commits.outputs.baseline_label }}
-      contender_label: ${{ steps.commits.outputs.contender_label }}
-      asv_factor: ${{ steps.commits.outputs.asv_factor }}
-      asv_processes: ${{ steps.commits.outputs.asv_processes }}
-      asv_skip_slow: ${{ steps.commits.outputs.asv_skip_slow }}
-      asv_full_params: ${{ steps.commits.outputs.asv_full_params }}
-      bench_filter: ${{ steps.commits.outputs.bench_filter }}
-      python_version: ${{ steps.commits.outputs.python_version }}
+      should_run: ${{ steps.params.outputs.should_run }}
+      baseline_sha: ${{ steps.params.outputs.baseline_sha }}
+      baseline_label: ${{ steps.params.outputs.baseline_label }}
+      contender_label: ${{ steps.params.outputs.contender_label }}
+      asv_factor: ${{ steps.params.outputs.asv_factor }}
+      asv_processes: ${{ steps.params.outputs.asv_processes }}
+      asv_skip_slow: ${{ steps.params.outputs.asv_skip_slow }}
+      asv_full_params: ${{ steps.params.outputs.asv_full_params }}
+      bench_filter: ${{ steps.params.outputs.bench_filter }}
+      python_version: ${{ steps.params.outputs.python_version }}
     steps:
       # We need the full repo to avoid this issue
       # https://github.com/actions/checkout/issues/23
@@ -58,7 +58,7 @@ jobs:
           persist-credentials: false
 
       - name: Determine comparison commits
-        id: commits
+        id: params
         env:
           EVENT_NAME: ${{ github.event_name }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -74,26 +74,26 @@ jobs:
   # repo's proven, ccache-tuned build workflow instead of asv's own
   # from-scratch (and much slower, sequential) build_command.
   build-baseline:
-    needs: resolve-commits
-    if: needs.resolve-commits.outputs.should_run == 'true'
+    needs: resolve-params
+    if: needs.resolve-params.outputs.should_run == 'true'
     uses: ./.github/workflows/_build_linux_for_python_x.yaml
     with:
-      python-version: ${{ needs.resolve-commits.outputs.python_version }}
-      ref: ${{ needs.resolve-commits.outputs.baseline_sha }}
+      python-version: ${{ needs.resolve-params.outputs.python_version }}
+      ref: ${{ needs.resolve-params.outputs.baseline_sha }}
       artifact-name: benchmark-wheel-baseline
 
   build-contender:
-    needs: resolve-commits
-    if: needs.resolve-commits.outputs.should_run == 'true'
+    needs: resolve-params
+    if: needs.resolve-params.outputs.should_run == 'true'
     uses: ./.github/workflows/_build_linux_for_python_x.yaml
     with:
-      python-version: ${{ needs.resolve-commits.outputs.python_version }}
+      python-version: ${{ needs.resolve-params.outputs.python_version }}
       ref: ${{ github.sha }}
       artifact-name: benchmark-wheel-contender
 
   benchmark:
-    needs: [resolve-commits, build-baseline, build-contender]
-    if: needs.resolve-commits.outputs.should_run == 'true'
+    needs: [resolve-params, build-baseline, build-contender]
+    if: needs.resolve-params.outputs.should_run == 'true'
     name: Linux
     runs-on: ubuntu-latest
     permissions:
@@ -111,7 +111,7 @@ jobs:
       - uses: actions/setup-python@v6
         name: Install Python
         with:
-          python-version: ${{ needs.resolve-commits.outputs.python_version }}
+          python-version: ${{ needs.resolve-params.outputs.python_version }}
           cache: "pip"
           cache-dependency-path: "requirements/*.txt"
 
@@ -122,7 +122,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: benchmark-wheel-baseline
-          path: .benchmark-wheels/${{ needs.resolve-commits.outputs.baseline_sha }}
+          path: .benchmark-wheels/${{ needs.resolve-params.outputs.baseline_sha }}
 
       - name: Download contender wheel
         uses: actions/download-artifact@v4
@@ -143,15 +143,15 @@ jobs:
           # build if a package's very latest release doesn't have full
           # wheel coverage yet.
           PIP_PREFER_BINARY: 1
-          ASV_FACTOR: "${{ needs.resolve-commits.outputs.asv_factor }}"
-          ASV_PROCESSES: "${{ needs.resolve-commits.outputs.asv_processes }}"
-          ASV_SKIP_SLOW: "${{ needs.resolve-commits.outputs.asv_skip_slow }}"
-          ASV_FULL_PARAMS: "${{ needs.resolve-commits.outputs.asv_full_params }}"
+          ASV_FACTOR: "${{ needs.resolve-params.outputs.asv_factor }}"
+          ASV_PROCESSES: "${{ needs.resolve-params.outputs.asv_processes }}"
+          ASV_SKIP_SLOW: "${{ needs.resolve-params.outputs.asv_skip_slow }}"
+          ASV_FULL_PARAMS: "${{ needs.resolve-params.outputs.asv_full_params }}"
           # Escape user controlled variables
-          BASELINE_SHA: "${{ needs.resolve-commits.outputs.baseline_sha }}"
-          BASELINE_LABEL: "${{ needs.resolve-commits.outputs.baseline_label }}"
-          CONTENDER_LABEL: "${{ needs.resolve-commits.outputs.contender_label }}"
-          BENCH_FILTER: "${{ needs.resolve-commits.outputs.bench_filter }}"
+          BASELINE_SHA: "${{ needs.resolve-params.outputs.baseline_sha }}"
+          BASELINE_LABEL: "${{ needs.resolve-params.outputs.baseline_label }}"
+          CONTENDER_LABEL: "${{ needs.resolve-params.outputs.contender_label }}"
+          BENCH_FILTER: "${{ needs.resolve-params.outputs.bench_filter }}"
         run: bash .github/scripts/run-benchmarks.sh
 
       - name: Add instructions to artifact
