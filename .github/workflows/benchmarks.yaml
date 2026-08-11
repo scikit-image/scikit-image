@@ -5,7 +5,7 @@ on:
     types: [opened, synchronize, reopened, labeled]
   schedule:
     # Full, untrimmed benchmark suite nightly - see the "schedule" branch
-    # in .github/scripts/resolve-benchmark-commits.sh.
+    # in .github/scripts/resolve-benchmark-params.sh.
     - cron: "0 7 * * *"
   workflow_dispatch:
     inputs:
@@ -36,7 +36,7 @@ jobs:
     permissions:
       contents: read
       # For the nightly-baseline `gh run list` lookup in
-      # resolve-benchmark-commits.sh (event_name == 'schedule').
+      # resolve-benchmark-params.sh (event_name == 'schedule').
       actions: read
     outputs:
       should_run: ${{ steps.commits.outputs.should_run }}
@@ -68,7 +68,7 @@ jobs:
           PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           PR_HEAD_LABEL: ${{ github.event.pull_request.head.label }}
           DISPATCH_BASELINE: ${{ github.event.inputs.baseline }}
-        run: bash .github/scripts/resolve-benchmark-commits.sh
+        run: bash .github/scripts/resolve-benchmark-params.sh
 
   # Build the baseline and contender wheels in parallel, reusing the
   # repo's proven, ccache-tuned build workflow instead of asv's own
