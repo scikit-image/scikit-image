@@ -1049,7 +1049,7 @@ class ProjectiveTransform(_HMatrixTransform):
         return np.linalg.inv(self.params)
 
     def __array__(self, dtype=None, copy=None):
-        return self.params if dtype is None else self.params.astype(dtype)
+        return np.asarray(self.params, dtype=dtype, copy=copy)
 
     def __call__(self, coords):
         """Apply forward transformation.
