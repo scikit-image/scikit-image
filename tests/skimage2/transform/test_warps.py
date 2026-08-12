@@ -956,7 +956,7 @@ def test_resize_local_mean3d_keep(channel_axis):
     channel_axis = channel_axis % x.ndim
     spatial_shape = (10, 10)
     out_shape = spatial_shape[:channel_axis] + (nch,) + spatial_shape[channel_axis:]
-    resized = resize_local_mean(x, out_shape)
+    resized = resize_local_mean(x, out_shape, channel_axis=channel_axis)
     # move channels back to last axis to match the reference image
     resized = np.moveaxis(resized, channel_axis, -1)
     assert_array_almost_equal(resized, ref)

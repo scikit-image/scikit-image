@@ -1377,7 +1377,7 @@ def resize_local_mean(
             # move channels to last position in output_shape
             channel_axis = channel_axis % image.ndim
             output_shape = (
-                output_shape[:channel_axis] + output_shape[channel_axis:] + (nc,)
+                output_shape[:channel_axis] + output_shape[channel_axis + 1 :] + (nc,)
             )
         else:
             raise ValueError(
