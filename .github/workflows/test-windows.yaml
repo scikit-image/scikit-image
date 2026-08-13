@@ -44,12 +44,12 @@ jobs:
 
     steps:
       - name: Checkout scikit-image
-        uses: actions/checkout@v5
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
         with:
           persist-credentials: false
 
       - name: Setup Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
         with:
           python-version: ${{ matrix.python-version}}
           allow-prereleases: true
@@ -68,7 +68,7 @@ jobs:
         run: choco install ccache --no-progress
 
       - name: Cache ccache
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ccache-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.OPTIONS_NAME }}-${{ github.sha }}
