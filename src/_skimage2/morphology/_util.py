@@ -121,7 +121,7 @@ def _raveled_offsets_and_distances(
 
     if not footprint.ndim == ndim == len(center):
         raise ValueError(
-            "number of dimensions in image shape, footprint and its"
+            "number of dimensions in image shape, footprint and its "
             "center index does not match"
         )
 
@@ -255,7 +255,7 @@ def _resolve_neighborhood(footprint, connectivity, ndim, enforce_adjacency=True)
         footprint = np.asarray(footprint, dtype=bool)
         # Must specify neighbors for all dimensions
         if footprint.ndim != ndim:
-            raise ValueError("number of dimensions in image and footprint do notmatch")
+            raise ValueError("number of dimensions in image and footprint do not match")
         # Must only specify direct neighbors
         if enforce_adjacency and any(s != 3 for s in footprint.shape):
             raise ValueError("dimension size in footprint is not 3")
