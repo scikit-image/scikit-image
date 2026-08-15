@@ -3,8 +3,8 @@
 # resolved baseline, and fail the step if a regression or error is
 # detected.
 #
-# Required env vars, exported into the job environment from
-# benchmark-params.json by export-benchmark-params.py:
+# Expects prepare-benchmarks.sh to have run first; it puts these into
+# the job environment from benchmark-params.json:
 #   ASV_FACTOR:      the asv --factor threshold
 #   ASV_PROCESSES:   the asv processes/rounds count
 #   BASELINE_SHA:    baseline commit SHA
@@ -19,24 +19,6 @@
 
 set -euo pipefail
 set -x
-
-# Keep the numeric libraries single-threaded so timings reflect the code
-# under test rather than however many cores the runner happened to give
-# us.
-export OPENBLAS_NUM_THREADS=1
-export MKL_NUM_THREADS=1
-export OMP_NUM_THREADS=1
-export PYTHONUNBUFFERED=1
-
-# asv installs each matrix requirement with its own separate pip
-# invocation; prefer an existing wheel over a much slower source build if
-# a package's very latest release doesn't have full wheel coverage yet.
-export PIP_PREFER_BINARY=1
-
-python -m pip install virtualenv
-
-# ID this runner
-asv machine --yes
 
 echo "Baseline: $BASELINE_SHA ($BASELINE_LABEL)"
 echo "Contender: $GITHUB_SHA ($CONTENDER_LABEL)"

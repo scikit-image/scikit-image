@@ -28,9 +28,11 @@ Due to the sensitivity of the test, we cannot guarantee that false positives are
 `resolve-benchmark-params.py` decides everything about a given run from the trigger event, reading the event payload from `GITHUB_EVENT_PATH` rather than taking it through the workflow's `env:` block. It publishes its decisions two ways:
 
 - Three job outputs, the values other jobs need before benchmarking starts: `should_run`, `python_version` (read from `asv.conf.json`, so it can't drift), and `baseline_sha`.
-- `benchmark-params.json`, uploaded as an artifact, holding the asv settings only the benchmark job cares about: `ASV_FACTOR`, `ASV_PROCESSES`, `ASV_SKIP_SLOW`, `ASV_FULL_PARAMS`, `BASELINE_SHA`, `BASELINE_LABEL`, `CONTENDER_LABEL`, and `BENCH_FILTER`. The benchmark job downloads it and `export-benchmark-params.py` copies the entries into `$GITHUB_ENV`, where `run-benchmarks.sh` and the benchmark processes pick them up.
+- `benchmark-params.json`, uploaded as an artifact, holding the asv settings only the benchmark job cares about: `ASV_FACTOR`, `ASV_PROCESSES`, `ASV_SKIP_SLOW`, `ASV_FULL_PARAMS`, `BASELINE_SHA`, `BASELINE_LABEL`, `CONTENDER_LABEL`, and `BENCH_FILTER`. The benchmark job downloads it and `prepare-benchmarks.sh` copies the entries into `$GITHUB_ENV`, where `run-benchmarks.sh` and the benchmark processes pick them up.
 
 The file's keys are the environment variable names themselves, so adding a parameter means adding one entry in `resolve-benchmark-params.py` rather than editing the workflow in several places.
+
+The benchmark job's two steps split along that seam. `prepare-benchmarks.sh` does everything before measurement: exporting the parameters, pinning the numeric libraries to a single thread, swapping `asv.conf.json`'s `build_command` over to the prebuilt wheels, and registering the runner with `asv machine`. `run-benchmarks.sh` is then just the `asv continuous` call and its pass/fail check.
 
 ## Running the benchmarks on GitHub Actions
 

@@ -13,9 +13,9 @@ lookup, nightly baseline lookup; the latter needs `actions: read`).
 Writes should_run, python_version, and baseline_sha to $GITHUB_OUTPUT:
 the only values other jobs need in order to start. The rest of the asv
 parameters go to benchmark-params.json, which the benchmark job
-downloads and unpacks into $GITHUB_ENV (see
-export-benchmark-params.py), so they don't have to be threaded through
-job outputs one `env:` entry at a time.
+downloads and unpacks into $GITHUB_ENV (see prepare-benchmarks.sh), so
+they don't have to be threaded through job outputs one `env:` entry at
+a time.
 """
 
 import json
