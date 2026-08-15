@@ -50,6 +50,43 @@ def _asv_builds_declared_environment(asv_args):
     return not any(arg == "existing" or arg.endswith("=existing") for arg in asv_args)
 
 
+def _changed_bench_filter(base):
+    """An asv `-b` regex covering the subpackages changed since base.
+
+    Uses the merge base so unrelated commits on base don't count, and
+    diffs against the working tree so uncommitted edits do. Returns
+    None when nothing benchmarked changed. Shares
+    benchmarks/module-map.json with CI's path scoping (see
+    .github/scripts/resolve-benchmark-params.py).
+    """
+    merge_base = subprocess.run(
+        ["git", "merge-base", base, "HEAD"],
+        stdout=subprocess.PIPE,
+        text=True,
+        check=True,
+    ).stdout.strip()
+    changed = subprocess.run(
+        ["git", "diff", "--name-only", merge_base, "--", "src/skimage/"],
+        stdout=subprocess.PIPE,
+        text=True,
+        check=True,
+    ).stdout.splitlines()
+
+    with open(os.path.join(_REPO_ROOT, "benchmarks", "module-map.json")) as f:
+        module_map = json.load(f)
+
+    modules = []
+    for pkg, pkg_modules in module_map.items():
+        if pkg.startswith("_"):
+            continue
+        if any(line.startswith(f"src/skimage/{pkg}/") for line in changed):
+            modules.extend(pkg_modules)
+
+    if not modules:
+        return None
+    return f"^({'|'.join(modules)})\\."
+
+
 def _apply_asv_profile(name, asv_args):
     """Set up asv to measure what CI's named profile measures.
 
@@ -112,8 +149,20 @@ def _check_asv_python_version():
     help="Measure what CI's 'pr' or 'nightly' run measures "
     "(see benchmarks/profiles.json).",
 )
+@click.option(
+    "--changed",
+    is_flag=True,
+    help="Only run the benchmarks covering subpackages you've changed, "
+    "the way a pull request check scopes itself.",
+)
+@click.option(
+    "--changed-base",
+    default="main",
+    show_default=True,
+    help="Ref that --changed compares against.",
+)
 @spin.cmds.meson.build_dir_option
-def asv(asv_args, profile, build_dir):
+def asv(asv_args, profile, changed, changed_base, build_dir):
     """🏃 Run `asv` to collect benchmarks
 
     ASV_ARGS are passed through directly to asv, e.g.:
@@ -121,14 +170,28 @@ def asv(asv_args, profile, build_dir):
     spin asv -- dev -b TransformSuite
 
     Pass --profile to match a CI run's benchmark selection and
-    comparison factor:
+    comparison factor, and --changed to scope the run to the
+    subpackages you've touched, as a pull request check does:
 
-    spin asv --profile pr -- continuous main -b TransformSuite
+    spin asv --profile pr --changed -- continuous main
 
     Please see CONTRIBUTING.txt
     """
     if profile:
         asv_args = _apply_asv_profile(profile, asv_args)
+
+    if changed:
+        if any(a == "-b" or a.startswith("--bench") for a in asv_args):
+            print("--changed was ignored: an explicit -b/--bench filter is set.")
+        else:
+            bench_filter = _changed_bench_filter(changed_base)
+            if bench_filter is None:
+                print(
+                    f"No benchmarked subpackage changed since {changed_base}; "
+                    "nothing to run."
+                )
+                return
+            asv_args = list(asv_args) + ["-b", bench_filter]
 
     if _asv_builds_declared_environment(asv_args):
         _check_asv_python_version()

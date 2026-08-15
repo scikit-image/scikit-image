@@ -1042,6 +1042,20 @@ matrices. Both are defined in `benchmarks/profiles.json`, which CI reads from
 as well. An explicit `--factor` or `-a processes=` of your own takes
 precedence over the profile's.
 
+A pull request check also narrows itself to the benchmarks covering the
+subpackages the branch touches, which is usually a small fraction of the
+suite. `--changed` does the same locally:
+
+```
+spin asv --profile pr --changed -- continuous main
+```
+
+This compares against the merge base with `main` (use `--changed-base` for a
+different ref) and counts uncommitted edits, so it follows the code you're
+working on. Editing `src/skimage/filters/` selects `benchmark_filters` and
+`benchmark_rank`; editing a subpackage with no benchmarks reports that there's
+nothing to run. Pass your own `-b` instead when you want a specific suite.
+
 The output may look something like:
 
 ```

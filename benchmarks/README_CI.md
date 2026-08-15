@@ -34,6 +34,8 @@ The file's keys are the environment variable names themselves, so adding a param
 
 The asv settings within it come from `benchmarks/profiles.json`, which defines the `pr` profile (used by pull request checks and manual dispatches) and the `nightly` profile. `spin asv --profile` reads the same file, so `spin asv --profile pr -- continuous main` measures locally what the pull request check measures. Retuning a profile means editing that one file rather than CI and the local tooling separately.
 
+The path scoping works the same way. `benchmarks/module-map.json` records which benchmark modules cover each `src/skimage/` subpackage, and both this script and `spin asv --changed` build their `-b` filter from it, so a benchmark added for a subpackage starts being selected in both places at once.
+
 The benchmark job's two steps split along that seam. `prepare-benchmarks.sh` does everything before measurement: exporting the parameters, pinning the numeric libraries to a single thread, swapping `asv.conf.json`'s `build_command` over to the prebuilt wheels, and registering the runner with `asv machine`. `run-benchmarks.sh` is then just the `asv continuous` call and its pass/fail check.
 
 ## Running the benchmarks on GitHub Actions

@@ -28,31 +28,7 @@ import subprocess
 
 PARAMS_FILE = "benchmark-params.json"
 PROFILES_FILE = "benchmarks/profiles.json"
-
-# Subpackages with no corresponding benchmark file, or changes outside
-# src/skimage/ entirely (docs, CI config, etc.), simply don't
-# contribute a module - they neither force nor block a run.
-PACKAGES = [
-    "exposure",
-    "feature",
-    "filters",
-    "graph",
-    "measure",
-    "metrics",
-    "morphology",
-    "registration",
-    "restoration",
-    "segmentation",
-    "transform",
-    "util",
-]
-
-# Packages whose benchmark coverage spans more than one module file.
-EXTRA_MODULES = {
-    "feature": "benchmark_feature|benchmark_peak_local_max",
-    "filters": "benchmark_filters|benchmark_rank",
-    "transform": "benchmark_transform|benchmark_transform_warp|benchmark_interpolation",
-}
+MODULE_MAP_FILE = "benchmarks/module-map.json"
 
 
 def run(*args: str) -> str:
@@ -72,14 +48,22 @@ def event_payload() -> dict:
 
 def bench_modules_for_path_changes(changed: str) -> str:
     """Map changed src/skimage/<subpackage>/ paths to the benchmark
-    module(s) that cover them.
+    module(s) that cover them, per benchmarks/module-map.json.
+
+    Subpackages absent from the map, or changes outside src/skimage/
+    entirely (docs, CI config, etc.), contribute no module: they
+    neither force nor block a run. `spin asv --changed` scopes local
+    runs from the same map (see .spin/cmds.py).
     """
+    with open(MODULE_MAP_FILE) as f:
+        module_map = json.load(f)
     changed_lines = changed.splitlines()
     modules = []
-    for pkg in PACKAGES:
-        if not any(line.startswith(f"src/skimage/{pkg}/") for line in changed_lines):
+    for pkg, pkg_modules in module_map.items():
+        if pkg.startswith("_"):
             continue
-        modules.append(EXTRA_MODULES.get(pkg, f"benchmark_{pkg}"))
+        if any(line.startswith(f"src/skimage/{pkg}/") for line in changed_lines):
+            modules.extend(pkg_modules)
     return "|".join(modules)
 
 
