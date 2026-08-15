@@ -1,3 +1,4 @@
+import importlib.util
 import json
 import os
 import subprocess
@@ -8,6 +9,24 @@ import spin
 from spin.cmds.meson import _is_editable_install_of_same_source
 
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def _load_sibling(name):
+    """Import a module sitting beside this file.
+
+    spin loads command files by path rather than as a package, so
+    neither a plain nor a relative import can find them.
+    """
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), f"{name}.py")
+    spec = importlib.util.spec_from_file_location(name, path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+# Lives in _asv.py, which is long enough to be worth its own file.
+# Re-exported so pyproject.toml points every command at this module.
+asv = _load_sibling("_asv").asv
 
 
 @click.option(
