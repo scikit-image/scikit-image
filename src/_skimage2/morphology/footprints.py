@@ -850,17 +850,20 @@ def footprint_ellipse(radii, *, shape=None, adjust_edge=0.4, dtype=np.uint8):
     _ellipse_field = np.zeros(shape, dtype=float)
 
     for dim, (length, radius) in enumerate(zip(shape, radii_adjusted)):
-        # Create coordinate space along current dimension
-        # We use integer division to determine value of the border pixels
-        # because that is what legacy skimage and other libraries
-        # (like MATLAB, imagemagick) did or seem to be doing. It makes it easier
-        # to approximate their results.
+        if radius == 0:
+            # Avoid division by zero warning later on
+            _ellipse_field[...] = np.inf
+            break  # We can break loop early here
+
+        # Create coordinate space along current dimension. We use integer
+        # division to determine value of the border pixels because that is what
+        # legacy skimage and other libraries (like MATLAB, imagemagick) did or
+        # seem to be doing. It makes it easier to approximate their results.
         coord_max = length // 2
         coords = np.linspace(-coord_max, coord_max, num=length, endpoint=True)
         coords = coords.reshape((1,) * dim + (length,) + (1,) * (len(shape) - dim - 1))
 
-        with np.errstate(all="ignore"):
-            coords /= radius
+        coords /= radius
         _ellipse_field += coords**2
 
     footprint = _ellipse_field <= 1

@@ -113,26 +113,24 @@ class TestFootprints:
         actual = actual[1:-1, 2:-2]
         assert_equal(expected, actual)
 
-    def test_footprint_ellipse_explicit(self):
-        expected = np.ones((3, 3), dtype=np.uint8)
-        actual = footprint_ellipse((3, 3))
+    def test_footprint_ellipse_zero_radius(self):
+        # `radii` aren't exactly 0 because of default `adjust_edge`
+        actual = footprint_ellipse(0)
+        assert_equal(actual, [[1]])
 
-        assert_equal(expected, actual)
-        # assert_equal(expected, footprints.ellipse(3, 5).T)
-        # assert_equal(expected, footprints.ellipse(1, 1).T)
+        actual = footprint_ellipse((0, 1))
+        assert_equal(actual, [[1, 1, 1]])
 
-    @pytest.mark.parametrize("shape", [(5, 7), (6, 6)])
-    def test_footprint_ellipse_zero_radius(self, shape):
-        footprint = footprint_ellipse(shape, radii=(2, 0))
-        np.testing.assert_equal(footprint, 0)
+        # Forcing even length in one dimension, is enough to evaluate to 0
+        actual = footprint_ellipse((0, 0), shape=(1, 2))
+        assert_equal(actual, [[0, 0]])
 
-        # For small non-zero radii the result depends on the "evenness" of
-        # the dimension: if odd, the central column will always be 1, else 0
-        expected = np.zeros(shape, dtype=np.uint8)
-        if shape[1] % 2 == 1:
-            expected[:, shape[1] // 2] = 1  # Central axis of 1 only in odd case
-        footprint = footprint_ellipse(shape, radii=(2, np.nextafter(0, 1)))
-        np.testing.assert_equal(footprint, expected)
+        # `radii` are exactly 0
+        actual = footprint_ellipse(0, adjust_edge=0)
+        assert_equal(actual, [[0]])
+
+        actual = footprint_ellipse((0, 1), adjust_edge=0)
+        assert_equal(actual, [[0, 0, 0]])
 
     def test_footprint_star(self):
         """Test star footprints"""
