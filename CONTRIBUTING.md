@@ -1033,21 +1033,21 @@ noise), so a local result and a CI result can disagree. Pass `--profile` to
 measure what a CI run measures:
 
 ```
-spin asv --profile pr -- continuous main -b TransformSuite
+spin asv --profile fast -- continuous main -b TransformSuite
 ```
 
-`pr` matches the pull request check, `nightly` matches the scheduled full run
-against `main`, which includes the slow benchmarks and the full parameter
-matrices. Both are defined in `benchmarks/profiles.json`, which CI reads from
-as well. An explicit `--factor` or `-a processes=` of your own takes
-precedence over the profile's.
+`fast` skips the benchmarks marked slow and uses the reduced parameter
+matrices, the way a pull request check runs. `full` includes both, the way the
+nightly run against `main` does. Both are defined in
+`benchmarks/profiles.json`, which CI reads from as well. An explicit
+`--factor` or `-a processes=` of your own takes precedence over the profile's.
 
 A pull request check also narrows itself to the benchmarks covering the
 subpackages the branch touches, which is usually a small fraction of the
 suite. `--changed` does the same locally:
 
 ```
-spin asv --profile pr --changed -- continuous main
+spin asv --profile fast --changed -- continuous main
 ```
 
 This compares against the merge base with `main` (use `--changed-base` for a

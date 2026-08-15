@@ -145,9 +145,9 @@ def _check_asv_python_version():
 @click.argument("asv_args", nargs=-1)
 @click.option(
     "--profile",
-    type=click.Choice(["pr", "nightly"]),
-    help="Measure what CI's 'pr' or 'nightly' run measures "
-    "(see benchmarks/profiles.json).",
+    type=click.Choice(["fast", "full"]),
+    help="Measure what a 'fast' (trimmed, as pull request checks run) or "
+    "'full' (nightly) run measures (see benchmarks/profiles.json).",
 )
 @click.option(
     "--changed",
@@ -173,7 +173,7 @@ def asv(asv_args, profile, changed, changed_base, build_dir):
     comparison factor, and --changed to scope the run to the
     subpackages you've touched, as a pull request check does:
 
-    spin asv --profile pr --changed -- continuous main
+    spin asv --profile fast --changed -- continuous main
 
     Please see CONTRIBUTING.txt
     """

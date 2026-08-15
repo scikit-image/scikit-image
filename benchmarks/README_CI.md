@@ -32,7 +32,7 @@ Due to the sensitivity of the test, we cannot guarantee that false positives are
 
 The file's keys are the environment variable names themselves, so adding a parameter means adding one entry in `resolve-benchmark-params.py` rather than editing the workflow in several places.
 
-The asv settings within it come from `benchmarks/profiles.json`, which defines the `pr` profile (used by pull request checks and manual dispatches) and the `nightly` profile. `spin asv --profile` reads the same file, so `spin asv --profile pr -- continuous main` measures locally what the pull request check measures. Retuning a profile means editing that one file rather than CI and the local tooling separately.
+The asv settings within it come from `benchmarks/profiles.json`, which defines a `fast` profile (trimmed, used by pull request checks and manual dispatches) and a `full` one (used by the nightly run). `spin asv --profile` reads the same file, so `spin asv --profile fast -- continuous main` measures locally what a pull request check measures. Retuning a profile means editing that one file rather than CI and the local tooling separately.
 
 The path scoping works the same way. `benchmarks/module-map.json` records which benchmark modules cover each `src/skimage/` subpackage, and both this script and `spin asv --changed` build their `-b` filter from it, so a benchmark added for a subpackage starts being selected in both places at once.
 

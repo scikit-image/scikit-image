@@ -132,7 +132,7 @@ def main() -> None:
         baseline_sha = pr_base_sha
         baseline_label = pull_request["base"]["label"]
         contender_label = pull_request["head"]["label"]
-        profile = load_profile("pr")
+        profile = load_profile("fast")
 
         # Fetch label state dynamically (not from the workflow trigger
         # payload) so that re-running the workflow after adding the
@@ -179,7 +179,7 @@ def main() -> None:
         baseline_sha = prev_sha
         baseline_label = prev_sha
         contender_label = github_sha
-        profile = load_profile("nightly")
+        profile = load_profile("full")
         should_run = "true"
         bench_filter = ""
 
@@ -196,7 +196,7 @@ def main() -> None:
             baseline_sha = run("git", "rev-parse", f"{github_sha}~1")
         baseline_label = baseline_sha
         contender_label = github_sha
-        profile = load_profile("pr")
+        profile = load_profile("fast")
         should_run = "true"
         bench_filter = ""
 

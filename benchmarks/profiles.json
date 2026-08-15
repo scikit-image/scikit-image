@@ -1,13 +1,13 @@
 {
-  "pr": {
-    "description": "Trimmed suite for pull request checks and manual runs: slow benchmarks skipped, reduced parameter matrices, and a comparison factor loose enough to absorb the noise of a shared CI runner.",
+  "fast": {
+    "description": "Trimmed run: benchmarks marked slow are skipped and heavily-parametrized ones use their reduced matrices. Used by pull request checks and manual dispatches, and the profile to reach for locally.",
     "ASV_FACTOR": "1.5",
     "ASV_PROCESSES": "2",
     "ASV_SKIP_SLOW": "1",
     "ASV_FULL_PARAMS": "0"
   },
-  "nightly": {
-    "description": "Complete suite for the nightly run against main: slow benchmarks and full parameter matrices included.",
+  "full": {
+    "description": "Complete run: the slow benchmarks and the full parameter matrices are included. Used by the nightly run against main.",
     "ASV_FACTOR": "1.5",
     "ASV_PROCESSES": "2",
     "ASV_SKIP_SLOW": "0",
