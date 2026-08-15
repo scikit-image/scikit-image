@@ -1,12 +1,11 @@
 """Benchmark commands for `spin`.
 
 Wraps `asv` so a local run can be scoped and configured the way CI
-scopes and configures its own, reading the same
-benchmarks/profiles.json and benchmarks/module-map.json that
-.github/scripts/resolve-benchmark-params.py does.
+scopes and configures its own, through the benchmarks/config.py that
+.github/scripts/resolve-benchmark-params.py reads as well.
 """
 
-import json
+import importlib.util
 import os
 import subprocess
 import sys
@@ -15,6 +14,14 @@ import click
 import spin
 
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# Loaded by path rather than imported: benchmarks/__init__.py pulls in
+# numpy and skimage, which reading configuration shouldn't require.
+_spec = importlib.util.spec_from_file_location(
+    "benchmark_config", os.path.join(_REPO_ROOT, "benchmarks", "config.py")
+)
+_config = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_config)
 
 
 # asv subcommands that build an environment from asv.conf.json. The
@@ -45,9 +52,7 @@ def _changed_bench_filter(base):
 
     Uses the merge base so unrelated commits on base don't count, and
     diffs against the working tree so uncommitted edits do. Returns
-    None when nothing benchmarked changed. Shares
-    benchmarks/module-map.json with CI's path scoping (see
-    .github/scripts/resolve-benchmark-params.py).
+    None when nothing benchmarked changed.
     """
     merge_base = subprocess.run(
         ["git", "merge-base", base, "HEAD"],
@@ -61,20 +66,7 @@ def _changed_bench_filter(base):
         text=True,
         check=True,
     ).stdout.splitlines()
-
-    with open(os.path.join(_REPO_ROOT, "benchmarks", "module-map.json")) as f:
-        module_map = json.load(f)
-
-    modules = []
-    for pkg, pkg_modules in module_map.items():
-        if pkg.startswith("_"):
-            continue
-        if any(line.startswith(f"src/skimage/{pkg}/") for line in changed):
-            modules.extend(pkg_modules)
-
-    if not modules:
-        return None
-    return f"^({'|'.join(modules)})\\."
+    return _config.bench_filter(changed) or None
 
 
 def _apply_asv_profile(name, asv_args):
@@ -85,13 +77,12 @@ def _apply_asv_profile(name, asv_args):
     are asv's own flags, so they're only added where asv accepts them,
     and never over an equivalent flag already given explicitly.
     """
-    with open(os.path.join(_REPO_ROOT, "benchmarks", "profiles.json")) as f:
-        profiles = json.load(f)
-    if name not in profiles:
+    try:
+        profile = _config.load_profile(name)
+    except KeyError:
         raise click.BadParameter(
-            f"unknown profile {name!r}; choose from {sorted(profiles)}"
+            f"unknown profile {name!r}; choose from {_config.profile_names()}"
         )
-    profile = profiles[name]
 
     os.environ["ASV_SKIP_SLOW"] = profile["ASV_SKIP_SLOW"]
     os.environ["ASV_FULL_PARAMS"] = profile["ASV_FULL_PARAMS"]
@@ -118,8 +109,7 @@ def _check_asv_python_version():
     would otherwise fail deep inside env creation with a much more
     cryptic "no such python" error.
     """
-    with open(os.path.join(_REPO_ROOT, "asv.conf.json")) as f:
-        pythons = json.load(f)["pythons"]
+    pythons = _config.asv_pythons()
 
     current = f"{sys.version_info.major}.{sys.version_info.minor}"
     if current not in pythons:
@@ -135,7 +125,7 @@ def _check_asv_python_version():
 @click.argument("asv_args", nargs=-1)
 @click.option(
     "--profile",
-    type=click.Choice(["fast", "full"]),
+    type=click.Choice(_config.profile_names()),
     help="Measure what a 'fast' (trimmed, as pull request checks run) or "
     "'full' (nightly) run measures (see benchmarks/profiles.json).",
 )

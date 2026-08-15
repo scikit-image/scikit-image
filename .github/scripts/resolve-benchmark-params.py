@@ -13,15 +13,19 @@ GITHUB_EVENT_PATH, GITHUB_OUTPUT, and GH_TOKEN for the gh lookups (the
 nightly baseline one needs `actions: read`).
 """
 
+import importlib.util
 import json
 import os
 import subprocess
 from dataclasses import dataclass
 
 PARAMS_FILE = "benchmark-params.json"
-PROFILES_FILE = "benchmarks/profiles.json"
-MODULE_MAP_FILE = "benchmarks/module-map.json"
-ASV_CONF_FILE = "asv.conf.json"
+
+# Loaded by path because benchmarks/__init__.py imports numpy and
+# skimage, which this job has no reason to install.
+_spec = importlib.util.spec_from_file_location("config", "benchmarks/config.py")
+config = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(config)
 
 
 def run(*args: str) -> str:
@@ -65,12 +69,6 @@ class Resolution:
         return cls(baseline_sha, baseline_sha, contender_sha, profile)
 
 
-def load_profile(name: str) -> dict:
-    """The asv settings a profile in PROFILES_FILE names."""
-    profile = read_json(PROFILES_FILE)[name]
-    return {k: v for k, v in profile.items() if k != "description"}
-
-
 def last_nightly_sha() -> str:
     """The commit the last successful nightly compared, or empty."""
     output = run(
@@ -111,22 +109,11 @@ def has_benchmark_label(pr_number: int) -> bool:
 def bench_filter_for_changes(base_sha: str, head_sha: str) -> str:
     """An asv -b regex covering the subpackages changed between two
     commits, or empty if none were.
-
-    Paths outside the map contribute nothing, so they neither force nor
-    block a run.
     """
     changed = run(
         "git", "diff", "--name-only", base_sha, head_sha, "--", "src/skimage/"
     ).splitlines()
-
-    modules = []
-    for pkg, pkg_modules in read_json(MODULE_MAP_FILE).items():
-        if pkg.startswith("_"):
-            continue
-        if any(path.startswith(f"src/skimage/{pkg}/") for path in changed):
-            modules.extend(pkg_modules)
-
-    return f"^({'|'.join(modules)})\\." if modules else ""
+    return config.bench_filter(changed)
 
 
 def resolve_pull_request(event: dict, github_sha: str) -> Resolution:
@@ -141,7 +128,7 @@ def resolve_pull_request(event: dict, github_sha: str) -> Resolution:
         baseline_sha=base_sha,
         baseline_label=pull_request["base"]["label"],
         contender_label=pull_request["head"]["label"],
-        profile=load_profile("fast"),
+        profile=config.load_profile("fast"),
     )
     if has_benchmark_label(pull_request["number"]):
         return resolution
@@ -161,7 +148,9 @@ def resolve_schedule(event: dict, github_sha: str) -> Resolution:
     busy day of merges cumulatively, not just its last commit.
     """
     baseline_sha = baseline_or_parent(last_nightly_sha(), github_sha)
-    return Resolution.between_shas(baseline_sha, github_sha, load_profile("full"))
+    return Resolution.between_shas(
+        baseline_sha, github_sha, config.load_profile("full")
+    )
 
 
 def resolve_workflow_dispatch(event: dict, github_sha: str) -> Resolution:
@@ -170,7 +159,9 @@ def resolve_workflow_dispatch(event: dict, github_sha: str) -> Resolution:
         baseline_sha = baseline_or_parent(last_nightly_sha(), github_sha)
     else:
         baseline_sha = run("git", "rev-parse", f"{github_sha}~1")
-    return Resolution.between_shas(baseline_sha, github_sha, load_profile("fast"))
+    return Resolution.between_shas(
+        baseline_sha, github_sha, config.load_profile("fast")
+    )
 
 
 RESOLVERS = {
@@ -185,7 +176,7 @@ def write_outputs(resolution: Resolution) -> None:
     outputs = {
         "should_run": "true" if resolution.should_run else "false",
         # Taking the version from asv's own config keeps the two in step.
-        "python_version": read_json(ASV_CONF_FILE)["pythons"][0],
+        "python_version": config.asv_pythons()[0],
         "baseline_sha": resolution.baseline_sha,
     }
     with open(os.environ["GITHUB_OUTPUT"], "a") as f:

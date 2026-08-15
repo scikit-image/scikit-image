@@ -36,6 +36,8 @@ The asv settings within it come from `benchmarks/profiles.json`, which defines a
 
 The path scoping works the same way. `benchmarks/module-map.json` records which benchmark modules cover each `src/skimage/` subpackage, and both this script and `spin asv --changed` build their `-b` filter from it, so a benchmark added for a subpackage starts being selected in both places at once.
 
+`benchmarks/config.py` is what reads both files, and is the only code either side shares. It stays within the standard library and imports nothing from the benchmarks package, so the workflow's resolve step can load it on a runner with no numpy or skimage installed.
+
 The benchmark job's two steps split along that seam. `prepare-benchmarks.sh` does everything before measurement: exporting the parameters, pinning the numeric libraries to a single thread, swapping `asv.conf.json`'s `build_command` over to the prebuilt wheels, and registering the runner with `asv machine`. `run-benchmarks.sh` is then just the `asv continuous` call and its pass/fail check.
 
 ## Running the benchmarks on GitHub Actions
