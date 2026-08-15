@@ -10,7 +10,7 @@ import scipy.ndimage
 import skimage
 from skimage import color, data, morphology, util
 
-from . import _full_params
+from . import _resolve_params
 
 
 class Skeletonize3d:
@@ -75,12 +75,12 @@ class GrayMorphology2D:
     param_names = ["shape", "footprint", "radius", "decomposition"]
     params = [
         ((512, 512),),
-        _full_params(
+        _resolve_params(
             reduced=("disk", "octagon"),
             full=("square", "diamond", "octagon", "disk", "ellipse", "star"),
         ),
-        _full_params(reduced=(5, 25), full=(1, 3, 5, 15, 25, 40)),
-        _full_params(
+        _resolve_params(reduced=(5, 25), full=(1, 3, 5, 15, 25, 40)),
+        _resolve_params(
             reduced=(None, "sequence"),
             full=(None, "sequence", "separable", "crosses"),
         ),
@@ -139,8 +139,10 @@ class GrayMorphology3D:
     params = [
         ((128, 128, 128),),
         ("ball", "cube", "octahedron"),
-        _full_params(reduced=(3, 10), full=(1, 3, 5, 10)),
-        _full_params(reduced=(None, "sequence"), full=(None, "sequence", "separable")),
+        _resolve_params(reduced=(3, 10), full=(1, 3, 5, 10)),
+        _resolve_params(
+            reduced=(None, "sequence"), full=(None, "sequence", "separable")
+        ),
     ]
 
     def setup(self, shape, footprint, radius, decomposition):
@@ -173,11 +175,11 @@ class GrayReconstruction:
     # skip rectangle as roughly equivalent to square
     param_names = ["shape", "dtype"]
     params = [
-        _full_params(
+        _resolve_params(
             reduced=((64, 64), (1200, 1200), (96, 96, 96)),
             full=((10, 10), (64, 64), (1200, 1200), (96, 96, 96)),
         ),
-        _full_params(
+        _resolve_params(
             reduced=(np.uint8, np.float64), full=(np.uint8, np.float32, np.float64)
         ),
     ]

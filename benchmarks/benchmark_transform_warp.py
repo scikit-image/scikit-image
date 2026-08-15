@@ -9,16 +9,16 @@ try:
 except ImportError:
     from skimage.util.dtype import convert
 
-from . import _full_params
+from . import _resolve_params
 
 
 class WarpSuite:
     params = (
-        _full_params(
+        _resolve_params(
             reduced=[np.uint8, np.float64],
             full=[np.uint8, np.uint16, np.float32, np.float64],
         ),
-        _full_params(reduced=[128, 1024], full=[128, 1024, 4096]),
+        _resolve_params(reduced=[128, 1024], full=[128, 1024, 4096]),
         [0, 1, 3],
         # [np.float32, np.float64]
     )
@@ -66,7 +66,7 @@ class ResizeLocalMeanSuite:
     # enumerate them directly instead of a full cross product
     params = (
         [np.float32, np.float64],
-        _full_params(
+        _resolve_params(
             reduced=[
                 ((512, 512), (2048, 2048)),
                 ((2048, 2048), (512, 512)),

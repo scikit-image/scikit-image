@@ -4,14 +4,14 @@ from skimage.filters.rank import __all__ as all_rank_filters
 from skimage.filters.rank import __3Dfilters as all_3d_rank_filters
 from skimage.morphology import disk, ball
 
-from . import _full_params
+from . import _resolve_params
 
 
 class RankSuite:
     param_names = ["filter_func", "shape"]
     params = [
         sorted(all_rank_filters),
-        _full_params(reduced=[(256, 256)], full=[(32, 32), (256, 256)]),
+        _resolve_params(reduced=[(256, 256)], full=[(32, 32), (256, 256)]),
     ]
 
     def setup(self, filter_func, shape):
@@ -26,7 +26,9 @@ class Rank3DSuite:
     param_names = ["filter3d", "shape3d"]
     params = [
         sorted(all_3d_rank_filters),
-        _full_params(reduced=[(128, 128, 128)], full=[(32, 32, 32), (128, 128, 128)]),
+        _resolve_params(
+            reduced=[(128, 128, 128)], full=[(32, 32, 32), (128, 128, 128)]
+        ),
     ]
 
     def setup(self, filter3d, shape3d):

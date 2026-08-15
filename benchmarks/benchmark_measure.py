@@ -2,7 +2,7 @@ import numpy as np
 
 from skimage import data, filters, measure
 
-from . import _full_params
+from . import _resolve_params
 
 try:
     from skimage.measure._regionprops import PROP_VALS
@@ -23,7 +23,7 @@ class RegionpropsTableIndividual:
     param_names = ['prop']
     # sample every 3rd property (alphabetically) to keep breadth while
     # trimming the many near-fixed-cost parameter combinations
-    params = _full_params(
+    params = _resolve_params(
         reduced=sorted(list(PROP_VALS))[::3],
         full=sorted(list(PROP_VALS)),
     )

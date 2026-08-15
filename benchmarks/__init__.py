@@ -29,7 +29,7 @@ def _skip_slow():
         raise NotImplementedError("Skipping this test...")
 
 
-def _full_params(reduced, full):
+def _resolve_params(reduced, full):
     """
     Pick between a reduced (fast CI) and full (nightly) parameter list.
 
@@ -41,9 +41,9 @@ def _full_params(reduced, full):
 
     For example:
 
-    >>> from . import _full_params
+    >>> from . import _resolve_params
     >>> class Suite:
-    ...     params = [_full_params(reduced=[1, 2], full=[1, 2, 3, 4, 5])]
+    ...     params = [_resolve_params(reduced=[1, 2], full=[1, 2, 3, 4, 5])]
     """
     if os.environ.get("ASV_FULL_PARAMS", "0") == "1":
         return full

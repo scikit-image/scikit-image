@@ -3,17 +3,17 @@
 import numpy as np
 from skimage import transform
 
-from . import _full_params
+from . import _resolve_params
 
 
 class InterpolationResize:
     param_names = ['new_shape', 'order', 'mode', 'dtype', 'anti_aliasing']
     params = [
-        _full_params(
+        _resolve_params(
             reduced=((500, 800), (150, 150, 150)),
             full=((500, 800), (2000, 4000), (80, 80, 80), (150, 150, 150)),
         ),  # new_shape
-        _full_params(reduced=(0, 3), full=(0, 1, 3, 5)),  # order
+        _resolve_params(reduced=(0, 3), full=(0, 1, 3, 5)),  # order
         ('symmetric',),  # mode
         (np.float64,),  # dtype
         (True,),  # anti_aliasing
