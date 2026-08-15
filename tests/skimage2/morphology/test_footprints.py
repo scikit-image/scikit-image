@@ -48,16 +48,15 @@ class TestFootprints:
         """Test diamond footprints"""
         self.strel_worker("data/diamond-matlab-output.npz", footprints.diamond)
 
-    def test_footprint_ellipse_compare_matlab(self):
-        """Compare behavior to Matlab."""
+    def test_footprint_ellipse_compare_matlabs_disk(self):
+        """Compare behavior to Matlab's disk."""
         file = "data/disk-matlab-output.npz"
         matlab_masks = np.load(fetch(file))
         for radius, name in enumerate(sorted(matlab_masks)):
             expected = matlab_masks[name]
             if expected.shape == (1,):
                 expected = expected[:, np.newaxis]
-            radii = (radius + 0.001,) * 2
-            actual = footprint_ellipse(expected.shape, radii=radii)
+            actual = footprint_ellipse(radius, adjust_edge=0.001)
             assert_equal(expected, actual)
 
     def test_footprint_octahedron(self):
@@ -88,30 +87,30 @@ class TestFootprints:
         assert_equal(expected_mask1, actual_mask1)
         assert_equal(expected_mask2, actual_mask2)
 
-    def test_footprint_ellipse_explicit_5_3(self):
+    def test_footprint_ellipse_explicit_3_5(self):
         expected = np.array(
             [
-                [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                [0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
+                [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
                 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
                 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
                 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                [0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
             ],
             dtype=np.uint8,
         )
-        actual = footprint_ellipse((7, 11), radii=(4, 6), compare=np.less)
-        assert_equal(expected, actual)
+        actual = footprint_ellipse((3, 5))
+        assert_equal(actual, expected)
 
         # Switching dimensions makes no difference
-        actual = footprint_ellipse((11, 7), radii=(6, 4), compare=np.less)
-        assert_equal(expected, actual.T)
+        actual = footprint_ellipse((5, 3))
+        assert_equal(actual.T, expected)
 
-        # Large shape with same radii, can be croped to original result
-        actual = footprint_ellipse((9, 15), radii=(4, 6), compare=np.less)
+        # Larger shape with same radii, can be cropped to original result
+        actual = footprint_ellipse((3, 5), shape=(9, 15))
         actual = actual[1:-1, 2:-2]
-        assert_equal(expected, actual)
+        assert_equal(actual, expected)
 
     def test_footprint_ellipse_zero_radius(self):
         # `radii` aren't exactly 0 because of default `adjust_edge`
@@ -159,6 +158,32 @@ class TestFootprints:
         assert_equal(expected_mask2, actual_mask2)
 
 
+@pytest.mark.parametrize("func", [footprint_ellipse])
+@pytest.mark.parametrize(
+    "shape",
+    [(2, 2), (3, 3), (11, 11), (41, 32), (5, 5, 5), (21, 21, 10), (4, 5, 6, 7)],
+)
+def test_symmetric_convex_footprints(func, shape):
+    footprint = func(shape)
+    mirrored = footprints.mirror_footprint(footprint)
+    assert_equal(footprint, mirrored, err_msg="not symmetric")
+
+    # Since footprint is symmetric along each dimension,
+    # we only need to check if one quadrant is convex
+    sl = tuple(slice(s // 2, None) for s in footprint.shape)
+    last_quadrant = footprint[sl]
+    last_quadrant = last_quadrant.astype(int)
+
+    for axis in range(footprint.ndim):
+        # Sum all axes but current one
+        other_axes = tuple(set(range(footprint.ndim)) - {axis})
+        sum_other_axes = last_quadrant.sum(axis=other_axes).ravel()
+        # The sum must decline or stay the same from index `i` to its following
+        # neighbor `i + 1`, otherwise footprint is not convex
+        is_convex = np.all(np.diff(sum_other_axes) <= 0)
+        assert is_convex
+
+
 @pytest.mark.parametrize(
     'function, args, supports_sequence_decomposition',
     [
@@ -203,8 +228,7 @@ def test_nsphere_series_approximation(ndim, radius):
 @pytest.mark.parametrize("radius", [1, 2, 3, 4, 5, 10, 20, 50, 75])
 @pytest.mark.parametrize("dtype", [bool, np.uint8, int, float])
 def test_ellipse_crosses_approximation_(radius, dtype):
-    shape = (radius * 2 + 1,) * 2
-    expected = footprint_ellipse(shape, dtype=dtype)
+    expected = footprint_ellipse(radius, dtype=dtype)
     decomposed = cross_decompose_footprint(expected)
     approximate = footprint_from_sequence(decomposed)
     assert approximate.shape == expected.shape
