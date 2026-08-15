@@ -60,13 +60,7 @@ def _changed_bench_filter(base):
         text=True,
         check=True,
     ).stdout.strip()
-    changed = subprocess.run(
-        ["git", "diff", "--name-only", merge_base, "--", "src/skimage/"],
-        stdout=subprocess.PIPE,
-        text=True,
-        check=True,
-    ).stdout.splitlines()
-    return _config.bench_filter(changed) or None
+    return _config.bench_filter_for_changes(merge_base) or None
 
 
 def _apply_asv_profile(name, asv_args):

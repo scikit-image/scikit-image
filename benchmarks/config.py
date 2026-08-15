@@ -1,4 +1,4 @@
-"""Read the benchmark run configuration beside this file.
+"""Decide which benchmarks a run covers, and how it is configured.
 
 Shared by CI (.github/scripts/resolve-benchmark-params.py) and local
 tooling (`spin asv`, see .spin/asv.py) so the two scope and configure
@@ -9,11 +9,17 @@ runner with no numpy or skimage installed.
 
 import json
 import os
+import subprocess
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
+_REPO_ROOT = os.path.dirname(_HERE)
 PROFILES_FILE = os.path.join(_HERE, "profiles.json")
 MODULE_MAP_FILE = os.path.join(_HERE, "module-map.json")
-ASV_CONF_FILE = os.path.join(os.path.dirname(_HERE), "asv.conf.json")
+ASV_CONF_FILE = os.path.join(_REPO_ROOT, "asv.conf.json")
+
+# Where module-map.json's subpackage names live, and so the only paths
+# a change has to touch for a benchmark to be worth running.
+SOURCE_DIR = "src/skimage"
 
 
 def _read(path: str) -> dict:
@@ -51,11 +57,11 @@ def modules_for_paths(paths) -> list:
     """The benchmark modules covering the given repository paths.
 
     Paths under a subpackage that module-map.json doesn't list, or
-    outside src/skimage/ entirely, contribute nothing.
+    outside SOURCE_DIR entirely, contribute nothing.
     """
     modules = []
     for pkg, pkg_modules in _read(MODULE_MAP_FILE).items():
-        if any(path.startswith(f"src/skimage/{pkg}/") for path in paths):
+        if any(path.startswith(f"{SOURCE_DIR}/{pkg}/") for path in paths):
             modules.extend(pkg_modules)
     return modules
 
@@ -64,3 +70,25 @@ def bench_filter(paths) -> str:
     """An asv -b regex covering those paths, or empty if none match."""
     modules = modules_for_paths(paths)
     return f"^({'|'.join(modules)})\\." if modules else ""
+
+
+def changed_source_paths(base: str, head: str = "") -> list:
+    """Files under SOURCE_DIR that differ between base and head.
+
+    With no head, compares against the working tree, so uncommitted
+    edits count - what a local run wants. CI passes both commits.
+    """
+    revisions = [base, head] if head else [base]
+    result = subprocess.run(
+        ["git", "diff", "--name-only", *revisions, "--", SOURCE_DIR],
+        stdout=subprocess.PIPE,
+        text=True,
+        check=True,
+        cwd=_REPO_ROOT,
+    )
+    return result.stdout.splitlines()
+
+
+def bench_filter_for_changes(base: str, head: str = "") -> str:
+    """An asv -b regex covering the subpackages changed since base."""
+    return bench_filter(changed_source_paths(base, head))

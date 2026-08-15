@@ -106,16 +106,6 @@ def has_benchmark_label(pr_number: int) -> bool:
     return any("benchmark" in label["name"].lower() for label in labels["labels"])
 
 
-def bench_filter_for_changes(base_sha: str, head_sha: str) -> str:
-    """An asv -b regex covering the subpackages changed between two
-    commits, or empty if none were.
-    """
-    changed = run(
-        "git", "diff", "--name-only", base_sha, head_sha, "--", "src/skimage/"
-    ).splitlines()
-    return config.bench_filter(changed)
-
-
 def resolve_pull_request(event: dict, github_sha: str) -> Resolution:
     """Head against base, scoped to the subpackages touched.
 
@@ -133,7 +123,7 @@ def resolve_pull_request(event: dict, github_sha: str) -> Resolution:
     if has_benchmark_label(pull_request["number"]):
         return resolution
 
-    resolution.bench_filter = bench_filter_for_changes(
+    resolution.bench_filter = config.bench_filter_for_changes(
         base_sha, pull_request["head"]["sha"]
     )
     # Nothing benchmarked changed, so there's nothing worth running.
