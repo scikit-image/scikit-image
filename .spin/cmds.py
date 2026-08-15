@@ -1,4 +1,3 @@
-import json
 import os
 import subprocess
 import sys
@@ -98,6 +97,7 @@ def _is_wheel_install():
     (e.g. a plain meson build with only PYTHONPATH set).
     """
     import importlib.metadata
+    import json
 
     try:
         dist = importlib.metadata.distribution("scikit-image")
