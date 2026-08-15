@@ -4,29 +4,25 @@ parameters (comparison factor, process count, skip-slow, full-params,
 an optional benchmark-module filter, and the Python version) for the
 current trigger event.
 
-Required env vars:
-  EVENT_NAME:        github.event_name
-  GITHUB_SHA:        the current commit (provided by default by Actions)
-  GITHUB_REPOSITORY: "owner/repo" (provided by default by Actions; used
-                      for the nightly-baseline gh run list lookup)
-  GH_TOKEN:          token for gh CLI (PR label lookup, nightly baseline
-                      lookup - needs `actions: read` for the latter)
-  PR_NUMBER:         pull request number (empty for non-PR events)
-  PR_BASE_SHA:       github.event.pull_request.base.sha
-  PR_BASE_LABEL:     github.event.pull_request.base.label
-  PR_HEAD_SHA:       github.event.pull_request.head.sha
-  PR_HEAD_LABEL:     github.event.pull_request.head.label
-  DISPATCH_BASELINE: github.event.inputs.baseline (workflow_dispatch
-                      only; "parent-commit" or "previous-nightly")
+Reads the environment Actions already provides - GITHUB_EVENT_NAME,
+GITHUB_SHA, GITHUB_REPOSITORY, GITHUB_EVENT_PATH (the full event
+payload, which carries the pull_request and workflow_dispatch input
+fields), GITHUB_OUTPUT - plus GH_TOKEN for the gh CLI lookups (PR label
+lookup, nightly baseline lookup; the latter needs `actions: read`).
 
-Writes should_run, baseline_sha, baseline_label, contender_label,
-asv_factor, asv_processes, asv_skip_slow, asv_full_params,
-bench_filter, and python_version to $GITHUB_OUTPUT.
+Writes should_run, python_version, and baseline_sha to $GITHUB_OUTPUT:
+the only values other jobs need in order to start. The rest of the asv
+parameters go to benchmark-params.json, which the benchmark job
+downloads and unpacks into $GITHUB_ENV (see
+export-benchmark-params.py), so they don't have to be threaded through
+job outputs one `env:` entry at a time.
 """
 
 import json
 import os
 import subprocess
+
+PARAMS_FILE = "benchmark-params.json"
 
 # Subpackages with no corresponding benchmark file, or changes outside
 # src/skimage/ entirely (docs, CI config, etc.), simply don't
@@ -58,6 +54,15 @@ def run(*args: str) -> str:
     return subprocess.run(
         args, stdout=subprocess.PIPE, text=True, check=True
     ).stdout.strip()
+
+
+def event_payload() -> dict:
+    """The github.event payload for this run."""
+    path = os.environ.get("GITHUB_EVENT_PATH")
+    if not path or not os.path.exists(path):
+        return {}
+    with open(path) as f:
+        return json.load(f)
 
 
 def bench_modules_for_path_changes(changed: str) -> str:
@@ -116,15 +121,17 @@ def resolve_baseline(candidate: str, github_sha: str) -> str:
 
 
 def main() -> None:
-    event_name = os.environ["EVENT_NAME"]
+    event_name = os.environ["GITHUB_EVENT_NAME"]
     github_sha = os.environ["GITHUB_SHA"]
+    event = event_payload()
 
     if event_name == "pull_request":
-        pr_base_sha = os.environ["PR_BASE_SHA"]
-        pr_head_sha = os.environ["PR_HEAD_SHA"]
+        pull_request = event["pull_request"]
+        pr_base_sha = pull_request["base"]["sha"]
+        pr_head_sha = pull_request["head"]["sha"]
         baseline_sha = pr_base_sha
-        baseline_label = os.environ["PR_BASE_LABEL"]
-        contender_label = os.environ["PR_HEAD_LABEL"]
+        baseline_label = pull_request["base"]["label"]
+        contender_label = pull_request["head"]["label"]
         asv_factor = "1.5"
         asv_processes = "2"
         asv_skip_slow = "1"
@@ -134,7 +141,7 @@ def main() -> None:
         # payload) so that re-running the workflow after adding the
         # 'benchmark' label picks up the new label state correctly.
         labels = json.loads(
-            run("gh", "pr", "view", os.environ["PR_NUMBER"], "--json", "labels")
+            run("gh", "pr", "view", str(pull_request["number"]), "--json", "labels")
         )["labels"]
         has_benchmark_label = any(
             "benchmark" in label["name"].lower() for label in labels
@@ -188,7 +195,7 @@ def main() -> None:
         # successful nightly run, per the "baseline" dispatch input.
         # Falls back to the immediate parent if "previous-nightly" is
         # requested but no prior successful nightly run exists yet.
-        dispatch_baseline = os.environ.get("DISPATCH_BASELINE") or "parent-commit"
+        dispatch_baseline = event.get("inputs", {}).get("baseline") or "parent-commit"
         if dispatch_baseline == "previous-nightly":
             baseline_sha = resolve_baseline(last_nightly_sha(), github_sha)
         else:
@@ -208,21 +215,33 @@ def main() -> None:
     with open("asv.conf.json") as f:
         python_version = json.load(f)["pythons"][0]
 
+    # Only what other jobs need before the benchmark step itself:
+    # which Python to build against, what to build as the baseline,
+    # and whether to bother at all.
     outputs = {
         "should_run": should_run,
-        "baseline_sha": baseline_sha,
-        "baseline_label": baseline_label,
-        "contender_label": contender_label,
-        "asv_factor": asv_factor,
-        "asv_processes": asv_processes,
-        "asv_skip_slow": asv_skip_slow,
-        "asv_full_params": asv_full_params,
-        "bench_filter": bench_filter,
         "python_version": python_version,
+        "baseline_sha": baseline_sha,
     }
     with open(os.environ["GITHUB_OUTPUT"], "a") as f:
         for key, value in outputs.items():
             f.write(f"{key}={value}\n")
+
+    # Keyed by the environment variable name each value is exported as,
+    # so unpacking is a straight copy into $GITHUB_ENV.
+    params = {
+        "ASV_FACTOR": asv_factor,
+        "ASV_PROCESSES": asv_processes,
+        "ASV_SKIP_SLOW": asv_skip_slow,
+        "ASV_FULL_PARAMS": asv_full_params,
+        "BASELINE_SHA": baseline_sha,
+        "BASELINE_LABEL": baseline_label,
+        "CONTENDER_LABEL": contender_label,
+        "BENCH_FILTER": bench_filter,
+    }
+    with open(PARAMS_FILE, "w") as f:
+        json.dump(params, f, indent=2)
+        f.write("\n")
 
 
 if __name__ == "__main__":

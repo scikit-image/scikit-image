@@ -15,13 +15,22 @@ We use `asv continuous` to run the job, which runs a relative performance measur
 Before `asv` runs, the baseline and contender commits are built as wheels in two parallel jobs (`build-baseline`/`build-contender` in `.github/workflows/benchmarks.yaml`), reusing the repo's own `_build_linux_for_python_x.yaml` build workflow (the same one `test-linux.yaml` uses), rather than compiling sequentially inside `asv` itself. `asv`'s own `build_command` just copies the matching prebuilt wheel into place; `virtualenv` is still used to create the per-environment install targets. `asv continuous` then:
 
 - Installs the appropriate prebuilt wheel for each commit.
-- Runs the benchmark suite for both commits, _twice_ per commit (`processes=2`), trading run time for statistical robustness (see `asv_factor`/`asv_processes` in the `resolve-params` job).
+- Runs the benchmark suite for both commits, _twice_ per commit (`processes=2`), trading run time for statistical robustness (see `ASV_FACTOR`/`ASV_PROCESSES` in `benchmark-params.json`, described below).
 - Generate a report table with performance ratios:
   - `ratio=1.0` -> performance didn't change.
   - `ratio<1.0` -> PR made it slower.
   - `ratio>1.0` -> PR made it faster.
 
 Due to the sensitivity of the test, we cannot guarantee that false positives are not produced. In practice, values between `(0.7, 1.5)` are to be considered part of the measurement noise. When in doubt, running the benchmark suite one more time will provide more information about the test being a false positive or not.
+
+## How the run is parameterized
+
+`resolve-benchmark-params.py` decides everything about a given run from the trigger event, reading the event payload from `GITHUB_EVENT_PATH` rather than taking it through the workflow's `env:` block. It publishes its decisions two ways:
+
+- Three job outputs, the values other jobs need before benchmarking starts: `should_run`, `python_version` (read from `asv.conf.json`, so it can't drift), and `baseline_sha`.
+- `benchmark-params.json`, uploaded as an artifact, holding the asv settings only the benchmark job cares about: `ASV_FACTOR`, `ASV_PROCESSES`, `ASV_SKIP_SLOW`, `ASV_FULL_PARAMS`, `BASELINE_SHA`, `BASELINE_LABEL`, `CONTENDER_LABEL`, and `BENCH_FILTER`. The benchmark job downloads it and `export-benchmark-params.py` copies the entries into `$GITHUB_ENV`, where `run-benchmarks.sh` and the benchmark processes pick them up.
+
+The file's keys are the environment variable names themselves, so adding a parameter means adding one entry in `resolve-benchmark-params.py` rather than editing the workflow in several places.
 
 ## Running the benchmarks on GitHub Actions
 

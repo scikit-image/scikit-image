@@ -40,15 +40,8 @@ jobs:
       actions: read
     outputs:
       should_run: ${{ steps.params.outputs.should_run }}
-      baseline_sha: ${{ steps.params.outputs.baseline_sha }}
-      baseline_label: ${{ steps.params.outputs.baseline_label }}
-      contender_label: ${{ steps.params.outputs.contender_label }}
-      asv_factor: ${{ steps.params.outputs.asv_factor }}
-      asv_processes: ${{ steps.params.outputs.asv_processes }}
-      asv_skip_slow: ${{ steps.params.outputs.asv_skip_slow }}
-      asv_full_params: ${{ steps.params.outputs.asv_full_params }}
-      bench_filter: ${{ steps.params.outputs.bench_filter }}
       python_version: ${{ steps.params.outputs.python_version }}
+      baseline_sha: ${{ steps.params.outputs.baseline_sha }}
     steps:
       # We need the full repo to avoid this issue
       # https://github.com/actions/checkout/issues/23
@@ -57,18 +50,21 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Determine comparison commits
+      # Reads the event payload from GITHUB_EVENT_PATH directly, so the
+      # pull_request/workflow_dispatch fields don't need threading
+      # through `env:` here. The asv parameters that only the benchmark
+      # job needs travel as an artifact rather than as job outputs.
+      - name: Resolve benchmark parameters
         id: params
         env:
-          EVENT_NAME: ${{ github.event_name }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          PR_BASE_LABEL: ${{ github.event.pull_request.base.label }}
-          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          PR_HEAD_LABEL: ${{ github.event.pull_request.head.label }}
-          DISPATCH_BASELINE: ${{ github.event.inputs.baseline }}
         run: python3 .github/scripts/resolve-benchmark-params.py
+
+      - uses: actions/upload-artifact@v4
+        if: steps.params.outputs.should_run == 'true'
+        with:
+          name: benchmark-params
+          path: benchmark-params.json
 
   # Build the baseline and contender wheels in parallel, reusing the
   # repo's proven, ccache-tuned build workflow instead of asv's own
@@ -130,6 +126,14 @@ jobs:
           name: benchmark-wheel-contender
           path: .benchmark-wheels/${{ github.sha }}
 
+      - name: Download benchmark parameters
+        uses: actions/download-artifact@v4
+        with:
+          name: benchmark-params
+
+      - name: Export benchmark parameters
+        run: python3 .github/scripts/export-benchmark-params.py
+
       # asv.conf.json's checked-in build_command does a real build, so
       # local runs (spin asv -- continuous ...) work out of the box.
       # This job already has both commits' wheels prebuilt above, so
@@ -144,25 +148,6 @@ jobs:
       - name: Run benchmarks
         shell: bash
         id: benchmark
-        env:
-          OPENBLAS_NUM_THREADS: 1
-          MKL_NUM_THREADS: 1
-          OMP_NUM_THREADS: 1
-          PYTHONUNBUFFERED: 1
-          # asv installs each matrix requirement with its own separate pip
-          # invocation; prefer an existing wheel over a much slower source
-          # build if a package's very latest release doesn't have full
-          # wheel coverage yet.
-          PIP_PREFER_BINARY: 1
-          ASV_FACTOR: "${{ needs.resolve-params.outputs.asv_factor }}"
-          ASV_PROCESSES: "${{ needs.resolve-params.outputs.asv_processes }}"
-          ASV_SKIP_SLOW: "${{ needs.resolve-params.outputs.asv_skip_slow }}"
-          ASV_FULL_PARAMS: "${{ needs.resolve-params.outputs.asv_full_params }}"
-          # Escape user controlled variables
-          BASELINE_SHA: "${{ needs.resolve-params.outputs.baseline_sha }}"
-          BASELINE_LABEL: "${{ needs.resolve-params.outputs.baseline_label }}"
-          CONTENDER_LABEL: "${{ needs.resolve-params.outputs.contender_label }}"
-          BENCH_FILTER: "${{ needs.resolve-params.outputs.bench_filter }}"
         run: bash .github/scripts/run-benchmarks.sh
 
       - name: Add instructions to artifact
