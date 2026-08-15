@@ -450,8 +450,12 @@ def footprint_decomposed_disk(radius, *, ndim=2, dtype=np.uint8):
             [1, 1, 1]], dtype=uint8), 2))
     """
     if radius == 1:
-        # for radius 1 just use the exact shape (3,) * ndim solution
-        footprint = footprint_ellipse((radius,) * ndim, dtype=dtype)
+        # For radius 1, we return a single footprint.
+        # We need `adjust_edge=0.5` because this keeps it consistent with
+        # results for other radii: `footprint_decomposed_disk` uses precomputed
+        # values that were generated with legacy `skimage.morphology.disk` with
+        # ``strict_radius=False`` (which added 0.5 to the radius internally).
+        footprint = footprint_ellipse((radius,) * ndim, adjust_edge=0.5, dtype=dtype)
         return ((footprint, 1),)
 
     # load precomputed decompositions

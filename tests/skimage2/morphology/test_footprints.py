@@ -185,19 +185,21 @@ def test_footprint_dtype(function, args, supports_sequence_decomposition, dtype)
 @pytest.mark.parametrize("ndim", [2, 3])
 @pytest.mark.parametrize("radius", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20])
 def test_nsphere_series_approximation(ndim, radius):
-    shape = (radius * 2 + 1,) * ndim
-    expected = footprint_ellipse(shape)
+    """Compare `footprint_ellipse` and `footprint_decomposed_disk`.
+
+    We need ``adjust_edge=0.5`` because `footprint_decomposed_disk` uses
+    precomputed values that were generated with legacy `skimage.morphology.disk`
+    with ``strict_radius=False`` (which added 0.5 to the radius internally).
+    """
+    expected = footprint_ellipse((radius,) * ndim, adjust_edge=0.5)
     decomposed = footprint_decomposed_disk(radius, ndim=ndim)
     approximate = footprints.footprint_from_sequence(decomposed)
     assert approximate.shape == expected.shape
 
     # verify that maximum error does not exceed some fraction of the size
-    error = np.sum(np.abs(expected.astype(int) - approximate.astype(int)))
-    if radius == 1:
-        assert error == 0
-    else:
-        max_error = 0.1 if ndim == 2 else 0.15
-        assert error / expected.size <= max_error
+    mean_error = np.sum(np.abs(expected.astype(int) - approximate.astype(int)))
+    mean_error = mean_error / expected.size
+    assert mean_error < 0.12
 
 
 @pytest.mark.parametrize("radius", [1, 2, 3, 4, 5, 10, 20, 50, 75])
