@@ -1,25 +1,16 @@
 #!/usr/bin/env python3
-"""Decide what the benchmark workflow should compare, and how.
+"""Resolve what the benchmark workflow compares, and how.
 
-Each trigger event gets a resolver below that returns a Resolution:
-which commits to compare, whether to run at all, which benchmarks to
-run, and which profile's asv settings to use. The asv settings
-themselves come from benchmarks/profiles.json and the subpackage
-scoping from benchmarks/module-map.json, both of which `spin asv`
-reads too, so a local run can reproduce what CI measures.
+One resolver per trigger event returns a Resolution, which main()
+writes out: three values to $GITHUB_OUTPUT for the jobs that run
+before benchmarking, the rest to benchmark-params.json for the
+benchmark job itself. Settings come from benchmarks/profiles.json and
+benchmarks/module-map.json, which `spin asv` reads too so local runs
+can match CI. benchmarks/README_CI.md describes the whole flow.
 
-Reads the environment Actions already provides - GITHUB_EVENT_NAME,
-GITHUB_SHA, GITHUB_REPOSITORY, GITHUB_EVENT_PATH (the full event
-payload, which carries the pull_request and workflow_dispatch input
-fields), GITHUB_OUTPUT - plus GH_TOKEN for the gh CLI lookups (PR label
-lookup, nightly baseline lookup; the latter needs `actions: read`).
-
-Writes should_run, python_version, and baseline_sha to $GITHUB_OUTPUT:
-the only values other jobs need in order to start. The rest of the asv
-parameters go to benchmark-params.json, which the benchmark job
-downloads and unpacks into $GITHUB_ENV (see prepare-benchmarks.sh), so
-they don't have to be threaded through job outputs one `env:` entry at
-a time.
+Expects GITHUB_EVENT_NAME, GITHUB_SHA, GITHUB_REPOSITORY,
+GITHUB_EVENT_PATH, GITHUB_OUTPUT, and GH_TOKEN for the gh lookups (the
+nightly baseline one needs `actions: read`).
 """
 
 import json
@@ -31,6 +22,27 @@ PARAMS_FILE = "benchmark-params.json"
 PROFILES_FILE = "benchmarks/profiles.json"
 MODULE_MAP_FILE = "benchmarks/module-map.json"
 ASV_CONF_FILE = "asv.conf.json"
+
+
+def run(*args: str) -> str:
+    """Stdout of a command that must succeed.
+
+    Stderr is left alone so git and gh report their own failures into
+    the job log.
+    """
+    result = subprocess.run(args, stdout=subprocess.PIPE, text=True, check=True)
+    return result.stdout.strip()
+
+
+def read_json(path: str):
+    with open(path) as f:
+        return json.load(f)
+
+
+def event_payload() -> dict:
+    """The github.event payload for this run."""
+    path = os.environ.get("GITHUB_EVENT_PATH")
+    return read_json(path) if path and os.path.exists(path) else {}
 
 
 @dataclass
@@ -45,75 +57,52 @@ class Resolution:
     # Empty runs every benchmark; otherwise an asv -b regex.
     bench_filter: str = ""
 
-
-def run(*args: str) -> str:
-    return subprocess.run(
-        args, stdout=subprocess.PIPE, text=True, check=True
-    ).stdout.strip()
-
-
-def event_payload() -> dict:
-    """The github.event payload for this run."""
-    path = os.environ.get("GITHUB_EVENT_PATH")
-    if not path or not os.path.exists(path):
-        return {}
-    with open(path) as f:
-        return json.load(f)
+    @classmethod
+    def between_shas(cls, baseline_sha: str, contender_sha: str, profile: dict):
+        """A resolution labelled by SHA, for the events that run off a
+        branch and so have no base/head labels to show instead.
+        """
+        return cls(baseline_sha, baseline_sha, contender_sha, profile)
 
 
 def load_profile(name: str) -> dict:
-    """The asv settings for a named run profile."""
-    with open(PROFILES_FILE) as f:
-        profile = json.load(f)[name]
+    """The asv settings a profile in PROFILES_FILE names."""
+    profile = read_json(PROFILES_FILE)[name]
     return {k: v for k, v in profile.items() if k != "description"}
 
 
-def commit_exists(sha: str) -> bool:
-    return (
-        subprocess.run(
-            ["git", "cat-file", "-e", f"{sha}^{{commit}}"],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        ).returncode
-        == 0
-    )
-
-
 def last_nightly_sha() -> str:
-    """The commit compared by the last successful nightly (schedule)
-    run of this workflow, or empty if none exists yet.
-    """
+    """The commit the last successful nightly compared, or empty."""
     output = run(
-        "gh",
-        "run",
-        "list",
-        "--repo",
-        os.environ["GITHUB_REPOSITORY"],
-        "--workflow=benchmarks.yaml",
-        "--event=schedule",
-        "--status=success",
-        "--limit=1",
-        "--json",
-        "headSha",
-    )
+        "gh", "run", "list",
+        "--repo", os.environ["GITHUB_REPOSITORY"],
+        "--workflow=benchmarks.yaml", "--event=schedule",
+        "--status=success", "--limit=1", "--json", "headSha"
+    )  # fmt: skip
     runs = json.loads(output)
     return runs[0]["headSha"] if runs else ""
 
 
 def baseline_or_parent(candidate: str, github_sha: str) -> str:
-    """candidate, or the immediate parent commit if candidate is empty
-    or isn't available locally (e.g. no nightly run has succeeded yet).
+    """candidate, falling back to the parent commit when it's missing
+    locally - no nightly has succeeded yet, say.
     """
-    if candidate and commit_exists(candidate):
-        return candidate
+    if candidate:
+        found = subprocess.run(
+            ["git", "cat-file", "-e", f"{candidate}^{{commit}}"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        if found.returncode == 0:
+            return candidate
     return run("git", "rev-parse", f"{github_sha}~1")
 
 
 def has_benchmark_label(pr_number: int) -> bool:
-    """Whether the PR carries a label asking for the full suite.
+    """Whether the PR asks for the full suite by label.
 
-    Read live rather than from the trigger payload, so re-running the
-    workflow after adding the label picks up the new state.
+    Read live rather than from the trigger payload, so re-running after
+    adding the label picks up the new state.
     """
     labels = json.loads(run("gh", "pr", "view", str(pr_number), "--json", "labels"))
     return any("benchmark" in label["name"].lower() for label in labels["labels"])
@@ -121,34 +110,30 @@ def has_benchmark_label(pr_number: int) -> bool:
 
 def bench_filter_for_changes(base_sha: str, head_sha: str) -> str:
     """An asv -b regex covering the subpackages changed between two
-    commits, per benchmarks/module-map.json, or "" if none were.
+    commits, or empty if none were.
 
-    Subpackages absent from the map, or changes outside src/skimage/
-    entirely (docs, CI config, etc.), contribute no module: they
-    neither force nor block a run. `spin asv --changed` scopes local
-    runs from the same map (see .spin/cmds.py).
+    Paths outside the map contribute nothing, so they neither force nor
+    block a run.
     """
     changed = run(
         "git", "diff", "--name-only", base_sha, head_sha, "--", "src/skimage/"
     ).splitlines()
-    with open(MODULE_MAP_FILE) as f:
-        module_map = json.load(f)
 
     modules = []
-    for pkg, pkg_modules in module_map.items():
+    for pkg, pkg_modules in read_json(MODULE_MAP_FILE).items():
         if pkg.startswith("_"):
             continue
-        if any(line.startswith(f"src/skimage/{pkg}/") for line in changed):
+        if any(path.startswith(f"src/skimage/{pkg}/") for path in changed):
             modules.extend(pkg_modules)
 
     return f"^({'|'.join(modules)})\\." if modules else ""
 
 
 def resolve_pull_request(event: dict, github_sha: str) -> Resolution:
-    """Compare the PR head against its base, running only the
-    benchmarks covering the subpackages it touches - or the whole suite
-    if it carries a benchmark label, since a change to shared code can
-    move benchmarks outside the subpackage it lives in.
+    """Head against base, scoped to the subpackages touched.
+
+    A benchmark label runs everything instead, since a change to shared
+    code can move benchmarks outside the subpackage it lives in.
     """
     pull_request = event["pull_request"]
     base_sha = pull_request["base"]["sha"]
@@ -158,48 +143,34 @@ def resolve_pull_request(event: dict, github_sha: str) -> Resolution:
         contender_label=pull_request["head"]["label"],
         profile=load_profile("fast"),
     )
-
     if has_benchmark_label(pull_request["number"]):
         return resolution
 
     resolution.bench_filter = bench_filter_for_changes(
         base_sha, pull_request["head"]["sha"]
     )
-    # Nothing benchmarked changed, so there is nothing worth running.
+    # Nothing benchmarked changed, so there's nothing worth running.
     resolution.should_run = bool(resolution.bench_filter)
     return resolution
 
 
 def resolve_schedule(event: dict, github_sha: str) -> Resolution:
-    """Compare main's tip against the commit the last successful
-    nightly compared, rather than its immediate parent, so a busy day
-    of merges is covered cumulatively rather than only its most recent
-    commit. Runs the full suite, untrimmed and unscoped.
+    """Main's tip against the commit the last nightly compared.
+
+    Comparing against that rather than the immediate parent covers a
+    busy day of merges cumulatively, not just its last commit.
     """
     baseline_sha = baseline_or_parent(last_nightly_sha(), github_sha)
-    return Resolution(
-        baseline_sha=baseline_sha,
-        baseline_label=baseline_sha,
-        contender_label=github_sha,
-        profile=load_profile("full"),
-    )
+    return Resolution.between_shas(baseline_sha, github_sha, load_profile("full"))
 
 
 def resolve_workflow_dispatch(event: dict, github_sha: str) -> Resolution:
-    """Compare against either the immediate parent commit or the
-    commit the last successful nightly compared, per the "baseline"
-    dispatch input.
-    """
+    """The parent commit, or the last nightly's, per the dispatch input."""
     if event.get("inputs", {}).get("baseline") == "previous-nightly":
         baseline_sha = baseline_or_parent(last_nightly_sha(), github_sha)
     else:
         baseline_sha = run("git", "rev-parse", f"{github_sha}~1")
-    return Resolution(
-        baseline_sha=baseline_sha,
-        baseline_label=baseline_sha,
-        contender_label=github_sha,
-        profile=load_profile("fast"),
-    )
+    return Resolution.between_shas(baseline_sha, github_sha, load_profile("fast"))
 
 
 RESOLVERS = {
@@ -210,29 +181,20 @@ RESOLVERS = {
 
 
 def write_outputs(resolution: Resolution) -> None:
-    """Publish what other jobs need before the benchmark step itself:
-    which Python to build against, what to build as the baseline, and
-    whether to bother at all.
-    """
-    # Single source of truth for the Python version used to build and
-    # run the benchmarks, so it can't drift out of sync with asv.
-    with open(ASV_CONF_FILE) as f:
-        python_version = json.load(f)["pythons"][0]
-
+    """Publish what the build jobs need to start."""
     outputs = {
         "should_run": "true" if resolution.should_run else "false",
-        "python_version": python_version,
+        # Taking the version from asv's own config keeps the two in step.
+        "python_version": read_json(ASV_CONF_FILE)["pythons"][0],
         "baseline_sha": resolution.baseline_sha,
     }
     with open(os.environ["GITHUB_OUTPUT"], "a") as f:
-        for key, value in outputs.items():
-            f.write(f"{key}={value}\n")
+        f.writelines(f"{key}={value}\n" for key, value in outputs.items())
 
 
 def write_params(resolution: Resolution) -> None:
-    """Hand the benchmark job its asv settings, keyed by the
-    environment variable name each is exported as, so unpacking is a
-    straight copy into $GITHUB_ENV.
+    """Hand the benchmark job its asv settings, keyed by the variable
+    name each is exported as so unpacking is a straight copy.
     """
     params = {
         **resolution.profile,
@@ -247,8 +209,7 @@ def write_params(resolution: Resolution) -> None:
 
 
 def main() -> None:
-    event_name = os.environ["GITHUB_EVENT_NAME"]
-    resolve = RESOLVERS[event_name]
+    resolve = RESOLVERS[os.environ["GITHUB_EVENT_NAME"]]
     resolution = resolve(event_payload(), os.environ["GITHUB_SHA"])
     write_outputs(resolution)
     write_params(resolution)
