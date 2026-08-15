@@ -38,16 +38,27 @@ jobs_param = next(p for p in docs.params if p.name == 'jobs')
 jobs_param.default = 1
 
 
+# asv subcommands that build an environment from asv.conf.json. The
+# rest either read stored results (compare, show) or don't touch
+# environments at all (machine, publish, preview, ...).
+_ASV_ENV_BUILDING = {"check", "continuous", "find", "profile", "run", "setup"}
+
+
 def _asv_builds_declared_environment(asv_args):
     """Whether this asv invocation builds an environment matching
-    asv.conf.json's declared `pythons`, as opposed to running against
-    whatever Python is already active (`check`, `dev`, or an explicit
-    `-E`/`--environment existing`) - which works with any Python and
-    shouldn't be gated on matching asv.conf.json.
+    asv.conf.json's declared `pythons`.
+
+    It doesn't when the subcommand never builds one, or when
+    `-E existing`/`--python=same` points asv at the interpreter already
+    running, which works with any version and so shouldn't be gated on
+    matching asv.conf.json.
     """
-    if asv_args and asv_args[0] in {"check", "dev"}:
+    if not asv_args or asv_args[0] not in _ASV_ENV_BUILDING:
         return False
-    return not any(arg == "existing" or arg.endswith("=existing") for arg in asv_args)
+    return not any(
+        "existing" in arg or arg == "same" or arg.endswith((":same", "=same"))
+        for arg in asv_args
+    )
 
 
 def _changed_bench_filter(base):
@@ -167,7 +178,7 @@ def asv(asv_args, profile, changed, changed_base, build_dir):
 
     ASV_ARGS are passed through directly to asv, e.g.:
 
-    spin asv -- dev -b TransformSuite
+    spin asv -- check -v -E existing
 
     Pass --profile to match a CI run's benchmark selection and
     comparison factor, and --changed to scope the run to the
