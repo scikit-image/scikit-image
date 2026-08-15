@@ -211,7 +211,7 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
     >>> fp1_sequence = ski.morphology.disk(radius, decomposition="sequence")
     >>> fp2_sequence = ski2.morphology.footprint_decomposed_disk(radius)
     >>> np.testing.assert_equal(fp1_sequence, fp2_sequence)
-    
+
     .. admonition:: Reproduce exact results of old implementation
         :class: note dropdown
 
