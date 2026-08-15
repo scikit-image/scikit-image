@@ -1,7 +1,7 @@
 """Read the benchmark run configuration beside this file.
 
 Shared by CI (.github/scripts/resolve-benchmark-params.py) and local
-tooling (`spin asv`, see .spin/_asv.py) so the two scope and configure
+tooling (`spin asv`, see .spin/asv.py) so the two scope and configure
 a run identically. Kept to the standard library, and free of imports
 from the benchmarks package itself, so both can load it by path on a
 runner with no numpy or skimage installed.

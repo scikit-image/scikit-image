@@ -148,7 +148,7 @@ Environments = [
 ]
 Documentation = ['.spin/cmds.py:docs']
 Metrics = [
-    '.spin/_asv.py:asv'
+    '.spin/asv.py:asv'
 ]
 
 [tool.ruff.format]
