@@ -1027,36 +1027,6 @@ This call will build out the environments specified in the `asv.conf.json`
 file and compare the performance of the benchmark between your current commit
 and the code in the main branch.
 
-By default this measures more than the pull request check does (which skips
-the benchmarks marked slow) and judges results more strictly (`asv`'s default
-comparison factor is tighter than the one CI uses to absorb shared-runner
-noise), so a local result and a CI result can disagree. Pass `--profile` to
-measure what a CI run measures:
-
-```
-spin asv --profile fast -- continuous main -b TransformSuite
-```
-
-`fast` skips the benchmarks marked slow and uses the reduced parameter
-matrices, the way a pull request check runs. `full` includes both, the way the
-nightly run against `main` does. Both are defined in
-`benchmarks/profiles.json`, which CI reads from as well. An explicit
-`--factor` or `-a processes=` of your own takes precedence over the profile's.
-
-A pull request check also narrows itself to the benchmarks covering the
-subpackages the branch touches, which is usually a small fraction of the
-suite. `--changed` does the same locally:
-
-```
-spin asv --profile fast --changed -- continuous main
-```
-
-This compares against the merge base with `main` (use `--changed-base` for a
-different ref) and counts uncommitted edits, so it follows the code you're
-working on. Editing `src/skimage/filters/` selects `benchmark_filters` and
-`benchmark_rank`; editing a subpackage with no benchmarks reports that there's
-nothing to run. Pass your own `-b` instead when you want a specific suite.
-
 The output may look something like:
 
 ```

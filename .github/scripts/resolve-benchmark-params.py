@@ -4,28 +4,59 @@
 One resolver per trigger event returns a Resolution, which main()
 writes out: three values to $GITHUB_OUTPUT for the jobs that run
 before benchmarking, the rest to benchmark-params.json for the
-benchmark job itself. Settings come from benchmarks/profiles.json and
-benchmarks/module-map.json, which `spin asv` reads too so local runs
-can match CI. benchmarks/README_CI.md describes the whole flow.
+benchmark job itself. benchmarks/README_CI.md describes the whole
+flow.
 
 Expects GITHUB_EVENT_NAME, GITHUB_SHA, GITHUB_REPOSITORY,
 GITHUB_EVENT_PATH, GITHUB_OUTPUT, and GH_TOKEN for the gh lookups (the
 nightly baseline one needs `actions: read`).
 """
 
-import importlib.util
 import json
 import os
 import subprocess
 from dataclasses import dataclass
 
 PARAMS_FILE = "benchmark-params.json"
+ASV_CONF_FILE = "asv.conf.json"
+SOURCE_DIR = "src/skimage"
 
-# Loaded by path because benchmarks/__init__.py imports numpy and
-# skimage, which this job has no reason to install.
-_spec = importlib.util.spec_from_file_location("config", "benchmarks/config.py")
-config = importlib.util.module_from_spec(_spec)
-_spec.loader.exec_module(config)
+# Which benchmark modules cover each SOURCE_DIR subpackage. Subpackages
+# absent here (color, data, draw, future, io) have no benchmarks, and
+# benchmark_import_time covers the whole package rather than one
+# subpackage, so neither scopes a run.
+MODULE_MAP = {
+    "exposure": ["benchmark_exposure"],
+    "feature": ["benchmark_feature", "benchmark_peak_local_max"],
+    "filters": ["benchmark_filters", "benchmark_rank"],
+    "graph": ["benchmark_graph"],
+    "measure": ["benchmark_measure"],
+    "metrics": ["benchmark_metrics"],
+    "morphology": ["benchmark_morphology"],
+    "registration": ["benchmark_registration"],
+    "restoration": ["benchmark_restoration"],
+    "segmentation": ["benchmark_segmentation"],
+    "transform": [
+        "benchmark_transform",
+        "benchmark_transform_warp",
+        "benchmark_interpolation",
+    ],
+    "util": ["benchmark_util"],
+}
+
+# Trimmed run for pull requests and manual dispatches: slow benchmarks
+# skipped, reduced parameter matrices, and a comparison factor loose
+# enough to absorb the noise of a shared runner.
+FAST_PROFILE = {
+    "ASV_FACTOR": "1.5",
+    "ASV_PROCESSES": "2",
+    "ASV_SKIP_SLOW": "1",
+    "ASV_FULL_PARAMS": "0",
+}
+
+# Complete run for the nightly: slow benchmarks and full parameter
+# matrices included.
+FULL_PROFILE = {**FAST_PROFILE, "ASV_SKIP_SLOW": "0", "ASV_FULL_PARAMS": "1"}
 
 
 def run(*args: str) -> str:
@@ -106,6 +137,26 @@ def has_benchmark_label(pr_number: int) -> bool:
     return any("benchmark" in label["name"].lower() for label in labels["labels"])
 
 
+def bench_filter_for_changes(base_sha: str, head_sha: str) -> str:
+    """An asv -b regex covering the subpackages changed between two
+    commits, or empty if none were.
+
+    Paths under a subpackage MODULE_MAP doesn't list, or outside
+    SOURCE_DIR entirely, contribute nothing: they neither force nor
+    block a run.
+    """
+    changed = run(
+        "git", "diff", "--name-only", base_sha, head_sha, "--", SOURCE_DIR
+    ).splitlines()
+
+    modules = []
+    for pkg, pkg_modules in MODULE_MAP.items():
+        if any(path.startswith(f"{SOURCE_DIR}/{pkg}/") for path in changed):
+            modules.extend(pkg_modules)
+
+    return f"^({'|'.join(modules)})\\." if modules else ""
+
+
 def resolve_pull_request(event: dict, github_sha: str) -> Resolution:
     """Head against base, scoped to the subpackages touched.
 
@@ -118,12 +169,12 @@ def resolve_pull_request(event: dict, github_sha: str) -> Resolution:
         baseline_sha=base_sha,
         baseline_label=pull_request["base"]["label"],
         contender_label=pull_request["head"]["label"],
-        profile=config.load_profile("fast"),
+        profile=FAST_PROFILE,
     )
     if has_benchmark_label(pull_request["number"]):
         return resolution
 
-    resolution.bench_filter = config.bench_filter_for_changes(
+    resolution.bench_filter = bench_filter_for_changes(
         base_sha, pull_request["head"]["sha"]
     )
     # Nothing benchmarked changed, so there's nothing worth running.
@@ -138,9 +189,7 @@ def resolve_schedule(event: dict, github_sha: str) -> Resolution:
     busy day of merges cumulatively, not just its last commit.
     """
     baseline_sha = baseline_or_parent(last_nightly_sha(), github_sha)
-    return Resolution.between_shas(
-        baseline_sha, github_sha, config.load_profile("full")
-    )
+    return Resolution.between_shas(baseline_sha, github_sha, FULL_PROFILE)
 
 
 def resolve_workflow_dispatch(event: dict, github_sha: str) -> Resolution:
@@ -149,9 +198,7 @@ def resolve_workflow_dispatch(event: dict, github_sha: str) -> Resolution:
         baseline_sha = baseline_or_parent(last_nightly_sha(), github_sha)
     else:
         baseline_sha = run("git", "rev-parse", f"{github_sha}~1")
-    return Resolution.between_shas(
-        baseline_sha, github_sha, config.load_profile("fast")
-    )
+    return Resolution.between_shas(baseline_sha, github_sha, FAST_PROFILE)
 
 
 RESOLVERS = {
@@ -166,7 +213,7 @@ def write_outputs(resolution: Resolution) -> None:
     outputs = {
         "should_run": "true" if resolution.should_run else "false",
         # Taking the version from asv's own config keeps the two in step.
-        "python_version": config.asv_pythons()[0],
+        "python_version": read_json(ASV_CONF_FILE)["pythons"][0],
         "baseline_sha": resolution.baseline_sha,
     }
     with open(os.environ["GITHUB_OUTPUT"], "a") as f:
