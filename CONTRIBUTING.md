@@ -1026,6 +1026,22 @@ This call will build out the environments specified in the `asv.conf.json`
 file and compare the performance of the benchmark between your current commit
 and the code in the main branch.
 
+By default this measures more than the pull request check does (which skips
+the benchmarks marked slow) and judges results more strictly (`asv`'s default
+comparison factor is tighter than the one CI uses to absorb shared-runner
+noise), so a local result and a CI result can disagree. Pass `--profile` to
+measure what a CI run measures:
+
+```
+spin asv --profile pr -- continuous main -b TransformSuite
+```
+
+`pr` matches the pull request check, `nightly` matches the scheduled full run
+against `main`, which includes the slow benchmarks and the full parameter
+matrices. Both are defined in `benchmarks/profiles.json`, which CI reads from
+as well. An explicit `--factor` or `-a processes=` of your own takes
+precedence over the profile's.
+
 The output may look something like:
 
 ```

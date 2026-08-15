@@ -32,6 +32,8 @@ Due to the sensitivity of the test, we cannot guarantee that false positives are
 
 The file's keys are the environment variable names themselves, so adding a parameter means adding one entry in `resolve-benchmark-params.py` rather than editing the workflow in several places.
 
+The asv settings within it come from `benchmarks/profiles.json`, which defines the `pr` profile (used by pull request checks and manual dispatches) and the `nightly` profile. `spin asv --profile` reads the same file, so `spin asv --profile pr -- continuous main` measures locally what the pull request check measures. Retuning a profile means editing that one file rather than CI and the local tooling separately.
+
 The benchmark job's two steps split along that seam. `prepare-benchmarks.sh` does everything before measurement: exporting the parameters, pinning the numeric libraries to a single thread, swapping `asv.conf.json`'s `build_command` over to the prebuilt wheels, and registering the runner with `asv machine`. `run-benchmarks.sh` is then just the `asv continuous` call and its pass/fail check.
 
 ## Running the benchmarks on GitHub Actions

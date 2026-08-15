@@ -50,6 +50,41 @@ def _asv_builds_declared_environment(asv_args):
     return not any(arg == "existing" or arg.endswith("=existing") for arg in asv_args)
 
 
+def _apply_asv_profile(name, asv_args):
+    """Set up asv to measure what CI's named profile measures.
+
+    ASV_SKIP_SLOW and ASV_FULL_PARAMS are read by benchmarks/__init__.py
+    and go into the environment. The comparison factor and process count
+    are asv's own flags, so they're only added where asv accepts them,
+    and never over an equivalent flag already given explicitly.
+    """
+    with open(os.path.join(_REPO_ROOT, "benchmarks", "profiles.json")) as f:
+        profiles = json.load(f)
+    if name not in profiles:
+        raise click.BadParameter(
+            f"unknown profile {name!r}; choose from {sorted(profiles)}"
+        )
+    profile = profiles[name]
+
+    os.environ["ASV_SKIP_SLOW"] = profile["ASV_SKIP_SLOW"]
+    os.environ["ASV_FULL_PARAMS"] = profile["ASV_FULL_PARAMS"]
+
+    args = list(asv_args)
+    if not args:
+        return args
+    subcommand, rest = args[0], args[1:]
+
+    injected = []
+    if subcommand == "continuous" and not any(a.startswith("--factor") for a in rest):
+        injected += ["--factor", profile["ASV_FACTOR"]]
+    if subcommand in {"continuous", "run"} and not any(
+        a == "-a" or a.startswith("--attribute") for a in rest
+    ):
+        injected += ["-a", f"processes={profile['ASV_PROCESSES']}"]
+
+    return [subcommand] + injected + rest
+
+
 def _check_asv_python_version():
     """Fail fast (with a clear message) if the active Python isn't one
     of the versions asv.conf.json declares support for - asv itself
@@ -71,16 +106,30 @@ def _check_asv_python_version():
 
 @click.command()
 @click.argument("asv_args", nargs=-1)
+@click.option(
+    "--profile",
+    type=click.Choice(["pr", "nightly"]),
+    help="Measure what CI's 'pr' or 'nightly' run measures "
+    "(see benchmarks/profiles.json).",
+)
 @spin.cmds.meson.build_dir_option
-def asv(asv_args, build_dir):
+def asv(asv_args, profile, build_dir):
     """🏃 Run `asv` to collect benchmarks
 
     ASV_ARGS are passed through directly to asv, e.g.:
 
     spin asv -- dev -b TransformSuite
 
+    Pass --profile to match a CI run's benchmark selection and
+    comparison factor:
+
+    spin asv --profile pr -- continuous main -b TransformSuite
+
     Please see CONTRIBUTING.txt
     """
+    if profile:
+        asv_args = _apply_asv_profile(profile, asv_args)
+
     if _asv_builds_declared_environment(asv_args):
         _check_asv_python_version()
 

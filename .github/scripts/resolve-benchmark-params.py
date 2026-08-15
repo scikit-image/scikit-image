@@ -4,6 +4,10 @@ parameters (comparison factor, process count, skip-slow, full-params,
 an optional benchmark-module filter, and the Python version) for the
 current trigger event.
 
+The asv settings themselves come from benchmarks/profiles.json, which
+`spin asv --profile` reads too, so a local run can reproduce what CI
+measures.
+
 Reads the environment Actions already provides - GITHUB_EVENT_NAME,
 GITHUB_SHA, GITHUB_REPOSITORY, GITHUB_EVENT_PATH (the full event
 payload, which carries the pull_request and workflow_dispatch input
@@ -23,6 +27,7 @@ import os
 import subprocess
 
 PARAMS_FILE = "benchmark-params.json"
+PROFILES_FILE = "benchmarks/profiles.json"
 
 # Subpackages with no corresponding benchmark file, or changes outside
 # src/skimage/ entirely (docs, CI config, etc.), simply don't
@@ -99,6 +104,17 @@ def last_nightly_sha() -> str:
     return runs[0]["headSha"] if runs else ""
 
 
+def load_profile(name: str) -> dict:
+    """The asv settings for a named run profile.
+
+    Shared with `spin asv --profile` (see .spin/cmds.py) so a local run
+    can reproduce what CI measures instead of the two drifting apart.
+    """
+    with open(PROFILES_FILE) as f:
+        profile = json.load(f)[name]
+    return {k: v for k, v in profile.items() if k != "description"}
+
+
 def commit_exists(sha: str) -> bool:
     return (
         subprocess.run(
@@ -132,10 +148,7 @@ def main() -> None:
         baseline_sha = pr_base_sha
         baseline_label = pull_request["base"]["label"]
         contender_label = pull_request["head"]["label"]
-        asv_factor = "1.5"
-        asv_processes = "2"
-        asv_skip_slow = "1"
-        asv_full_params = "0"
+        profile = load_profile("pr")
 
         # Fetch label state dynamically (not from the workflow trigger
         # payload) so that re-running the workflow after adding the
@@ -182,10 +195,7 @@ def main() -> None:
         baseline_sha = prev_sha
         baseline_label = prev_sha
         contender_label = github_sha
-        asv_factor = "1.5"
-        asv_processes = "2"
-        asv_skip_slow = "0"
-        asv_full_params = "1"
+        profile = load_profile("nightly")
         should_run = "true"
         bench_filter = ""
 
@@ -202,10 +212,7 @@ def main() -> None:
             baseline_sha = run("git", "rev-parse", f"{github_sha}~1")
         baseline_label = baseline_sha
         contender_label = github_sha
-        asv_factor = "1.5"
-        asv_processes = "2"
-        asv_skip_slow = "1"
-        asv_full_params = "0"
+        profile = load_profile("pr")
         should_run = "true"
         bench_filter = ""
 
@@ -230,10 +237,7 @@ def main() -> None:
     # Keyed by the environment variable name each value is exported as,
     # so unpacking is a straight copy into $GITHUB_ENV.
     params = {
-        "ASV_FACTOR": asv_factor,
-        "ASV_PROCESSES": asv_processes,
-        "ASV_SKIP_SLOW": asv_skip_slow,
-        "ASV_FULL_PARAMS": asv_full_params,
+        **profile,
         "BASELINE_SHA": baseline_sha,
         "BASELINE_LABEL": baseline_label,
         "CONTENDER_LABEL": contender_label,
