@@ -139,12 +139,6 @@ jobs:
         id: benchmark
         run: bash .github/scripts/run-benchmarks.sh
 
-      - name: Add instructions to artifact
-        if: always()
-        run: |
-          mkdir -p .asv/results
-          cp benchmarks/README_CI.md benchmarks.log .asv/results/
-
       - uses: actions/upload-artifact@v4
         if: always()
         with:

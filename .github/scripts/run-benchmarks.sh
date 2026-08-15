@@ -20,6 +20,21 @@
 set -euo pipefail
 set -x
 
+# Stage the log and this suite's README next to asv's own results for
+# the artifact upload. On an EXIT trap because the log is most useful
+# on the runs that failed, including the ones that fail before
+# benchmarking starts and never write a log at all.
+collect_results() {
+    status=$?
+    mkdir -p .asv/results
+    cp benchmarks/README_CI.md .asv/results/
+    if [ -f benchmarks.log ]; then
+        cp benchmarks.log .asv/results/
+    fi
+    return $status
+}
+trap collect_results EXIT
+
 echo "Baseline: $BASELINE_SHA ($BASELINE_LABEL)"
 echo "Contender: $GITHUB_SHA ($CONTENDER_LABEL)"
 
