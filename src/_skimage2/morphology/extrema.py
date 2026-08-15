@@ -24,7 +24,7 @@ def _add_constant_clip(image, const_value):
 
     if const_value > (max_dtype - min_dtype):
         raise ValueError(
-            "The added constant is not compatible" "with the image data type."
+            "The added constant is not compatiblewith the image data type."
         )
 
     result = image + const_value
@@ -38,7 +38,7 @@ def _subtract_constant_clip(image, const_value):
 
     if const_value > (max_dtype - min_dtype):
         raise ValueError(
-            "The subtracted constant is not compatible" "with the image data type."
+            "The subtracted constant is not compatiblewith the image data type."
         )
 
     result = image - const_value
@@ -147,7 +147,7 @@ def h_maxima(image, h, footprint=None):
             h = image.dtype.type(h)
 
     if h == 0:
-        raise ValueError("h = 0 is ambiguous, use local_maxima() " "instead?")
+        raise ValueError("h = 0 is ambiguous, use local_maxima() instead?")
 
     if np.issubdtype(image.dtype, np.floating):
         # The purpose of the resolution variable is to allow for the
@@ -257,7 +257,7 @@ def h_minima(image, h, footprint=None):
             h = image.dtype.type(h)
 
     if h == 0:
-        raise ValueError("h = 0 is ambiguous, use local_minima() " "instead?")
+        raise ValueError("h = 0 is ambiguous, use local_minima() instead?")
 
     if np.issubdtype(image.dtype, np.floating):
         resolution = 2 * np.finfo(image.dtype).resolution * np.abs(image)

@@ -46,7 +46,7 @@ def _validate_connectivity(image_dim, connectivity, offset):
 
     if offset is None:
         if any([x % 2 == 0 for x in c_connectivity.shape]):
-            raise ValueError("Connectivity array must have an unambiguous " "center")
+            raise ValueError("Connectivity array must have an unambiguous center")
 
         offset = np.array(c_connectivity.shape) // 2
 
@@ -255,9 +255,7 @@ def _resolve_neighborhood(footprint, connectivity, ndim, enforce_adjacency=True)
         footprint = np.asarray(footprint, dtype=bool)
         # Must specify neighbors for all dimensions
         if footprint.ndim != ndim:
-            raise ValueError(
-                "number of dimensions in image and footprint do not" "match"
-            )
+            raise ValueError("number of dimensions in image and footprint do notmatch")
         # Must only specify direct neighbors
         if enforce_adjacency and any(s != 3 for s in footprint.shape):
             raise ValueError("dimension size in footprint is not 3")
@@ -309,7 +307,7 @@ def _set_border_values(image, value, border_width=1):
         raise ValueError('length of `border_width` must match image.ndim')
     for axis, npad in enumerate(border_width):
         if len(npad) != 2:
-            raise ValueError('each sequence in `border_width` must have ' 'length 2')
+            raise ValueError('each sequence in `border_width` must have length 2')
         w_start, w_end = npad
         if w_start == w_end == 0:
             continue

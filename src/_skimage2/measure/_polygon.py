@@ -131,7 +131,7 @@ def subdivide_polygon(coords, degree=2, preserve_ends=False):
     .. [1] http://mrl.nyu.edu/publications/subdiv-course2000/coursenotes00.pdf
     """
     if degree not in _SUBDIVISION_MASKS:
-        raise ValueError("Invalid B-Spline degree. Only degree 1 - 7 is " "supported.")
+        raise ValueError("Invalid B-Spline degree. Only degree 1 - 7 is supported.")
 
     circular = np.all(coords[0, :] == coords[-1, :])
 
