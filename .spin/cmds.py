@@ -37,27 +37,6 @@ jobs_param = next(p for p in docs.params if p.name == 'jobs')
 jobs_param.default = 1
 
 
-@click.command()
-@click.argument("asv_args", nargs=-1)
-@spin.cmds.meson.build_dir_option
-def asv(asv_args, build_dir):
-    """🏃 Run `asv` to collect benchmarks
-
-    ASV_ARGS are passed through directly to asv, e.g.:
-
-    spin asv -- check -v -E existing
-
-    Please see CONTRIBUTING.txt
-    """
-    site_path = spin.cmds.meson._get_site_packages(build_dir)
-    if site_path is None:
-        print("No built scikit-image found; run `spin build` first.")
-        sys.exit(1)
-
-    os.environ['PYTHONPATH'] = f'{site_path}{os.sep}:{os.environ.get("PYTHONPATH", "")}'
-    spin.util.run(['asv'] + list(asv_args))
-
-
 @spin.util.extend_command(spin.cmds.meson.ipython)
 def ipython(*, parent_callback, **kwargs):
     env = os.environ

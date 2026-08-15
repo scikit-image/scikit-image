@@ -50,15 +50,20 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      # Reads the event payload from GITHUB_EVENT_PATH directly, so the
+      - name: Install spin
+        run: pip install spin
+
+      # `spin asv` decides this for local runs too, so the two can't
+      # disagree about what a change is worth benchmarking. It reads the
+      # event payload from GITHUB_EVENT_PATH itself, so the
       # pull_request/workflow_dispatch fields don't need threading
-      # through `env:` here. The asv parameters that only the benchmark
-      # job needs travel as an artifact rather than as job outputs.
+      # through `env:` here, and writes the asv parameters the benchmark
+      # job needs to a file rather than to job outputs.
       - name: Resolve benchmark parameters
         id: params
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python3 .github/scripts/resolve-benchmark-params.py
+        run: spin asv --resolve
 
       - uses: actions/upload-artifact@v4
         if: steps.params.outputs.should_run == 'true'
