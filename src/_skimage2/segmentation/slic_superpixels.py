@@ -244,8 +244,8 @@ def slic(
     Examples
     --------
     >>> from _skimage2.segmentation import slic
-    >>> from _skimage2.data import astronaut
-    >>> img = astronaut()
+    >>> from _skimage2.data import fetch_astronaut
+    >>> img = fetch_astronaut()
     >>> segments = slic(img, n_segments=100, compactness=10)
 
     Increasing the compactness parameter yields more square regions:

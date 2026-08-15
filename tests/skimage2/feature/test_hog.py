@@ -9,7 +9,7 @@ from _skimage2._shared.utils import _supported_float_type
 
 
 def test_hog_output_size():
-    img = img_as_float(data.astronaut()[:256, :].mean(axis=2))
+    img = img_as_float(data.fetch_astronaut()[:256, :].mean(axis=2))
 
     fd = feature.hog(
         img,
@@ -24,7 +24,7 @@ def test_hog_output_size():
 
 @pytest.mark.parametrize('dtype', [np.float32, np.float64])
 def test_hog_output_correctness_l1_norm(dtype):
-    img = color.rgb2gray(data.astronaut()).astype(dtype=dtype, copy=False)
+    img = color.rgb2gray(data.fetch_astronaut()).astype(dtype=dtype, copy=False)
     correct_output = np.load(fetch('data/astronaut_GRAY_hog_L1.npy'))
 
     output = feature.hog(
@@ -45,7 +45,7 @@ def test_hog_output_correctness_l1_norm(dtype):
 
 @pytest.mark.parametrize('dtype', [np.float32, np.float64])
 def test_hog_output_correctness_l2hys_norm(dtype):
-    img = color.rgb2gray(data.astronaut()).astype(dtype=dtype, copy=False)
+    img = color.rgb2gray(data.fetch_astronaut()).astype(dtype=dtype, copy=False)
     correct_output = np.load(fetch('data/astronaut_GRAY_hog_L2-Hys.npy'))
 
     output = feature.hog(
@@ -65,7 +65,7 @@ def test_hog_output_correctness_l2hys_norm(dtype):
 
 
 def test_hog_image_size_cell_size_mismatch():
-    image = data.camera()[:150, :200]
+    image = data.fetch_camera()[:150, :200]
     fd = feature.hog(
         image,
         orientations=9,
@@ -317,7 +317,7 @@ def test_hog_incorrect_dimensions(shape, channel_axis):
 
 
 def test_hog_output_equivariance_deprecated_multichannel():
-    img = data.astronaut()
+    img = data.fetch_astronaut()
     img[:, :, (1, 2)] = 0
     hog_ref = feature.hog(img, channel_axis=-1, block_norm='L1')
 
@@ -330,7 +330,7 @@ def test_hog_output_equivariance_deprecated_multichannel():
 
 @pytest.mark.parametrize('channel_axis', [0, 1, -1, -2])
 def test_hog_output_equivariance_channel_axis(channel_axis):
-    img = data.astronaut()[:64, :32]
+    img = data.fetch_astronaut()[:64, :32]
     img[:, :, (1, 2)] = 0
     img = np.moveaxis(img, -1, channel_axis)
     hog_ref = feature.hog(img, channel_axis=channel_axis, block_norm='L1')

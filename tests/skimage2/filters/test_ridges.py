@@ -5,7 +5,7 @@ from numpy.testing import assert_allclose, assert_array_less, assert_equal
 from _skimage2 import img_as_float
 from _skimage2._shared.utils import _supported_float_type
 from _skimage2.color import rgb2gray
-from _skimage2.data import camera, retina
+from _skimage2.data import fetch_camera, fetch_retina
 from _skimage2.filters import frangi, hessian, meijering, sato
 from _skimage2.util import crop, invert
 
@@ -205,7 +205,7 @@ def test_3d_linearity():
 
 
 def test_2d_cropped_camera_image():
-    a_black = crop(camera(), ((200, 212), (100, 312)))
+    a_black = crop(fetch_camera(), ((200, 212), (100, 312)))
     a_white = invert(a_black)
 
     np.zeros((100, 100))
@@ -235,12 +235,12 @@ def test_2d_cropped_camera_image():
 @pytest.mark.parametrize('func', [meijering, sato, frangi, hessian])
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_ridge_output_dtype(func, dtype):
-    img = img_as_float(camera()).astype(dtype, copy=False)
+    img = img_as_float(fetch_camera()).astype(dtype, copy=False)
     assert func(img).dtype == _supported_float_type(img.dtype)
 
 
 def test_3d_cropped_camera_image():
-    a_black = crop(camera(), ((200, 212), (100, 312)))
+    a_black = crop(fetch_camera(), ((200, 212), (100, 312)))
     a_black = np.stack([a_black] * 5, axis=-1)
     a_white = invert(a_black)
 
@@ -272,7 +272,7 @@ def test_3d_cropped_camera_image():
     'func, tol', [(frangi, 1e-2), (meijering, 1e-2), (sato, 2e-3), (hessian, 2e-2)]
 )
 def test_border_management(func, tol):
-    img = rgb2gray(retina()[300:500, 700:900])
+    img = rgb2gray(fetch_retina()[300:500, 700:900])
     out = func(img, sigmas=[1], mode='reflect')
 
     full_std = out.std()

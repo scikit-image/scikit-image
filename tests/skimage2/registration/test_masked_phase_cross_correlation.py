@@ -11,7 +11,7 @@ from scipy.ndimage import fourier_shift, shift as real_shift
 import scipy.fft as fft
 
 from _skimage2._shared.utils import _supported_float_type
-from _skimage2.data import camera, brain
+from _skimage2.data import fetch_camera, fetch_brain
 
 
 from _skimage2.io import imread
@@ -25,7 +25,7 @@ from _skimage2.registration import phase_cross_correlation
 def test_masked_registration_vs_phase_cross_correlation():
     """masked_register_translation should give the same results as
     phase_cross_correlation in the case of trivial masks."""
-    reference_image = camera()
+    reference_image = fetch_camera()
     shift = (-7, 12)
     shifted = np.real(fft.ifft2(fourier_shift(fft.fft2(reference_image), shift)))
     trivial_mask = np.ones_like(reference_image)
@@ -44,7 +44,7 @@ def test_masked_registration_random_masks():
     # Seed random number generator for reproducible results
     rng = np.random.RandomState(674032722)
 
-    reference_image = camera()
+    reference_image = fetch_camera()
     shift = (-7, 12)
     shifted = np.real(fft.ifft2(fourier_shift(fft.fft2(reference_image), shift)))
 
@@ -61,7 +61,7 @@ def test_masked_registration_random_masks():
 def test_masked_registration_3d_contiguous_mask():
     """masked_register_translation should be able to register translations
     between volumes with contiguous masks."""
-    ref_vol = brain()[:, ::2, ::2]
+    ref_vol = fetch_brain()[:, ::2, ::2]
 
     offset = (1, -5, 10)
 
@@ -84,7 +84,7 @@ def test_masked_registration_random_masks_non_equal_sizes():
     # Seed random number generator for reproducible results
     rng = np.random.RandomState(133887294)
 
-    reference_image = camera()
+    reference_image = fetch_camera()
     shift = (-7, 12)
     shifted = np.real(fft.ifft2(fourier_shift(fft.fft2(reference_image), shift)))
 
@@ -260,7 +260,7 @@ def test_cross_correlate_masked_autocorrelation_trivial_masks():
     # Seed random number generator for reproducible results
     rng = np.random.RandomState(3555640249)
 
-    arr1 = camera()
+    arr1 = fetch_camera()
 
     # Random masks with 75% of pixels being valid
     m1 = rng.choice([True, False], arr1.shape, p=[3 / 4, 1 / 4])

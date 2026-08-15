@@ -117,7 +117,7 @@ def convert_colorspace(arr, fromspace, tospace, *, channel_axis=-1):
     Examples
     --------
     >>> from _skimage2 import data
-    >>> img = data.astronaut()
+    >>> img = data.fetch_astronaut()
     >>> img_hsv = convert_colorspace(img, 'RGB', 'HSV')
     """
     fromdict = {
@@ -221,7 +221,7 @@ def rgba2rgb(rgba, background=(1, 1, 1), *, channel_axis=-1):
     --------
     >>> from _skimage2 import color
     >>> from _skimage2 import data
-    >>> img_rgba = data.logo()
+    >>> img_rgba = data.fetch_logo()
     >>> img_rgb = color.rgba2rgb(img_rgba)
     """
     arr = np.asanyarray(rgba)
@@ -297,7 +297,7 @@ def rgb2hsv(rgb, *, channel_axis=-1):
     --------
     >>> from _skimage2 import color
     >>> from _skimage2 import data
-    >>> img = data.astronaut()
+    >>> img = data.fetch_astronaut()
     >>> img_hsv = color.rgb2hsv(img)
     """
     input_is_one_pixel = rgb.ndim == 1
@@ -387,7 +387,7 @@ def hsv2rgb(hsv, *, channel_axis=-1):
     --------
     >>> from _skimage2 import data
     >>> from _skimage2.color import rgb2hsv
-    >>> img = data.astronaut()
+    >>> img = data.fetch_astronaut()
     >>> img_hsv = rgb2hsv(img)
     >>> img_rgb = hsv2rgb(img_hsv)
     """
@@ -795,7 +795,7 @@ def xyz2rgb(xyz, *, channel_axis=-1):
     --------
     >>> from _skimage2 import data
     >>> from _skimage2.color import rgb2xyz, xyz2rgb
-    >>> img = data.astronaut()
+    >>> img = data.fetch_astronaut()
     >>> img_xyz = rgb2xyz(img)
     >>> img_rgb = xyz2rgb(img_xyz)
     """
@@ -847,7 +847,7 @@ def rgb2xyz(rgb, *, channel_axis=-1):
     Examples
     --------
     >>> from _skimage2 import data
-    >>> img = data.astronaut()
+    >>> img = data.fetch_astronaut()
     >>> img_xyz = rgb2xyz(img)
     """
     # Follow the algorithm from http://www.easyrgb.com/index.php
@@ -893,7 +893,7 @@ def rgb2rgbcie(rgb, *, channel_axis=-1):
     --------
     >>> from _skimage2 import data
     >>> from _skimage2.color import rgb2rgbcie
-    >>> img = data.astronaut()
+    >>> img = data.fetch_astronaut()
     >>> img_rgbcie = rgb2rgbcie(img)
     """
     return _convert(rgbcie_from_rgb, rgb)
@@ -933,7 +933,7 @@ def rgbcie2rgb(rgbcie, *, channel_axis=-1):
     --------
     >>> from _skimage2 import data
     >>> from _skimage2.color import rgb2rgbcie, rgbcie2rgb
-    >>> img = data.astronaut()
+    >>> img = data.fetch_astronaut()
     >>> img_rgbcie = rgb2rgbcie(img)
     >>> img_rgb = rgbcie2rgb(img_rgbcie)
     """
@@ -978,7 +978,7 @@ def rgb2gray(rgb, *, channel_axis=-1):
     --------
     >>> from _skimage2.color import rgb2gray
     >>> from _skimage2 import data
-    >>> img = data.astronaut()
+    >>> img = data.fetch_astronaut()
     >>> img_gray = rgb2gray(img)
     """
     rgb = _prepare_colorarray(rgb)
@@ -1100,7 +1100,7 @@ def xyz2lab(xyz, illuminant="D65", observer="2", *, channel_axis=-1):
     --------
     >>> from _skimage2 import data
     >>> from _skimage2.color import rgb2xyz, xyz2lab
-    >>> img = data.astronaut()
+    >>> img = data.fetch_astronaut()
     >>> img_xyz = rgb2xyz(img)
     >>> img_lab = xyz2lab(img_xyz)
     """
@@ -1390,7 +1390,7 @@ def xyz2luv(xyz, illuminant="D65", observer="2", *, channel_axis=-1):
     --------
     >>> from _skimage2 import data
     >>> from _skimage2.color import rgb2xyz, xyz2luv
-    >>> img = data.astronaut()
+    >>> img = data.fetch_astronaut()
     >>> img_xyz = rgb2xyz(img)
     >>> img_luv = xyz2luv(img_xyz)
     """
@@ -1616,7 +1616,7 @@ def rgb2hed(rgb, *, channel_axis=-1):
     --------
     >>> from _skimage2 import data
     >>> from _skimage2.color import rgb2hed
-    >>> ihc = data.immunohistochemistry()
+    >>> ihc = data.fetch_immunohistochemistry()
     >>> ihc_hed = rgb2hed(ihc)
     """
     return separate_stains(rgb, hed_from_rgb)
@@ -1659,7 +1659,7 @@ def hed2rgb(hed, *, channel_axis=-1):
     --------
     >>> from _skimage2 import data
     >>> from _skimage2.color import rgb2hed, hed2rgb
-    >>> ihc = data.immunohistochemistry()
+    >>> ihc = data.fetch_immunohistochemistry()
     >>> ihc_hed = rgb2hed(ihc)
     >>> ihc_rgb = hed2rgb(ihc_hed)
     """
@@ -1728,7 +1728,7 @@ def separate_stains(rgb, conv_matrix, *, channel_axis=-1):
     --------
     >>> from _skimage2 import data
     >>> from _skimage2.color import separate_stains, hdx_from_rgb
-    >>> ihc = data.immunohistochemistry()
+    >>> ihc = data.fetch_immunohistochemistry()
     >>> ihc_hdx = separate_stains(ihc, hdx_from_rgb)
     """
     rgb = _prepare_colorarray(rgb, force_copy=True, channel_axis=-1)
@@ -1800,7 +1800,7 @@ def combine_stains(stains, conv_matrix, *, channel_axis=-1):
     >>> from _skimage2 import data
     >>> from _skimage2.color import (separate_stains, combine_stains,
     ...                            hdx_from_rgb, rgb_from_hdx)
-    >>> ihc = data.immunohistochemistry()
+    >>> ihc = data.fetch_immunohistochemistry()
     >>> ihc_hdx = separate_stains(ihc, hdx_from_rgb)
     >>> ihc_rgb = combine_stains(ihc_hdx, rgb_from_hdx)
     """
@@ -1864,7 +1864,7 @@ def lab2lch(lab, *, channel_axis=-1):
     --------
     >>> from _skimage2 import data
     >>> from _skimage2.color import rgb2lab, lab2lch
-    >>> img = data.astronaut()
+    >>> img = data.fetch_astronaut()
     >>> img_lab = rgb2lab(img)
     >>> img_lch = lab2lch(img_lab)
     """
@@ -1936,7 +1936,7 @@ def lch2lab(lch, *, channel_axis=-1):
     --------
     >>> from _skimage2 import data
     >>> from _skimage2.color import rgb2lab, lch2lab, lab2lch
-    >>> img = data.astronaut()
+    >>> img = data.fetch_astronaut()
     >>> img_lab = rgb2lab(img)
     >>> img_lch = lab2lch(img_lab)
     >>> img_lab2 = lch2lab(img_lch)

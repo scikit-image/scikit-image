@@ -441,7 +441,7 @@ def perimeter(image, neighborhood=4):
     --------
     >>> import _skimage2 as ski2
     >>> # coins image (binary)
-    >>> img_coins = ski2.data.coins() > 110
+    >>> img_coins = ski2.data.fetch_coins() > 110
     >>> # total perimeter of all objects in the image
     >>> ski2.measure.perimeter(img_coins, neighborhood=4)  # doctest: +ELLIPSIS
     7796.867...
@@ -523,7 +523,7 @@ def perimeter_crofton(image, directions=4):
     --------
     >>> import _skimage2 as ski2
     >>> # coins image (binary)
-    >>> img_coins = ski2.data.coins() > 110
+    >>> img_coins = ski2.data.fetch_coins() > 110
     >>> # total perimeter of all objects in the image
     >>> ski2.measure.perimeter_crofton(img_coins, directions=2)  # doctest: +ELLIPSIS
     8144.578...
