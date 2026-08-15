@@ -455,6 +455,7 @@ def _ellipse_perimeter(Py_ssize_t r_o, Py_ssize_t c_o, Py_ssize_t r_radius,
     cdef Py_ssize_t n_samples, prev_r, prev_c
     cdef Py_ssize_t k
     cdef cnp.float64_t t, u, v
+    cdef bint has_prev = False
 
     if orientation == 0:
         c = -c_radius
@@ -505,18 +506,19 @@ def _ellipse_perimeter(Py_ssize_t r_o, Py_ssize_t c_o, Py_ssize_t r_radius,
         ra = cos(orientation)
         n_samples = (<Py_ssize_t>(3 * pi * (r_radius if r_radius > c_radius else c_radius))
                      + 2)
-        prev_r = prev_c = -9223372036854775807
+        prev_r = prev_c = 0
         for k in range(n_samples + 1):
             t = 2 * pi * k / n_samples
             u = r_radius * sin(t)
             v = c_radius * cos(t)
             r = r_o + <Py_ssize_t>floor(u * ra - v * sin_angle + 0.5)
             c = c_o + <Py_ssize_t>floor(u * sin_angle + v * ra + 0.5)
-            if r != prev_r or c != prev_c:
+            if not has_prev or r != prev_r or c != prev_c:
                 rr.append(r)
                 cc.append(c)
                 prev_r = r
                 prev_c = c
+                has_prev = True
 
     else:
         sin_angle = sin(orientation)
