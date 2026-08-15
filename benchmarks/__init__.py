@@ -29,9 +29,9 @@ def _skip_slow():
         raise NotImplementedError("Skipping this test...")
 
 
-def _resolve_params(reduced, full):
+def _resolve_param(reduced, full):
     """
-    Pick between a reduced (fast CI) and full (nightly) parameter list.
+    Pick one parameter's values: reduced for fast CI, full for nightly.
 
     Controlled by the ASV_FULL_PARAMS environment variable. Use this to
     wrap one axis of a benchmark class's ``params`` where the reduced
@@ -41,9 +41,9 @@ def _resolve_params(reduced, full):
 
     For example:
 
-    >>> from . import _resolve_params
+    >>> from . import _resolve_param
     >>> class Suite:
-    ...     params = [_resolve_params(reduced=[1, 2], full=[1, 2, 3, 4, 5])]
+    ...     params = [_resolve_param(reduced=[1, 2], full=[1, 2, 3, 4, 5])]
     """
     if os.environ.get("ASV_FULL_PARAMS", "0") == "1":
         return full
