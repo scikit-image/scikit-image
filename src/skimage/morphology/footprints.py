@@ -45,7 +45,8 @@ adapt_doctests(globals())
     ``%(qname_new)s`` with a new signature and behavior:
 
     * ``width`` and ``height`` are replaced by the parameter ``radii``
-    * ``decomposition`` parameter is removed
+    * ``decomposition`` parameter is removed in favor of new function
+      `cross_decompose_footprint`
 
     WARNING: The new underlying algorithm is slightly different and compounding
     float errors may lead to a few pixels at the footprints edge being 0
@@ -56,8 +57,8 @@ adapt_doctests(globals())
     To keep the old (``skimage``, v1.x) behavior after switching to
     ``skimage2``, pass the following parameters to the new function:
 
-    * ``radii= (height, width)``
-    * ``adjust_edge=0.9999``.
+    * Use ``radii=(height, width)``
+    * Use ``adjust_edge=0.9999``
 
     If you used ``decomposition='crosses'``, apply the new function
     `skimage2.morphology.cross_decompose_footprint` to the generated footprint.
@@ -158,7 +159,6 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
     return sequence
 
 
-# TODO decomposition case
 @ski2_migration_decorator(
     """\
     ``%(qname_old)s`` is deprecated in favor of
@@ -166,7 +166,8 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
 
     * ``radius`` and ``strict_radius`` are replaced by
       the parameters ``radii`` and ``adjust_edge``
-    * ``decomposition`` parameter is removed
+    * ``decomposition`` parameter is removed in favor of new functions
+      `cross_decompose_footprint` and `footprint_decomposed_disk`
 
     WARNING: The new underlying algorithm is slightly different and compounding
     float errors may lead to a few pixels at the footprints edge being 0
@@ -181,23 +182,36 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
     * ``strict_radius=True`` (default), use ``adjust_edge=0.001``
     * ``strict_radius=False``, use ``adjust_edge=0.5``
 
+    If you used ``decomposition='crosses'``, apply the new function
+    `skimage2.morphology.cross_decompose_footprint` to the generated footprint.
+    If you used ``decomposition='sequence'``, instead use
+    `skimage2.morphology.footprint_decomposed_disk` to generate the decomposed
+    footprint.
+
     <!--- cond-start: doc -->
     For example:
 
     >>> import numpy as np
     >>> import skimage as ski
     >>> import _skimage2 as ski2
-
     >>> radius = 7
 
-    >>> fp1 = ski.morphology.disk(radius)
-    >>> fp2 = ski2.morphology.footprint_ellipse(radius, adjust_edge=0.001)
-    >>> np.testing.assert_equal(fp1, fp2)
+    >>> fp1_strict = ski.morphology.disk(radius)
+    >>> fp2_strict = ski2.morphology.footprint_ellipse(radius, adjust_edge=0.001)
+    >>> np.testing.assert_equal(fp1_strict, fp2_strict)
 
     >>> fp1 = ski.morphology.disk(radius, strict_radius=False)
     >>> fp2 = ski2.morphology.footprint_ellipse(radius, adjust_edge=0.5)
     >>> np.testing.assert_equal(fp1, fp2)
 
+    >>> fp1_crosses = ski.morphology.disk(radius, decomposition="crosses")
+    >>> fp2_crosses = ski2.morphology.cross_decompose_footprint(fp2_strict)
+    >>> np.testing.assert_equal(fp1_crosses, fp2_crosses)
+
+    >>> fp1_sequence = ski.morphology.disk(radius, decomposition="sequence")
+    >>> fp2_sequence = ski2.morphology.footprint_decomposed_disk(radius)
+    >>> np.testing.assert_equal(fp1_sequence, fp2_sequence)
+    
     .. admonition:: Reproduce exact results of old implementation
         :class: note dropdown
 
@@ -311,7 +325,6 @@ def disk(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
     return sequence
 
 
-# TODO decomposition case
 @ski2_migration_decorator(
     """\
     ``%(qname_old)s`` is deprecated in favor of
@@ -334,22 +347,29 @@ def disk(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
     * ``strict_radius=True`` (default), use ``adjust_edge=0.001``
     * ``strict_radius=False``, use ``adjust_edge=0.5``
 
+    If you used ``decomposition='sequence'``, instead use
+    `skimage2.morphology.footprint_decomposed_disk` to generate the decomposed
+    footprint.
+
     <!--- cond-start: doc -->
     For example:
 
     >>> import numpy as np
     >>> import skimage as ski
     >>> import _skimage2 as ski2
-
     >>> radius = 7
 
-    >>> fp1 = ski.morphology.ball(radius)
-    >>> fp2 = ski2.morphology.footprint_ellipse((radius,) * 3, adjust_edge=0.001)
-    >>> np.testing.assert_equal(fp1, fp2)
+    >>> fp1_strict = ski.morphology.ball(radius)
+    >>> fp2_strict = ski2.morphology.footprint_ellipse((radius,) * 3, adjust_edge=0.001)
+    >>> np.testing.assert_equal(fp1_strict, fp2_strict)
 
     >>> fp1 = ski.morphology.ball(radius, strict_radius=False)
     >>> fp2 = ski2.morphology.footprint_ellipse((radius,) * 3, adjust_edge=0.5)
     >>> np.testing.assert_equal(fp1, fp2)
+
+    >>> fp1_sequence = ski.morphology.ball(radius, decomposition="sequence")
+    >>> fp2_sequence = ski2.morphology.footprint_decomposed_disk(radius, ndim=3)
+    >>> np.testing.assert_equal(fp1_sequence, fp2_sequence)
 
     .. admonition:: Reproduce exact results of old implementation
         :class: note dropdown

@@ -696,6 +696,8 @@ def _normalize_radii_shape(radii, shape=None):
     >>> _normalize_radii_shape(radii=(3, 4, 5), shape=(11, 11, 11))
     ((3, 4, 5), (11, 11, 11))
 
+    If `shape` is given, `radii` must be a tuple:
+
     >>> _normalize_radii_shape(radii=3, shape=(6, 6, 7))
     Traceback (most recent call last):
         ...
@@ -760,11 +762,11 @@ def footprint_ellipse(radii, *, shape=None, adjust_edge=0.4, dtype=np.uint8):
         footprint with even length. The ellipse will always be positioned at the
         center.
     adjust_edge : float or Sequence of float(s), optional
-        Adjust `radii` by subpixel-amount in each dimension. The default value
+        Adjust `radii` by (subpixel-)amount in each dimension. The default value
         increases the radii slightly which leads to a smoother edge.
         ``adjust_edge=0`` usually leads to a *pointier* ellipse that touches the
         footprint's edge with only one pixel. Try other values to match other
-        implementations [1]_, [2]_ pixel by pixel.
+        implementations [1]_, [2]_ pixel-by-pixel.
     dtype : data-type, optional
         The data type of the footprint.
 
@@ -794,12 +796,14 @@ def footprint_ellipse(radii, *, shape=None, adjust_edge=0.4, dtype=np.uint8):
     respective dimension :math:`n \\in N`. Its minimum and maximum are derived
     from `shape` with ``tuple(s // 2 for s in shape)`` for each dimension.
 
-    To approximate the results of `disk` and `ball` in legacy `skimage`, and
-    that of other libraries [2]_, try ``radii=tuple(s // 2 for s in shape)``.
-    The underlying calculation in this function is different which may result in
-    floating errors compounding in a different way. Depending on the platform
-    and used precision you may need to increase the radii slightly (like +0.001)
-    to get pixel-perfect reproductions.
+    The defaults and underlying calculation in this function are different from
+    legacy `skimage` and that of other libraries [1]_ [2]_. Depending on the
+    platform and used precision, floating-point errors may compound this
+    difference further. `adjust_edge` can counter-act this to some extent.
+    MATLAB's disk can be approximated with ``adjust_edge=0.001``.
+
+    Use ``adjust_edge=0.5`` if you want to generate an approximate dense
+    equivalent to `footprint_decomposed_disk`.
 
     References
     ----------
@@ -809,12 +813,15 @@ def footprint_ellipse(radii, *, shape=None, adjust_edge=0.4, dtype=np.uint8):
     Examples
     --------
     >>> import _skimage2 as ski2
-    >>> ski2.morphology.footprint_ellipse((1, 2))
-    array([[0, 1, 1, 1, 0],
-           [1, 1, 1, 1, 1],
-           [0, 1, 1, 1, 0]], dtype=uint8)
+    >>> ski2.morphology.footprint_ellipse((2, 3))
+    array([[0, 0, 1, 1, 1, 0, 0],
+           [1, 1, 1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 1, 1, 1],
+           [0, 0, 1, 1, 1, 0, 0]], dtype=uint8)
 
     Pass single value for radius as a shortcut for a 2-dimensional disk
+
     >>> ski2.morphology.footprint_ellipse(2)
     array([[0, 1, 1, 1, 0],
            [1, 1, 1, 1, 1],
@@ -822,7 +829,17 @@ def footprint_ellipse(radii, *, shape=None, adjust_edge=0.4, dtype=np.uint8):
            [1, 1, 1, 1, 1],
            [0, 1, 1, 1, 0]], dtype=uint8)
 
+    Produce ellipsis that strictly touches the edge (no smoothing/cropping)
+
+    >>> ski2.morphology.footprint_ellipse((2, 3), adjust_edge=0)
+    array([[0, 0, 0, 1, 0, 0, 0],
+           [0, 1, 1, 1, 1, 1, 0],
+           [1, 1, 1, 1, 1, 1, 1],
+           [0, 1, 1, 1, 1, 1, 0],
+           [0, 0, 0, 1, 0, 0, 0]], dtype=uint8)
+
     Produce a disk with an even length in each dimension
+
     >>> ski2.morphology.footprint_ellipse((2, 2), shape=(4, 4))
     array([[0, 1, 1, 0],
            [1, 1, 1, 1],
@@ -830,6 +847,7 @@ def footprint_ellipse(radii, *, shape=None, adjust_edge=0.4, dtype=np.uint8):
            [0, 1, 1, 0]], dtype=uint8)
 
     Produce a 3-dimensional ellipsoid
+
     >>> ellipsoid = ski2.morphology.footprint_ellipse((3, 4, 11))
     >>> ellipsoid.shape
     (7, 9, 23)
