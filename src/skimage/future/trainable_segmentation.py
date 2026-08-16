@@ -46,7 +46,7 @@ class TrainableSegmenter:
                 self.clf = RandomForestClassifier(n_estimators=100, n_jobs=-1)
             else:
                 raise ImportError(
-                    "Please install scikit-learn or pass a classifier instance"
+                    "Please install scikit-learn or pass a classifier instance "
                     "to TrainableSegmenter."
                 )
         else:
@@ -162,7 +162,7 @@ def predict_segmenter(features, clf):
         predicted_labels = clf.predict(features)
     except NotFittedError:
         raise NotFittedError(
-            "You must train the classifier `clf` first"
+            "You must train the classifier `clf` first, "
             "for example with the `fit_segmenter` function."
         )
     except ValueError as err:
