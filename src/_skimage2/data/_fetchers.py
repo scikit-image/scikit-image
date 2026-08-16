@@ -268,9 +268,9 @@ def _fetch(data_filename, prefix=None):
 def fetch(data_filename):
     """Fetch a scikit-image example dataset file, returning its local path.
 
-    Resolves ``data_filename`` to a path on disk: a bundled copy from the
-    ``scikit-image-data`` package, an already-cached download, or
-    a fresh download using pooch, in that order. This is the same
+    Resolves ``data_filename`` to a path on disk: a copy shipped with the
+    distribution, an already-cached download, or a fresh download using
+    pooch, in that order. This is the same
     machinery every ``fetch_*()`` convenience function
     (e.g. :func:`fetch_astronaut`) uses internally; call this directly
     for datasets that don't have one, or when you want the file path
@@ -294,11 +294,8 @@ def fetch(data_filename):
         If ``data_filename`` is not known to the scikit-image distribution.
 
     ModuleNotFoundError:
-        If pooch is not installed and the file isn't otherwise available
-        locally (bundled with ``scikit-image-data`` or already cached).
-        Pooch is a normal dependency of scikit-image, so this should only
-        happen on a platform where it isn't available (e.g. Pyodide) or
-        after manually uninstalling it; ``pip install pooch`` resolves it.
+        If the filename is known to the scikit-image distribution but pooch
+        is not installed.
 
     ConnectionError:
         If scikit-image is unable to connect to the internet but the
