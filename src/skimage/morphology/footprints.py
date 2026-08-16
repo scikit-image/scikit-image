@@ -178,7 +178,7 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
     To *approximate* the old (``skimage``, v1.x) behavior after switching to
     ``skimage2``:
 
-    * Use ``shape = (radius * 2 + 1,) * 2``
+    * Use ``radii=(radius, radius)``
     * ``strict_radius=True`` (default), use ``adjust_edge=0.001``
     * ``strict_radius=False``, use ``adjust_edge=0.5``
 
@@ -343,7 +343,7 @@ def disk(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
     To approximate the old (``skimage``, v1.x) behavior after switching to
     ``skimage2``:
 
-    * Use ``shape = (radius * 2 + 1,) * 3``
+    * Use ``radii=(radius,) * 3``
     * ``strict_radius=True`` (default), use ``adjust_edge=0.001``
     * ``strict_radius=False``, use ``adjust_edge=0.5``
 
