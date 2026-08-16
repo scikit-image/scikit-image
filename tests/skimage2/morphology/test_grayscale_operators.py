@@ -36,8 +36,7 @@ def _ski1_legacy_disk(radius):
     against ``gray_morph_output.npz`` which was computed with the legacy
     `disk` function from skimage.
     """
-    shape = (radius * 2 + 1,) * 2
-    return ski2.morphology.footprint_ellipse(shape, radii=radius)
+    return ski2.morphology.footprint_ellipse(radius, adjust_edge=0.001)
 
 
 class TestMorphology:

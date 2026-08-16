@@ -157,7 +157,7 @@ def test_inpaint_nrmse(dtype, order, channel_axis, split_into_regions):
         thresh = 3.25 + 0.25 * radius  # larger defects less common
         tmp_mask = rstate.standard_normal(image_orig.shape[:-1]) > thresh
         if radius > 0:
-            footprint = footprint_ellipse((radius * 2 + 1,) * 2, dtype=bool)
+            footprint = footprint_ellipse(radius, dtype=bool, adjust_edge=0.001)
             tmp_mask = dilation(tmp_mask, footprint)
         mask[tmp_mask] = 1
 

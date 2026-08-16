@@ -87,7 +87,7 @@ ref_data_3d = dict(np.load(fetch('data/rank_filters_tests_3d.npz')))
 )
 def test_1d_input_raises_error(func):
     image = np.arange(10)
-    footprint = footprint_ellipse((7, 7), radii=3)
+    footprint = footprint_ellipse((3, 3), adjust_edge=0.001)
     with pytest.raises(ValueError, match='`image` must have 2 or 3 dimensions, got 1'):
         func(image, footprint)
 
@@ -101,8 +101,8 @@ class TestRank:
         self.image = rng.rand(25, 25)
         rng.seed(0)
         self.volume = rng.rand(10, 10, 10)
-        self.footprint = footprint_ellipse((3, 3), radii=1)
-        self.footprint_3d = footprint_ellipse((3, 3, 3), radii=1)
+        self.footprint = footprint_ellipse((1, 1), adjust_edge=0.001)
+        self.footprint_3d = footprint_ellipse((1, 1, 1), adjust_edge=0.001)
         self.refs = ref_data
         self.refs_3d = ref_data_3d
 
@@ -407,7 +407,7 @@ class TestRank:
     def test_inplace_output(self):
         # rank filters are not supposed to filter inplace
 
-        footprint = footprint_ellipse((41, 41), radii=20)
+        footprint = footprint_ellipse((20, 20), adjust_edge=0.001)
         rng = np.random.RandomState(595130246)
         image = (rng.rand(500, 500) * 256).astype(np.uint8)
         out = image
@@ -420,7 +420,7 @@ class TestRank:
 
         image = util.img_as_ubyte(data.camera())
 
-        footprint = footprint_ellipse((41, 41), radii=20)
+        footprint = footprint_ellipse((20, 20), adjust_edge=0.001)
         loc_autolevel = rank.autolevel(image, footprint=footprint)
         loc_perc_autolevel = rank.autolevel_percentile(
             image, footprint=footprint, p0=0.0, p1=1.0
@@ -434,7 +434,7 @@ class TestRank:
 
         image = data.camera().astype(np.uint16) * 4
 
-        footprint = footprint_ellipse((41, 41), radii=20)
+        footprint = footprint_ellipse((20, 20), adjust_edge=0.001)
         loc_autolevel = rank.autolevel(image, footprint=footprint)
         loc_perc_autolevel = rank.autolevel_percentile(
             image, footprint=footprint, p0=0.0, p1=1.0
@@ -457,7 +457,7 @@ class TestRank:
             'pop',
         ]
 
-        footprint = footprint_ellipse((7, 7), radii=3)
+        footprint = footprint_ellipse((3, 3), adjust_edge=0.001)
         for method in methods:
             func = getattr(rank, method)
             out_u = func(image_uint, footprint)
@@ -492,7 +492,7 @@ class TestRank:
             'entropy',
         ]
 
-        footprint = footprint_ellipse((7, 7, 7), radii=3)
+        footprint = footprint_ellipse((3, 3, 3), adjust_edge=0.001)
         for method in methods_3d:
             func = getattr(rank, method)
             out_u = func(volume_uint, footprint)
@@ -527,7 +527,7 @@ class TestRank:
             'threshold',
         ]
 
-        footprint = footprint_ellipse((7, 7), radii=3)
+        footprint = footprint_ellipse((3, 3), adjust_edge=0.001)
         for method in methods:
             func = getattr(rank, method)
             out_u = func(image_u, footprint)
@@ -566,7 +566,7 @@ class TestRank:
             'entropy',
         ]
 
-        footprint = footprint_ellipse((7, 7, 7), radii=3)
+        footprint = footprint_ellipse((3, 3, 3), adjust_edge=0.001)
         for method in methods_3d:
             func = getattr(rank, method)
             out_u = func(volume_u, footprint)
@@ -623,13 +623,13 @@ class TestRank:
             'entropy',
         ]
 
-        disk = footprint_ellipse((7, 7), radii=3)
+        disk = footprint_ellipse((3, 3), adjust_edge=0.001)
         func = getattr(rank, method)
         f8 = func(image8, disk)
         f16 = func(image16, disk)
         assert_equal(f8, f16)
 
-        ball = footprint_ellipse((7, 7), radii=3)
+        ball = footprint_ellipse((3, 3, 3), adjust_edge=0.001)
         if method in methods_3d:
             f8 = func(volume8, ball)
             f16 = func(volume16, ball)
@@ -908,7 +908,7 @@ class TestRank:
         # check that percentile p0 = 0 is identical to local min
         img = data.camera()
         img16 = img.astype(np.uint16)
-        footprint = footprint_ellipse((31, 31), radii=15)
+        footprint = footprint_ellipse((15, 15), adjust_edge=0.001)
         # check for 8bit
         img_p0 = rank.percentile(img, footprint=footprint, p0=0)
         img_min = rank.minimum(img, footprint=footprint)
@@ -922,7 +922,7 @@ class TestRank:
         # check that percentile p0 = 1 is identical to local max
         img = data.camera()
         img16 = img.astype(np.uint16)
-        footprint = footprint_ellipse((31, 31), radii=15)
+        footprint = footprint_ellipse((15, 15), adjust_edge=0.001)
         # check for 8bit
         img_p0 = rank.percentile(img, footprint=footprint, p0=1.0)
         img_max = rank.maximum(img, footprint=footprint)
@@ -936,7 +936,7 @@ class TestRank:
         # check that percentile p0 = 0.5 is identical to local median
         img = data.camera()
         img16 = img.astype(np.uint16)
-        footprint = footprint_ellipse((31, 31), radii=15)
+        footprint = footprint_ellipse((15, 15), adjust_edge=0.001)
         # check for 8bit
         img_p0 = rank.percentile(img, footprint=footprint, p0=0.5)
         img_max = rank.median(img, footprint=footprint)
@@ -1086,7 +1086,7 @@ class TestRank:
         a = np.zeros((3, 3), dtype=np.uint8)
         a[1] = 1
         full_footprint = np.ones((3, 3), dtype=np.uint8)
-        disk_footprint = footprint_ellipse((3, 3), radii=1)
+        disk_footprint = footprint_ellipse((1, 1), adjust_edge=0.001)
         assert_equal(rank.median(a), rank.median(a, full_footprint))
         assert rank.median(a)[1, 1] == 0
         assert rank.median(a, disk_footprint)[1, 1] == 1
