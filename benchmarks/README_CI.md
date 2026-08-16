@@ -6,7 +6,7 @@
 
 ## How it works
 
-The `asv` suite runs automatically on every PR, scoped to whichever benchmark module(s) cover the `skimage` subpackage(s) the PR touches (see `MODULE_MAP` in `.spin/asv.py`). A PR touching only `skimage/restoration/` runs just `benchmark_restoration.py`; a PR touching no mapped subpackage (docs, CI config, a subpackage with no benchmark file, etc.) doesn't run benchmarks at all. Adding a label whose name contains `benchmark` (e.g. `run-benchmark`) to a PR overrides this and always runs the full suite, regardless of which paths changed - useful when a change to shared/core code could affect benchmarks outside the touched subpackage's own module.
+The `asv` suite runs automatically on every PR, scoped to whichever benchmark module(s) cover the `skimage` subpackage(s) the PR touches (see `.github/scripts/resolve-benchmark-params.py`). A PR touching only `skimage/restoration/` runs just `benchmark_restoration.py`; a PR touching no mapped subpackage (docs, CI config, a subpackage with no benchmark file, etc.) doesn't run benchmarks at all. Adding a label whose name contains `benchmark` (e.g. `run-benchmark`) to a PR overrides this and always runs the full suite, regardless of which paths changed - useful when a change to shared/core code could affect benchmarks outside the touched subpackage's own module.
 
 The suite also runs nightly at 07:00 UTC against `main`, using the full, untrimmed benchmark suite (see "Full nightly runs" below), and can be triggered manually from the `workflow_dispatch` entry point on the `Actions` tab, which offers a `baseline` choice: `parent-commit` (default, compares the current commit against its immediate parent) or `previous-nightly` (compares against the same commit the last successful nightly run used, falling back to the immediate parent if no nightly run has succeeded yet). Merges to `main` don't trigger a benchmark run on their own - the nightly run covers that ground, without paying the CI cost on every single merge. If a nightly or manually-dispatched run on `main` fails (including a detected regression), it opens (or updates, if one is already open) a `CI failure`-labeled GitHub issue using the same convention as the repo's other main-branch CI checks.
 
@@ -25,14 +25,14 @@ Due to the sensitivity of the test, we cannot guarantee that false positives are
 
 ## How the run is parameterized
 
-`spin asv --resolve` decides everything about a given run from the trigger event, reading the event payload from `GITHUB_EVENT_PATH` rather than taking it through the workflow's `env:` block. It publishes its decisions two ways:
+`resolve-benchmark-params.py` decides everything about a given run from the trigger event, reading the event payload from `GITHUB_EVENT_PATH` rather than taking it through the workflow's `env:` block. It publishes its decisions two ways:
 
 - Three job outputs, the values other jobs need before benchmarking starts: `should_run`, `python_version` (read from `asv.conf.json`, so it can't drift), and `baseline_sha`.
 - `benchmark-params.json`, uploaded as an artifact, holding the asv settings only the benchmark job cares about: `ASV_FACTOR`, `ASV_PROCESSES`, `ASV_SKIP_SLOW`, `ASV_FULL_PARAMS`, `BASELINE_SHA`, `BASELINE_LABEL`, `CONTENDER_LABEL`, and `BENCH_FILTER`. The benchmark job downloads it and `prepare-benchmarks.sh` copies the entries into `$GITHUB_ENV`, where `run-benchmarks.sh` and the benchmark processes pick them up.
 
-The file's keys are the environment variable names themselves, so adding a parameter means adding one entry rather than editing the workflow in several places.
+The file's keys are the environment variable names themselves, so adding a parameter means adding one entry in `resolve-benchmark-params.py` rather than editing the workflow in several places.
 
-All of this lives in `.spin/asv.py`, the same command a contributor runs locally, so `spin asv --profile fast --changed` measures what a pull request check measures rather than approximating it. `MODULE_MAP` there records which benchmark modules cover each `src/skimage/` subpackage, and `FAST_PROFILE`/`FULL_PROFILE` hold the asv settings each kind of run uses.
+`MODULE_MAP` in the same script records which benchmark modules cover each `src/skimage/` subpackage, and is what a pull request check scopes itself with.
 
 The benchmark job's two steps split along that seam. `prepare-benchmarks.sh` does everything before measurement: exporting the parameters, pinning the numeric libraries to a single thread, swapping `asv.conf.json`'s `build_command` over to the prebuilt wheels, and registering the runner with `asv machine`. `run-benchmarks.sh` is then just the `asv continuous` call and its pass/fail check.
 
