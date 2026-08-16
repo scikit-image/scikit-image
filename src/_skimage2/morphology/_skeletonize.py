@@ -81,17 +81,17 @@ def skeletonize(image, *, method=None):
 
     if method not in {'zhang', 'lee', None}:
         raise ValueError(
-            f'skeletonize method should be either "lee" or "zhang", ' f'got {method}.'
+            f'skeletonize method should be either "lee" or "zhang", got {method}.'
         )
     if image.ndim == 2 and (method is None or method == 'zhang'):
         skeleton = _skeletonize_zhang(image)
     elif image.ndim == 3 and method == 'zhang':
-        raise ValueError('skeletonize method "zhang" only works for 2D ' 'images.')
+        raise ValueError('skeletonize method "zhang" only works for 2D images.')
     elif image.ndim == 3 or (image.ndim == 2 and method == 'lee'):
         skeleton = _skeletonize_lee(image)
     else:
         raise ValueError(
-            f'skeletonize requires a 2D or 3D image as input, ' f'got {image.ndim}D.'
+            f'skeletonize requires a 2D or 3D image as input, got {image.ndim}D.'
         )
     return skeleton
 
