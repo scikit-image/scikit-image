@@ -939,22 +939,22 @@ def test_resize_local_mean2d():
 def test_resize_local_mean3d_keep(channel_axis):
     # keep 3rd dimension
     nch = 3
-    x = np.zeros((5, 5, nch), dtype=np.float64)
+    x = np.zeros((4, 5, nch), dtype=np.float64)
     x[1, 1, :] = 1
     # move channels to expected dimension
     x = np.moveaxis(x, -1, channel_axis)
-    resized = resize_local_mean(x, (10, 10), channel_axis=channel_axis)
+    resized = resize_local_mean(x, (8, 10), channel_axis=channel_axis)
     # move channels back to last axis to match the reference image
     resized = np.moveaxis(resized, channel_axis, -1)
     with pytest.raises(ValueError):
         # output_shape too short
         resize_local_mean(x, (10,))
-    ref = np.zeros((10, 10, nch))
+    ref = np.zeros((8, 10, nch))
     ref[2:4, 2:4, :] = 1
     assert_array_almost_equal(resized, ref)
 
     channel_axis = channel_axis % x.ndim
-    spatial_shape = (10, 10)
+    spatial_shape = (8, 10)
     out_shape = spatial_shape[:channel_axis] + (nch,) + spatial_shape[channel_axis:]
     resized = resize_local_mean(x, out_shape, channel_axis=channel_axis)
     # move channels back to last axis to match the reference image
