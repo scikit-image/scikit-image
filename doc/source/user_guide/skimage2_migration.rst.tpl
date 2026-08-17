@@ -115,6 +115,28 @@ The new counterparts behave differently in the following ways:
 {% endfor -%}
 
 
+Dataset functions in ``skimage2.data`` use a ``fetch_`` prefix
+--------------------------------------------------------------
+
+Each dataset in ``skimage2.data`` is retrieved through a function whose name
+begins with ``fetch_``, following the convention used by ``sklearn.datasets``.
+The bare names are no longer part of the public API:
+
+.. code-block:: python
+
+    import skimage as ski
+    import skimage2 as ski2
+
+    image = ski.data.astronaut()         # skimage
+    image = ski2.data.fetch_astronaut()  # skimage2
+
+The prefix makes it explicit at the call site that a dataset may need to be
+downloaded and cached the first time it is used. For registry entries without
+a dedicated wrapper, ``skimage2.data.fetch()`` takes a key such as
+``'data/astronaut.png'`` and returns the path to the local file.
+
+``skimage.data`` is unchanged. The bare names continue to work there.
+
 Removal of ``skimage.future``
 -----------------------------
 
