@@ -171,24 +171,25 @@ def find_boundaries(label_img, connectivity=1, mode='thick', background=0):
             boundaries &= foreground_image
         elif mode == 'outer':
             background_image = label_img == background
+            foreground_image = ~background_image
             inverted_background = np.array(label_img, copy=True)
-            if np.any(background_image):
+            if np.any(background_image) and np.any(foreground_image):
                 dtype_max = np.iinfo(label_img.dtype).max
-                data_max = int(label_img.max())
-                if data_max >= dtype_max:
+                label_max = int(label_img[foreground_image].max())
+                if label_max >= dtype_max:
                     raise ValueError(
                         "find_boundaries with mode='outer' needs a value "
                         "larger than the largest label to mark background "
-                        f"internally, but label_img already reaches the "
-                        f"{label_img.dtype} maximum ({dtype_max}). Cast "
+                        f"internally, but the largest label already reaches "
+                        f"the {label_img.dtype} maximum ({dtype_max}). Cast "
                         "label_img to a wider integer dtype."
                     )
-                inverted_background[background_image] = data_max + 1
+                inverted_background[background_image] = label_max + 1
             footprint = ndi.generate_binary_structure(ndim, ndim)
             adjacent_objects = (
                 dilation(label_img, footprint, mode='reflect')
                 != erosion(inverted_background, footprint, mode='reflect')
-            ) & ~background_image
+            ) & foreground_image
             boundaries &= background_image | adjacent_objects
         return boundaries
     else:

@@ -235,3 +235,26 @@ def test_find_boundaries_outer_no_headroom_raises(dtype):
     image[1, 1] = np.iinfo(dtype).max
     with pytest.raises(ValueError):
         find_boundaries(image, mode='outer')
+
+
+@pytest.mark.parametrize('dtype', [np.int8, np.uint8])
+def test_find_boundaries_outer_background_at_dtype_max(dtype):
+    # Only the labels themselves need headroom; a `background` value at the
+    # dtype maximum is replaced before erosion and must not exhaust it.
+    dtype_max = np.iinfo(dtype).max
+    image = np.full((5, 5), dtype_max, dtype=dtype)
+    image[1:4, 1:4] = 1
+    image[2, 2] = 2
+
+    ref = np.array(
+        [
+            [False, True, True, True, False],
+            [True, True, True, True, True],
+            [True, True, True, True, True],
+            [True, True, True, True, True],
+            [False, True, True, True, False],
+        ],
+        dtype=bool,
+    )
+    result = find_boundaries(image, mode='outer', background=dtype_max)
+    assert_array_equal(result, ref)
