@@ -158,3 +158,80 @@ def test_boundaries_constant_image(mode):
     ones = np.ones((8, 8), dtype=int)
     b = find_boundaries(ones, mode=mode)
     assert np.all(b == 0)
+
+
+def test_find_boundaries_outer_overflow():
+    # Regression test for https://github.com/scikit-image/scikit-image/issues/4558
+    # mode='outer' used to mark background pixels with the dtype's true
+    # maximum value before eroding, which silently overflowed for wide
+    # integer dtypes (e.g. int64) and produced wrong boundaries.
+    source = np.array(
+        [
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 1, 1, 1, 1, 1, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+        ],
+        dtype=np.int64,
+    )
+    ref = np.array(
+        [
+            [0, 1, 1, 1, 1, 1, 1, 0],
+            [1, 0, 0, 0, 0, 0, 0, 1],
+            [0, 1, 1, 1, 1, 1, 1, 0],
+        ]
+    )
+    result = find_boundaries(source, connectivity=1, mode='outer', background=0)
+    assert_array_equal(result.astype(int), ref)
+
+
+def test_find_boundaries_outer_all_background():
+    image = np.zeros((5, 5), dtype=np.int64)
+    result = find_boundaries(image, mode='outer')
+    assert np.all(result == 0)
+
+
+def test_find_boundaries_outer_bool():
+    image = np.zeros((5, 5), dtype=bool)
+    image[2:5, 2:5] = True
+
+    ref = np.array(
+        [
+            [False, False, False, False, False],
+            [False, False, True, True, True],
+            [False, True, False, False, False],
+            [False, True, False, False, False],
+            [False, True, False, False, False],
+        ],
+        dtype=bool,
+    )
+    result = find_boundaries(image, mode='outer')
+    assert_array_equal(result, ref)
+
+
+@pytest.mark.parametrize('dtype', [np.int8, np.uint8])
+def test_find_boundaries_outer_narrow_dtype(dtype):
+    image = np.zeros((5, 5), dtype=dtype)
+    image[2:5, 2:5] = 1
+
+    ref = np.array(
+        [
+            [False, False, False, False, False],
+            [False, False, True, True, True],
+            [False, True, False, False, False],
+            [False, True, False, False, False],
+            [False, True, False, False, False],
+        ],
+        dtype=bool,
+    )
+    result = find_boundaries(image, mode='outer')
+    assert_array_equal(result, ref)
+
+
+@pytest.mark.parametrize('dtype', [np.int8, np.uint8])
+def test_find_boundaries_outer_no_headroom_raises(dtype):
+    # Regression test for https://github.com/scikit-image/scikit-image/issues/4558
+    # No integer headroom is left to mark background internally.
+    image = np.zeros((3, 3), dtype=dtype)
+    image[1, 1] = np.iinfo(dtype).max
+    with pytest.raises(ValueError):
+        find_boundaries(image, mode='outer')
