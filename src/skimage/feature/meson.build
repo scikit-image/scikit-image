@@ -30,6 +30,7 @@ python_sources = [
     'match.py',
     'brief_cy.py',
     '_hessian_det_appx.py',
+    'zernike.py',
 ]
 
 py3.install_sources(
