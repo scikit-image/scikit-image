@@ -55,10 +55,12 @@ class TestZernikeFeatures:
         )
         assert isinstance(results, ZernikeResults)
         assert isinstance(znres, ZernikeResults)
-        assert np.all(znres.features) == np.all(results.features)
+        np.testing.assert_allclose(
+            znres.features, results.features, rtol=1e-6, atol=1e-6
+        )
         assert znres.complex_moments == results.complex_moments
         assert znres.radius == results.radius
-        assert np.all(znres.center_coord) == np.all(results.center_coord)
+        np.testing.assert_equal(znres.center_coord, results.center_coord)
 
     def test_pseudo_zernike_features(self, sample_image):
         """Test for pseudo ZFs with degree given, but radius, center are auto."""
@@ -132,10 +134,14 @@ class TestZernikeFeatures:
         )
         assert isinstance(results, ZernikeResults)
         assert isinstance(znres, ZernikeResults)
-        assert np.all(znres.features) == np.all(results.features)
-        assert np.all(znres.complex_moments) == np.all(results.complex_moments)
+        np.testing.assert_allclose(
+            znres.features, results.features, rtol=1e-6, atol=1e-6
+        )
+        np.testing.assert_allclose(
+            znres.complex_moments, results.complex_moments, rtol=1e-6, atol=1e-6
+        )
         assert znres.radius == results.radius
-        assert np.all(znres.center_coord) == np.all(results.center_coord)
+        np.testing.assert_equal(znres.center_coord, results.center_coord)
 
     @pytest.mark.parametrize(
         "one_dtype", [np.uint8, np.float16, np.float32, np.float64]
@@ -179,10 +185,12 @@ class TestZernikeFeatures:
         )
         assert isinstance(results, ZernikeResults)
         assert isinstance(znres, ZernikeResults)
-        assert np.all(znres.features) == np.all(results.features)
+        np.testing.assert_allclose(
+            znres.features, results.features, rtol=1e-6, atol=1e-6
+        )
         assert znres.complex_moments == results.complex_moments
         assert znres.radius == results.radius
-        assert np.all(znres.center_coord) == np.all(results.center_coord)
+        np.testing.assert_equal(znres.center_coord, results.center_coord)
 
 
 class TestZFErrors:

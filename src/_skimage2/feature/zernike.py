@@ -3,7 +3,7 @@ import numpy as np
 from multiprocessing import cpu_count
 from typing import NamedTuple
 
-from skimage.measure import regionprops, label
+from _skimage2.measure import regionprops, label
 
 from .zernike_cy import ZernikeFeatures, PseudoZernikeFeatures
 
@@ -121,10 +121,10 @@ def _verify_radius_center(
         if center.shape != (2,):
             raise ValueError("'center_coord' expects 1D array of shape '(2,)'.")
         if not radius_str_flag:
-            leftlim = (center[0] - radius) < 0.0
-            rightlim = (center[0] + radius) > width
-            toplim = (center[1] - radius) < 0.0
-            bottomlim = (center[1] + radius) > height
+            toplim = (center[0] - radius) < 0.0
+            bottomlim = (center[0] + radius) > height
+            leftlim = (center[1] - radius) < 0.0
+            rightlim = (center[1] + radius) > width
             if leftlim or rightlim or toplim or bottomlim:
                 raise ValueError("'center_coord' and 'radius' exceed image size.")
     else:
