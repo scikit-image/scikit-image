@@ -179,7 +179,7 @@ def test_register_affine_dtype(data_2d_grayscale, solver, dtype):
     tfm = ski.registration.estimate_affine(
         reference.astype(dtype),
         moving.astype(dtype),
-        solver=solver(ski.registration.TranslationTransform),
+        solver_config=solver(ski.registration.TranslationTransform),
     )
     assert tfm.params.shape == (3, 3)
     tre = ski.registration.target_registration_error(
@@ -196,7 +196,9 @@ def test_register_affine_model(data_2d_grayscale, solver, model):
     reference = data_2d_grayscale
     forward = create_matrix(reference.shape, model)
     moving = ndi.affine_transform(reference, forward)
-    tfm = ski.registration.estimate_affine(reference, moving, solver=solver(model))
+    tfm = ski.registration.estimate_affine(
+        reference, moving, solver_config=solver(model)
+    )
     assert tfm.params.shape == (3, 3)
     tre = ski.registration.target_registration_error(
         reference.shape, tfm.params @ forward
@@ -213,7 +215,7 @@ def test_register_affine_init(data_2d_grayscale, solver, model):
     backward = np.linalg.inv(forward)
     moving = ndi.affine_transform(reference, forward)
     tfm = ski.registration.estimate_affine(
-        reference, moving, solver=solver(model), matrix=backward
+        reference, moving, solver_config=solver(model), matrix=backward
     )
     assert tfm.params.shape == (3, 3)
     tre = ski.registration.target_registration_error(
@@ -234,7 +236,7 @@ def test_register_affine_multichannel(data_2d_rgb, solver):
     for ch in range(reference.shape[-1]):
         ndi.affine_transform(reference[..., ch], forward, output=moving[..., ch])
     tfm = ski.registration.estimate_affine(
-        reference, moving, solver=solver(model), channel_axis=2
+        reference, moving, solver_config=solver(model), channel_axis=2
     )
     tre = ski.registration.target_registration_error(shape, tfm.params @ forward)
     tre_max = tre.max()
@@ -249,7 +251,9 @@ def test_3d(data_3d, solver):
     model = ski.registration.TranslationTransform
     forward = np.array([[1, 0, 0, 4], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
     moving = ndi.affine_transform(reference, forward)
-    tfm = ski.registration.estimate_affine(reference, moving, solver=solver(model))
+    tfm = ski.registration.estimate_affine(
+        reference, moving, solver_config=solver(model)
+    )
     tre = ski.registration.target_registration_error(
         reference.shape, tfm.params @ forward
     )
@@ -268,7 +272,9 @@ def test_register_weight(data_2d_grayscale, solver):
     moving = ndi.affine_transform(reference, forward)
     weight_moving = moving > 16
     tfm = ski.registration.estimate_affine(
-        (reference, weight_reference), (moving, weight_moving), solver=solver(model)
+        (reference, weight_reference),
+        (moving, weight_moving),
+        solver_config=solver(model),
     )
     assert tfm.params.shape == (3, 3)
     tre = ski.registration.target_registration_error(
@@ -292,7 +298,9 @@ def test_center_and_normalize(model):
 @pytest.mark.parametrize("model", models)
 def test_no_motion(data_2d_grayscale, solver, model):
     reference = data_2d_grayscale
-    tfm = ski.registration.estimate_affine(reference, reference, solver=solver(model))
+    tfm = ski.registration.estimate_affine(
+        reference, reference, solver_config=solver(model)
+    )
     tre = ski.registration.target_registration_error(reference.shape, tfm.params)
     tre_max = tre.max()
     assert tre_max < max_error, f"TRE ({tre_max:.2f}) is more than {max_error} pixels."
