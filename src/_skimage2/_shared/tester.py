@@ -12,10 +12,10 @@ class PytestTester:
     """
     Pytest test runner.
 
-    This class is made available in ``skimage._shared.testing``, and a test
+    This class is made available in ``_skimage2._shared.testing``, and a test
     function is typically added to a package's __init__.py like so::
 
-      from skimage._shared.testing import PytestTester
+      from _skimage2._shared.testing import PytestTester
       test = PytestTester(__name__)
       del PytestTester
 

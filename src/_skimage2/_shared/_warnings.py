@@ -164,33 +164,14 @@ def warn_external(message, *, category=None):
     category : type[Warning]
         The class used in the warning.
     """
-    kwargs = {}
-    if sys.version_info[:2] >= (3, 12):
-        # Go to Python's `site-packages` or `lib` from an editable install.
-        basedir = Path(__file__).parents[2]
-        kwargs['skip_file_prefixes'] = (
+    # Go to Python's `site-packages` or `lib` from an editable install.
+    basedir = Path(__file__).parents[2]
+    warnings.warn(
+        message,
+        category,
+        skip_file_prefixes=(
             str(basedir / 'skimage'),
             str(basedir / 'skimage2'),
             str(basedir / '_skimage2'),
-        )
-    else:
-        frame = sys._getframe()
-        # finite counter in case of error in break logic
-        counter = range(1, sys.getrecursionlimit() + 1)
-        for stacklevel in counter:
-            if frame is None:
-                # when called in embedded context may hit frame is None
-                kwargs['stacklevel'] = stacklevel
-                break
-            in_skimage_namespace = re.match(
-                r"\A_?skimage(2)?(\Z|\.)",
-                # Work around sphinx-gallery not setting __name__.
-                frame.f_globals.get("__name__", ""),
-            )
-            if not in_skimage_namespace:
-                kwargs['stacklevel'] = stacklevel
-                break
-            frame = frame.f_back
-        # preemptively break reference cycle between locals and the frame
-        del frame
-    warnings.warn(message, category, **kwargs)
+        ),
+    )

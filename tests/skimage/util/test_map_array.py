@@ -41,7 +41,9 @@ def test_map_array_simple(dtype_in, dtype_out, out_array):
         assert out is result
 
 
-@pytest.mark.parametrize("writeable_flags", itertools.product([True, False], repeat=3))
+@pytest.mark.parametrize(
+    "writeable_flags", list(itertools.product([True, False], repeat=3))
+)
 @pytest.mark.parametrize("dtype", _map_array_dtypes_in)
 def test_map_array_read_only(writeable_flags, dtype):
     """Check that input arrays can be read-only, but output_arr must not be.

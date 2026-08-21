@@ -3,9 +3,6 @@ import sys
 from .._vendored.numpy_lookfor import lookfor as _lookfor
 
 
-__doctest_requires__ = {("lookfor",): ["SimpleITK"]}
-
-
 def lookfor(what):
     """Do a keyword search on scikit-image docstrings and print results.
 

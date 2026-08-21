@@ -2,7 +2,9 @@
 
 from functools import wraps
 import re
+import sys
 from textwrap import dedent
+from itertools import accumulate
 
 
 # URL to migration page.
@@ -86,6 +88,55 @@ def _select_blocks(doc, *, context_name):
 
     context = _CONTEXT_BLOCK_RE.sub(repl, doc)
     return context
+
+
+def _public_api_names(obj):
+    """Find the public name(s) of an object as advertised by ``__all__``.
+
+    scikit-image advertises its public API with the help of ``__all__`` in its
+    modules. At the point at which any given module is being instantiated, its
+    parent modules will have already defined their ``__all__`` attributes. This
+    function looks for its own ``__qualname__`` in the ``__all__`` entries of
+    its parent modules.
+
+    Parameters
+    ----------
+    obj : Any
+
+    Returns
+    -------
+    public_matches : list of str
+        Full dotted paths to the given `obj` that are advertised and reachable
+        through ``__all__`` in parent modules.
+
+    Examples
+    --------
+    >>> from skimage.data._binary_blobs import binary_blobs
+    >>> _public_api_names(binary_blobs)
+    ['skimage.data.binary_blobs']
+
+    >>> from skimage.filters.rank import autolevel
+    >>> _public_api_names(autolevel)
+    ['skimage.filters.rank.autolevel', 'skimage.filters.rank.generic.autolevel']
+    """
+    qualname = obj.__qualname__
+    base_name_in_module, *_ = qualname.partition(".")
+    all_parents = obj.__module__.split(".")
+
+    matches = []
+    for module_name in accumulate(all_parents, lambda x, y: f"{x}.{y}"):
+        # `obj` is passed, so its parents should be loaded
+        module = sys.modules[module_name]
+
+        if not hasattr(module, "__all__"):
+            # Module doesn't advertise any public API, abort
+            break
+
+        if base_name_in_module in module.__all__:
+            public_name = f"{module.__name__}.{qualname}"
+            matches.append(public_name)
+
+    return matches
 
 
 class Skimage2Migration:
@@ -187,7 +238,25 @@ class Skimage2Migration:
         qualname, modname = func.__qualname__, func.__module__
 
         if qname_old is None:
-            qname_old = f'{modname}.{qualname}'
+            # Not given, try to guess if not ambiguous
+            candidates = _public_api_names(func)
+            if not candidates:
+                msg = f"could not determine for {func!r}, set `qname_old` explicitly"
+                raise RuntimeError(msg)
+            if len(candidates) > 1:
+                msg = (
+                    f"multiple candidates for {func!r},"
+                    f"set `qname_old` explicitly: {candidates=}"
+                )
+                raise RuntimeError(msg)
+            qname_old = candidates[0]
+
+        # At this point `qname_old` should contain the name of the given `func`,
+        # no private prefixes, and no references to local scopes
+        assert func.__qualname__ in qname_old, (func.__qualname__, qname_old)
+        assert "._" not in qname_old, qname_old
+        assert "<locals>" not in qname_old, qname_old
+
         if qname_new is None:
             qname_new = _SKI1PREFIX_RE.sub(r'skimage2.', qname_old)
 

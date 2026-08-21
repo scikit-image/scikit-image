@@ -3,10 +3,10 @@ import pytest
 from scipy import ndimage as ndi
 from scipy.signal import convolve2d, convolve
 
-from skimage import restoration, util
-from _skimage2._shared import filters
 from _skimage2._shared.testing import fetch
 from _skimage2._shared.utils import _supported_float_type
+
+from skimage import restoration, util, filters
 from skimage.color import rgb2gray
 from skimage.data import astronaut, camera
 from skimage.restoration import uft

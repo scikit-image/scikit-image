@@ -42,9 +42,6 @@ jobs:
     name: linux-cp${{ inputs.python-version }}-${{ inputs.OPTIONS_NAME }}
     runs-on: ubuntu-latest
 
-    env:
-      PYTEST: "pytest --config-file ${{ github.workspace }}/pyproject.toml"
-
     steps:
       - name: Checkout scikit-image
         uses: actions/checkout@v5
@@ -79,6 +76,9 @@ jobs:
         run: |
           pip install dist/*.tar.gz
 
+      - name: Install spin
+        run: pip install spin
+
       - name: Install test dependencies
         env:
           MINIMUM_REQUIREMENTS: ${{ inputs.MINIMUM_REQUIREMENTS }}
@@ -94,14 +94,45 @@ jobs:
           # Attempt to resolve all requirements simultaneously
           pip install --dry-run --ignore-installed $(ls requirements/*.txt | sed 's/^/-r /')
 
+      - name: Check for run-all-tests label
+        id: check-run-all-tests-label
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: bash .github/scripts/check-run-all-tests-label.sh
+
       - name: Run tests
+        if: ${{ inputs.python-version != '3.14t' }}
+        env:
+          TEST_MODIFIED: ${{ steps.check-run-all-tests-label.outputs.test_modified }}
+          GITHUB_BASE_REF: ${{ github.base_ref }}
+          # A lazy loader configuration parameter
+          EAGER_IMPORT: ${{ inputs.EAGER_IMPORT }}
+          MINIMUM_REQUIREMENTS: ${{ inputs.MINIMUM_REQUIREMENTS }}
+          PYTHONOPTIMIZE: ${{ inputs.PYTHONOPTIMIZE }}
+        run: |
+          if [[ "$TEST_MODIFIED" == "true" ]]; then
+            MODIFIED_FLAG="--test-modified"
+            git fetch origin "$GITHUB_BASE_REF"
+          else
+            MODIFIED_FLAG=""
+          fi
+          spin test --doctest $MODIFIED_FLAG
+
+      - name: Doctest skimage2 migration
+        run: |
+          python doc/tools/run_migration_doctests.py
+
+      - name: Run multithreaded tests (3.14t only)
+        if: ${{ inputs.python-version == '3.14t' }}
         env:
           # A lazy loader configuration parameter
           EAGER_IMPORT: ${{ inputs.EAGER_IMPORT }}
           MINIMUM_REQUIREMENTS: ${{ inputs.MINIMUM_REQUIREMENTS }}
           PYTHONOPTIMIZE: ${{ inputs.PYTHONOPTIMIZE }}
         run: |
-          $PYTEST --doctest-plus --showlocals --pyargs skimage ./tests
+          pip install pytest-run-parallel
+          spin test --doctest -- --parallel-threads=4
 
       - name: Check benchmarks
         run: |

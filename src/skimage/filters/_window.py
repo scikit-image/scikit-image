@@ -4,7 +4,7 @@ import numpy as np
 from scipy.signal import get_window
 
 from _skimage2._shared.utils import safe_as_int
-from ..transform import warp
+from ..transform._warps import warp
 
 
 def window(window_type, shape, warp_kwargs=None):
