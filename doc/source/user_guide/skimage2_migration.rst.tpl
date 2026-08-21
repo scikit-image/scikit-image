@@ -125,6 +125,8 @@ Boundary modes in `skimage.util.apply_parallel`
 This function is replaced by ``skimage2.util.apply_parallel`` with a new
 behavior for the ``mode`` parameter.
 
+Also, the new (skimage2) implementation applies no padding by default (this is
+a fix with respect to the old implementation).
 In the old (skimage, v1.x) implementation, symmetric padding is applied by
 default. To avoid any boundary padding from being used, you should call:
 
