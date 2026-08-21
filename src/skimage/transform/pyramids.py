@@ -2,7 +2,7 @@ import math
 
 import numpy as np
 
-from _skimage2._shared.filters import gaussian
+from ..filters._gaussian import gaussian
 from _skimage2._shared.utils import convert_to_float
 from ._warps import resize
 

@@ -6,7 +6,7 @@ from scipy import spatial
 
 from _skimage2.util._value_rescaling import _prescale_value_range
 
-from _skimage2._shared.filters import gaussian
+from ..filters._gaussian import gaussian
 from _skimage2._shared.utils import (
     _supported_float_type,
     check_nD,

@@ -8,7 +8,7 @@ from ..feature.util import (
 )
 
 from .corner import corner_fast, corner_orientations, corner_peaks, corner_harris
-from ..transform import pyramid_gaussian
+from ..transform.pyramids import pyramid_gaussian
 from _skimage2._shared.utils import check_nD
 from _skimage2._shared.compat import NP_COPY_IF_NEEDED
 

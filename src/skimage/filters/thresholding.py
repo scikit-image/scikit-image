@@ -7,7 +7,7 @@ from collections.abc import Iterable
 import numpy as np
 from scipy import ndimage as ndi
 
-from _skimage2._shared.filters import gaussian
+from ._gaussian import gaussian
 from _skimage2._shared.utils import _supported_float_type, warn
 from _skimage2._shared.version_requirements import require
 from ..exposure import histogram
@@ -15,7 +15,7 @@ from ..filters._multiotsu import (
     _get_multiotsu_thresh_indices,
     _get_multiotsu_thresh_indices_lut,
 )
-from ..transform import integral_image
+from ..transform.integral import integral_image
 from ..util import dtype_limits
 from ._sparse import _correlate_sparse, _validate_window_size
 
@@ -34,9 +34,6 @@ __all__ = [
     'apply_hysteresis_threshold',
     'threshold_multiotsu',
 ]
-
-
-__doctest_requires__ = {("try_all_threshold",): ["matpotlib"]}
 
 
 def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
@@ -108,7 +105,7 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
     return fig, ax
 
 
-@require("matplotlib", ">=3.3")
+@require("matplotlib", version=">=3.3")
 def try_all_threshold(image, figsize=(8, 5), verbose=True):
     """Returns a figure comparing the outputs of different thresholding methods.
 

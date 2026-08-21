@@ -2,7 +2,18 @@
 
 name: Test Pyodide
 
-on: [push, pull_request, merge_group]
+on:
+  push:
+    branches:
+      - main
+      - pre-megamove-integration
+  pull_request:
+    branches:
+      - main
+      - pre-megamove-integration
+  merge_group:
+    branches:
+      - main
 
 permissions:
   contents: read # to fetch code (actions/checkout)
@@ -11,7 +22,7 @@ env:
   FORCE_COLOR: 3
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.base.ref || github.ref }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
 jobs:
