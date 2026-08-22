@@ -38,7 +38,6 @@ def pixel_graph(
     edge_function=None,
     connectivity=1,
     spacing=None,
-    sparse_type="matrix",
 ):
     """Create an adjacency graph of pixels in an image.
 
@@ -69,16 +68,12 @@ def pixel_graph(
         `scipy.ndimage.generate_binary_structure` for details.
     spacing : tuple of float
         The spacing between pixels along each axis.
-    sparse_type : {"matrix", "array"}, optional
-        The return type of `graph`, either `scipy.sparse.csr_array` or
-        `scipy.sparse.csr_matrix` (default).
 
     Returns
     -------
-    graph : scipy.sparse.csr_matrix or scipy.sparse.csr_array
+    graph : scipy.sparse.csr_array
         A sparse adjacency matrix in which entry (i, j) is 1 if nodes i and j
-        are neighbors, 0 otherwise. Depending on `sparse_type`, this can be
-        returned as a `scipy.sparse.csr_array`.
+        are neighbors, 0 otherwise.
     nodes : array of int
         The nodes of the graph. These correspond to the raveled indices of the
         nonzero pixels in the mask.
@@ -150,12 +145,6 @@ def pixel_graph(
     graph = sparse.csr_array(
         (data, (indices_sequential, neighbor_indices_sequential)), shape=(m, m)
     )
-
-    if sparse_type == "matrix":
-        graph = sparse.csr_matrix(graph)
-    elif sparse_type != "array":
-        msg = f"`sparse_type` must be 'array' or 'matrix', got {sparse_type}"
-        raise ValueError(msg)
 
     return graph, nodes
 
