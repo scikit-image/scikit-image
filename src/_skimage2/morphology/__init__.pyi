@@ -1,5 +1,3 @@
-from .binary import binary_closing, binary_dilation, binary_erosion, binary_opening
-
 from .isotropic import (
     isotropic_erosion,
     isotropic_dilation,
