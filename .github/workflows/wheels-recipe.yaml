@@ -55,9 +55,8 @@ jobs:
       - name: Set up LLVM toolchain for Windows ARM64
         if: matrix.os == 'windows-11-arm'
         uses: ./.github/windows_arm64_steps
-      # cibuildwheel v4+ bundles DLL dependencies into scikit_image.libs/ via delvewheel.
-      # This default is accepted. To opt out, add repair-wheel-command = "" under
-      # [tool.cibuildwheel.windows] in pyproject.toml.
+      # Wheel repair is disabled for Windows in pyproject.toml; see the comment
+      # on repair-wheel-command under [tool.cibuildwheel.windows].
       - uses: pypa/cibuildwheel@1828c10ab37f080699c7b81cea34097c684a7074 # v4.2.0
         env:
           CIBW_BUILD: ${{ matrix.build }}

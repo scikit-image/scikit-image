@@ -313,6 +313,11 @@ environment = {PIP_PREFER_BINARY=1, SKIMAGE_LINK_FLAGS="-Wl,--strip-debug"}
 
 [tool.cibuildwheel.windows]
 archs = ["auto"]
+# cibuildwheel 4.0 made delvewheel the default repair command on Windows. Five
+# of our extension modules import msvcp140.dll, so the default would start
+# bundling it; disabling repair keeps wheel contents as they have always been.
+# Revisit as its own change, not as a side effect of a cibuildwheel bump.
+repair-wheel-command = ""
 
 [tool.cibuildwheel.macos]
 test-command = "pytest"
