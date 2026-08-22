@@ -55,6 +55,9 @@ jobs:
       - name: Set up LLVM toolchain for Windows ARM64
         if: matrix.os == 'windows-11-arm'
         uses: ./.github/windows_arm64_steps
+      # cibuildwheel v4+ bundles DLL dependencies into scikit_image.libs/ via delvewheel.
+      # This default is accepted. To opt out, add repair-wheel-command = "" under
+      # [tool.cibuildwheel.windows] in pyproject.toml.
       - uses: pypa/cibuildwheel@1828c10ab37f080699c7b81cea34097c684a7074 # v4.2.0
         env:
           CIBW_BUILD: ${{ matrix.build }}
@@ -113,7 +116,7 @@ jobs:
         uses: pypa/cibuildwheel@1828c10ab37f080699c7b81cea34097c684a7074 # v4.2.0
         env:
           CIBW_PLATFORM: pyodide
-          # only build for newer pyodide_2025_0 ABI and not cp312-pyodide_wasm32 (pyodide_2024_0)
+          # cp313 only: skip cp314+ (pyodide 3.15 is 315.0.0a2 prerelease, not production)
           CIBW_BUILD: "cp313-pyodide_wasm32"
       - uses: actions/upload-artifact@v4
         with:
