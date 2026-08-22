@@ -58,3 +58,42 @@ def test_no_eager_skimage_import(namespace):
         top_module, *_ = module.partition(".")
         assert top_module != "skimage"
         assert "skimage" in top_module
+
+
+def test_skimage2_submodule_imports():
+    """Test that public submodules can be imported from skimage2."""
+    import _skimage2
+    
+    with pytest.warns(_skimage2.ExperimentalAPIWarning):
+        import skimage2
+
+    # Check a few public submodules
+    from skimage2.filters import gaussian
+    from _skimage2.filters import gaussian as _gaussian
+
+    assert gaussian is _gaussian
+
+    from skimage2.morphology import disk
+    from _skimage2.morphology import disk as _disk
+
+    assert disk is _disk
+
+    from skimage2.color import rgb2gray
+    from _skimage2.color import rgb2gray as _rgb2gray
+
+    assert rgb2gray is _rgb2gray
+
+    # Private submodules should not be accessible
+    with pytest.raises(ImportError):
+        import skimage2._shared
+
+    with pytest.raises(ImportError):
+        import skimage2._build_utils
+
+    with pytest.raises(ImportError):
+        import skimage2._vendored
+
+    # Existing top-level imports should still work
+    assert hasattr(skimage2, "filters")
+    assert hasattr(skimage2.filters, "gaussian")
+
