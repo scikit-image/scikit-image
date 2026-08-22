@@ -135,7 +135,7 @@ downloaded and cached the first time it is used. For registry entries without
 a dedicated wrapper, ``skimage2.data.fetch()`` takes a key such as
 ``'data/astronaut.png'`` and returns the path to the local file.
 
-``skimage.data`` is unchanged. The bare names continue to work there.
+``skimage.data`` is unchanged; the bare names continue to work there.
 
 Removal of ``skimage.future``
 -----------------------------

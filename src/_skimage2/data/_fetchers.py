@@ -269,12 +269,11 @@ def fetch(data_filename):
     """Fetch a scikit-image example dataset file, returning its local path.
 
     Resolves ``data_filename`` to a path on disk: a copy shipped with the
-    distribution, an already-cached download, or a fresh download using
-    pooch, in that order. This is the same
-    machinery every ``fetch_*()`` convenience function
-    (e.g. :func:`fetch_astronaut`) uses internally; call this directly
-    for datasets that don't have one, or when you want the file path
-    itself rather than a loaded array.
+    distribution, an already-cached download, or a fresh download using pooch,
+    in that order.
+
+    Use this for registry entries that have no ``fetch_*()`` wrapper, or when
+    you want the file path rather than a loaded array.
 
     Parameters
     ----------
@@ -1320,13 +1319,10 @@ def vortex():
     )
 
 
-# skimage2's public dataset accessors use sklearn's fetch_*() naming
-# convention (e.g. sklearn.datasets.fetch_lfw_people) to make explicit that
-# calling them may need pooch and a network connection; see `fetch()`
-# above. These are plain aliases: skimage1's bare-name functions above
-# (astronaut(), camera(), etc.) already implement the exact same behavior,
-# and are kept as-is since skimage1's shim imports them directly from this
-# module, bypassing _skimage2.data's public surface.
+# Named after sklearn.datasets.fetch_*, so the call site shows that a dataset
+# may need downloading. The bare-name functions above stay put: skimage1's shim
+# imports them straight from this module, bypassing _skimage2.data's public
+# surface.
 fetch_astronaut = astronaut
 fetch_brain = brain
 fetch_brick = brick
