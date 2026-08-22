@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 """Pin asv.conf.json's numpy/scipy matrix to pyproject.toml's minimums.
 
-Keeps the benchmarked environment in sync with the versions the
-package actually promises to support, rather than an arbitrary fixed
-pin that can silently drift as pyproject.toml's floor moves.
+Benchmarks then run against the versions the package promises to
+support, rather than a fixed pin that drifts as that floor moves.
 """
 
 import re
@@ -18,10 +17,8 @@ repo_dir = script_pth.parent.parent
 def min_numpy_scipy_versions(dependencies: list[str]) -> tuple[str, str]:
     """Return (numpy, scipy) minimums from [project.dependencies].
 
-    Deliberately reads [project.dependencies], not [build-system] ->
-    requires, which pins older build-time versions for ABI
-    compatibility rather than the runtime support floor. Uses the
-    non-emscripten scipy floor since benchmarks don't run on Pyodide.
+    Not [build-system] requires, which pins older versions for build-time
+    ABI compatibility. Takes the non-emscripten scipy floor.
     """
     numpy_version = next(
         re.match(r"numpy>=([0-9.]+)", dep).group(1)

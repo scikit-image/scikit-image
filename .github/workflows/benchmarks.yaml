@@ -4,7 +4,7 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, labeled]
   schedule:
-    # Full, untrimmed benchmark suite nightly - see the "schedule" branch
+    # Full, untrimmed benchmark suite nightly. See the "schedule" branch
     # in .github/scripts/resolve-benchmark-params.py.
     - cron: "0 7 * * *"
   workflow_dispatch:

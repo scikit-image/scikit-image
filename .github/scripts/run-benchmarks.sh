@@ -43,7 +43,7 @@ echo "Contender: $GITHUB_SHA ($CONTENDER_LABEL)"
 # actually visible instead of one large silent gap; `sed -u` (unbuffered)
 # so that output streams through the pipeline in real time rather than
 # waiting on sed's default block buffering when its stdout isn't a
-# terminal - which was previously stalling the whole pipeline, not just
+# terminal. That was previously stalling the whole pipeline, not just
 # hiding output.
 ASV_OPTIONS="--verbose --split --show-stderr --factor $ASV_FACTOR -a processes=$ASV_PROCESSES"
 if [ -n "$BENCH_FILTER" ]; then

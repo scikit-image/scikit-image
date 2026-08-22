@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 """Resolve what the benchmark workflow compares, and how.
 
-One resolver per trigger event returns a Resolution, which main()
-writes out: three values to $GITHUB_OUTPUT for the jobs that run
-before benchmarking, the rest to benchmark-params.json for the
-benchmark job itself. benchmarks/README_CI.md describes the whole
-flow.
+One resolver per trigger event. main() writes three values to
+$GITHUB_OUTPUT for the jobs that start before benchmarking, and the asv
+settings to benchmark-params.json for the benchmark job.
+benchmarks/README_CI.md describes the flow around this.
 
 Expects GITHUB_EVENT_NAME, GITHUB_SHA, GITHUB_REPOSITORY,
-GITHUB_EVENT_PATH, GITHUB_OUTPUT, and GH_TOKEN for the gh lookups (the
-nightly baseline one needs `actions: read`).
+GITHUB_EVENT_PATH, GITHUB_OUTPUT, and GH_TOKEN (the nightly baseline
+lookup needs `actions: read`).
 """
 
 import json
@@ -114,7 +113,7 @@ def last_nightly_sha() -> str:
 
 def baseline_or_parent(candidate: str, github_sha: str) -> str:
     """candidate, falling back to the parent commit when it's missing
-    locally - no nightly has succeeded yet, say.
+    locally, as when no nightly has succeeded yet.
     """
     if candidate:
         found = subprocess.run(
