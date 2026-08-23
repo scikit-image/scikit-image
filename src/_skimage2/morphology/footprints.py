@@ -608,13 +608,18 @@ def cross_decompose_footprint(footprint, *, dtype=None):
 
     Examples
     --------
-    >>> footprint = footprint_ellipse((5, 7))
-    >>> cross_decompose_footprint(footprint)
-    ((array([[1, 1, 1, 1, 1]], dtype=uint8), 1), (array([[0, 1, 0],
-            [1, 1, 1],
-            [0, 1, 0]], dtype=uint8), 1), (array([[1],
-            [1],
-            [1]], dtype=uint8), 1))
+    >>> import _skimage2 as ski2
+    >>> footprint = ski2.morphology.footprint_ellipse((2, 3))
+    >>> ski2.morphology.cross_decompose_footprint(footprint)
+    ((array([[1, 1, 1]], dtype=uint8), 1),
+     (array([[0, 0, 1, 0, 0],
+             [1, 1, 1, 1, 1],
+             [0, 0, 1, 0, 0]], dtype=uint8),
+      1),
+     (array([[1],
+             [1],
+             [1]], dtype=uint8),
+      1))
     """
     if footprint.ndim != 2:
         msg = f"footprint is not 2-dimensional, go {footprint.shape=}"
@@ -701,8 +706,8 @@ def _normalize_radii_shape(radii, shape=None):
     >>> _normalize_radii_shape(radii=3, shape=(6, 6, 7))
     Traceback (most recent call last):
         ...
-    ValueError: `radii` must be a tuple matching `shape`
-        (`radii=<scalar>` is only supported if `shape` is None)
+    TypeError: `radii` must be a tuple matching `shape`, got `radii=3`
+        (`radii=<int>` is only supported if `shape` is None)
     """
     orig_radii = radii
     orig_shape = shape
@@ -718,7 +723,7 @@ def _normalize_radii_shape(radii, shape=None):
         # `shape` is source of truth for dimensionality
         if np.isscalar(radii):
             msg = (
-                f"`radii` must be a tuple matching `shape`, got `radii={radii!r}`"
+                f"`radii` must be a tuple matching `shape`, got `radii={radii!r}` "
                 f"(`radii=<int>` is only supported if `shape` is None)"
             )
             raise TypeError(msg)
