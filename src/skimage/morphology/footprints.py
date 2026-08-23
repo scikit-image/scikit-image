@@ -57,7 +57,7 @@ adapt_doctests(globals())
     To keep the old (``skimage``, v1.x) behavior after switching to
     ``skimage2``, pass the following parameters to the new function:
 
-    * Use ``radii=(height, width)``
+    * Instead of ``width`` and ``height``, use ``radii=(height, width)``
     * Use ``adjust_edge=0.9999``
 
     If you used ``decomposition='crosses'``, apply the new function
@@ -178,9 +178,9 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
     To *approximate* the old (``skimage``, v1.x) behavior after switching to
     ``skimage2``:
 
-    * Use ``radii=(radius, radius)``
-    * ``strict_radius=True`` (default), use ``adjust_edge=0.001``
-    * ``strict_radius=False``, use ``adjust_edge=0.5``
+    * Instead of ``radius``, use ``radii=(radius, radius)``
+    * Instead of ``strict_radius=True`` (default), use ``adjust_edge=0.001``
+    * Instead of ``strict_radius=False``, use ``adjust_edge=0.5``
 
     If you used ``decomposition='crosses'``, apply the new function
     `skimage2.morphology.cross_decompose_footprint` to the generated footprint.
@@ -343,9 +343,9 @@ def disk(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
     To approximate the old (``skimage``, v1.x) behavior after switching to
     ``skimage2``:
 
-    * Use ``radii=(radius,) * 3``
-    * ``strict_radius=True`` (default), use ``adjust_edge=0.001``
-    * ``strict_radius=False``, use ``adjust_edge=0.5``
+    * Instead of ``radius``, use ``radii=(radius,) * 3``
+    * Instead of ``strict_radius=True`` (default), use ``adjust_edge=0.001``
+    * Instead of ``strict_radius=False``, use ``adjust_edge=0.5``
 
     If you used ``decomposition='sequence'``, instead use
     `skimage2.morphology.footprint_decomposed_disk` to generate the decomposed
