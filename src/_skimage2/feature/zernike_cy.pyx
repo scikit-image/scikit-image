@@ -7,6 +7,7 @@ cimport numpy as cnp
 from libc.math cimport cos, sin
 from cython.parallel cimport prange, threadid
 from scipy.special.cython_special cimport binom
+from scipy.linalg cimport cython_lapack
 
 cnp.import_array()
 
@@ -472,6 +473,219 @@ cdef class PseudoZernikeFeatures:
         return (norm_feats, complex_moms)
 
     def compute_pseudo_zernike_features(self) -> tuple[np.typing.NDArray, np.typing.NDArray]:
+        """Compute moments and features using C-level, optimized computations."""
+        norm_feats, complex_moms = self._compute_zernike_features()
+        return norm_feats, complex_moms
+
+
+cdef class ZernikeArbitrary:
+    cdef int _degree, _num_features, _num_threads
+    cdef float _radius, _obscure_radius
+    cdef long _num_enclosed_pixels
+    cdef Py_ssize_t _num_rows, _num_cols
+    cdef cnp.int32_t[::1] _azimuthals_list
+    cdef cnp.float64_t[::1] _scaling_factors_list
+    cdef cnp.float64_t[::1] _coeffs_flat
+    cdef cnp.int32_t[::1] _powvals_flat
+    cdef cnp.int32_t[::1] _offsets
+    cdef cnp.float64_t[:,::1] _valid_image
+    cdef cnp.uint8_t[:, ::1] _pupil_mask
+    cdef cnp.int32_t[::1] _valid_rows
+    cdef cnp.int32_t[::1] _valid_cols
+    cdef cnp.float64_t[:,::1] _distances_rho
+    cdef cnp.float64_t[:,::1] _azimuthal_theta
+    cdef cnp.complex128_t[:,::1] _complex_basis
+    cdef cnp.complex128_t[:,::1] _orthonormal_basis
+    cdef cnp.float64_t[::1] _weights
+
+    def __cinit__(
+        self,
+        *,
+        cnp.ndarray[cnp.float64_t, ndim=2] image,
+        int degree,
+        float radius,
+        float obscure_radius,
+        cnp.ndarray[cnp.float64_t, ndim=1] center_coord,
+        int num_threads=4,
+    ):
+        """C-level initialization of parameters."""
+        self._degree = degree
+        self._radius = radius
+        self._obscure_radius = obscure_radius
+        self._num_threads = num_threads if num_threads > 0 else 1
+        self._num_rows, self._num_cols = image.shape[0], image.shape[1]
+        self._num_enclosed_pixels = 0
+        self._build_normalized_grid(image, center_coord)
+
+    cdef void _build_normalized_grid(
+        self,
+        cnp.ndarray[cnp.float64_t, ndim=2] image,
+        cnp.ndarray[cnp.float64_t, ndim=1] center_coord,
+    ):
+        """Build centered and normalized pupil grid over the image."""
+        cdef float obscure_ratio = 0.0
+        cdef cnp.ndarray[cnp.float64_t, ndim=3] var_yx
+        cdef cnp.ndarray[cnp.float64_t, ndim=2] distances_rho, azimuthal_theta
+        cdef cnp.ndarray[cnp.uint8_t, ndim=2, cast=True] pupil_mask
+
+        center = np.reshape(center_coord, (-1, 1, 1))
+        var_yx = np.mgrid[:self._num_rows, :self._num_cols].astype(np.float64)
+        var_yx = (var_yx - center) / self._radius
+        obscure_ratio = self._obscure_radius / self._radius
+
+        distances_rho = np.sqrt(np.sum(var_yx**2.0, axis=0))
+        pupil_mask = ((distances_rho >= obscure_ratio) & (distances_rho <= 1.0)).astype(np.uint8)
+        valid_coords = np.nonzero(pupil_mask)
+        valid_image = np.where(pupil_mask, image, 0.0)
+        distances_rho = np.where(pupil_mask, distances_rho, 0.0)
+        azimuthal_theta = np.arctan2(var_yx[0, :, :], var_yx[1, :, :]) + np.pi
+        azimuthal_theta = np.where(pupil_mask, azimuthal_theta, 0.0)
+
+        self._num_enclosed_pixels = int(np.sum(pupil_mask))
+        self._distances_rho = np.ascontiguousarray(distances_rho)
+        self._azimuthal_theta = np.ascontiguousarray(azimuthal_theta)
+        self._pupil_mask = np.ascontiguousarray(pupil_mask)
+        self._valid_image = np.ascontiguousarray(valid_image)
+        self._valid_rows = np.ascontiguousarray(valid_coords[0], dtype=np.int32)
+        self._valid_cols = np.ascontiguousarray(valid_coords[1], dtype=np.int32)
+        # self._weights = np.ascontiguousarray((1/self._num_enclosed_pixels)*np.identity(self._num_enclosed_pixels, dtype=np.float64))
+        self._weights = np.ascontiguousarray((1/<double>self._num_enclosed_pixels)*np.ones((self._num_enclosed_pixels,), dtype=np.float64))
+
+    cdef void _build_paired_data(self):
+        """Build flattened lists for precomputed values."""
+        cdef list degrees_list = []
+        cdef list azimuthals_list = []
+        cdef list scaling_list = []
+        cdef list coeffs = []
+        cdef list powvals = []
+        cdef list offsets = [0]
+        cdef int one_degree, one_azimuthal, num, num_repeats, s
+        cdef double one_sf, coeff, sign
+        cdef long denom_pixels = self._num_enclosed_pixels if self._num_enclosed_pixels > 0 else 1
+
+        for one_degree in range(self._degree + 1):
+            # one_sf = (one_degree + 1) / np.pi
+            # one_sf = (one_degree + 1) / (<double>denom_pixels * np.pi)
+            one_sf = (one_degree + 1) / <double>denom_pixels
+            for one_azimuthal in range(one_degree + 1):
+                num = one_degree - one_azimuthal
+                if (num >= 0) and (num % 2 == 0.0):
+                    degrees_list.append(one_degree)
+                    azimuthals_list.append(one_azimuthal)
+                    scaling_list.append(one_sf)
+                    num_repeats = num // 2
+                    for s in range(num_repeats + 1):
+                        sign = -1.0 if (s % 2) else 1.0
+                        coeff = sign * binom(one_degree - s, s) * binom(one_degree - 2 * s, ((one_degree - one_azimuthal) // 2) - s)
+                        coeffs.append(coeff)
+                        powvals.append(one_degree - 2 * s)
+                    offsets.append(len(coeffs))
+
+        self._num_features = len(degrees_list)
+        self._azimuthals_list = np.array(azimuthals_list, dtype=np.int32)
+        self._scaling_factors_list = np.array(scaling_list, dtype=np.float64)
+        self._coeffs_flat = np.array(coeffs, dtype=np.float64)
+        self._powvals_flat = np.array(powvals, dtype=np.int32)
+        self._offsets = np.array(offsets, dtype=np.int32)
+
+    cdef void _build_basis_polynomials(self):
+        """Build complex basis polynomials for every valid pixel, in parallel."""
+        cdef int nfeatures = self._num_features
+        cdef int degree = self._degree
+        cdef Py_ssize_t one_idx
+        cdef int one_row, one_col, one_feat, k, m, start, end, th_id
+        cdef double one_rho, one_theta, one_cos, one_sin, one_rad_poly
+
+        cdef cnp.ndarray[cnp.float64_t, ndim=2] acc_real_part = np.zeros((self._num_enclosed_pixels, nfeatures), dtype=np.float64)
+        cdef cnp.ndarray[cnp.float64_t, ndim=2] acc_imag_part = np.zeros((self._num_enclosed_pixels, nfeatures), dtype=np.float64)
+        cdef cnp.ndarray[cnp.float64_t, ndim=2] acc_dist_rho_power = np.zeros((self._num_threads, degree + 1,), dtype=np.float64)
+        cdef cnp.ndarray[cnp.float64_t, ndim=2] acc_cosine = np.zeros((self._num_threads, degree + 1,), dtype=np.float64)
+        cdef cnp.ndarray[cnp.float64_t, ndim=2] acc_sine = np.zeros((self._num_threads, degree + 1,), dtype=np.float64)
+
+        cdef double[:, ::1] acc_real_view = acc_real_part
+        cdef double[:, ::1] acc_imag_view = acc_imag_part
+        cdef double[:, ::1] acc_dist_rho_pow_view = acc_dist_rho_power
+        cdef double[:, ::1] acc_cos_view = acc_cosine
+        cdef double[:, ::1] acc_sin_view = acc_sine
+
+        for one_idx in prange(self._num_enclosed_pixels, nogil=True, num_threads=self._num_threads, schedule="static"):
+            th_id = threadid()
+            one_row = self._valid_rows[one_idx]
+            one_col = self._valid_cols[one_idx]
+            one_rho = self._distances_rho[one_row, one_col]
+            one_theta = self._azimuthal_theta[one_row, one_col]
+            acc_dist_rho_pow_view[th_id, 0] = 1.0
+            for k in range(1, degree + 1):
+                acc_dist_rho_pow_view[th_id, k] = acc_dist_rho_pow_view[th_id, k - 1] * one_rho
+            one_cos = cos(one_theta)
+            one_sin = sin(one_theta)
+            acc_cos_view[th_id, 0] = 1.0
+            acc_sin_view[th_id, 0] = 0.0
+            if degree >= 1:
+                acc_cos_view[th_id, 1] = one_cos
+                acc_sin_view[th_id, 1] = one_sin
+                for m in range(2, degree + 1):
+                    acc_cos_view[th_id, m] = acc_cos_view[th_id, m - 1] * one_cos - acc_sin_view[th_id, m - 1] * one_sin
+                    acc_sin_view[th_id, m] = acc_sin_view[th_id, m - 1] * one_cos + acc_cos_view[th_id, m - 1] * one_sin
+            for one_feat in range(nfeatures):
+                m = self._azimuthals_list[one_feat]
+                start = self._offsets[one_feat]
+                end = self._offsets[one_feat + 1]
+                one_rad_poly = 0.0
+                for k in range(start, end):
+                    one_rad_poly = one_rad_poly + self._coeffs_flat[k] * acc_dist_rho_pow_view[th_id, self._powvals_flat[k]]
+                acc_real_view[one_idx, one_feat] = one_rad_poly * acc_cos_view[th_id, m]
+                acc_imag_view[one_idx, one_feat] = one_rad_poly * acc_sin_view[th_id, m]
+
+        self._complex_basis = acc_real_part + 1.0j * acc_imag_part
+
+    cdef void _cholesky_basis(self):
+        cdef cnp.ndarray[cnp.complex128_t, ndim=2] gram_matrix = np.zeros((self._num_features,self._num_features), dtype=np.complex128)
+        cdef cnp.ndarray[cnp.complex128_t, ndim=2] decomp_cholesy_L = np.zeros((self._num_features,self._num_features), dtype=np.complex128, order="F")
+        cdef cnp.ndarray[cnp.complex128_t, ndim=2] cholesy_inverse_hermitian = np.zeros((self._num_features,self._num_features), dtype=np.complex128, order="F")
+        cdef cnp.ndarray[cnp.complex128_t, ndim=2] transformation = np.zeros((self._num_features,self._num_features), dtype=np.complex128, order="F")
+        cdef char uplo = b'L'
+        cdef char diag = b'N'
+        cdef int lda = self._num_features
+        cdef int info = 0
+        cdef int i, j
+
+        gram_matrix = ((np.transpose(np.conjugate(self._complex_basis))) * self._weights) @ self._complex_basis
+        decomp_cholesy_L = np.asfortranarray(gram_matrix.copy())
+
+        cython_lapack.zpotrf(&uplo, &lda, <double complex*> decomp_cholesy_L.data, &lda, &info)
+        if info != 0:
+            raise ValueError(f"LAPACK Cholesky decomposition failed. {info}")
+        for i in range(self._num_features):
+            for j in range(i + 1, self._num_features):
+                decomp_cholesy_L[i, j] = 0.0
+
+        cholesy_inverse_hermitian = decomp_cholesy_L.copy()
+        cython_lapack.ztrtri(&uplo, &diag, &lda, <double complex*> cholesy_inverse_hermitian.data, &lda, &info)
+        if info != 0:
+            raise ValueError(f"LAPACK Cholesky inverse failed. {info}")
+
+        transformation = np.transpose(np.conjugate(cholesy_inverse_hermitian))
+        self._orthonormal_basis = self._complex_basis @ transformation
+
+    cdef tuple _compute_zernike_features(self):
+        cdef Py_ssize_t one_pix
+        cdef cnp.ndarray[cnp.float64_t, ndim=1] pixel_vector = np.zeros((self._num_enclosed_pixels,), dtype=np.float64)
+        cdef cnp.ndarray[cnp.complex128_t, ndim=1] complex_moments = np.zeros((self._num_features,), dtype=np.complex128)
+        cdef cnp.ndarray[cnp.float64_t, ndim=1] features = np.zeros((self._num_features,), dtype=np.float64)
+
+        self._build_paired_data()
+        self._build_basis_polynomials()
+        self._cholesky_basis()
+
+        for one_pix in prange(self._num_enclosed_pixels, nogil=True, schedule="static", num_threads=self._num_threads):
+            pixel_vector[one_pix] = self._valid_image[self._valid_rows[one_pix], self._valid_cols[one_pix]]
+
+        complex_moments = np.transpose(np.conjugate(self._orthonormal_basis)) @ (self._weights * pixel_vector)
+        features = np.absolute(complex_moments)
+        return (features, complex_moments)
+
+    def compute_zernike_features(self) -> tuple[np.typing.NDArray, np.typing.NDArray]:
         """Compute moments and features using C-level, optimized computations."""
         norm_feats, complex_moms = self._compute_zernike_features()
         return norm_feats, complex_moms
