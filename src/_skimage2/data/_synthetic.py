@@ -21,10 +21,13 @@ def binary_blobs(
     shape : tuple of (int, ...)
         Shape of the output image.
     blob_size : float
-        Typical linear size of blob in pixels.
-        Values smaller than 1 may lead to unexpected results.
+        Typical linear size of blobs in pixels. Values smaller than 1 or larger
+        than `shape` may lead to unexpected results. The actual size is also
+        affected by `volume_fraction`.
     volume_fraction : float, in interval [0, 1], optional
-        Fraction of image pixels covered by the blobs.
+        Fraction of image pixels covered by the blobs. Blobs shrink
+        with smaller fractions, and grow and merge together with larger
+        fractions.
     rng : int or :class:`numpy.random.Generator`, optional
         Pseudo-random number generator.
         By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
@@ -86,6 +89,11 @@ def binary_blobs(
         warn_external(
             "Clamping to `blob_size=0.1` to avoid allocating excessive memory.",
             category=RuntimeWarning,
+        )
+    if blob_size > min_length:
+        warn_external(
+            f"`blob_size={blob_size}` is larger than a dimension "
+            f"in `shape={shape}` which may lead to unexpected results! "
         )
 
     rng = np.random.default_rng(rng)
