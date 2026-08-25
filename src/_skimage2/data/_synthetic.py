@@ -93,7 +93,8 @@ def binary_blobs(
     if blob_size > min_length:
         warn_external(
             f"`blob_size={blob_size}` is larger than a dimension "
-            f"in `shape={shape}` which may lead to unexpected results! "
+            f"in `shape={shape}` which may lead to unexpected results! ",
+            category=RuntimeWarning,
         )
 
     rng = np.random.default_rng(rng)
