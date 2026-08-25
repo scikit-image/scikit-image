@@ -21,9 +21,9 @@ def binary_blobs(
     shape : tuple of (int, ...)
         Shape of the output image.
     blob_size : float
-        Typical linear size of blobs in pixels. Values smaller than 1 or larger
-        than `shape` may lead to unexpected results. The actual size is also
-        affected by `volume_fraction`.
+        Typical linear size (diameter) of blobs in pixels. Values smaller than
+        1 or larger than any length in `shape` may lead to unexpected results.
+        The actual size is also affected by `volume_fraction`.
     volume_fraction : float, in interval [0, 1], optional
         Fraction of image pixels covered by the blobs. Blobs shrink
         with smaller fractions, and grow and merge together with larger
