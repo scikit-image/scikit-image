@@ -158,15 +158,38 @@ def footprint_rectangle_decomposed(shape, *, method="separable", dtype=np.uint8)
 
     Examples
     --------
-    Decomposition will return multiple footprints that combine into a simple
-    footprint of the requested shape.
+    Decomposition will return multiple smaller footprints that can be used
+    instead of a conventional "dense" footprint:
 
     >>> import _skimage2 as ski2
-    >>> ski2.morphology.footprint_rectangle_decomposed((9, 9), method="sequence")
-    ((array([[1, 1, 1],
-             [1, 1, 1],
-             [1, 1, 1]], dtype=uint8),
-      4),)
+    >>> decomposed = ski2.morphology.footprint_rectangle_decomposed((3, 5))
+    >>> decomposed
+    ((array([[1],
+             [1],
+             [1]], dtype=uint8),
+      1),
+     (array([[1, 1, 1, 1, 1]], dtype=uint8), 1))
+
+    Use this as you would use a "dense" footprint with any function in the
+    library that accepts a footprint. For example, dilating an array with a
+    single pixel in the middle with the decomposed footprint reveals the
+    composed shape of the footprint:
+
+    >>> dirac = np.zeros((7, 7), dtype=np.uint8)
+    >>> dirac[3, 3] = 1
+    >>> ski2.morphology.dilation(dirac, footprint=decomposed)
+    array([[0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0],
+           [0, 1, 1, 1, 1, 1, 0],
+           [0, 1, 1, 1, 1, 1, 0],
+           [0, 1, 1, 1, 1, 1, 0],
+           [0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
+
+    This is effectively what `footprint_from_sequence` does under the hood.
+
+    You can also try ``method='sequence'`` which will try to generate a more
+    compact decomposition.
 
     >>> ski2.morphology.footprint_rectangle_decomposed((3, 5), method="sequence")
     ((array([[1, 1, 1],
@@ -175,14 +198,8 @@ def footprint_rectangle_decomposed(shape, *, method="separable", dtype=np.uint8)
       1),
      (array([[1, 1, 1]], dtype=uint8), 1))
 
-    `"separable"` makes sure that the decomposition only returns 1D footprints.
-
-    >>> ski2.morphology.footprint_rectangle_decomposed((3, 5), method="separable")
-    ((array([[1],
-             [1],
-             [1]], dtype=uint8),
-      1),
-     (array([[1, 1, 1, 1, 1]], dtype=uint8), 1))
+     This can be faster than the default ``method='separable'`` but is only
+     supported with footprints of odd length.
     """
     has_even_width = any(width % 2 == 0 for width in shape)
     if method == "sequence" and has_even_width:
