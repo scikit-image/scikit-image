@@ -52,7 +52,8 @@ import numpy as np
 from scipy import ndimage as ndi
 
 from _skimage2.morphology._footprints import _footprint_is_sequence
-from _skimage2._shared.utils import check_nD, warn
+from _skimage2._shared.utils import check_nD
+from _skimage2._shared._warnings import warn_external
 
 from ...util import img_as_ubyte
 from . import generic_cy
@@ -136,7 +137,7 @@ def _preprocess_input(
             f'Convert manually using skimage.util.img_as_ubyte to '
             f'silence this warning.'
         )
-        warn(message, stacklevel=5)
+        warn_external(message)
         image = img_as_ubyte(image)
 
     if _footprint_is_sequence(footprint):
@@ -173,20 +174,17 @@ def _preprocess_input(
         n_bins = int(max(3, image.max())) + 1
 
     if n_bins > 2**10:
-        warn(
+        warn_external(
             f'Bad rank filter performance is expected due to a '
             f'large number of bins ({n_bins}), equivalent to an approximate '
-            f'bitdepth of {np.log2(n_bins):.1f}.',
-            stacklevel=2,
+            f'bitdepth of {np.log2(n_bins):.1f}.'
         )
 
     for name, value in zip(("shift_x", "shift_y"), (shift_x, shift_y)):
         if np.dtype(type(value)) == bool:
-            warn(
+            warn_external(
                 f"Paramter `{name}` is boolean and will be interpreted as int. "
-                "This is not officially supported, use int instead.",
-                category=UserWarning,
-                stacklevel=4,
+                "This is not officially supported, use int instead."
             )
 
     return image, footprint, out, mask, n_bins
@@ -248,7 +246,7 @@ def _handle_input_3D(
             f'Convert manually using skimage.util.img_as_ubyte to '
             f'silence this warning.'
         )
-        warn(message, stacklevel=2)
+        warn_external(message)
         image = img_as_ubyte(image)
 
     footprint = np.ascontiguousarray(img_as_ubyte(footprint > 0))
@@ -282,22 +280,19 @@ def _handle_input_3D(
         n_bins = int(max(3, image.max())) + 1
 
     if n_bins > 2**10:
-        warn(
+        warn_external(
             f'Bad rank filter performance is expected due to a '
             f'large number of bins ({n_bins}), equivalent to an approximate '
-            f'bitdepth of {np.log2(n_bins):.1f}.',
-            stacklevel=2,
+            f'bitdepth of {np.log2(n_bins):.1f}.'
         )
 
     for name, value in zip(
         ("shift_x", "shift_y", "shift_z"), (shift_x, shift_y, shift_z)
     ):
         if np.dtype(type(value)) == bool:
-            warn(
+            warn_external(
                 f"Parameter `{name}` is boolean and will be interpreted as int. "
-                "This is not officially supported, use int instead.",
-                category=UserWarning,
-                stacklevel=4,
+                "This is not officially supported, use int instead."
             )
 
     return image, footprint, out, mask, n_bins
