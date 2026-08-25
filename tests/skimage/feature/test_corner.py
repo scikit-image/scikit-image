@@ -2,8 +2,7 @@ import numpy as np
 import pytest
 from numpy.testing import assert_almost_equal, assert_array_equal, assert_equal
 
-from skimage import data, draw, img_as_float
-from _skimage2._shared._warnings import expected_warnings
+from skimage import data, draw, img_as_float, measure
 from _skimage2._shared.testing import run_in_parallel
 from _skimage2._shared.utils import _supported_float_type
 from skimage.color import rgb2gray
@@ -210,7 +209,9 @@ def test_hessian_matrix(dtype):
         ),
     )
 
-    with expected_warnings(["use_gaussian_derivatives currently defaults"]):
+    with pytest.warns(
+        FutureWarning, match="use_gaussian_derivatives currently defaults"
+    ):
         # FutureWarning warning when use_gaussian_derivatives is not
         # specified.
         hessian_matrix(square, sigma=0.1, order='rc')
@@ -397,6 +398,7 @@ def test_hessian_matrix_eigvals_3d(im3d, dtype):
     assert np.max(response0) > 0
 
 
+@pytest.mark.thread_unsafe(reason="test is explicitly multithreaded")
 @run_in_parallel()
 def test_hessian_matrix_det():
     image = np.zeros((5, 5))
@@ -427,13 +429,15 @@ def test_hessian_matrix_det_3d(im3d, dtype):
     assert response[highest] > 0
 
 
+@pytest.mark.filterwarnings(
+    "ignore:`skimage.filters.gaussian` is deprecated:PendingDeprecationWarning"
+)
 def test_shape_index():
     # software floating point arm doesn't raise a warning on divide by zero
     # https://github.com/scikit-image/scikit-image/issues/3335
     square = np.zeros((5, 5))
     square[2, 2] = 4
-    with expected_warnings([r'divide by zero|\A\Z', r'invalid value|\A\Z']):
-        s = shape_index(square, sigma=0.1)
+    s = shape_index(square, sigma=0.1)
     assert_almost_equal(
         s,
         np.array(
@@ -671,6 +675,22 @@ def test_corner_peaks():
         response, exclude_border=False, min_distance=1, indices=False
     )
     assert np.sum(corners) == 5
+
+
+def test_corner_peaks_num_peaks_with_labels():
+    """`num_peaks` with `labels` should pick the globally brightest peaks,
+    not just the first ones in label order.
+    """
+    img = np.zeros((6, 6))
+    img[1, 1] = 1
+    img[2, 3] = 2
+    img[4, 4] = 3
+
+    labels = measure.label(img > 0)
+
+    corners = corner_peaks(img, num_peaks=2, labels=labels, num_peaks_per_label=1)
+    expected = np.array([[4, 4], [2, 3]])
+    assert_equal(corners, expected)
 
 
 def test_blank_image_nans():

@@ -738,6 +738,7 @@ def test_wavelet_denoising_channel_axis(channel_axis, convert2ycbcr):
     assert psnr_denoised > psnr_noisy
 
 
+@xfail_without_pywt
 @pytest.mark.parametrize(
     "case", ["1d", pytest.param("2d multichannel", marks=xfail_without_pywt)]
 )
@@ -852,7 +853,7 @@ def test_wavelet_threshold():
 @xfail_without_pywt
 @pytest.mark.parametrize(
     'rescale_sigma, method, ndim',
-    itertools.product([True, False], ['VisuShrink', 'BayesShrink'], range(1, 5)),
+    list(itertools.product([True, False], ['VisuShrink', 'BayesShrink'], range(1, 5))),
 )
 def test_wavelet_denoising_nd(rescale_sigma, method, ndim):
     rstate = np.random.RandomState(2098169547)
@@ -882,6 +883,7 @@ def test_wavelet_denoising_nd(rescale_sigma, method, ndim):
     assert psnr_denoised > psnr_noisy
 
 
+@xfail_without_pywt
 def test_wavelet_invalid_method():
     with pytest.raises(ValueError):
         restoration.denoise_wavelet(

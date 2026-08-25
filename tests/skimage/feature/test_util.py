@@ -1,3 +1,5 @@
+import io
+
 import numpy as np
 import pytest
 
@@ -66,12 +68,10 @@ def test_mask_border_keypoints():
     ],
 )
 def test_plot_matched_features(shapes):
-    from matplotlib import pyplot as plt
-    from matplotlib import use
+    from matplotlib.figure import Figure
 
-    use('Agg')
-
-    fig, ax = plt.subplots()
+    fig = Figure()
+    ax = fig.subplots()
 
     rng = np.random.RandomState(2423194815)
     keypoints0 = 10 * rng.random((10, 2))
@@ -151,18 +151,17 @@ def test_plot_matched_features(shapes):
         matches=matches,
         alignment='vertical',
     )
-    plt.close()
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png")
 
 
 @uses_matplotlib
 @pytest.mark.parametrize("matches_color", ([], ["C0"], ["C0", "C1"], np.arange(30)))
 def test_plot_matched_features_color_error(matches_color):
-    from matplotlib import pyplot as plt
-    from matplotlib import use
+    from matplotlib.figure import Figure
 
-    use('Agg')
-
-    _, ax = plt.subplots()
+    fig = Figure()
+    ax = fig.subplots()
 
     rng = np.random.RandomState(3832133755)
 
@@ -197,12 +196,10 @@ def test_plot_matched_features_matplotlib_color_error():
     # Error is raised from matplotlib itself if we pass a sequence of correct length
     # but with values that aren't colors
 
-    from matplotlib import pyplot as plt
-    from matplotlib import use
+    from matplotlib.figure import Figure
 
-    use('Agg')
-
-    _, ax = plt.subplots()
+    fig = Figure()
+    ax = fig.subplots()
 
     rng = np.random.RandomState(3533696481)
 

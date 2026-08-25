@@ -9,7 +9,8 @@ import numpy as np
 import scipy.ndimage as ndi
 
 from .._shared.utils import check_nD, _supported_float_type
-from .._shared.filters import gaussian
+from ..filters._gaussian import gaussian
+from ..util._value_rescaling import rescale_legacy
 
 from ._canny_cy import _nonmaximum_suppression_bilinear
 
@@ -52,9 +53,14 @@ def _preprocess(image, mask, sigma, mode, cval):
     out mask to recover the effect of smoothing from just the significant
     pixels.
     """
-    gaussian_kwargs = dict(sigma=sigma, mode=mode, cval=cval, preserve_range=False)
+    gaussian_kwargs = dict(sigma=sigma, mode=mode, cval=cval)
     compute_bleedover = mode == 'constant' or mask is not None
     float_type = _supported_float_type(image.dtype)
+
+    # TODO Temporarily preserve old dtype sensitive behavior in `canny`,
+    #      patch in a follow-up PR
+    image = rescale_legacy(image)
+
     if mask is None:
         if compute_bleedover:
             mask = np.ones(image.shape, dtype=float_type)

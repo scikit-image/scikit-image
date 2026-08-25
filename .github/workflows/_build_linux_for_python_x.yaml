@@ -50,7 +50,6 @@ jobs:
           sudo apt-get install -y ccache
           sudo /usr/sbin/update-ccache-symlinks
           echo "/usr/lib/ccache" >> $GITHUB_PATH
-          ccache --zero-stats
 
       - name: Restore/save ccache
         uses: actions/cache@v4
@@ -59,6 +58,9 @@ jobs:
           key: ccache-${{ runner.os }}-py${{ inputs.python-version }}-${{ github.sha }}
           restore-keys: |
             ccache-${{ runner.os }}-py${{ inputs.python-version }}-
+
+      - name: Zero ccache stats
+        run: ccache --zero-stats
 
       - name: Build wheel
         run: |

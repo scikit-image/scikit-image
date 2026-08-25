@@ -5,7 +5,7 @@ from numpy import arctan2, exp, pi, sqrt
 
 from .. import draw
 from ..util.dtype import img_as_float
-from _skimage2._shared.filters import gaussian
+from ..filters._gaussian import gaussian
 from _skimage2._shared.utils import check_nD
 from ..color import gray2rgb
 

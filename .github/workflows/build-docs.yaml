@@ -38,7 +38,7 @@ jobs:
           python -m pip install -v --no-build-isolation .
       - name: Run Skimage2 migration doctests
         run: |
-          python doc/tools/doctest_migration.py
+          python doc/tools/run_migration_doctests.py
       - name: Push docs
         run: |
           eval "$(ssh-agent -s)"

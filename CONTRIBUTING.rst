@@ -262,7 +262,7 @@ Stylistic Guidelines
    hough(canny(my_image))
 
 * Use relative module imports, i.e. ``from .._shared import xyz`` rather than
-  ``from skimage._shared import xyz``.
+  ``from _skimage2._shared import xyz``.
 
 * For Cython functions:
 
@@ -274,6 +274,231 @@ Stylistic Guidelines
 * Use ``Py_ssize_t`` as data type for all indexing, shape and size variables
   in C/C++ and Cython code.
 
+Installation
+------------
+
+Your system needs a:
+
+- C compiler,
+- C++ compiler, and
+- a version of Python supported by ``scikit-image`` (see
+  `pyproject.toml <https://github.com/scikit-image/scikit-image/blob/main/pyproject.toml#L14>`_).
+
+First, `fork the scikit-image repository on GitHub <https://github.com/scikit-image/scikit-image/fork>`_.
+Then clone your fork locally and set an ``upstream`` remote to point to the original scikit-image repository:
+
+.. note::
+
+    We use ``git@github.com`` below; if you don't have SSH keys setup, use
+    ``https://github.com`` instead.
+
+.. code-block:: sh
+
+   git clone git@github.com:YOURUSERNAME/scikit-image
+   cd scikit-image
+   git remote add upstream git@github.com:scikit-image/scikit-image
+
+All commands below are run from within the cloned ``scikit-image`` directory.
+
+.. _build-env-setup:
+
+Build environment setup
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Set up a Python development environment tailored for scikit-image.
+Here we provide instructions for two popular environment managers:
+``venv`` (pip) and ``conda`` (miniforge).
+
+venv
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+.. code-block:: sh
+
+  # Create a virtualenv named ``skimage-dev`` that lives outside of the repository.
+  # One common convention is to place it inside an ``envs`` directory under your home directory:
+  mkdir ~/envs
+  python -m venv ~/envs/skimage-dev
+
+  # Activate it
+  # (On Windows, use ``skimage-dev\Scripts\activate``)
+  source ~/envs/skimage-dev/bin/activate
+
+  # Install development dependencies
+  pip install -r requirements.txt
+
+  # Install scikit-image in editable mode. In editable mode,
+  # scikit-image will be recompiled, as necessary, on import.
+  spin install -v
+
+.. tip::
+
+    The above installs scikit-image into your environment, which makes
+    it accessible to IDEs, IPython, etc.
+    This is not strictly necessary; you can also build with:
+
+    .. code-block:: sh
+
+        spin build
+
+    In that case, the library is not installed, but is accessible via
+    ``spin`` commands, such as ``spin test``, ``spin ipython``, ``spin run``,
+    etc.
+
+conda
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+We recommend installing conda using
+`miniforge <https://github.com/conda-forge/miniforge>`_,
+an alternative to Anaconda without licensing costs.
+
+After installing miniforge:
+
+.. code-block:: sh
+
+  # Create a conda environment with required dependencies
+  conda env create -f environment.yml
+
+  # Activate it
+  conda activate skimage-dev
+
+  # Install scikit-image in editable mode. In editable mode,
+  # scikit-image will be recompiled, as necessary, on import.
+  spin install -v
+
+.. tip::
+
+    The above installs scikit-image into your environment, which makes
+    it accessible to IDEs, IPython, etc.
+    This is not strictly necessary; you can also build with:
+
+    .. code-block:: sh
+
+        spin build
+
+    In that case, the library is not installed, but is accessible via
+    ``spin`` commands, such as ``spin test``, ``spin ipython``, ``spin run``,
+    etc.
+
+Adding a feature branch
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+When contributing a new feature, do so via a feature branch.
+
+First, fetch the latest source:
+
+.. code-block:: sh
+
+   git switch main
+   git pull upstream main
+
+Create your feature branch:
+
+.. code-block:: sh
+
+   git switch --create my-feature-name
+
+Using an editable install, ``scikit-image`` will rebuild itself as
+necessary.
+If you are building manually, rebuild with::
+
+.. code-block:: sh
+
+   spin build
+
+Repeated, incremental builds usually work just fine, but if you notice build
+problems, rebuild from scratch using:
+
+.. code-block:: sh
+
+   spin build --clean
+
+Platform-specific notes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Windows**
+
+Building ``scikit-image`` on Windows is done as part of our continuous
+integration testing; the steps are shown in this `Azure Pipeline`_.
+
+.. _Azure Pipeline: https://github.com/scikit-image/scikit-image/blob/main/azure-pipelines.yml
+
+**Debian and Ubuntu**
+
+Install suitable compilers prior to library compilation:
+
+.. code-block:: sh
+
+  sudo apt-get install build-essential
+
+
+Full requirements list
+^^^^^^^^^^^^^^^^^^^^^^
+**Build Requirements**
+
+.. include:: ../../../requirements/build.txt
+   :literal:
+
+**Runtime Requirements**
+
+.. include:: ../../../requirements/default.txt
+   :literal:
+
+**Test Requirements**
+
+.. include:: ../../../requirements/test.txt
+   :literal:
+
+**Documentation Requirements**
+
+.. include:: ../../../requirements/docs.txt
+   :literal:
+
+**Developer Requirements**
+
+.. include:: ../../../requirements/developer.txt
+   :literal:
+
+**Data Requirements**
+
+The full selection of demo datasets is only available with the
+following installed:
+
+.. include:: ../../../requirements/data.txt
+   :literal:
+
+**Optional Requirements**
+
+You can use ``scikit-image`` with the basic requirements listed above, but some
+functionality is only available with the following installed:
+
+* `Matplotlib <https://matplotlib.org>`__
+  Used in various functions, e.g., for drawing, segmenting, reading images.
+
+* `Dask <https://dask.org/>`__
+  The ``dask`` module is used to parallelize certain functions.
+
+More rarely, you may also need:
+
+* `PyAMG <https://pyamg.org/>`__
+  The ``pyamg`` module is used for the fast ``cg_mg`` mode of random
+  walker segmentation.
+
+* `Astropy <https://www.astropy.org>`__
+  Provides FITS I/O capability.
+
+* `SimpleITK <http://www.simpleitk.org/>`__
+  Optional I/O plugin providing a wide variety of `formats <https://itk.org/Wiki/ITK_File_Formats>`__.
+  including specialized formats used in biomedical imaging.
+
+.. include:: ../../../requirements/optional.txt
+  :literal:
+
+Help with contributor installation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+See :ref:`additional-help`.
+
+
 Testing
 -------
 
@@ -282,6 +507,11 @@ tests should be added to cover all modifications in behavior.
 
 Tests are located in the ``tests/`` directory.
 We also test examples in docstrings of our package (located in ``src/``).
+
+.. _rng-state:
+
+Dealing with RNG state
+^^^^^^^^^^^^^^^^^^^^^^
 
 Prefer creating local ``np.random.RandomState`` instances rather than using the
 global NumPy RNG or ``np.random.default_rng``. The ``RandomState`` class is
@@ -336,6 +566,44 @@ Examples of running ``spin test``:
 
 Testing requirements are listed in ``requirements/test.txt``.
 
+.. note:: CI runs only modified tests on pull requests
+
+    To keep feedback fast, CI workflows run ``spin test --test-modified`` on
+    pull requests, which limits the test run to subpackages that were changed
+    relative to the base branch. The full test suite still runs on pushes to
+    ``main`` and on merge-queue entries.
+
+    To force the full suite on a pull request — for example when changes
+    affect test infrastructure rather than a specific subpackage — add the
+    **run-all-tests** label to the PR.
+
+You can also use ``--test-modified`` locally to replicate this CI behaviour:
+
+.. code-block:: shell
+
+    # Run tests only for subpackages you have changed relative to your
+    # upstream tracking branch (e.g. origin/main)
+    spin test --test-modified
+
+    # Specify the base branch explicitly
+    spin test --test-modified --base-ref main
+
+    # Include doctests for modified subpackages
+    spin test --test-modified --doctest
+
+``spin test`` automatically detects whether scikit-image is installed as a
+wheel (e.g. via ``spin install``) or being tested from a meson build
+directory.  To test a pip-installed wheel, install it first and then run
+``spin test`` as usual:
+
+.. code-block:: shell
+
+    spin install
+    spin test -- tests/skimage/morphology
+
+    # Combine with --test-modified to run only changed subpackages
+    spin test --test-modified
+
 
 Warnings during testing phase
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -363,6 +631,77 @@ detailing the test coverage::
   skimage/color/colorconv                             77     77   100%
   skimage/filter/__init__                              1      1   100%
   ...
+
+
+Multithreaded Testing
+---------------------
+
+scikit-image supports the free-threaded build and we endeavor to ensure the
+implementation is thread-safe.
+
+``pytest-run-parallel``
+^^^^^^^^^^^^^^^^^^^^^^^
+
+All tests are automatically run under `pytest-run-parallel
+<https://github.com/quansight-labs/pytest-run-parallel>`_ in the GitHub actions
+CI using a free-threaded interpreter. The ``pytest-run-parallel`` plugin runs
+each test in the entire test suite in a thread pool with many other instances of
+the same test, simultaneously. This detects issues caused by use of global state
+in the implementation of tested functionality. Since the thread pool runs the
+same test several times across threads, the global state is shared, leading to
+possible test failures.
+
+Generally, the solution is to avoid using global state. For example, it is best
+to avoid using the global NumPy RNGs exposed in the ``np.random``
+namespace. Instead, you should create and explicitly seed an RNG local to the
+test. See :ref:`rng-state` for more detail on dealing with RNGs.
+
+Another example is a test that writes to a file. You should use the pytest
+tmp_path fixture rather than manually setting up temporary paths. This will
+automatically handle creating a thread-local temporary directory for each worker
+thread.
+
+Sometimes using global state in a test is unavoidable. For example, Python
+module, function, and type objects are global state. That means tests that
+monkeypatch functionality are not thread-safe, however, sometimes monkeypatching
+is the most straightforward way to test something. In cases like this, you can
+mark a test as thread-unsafe using a pytest mark:
+
+.. code-block:: python
+
+   @pytest.mark.thread_unsafe(reason="Test mutates global plugin state")
+   def test_plugins():
+       ...
+
+This test will still run under a free-threaded interpreter, but it will execute
+on only one thread.
+
+Another reason to mark tests as thread-unsafe is because a test spawns a thread
+or process pool. Usually, tests should only use only one level of parallelism
+to avoid CPU oversubscription.
+
+Note that ``pytest-run-parallel`` marks many standard
+library functions and built-in pytest fixtures as thread-unsafe
+automatically. See the ``pytest-run-parallel`` `README
+<https://github.com/Quansight-Labs/pytest-run-parallel#caveats>`_
+for more information.
+
+
+Explicitly multithreaded tests
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The ``threading`` module is part of the Python standard library. This means that
+all Python classes can be used and mutated freely by a thread pool. If you are
+working on the implementation of a mutable object, you should consider whether
+it makes sense to allow shared mutation of the object under multiple threads and
+whether it is safe to do so. Clearly document the thread safety guarantees of
+the object. Also consider adding explciitly multithreaded tests to exercise code
+paths that only fire under shared multithreaded use of an object.
+
+See the `Python free-threading guide <https://py-free-threading.github.io>`_ for
+more information on `test <https://py-free-threading.github.io/testing/>`_ and
+`document <https://py-free-threading.github.io/documentation-principles/>`_
+Python projects for multithreaded use.
 
 
 Building docs
@@ -401,6 +740,8 @@ Fixing Warnings
 
 -  Make sure to use pre-sphinxification paths to images (not the
    \_images directory)
+
+.. _deprecation-cycle:
 
 Deprecation cycle (advanced)
 ----------------------------
@@ -521,38 +862,21 @@ API, e.g.:
 
 .. code-block:: python
 
-   from warnings import warn
-   warn(
+   from skimage._shared._warnings import warn_external
+   warn_external(
        "Automatic detection of the color channel was deprecated in "
        "v0.19, and `channel_axis=None` will be the new default in "
        "v0.22. Set `channel_axis=-1` explicitly to silence this "
        "warning.",
-       FutureWarning,
-       stacklevel=2,
+       category=FutureWarning,
    )
-
-The `stacklevel
-<https://docs.python.org/3/library/warnings.html#warnings.warn>`_ is
-a bit of a technicality, but ensures that the warning points to the
-user-called function, and not to a utility function within.
-
-In most cases, set the ``stacklevel`` to ``2``.
-When warnings originate from helper routines internal to the
-scikit-image library, set it to ``3``.
-
-To test if your warning is being emitted correctly, try calling the function
-from an IPython console. It should point you to the console input itself
-instead of being emitted by files in the scikit-image library:
-
-* **Good**: ``ipython:1: UserWarning: ...``
-* **Bad**: ``scikit-image/skimage/measure/_structural_similarity.py:155: UserWarning:``
 
 Deprecating Keywords and Functions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 When removing keywords or entire functions, the
-``skimage._shared.utils.deprecate_parameter`` and
-``skimage._shared.utils.deprecate_func`` utility functions can be used
+``_skimage2._shared.utils.deprecate_parameter`` and
+``_skimage2._shared.utils.deprecate_func`` utility functions can be used
 to perform the above procedure.
 
 Adding Data
