@@ -123,12 +123,10 @@ def find_contours(
            [0.5, 0. ]])]
     """
     if fully_connected not in _param_options:
-        raise ValueError(
-            'Parameters "fully_connected" must be either ' '"high" or "low".'
-        )
+        raise ValueError('Parameters "fully_connected" must be either "high" or "low".')
     if positive_orientation not in _param_options:
         raise ValueError(
-            'Parameters "positive_orientation" must be either ' '"high" or "low".'
+            'Parameters "positive_orientation" must be either "high" or "low".'
         )
     if image.shape[0] < 2 or image.shape[1] < 2:
         raise ValueError("Input array must be at least 2x2.")
@@ -136,7 +134,7 @@ def find_contours(
         raise ValueError('Only 2D arrays are supported.')
     if mask is not None:
         if mask.shape != image.shape:
-            raise ValueError('Parameters "array" and "mask"' ' must have same shape.')
+            raise ValueError('Parameters "array" and "mask" must have same shape.')
         if not np.can_cast(mask.dtype, bool, casting='safe'):
             raise TypeError('Parameter "mask" must be a binary array.')
         mask = mask.astype(np.uint8, copy=False)

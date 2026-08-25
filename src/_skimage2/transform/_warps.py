@@ -61,8 +61,7 @@ def _preprocess_resize_output_shape(image, output_shape):
         output_shape = output_shape + (image.shape[-1],)
     elif output_ndim < image.ndim:
         raise ValueError(
-            "output_shape length cannot be smaller than the "
-            "image number of dimensions"
+            "output_shape length cannot be smaller than the image number of dimensions"
         )
 
     return image, output_shape
@@ -322,7 +321,7 @@ def rescale(
         if (not multichannel and len(scale) != image.ndim) or (
             multichannel and len(scale) != image.ndim - 1
         ):
-            raise ValueError("Supply a single scale, or one value per spatial " "axis")
+            raise ValueError("Supply a single scale, or one value per spatial axis")
         if multichannel:
             scale = np.concatenate((scale, [1]))
     orig_shape = np.asarray(image.shape)
@@ -1325,6 +1324,10 @@ def resize_local_mean(
         image is converted according to the conventions of `img_as_float`.
         Also see
         https://scikit-image.org/docs/dev/user_guide/data_types.html
+    channel_axis : int or None, optional
+        If None, the image is assumed to be a grayscale (single channel) image.
+        Otherwise, this parameter indicates which axis of the array corresponds
+        to channels.
 
     Returns
     -------
@@ -1377,7 +1380,7 @@ def resize_local_mean(
             # move channels to last position in output_shape
             channel_axis = channel_axis % image.ndim
             output_shape = (
-                output_shape[:channel_axis] + output_shape[channel_axis:] + (nc,)
+                output_shape[:channel_axis] + output_shape[channel_axis + 1 :] + (nc,)
             )
         else:
             raise ValueError(

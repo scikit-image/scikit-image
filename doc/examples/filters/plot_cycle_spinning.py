@@ -71,7 +71,7 @@ for n, s in enumerate(max_shifts):
     if s == 0:
         ax[n + 1].set_title(f'Denoised: no cycle shifts\nPSNR={psnr:0.4g}')
     else:
-        ax[n + 1].set_title(f'Denoised: {s+1}x{s+1} shifts\nPSNR={psnr:0.4g}')
+        ax[n + 1].set_title(f'Denoised: {s + 1}x{s + 1} shifts\nPSNR={psnr:0.4g}')
     all_psnr.append(psnr)
 
 # plot PSNR as a function of the degree of cycle shifting

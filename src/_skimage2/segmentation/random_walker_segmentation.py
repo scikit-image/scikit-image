@@ -520,7 +520,7 @@ def random_walker(
     if not multichannel:
         if data.ndim not in (2, 3):
             raise ValueError(
-                'For non-multichannel input, data must be of ' 'dimension 2 or 3.'
+                'For non-multichannel input, data must be of dimension 2 or 3.'
             )
         if data.shape != labels.shape:
             raise ValueError('Incompatible data and labels shapes.')
@@ -528,7 +528,7 @@ def random_walker(
     else:
         if data.ndim not in (3, 4):
             raise ValueError(
-                'For multichannel input, data must have 3 or 4 ' 'dimensions.'
+                'For multichannel input, data must have 3 or 4 dimensions.'
             )
         if data.shape[:-1] != labels.shape:
             raise ValueError('Incompatible data and labels shapes.')
