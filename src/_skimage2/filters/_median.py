@@ -5,7 +5,6 @@ from .._shared._warnings import warn_external
 from .rank import generic
 
 
-
 def median(
     image, footprint=None, out=None, mode='nearest', cval=0.0, behavior='ndimage'
 ):
