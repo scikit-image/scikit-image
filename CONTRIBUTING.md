@@ -224,10 +224,14 @@ first** to discuss your strategy.
 **Always declare tool usage**. Use an `Assisted-by:` tag in the commit
 message, as recommended by the
 [Linux kernel](https://docs.kernel.org/process/coding-assistants.html).
-We (the human maintainers) need to know that you (the human author) fully understand the code you have submitted, and its implications for the code-base.   So, even if you have some summary from an AI system available to you,  please write PR descriptions by hand.  If you do quote AI text, do so sparingly, and indicate
-where you're doing so, e.g. by writing `:robot: _AI text below_ :robot:`.
-You can also use a `<details>...</details>` block to "fold up" that
-text by default.
+
+We (the human maintainers) need to know that you (the human author)
+fully understand the code you have submitted, and its implications for
+the code-base. So, even if you have a summary from an AI system
+available to you, please write PR descriptions by hand. If you do
+quote AI text, do so sparingly, and indicate where you're doing so,
+e.g. by writing `:robot: _AI text below_ :robot:`. You can also use a
+`<details>...</details>` block to "fold up" that text by default.
 
 (guidelines)=
 
