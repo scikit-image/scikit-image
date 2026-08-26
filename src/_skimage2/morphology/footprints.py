@@ -434,20 +434,42 @@ def footprint_disk_decomposed(radius, *, ndim=2, dtype=np.uint8):
 
     Examples
     --------
-    >>> footprint_decomposed_disk(radius=20)
-    ((array([[1, 1, 1],
-            [0, 1, 0],
-            [0, 1, 0]], dtype=uint8), 3), (array([[1, 0, 0],
+    Decomposition will return multiple smaller footprints that can be used
+    instead of a conventional "dense" footprint.
+
+    >>> import _skimage2 as ski2
+    >>> decomposed = ski2.morphology.footprint_disk_decomposed(radius=5)
+    >>> decomposed
+    ((array([[0, 1, 0],
             [1, 1, 1],
-            [1, 0, 0]], dtype=uint8), 3), (array([[0, 1, 0],
-            [0, 1, 0],
-            [1, 1, 1]], dtype=uint8), 3), (array([[0, 0, 1],
-            [1, 1, 1],
-            [0, 0, 1]], dtype=uint8), 3), (array([[0, 1, 0],
-            [1, 1, 1],
-            [0, 1, 0]], dtype=uint8), 6), (array([[1, 1, 1],
+            [0, 1, 0]], dtype=uint8), 3), (array([[1, 1, 1],
             [1, 1, 1],
             [1, 1, 1]], dtype=uint8), 2))
+
+    Use ``decomposed`` as you would use a "dense" footprint with any function
+    in the library that accepts a footprint. Especially for larger footprints
+    this can improve performance.
+
+    Dilating an array with a single pixel in the middle with the decomposed
+    footprint reveals the composed shape of the footprint:
+
+    >>> dirac = np.zeros((11, 11), dtype=np.uint8)
+    >>> dirac[5, 5] = 1
+    >>> ski2.morphology.dilation(dirac, footprint=decomposed)
+    array([[0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+           [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+           [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+           [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+           [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0]], dtype=uint8)
+
+    The above operation is effectively what `footprint_from_sequence` does under
+    the hood.
     """
     if radius == 1:
         # For radius 1, we return a single footprint.
@@ -608,9 +630,18 @@ def cross_decompose_footprint(footprint, *, dtype=None):
 
     Examples
     --------
+    Decomposition will return multiple smaller footprints that can be used
+    instead of a conventional "dense" footprint.
+
+    Create a "dense" symmetric and convex footprint first:
+
     >>> import _skimage2 as ski2
     >>> footprint = ski2.morphology.footprint_ellipse((2, 3))
-    >>> ski2.morphology.cross_decompose_footprint(footprint)
+
+    Then cross-decompose it:
+
+    >>> decomposed = ski2.morphology.cross_decompose_footprint(footprint)
+    >>> decomposed
     ((array([[1, 1, 1]], dtype=uint8), 1),
      (array([[0, 0, 1, 0, 0],
              [1, 1, 1, 1, 1],
@@ -620,6 +651,27 @@ def cross_decompose_footprint(footprint, *, dtype=None):
              [1],
              [1]], dtype=uint8),
       1))
+
+    Use ``decomposed`` as you would use a "dense" footprint with any function
+    in the library that accepts a footprint. Especially for larger footprints
+    this can improve performance.
+
+    Dilating an array with a single pixel in the middle with the decomposed
+    footprint reveals the composed shape of the footprint:
+
+    >>> dirac = np.zeros((7, 9), dtype=np.uint8)
+    >>> dirac[3, 4] = 1
+    >>> ski2.morphology.dilation(dirac, footprint=decomposed)
+    array([[0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 1, 1, 1, 0, 0, 0],
+           [0, 1, 1, 1, 1, 1, 1, 1, 0],
+           [0, 1, 1, 1, 1, 1, 1, 1, 0],
+           [0, 1, 1, 1, 1, 1, 1, 1, 0],
+           [0, 0, 0, 1, 1, 1, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
+
+    The above operation is effectively what `footprint_from_sequence` does under
+    the hood.
     """
     if footprint.ndim != 2:
         msg = f"footprint is not 2-dimensional, go {footprint.shape=}"
