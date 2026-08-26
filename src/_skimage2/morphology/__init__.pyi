@@ -8,17 +8,15 @@ from .isotropic import (
 )
 
 from .footprints import (
-    cube,
     cross_decompose_footprint,
     diamond,
     footprint_ellipse,
     footprint_disk_decomposed,
     footprint_from_sequence,
     footprint_rectangle,
+    footprint_rectangle_decomposed,
     octagon,
     octahedron,
-    rectangle,
-    square,
     star,
 )
 
@@ -69,6 +67,7 @@ __all__ = [
     'footprint_disk_decomposed',
     'footprint_ellipse',
     'footprint_rectangle',
+    'footprint_rectangle_decomposed',
     'h_maxima',
     'h_minima',
     'isotropic_closing',
