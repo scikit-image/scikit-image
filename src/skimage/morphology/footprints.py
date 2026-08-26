@@ -1,10 +1,10 @@
 import numpy as np
 
 from _skimage2.morphology.footprints import (
-    cross_decompose_footprint,
+    cross_decompose_footprint as _ski2_cross_decompose_footprint,
     cube as cube,
     diamond as diamond,
-    footprint_disk_decomposed,
+    footprint_disk_decomposed as _ski2_footprint_disk_decomposed,
     footprint_from_sequence as footprint_from_sequence,
     footprint_rectangle as footprint_rectangle,
     octagon as octagon,
@@ -36,7 +36,10 @@ from _skimage2.morphology._footprints import mirror_footprint, pad_footprint  # 
 
 from skimage._doctest_adapters import adapt_doctests
 
-adapt_doctests(globals())
+adapt_doctests(
+    globals(),
+    skip_names=["_ski2_footprint_disk_decomposed", "_ski2_cross_decompose_footprint"],
+)
 
 
 @ski2_migration_decorator(
@@ -149,13 +152,16 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
 
     """
     if decomposition is None:
+        # Intentionally left this old implementation in place so that
+        # compatibility tests comaring skimage and skimage2 behavior are
+        # meaningful
         footprint = np.zeros((2 * height + 1, 2 * width + 1), dtype=dtype)
         rows, cols = _draw_ellipse(height, width, height + 1, width + 1)
         footprint[rows, cols] = 1
         return footprint
     elif decomposition == 'crosses':
         fp = ellipse(width, height, dtype, decomposition=None)
-        sequence = cross_decompose_footprint(fp)
+        sequence = _ski2_cross_decompose_footprint(fp)
     return sequence
 
 
@@ -312,16 +318,19 @@ def disk(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
            :DOI:`10.1117/12.23608`
     """
     if decomposition is None:
+        # Intentionally left this old implementation in place so that
+        # compatibility tests comaring skimage and skimage2 behavior are
+        # meaningful
         L = np.arange(-radius, radius + 1)
         X, Y = np.meshgrid(L, L)
         if not strict_radius:
             radius += 0.5
         return np.array((X**2 + Y**2) <= radius**2, dtype=dtype)
     elif decomposition == 'sequence':
-        sequence = footprint_disk_decomposed(radius, ndim=2, dtype=dtype)
+        sequence = _ski2_footprint_disk_decomposed(radius, ndim=2, dtype=dtype)
     elif decomposition == 'crosses':
         fp = disk(radius, dtype, strict_radius=strict_radius, decomposition=None)
-        sequence = cross_decompose_footprint(fp)
+        sequence = _ski2_cross_decompose_footprint(fp)
     return sequence
 
 
@@ -453,6 +462,9 @@ def ball(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
     .. [2] https://en.wikipedia.org/wiki/Rhombicuboctahedron
     """
     if decomposition is None:
+        # Intentionally left this old implementation in place so that
+        # compatibility tests comaring skimage and skimage2 behavior are
+        # meaningful
         n = 2 * radius + 1
         Z, Y, X = np.mgrid[
             -radius : radius : n * 1j,
@@ -464,7 +476,7 @@ def ball(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
             radius += 0.5
         return np.array(s <= radius**2, dtype=dtype)
     elif decomposition == 'sequence':
-        sequence = footprint_disk_decomposed(radius, ndim=3, dtype=dtype)
+        sequence = _ski2_footprint_disk_decomposed(radius, ndim=3, dtype=dtype)
     else:
         raise ValueError(f"Unrecognized decomposition: {decomposition}")
     return sequence
