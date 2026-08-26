@@ -14,7 +14,7 @@ from ._grayscale_operators import dilation
 # the array. The values at a given radius corresponds to the number of
 # repetitions of 3 different types elementary of structuring elements.
 #
-# See `footprint_decomposed_disk` for full details.
+# See `footprint_disk_decomposed` for full details.
 _nsphere_decompositions = {
     2: np.load(Path(__file__).parent / 'disk_decompositions.npy'),  # shape (251, 3)
     3: np.load(Path(__file__).parent / 'ball_decompositions.npy'),  # shape (101, 3)
@@ -375,7 +375,7 @@ def diamond(radius, dtype=np.uint8, *, decomposition=None):
     return footprint
 
 
-def footprint_decomposed_disk(radius, *, ndim=2, dtype=np.uint8):
+def footprint_disk_decomposed(radius, *, ndim=2, dtype=np.uint8):
     """Approximate a disk (2D) or ball (3D) with a decomposed footprint.
 
     Approximate the footprint of a disk or ball with a series of smaller
@@ -452,7 +452,7 @@ def footprint_decomposed_disk(radius, *, ndim=2, dtype=np.uint8):
     if radius == 1:
         # For radius 1, we return a single footprint.
         # We need `adjust_edge=0.5` because this keeps it consistent with
-        # results for other radii: `footprint_decomposed_disk` uses precomputed
+        # results for other radii: `footprint_disk_decomposed` uses precomputed
         # values that were generated with legacy `skimage.morphology.disk` with
         # ``strict_radius=False`` (which added 0.5 to the radius internally).
         footprint = footprint_ellipse((radius,) * ndim, adjust_edge=0.5, dtype=dtype)
@@ -589,7 +589,7 @@ def cross_decompose_footprint(footprint, *, dtype=None):
 
     See Also
     --------
-    footprint_decomposed_disk
+    footprint_disk_decomposed
         Approximate a disk (2D) or ball (3D) with a decomposed footprint.
 
     Notes
@@ -786,7 +786,7 @@ def footprint_ellipse(radii, *, shape=None, adjust_edge=0.4, dtype=np.uint8):
     cross_decompose_footprint
         Decompose a symmetric convex 2D-footprint into cross-shaped elements
         (may increase performance for larger footprints).
-    footprint_decomposed_disk
+    footprint_disk_decomposed
         Approximate a disk (2D) or ball (3D) with a decomposed footprint
         (may increase performance for larger footprints).
 
@@ -808,7 +808,7 @@ def footprint_ellipse(radii, *, shape=None, adjust_edge=0.4, dtype=np.uint8):
     MATLAB's disk can be approximated with ``adjust_edge=0.001``.
 
     Use ``adjust_edge=0.5`` if you want to generate an approximate dense
-    equivalent to `footprint_decomposed_disk`.
+    equivalent to `footprint_disk_decomposed`.
 
     References
     ----------

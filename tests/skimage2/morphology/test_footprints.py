@@ -7,7 +7,7 @@ from _skimage2.morphology import (
     footprints,
     cross_decompose_footprint,
     footprint_rectangle,
-    footprint_decomposed_disk,
+    footprint_disk_decomposed,
     footprint_ellipse,
     footprint_from_sequence,
     pad_footprint,
@@ -208,14 +208,14 @@ def test_footprint_dtype(function, args, supports_sequence_decomposition, dtype)
 @pytest.mark.parametrize("ndim", [2, 3])
 @pytest.mark.parametrize("radius", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20])
 def test_nsphere_series_approximation(ndim, radius):
-    """Compare `footprint_ellipse` and `footprint_decomposed_disk`.
+    """Compare `footprint_ellipse` and `footprint_disk_decomposed`.
 
-    We need ``adjust_edge=0.5`` because `footprint_decomposed_disk` uses
+    We need ``adjust_edge=0.5`` because `footprint_disk_decomposed` uses
     precomputed values that were generated with legacy `skimage.morphology.disk`
     with ``strict_radius=False`` (which added 0.5 to the radius internally).
     """
     expected = footprint_ellipse((radius,) * ndim, adjust_edge=0.5)
-    decomposed = footprint_decomposed_disk(radius, ndim=ndim)
+    decomposed = footprint_disk_decomposed(radius, ndim=ndim)
     approximate = footprints.footprint_from_sequence(decomposed)
     assert approximate.shape == expected.shape
 
@@ -277,19 +277,19 @@ def test_cross_decompose_footprint_even():
 
 
 def test_disk_series_approximation_unavailable():
-    footprint = footprints.footprint_decomposed_disk(radius=250)
+    footprint = footprints.footprint_disk_decomposed(radius=250)
     assert len(footprint) == 6
     # ValueError if radius is too large (only precomputed up to radius=250)
     with pytest.raises(ValueError):
-        footprints.footprint_decomposed_disk(radius=251)
+        footprints.footprint_disk_decomposed(radius=251)
 
 
 def test_ball_series_approximation_unavailable():
-    footprint = footprints.footprint_decomposed_disk(radius=100, ndim=3)
+    footprint = footprints.footprint_disk_decomposed(radius=100, ndim=3)
     assert len(footprint) == 7
     # ValueError if radius is too large (only precomputed up to radius=100)
     with pytest.raises(ValueError):
-        footprints.footprint_decomposed_disk(radius=101, ndim=3)
+        footprints.footprint_disk_decomposed(radius=101, ndim=3)
 
 
 # skimage.morphology.mirror_footprint --------------------------------------------------

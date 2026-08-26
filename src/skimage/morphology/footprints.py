@@ -4,7 +4,7 @@ from _skimage2.morphology.footprints import (
     cross_decompose_footprint,
     cube as cube,
     diamond as diamond,
-    footprint_decomposed_disk,
+    footprint_disk_decomposed,
     footprint_from_sequence as footprint_from_sequence,
     footprint_rectangle as footprint_rectangle,
     octagon as octagon,
@@ -167,7 +167,7 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
     * ``radius`` and ``strict_radius`` are replaced by
       the parameters ``radii`` and ``adjust_edge``
     * ``decomposition`` parameter is removed in favor of new functions
-      `cross_decompose_footprint` and `footprint_decomposed_disk`
+      `cross_decompose_footprint` and `footprint_disk_decomposed`
 
     WARNING: The new underlying algorithm is slightly different and compounding
     float errors may lead to a few pixels at the footprints edge being 0
@@ -185,7 +185,7 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
     If you used ``decomposition='crosses'``, apply the new function
     `skimage2.morphology.cross_decompose_footprint` to the generated footprint.
     If you used ``decomposition='sequence'``, instead use
-    `skimage2.morphology.footprint_decomposed_disk` to generate the decomposed
+    `skimage2.morphology.footprint_disk_decomposed` to generate the decomposed
     footprint.
 
     <!--- cond-start: doc -->
@@ -209,7 +209,7 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
     >>> np.testing.assert_equal(fp1_crosses, fp2_crosses)
 
     >>> fp1_sequence = ski.morphology.disk(radius, decomposition="sequence")
-    >>> fp2_sequence = ski2.morphology.footprint_decomposed_disk(radius)
+    >>> fp2_sequence = ski2.morphology.footprint_disk_decomposed(radius)
     >>> np.testing.assert_equal(fp1_sequence, fp2_sequence)
 
     .. admonition:: Reproduce exact results of old implementation
@@ -318,7 +318,7 @@ def disk(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
             radius += 0.5
         return np.array((X**2 + Y**2) <= radius**2, dtype=dtype)
     elif decomposition == 'sequence':
-        sequence = footprint_decomposed_disk(radius, ndim=2, dtype=dtype)
+        sequence = footprint_disk_decomposed(radius, ndim=2, dtype=dtype)
     elif decomposition == 'crosses':
         fp = disk(radius, dtype, strict_radius=strict_radius, decomposition=None)
         sequence = cross_decompose_footprint(fp)
@@ -348,7 +348,7 @@ def disk(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
     * Instead of ``strict_radius=False``, use ``adjust_edge=0.5``
 
     If you used ``decomposition='sequence'``, instead use
-    `skimage2.morphology.footprint_decomposed_disk` to generate the decomposed
+    `skimage2.morphology.footprint_disk_decomposed` to generate the decomposed
     footprint.
 
     <!--- cond-start: doc -->
@@ -368,7 +368,7 @@ def disk(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
     >>> np.testing.assert_equal(fp1, fp2)
 
     >>> fp1_sequence = ski.morphology.ball(radius, decomposition="sequence")
-    >>> fp2_sequence = ski2.morphology.footprint_decomposed_disk(radius, ndim=3)
+    >>> fp2_sequence = ski2.morphology.footprint_disk_decomposed(radius, ndim=3)
     >>> np.testing.assert_equal(fp1_sequence, fp2_sequence)
 
     .. admonition:: Reproduce exact results of old implementation
@@ -464,7 +464,7 @@ def ball(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
             radius += 0.5
         return np.array(s <= radius**2, dtype=dtype)
     elif decomposition == 'sequence':
-        sequence = footprint_decomposed_disk(radius, ndim=3, dtype=dtype)
+        sequence = footprint_disk_decomposed(radius, ndim=3, dtype=dtype)
     else:
         raise ValueError(f"Unrecognized decomposition: {decomposition}")
     return sequence
