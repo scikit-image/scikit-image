@@ -537,13 +537,14 @@ def test_no_blob():
     assert len(blobs) == 0
 
 
-def test_blob_dog_min_sigma_zero_raises():
-    # Regression test: min_sigma=0 used to raise an unhandled
+@pytest.mark.parametrize("min_sigma", [0, -1, [0, 1], [1, 0]])
+def test_blob_dog_min_sigma_nonpositive_raises(min_sigma):
+    # Regression test: non-positive min_sigma used to raise an unhandled
     # OverflowError (via a silent divide-by-zero -> log(inf) -> int(inf))
     # instead of a clear validation error. See gh-8298.
     img = np.zeros((10, 10))
     with pytest.raises(ValueError, match="min_sigma must be > 0"):
-        blob_dog(img, min_sigma=0)
+        blob_dog(img, min_sigma=min_sigma)
 
 
 @pytest.mark.parametrize("func", [blob_dog, blob_doh, blob_log])
