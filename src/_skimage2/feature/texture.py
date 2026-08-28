@@ -327,7 +327,11 @@ def local_binary_pattern(image, P, R, method='default'):
         2D grayscale image.
     P : int
         Number of circularly symmetric neighbor set points (quantization of
-        the angular space).
+        the angular space). For the ``'default'`` and ``'ror'`` methods, ``P``
+        must not exceed 31: those codes are accumulated in a 32-bit signed
+        integer, which cannot represent a pattern wider than that. The
+        ``'uniform'``, ``'nri_uniform'`` and ``'var'`` methods do not weight
+        neighbors by powers of two and take any ``P``.
     R : float
         Radius of circle (spatial resolution of the operator).
     method : {'default', 'ror', 'uniform', 'nri_uniform', 'var'}, optional
@@ -354,6 +358,11 @@ def local_binary_pattern(image, P, R, method='default'):
     -------
     output : (M, N) array
         LBP image.
+
+    Raises
+    ------
+    ValueError
+        If ``P > 31`` and ``method`` is ``'default'`` or ``'ror'``.
 
     References
     ----------
@@ -382,6 +391,18 @@ def local_binary_pattern(image, P, R, method='default'):
         'nri_uniform': ord('N'),
         'var': ord('V'),
     }
+    # The 'default' and 'ror' codes are a sum of one power of two per neighbor,
+    # accumulated in the int32 weights of the Cython kernel. At P == 32 the last
+    # weight, 2 ** 31, overflows int32, so the returned codes go negative
+    # instead of enumerating the 2 ** P patterns, with no error or warning. The
+    # other methods do not weight neighbors by powers of two and are unaffected.
+    if method.lower() in ('default', 'ror') and P > 31:
+        raise ValueError(
+            f"P must not exceed 31 for method={method!r}, got P={P}. The "
+            "pattern code is accumulated in a 32-bit signed integer, which "
+            "cannot represent a wider pattern. Use method='uniform', "
+            "'nri_uniform' or 'var' for a larger neighborhood."
+        )
     if np.issubdtype(image.dtype, np.floating):
         warnings.warn(
             "Applying `local_binary_pattern` to floating-point images may "
