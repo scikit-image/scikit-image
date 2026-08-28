@@ -330,8 +330,10 @@ def local_binary_pattern(image, P, R, method='default'):
         the angular space). For the ``'default'`` and ``'ror'`` methods, ``P``
         must not exceed 31: those codes are accumulated in a 32-bit signed
         integer, which cannot represent a pattern wider than that. The
-        ``'uniform'``, ``'nri_uniform'`` and ``'var'`` methods do not weight
-        neighbors by powers of two and take any ``P``.
+        ``'uniform'`` and ``'var'`` methods do not weight neighbors by powers
+        of two and accept any ``P``. ``'nri_uniform'`` escapes that limit too,
+        but enumerates ``P * (P - 1) + 3`` codes in a 32-bit integer, so it
+        requires ``P <= 46341``.
     R : float
         Radius of circle (spatial resolution of the operator).
     method : {'default', 'ror', 'uniform', 'nri_uniform', 'var'}, optional
