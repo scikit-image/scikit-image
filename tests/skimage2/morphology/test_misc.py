@@ -2,6 +2,8 @@ import numpy as np
 import pytest
 import scipy as sp
 
+from packaging.version import Version
+
 from _skimage2.morphology import (
     remove_small_objects,
     remove_small_holes,
@@ -432,17 +434,18 @@ class Test_remove_near_objects:
         kdtree = sp.spatial.cKDTree(
             np.array(np.nonzero(spaced_objects), dtype=np.float64).transpose(),
         )
+        output_type = "doc_array" if Version(sp.__version__) < Version("1.18") else None
 
         # Compute distance between all objects that are equal or smaller `distance`
         distances = kdtree.sparse_distance_matrix(
-            kdtree, max_distance=distance, p=p_norm, output_type='dok_array'
+            kdtree, max_distance=distance, p=p_norm, output_type=output_type
         )
         # There should be no objects left
         assert distances.count_nonzero() == 0
 
         # But increasing by 1 should reveal a few objects
         distances = kdtree.sparse_distance_matrix(
-            kdtree, max_distance=distance + 1, p=p_norm, output_type='dok_array'
+            kdtree, max_distance=distance + 1, p=p_norm, output_type=output_type
         )
         assert distances.count_nonzero() > 0
 
