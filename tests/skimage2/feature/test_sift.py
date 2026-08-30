@@ -177,3 +177,14 @@ def test_no_descriptors_extracted_sift():
     detector_extractor = SIFT()
     with pytest.raises(RuntimeError):
         detector_extractor.detect_and_extract(img)
+
+
+def test_sift_sigma_in_exceeds_sigma_min_raises():
+    # Regression test: sigma_in >= sigma_min / upsampling used to reach
+    # math.sqrt() with a negative argument inside _create_scalespace,
+    # raising an unhelpful ValueError/"math domain error" instead of a
+    # clear validation error. See gh-8303.
+    with pytest.raises(
+        ValueError, match="sigma_in must be less than sigma_min / upsampling"
+    ):
+        SIFT(sigma_in=2.0)
