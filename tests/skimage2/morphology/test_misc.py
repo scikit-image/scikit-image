@@ -435,7 +435,7 @@ class Test_remove_near_objects:
             np.array(np.nonzero(spaced_objects), dtype=np.float64).transpose(),
         )
         output_type = (
-            "doc_array" if Version(sp.__version__) >= Version("1.18") else None
+            "dok_array" if Version(sp.__version__) >= Version("1.18") else None
         )
 
         # Compute distance between all objects that are equal or smaller `distance`
