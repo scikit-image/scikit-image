@@ -270,7 +270,7 @@ def footprint_diamond(radii, *, dtype=np.uint8):
 
     See Also
     --------
-    footprint_decomposed_diamond
+    footprint_diamond_decomposed
         Decomposed version of this function.
 
     Notes
@@ -351,7 +351,7 @@ def footprint_diamond(radii, *, dtype=np.uint8):
     return footprint
 
 
-def footprint_decomposed_diamond(shape, *, dtype=np.uint8):
+def footprint_diamond_decomposed(shape, *, dtype=np.uint8):
     """Generate a decomposed rhombus-shaped footprint.
 
     Generates a decomposed footprint that is equivalent to the "dense" footprint
@@ -386,7 +386,7 @@ def footprint_decomposed_diamond(shape, *, dtype=np.uint8):
 
     Examples
     --------
-    >>> footprint_decomposed_diamond((31, 31))
+    >>> footprint_diamond_decomposed((31, 31))
     ((array([[0, 1, 0],
              [1, 1, 1],
              [0, 1, 0]], dtype=uint8),

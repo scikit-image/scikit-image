@@ -10,7 +10,7 @@ from .isotropic import (
 from .footprints import (
     ball,
     footprint_diamond,
-    footprint_decomposed_diamond,
+    footprint_diamond_decomposed,
     disk,
     ellipse,
     footprint_from_sequence,
@@ -59,7 +59,7 @@ __all__ = [
     'diameter_closing',
     'diameter_opening',
     'footprint_diamond',
-    'footprint_decomposed_diamond',
+    'footprint_diamond_decomposed',
     'dilation',
     'disk',
     'ellipse',

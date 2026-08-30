@@ -2,7 +2,7 @@ import numpy as np
 
 from _skimage2.morphology.footprints import (
     footprint_diamond,
-    footprint_decomposed_diamond,
+    footprint_diamond_decomposed,
     ball as ball,
     disk as disk,
     ellipse as ellipse,
@@ -513,7 +513,7 @@ def diamond(radius, dtype=np.uint8, *, decomposition=None):
     if decomposition is None:
         footprint = footprint_diamond(shape, dtype=dtype)
     elif decomposition == 'sequence':
-        footprint = footprint_decomposed_diamond(shape, dtype=dtype)
+        footprint = footprint_diamond_decomposed(shape, dtype=dtype)
     else:
         raise ValueError(f"Unrecognized decomposition: {decomposition}")
     return footprint
@@ -565,7 +565,7 @@ def octahedron(radius, dtype=np.uint8, *, decomposition=None):
     if decomposition is None:
         footprint = footprint_diamond(shape, dtype=dtype)
     elif decomposition == 'sequence':
-        footprint = footprint_decomposed_diamond(shape, dtype=dtype)
+        footprint = footprint_diamond_decomposed(shape, dtype=dtype)
     else:
         raise ValueError(f"Unrecognized decomposition: {decomposition}")
     return footprint
