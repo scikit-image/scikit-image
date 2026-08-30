@@ -434,8 +434,14 @@ class Test_remove_near_objects:
         kdtree = sp.spatial.cKDTree(
             np.array(np.nonzero(spaced_objects), dtype=np.float64).transpose(),
         )
+
+        # The default output_type for sparse_distance_matrix is 'dok_matrix' for
+        # all versions of SciPy that we support, but 'dok_matrix' is being replaced
+        # by 'dok_array'.  'dok_array' was added in Scipy 1.18.
+        # If we do not explicitly set 'dok_array' in SciPy 2.0,
+        # a warning is raised (pending https://github.com/scipy/scipy/issues/25943).
         output_type = (
-            "dok_array" if Version(sp.__version__) >= Version("1.18") else None
+            "dok_array" if Version(sp.__version__) >= Version("1.18") else "dok_matrix"
         )
 
         # Compute distance between all objects that are equal or smaller `distance`
