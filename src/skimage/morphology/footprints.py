@@ -4,7 +4,7 @@ from _skimage2.morphology.footprints import (
     cross_decompose_footprint as _ski2_cross_decompose_footprint,
     diamond as diamond,
     footprint_disk_decomposed as _ski2_footprint_disk_decomposed,
-    footprint_from_sequence as footprint_from_sequence,
+    footprint_from_sequence as _ski2_footprint_from_sequence,
     footprint_rectangle_decomposed as _sk2_footprint_rectangle_decomposed,
     octagon as octagon,
     octahedron as octahedron,
@@ -23,6 +23,7 @@ adapt_doctests(
         "_sk2_footprint_rectangle_decomposed",
         "_ski2_footprint_disk_decomposed",
         "_ski2_cross_decompose_footprint",
+        "_ski2_footprint_from_sequence",
     ),
 )
 
@@ -41,6 +42,57 @@ __all__ = [
     'square',
     'star',
 ]
+
+
+@ski2_migration_decorator(
+    """\
+`skimage.morphology.footprint_from_sequence` is deprecated in favor of
+`skimage2.morphology.footprint_from_sequence` with new default behavior.
+
+By default, `skimage2.morphology.footprint_from_sequence` now returns the same
+dtype of the first array in the given ``decomposed`` sequence
+(`skimage.morphology.footprint_from_sequence` always returned ``dtype=bool``).
+
+To keep the old behavior when switching to `skimage2`, use the new parameter
+and pass ``dtype=bool`` to the function.
+
+<!--- cond-start: doc -->
+
+>>> import numpy as np
+>>> import skimage as ski1
+>>> import skimage2 as ski2
+
+>>> decomposed = (
+...     (np.ones((3, 1), dtype=np.uint8), 1),
+...     (np.ones((1, 3), dtype=np.uint8), 2),
+... )
+
+>>> fp1 = ski1.morphology.footprint_from_sequence(decomposed)
+>>> fp2 = ski2.morphology.footprint_from_sequence(decomposed, dtype=bool)
+>>> assert fp1.dtype == fp2.dtype
+>>> np.testing.assert_equal(fp1, fp2)
+
+<!--- cond-end -->
+""",
+    qname_old="skimage.morphology.footprint_from_sequence",
+)
+def footprint_from_sequence(footprints):
+    """Convert a footprint sequence into an equivalent ndarray.
+
+    Parameters
+    ----------
+    footprints : tuple of 2-tuples
+        A sequence of footprint tuples where the first element of each tuple
+        is an array corresponding to a footprint and the second element is the
+        number of times it is to be applied. Currently, all footprints should
+        have odd size.
+
+    Returns
+    -------
+    footprint : ndarray
+        An single array equivalent to applying the sequence of ``footprints``.
+    """
+    return _ski2_footprint_from_sequence(footprints, dtype=bool)
 
 
 @ski2_migration_decorator(

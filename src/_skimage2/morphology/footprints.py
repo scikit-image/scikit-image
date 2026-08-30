@@ -61,7 +61,19 @@ def footprint_from_sequence(decomposed, *, dtype=None):
     Returns
     -------
     footprint : ndarray
-        An single array equivalent to applying the sequence of ``footprints``.
+        An single array equivalent to applying the sequence of `decomposed`.
+
+    Examples
+    --------
+    >>> import _skimage2 as ski2
+    >>> decomposed = (
+    ...     (np.ones((3, 1), dtype=np.uint8), 1),
+    ...     (np.ones((1, 3), dtype=np.uint8), 2),
+    ... )
+    >>> ski2.morphology.footprint_from_sequence(decomposed)
+    array([[1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 1]], dtype=uint8)
     """
     if not _footprint_is_sequence(decomposed):
         msg = f"expected decomposed footprint, got {decomposed=!r}"
