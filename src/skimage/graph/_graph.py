@@ -20,7 +20,7 @@ __all__ = [
     ``%(qname_new)s`` with new behavior:
 
     * Parameter `sparse_type` was removed
-    * `graph` is always a `scipy.sparse.csr_array`
+    * Returned `graph` is always a `scipy.sparse.csr_array`
 
     SciPy 2.0 deprecates the sparse matrix classes and will remove them no
     earlier than SciPy 2.2. The two types define ``*`` differently: matrix
