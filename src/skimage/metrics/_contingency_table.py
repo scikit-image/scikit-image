@@ -13,7 +13,7 @@ __all__ = ['contingency_table']
     ``%(qname_new)s`` with new behavior:
 
     * Parameter `sparse_type` was removed
-    * `cont` is always a `scipy.sparse.csr_array`
+    * Returned `cont` is always a `scipy.sparse.csr_array`
 
     SciPy 2.0 deprecates the sparse matrix classes and will remove them no
     earlier than SciPy 2.2. The two types define ``*`` differently: matrix
