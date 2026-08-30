@@ -187,6 +187,28 @@ def test_laplacian_pyramid_max_layers(channel_axis):
         assert out_shape_without_channels == (1, 1)
 
 
+def test_laplacian_pyramid_reconstruction():
+    # A Laplacian pyramid must rebuild the original image by successively
+    # upsampling the coarsest layer and adding the finer layers back in.
+    # Regression test for gh-7921.
+    rng = np.random.default_rng(0)
+    image = rng.random((40, 40))
+    downscale = 2
+    sigma = 2 * downscale / 6.0
+
+    layers = list(pyramids.pyramid_laplacian(image, downscale=downscale))
+
+    reconstructed = layers[-1]
+    for layer in reversed(layers[:-1]):
+        expanded = pyramids.resize(
+            reconstructed, layer.shape, mode='reflect', anti_aliasing=False
+        )
+        expanded = pyramids._smooth(expanded, sigma, 'reflect', 0, None)
+        reconstructed = expanded + layer
+
+    assert_almost_equal(reconstructed, image)
+
+
 def test_check_factor():
     with pytest.raises(ValueError):
         pyramids._check_factor(0.99)

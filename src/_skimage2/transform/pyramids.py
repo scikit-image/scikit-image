@@ -301,15 +301,17 @@ def pyramid_laplacian(
     *,
     channel_axis=None,
 ):
-    """Yield images of the laplacian pyramid formed by the input image.
+    """Yield images of the Laplacian pyramid formed by the input image.
 
-    Each layer contains the difference between the downsampled and the
-    downsampled, smoothed image::
+    Each layer but the last is the difference between a Gaussian-pyramid level
+    and the next, coarser level upsampled back to its shape::
 
-        layer = resize(prev_layer) - smooth(resize(prev_layer))
+        layer_i = gaussian_i - expand(gaussian_{i + 1})
 
-    Note that the first image of the pyramid will be the difference between the
-    original, unscaled image and its smoothed version. The total number of
+    where ``expand`` upsamples and then smooths. The last layer is the smallest
+    Gaussian level itself (the low-frequency residual). Because of this, the
+    pyramid can rebuild the original image by successively upsampling the
+    coarsest layer and adding the finer layers back in. The total number of
     images is `max_layer + 1`. In case all layers are computed, the last image
     is either a one-pixel image or the image where the reduction does not
     change its shape.
@@ -367,42 +369,35 @@ def pyramid_laplacian(
         # automatically determine sigma which covers > 99% of distribution
         sigma = 2 * downscale / 6.0
 
-    current_shape = image.shape
+    # Gaussian pyramid levels G_0, G_1, ..., G_n. The image is already float, so
+    # keep its range to avoid a second conversion.
+    gaussian_layers = pyramid_gaussian(
+        image,
+        max_layer=max_layer,
+        downscale=downscale,
+        sigma=sigma,
+        order=order,
+        mode=mode,
+        cval=cval,
+        preserve_range=True,
+        channel_axis=channel_axis,
+    )
 
-    smoothed_image = _smooth(image, sigma, mode, cval, channel_axis)
-    yield image - smoothed_image
-
-    if channel_axis is not None:
-        channel_axis = channel_axis % image.ndim
-        shape_without_channels = list(current_shape)
-        shape_without_channels.pop(channel_axis)
-        shape_without_channels = tuple(shape_without_channels)
-    else:
-        shape_without_channels = current_shape
-
-    # build downsampled images until max_layer is reached or downscale process
-    # does not change image size
-    if max_layer == -1:
-        max_layer = math.ceil(math.log(max(shape_without_channels), downscale))
-
-    for layer in range(max_layer):
-        if channel_axis is not None:
-            out_shape = tuple(
-                math.ceil(d / float(downscale)) if ax != channel_axis else d
-                for ax, d in enumerate(current_shape)
-            )
-        else:
-            out_shape = tuple(math.ceil(d / float(downscale)) for d in current_shape)
-
-        resized_image = resize(
-            smoothed_image,
-            out_shape,
+    prev_layer = next(gaussian_layers)
+    for layer in gaussian_layers:
+        # ``expand`` the coarser Gaussian level back to the finer level's shape
+        # (upsample and smooth), then take the band-pass difference.
+        expanded = resize(
+            layer,
+            prev_layer.shape,
             order=order,
             mode=mode,
             cval=cval,
             anti_aliasing=False,
         )
-        smoothed_image = _smooth(resized_image, sigma, mode, cval, channel_axis)
-        current_shape = resized_image.shape
+        expanded = _smooth(expanded, sigma, mode, cval, channel_axis)
+        yield prev_layer - expanded
+        prev_layer = layer
 
-        yield resized_image - smoothed_image
+    # the smallest Gaussian level is the low-frequency residual
+    yield prev_layer
