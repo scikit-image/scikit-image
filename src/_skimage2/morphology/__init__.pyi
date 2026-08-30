@@ -9,16 +9,14 @@ from .isotropic import (
 
 from .footprints import (
     ball,
-    cube,
     footprint_diamond,
     footprint_decomposed_diamond,
     disk,
     ellipse,
     footprint_from_sequence,
     footprint_rectangle,
+    footprint_rectangle_decomposed,
     octagon,
-    rectangle,
-    square,
     star,
 )
 
@@ -70,6 +68,7 @@ __all__ = [
     'flood_fill',
     'footprint_from_sequence',
     'footprint_rectangle',
+    'footprint_rectangle_decomposed',
     'h_maxima',
     'h_minima',
     'isotropic_closing',
@@ -84,7 +83,6 @@ __all__ = [
     'medial_axis',
     'mirror_footprint',
     'octagon',
-    'octahedron',
     'opening',
     'pad_footprint',
     'reconstruction',

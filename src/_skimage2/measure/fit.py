@@ -1147,13 +1147,12 @@ def add_from_estimate(cls):
 
     if hasattr(cls, 'from_estimate'):
         if not inspect.ismethod(cls.from_estimate):
-            raise TypeError(f'Class {cls} `from_estimate` must be a ' 'class method.')
+            raise TypeError(f'Class {cls} `from_estimate` must be a class method.')
         return cls
 
     if not hasattr(cls, 'estimate'):
         raise TypeError(
-            f'Class {cls} must have `from_estimate` class method '
-            'or `estimate` method.'
+            f'Class {cls} must have `from_estimate` class method or `estimate` method.'
         )
 
     warn(

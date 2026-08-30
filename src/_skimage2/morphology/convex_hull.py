@@ -107,8 +107,7 @@ def convex_hull_image(
     ndim = image.ndim
     if np.count_nonzero(image) == 0:
         warn(
-            "Input image is entirely zero, no valid convex hull. "
-            "Returning empty image",
+            "Input image is entirely zero, no valid convex hull. Returning empty image",
             UserWarning,
         )
         return np.zeros(image.shape, dtype=bool)

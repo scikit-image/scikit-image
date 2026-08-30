@@ -277,7 +277,7 @@ def test_pad_footprint(as_sequence, pad_end):
     assert_equal(expected_res, actual_res)
 
 
-class Test_footprint_rectangule:
+class Test_footprint_rectangle:
     @pytest.mark.parametrize("i", [0, 1, 2, 3, 4])
     @pytest.mark.parametrize("j", [0, 1, 2, 3, 4])
     def test_rectangle(self, i, j):
@@ -302,10 +302,11 @@ class Test_footprint_rectangule:
         assert_equal(recomposed, regular)
 
     @pytest.mark.parametrize("shape", [(2,), (3, 4)])
+    @pytest.mark.filterwarnings("ignore::skimage.util.PendingSkimage2Change")
     def test_uneven_sequence_decomposition_warning(self, shape):
         """Should fall back to decomposition="separable" for uneven footprint size."""
         desired = footprint_rectangle(shape, decomposition="separable")
-        regex = "decomposition='sequence' is only supported for uneven footprints"
+        regex = "method='sequence' is only supported for uneven footprints"
         with pytest.warns(UserWarning, match=regex) as record:
             actual = footprint_rectangle(shape, decomposition="sequence")
         assert_stacklevel(record)
