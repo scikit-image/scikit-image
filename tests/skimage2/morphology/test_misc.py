@@ -433,16 +433,18 @@ class Test_remove_near_objects:
             np.array(np.nonzero(spaced_objects), dtype=np.float64).transpose(),
         )
 
-        # Find all pairs of objects that are `distance` apart or closer.
-        # Not sparse_distance_matrix: it builds a coo_matrix internally, which
-        # SciPy 2.0 deprecates (https://github.com/scipy/scipy/issues/25943).
-        pairs = kdtree.query_pairs(r=distance, p=p_norm)
+        # Compute distance between all objects that are equal or smaller `distance`
+        distances = kdtree.sparse_distance_matrix(
+            kdtree, max_distance=distance, p=p_norm, output_type='dok_array'
+        )
         # There should be no objects left
-        assert len(pairs) == 0
+        assert distances.count_nonzero() == 0
 
         # But increasing by 1 should reveal a few objects
-        pairs = kdtree.query_pairs(r=distance + 1, p=p_norm)
-        assert len(pairs) > 0
+        distances = kdtree.sparse_distance_matrix(
+            kdtree, max_distance=distance + 1, p=p_norm, output_type='dok_array'
+        )
+        assert distances.count_nonzero() > 0
 
     @pytest.mark.parametrize("value", [0, 1])
     @pytest.mark.parametrize("dtype", supported_dtypes)

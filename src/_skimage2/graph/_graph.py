@@ -157,17 +157,17 @@ def central_pixel(graph, nodes=None, shape=None, partition_size=100):
 
     Parameters
     ----------
-    graph : scipy.sparse.csr_array or scipy.sparse.csr_matrix
+    graph : scipy.sparse.csr_array
         The sparse representation of the graph.
-    nodes : array of int
+    nodes : array of int, optional
         The raveled index of each node in graph in the image. If not provided,
         the returned value will be the index in the input graph.
-    shape : tuple of int
+    shape : tuple of int, optional
         The shape of the image in which the nodes are embedded. If provided,
         the returned coordinates are a NumPy multi-index of the same
         dimensionality as the input shape. Otherwise, the returned coordinate
         is the raveled index provided in `nodes`.
-    partition_size : int
+    partition_size : int, optional
         This function computes the shortest path distance between every pair
         of nodes in the graph. This can result in a very large (N*N) matrix.
         As a simple performance tweak, the distance values are computed in

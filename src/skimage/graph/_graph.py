@@ -13,6 +13,10 @@ __all__ = [
     'pixel_graph',
 ]
 
+from skimage._doctest_adapters import adapt_doctests  # noqa: E402
+
+adapt_doctests(globals())
+
 
 @ski2_migration_decorator(
     """\
@@ -101,8 +105,3 @@ def pixel_graph(
         graph = sparse.csr_matrix(graph)
 
     return graph, nodes
-
-
-from skimage._doctest_adapters import adapt_doctests  # noqa: E402
-
-adapt_doctests(globals())
