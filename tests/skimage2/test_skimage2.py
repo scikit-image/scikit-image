@@ -62,9 +62,15 @@ def test_no_eager_skimage_import(namespace):
 
 def test_skimage2_submodule_imports():
     """Test that public submodules can be imported from skimage2."""
-    import _skimage2
-    
-    with pytest.warns(_skimage2.ExperimentalAPIWarning):
+
+    # Warning behavior on first import is already covered by
+    # test_import_skimage2_warning (which uses a subprocess to
+    # guarantee a fresh, uncached import). Suppress it here since
+    # whether it fires depends on prior import state in the process.
+    import warnings
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
         import skimage2
 
     # Check a few public submodules
@@ -96,4 +102,3 @@ def test_skimage2_submodule_imports():
     # Existing top-level imports should still work
     assert hasattr(skimage2, "filters")
     assert hasattr(skimage2.filters, "gaussian")
-
