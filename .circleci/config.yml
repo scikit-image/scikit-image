@@ -36,6 +36,10 @@ jobs:
             python3 -m pip install -r requirements/default.txt
             python3 -m pip install -r requirements/docs.txt
       - run:
+          name: Install Chrome for kaleido
+          command: |
+            plotly_get_chrome -y
+      - run:
           name: Print ccache performance
           command: |
             ccache -s
