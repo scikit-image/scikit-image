@@ -34,7 +34,8 @@ def test_wiener(dtype, ndim, test_root_dir):
     precomputed result in 2d case.
     """
 
-    # fails with other seeds?
+    # seed fixed for compatibility with the stored reference data
+    # (camera_wiener.npy) compared against in the ndim == 2 case below
     rng = np.random.RandomState(0)
     psf = np.ones([5] * ndim, dtype=dtype) / 5**ndim
 
@@ -148,7 +149,8 @@ def test_image_shape():
 @pytest.mark.parametrize('ndim', [1, 2, 3])
 def test_richardson_lucy(ndim, test_root_dir):
     psf = np.ones([5] * ndim, dtype=float) / 5**ndim
-    # fails with different seeds?
+    # seed fixed for compatibility with the stored reference data
+    # (camera_rl.npy) compared against in the ndim == 2 case below
     rng = np.random.RandomState(0)
     if ndim != 2:
         test_img = rng.randint(0, 100, [30] * ndim)
