@@ -7,7 +7,20 @@ from skimage.graph._graph import pixel_graph, central_pixel
 mask = np.array([[1, 0, 0], [0, 1, 1], [0, 1, 0]], dtype=bool)
 image = np.random.RandomState(3224015571).random(mask.shape)
 
+# SciPy >= 2.0 deprecates the sparse matrix classes in favor of sparse arrays.
+# The legacy ``skimage`` namespace keeps returning a `scipy.sparse.csr_matrix`
+# by default, so these tests have to tolerate that warning. In ``skimage2`` the
+# default is ``sparse_type="array"``.
+ignore_spmatrix_deprecation = pytest.mark.filterwarnings(
+    "ignore:.*_matrix is being replaced by .*_array:DeprecationWarning"
+)
+sparse_types = [
+    pytest.param("matrix", marks=ignore_spmatrix_deprecation),
+    "array",
+]
 
+
+@ignore_spmatrix_deprecation
 def test_small_graph():
     g, n = pixel_graph(mask, connectivity=2)
     assert g.shape == (4, 4)
@@ -16,6 +29,7 @@ def test_small_graph():
     np.testing.assert_array_equal(n, [0, 4, 5, 7])
 
 
+@ignore_spmatrix_deprecation
 def test_pixel_graph_return_type():
     g, n = pixel_graph(mask, connectivity=2)
     assert isinstance(g, sp.sparse.csr_matrix)
@@ -30,7 +44,7 @@ def test_pixel_graph_return_type():
         pixel_graph(mask, connectivity=2, sparse_type="unknown")
 
 
-@pytest.mark.parametrize("sparse_type", ["matrix", "array"])
+@pytest.mark.parametrize("sparse_type", sparse_types)
 def test_central_pixel(sparse_type):
     g, n = pixel_graph(mask, connectivity=2, sparse_type=sparse_type)
     px, ds = central_pixel(g, n, shape=mask.shape)
@@ -47,7 +61,7 @@ def test_central_pixel(sparse_type):
     assert px == 1
 
 
-@pytest.mark.parametrize("sparse_type", ["matrix", "array"])
+@pytest.mark.parametrize("sparse_type", sparse_types)
 def test_edge_function(sparse_type):
     def edge_func(values_src, values_dst, distances):
         return np.abs(values_src - values_dst) + distances
@@ -65,7 +79,7 @@ def test_edge_function(sparse_type):
     np.testing.assert_array_equal(n, [0, 4, 5, 7])
 
 
-@pytest.mark.parametrize("sparse_type", ["matrix", "array"])
+@pytest.mark.parametrize("sparse_type", sparse_types)
 def test_default_edge_func(sparse_type):
     g, n = pixel_graph(image, spacing=np.array([0.78, 0.78]), sparse_type=sparse_type)
     num_edges = len(g.data) // 2  # each edge appears in both directions
@@ -74,7 +88,7 @@ def test_default_edge_func(sparse_type):
     np.testing.assert_array_equal(n, np.arange(image.size))
 
 
-@pytest.mark.parametrize("sparse_type", ["matrix", "array"])
+@pytest.mark.parametrize("sparse_type", sparse_types)
 def test_no_mask_with_edge_func(sparse_type):
     """Ensure function `pixel_graph` runs when passing `edge_function` but not `mask`."""
     image = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
