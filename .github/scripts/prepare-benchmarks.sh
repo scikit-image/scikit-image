@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
-# Get the runner ready for run-benchmarks.sh: put the resolved run
-# parameters into the job environment, point asv's build step at the
-# wheels the build jobs already produced, and install/register what asv
-# needs.
+# Get the runner ready for run-benchmarks.sh: export the resolved
+# parameters, point asv's build step at the already-downloaded wheels,
+# and install/register what asv needs.
 #
 # Reads benchmark-params.json (written by resolve-benchmark-params.py,
-# downloaded here as an artifact) and appends to $GITHUB_ENV, so the
-# values reach both run-benchmarks.sh and the benchmark processes
-# themselves. CI-only: $GITHUB_ENV doesn't exist outside Actions.
+# downloaded here as an artifact) into $GITHUB_ENV, for run-benchmarks.sh
+# and the benchmark processes. CI-only: $GITHUB_ENV doesn't exist outside
+# Actions.
 
 set -euo pipefail
 set -x

@@ -996,9 +996,9 @@ code is free of typos. To do so, you may use the command:
 spin asv -- check -v -E existing
 ```
 
-This imports every benchmark and checks that it is well-formed, in your current
-environment and without timing anything, so typos surface in seconds. CI runs
-the same command.
+This imports every benchmark and checks that it is well-formed in your
+current environment, without timing anything, so typos surface in
+seconds. CI runs the same command.
 
 ### Running your benchmark
 

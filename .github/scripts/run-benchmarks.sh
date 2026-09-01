@@ -38,13 +38,10 @@ trap collect_results EXIT
 echo "Baseline: $BASELINE_SHA ($BASELINE_LABEL)"
 echo "Contender: $GITHUB_SHA ($CONTENDER_LABEL)"
 
-# Run benchmarks for current commit against base.
-# --verbose (DEBUG-level logging) so env-creation/pip-install progress is
-# actually visible instead of one large silent gap; `sed -u` (unbuffered)
-# so that output streams through the pipeline in real time rather than
-# waiting on sed's default block buffering when its stdout isn't a
-# terminal. That was previously stalling the whole pipeline, not just
-# hiding output.
+# --verbose (DEBUG-level logging) makes env-creation/pip-install progress
+# visible instead of one large silent gap. `sed -u` (unbuffered) streams
+# that output in real time; buffered, it was stalling the whole pipeline,
+# not just delaying output.
 ASV_OPTIONS="--verbose --split --show-stderr --factor $ASV_FACTOR -a processes=$ASV_PROCESSES"
 if [ -n "$BENCH_FILTER" ]; then
     ASV_OPTIONS="$ASV_OPTIONS -b $BENCH_FILTER"
@@ -57,7 +54,6 @@ asv continuous $ASV_OPTIONS $BASELINE_SHA $GITHUB_SHA \
 asv_status=${PIPESTATUS[0]}
 set -e
 
-# Report and export results for subsequent steps
 if [ "$asv_status" -ne 0 ] || grep "Traceback \|failed\|PERFORMANCE DECREASED" benchmarks.log > /dev/null ; then
     exit 1
 fi

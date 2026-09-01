@@ -6,45 +6,42 @@
 
 ## How it works
 
-The `asv` suite runs automatically on every PR, scoped to whichever benchmark module(s) cover the `skimage` subpackage(s) the PR touches (see `.github/scripts/resolve-benchmark-params.py`). A PR touching only `skimage/restoration/` runs just `benchmark_restoration.py`; a PR touching no mapped subpackage (docs, CI config, a subpackage with no benchmark file, etc.) doesn't run benchmarks at all. Adding a label whose name contains `benchmark` (e.g. `run-benchmark`) to a PR overrides this and always runs the full suite, regardless of which paths changed - useful when a change to shared/core code could affect benchmarks outside the touched subpackage's own module.
+The `asv` suite runs automatically on every PR, scoped to whichever benchmark module(s) cover the `skimage` subpackage(s) touched (see `.github/scripts/resolve-benchmark-params.py`). A PR touching only `skimage/restoration/` runs just `benchmark_restoration.py`; a PR touching no mapped subpackage runs none. A label whose name contains `benchmark` (e.g. `run-benchmark`) overrides this and runs the full suite, for changes to shared code that could affect benchmarks outside the touched subpackage.
 
-The suite also runs nightly at 07:00 UTC against `main`, using the full, untrimmed benchmark suite (see "Full nightly runs" below), and can be triggered manually from the `workflow_dispatch` entry point on the `Actions` tab, which offers a `baseline` choice: `parent-commit` (default, compares the current commit against its immediate parent) or `previous-nightly` (compares against the same commit the last successful nightly run used, falling back to the immediate parent if no nightly run has succeeded yet). Merges to `main` don't trigger a benchmark run on their own - the nightly run covers that ground, without paying the CI cost on every single merge. If a nightly or manually-dispatched run on `main` fails (including a detected regression), it opens (or updates, if one is already open) a `CI failure`-labeled GitHub issue using the same convention as the repo's other main-branch CI checks.
+The suite also runs nightly at 07:00 UTC against `main` (see "Full nightly runs" below), and can be triggered manually from the `workflow_dispatch` entry point on the `Actions` tab. `workflow_dispatch` offers a `baseline` choice: `parent-commit` (default) or `previous-nightly`, falling back to the immediate parent if no nightly run has succeeded yet. Merges to `main` don't trigger a run on their own; the nightly run covers that ground without the CI cost of running on every merge. A failing nightly or dispatched run on `main`, including a detected regression, opens or updates a `CI failure`-labeled issue, the same convention the repo's other main-branch checks use.
 
-We use `asv continuous` to run the job, which runs a relative performance measurement. This means that there's no state to be saved and that regressions are only caught in terms of performance ratio (absolute numbers are available but they are not useful since we do not use stable hardware over time).
+`asv continuous` runs a relative performance measurement: no state is saved, and a regression is only a ratio, since we don't have stable hardware over time to make absolute numbers meaningful.
 
-Before `asv` runs, the baseline and contender commits are built as wheels in two parallel jobs (`build-baseline`/`build-contender` in `.github/workflows/benchmarks.yaml`), reusing the repo's own `_build_linux_for_python_x.yaml` build workflow (the same one `test-linux.yaml` uses), rather than compiling sequentially inside `asv` itself. `asv`'s own `build_command` just copies the matching prebuilt wheel into place; `virtualenv` is still used to create the per-environment install targets. `asv continuous` then:
+Before `asv` runs, the baseline and contender commits build as wheels in two parallel jobs (`build-baseline`/`build-contender` in `.github/workflows/benchmarks.yaml`), reusing the repo's `_build_linux_for_python_x.yaml` build workflow instead of compiling sequentially inside `asv`. `asv`'s `build_command` copies the matching prebuilt wheel into place. `asv continuous` then:
 
-- Installs the appropriate prebuilt wheel for each commit.
-- Runs the benchmark suite for both commits, _twice_ per commit (`processes=2`), trading run time for statistical robustness (see `ASV_FACTOR`/`ASV_PROCESSES` in `benchmark-params.json`, described below).
-- Generate a report table with performance ratios:
-  - `ratio=1.0` -> performance didn't change.
-  - `ratio<1.0` -> PR made it slower.
-  - `ratio>1.0` -> PR made it faster.
+- Installs the prebuilt wheel for each commit.
+- Runs the suite for both commits, twice per commit (`processes=2`), trading time for statistical robustness (see `ASV_FACTOR`/`ASV_PROCESSES` below).
+- Reports a performance ratio per benchmark: 1.0 unchanged, below 1.0 slower, above 1.0 faster.
 
-Due to the sensitivity of the test, we cannot guarantee that false positives are not produced. In practice, values between `(0.7, 1.5)` are to be considered part of the measurement noise. When in doubt, running the benchmark suite one more time will provide more information about the test being a false positive or not.
+Values between `(0.7, 1.5)` are measurement noise, not a reliable signal. When in doubt, rerun the suite.
 
 ## How the run is parameterized
 
-`resolve-benchmark-params.py` decides everything about a given run from the trigger event, reading the event payload from `GITHUB_EVENT_PATH` rather than taking it through the workflow's `env:` block. It publishes its decisions two ways:
+`resolve-benchmark-params.py` decides everything about a run from the trigger event, reading the event payload from `GITHUB_EVENT_PATH` instead of the workflow's `env:` block. It publishes two things:
 
-- Three job outputs, the values other jobs need before benchmarking starts: `should_run`, `python_version` (read from `asv.conf.json`, so it can't drift), and `baseline_sha`.
-- `benchmark-params.json`, uploaded as an artifact, holding the asv settings only the benchmark job cares about: `ASV_FACTOR`, `ASV_PROCESSES`, `ASV_SKIP_SLOW`, `ASV_FULL_PARAMS`, `BASELINE_SHA`, `BASELINE_LABEL`, `CONTENDER_LABEL`, and `BENCH_FILTER`. The benchmark job downloads it and `prepare-benchmarks.sh` copies the entries into `$GITHUB_ENV`, where `run-benchmarks.sh` and the benchmark processes pick them up.
+- Three job outputs the earlier jobs need: `should_run`, `python_version` (from `asv.conf.json`, so it can't drift), and `baseline_sha`.
+- `benchmark-params.json`, an artifact holding the settings only the benchmark job needs: `ASV_FACTOR`, `ASV_PROCESSES`, `ASV_SKIP_SLOW`, `ASV_FULL_PARAMS`, `BASELINE_SHA`, `BASELINE_LABEL`, `CONTENDER_LABEL`, `BENCH_FILTER`. `prepare-benchmarks.sh` copies these into `$GITHUB_ENV` for `run-benchmarks.sh` and the benchmark processes.
 
-The file's keys are the environment variable names themselves, so adding a parameter means adding one entry in `resolve-benchmark-params.py` rather than editing the workflow in several places.
+Its keys are the environment variable names, so adding a parameter is one entry in `resolve-benchmark-params.py`, not an edit to the workflow in several places.
 
-`MODULE_MAP` in the same script records which benchmark modules cover each `src/skimage/` subpackage, and is what a pull request check scopes itself with.
+`MODULE_MAP` in the same script maps each `src/skimage/` subpackage to the benchmark modules covering it, and is what scopes a pull request check.
 
-The benchmark job's two steps split along that seam. `prepare-benchmarks.sh` does everything before measurement: exporting the parameters, pinning the numeric libraries to a single thread, swapping `asv.conf.json`'s `build_command` over to the prebuilt wheels, and registering the runner with `asv machine`. `run-benchmarks.sh` is then just the `asv continuous` call and its pass/fail check.
+The benchmark job splits along that seam: `prepare-benchmarks.sh` handles everything before measurement (parameters, thread pinning, pointing `build_command` at the prebuilt wheels, `asv machine`), and `run-benchmarks.sh` is just the `asv continuous` call and its pass/fail check.
 
 ## Running the benchmarks on GitHub Actions
 
-1. Opening or updating a PR that touches a `skimage` subpackage with a matching `benchmarks/benchmark_*.py` module runs that module's benchmarks automatically - no action needed. Checks appear in the usual dashboard panel above the comment box.
-2. To force the full suite regardless of which paths changed, add a label whose name contains `benchmark` (e.g. `run-benchmark`) to the PR. This stays in effect for that PR's subsequent runs too, not just the run triggered by adding the label.
-3. You can always go to the `Actions` tab in the repo and [filter for `workflow:Benchmark`](https://github.com/scikit-image/scikit-image/actions?query=workflow%3ABenchmark). Your username will be assigned to the `actor` field, so you can also filter the results with that if you need it.
+1. Opening or updating a PR that touches a mapped subpackage runs that module's benchmarks automatically. Checks appear above the comment box.
+2. A label whose name contains `benchmark` (e.g. `run-benchmark`) forces the full suite, and stays in effect for that PR's later runs too.
+3. Filter the `Actions` tab for [`workflow:Benchmark`](https://github.com/scikit-image/scikit-image/actions?query=workflow%3ABenchmark); your username is the `actor`.
 
 ## Full nightly runs
 
-Every night at 07:00 UTC, a scheduled run compares the current `main` tip against the commit compared by the last successful nightly run (not just its immediate parent, so a busy day of merges is covered cumulatively rather than only the single most recent one) using the complete, untrimmed benchmark suite: `ASV_SKIP_SLOW=0` (benchmarks marked with the `_skip_slow` helper in `benchmarks/__init__.py` run too) and `ASV_FULL_PARAMS=1` (classes wrapped with the `_resolve_param` helper use their full parameter matrices instead of the smaller sets used elsewhere to keep PR checks within a reasonable time budget). This isn't path-scoped or time-boxed, so it's the place to look for regressions a fast, trimmed PR check could miss - including regressions introduced by merges to `main` themselves, which don't trigger a benchmark run of their own.
+Every night at 07:00 UTC, a scheduled run compares `main`'s tip against the commit the last successful nightly compared, not just its immediate parent, so a busy day of merges is covered cumulatively. It runs the complete suite: `ASV_SKIP_SLOW=0` includes the slow benchmarks, `ASV_FULL_PARAMS=1` uses each benchmark's full parameter matrix instead of the reduced one PR checks use. This is the only check unscoped by path or trimmed by time, so it's where a regression a fast PR check missed, including one from a merge to `main` itself, would surface.
 
 ## The artifacts
 
