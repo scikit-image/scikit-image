@@ -45,6 +45,8 @@ jobs:
         # arm64 Chrome, at the same version Chrome for Testing is missing for
         # that architecture, and choreographer's browser search checks
         # /usr/bin/google-chrome-stable before falling back to a download.
+        # CircleCI's docs job installs Chrome the same way, since
+        # `plotly_get_chrome`'s console script isn't reliably on PATH there.
         run: |
           wget -q -O - https://dl.google.com/linux/linux_signing_key.pub \
             | gpg --dearmor \

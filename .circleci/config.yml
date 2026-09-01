@@ -37,8 +37,22 @@ jobs:
             python3 -m pip install -r requirements/docs.txt
       - run:
           name: Install Chrome for kaleido
+          # See .github/workflows/test-docs.yaml for why this installs
+          # Chrome through apt instead of `plotly_get_chrome`. This machine
+          # image already has a google-chrome apt source configured under a
+          # different (or no) Signed-By, so only add our own if none exists;
+          # a second, conflicting definition for the same repo breaks `apt-get
+          # update` outright ("Conflicting values set for option Signed-By").
           command: |
-            plotly_get_chrome -y
+            if ! grep -qr "dl.google.com/linux/chrome/deb" /etc/apt/sources.list /etc/apt/sources.list.d/ 2>/dev/null; then
+              wget -q -O - https://dl.google.com/linux/linux_signing_key.pub \
+                | gpg --dearmor \
+                | sudo tee /usr/share/keyrings/google-chrome.gpg >/dev/null
+              echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" \
+                | sudo tee /etc/apt/sources.list.d/google-chrome.list
+            fi
+            sudo apt-get update
+            sudo apt-get install -y google-chrome-stable
       - run:
           name: Print ccache performance
           command: |
