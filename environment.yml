@@ -42,7 +42,7 @@ dependencies:
   - intersphinx-registry>=0.2411.14
   - ipywidgets
   - ipykernel
-  - plotly>=5.20
+  - plotly>=6.1.1
   - python-kaleido>=1.0
   - scikit-learn>=1.6
   - sphinx-design>=0.5
