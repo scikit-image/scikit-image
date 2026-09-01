@@ -1,6 +1,7 @@
 import os
 import sys
 import subprocess
+import inspect
 
 import pytest
 
@@ -58,3 +59,21 @@ def test_no_eager_skimage_import(namespace):
         top_module, *_ = module.partition(".")
         assert top_module != "skimage"
         assert "skimage" in top_module
+
+
+def test_skimage2_modules_match():
+    """Ensure _skimage2 and skimage2 package structures are aligned."""
+
+    def generate_submodule_tree(module):
+        tree = {}
+        for attr_name, attr in inspect.getmembers(module):
+            if inspect.ismodule(attr):
+                tree[attr_name] = generate_submodule_tree(attr)
+        return tree
+
+    import _skimage2
+
+    with pytest.warns(_skimage2.ExperimentalAPIWarning):
+        import skimage2
+
+    assert generate_submodule_tree(skimage2) == generate_submodule_tree(_skimage2)
