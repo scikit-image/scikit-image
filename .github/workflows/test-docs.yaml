@@ -38,15 +38,10 @@ jobs:
           source .github/scripts/setup-docs-env.sh
 
       - name: Install Chrome for kaleido
-        # Neither kaleido's own `plotly_get_chrome` nor browser-actions/setup-chrome
-        # can provision Chrome here: both fetch from Chrome for Testing, which
-        # doesn't yet publish a Stable-channel linux-arm64 build, and this job
-        # runs on an arm64 runner. Google's separate apt repository does ship
-        # arm64 Chrome, at the same version Chrome for Testing is missing for
-        # that architecture, and choreographer's browser search checks
-        # /usr/bin/google-chrome-stable before falling back to a download.
-        # CircleCI's docs job installs Chrome the same way, since
-        # `plotly_get_chrome`'s console script isn't reliably on PATH there.
+        # plotly_get_chrome and browser-actions/setup-chrome fetch from Chrome
+        # for Testing, which has no Stable-channel linux-arm64 build (this
+        # runner is arm64). Google's apt repo does have arm64 Chrome, and
+        # choreographer checks /usr/bin/google-chrome-stable before downloading.
         run: |
           wget -q -O - https://dl.google.com/linux/linux_signing_key.pub \
             | gpg --dearmor \

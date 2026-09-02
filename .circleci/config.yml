@@ -37,17 +37,20 @@ jobs:
             python3 -m pip install -r requirements/docs.txt
       - run:
           name: Install Chrome for kaleido
-          # See .github/workflows/test-docs.yaml for why this installs
-          # Chrome through apt instead of `plotly_get_chrome`. Installing
-          # the downloaded .deb directly, rather than adding Google's apt
-          # repo, avoids this machine image's own preconfigured
-          # google-chrome source, whose Signed-By conflicts with one we'd
-          # add ("Conflicting values set for option Signed-By").
+          # Installs via apt like test-docs.yaml (see there for why). This
+          # image preconfigures a google-chrome source without Signed-By,
+          # which conflicts with the signed one below, so remove it first.
           command: |
-            wget -q -O google-chrome-stable.deb \
-              https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+            for f in /etc/apt/sources.list /etc/apt/sources.list.d/*.list; do
+              [ -f "$f" ] && sudo sed -i '\#dl\.google\.com/linux/chrome/deb#d' "$f"
+            done
+            wget -q -O - https://dl.google.com/linux/linux_signing_key.pub \
+              | gpg --dearmor \
+              | sudo tee /usr/share/keyrings/google-chrome.gpg >/dev/null
+            echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" \
+              | sudo tee /etc/apt/sources.list.d/google-chrome.list
             sudo apt-get update
-            sudo apt-get install -y ./google-chrome-stable.deb
+            sudo apt-get install -y google-chrome-stable
       - run:
           name: Print ccache performance
           command: |
