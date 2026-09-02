@@ -637,7 +637,7 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
     """
     if decomposition is None:
         # Intentionally left this old implementation in place so that
-        # compatibility tests comaring skimage and skimage2 behavior are
+        # compatibility tests comparing skimage and skimage2 behavior are
         # meaningful
         footprint = np.zeros((2 * height + 1, 2 * width + 1), dtype=dtype)
         rows, cols = _draw_ellipse(height, width, height + 1, width + 1)
@@ -803,7 +803,7 @@ def disk(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
     """
     if decomposition is None:
         # Intentionally left this old implementation in place so that
-        # compatibility tests comaring skimage and skimage2 behavior are
+        # compatibility tests comparing skimage and skimage2 behavior are
         # meaningful
         L = np.arange(-radius, radius + 1)
         X, Y = np.meshgrid(L, L)
@@ -947,7 +947,7 @@ def ball(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
     """
     if decomposition is None:
         # Intentionally left this old implementation in place so that
-        # compatibility tests comaring skimage and skimage2 behavior are
+        # compatibility tests comparing skimage and skimage2 behavior are
         # meaningful
         n = 2 * radius + 1
         Z, Y, X = np.mgrid[

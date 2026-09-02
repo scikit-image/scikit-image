@@ -669,18 +669,17 @@ def cross_decompose_footprint(footprint, *, dtype=None):
     return decomposed
 
 
-def _normalize_radii_shape(radii, shape=None):
-    """Ensure radii and shape are tuples of matching length.
+def _normalize_radii(radii):
+    """Normalize `radii` and create shape of matching dimensionality.
 
     Parameters
     ----------
     radii : int or Sequence of int(s)
         A tuple of floats that denote a radius in each dimension. If a single
-        scalar is given instead, it will be applied in two dimensions.
-    shape : Sequence of int(s), optional
-        By default, the shape is inferred from `radii`. If `radii` is a scalar,
-        `shape` defaults to 2 dimensions. The length of each dimension is
-        derived as ``radius * 2 + 1``.
+        scalar is given instead, it will be applied in two dimensions. The shape
+        is inferred from `radii`. If `radii` is a scalar, `shape` defaults to 2
+        dimensions. The length of each dimension is derived as
+        ``radius * 2 + 1``.
 
     Returns
     -------
@@ -691,47 +690,20 @@ def _normalize_radii_shape(radii, shape=None):
 
     Examples
     --------
-    >>> _normalize_radii_shape(radii=3)
+    >>> _normalize_radii(radii=3)
     ((3, 3), (7, 7))
-    >>> _normalize_radii_shape(radii=(3,))
+    >>> _normalize_radii(radii=(3,))
     ((3,), (7,))
-    >>> _normalize_radii_shape(radii=(3, 4, 5))
+    >>> _normalize_radii(radii=(3, 4, 5))
     ((3, 4, 5), (7, 9, 11))
-    >>> _normalize_radii_shape(radii=(3, 4, 5), shape=(11, 11, 11))
-    ((3, 4, 5), (11, 11, 11))
-
-    If `shape` is given, `radii` must be a tuple:
-
-    >>> _normalize_radii_shape(radii=3, shape=(6, 6, 7))
-    Traceback (most recent call last):
-        ...
-    TypeError: `radii` must be a tuple matching `shape`, got `radii=3`
-        (`radii=<int>` is only supported if `shape` is None)
     """
     orig_radii = radii
-    orig_shape = shape
 
-    if shape is None:
-        # `radii` is source of truth for dimensionality
-        if np.isscalar(radii):
-            radii = (radii,) * 2  # Fallback to 2
-        # Derive `shape` from `radii`
-        shape = tuple(radius * 2 + 1 for radius in radii)
-
-    else:
-        # `shape` is source of truth for dimensionality
-        if np.isscalar(radii):
-            msg = (
-                f"`radii` must be a tuple matching `shape`, got `radii={radii!r}` "
-                f"(`radii=<int>` is only supported if `shape` is None)"
-            )
-            raise TypeError(msg)
-        elif len(radii) != len(shape):
-            msg = (
-                f"dimension of radii and shape don't match: "
-                f"radii={orig_radii!r}, shape={orig_shape!r}"
-            )
-            raise ValueError(msg)
+    # `radii` is source of truth for dimensionality
+    if np.isscalar(radii):
+        radii = (radii,) * 2  # Fallback to 2
+    # Derive `shape` from `radii`
+    shape = tuple(radius * 2 + 1 for radius in radii)
 
     for radius in radii:
         if radius < 0:
@@ -746,31 +718,27 @@ def _normalize_radii_shape(radii, shape=None):
     return radii, shape
 
 
-def footprint_ellipse(radii, *, shape=None, adjust_edge=0.4, dtype=np.uint8):
+def footprint_ellipse(radii, *, adjust_edge=0.4, dtype=np.uint8):
     """Generates an elliptical or spherical footprint.
 
     This function generates ellipsoids with any number of desired dimensions,
     including spherical footprints. Use this function to generate shapes such
-    as a disk (2D), an ellipse (2D), or a ball (3D).
+    as a disk or an ellipse (2D), a ball or an ellipsoid (3D).
 
     Parameters
     ----------
     radii : int or Sequence of int(s), optional
         The radii of the ellipse for each dimension. If a single radius is
         given instead of a tuple, it will be interpreted as the radius of a
-        2-dimensional disk.
-    shape : Sequence of int(s), optional
-        If not given or ``None`` the default `shape` is derived from `radii`
-        with ``radius * 2 + 1`` for each dimension. Pass an explicit `shape`
-        to crop or pad the footprint relative to `radii` or to receive a
-        footprint with even length. The ellipse will always be positioned at the
-        center.
+        2-dimensional disk. The default shape of the returned `footprint` is
+        derived from `radii` with ``radius * 2 + 1`` for each dimension.
     adjust_edge : float or Sequence of float(s), optional
-        Adjust `radii` by (subpixel-)amount in each dimension. The default value
-        increases the radii slightly which leads to a smoother edge.
-        ``adjust_edge=0`` usually leads to a *pointier* ellipse that touches the
-        footprint's edge with only one pixel. Try other values to match other
-        implementations [1]_, [2]_ pixel-by-pixel.
+        Adjust sampling at the edge by adjusting `radii` by a (subpixel-)amount
+        without affecting the shape of the returned `footprint` array. The
+        default value increases the radii slightly which leads to a smoother
+        edge. ``adjust_edge=0`` usually leads to a *pointier* ellipse that
+        touches the array's edge with only one pixel. Try other values like
+        0.3 or 0.5 to match other implementations [1]_, [2]_ pixel-by-pixel.
     dtype : data-type, optional
         The data type of the footprint.
 
@@ -778,7 +746,7 @@ def footprint_ellipse(radii, *, shape=None, adjust_edge=0.4, dtype=np.uint8):
     -------
     footprint : ndarray
         The footprint where elements. Depending on the requested `dtype`,
-        pixels that belong to the ellipse are *truthy* otherwise *falsy*.
+        pixels that belong to the ellipse are *truthy*, others are *falsy*.
 
     See Also
     --------
@@ -842,21 +810,13 @@ def footprint_ellipse(radii, *, shape=None, adjust_edge=0.4, dtype=np.uint8):
            [0, 1, 1, 1, 1, 1, 0],
            [0, 0, 0, 1, 0, 0, 0]], dtype=uint8)
 
-    Produce a disk with an even length in each dimension
-
-    >>> ski2.morphology.footprint_ellipse((2, 2), shape=(4, 4))
-    array([[0, 1, 1, 0],
-           [1, 1, 1, 1],
-           [1, 1, 1, 1],
-           [0, 1, 1, 0]], dtype=uint8)
-
     Produce a 3-dimensional ellipsoid
 
     >>> ellipsoid = ski2.morphology.footprint_ellipse((3, 4, 11))
     >>> ellipsoid.shape
     (7, 9, 23)
     """
-    radii, shape = _normalize_radii_shape(radii, shape)
+    radii, shape = _normalize_radii(radii)
 
     if np.isscalar(adjust_edge):
         adjust_edge = (adjust_edge,) * len(shape)

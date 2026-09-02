@@ -108,22 +108,16 @@ class TestFootprints:
         actual = footprint_ellipse((5, 3))
         assert_equal(actual.T, expected)
 
-        # Larger shape with same radii, can be cropped to original result
-        actual = footprint_ellipse((3, 5), shape=(9, 15))
-        actual = actual[1:-1, 2:-2]
-        assert_equal(actual, expected)
-
     def test_footprint_ellipse_zero_radius(self):
         # `radii` aren't exactly 0 because of default `adjust_edge`
         actual = footprint_ellipse(0)
         assert_equal(actual, [[1]])
 
+        actual = footprint_ellipse((0, 0))
+        assert_equal(actual, [[1]])
+
         actual = footprint_ellipse((0, 1))
         assert_equal(actual, [[1, 1, 1]])
-
-        # Forcing even length in one dimension, is enough to evaluate to 0
-        actual = footprint_ellipse((0, 0), shape=(1, 2))
-        assert_equal(actual, [[0, 0]])
 
         # `radii` are exactly 0
         actual = footprint_ellipse(0, adjust_edge=0)
