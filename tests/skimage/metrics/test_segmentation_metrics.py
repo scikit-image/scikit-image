@@ -15,7 +15,20 @@ from _skimage2._shared.testing import (
 )
 
 
-@pytest.mark.parametrize("sparse_type", ["matrix", "array"])
+# SciPy >= 2.0 deprecates the sparse matrix classes in favor of sparse arrays.
+# The legacy ``skimage`` namespace keeps returning a `scipy.sparse.csr_matrix`
+# by default, so these tests have to tolerate that warning. In ``skimage2`` the
+# default is ``sparse_type="array"``.
+ignore_spmatrix_deprecation = pytest.mark.filterwarnings(
+    "ignore:.*_matrix is being replaced by .*_array:DeprecationWarning"
+)
+sparse_types = [
+    pytest.param("matrix", marks=ignore_spmatrix_deprecation),
+    "array",
+]
+
+
+@pytest.mark.parametrize("sparse_type", sparse_types)
 def test_contingency_table(sparse_type):
     im_true = np.array([1, 2, 3, 4])
     im_test = np.array([1, 1, 8, 8])
@@ -37,6 +50,7 @@ def test_contingency_table(sparse_type):
     assert_array_equal(table1, table2)
 
 
+@ignore_spmatrix_deprecation
 def test_contingency_table_sparse_type():
     im_true = np.array([1, 2, 3, 4])
     im_test = np.array([1, 1, 8, 8])
