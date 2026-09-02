@@ -74,7 +74,6 @@ def adapted_rand_error(
             image_test,
             ignore_labels=ignore_labels,
             normalize=False,
-            sparse_type="array",
         )
     else:
         p_ij = table

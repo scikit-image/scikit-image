@@ -57,7 +57,7 @@ def slice_along_axes(image, slices, axes=None, copy=False):
 
     if not all(a >= 0 and a < image.ndim for a in axes):
         raise ValueError(
-            f"axes {axes} out of range; image has only " f"{image.ndim} dimensions"
+            f"axes {axes} out of range; image has only {image.ndim} dimensions"
         )
 
     _slices = [
