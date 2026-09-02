@@ -246,13 +246,14 @@ FETCH_FUNCTION_NAMES = [
 
 
 @pytest.mark.parametrize('function_name', FETCH_FUNCTION_NAMES)
-def test_fetch_functions_are_public_and_bare_names_are_not(function_name):
-    """Every dataset getter is only reachable as fetch_<name>(); the old
-    bare name (e.g. astronaut() for fetch_astronaut()) must not resolve on
-    _skimage2.data, even though the underlying function of that name still
-    exists in _fetchers.py for skimage1's shim to import directly."""
+def test_fetch_functions_and_bare_aliases_are_both_public(function_name):
+    """Every dataset getter is reachable both as fetch_<name>() and under
+    its bare name (e.g. astronaut() for fetch_astronaut()), and the two
+    are the same function, not independent copies."""
+    bare_name = function_name.removeprefix('fetch_')
     assert hasattr(data, function_name)
-    assert not hasattr(data, function_name.removeprefix('fetch_'))
+    assert hasattr(data, bare_name)
+    assert getattr(data, function_name) is getattr(data, bare_name)
 
 
 def test_fetch_public_wrapper_matches_internal_fetch():

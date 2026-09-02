@@ -1320,9 +1320,8 @@ def vortex():
 
 
 # Named after sklearn.datasets.fetch_*, so the call site shows that a dataset
-# may need downloading. The bare-name functions above stay put: skimage1's shim
-# imports them straight from this module, bypassing _skimage2.data's public
-# surface.
+# may need downloading. Both names resolve to the same function; see
+# _skimage2/data/__init__.pyi for the bare aliases.
 fetch_astronaut = astronaut
 fetch_brain = brain
 fetch_brick = brick
