@@ -38,21 +38,16 @@ jobs:
       - run:
           name: Install Chrome for kaleido
           # See .github/workflows/test-docs.yaml for why this installs
-          # Chrome through apt instead of `plotly_get_chrome`. This machine
-          # image already has a google-chrome apt source configured under a
-          # different (or no) Signed-By, so only add our own if none exists;
-          # a second, conflicting definition for the same repo breaks `apt-get
-          # update` outright ("Conflicting values set for option Signed-By").
+          # Chrome through apt instead of `plotly_get_chrome`. Installing
+          # the downloaded .deb directly, rather than adding Google's apt
+          # repo, avoids this machine image's own preconfigured
+          # google-chrome source, whose Signed-By conflicts with one we'd
+          # add ("Conflicting values set for option Signed-By").
           command: |
-            if ! grep -qr "dl.google.com/linux/chrome/deb" /etc/apt/sources.list /etc/apt/sources.list.d/ 2>/dev/null; then
-              wget -q -O - https://dl.google.com/linux/linux_signing_key.pub \
-                | gpg --dearmor \
-                | sudo tee /usr/share/keyrings/google-chrome.gpg >/dev/null
-              echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" \
-                | sudo tee /etc/apt/sources.list.d/google-chrome.list
-            fi
+            wget -q -O google-chrome-stable.deb \
+              https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
             sudo apt-get update
-            sudo apt-get install -y google-chrome-stable
+            sudo apt-get install -y ./google-chrome-stable.deb
       - run:
           name: Print ccache performance
           command: |
