@@ -50,10 +50,8 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      # Reads the event payload from GITHUB_EVENT_PATH directly, so the
-      # pull_request/workflow_dispatch fields don't need threading
-      # through `env:` here. The asv parameters that only the benchmark
-      # job needs travel as an artifact rather than as job outputs.
+      # Reads GITHUB_EVENT_PATH itself, so pull_request/workflow_dispatch
+      # fields don't need repeating in `env:`.
       - name: Resolve benchmark parameters
         id: params
         env:
@@ -66,9 +64,9 @@ jobs:
           name: benchmark-params
           path: benchmark-params.json
 
-  # Build the baseline and contender wheels in parallel, reusing the
-  # repo's proven, ccache-tuned build workflow instead of asv's own
-  # from-scratch (and much slower, sequential) build_command.
+  # Build the baseline and contender wheels in parallel, reusing the repo's
+  # proven, ccache-tuned build workflow instead of asv's own from-scratch
+  # (and much slower, sequential) build_command.
   build-baseline:
     needs: resolve-params
     if: needs.resolve-params.outputs.should_run == 'true'

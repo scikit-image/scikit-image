@@ -33,10 +33,8 @@ def _resolve_param(reduced, full):
     """
     Pick one parameter's values: reduced for fast CI, full for nightly.
 
-    Controlled by the ASV_FULL_PARAMS environment variable, for wrapping
-    one axis of a benchmark class's ``params``. The reduced set trims a
-    heavily-parametrized suite for fast CI runs; the nightly run sets
-    ASV_FULL_PARAMS=1 for the full parameter space.
+    Wrap one axis of a benchmark class's ``params`` with this. Controlled
+    by ASV_FULL_PARAMS, which the nightly run sets to 1.
 
     For example:
 

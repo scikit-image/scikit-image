@@ -44,10 +44,10 @@ MODULE_MAP = {
 }
 
 # Trimmed run for pull requests and manual dispatches: slow benchmarks
-# skipped, reduced parameter matrices, and a comparison factor loose
-# enough to absorb the noise of a shared runner.
+# skipped and reduced parameter matrices. ASV_FACTOR is asv's own
+# default, not overridden.
 FAST_PROFILE = {
-    "ASV_FACTOR": "1.5",
+    "ASV_FACTOR": "1.1",
     "ASV_PROCESSES": "2",
     "ASV_SKIP_SLOW": "1",
     "ASV_FULL_PARAMS": "0",
