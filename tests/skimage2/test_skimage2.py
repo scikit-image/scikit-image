@@ -61,6 +61,9 @@ def test_no_eager_skimage_import(namespace):
         assert "skimage" in top_module
 
 
+@pytest.mark.thread_unsafe(
+    reason="pytest.warns (subclass of warnings.catch_warnings) is not thread safe"
+)
 def test_skimage2_modules_match():
     """Ensure _skimage2 and skimage2 package structures are aligned."""
 
