@@ -42,8 +42,7 @@ __all__ = [
     'fetch_stereo_motorcycle',
     'fetch_text',
     'fetch_vortex',
-    # Bare aliases of the fetch_*() functions above, kept for backward
-    # compatibility.
+    # Original names, kept public for backward compatibility.
     'astronaut',
     'brain',
     'brick',

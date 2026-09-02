@@ -1320,8 +1320,7 @@ def vortex():
 
 
 # Named after sklearn.datasets.fetch_*, so the call site shows that a dataset
-# may need downloading. Both names resolve to the same function; see
-# _skimage2/data/__init__.pyi for the bare aliases.
+# may need downloading.
 fetch_astronaut = astronaut
 fetch_brain = brain
 fetch_brick = brick
