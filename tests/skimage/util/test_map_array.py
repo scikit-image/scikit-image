@@ -104,6 +104,14 @@ def test_arraymap_long_str():
     assert len(str(m).split('\n')) == m._max_str_lines + 2
 
 
+def test_arraymap_array_protocol():
+    m = ArrayMap(np.array([0, 2]), np.array([1.0, 3.0]))
+    np.testing.assert_array_equal(np.array(m, copy=True), [1.0, 0.0, 3.0])
+
+    with pytest.raises(ValueError, match='Unable to avoid a copy'):
+        np.array(m, copy=False)
+
+
 def test_arraymap_update():
     rng = np.random.RandomState(1125684548)
     in_values = np.unique(rng.randint(0, 200, size=5))

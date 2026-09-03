@@ -1296,8 +1296,17 @@ def test_fundamental_3d_not_implemented():
 def test_array_protocol():
     mat = np.eye(4)
     tf = ProjectiveTransform(mat)
-    assert_equal(np.array(tf), mat)
+    copied = np.array(tf, copy=True)
+    assert_equal(copied, mat)
+    assert not np.shares_memory(copied, tf.params)
+
+    view = np.array(tf, copy=False)
+    assert_equal(view, mat)
+    assert np.shares_memory(view, tf.params)
+
     assert_equal(np.array(tf, dtype=int), mat.astype(int))
+    with pytest.raises(ValueError):
+        np.array(tf, dtype=int, copy=False)
 
 
 def test_affine_transform_from_linearized_parameters():
