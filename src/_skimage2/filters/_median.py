@@ -1,8 +1,7 @@
-from warnings import warn
-
 import numpy as np
 from scipy import ndimage as ndi
 
+from .._shared._warnings import warn_external
 from .rank import generic
 
 
@@ -65,16 +64,15 @@ def median(
     --------
     >>> import _skimage2 as ski2
     >>> img = ski2.data.camera()
-    >>> med = ski2.filters.median(img, ski2.morphology.disk(5))
+    >>> med = ski2.filters.median(img, ski2.morphology.footprint_ellipse(5))
 
     """
     if behavior == 'rank':
         if mode != 'nearest' or not np.isclose(cval, 0.0):
-            warn(
+            warn_external(
                 "Change 'behavior' to 'ndimage' if you want to use the "
                 "parameters 'mode' or 'cval'. They will be discarded "
-                "otherwise.",
-                stacklevel=2,
+                "otherwise."
             )
         return generic.median(image, footprint=footprint, out=out)
     if footprint is None:
