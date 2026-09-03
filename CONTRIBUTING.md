@@ -208,30 +208,42 @@ PRs anyway, so we don't mind merge commits.
 
 ## AI Policy
 
-Regardless of how a PR was produced, scikit-image requires that
-authors illustrate a thorough understanding of any proposed changes.
-You **must review such code line-by-line**—it is **your
-responsibility** to ensure that it is correct, and that it does not
-breach copyright. You should expect the team to ask questions about
-your work.
+scikit-image is technically complex, key research infrastructure;
+therefore, we place a high premium on correctness, and on avoiding
+technical complexity that may affect maintainability.
 
-scikit-image is technically complex, key infrastructure; therefore, we
-place a high premium on correctness, and on avoiding technical
-complexity that may affect maintainability. If you want to make use of
-LLMs in a significant way, we recommend that you **check in with us
-first** to discuss your strategy.
+To preserve our culture of collaboration, we (the human maintainers)
+need to know that you (the human author) fully understand the code you
+have submitted, and its implications for the code-base.
 
-**Always declare tool usage**. Use an `Assisted-by:` tag in the commit
-message, as recommended by the
-[Linux kernel](https://docs.kernel.org/process/coding-assistants.html).
+If you want to make use of LLMs in a significant way and have your
+contributions reviewed, safest is to **check in with us first** to
+discuss your strategy.
 
-We (the human maintainers) need to know that you (the human author)
-fully understand the code you have submitted, and its implications for
-the code-base. So, even if you have a summary from an AI system
-available to you, please write PR descriptions by hand. If you do
-quote AI text, do so sparingly, and indicate where you're doing so,
-e.g. by writing `:robot: _AI text below_ :robot:`. You can also use a
-`<details>...</details>` block to "fold up" that text by default.
+Do not use AI for:
+
+1. Creating novel code (algorithmic additions, writing tests, etc.).
+2. Writing pull request descriptions, or commenting on issues or PRs.
+
+How you may use AI:
+
+1. For exploring the codebase, for iterating on hand-written code, and for fixing trivial bugs.
+2. To automate mechanical tasks. E.g., if you discover that you need to add a decorator across the code-base.
+3. For infrastructure code, such as CI, as long as the changes are easy to review.
+
+If you use AI as above, you must:
+
+1. **Always declare tool usage**: say specifically what part of the task you used AI for in the PR description.
+2. **Write PR descriptions and comments by hand.** If you do quote AI text, do so sparingly, and indicate where you're doing so,e.g. by writing `:robot: _AI text below_ :robot:`.
+   You can also use a `<details>...</details>` block to "fold up" that text by default.
+3. As far as possible, **separate AI-generated code from human-generated** code with individual commits.
+   Tag AI commits with an `Assisted-by:` tag as recommended by the [Linux kernel](https://docs.kernel.org/process/coding-assistants.html).
+4. **AI-generated code must be trivial to review:** the reviewer must be able to review the AI-generated code with little background in image-processing or experience working on the code-base, and see that the changes are correct.
+   Note that _tests, specifically, are rarely trivial_, as the decision about _what to test_ relies on understanding how the code could give the wrong answer.
+5. You must **take responsibility for copyright** of the AI-generated code; the simplest and best way to do this, is to make sure the code changes are trivial, in the sense that they cannot reasonably be done differently to solve the given problem.
+6. **Expect the team to ask questions** about your work - and you must answer these questions yourself, without deferring to AI.
+
+The landscape around AI is changing quickly, and we will continue to update this policy as informed by our current experience.
 
 (guidelines)=
 
