@@ -347,6 +347,32 @@ class TestLBP:
         )
         np.testing.assert_array_almost_equal(lbp, ref)
 
+    @pytest.mark.parametrize('method', ['default', 'ror', 'DEFAULT', 'RoR'])
+    def test_p_above_int32_capacity_raises(self, method):
+        # gh-5025: the 'default' and 'ror' codes sum one power of two per
+        # neighbor into an int32, so at P == 32 the last weight (2 ** 31)
+        # overflows and the returned codes go negative -- silently, with no
+        # error or warning. Measured on 0.26.0: P=32 'default' returned codes
+        # from -2147483647, and 'ror' returned a maximum of 0.
+        with pytest.raises(ValueError, match='must not exceed 31'):
+            local_binary_pattern(self.image, 32, 1, method)
+
+    @pytest.mark.parametrize('method', ['uniform', 'nri_uniform', 'var'])
+    def test_p_above_31_allowed_for_unweighted_methods(self, method):
+        # These methods do not weight neighbors by powers of two, so the int32
+        # ceiling does not apply and a wide neighborhood stays valid.
+        lbp = local_binary_pattern(self.image, 32, 1, method)
+        assert lbp.shape == self.image.shape
+        assert np.all(lbp >= 0)
+
+    def test_p_at_int32_limit_is_accepted(self):
+        # P == 31 is the largest pattern an int32 can hold: the weights top out
+        # at 2 ** 30 and the widest code is 2 ** 31 - 1. It must not be
+        # rejected by the guard above.
+        lbp = local_binary_pattern(self.image, 31, 1, 'default')
+        assert np.all(lbp >= 0)
+        assert lbp.max() <= 2**31 - 1
+
 
 class TestMBLBP:
     def test_single_mblbp(self):
