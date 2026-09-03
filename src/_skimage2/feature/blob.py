@@ -406,6 +406,9 @@ def blob_dog(
     if sigma_ratio <= 1.0:
         raise ValueError('sigma_ratio must be > 1.0')
 
+    if np.any(min_sigma <= 0):
+        raise ValueError('min_sigma must be > 0')
+
     # k such that min_sigma*(sigma_ratio**k) > max_sigma
     k = int(np.mean(np.log(max_sigma / min_sigma) / np.log(sigma_ratio) + 1))
 
