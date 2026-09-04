@@ -270,6 +270,10 @@ e.g. by writing `:robot: _AI text below_ :robot:`. You can also use a
 - Use numpy data types instead of strings (`np.uint8` instead of
   `"uint8"`).
 
+- Return a consistent family of types. Do not mix native Python scalars and NumPy scalar types in the same return value.
+
+- Prefer the native Python `bool` type over NumPy `np.bool_` when the value is not part of an array dtype.
+
 - When documenting array parameters, use `image : ndarray of shape (M, N)`
   and then refer to `M` and `N` in the docstring, if necessary.
 
