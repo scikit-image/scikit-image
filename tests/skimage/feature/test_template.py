@@ -1,5 +1,5 @@
 import numpy as np
-from _skimage2._shared.testing import assert_almost_equal, assert_equal
+from _skimage2._shared.testing import assert_almost_equal, assert_allclose, assert_equal
 
 from skimage import data, img_as_float
 from skimage.morphology import diamond
@@ -137,6 +137,24 @@ def test_3d():
 
     assert_equal(result.shape, (10, 10, 10))
     assert_equal(np.unravel_index(result.argmax(), result.shape), (3, 5, 4))
+
+
+def test_3d_image_with_2d_template():
+    rng = np.random.RandomState(28378128)
+    template = rng.rand(3, 3)
+    image = rng.rand(12, 12, 5)
+
+    result = match_template(image, template)
+    expected = match_template(image, template[..., np.newaxis])
+
+    assert_equal(result.shape, (10, 10, 5))
+    assert_allclose(result, expected)
+
+    padded_result = match_template(image, template, pad_input=True)
+    padded_expected = match_template(image, template[..., np.newaxis], pad_input=True)
+
+    assert_equal(padded_result.shape, (12, 12, 5))
+    assert_allclose(padded_result, padded_expected)
 
 
 def test_3d_pad_input():
