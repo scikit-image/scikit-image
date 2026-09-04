@@ -239,7 +239,7 @@ def flood(image, seed_point, *, footprint=None, connectivity=None, tolerance=Non
     except TypeError:
         seed_point = (seed_point,)
 
-    if isinstance(seed_point, (list, tuple, np.ndarray)):
+    if np.iterable(seed_point):
         index_point = tuple(seed_point)
     else:
         index_point = seed_point
