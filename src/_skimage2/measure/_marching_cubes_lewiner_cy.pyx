@@ -427,21 +427,21 @@ cdef class Cell:
 
         # Set values
         self.v0 = v0 - isovalue
-        if dabs(self.v0) < FLT_EPSILON: self.v0 = FLT_EPSILON
+        if self.v0 == 0: self.v0 = FLT_EPSILON
         self.v1 = v1 - isovalue
-        if dabs(self.v1) < FLT_EPSILON: self.v1 = FLT_EPSILON
+        if self.v1 == 0: self.v1 = FLT_EPSILON
         self.v2 = v2 - isovalue
-        if dabs(self.v2) < FLT_EPSILON: self.v2 = FLT_EPSILON
+        if self.v2 == 0: self.v2 = FLT_EPSILON
         self.v3 = v3 - isovalue
-        if dabs(self.v3) < FLT_EPSILON: self.v3 = FLT_EPSILON
+        if self.v3 == 0: self.v3 = FLT_EPSILON
         self.v4 = v4 - isovalue
-        if dabs(self.v4) < FLT_EPSILON: self.v4 = FLT_EPSILON
+        if self.v4 == 0: self.v4 = FLT_EPSILON
         self.v5 = v5 - isovalue
-        if dabs(self.v5) < FLT_EPSILON: self.v5 = FLT_EPSILON
+        if self.v5 == 0: self.v5 = FLT_EPSILON
         self.v6 = v6 - isovalue
-        if dabs(self.v6) < FLT_EPSILON: self.v6 = FLT_EPSILON
+        if self.v6 == 0: self.v6 = FLT_EPSILON
         self.v7 = v7 - isovalue
-        if dabs(self.v7) < FLT_EPSILON: self.v7 = FLT_EPSILON
+        if self.v7 == 0: self.v7 = FLT_EPSILON
 
         # Calculate index
         cdef int index = 0
