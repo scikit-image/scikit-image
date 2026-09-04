@@ -23,6 +23,35 @@ def test_marching_cubes_isotropic():
     assert surf > surf_calc and surf_calc > surf * 0.99
 
 
+def test_marching_cubes_level_equal_to_voxel_value():
+    """Equal-valued cube corners use a consistent triangulation."""
+    volume = np.array(
+        [
+            [[1, 1, 1], [1, 1, 1], [1, 1, -1]],
+            [[-1, 1, 1], [-1, 0, 1], [1, 1, -1]],
+            [[-1, -1, -1], [1, -1, -1], [1, 1, -1]],
+        ],
+        dtype=float,
+    )
+
+    vertices, faces, _, _ = marching_cubes(volume, level=0)
+
+    assert vertices.shape == (18, 3)
+    assert faces.shape == (18, 3)
+
+
+@pytest.mark.parametrize('scale', [1.0, 1e-15, 2e-16, 1e-16, 1e-20])
+def test_marching_cubes_preserves_sign_of_nonzero_residuals(scale):
+    """Nonzero values near the isosurface retain their sign."""
+    volume = np.stack([np.full((2, 2), -scale), np.full((2, 2), scale)])
+    assert np.all(volume != 0)
+
+    vertices, faces, _, _ = marching_cubes(volume, level=0)
+
+    assert vertices.shape == (4, 3)
+    assert faces.shape == (2, 3)
+
+
 def test_marching_cubes_anisotropic():
     # test spacing as numpy array (and not just tuple)
     spacing = np.array([1.0, 10 / 6.0, 16 / 6.0])
