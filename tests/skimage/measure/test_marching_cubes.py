@@ -43,9 +43,7 @@ def test_marching_cubes_level_equal_to_voxel_value():
 @pytest.mark.parametrize('scale', [1.0, 1e-15, 2e-16, 1e-16, 1e-20])
 def test_marching_cubes_preserves_sign_of_nonzero_residuals(scale):
     """Nonzero values near the isosurface retain their sign."""
-    volume = np.stack(
-        [np.full((2, 2), -scale), np.full((2, 2), scale)]
-    )
+    volume = np.stack([np.full((2, 2), -scale), np.full((2, 2), scale)])
     assert np.all(volume != 0)
 
     vertices, faces, _, _ = marching_cubes(volume, level=0)
