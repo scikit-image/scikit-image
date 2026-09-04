@@ -46,6 +46,7 @@ def test_marching_cubes_preserves_sign_of_nonzero_residuals(scale):
     volume = np.stack(
         [np.full((2, 2), -scale), np.full((2, 2), scale)]
     )
+    assert np.all(volume != 0)
 
     vertices, faces, _, _ = marching_cubes(volume, level=0)
 
