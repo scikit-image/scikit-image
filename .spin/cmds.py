@@ -47,7 +47,7 @@ def asv(asv_args, build_dir):
 
     spin asv -- check -v -E existing
 
-    Please see CONTRIBUTING.txt
+    Please see CONTRIBUTING.md
     """
     site_path = spin.cmds.meson._get_site_packages(build_dir)
     if site_path is None:

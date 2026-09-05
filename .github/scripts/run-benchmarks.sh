@@ -20,9 +20,8 @@ set -euo pipefail
 set -x
 
 # Stage the log and this suite's README next to asv's own results for the
-# artifact upload. Uses an EXIT trap since the log matters most on the runs
-# that failed, including ones that fail before benchmarking starts and never
-# write a log at all.
+# artifact upload. EXIT trap, because the log matters most on failed runs,
+# including ones that fail before benchmarking starts and never write one.
 collect_results() {
     status=$?
     mkdir -p .asv/results

@@ -14,11 +14,9 @@ def _channel_kwarg(is_multichannel=False):
 
 def _skip_slow():
     """
-    Use this function to skip slow or highly demanding tests.
+    Skip slow or highly demanding tests when `ASV_SKIP_SLOW` is set.
 
-    Use it as a `Class.setup` method or a `function.setup` attribute.
-
-    For example:
+    Attach it as a `Class.setup` method or a `function.setup` attribute:
 
     >>> from . import _skip_slow
     >>> def time_something_slow():

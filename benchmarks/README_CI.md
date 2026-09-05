@@ -45,7 +45,7 @@ Every night at 07:00 UTC, a scheduled run compares `main`'s tip against the comm
 
 ## The artifacts
 
-The CI job will also generate an artifact. This is the `.asv/results` directory compressed in a zip file. Its contents include:
+The job also uploads `.asv/results` compressed into a zip. Its contents include:
 
 - `fv-xxxxx-xx/`. A directory for the machine that ran the suite. It contains three files:
   - `<baseline>.json`, `<contender>.json`: the benchmark results for each commit, with stats.
@@ -56,9 +56,9 @@ The CI job will also generate an artifact. This is the `.asv/results` directory 
 
 ## Re-running the analysis
 
-Although the CI logs should be enough to get an idea of what happened (check the table at the end), one can use `asv` to run the analysis routines again.
+Although the CI logs usually show enough to see what happened (check the table at the end), `asv` can rerun the analysis.
 
-1. Uncompress the artifact contents in the repo, under `.asv/results`. This is, you should see `.asv/results/benchmarks.log`, not `.asv/results/something_else/benchmarks.log`. Write down the machine directory name for later.
+1. Uncompress the artifact contents in the repo, under `.asv/results` (that is, `.asv/results/benchmarks.log`, not `.asv/results/something_else/benchmarks.log`). Write down the machine directory name for later.
 2. Run `asv show` to see your available results. You will see something like this:
 
 ```
@@ -78,7 +78,7 @@ Environment: conda-py3.7-cython-numpy1.17-pooch-scipy
     3a305096
 ```
 
-3. We are interested in the commits for `fv-az95-499` (the CI machine for this run). We can compare them with `asv compare` and some extra options. `--sort ratio` will show largest ratios first, instead of alphabetical order. `--split` will produce three tables: improved, worsened, no changes. `--factor 1.5` tells `asv` to only complain if deviations are above a 1.5 ratio. `-m` is used to indicate the machine ID (use the one you wrote down in step 1). Finally, specify your commit hashes: baseline first, then contender!
+3. Compare the commits for `fv-az95-499` (the CI machine for this run) with `asv compare` and some extra options. `--sort ratio` shows the largest ratios first instead of alphabetical order. `--split` produces three tables: improved, worsened, no changes. `--factor 1.5` only complains about deviations above a 1.5 ratio. `-m` gives the machine ID (the one you wrote down in step 1). Give your commit hashes baseline first, then contender.
 
 ```
 $> asv compare --sort ratio --split --factor 1.5 -m fv-az95-499 8db28f02 3a305096
@@ -101,7 +101,7 @@ Benchmarks that have stayed the same:
 ...
 ```
 
-If you want more details on a specific test, you can use `asv show`. Use `-b pattern` to filter which tests to show, and then specify a commit hash to inspect:
+For more details on a specific test, use `asv show`. Filter which tests to show with `-b pattern`, then specify a commit hash to inspect:
 
 ```
 $> asv show -b time_to_float64 8db28f02
@@ -127,10 +127,10 @@ benchmark_transform_warp.WarpSuite.time_to_float64 [fv-az95-499/conda-py3.7-cyth
 
 ### Skipping slow or demanding tests
 
-To minimize the time required to run the full suite, we trimmed the parameter matrix in some cases and, in others, directly skipped tests that ran for too long or require too much memory. Unlike `pytest`, `asv` does not have a notion of marks. However, you can `raise NotImplementedError` in the setup step to skip a test. In that vein, a new private function is defined at `benchmarks.__init__`: `_skip_slow`. This will check if the `ASV_SKIP_SLOW` environment variable has been defined. If set to `1`, it will raise `NotImplementedError` and skip the test. To implement this behavior in other tests, you can add the following attribute:
+To keep the full suite fast, we trimmed some parameter matrices and skipped tests that run too long or need too much memory. Unlike `pytest`, `asv` has no concept of marks; instead, raise `NotImplementedError` in a setup step. `benchmarks/__init__.py` ships `_skip_slow`, which does that when `ASV_SKIP_SLOW` is set to `1`. Attach it as a setup method or attribute:
 
 ```python
-from . import _skip_slow  # this function is defined in benchmarks.__init__
+from . import _skip_slow
 
 def time_something_slow():
     pass

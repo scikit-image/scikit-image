@@ -21,8 +21,8 @@ def init_regionprops_data():
 
 class RegionpropsTableIndividual:
     param_names = ['prop']
-    # sample every 3rd property (alphabetically) to keep breadth while
-    # trimming the many near-fixed-cost parameter combinations
+    # Sample every 3rd property (alphabetical) to keep breadth while
+    # cutting the near-fixed-cost combinations.
     params = _resolve_param(
         reduced=sorted(list(PROP_VALS))[::3],
         full=sorted(list(PROP_VALS)),

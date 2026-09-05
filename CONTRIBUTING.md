@@ -997,8 +997,7 @@ except ImportError:
 
 ### Testing the benchmarks locally
 
-Prior to running the true benchmark, it is often worthwhile to test that the
-code is free of typos. To do so, you may use the command:
+Before running the real benchmark, check that your code is free of typos. Use the command:
 
 ```
 spin asv -- check -v -E existing

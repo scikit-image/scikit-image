@@ -1,5 +1,5 @@
 name: Build on Linux for a given Python version
-# Also use ccache as much as possible.
+# Cache ccache to speed up rebuilds.
 
 on:
   workflow_call:

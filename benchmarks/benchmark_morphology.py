@@ -24,7 +24,7 @@ class Skeletonize3d:
         except AttributeError:
             raise NotImplementedError("3d skeletonize unavailable")
 
-        # we stack the horse data 5 times to get an example volume
+        # Stack the horse data five times to form an example volume.
         self.image = np.stack(5 * [util.invert(data.horse())])
 
     def time_skeletonize(self):

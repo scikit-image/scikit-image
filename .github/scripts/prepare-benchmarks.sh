@@ -43,5 +43,5 @@ mv asv.conf.json.tmp asv.conf.json
 
 python -m pip install virtualenv
 
-# ID this runner
+# Register this runner with asv.
 asv machine --yes

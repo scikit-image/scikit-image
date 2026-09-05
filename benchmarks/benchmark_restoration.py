@@ -55,8 +55,8 @@ class RestorationSuite:
             **_channel_kwarg(False),
         )
 
-    # fast_mode=False is much slower than the fast_mode=True variants below
-    # and exercises the same underlying function; skip it in CI.
+    # fast_mode=False is much slower and exercises the same underlying
+    # function; skip it in CI.
     time_denoise_nl_means_f64.setup = _skip_slow
 
     def time_denoise_nl_means_f32(self):

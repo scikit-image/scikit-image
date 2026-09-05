@@ -19,7 +19,7 @@ on:
           - previous-nightly
 
 concurrency:
-  # Cancel previous workflows of the same PR, but only for PRs
+  # Cancel a previous run of the same PR; non-PR runs group by SHA, so each run is a fresh group.
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
@@ -43,7 +43,7 @@ jobs:
       python_version: ${{ steps.params.outputs.python_version }}
       baseline_sha: ${{ steps.params.outputs.baseline_sha }}
     steps:
-      # We need the full repo to avoid this issue
+      # Full-checkout needed to avoid this issue:
       # https://github.com/actions/checkout/issues/23
       - uses: actions/checkout@v5
         with:
@@ -95,7 +95,7 @@ jobs:
       issues: write
 
     steps:
-      # We need the full repo to avoid this issue
+      # Full-checkout needed to avoid this issue:
       # https://github.com/actions/checkout/issues/23
       - uses: actions/checkout@v5
         with:
