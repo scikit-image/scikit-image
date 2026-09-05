@@ -231,9 +231,11 @@ def _convert(image, dtype, force_copy=False, uniform=False):
         Force a copy of the data, irrespective of its current dtype.
     uniform : bool, optional
         Uniformly quantize the floating point range to the integer range.
-        By default (uniform=False) floating point values are scaled and
-        rounded to the nearest integers, which minimizes back and forth
-        conversion errors.
+        When converting from an integer range to a floating point range
+        each integer is mapped to the center of its corresponding bin.
+        This makes matched round-trips, while True in both directions,
+        preserve bin identity. By default (uniform=False), the non-uniform
+        scaling is used, which minimizes single-conversion error.
 
     Notes
     -----
@@ -346,25 +348,41 @@ def _convert(image, dtype, force_copy=False, uniform=False):
             itemsize_in, dtype_out, np.float32, np.float64
         )
 
-        if kind_in == 'u':
-            # using np.divide or np.multiply doesn't copy the data
-            # until the computation time
-            image = np.multiply(image, 1.0 / imax_in, dtype=computation_type)
-            # DirectX uses this conversion also for signed ints
-            # if imin_in:
-            #     np.maximum(image, -1.0, out=image)
-        elif kind_in == 'i':
-            # From DirectX conversions:
-            # The most negative value maps to -1.0f
-            # Every other value is converted to a float (call it c)
-            # and then result = c * (1.0f / (2⁽ⁿ⁻¹⁾-1)).
+        if not uniform:
+            if kind_in == 'u':
+                # using np.divide or np.multiply doesn't copy the data
+                # until the computation time
+                image = np.multiply(image, 1.0 / imax_in, dtype=computation_type)
+                # DirectX uses this conversion also for signed ints
+                # if imin_in:
+                #     np.maximum(image, -1.0, out=image)
+            elif kind_in == 'i':
+                # From DirectX conversions:
+                # The most negative value maps to -1.0f
+                # Every other value is converted to a float (call it c)
+                # and then result = c * (1.0f / (2⁽ⁿ⁻¹⁾-1)).
 
-            image = np.multiply(image, 1.0 / imax_in, dtype=computation_type)
-            np.maximum(image, -1.0, out=image)
+                image = np.multiply(image, 1.0 / imax_in, dtype=computation_type)
+                np.maximum(image, -1.0, out=image)
 
+            else:
+                image = np.add(image, 0.5, dtype=computation_type)
+                image *= 2 / (imax_in - imin_in)
+        elif kind_in == 'u':
+            # uniform uses imax_in + 1 as the size of an "integer bin"
+            # so we expand the bin, and then shift the resulting float values
+            # to the center of said bins, by using half of the size of a bin
+            image = np.multiply(image, 1 / (imax_in + 1), dtype=computation_type)
+            image = np.add(image, 0.5 / (imax_in + 1), dtype=computation_type)
         else:
-            image = np.add(image, 0.5, dtype=computation_type)
-            image *= 2 / (imax_in - imin_in)
+            # Same uniform bin logic as unsigned, but over the range
+            # [imin_in, imax_in] which spans (imax_in - imin_in + 1) values
+            image = np.multiply(
+                image, 2.0 / (imax_in - imin_in + 1), dtype=computation_type
+            )
+            image = np.add(image, 1.0 / (imax_in - imin_in + 1), dtype=computation_type)
+            # Values cannot reach -1.0 in the uniform path
+            # as the minimum is (-1 + 1/N), no clamping needed
 
         return np.asarray(image, dtype_out)
 
@@ -424,7 +442,7 @@ if _convert.__doc__ is not None:
     )
 
 
-def img_as_float32(image, force_copy=False):
+def img_as_float32(image, force_copy=False, uniform=False):
     """Convert an image to single-precision (32-bit) floating point format.
 
     Parameters
@@ -433,6 +451,13 @@ def img_as_float32(image, force_copy=False):
         Input image.
     force_copy : bool, optional
         Force a copy of the data, irrespective of its current dtype.
+    uniform : bool, optional
+        Uniformly quantize the floating point range to the integer range.
+        When converting from an integer range to a floating point range
+        each integer is mapped to the center of its corresponding bin.
+        This makes matched round-trips, while True in both directions,
+        preserve bin identity. By default (uniform=False), the non-uniform
+        scaling is used, which minimizes single-conversion error.
 
     Returns
     -------
@@ -447,10 +472,10 @@ def img_as_float32(image, force_copy=False):
     and can be outside the ranges [0.0, 1.0] or [-1.0, 1.0].
 
     """
-    return _convert(image, np.float32, force_copy)
+    return _convert(image, np.float32, force_copy, uniform)
 
 
-def img_as_float64(image, force_copy=False):
+def img_as_float64(image, force_copy=False, uniform=False):
     """Convert an image to double-precision (64-bit) floating point format.
 
     Parameters
@@ -459,6 +484,13 @@ def img_as_float64(image, force_copy=False):
         Input image.
     force_copy : bool, optional
         Force a copy of the data, irrespective of its current dtype.
+    uniform : bool, optional
+        Uniformly quantize the floating point range to the integer range.
+        When converting from an integer range to a floating point range
+        each integer is mapped to the center of its corresponding bin.
+        This makes matched round-trips, while True in both directions,
+        preserve bin identity. By default (uniform=False), the non-uniform
+        scaling is used, which minimizes single-conversion error.
 
     Returns
     -------
@@ -473,10 +505,10 @@ def img_as_float64(image, force_copy=False):
     and can be outside the ranges [0.0, 1.0] or [-1.0, 1.0].
 
     """
-    return _convert(image, np.float64, force_copy)
+    return _convert(image, np.float64, force_copy, uniform)
 
 
-def img_as_float(image, force_copy=False):
+def img_as_float(image, force_copy=False, uniform=False):
     """Convert an image to floating point format.
 
     This function is similar to `img_as_float64`, but will not convert
@@ -488,6 +520,13 @@ def img_as_float(image, force_copy=False):
         Input image.
     force_copy : bool, optional
         Force a copy of the data, irrespective of its current dtype.
+    uniform : bool, optional
+        Uniformly quantize the floating point range to the integer range.
+        When converting from an integer range to a floating point range
+        each integer is mapped to the center of its corresponding bin.
+        This makes matched round-trips, while True in both directions,
+        preserve bin identity. By default (uniform=False), the non-uniform
+        scaling is used, which minimizes single-conversion error.
 
     Returns
     -------
@@ -502,10 +541,10 @@ def img_as_float(image, force_copy=False):
     and can be outside the ranges [0.0, 1.0] or [-1.0, 1.0].
 
     """
-    return _convert(image, np.floating, force_copy)
+    return _convert(image, np.floating, force_copy, uniform)
 
 
-def img_as_uint(image, force_copy=False):
+def img_as_uint(image, force_copy=False, uniform=False):
     """Convert an image to 16-bit unsigned integer format.
 
     Parameters
@@ -514,6 +553,13 @@ def img_as_uint(image, force_copy=False):
         Input image.
     force_copy : bool, optional
         Force a copy of the data, irrespective of its current dtype.
+    uniform : bool, optional
+        Uniformly quantize the floating point range to the integer range.
+        When converting from an integer range to a floating point range
+        each integer is mapped to the center of its corresponding bin.
+        This makes matched round-trips, while True in both directions,
+        preserve bin identity. By default (uniform=False), the non-uniform
+        scaling is used, which minimizes single-conversion error.
 
     Returns
     -------
@@ -526,10 +572,10 @@ def img_as_uint(image, force_copy=False):
     Positive values are scaled between 0 and 65535.
 
     """
-    return _convert(image, np.uint16, force_copy)
+    return _convert(image, np.uint16, force_copy, uniform)
 
 
-def img_as_int(image, force_copy=False):
+def img_as_int(image, force_copy=False, uniform=False):
     """Convert an image to 16-bit signed integer format.
 
     Parameters
@@ -538,6 +584,13 @@ def img_as_int(image, force_copy=False):
         Input image.
     force_copy : bool, optional
         Force a copy of the data, irrespective of its current dtype.
+    uniform : bool, optional
+        Uniformly quantize the floating point range to the integer range.
+        When converting from an integer range to a floating point range
+        each integer is mapped to the center of its corresponding bin.
+        This makes matched round-trips, while True in both directions,
+        preserve bin identity. By default (uniform=False), the non-uniform
+        scaling is used, which minimizes single-conversion error.
 
     Returns
     -------
@@ -551,10 +604,10 @@ def img_as_int(image, force_copy=False):
     the output image will still only have positive values.
 
     """
-    return _convert(image, np.int16, force_copy)
+    return _convert(image, np.int16, force_copy, uniform)
 
 
-def img_as_ubyte(image, force_copy=False):
+def img_as_ubyte(image, force_copy=False, uniform=False):
     """Convert an image to 8-bit unsigned integer format.
 
     Parameters
@@ -563,6 +616,13 @@ def img_as_ubyte(image, force_copy=False):
         Input image.
     force_copy : bool, optional
         Force a copy of the data, irrespective of its current dtype.
+    uniform : bool, optional
+        Uniformly quantize the floating point range to the integer range.
+        When converting from an integer range to a floating point range
+        each integer is mapped to the center of its corresponding bin.
+        This makes matched round-trips, while True in both directions,
+        preserve bin identity. By default (uniform=False), the non-uniform
+        scaling is used, which minimizes single-conversion error.
 
     Returns
     -------
@@ -575,7 +635,7 @@ def img_as_ubyte(image, force_copy=False):
     Positive values are scaled between 0 and 255.
 
     """
-    return _convert(image, np.uint8, force_copy)
+    return _convert(image, np.uint8, force_copy, uniform)
 
 
 def img_as_bool(image, force_copy=False):
