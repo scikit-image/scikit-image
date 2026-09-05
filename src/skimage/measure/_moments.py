@@ -43,7 +43,7 @@ def moments_coords(coords, order=3):
     >>> M = moments_coords(coords)
     >>> centroid = (M[1, 0] / M[0, 0], M[0, 1] / M[0, 0])
     >>> centroid
-    (14.5, 15.5)
+    (np.float64(14.5), np.float64(15.5))
     """
     return moments_coords_central(coords, 0, order=order)
 
@@ -193,7 +193,7 @@ def moments(image, order=3, *, spacing=None):
     >>> M = moments(image)
     >>> centroid = (M[1, 0] / M[0, 0], M[0, 1] / M[0, 0])
     >>> centroid
-    (14.5, 14.5)
+    (np.float64(14.5), np.float64(14.5))
     """
     return moments_central(image, (0,) * image.ndim, order=order, spacing=spacing)
 

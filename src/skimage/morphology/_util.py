@@ -109,9 +109,9 @@ def _raveled_offsets_and_distances(
     >>> off
     array([-5, -1,  1,  5, -6, -4,  4,  6, 10,  9, 11])
     >>> d[0]
-    1.0
-    >>> d[-1]  # distance from (1, 1) to (3, 2)
-    2.236...
+    np.float64(1.0)
+    >>> d[-1]  # distance from (1, 1) to (3, 2)  # doctest: +ELLIPSIS
+    np.float64(2.236...)
     """
     ndim = len(image_shape)
     if footprint is None:

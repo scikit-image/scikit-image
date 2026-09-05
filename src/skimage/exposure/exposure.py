@@ -668,7 +668,7 @@ def adjust_gamma(image, gamma=1, gain=1):
     >>> gamma_corrected = ski.exposure.adjust_gamma(image, 2)
     >>> # Output is darker for gamma > 1
     >>> image.mean() > gamma_corrected.mean()
-    True
+    np.True_
     """
     if gamma < 0:
         raise ValueError("Gamma should be a non-negative real number.")
@@ -834,7 +834,7 @@ def is_low_contrast(
     image = np.asanyarray(image)
 
     if image.dtype == bool:
-        return not ((image.max() == 1) and (image.min() == 0))
+        return bool(not ((image.max() == 1) and (image.min() == 0)))
 
     if image.ndim == 3:
         from ..color import rgb2gray, rgba2rgb  # avoid circular import
@@ -848,4 +848,4 @@ def is_low_contrast(
     limits = np.percentile(image, [lower_percentile, upper_percentile])
     ratio = (limits[1] - limits[0]) / (dlimits[1] - dlimits[0])
 
-    return ratio < fraction_threshold
+    return bool(ratio < fraction_threshold)
