@@ -1303,7 +1303,9 @@ cdef int test_face(Cell cell, int face):
     # Return sign
     cdef cnp.float64_t AC_BD = A*C - B*D
     if AC_BD > - FLT_EPSILON and AC_BD < FLT_EPSILON:
-        return face >= 0
+        # Returning False avoids adjacent cubes to both generate the same triangle
+        # on a shared face.
+        return False;
     else:
         return face * A * AC_BD >= 0;  # face and A invert signs
 
