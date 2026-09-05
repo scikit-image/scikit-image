@@ -75,10 +75,14 @@ def graycomatrix(image, distances, angles, levels=None, symmetric=False, normed=
 
     Examples
     --------
-    Compute 4 GLCMs using 1-pixel distance and 4 different angles. For example,
-    an angle of 0 radians refers to the neighboring pixel to the right;
-    pi/4 radians to the top-right diagonal neighbor; pi/2 radians to the pixel
-    above, and so forth.
+    Compute 4 GLCMs using 1-pixel distance and 4 different angles. Angles are
+    measured counter-clockwise from the positive x-axis (horizontal right).
+    In image coordinates where rows increase downward:
+
+    - 0 radians: neighboring pixel to the right
+    - pi/4 radians: bottom-right diagonal neighbor (down and right)
+    - pi/2 radians: pixel below
+    - 3*pi/4 radians: bottom-left diagonal neighbor (down and left)
 
     >>> image = np.array([[0, 0, 1, 1],
     ...                   [0, 0, 1, 1],
