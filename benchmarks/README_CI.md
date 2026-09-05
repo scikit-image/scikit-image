@@ -18,7 +18,7 @@ Before `asv` runs, the baseline and contender commits build as wheels in two par
 - Runs the suite for both commits, twice per commit (`processes=2`), trading time for statistical robustness (see `ASV_FACTOR`/`ASV_PROCESSES` below).
 - Reports a performance ratio per benchmark: 1.0 unchanged, below 1.0 slower, above 1.0 faster.
 
-Values between `(0.7, 1.5)` are measurement noise, not a reliable signal. When in doubt, rerun the suite.
+Values within roughly `(0.91, 1.1)` are measurement noise (the `ASV_FACTOR` cutoff), not a reliable signal. When in doubt, rerun the suite.
 
 ## How the run is parameterized
 
@@ -78,10 +78,10 @@ Environment: conda-py3.7-cython-numpy1.17-pooch-scipy
     3a305096
 ```
 
-3. Compare the commits for `fv-az95-499` (the CI machine for this run) with `asv compare` and some extra options. `--sort ratio` shows the largest ratios first instead of alphabetical order. `--split` produces three tables: improved, worsened, no changes. `--factor 1.5` only complains about deviations above a 1.5 ratio. `-m` gives the machine ID (the one you wrote down in step 1). Give your commit hashes baseline first, then contender.
+3. Compare the commits for `fv-az95-499` (the CI machine for this run) with `asv compare` and some extra options. `--sort ratio` shows the largest ratios first instead of alphabetical order. `--split` produces three tables: improved, worsened, no changes. `--factor 1.1` only complains about deviations above a 1.1 ratio. `-m` gives the machine ID (the one you wrote down in step 1). Give your commit hashes baseline first, then contender.
 
 ```
-$> asv compare --sort ratio --split --factor 1.5 -m fv-az95-499 8db28f02 3a305096
+$> asv compare --sort ratio --split --factor 1.1 -m fv-az95-499 8db28f02 3a305096
 
 Benchmarks that have stayed the same:
 
