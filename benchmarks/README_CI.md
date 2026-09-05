@@ -29,7 +29,7 @@ Values between `(0.7, 1.5)` are measurement noise, not a reliable signal. When i
 
 Its keys are the environment variable names, so adding a parameter is one entry in `resolve-benchmark-params.py`, not an edit to the workflow in several places.
 
-`MODULE_MAP` in the same script maps each `src/skimage/` subpackage to the benchmark modules covering it, and is what scopes a pull request check.
+`MODULE_MAP` in the same script maps each subpackage — in any of the three package trees (`src/skimage/`, `src/_skimage2/`, `src/skimage2/`) — to the benchmark modules covering it, and is what scopes a pull request check. The diff is taken from the merge base, so a PR that has fallen behind `main` is scoped by its own changes, not by what `main` merged since it branched.
 
 The benchmark job splits along that seam: `prepare-benchmarks.sh` handles everything before measurement (parameters, thread pinning, pointing `build_command` at the prebuilt wheels, `asv machine`), and `run-benchmarks.sh` is just the `asv continuous` call and its pass/fail check.
 

@@ -18,12 +18,16 @@ from dataclasses import dataclass
 
 PARAMS_FILE = "benchmark-params.json"
 ASV_CONF_FILE = "asv.conf.json"
-SOURCE_DIR = "src/skimage"
+# All three package trees: src/skimage is the legacy adapter layer,
+# src/_skimage2 holds the implementations it re-exports, and
+# src/skimage2 is the new public namespace. The subpackage names line
+# up across them, so MODULE_MAP covers all three.
+SOURCE_DIRS = ("src/skimage", "src/_skimage2", "src/skimage2")
 
-# Which benchmark modules cover each SOURCE_DIR subpackage. Subpackages
-# absent here (color, data, draw, future, io) have no benchmarks, and
-# benchmark_import_time covers the whole package rather than one
-# subpackage, so neither scopes a run.
+# Which benchmark modules cover each source-tree subpackage.
+# Subpackages absent here (color, data, draw, future, io) have no
+# benchmarks, and benchmark_import_time covers the whole package rather
+# than one subpackage, so neither scopes a run.
 MODULE_MAP = {
     "exposure": ["benchmark_exposure"],
     "feature": ["benchmark_feature", "benchmark_peak_local_max"],
@@ -137,20 +141,25 @@ def has_benchmark_label(pr_number: int) -> bool:
 
 
 def bench_filter_for_changes(base_sha: str, head_sha: str) -> str:
-    """An asv -b regex covering the subpackages changed between two
-    commits, or empty if none were.
+    """An asv -b regex covering the subpackages a branch changed, or
+    empty if it changed none.
 
-    Paths under a subpackage MODULE_MAP doesn't list, or outside
-    SOURCE_DIR entirely, contribute nothing: they neither force nor
+    Diffed from the merge base rather than from base's tip, so a branch
+    that has fallen behind main isn't credited with reverting the
+    commits merged since it branched.
+
+    Paths under a subpackage MODULE_MAP doesn't list, or outside the
+    source trees entirely, contribute nothing: they neither force nor
     block a run.
     """
     changed = run(
-        "git", "diff", "--name-only", base_sha, head_sha, "--", SOURCE_DIR
+        "git", "diff", "--name-only", f"{base_sha}...{head_sha}", "--", *SOURCE_DIRS
     ).splitlines()
 
     modules = []
     for pkg, pkg_modules in MODULE_MAP.items():
-        if any(path.startswith(f"{SOURCE_DIR}/{pkg}/") for path in changed):
+        prefixes = tuple(f"{source_dir}/{pkg}/" for source_dir in SOURCE_DIRS)
+        if any(path.startswith(prefixes) for path in changed):
             modules.extend(pkg_modules)
 
     return f"^({'|'.join(modules)})\\." if modules else ""
