@@ -1,12 +1,20 @@
+import operator
+from functools import partial
+
 import numpy as np
 import pytest
-from numpy.testing import assert_allclose, assert_array_less, assert_equal
+from numpy.testing import (
+    assert_allclose,
+    assert_array_compare,
+    assert_array_less,
+    assert_equal,
+)
 
 from skimage import img_as_float
 from _skimage2._shared.utils import _supported_float_type
 from skimage.color import rgb2gray
 from skimage.data import camera, retina
-from skimage.filters import frangi, hessian, meijering, sato
+from skimage.filters import frangi, hessian, jerman, meijering, sato
 from skimage.util import crop, invert
 
 
@@ -22,6 +30,9 @@ def test_2d_null_matrix():
 
     assert_equal(sato(a_black, black_ridges=True, mode='reflect'), zeros)
     assert_equal(sato(a_white, black_ridges=False, mode='reflect'), zeros)
+
+    assert_equal(jerman(a_black, black_ridges=True, mode='reflect'), zeros)
+    assert_equal(jerman(a_white, black_ridges=False, mode='reflect'), zeros)
 
     assert_allclose(frangi(a_black, black_ridges=True), zeros, atol=1e-3)
     assert_allclose(frangi(a_white, black_ridges=False), zeros, atol=1e-3)
@@ -45,6 +56,9 @@ def test_3d_null_matrix():
     assert_equal(sato(a_black, black_ridges=True, mode='reflect'), zeros)
     assert_equal(sato(a_white, black_ridges=False, mode='reflect'), zeros)
 
+    assert_equal(jerman(a_black, black_ridges=True, mode='reflect'), zeros)
+    assert_equal(jerman(a_white, black_ridges=False, mode='reflect'), zeros)
+
     assert_allclose(frangi(a_black, black_ridges=True), zeros, atol=1e-3)
     assert_allclose(frangi(a_white, black_ridges=False), zeros, atol=1e-3)
 
@@ -65,6 +79,13 @@ def test_2d_energy_decrease():
     )
     assert_array_less(
         sato(a_white, black_ridges=False, mode='reflect').std(), a_white.std()
+    )
+
+    assert_array_less(
+        jerman(a_black, black_ridges=True, mode='reflect').std(), a_black.std()
+    )
+    assert_array_less(
+        jerman(a_white, black_ridges=False, mode='reflect').std(), a_white.std()
     )
 
     assert_array_less(frangi(a_black, black_ridges=True).std(), a_black.std())
@@ -91,6 +112,13 @@ def test_3d_energy_decrease():
     )
     assert_array_less(
         sato(a_white, black_ridges=False, mode='reflect').std(), a_white.std()
+    )
+
+    assert_array_less(
+        jerman(a_black, black_ridges=True, mode='reflect').std(), a_black.std()
+    )
+    assert_array_less(
+        jerman(a_white, black_ridges=False, mode='reflect').std(), a_white.std()
     )
 
     assert_array_less(frangi(a_black, black_ridges=True).std(), a_black.std())
@@ -127,6 +155,17 @@ def test_2d_linearity():
     assert_allclose(
         sato(1 * a_white, black_ridges=False, mode='reflect'),
         sato(10 * a_white, black_ridges=False, mode='reflect'),
+        atol=1e-3,
+    )
+
+    assert_allclose(
+        jerman(1 * a_black, black_ridges=True, mode='reflect'),
+        jerman(10 * a_black, black_ridges=True, mode='reflect'),
+        atol=1e-3,
+    )
+    assert_allclose(
+        jerman(1 * a_white, black_ridges=False, mode='reflect'),
+        jerman(10 * a_white, black_ridges=False, mode='reflect'),
         atol=1e-3,
     )
 
@@ -182,6 +221,17 @@ def test_3d_linearity():
     )
 
     assert_allclose(
+        jerman(1 * a_black, black_ridges=True, mode='reflect'),
+        jerman(10 * a_black, black_ridges=True, mode='reflect'),
+        atol=1e-3,
+    )
+    assert_allclose(
+        jerman(1 * a_white, black_ridges=False, mode='reflect'),
+        jerman(10 * a_white, black_ridges=False, mode='reflect'),
+        atol=1e-3,
+    )
+
+    assert_allclose(
         frangi(1 * a_black, black_ridges=True),
         frangi(10 * a_black, black_ridges=True),
         atol=1e-3,
@@ -221,6 +271,11 @@ def test_2d_cropped_camera_image():
     )
 
     assert_allclose(
+        jerman(a_black, black_ridges=True, mode='reflect'),
+        jerman(a_white, black_ridges=False, mode='reflect'),
+    )
+
+    assert_allclose(
         frangi(a_black, black_ridges=True), frangi(a_white, black_ridges=False)
     )
 
@@ -232,7 +287,7 @@ def test_2d_cropped_camera_image():
     )
 
 
-@pytest.mark.parametrize('func', [meijering, sato, frangi, hessian])
+@pytest.mark.parametrize('func', [meijering, sato, jerman, frangi, hessian])
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_ridge_output_dtype(func, dtype):
     img = img_as_float(camera()).astype(dtype, copy=False)
@@ -257,6 +312,11 @@ def test_3d_cropped_camera_image():
     )
 
     assert_allclose(
+        jerman(a_black, black_ridges=True, mode='reflect'),
+        jerman(a_white, black_ridges=False, mode='reflect'),
+    )
+
+    assert_allclose(
         frangi(a_black, black_ridges=True), frangi(a_white, black_ridges=False)
     )
 
@@ -269,7 +329,8 @@ def test_3d_cropped_camera_image():
 
 
 @pytest.mark.parametrize(
-    'func, tol', [(frangi, 1e-2), (meijering, 1e-2), (sato, 2e-3), (hessian, 2e-2)]
+    'func, tol',
+    [(frangi, 1e-2), (meijering, 1e-2), (sato, 2e-3), (jerman, 2e-2), (hessian, 2e-2)],
 )
 def test_border_management(func, tol):
     img = rgb2gray(retina()[300:500, 700:900])
@@ -290,3 +351,44 @@ def test_border_management(func, tol):
     assert abs(full_mean - inside_mean) < tol
     assert abs(full_mean - border_mean) < tol
     assert abs(inside_mean - border_mean) < tol
+
+
+def test_jerman_result_decrease_with_tau_increase():
+    # tau is a parameter of the Jerman filter used to enhance the difference between
+    # lamdba3 and lambda2. Increasing tau makes the filter less sensitive to noisy
+    # structures.
+    #
+    # The Jerman filter depends only on the ratio of lambda_rho / lambda2, where
+    # lambda_rho is the enhanced lambda3 (lambda3 can only increase with tau, see
+    # implementation). The implementation also ensures lambda_rho >= lambda2, so r =
+    # lambda_rho / lambda2 >= 1. The final value of the filter depends on:
+    #
+    # V = lambda2**2 * (lambda_rho - lambda2) * 27 / ((lambda2 + lambda_rho) ** 3) with
+    # V = 1 if lambda2 >= lambda_rho/2 > 0
+    #
+    # Substituting lambda_rho = lambda2 * r:
+    #
+    # V = 1 if 2 >= r > 1, otherwise for r > 2:
+    #
+    # V(r) = lambda2**2 * (lambda2 * (r - 1)) * 27 / ((lambda2 * (1 + r)) ** 3)
+    # V(r) = (r - 1) * 27 / ((1 + r) ** 3)
+    #
+    # We can verify that V(r) decreses with r > 2 with the derivative of V that is
+    # strictly negative for r > 2:
+    #
+    # V'(r) = 27 * (4 - 2*r) / ((1 + r) ** 4)
+    #
+    # r increases with tau (or stays the same). V decreases with r (or stays the same).
+    assert_array_less_or_equal = partial(assert_array_compare, operator.le)
+
+    img = rgb2gray(retina()[300:500, 700:900])
+    monotonic_tau_increase = np.linspace(0, 2, 5)
+
+    out = jerman(img, tau=monotonic_tau_increase[0])
+    for tau in monotonic_tau_increase[1:]:
+        out_next = jerman(img, tau=tau)
+        assert_array_less_or_equal(out_next, out)
+        # for the retina image, we know we do not max out the filter response, so we
+        # expect a decrease in the sum of all values.
+        assert out_next.sum() <= out.sum()
+        out = out_next
