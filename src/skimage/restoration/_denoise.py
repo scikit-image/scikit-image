@@ -9,7 +9,7 @@ from ..util.dtype import img_as_float
 from _skimage2._shared import utils
 from _skimage2._shared.utils import _supported_float_type, warn
 from _skimage2._shared.version_requirements import require
-from ._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
+from ._denoise_cy import _denoise_bilateral, _denoise_tv_bregman, _denoise_bilateral3d
 from .. import color
 from ..color.colorconv import ycbcr_from_rgb
 
@@ -89,6 +89,14 @@ def _compute_spatial_lut(win_size, sigma, *, dtype=float):
     grid_points = np.arange(-win_size // 2, win_size // 2 + 1)
     rr, cc = np.meshgrid(grid_points, grid_points, indexing='ij')
     distances = np.hypot(rr, cc)
+    return _gaussian_weight(distances, sigma**2, dtype=dtype).ravel()
+
+
+def _compute_spatial_lut_3d(win_size, sigma, *, dtype=float):
+    """Lookup table for 3D spatial sigma — win_size^3 elements."""
+    grid_points = np.arange(-win_size // 2, win_size // 2 + 1)
+    rr, cc, zz = np.meshgrid(grid_points, grid_points, grid_points, indexing='ij')
+    distances = np.sqrt(rr**2 + cc**2 + zz**2)
     return _gaussian_weight(distances, sigma**2, dtype=dtype).ravel()
 
 
@@ -183,44 +191,61 @@ def denoise_bilateral(
     ...                              channel_axis=-1)
     """
     if channel_axis is not None:
-        if image.ndim != 3:
-            if image.ndim == 2:
-                raise ValueError(
-                    "Use ``channel_axis=None`` for 2D grayscale "
-                    "images. The last axis of the input image "
-                    "must be multiple color channels not another "
-                    "spatial dimension."
-                )
-            else:
-                raise ValueError(
-                    f'Bilateral filter is only implemented for '
-                    f'2D grayscale images (image.ndim == 2) and '
-                    f'2D multichannel (image.ndim == 3) images, '
-                    f'but the input image has {image.ndim} dimensions.'
-                )
-        elif image.shape[2] not in (3, 4):
-            if image.shape[2] > 4:
-                msg = (
-                    f'The last axis of the input image is '
-                    f'interpreted as channels. Input image with '
-                    f'shape {image.shape} has {image.shape[2]} channels '
-                    f'in last axis. ``denoise_bilateral``is implemented '
-                    f'for 2D grayscale and color images only.'
-                )
-                warn(msg)
-            else:
-                msg = (
-                    f'Input image must be grayscale, RGB, or RGBA; '
-                    f'but has shape {image.shape}.'
-                )
-                warn(msg)
+        if image.ndim == 2:
+            raise ValueError(
+                "Use ``channel_axis=None`` for 2D grayscale "
+                "images. The last axis of the input image "
+                "must be multiple color channels not another "
+                "spatial dimension."
+            )
+
+        elif image.ndim == 3:
+            if image.shape[2] not in (3, 4):
+                if image.shape[2] > 4:
+                    warn(
+                        f'Input image with shape {image.shape} has '
+                        f'{image.shape[2]} channels. ``denoise_bilateral`` '
+                        f'is implemented for 2D grayscale, 3D grayscale, '
+                        f'RGB and RGBA images only.'
+                    )
+                else:
+                    warn(
+                        f'Input image must be grayscale, RGB, or RGBA; '
+                        f'but has shape {image.shape}.'
+                    )
+
+        elif image.ndim == 4:
+            if image.shape[3] not in (3, 4):
+                if image.shape[3] > 4:
+                    warn(
+                        f'Input image with shape {image.shape} has '
+                        f'{image.shape[3]} channels. ``denoise_bilateral`` '
+                        f'is implemented for 2D grayscale, 3D grayscale, '
+                        f'RGB and RGBA images only.'
+                    )
+                else:
+                    warn(
+                        f'Input image must be grayscale, RGB, or RGBA; '
+                        f'but has shape {image.shape}.'
+                    )
+
+        else:
+            raise ValueError(
+                f'Bilateral filter is only implemented for '
+                f'2D grayscale images (image.ndim == 2), '
+                f'2D multichannel images (image.ndim == 3), '
+                f'3D grayscale images (image.ndim == 3), and '
+                f'3D multichannel images (image.ndim == 4), '
+                f'but the input image has {image.ndim} dimensions.'
+            )
+
     else:
-        if image.ndim > 2:
+        if image.ndim > 3:
             raise ValueError(
                 f'Bilateral filter is not implemented for '
-                f'grayscale images of 3 or more dimensions, '
+                f'grayscale images of 4 or more dimensions, '
                 f'but input image has {image.shape} shape. Use '
-                f'``channel_axis=-1`` for 2D RGB images.'
+                f'``channel_axis=-1`` for 3D RGB images.'
             )
 
     if win_size is None:
@@ -236,18 +261,31 @@ def denoise_bilateral(
     # and color_lut[<int>(dist * dist_scale)] may cause a segmentation fault
     # so we verify we have a positive image and that the max is not 0.0.
 
-    image = np.atleast_3d(img_as_float(image))
-    image = np.ascontiguousarray(image)
+    if image.ndim == 2 and channel_axis is None:
+        image = np.atleast_3d(img_as_float(image))
 
+    elif image.ndim == 3 and channel_axis is None:
+        image = img_as_float(image)[..., np.newaxis]
+
+    else:
+        image = img_as_float(image)
+
+    image = np.ascontiguousarray(image)
     sigma_color = sigma_color or image.std()
 
     color_lut = _compute_color_lut(bins, sigma_color, max_value, dtype=image.dtype)
 
-    range_lut = _compute_spatial_lut(win_size, sigma_spatial, dtype=image.dtype)
+    if image.ndim == 4:
+        range_lut = _compute_spatial_lut_3d(win_size, sigma_spatial, dtype=image.dtype)
+    else:
+        range_lut = _compute_spatial_lut(win_size, sigma_spatial, dtype=image.dtype)
 
     out = np.empty(image.shape, dtype=image.dtype)
 
-    dims = image.shape[2]
+    if len(image.shape) == 3:
+        dims = image.shape[2]
+    else:
+        dims = image.shape[3]
 
     # There are a number of arrays needed in the Cython function.
     # It's easier to allocate them outside of Cython so that all
@@ -258,20 +296,37 @@ def denoise_bilateral(
     if min_value < 0:
         image = image - min_value
         max_value -= min_value
-    _denoise_bilateral(
-        image,
-        max_value,
-        win_size,
-        sigma_color,
-        sigma_spatial,
-        bins,
-        mode,
-        cval,
-        color_lut,
-        range_lut,
-        empty_dims,
-        out,
-    )
+
+    if len(image.shape) == 3:
+        _denoise_bilateral(
+            image,
+            max_value,
+            win_size,
+            sigma_color,
+            sigma_spatial,
+            bins,
+            mode,
+            cval,
+            color_lut,
+            range_lut,
+            empty_dims,
+            out,
+        )
+    else:
+        _denoise_bilateral3d(
+            image,
+            max_value,
+            win_size,
+            sigma_color,
+            sigma_spatial,
+            bins,
+            mode,
+            cval,
+            color_lut,
+            range_lut,
+            empty_dims,
+            out,
+        )
     # need to drop the added channels axis for grayscale images
     out = np.squeeze(out)
     if min_value < 0:
