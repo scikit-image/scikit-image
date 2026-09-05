@@ -1319,8 +1319,10 @@ def vortex():
     )
 
 
-# Named after sklearn.datasets.fetch_*, so the call site shows that a dataset
-# may need downloading.
+# The fetch_* names, after sklearn.datasets.fetch_*, are the canonical API:
+# the prefix shows at the call site that a dataset may need downloading.
+# skimage2.data also exposes the bare names above as unadvertised aliases
+# (see data/__init__.pyi); the skimage (v1) shim imports them from here.
 fetch_astronaut = astronaut
 fetch_brain = brain
 fetch_brick = brick

@@ -1,4 +1,12 @@
+import ast
+import os
+import warnings
+from pathlib import Path
+
 import numpy as np
+import pytest
+
+import _skimage2
 import _skimage2.data as data
 import _skimage2.data._fetchers as _fetchers
 from _skimage2.data._fetchers import _image_fetcher
@@ -7,8 +15,6 @@ from _skimage2._shared.testing import (
     assert_equal,
     fetch,
 )
-import os
-import pytest
 
 
 @pytest.mark.thread_unsafe(reason="worker threads would share a download directory")
@@ -246,14 +252,54 @@ FETCH_FUNCTION_NAMES = [
 
 
 @pytest.mark.parametrize('function_name', FETCH_FUNCTION_NAMES)
-def test_fetch_functions_and_bare_aliases_are_both_public(function_name):
-    """Every dataset getter is reachable both as fetch_<name>() and under
-    its bare name (e.g. astronaut() for fetch_astronaut()), and the two
-    are the same function, not independent copies."""
+def test_bare_v1_names_are_unadvertised_aliases(function_name):
+    """fetch_<name>() is public API; the bare v1 name (e.g. astronaut for
+    fetch_astronaut) resolves to the same function but is absent from
+    __all__ and __dir__."""
     bare_name = function_name.removeprefix('fetch_')
     assert hasattr(data, function_name)
     assert hasattr(data, bare_name)
     assert getattr(data, function_name) is getattr(data, bare_name)
+    assert function_name in data.__all__
+    assert bare_name not in data.__all__
+    assert bare_name not in dir(data)
+
+
+def test_bare_v1_name_is_importable():
+    """The v1 alias imports the same way the fetch_ name does."""
+    from _skimage2.data import astronaut, fetch_astronaut
+
+    assert astronaut is fetch_astronaut
+
+
+def test_public_skimage2_data_surface():
+    """The v1 aliases and __all__ reach users through skimage2.data."""
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore', _skimage2.ExperimentalAPIWarning)
+        import skimage2
+
+    public_data = skimage2.data
+    assert public_data is data
+    assert public_data.astronaut is public_data.fetch_astronaut
+    assert 'fetch_astronaut' in public_data.__all__
+    assert 'astronaut' not in public_data.__all__
+
+
+def test_runtime_all_matches_stub():
+    """Runtime __all__ lists exactly the names the stub declares in __all__."""
+    stub_path = Path(data.__file__).with_name('__init__.pyi')
+    tree = ast.parse(stub_path.read_text())
+    stub_all = next(
+        node.value
+        for node in tree.body
+        if isinstance(node, ast.Assign)
+        and any(
+            isinstance(target, ast.Name) and target.id == '__all__'
+            for target in node.targets
+        )
+    )
+    stub_names = [element.value for element in stub_all.elts]
+    assert data.__all__ == stub_names
 
 
 def test_fetch_public_wrapper_matches_internal_fetch():
