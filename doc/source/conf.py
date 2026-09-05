@@ -311,10 +311,6 @@ nitpick_ignore = [
     ),  # skimage.transform._geometric.estimate_transform
     ("py:obj", "convert"),  # skimage.graph._rag.RAG.__init__
     ("py:obj", "skimage.io.collection"),  # (generated) doc/source/api/skimage.io.rst
-    (
-        "py:obj",
-        "skimage.io.manage_plugins",
-    ),  # (generated) doc/source/api/skimage.io.rst
     ("py:obj", "skimage.io.sift"),  # (generated) doc/source/api/skimage.io.rst
     ("py:obj", "skimage.io.util"),  # (generated) doc/source/api/skimage.io.rst
 ]

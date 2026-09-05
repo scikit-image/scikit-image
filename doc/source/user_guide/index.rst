@@ -13,7 +13,6 @@ and more advanced topics.
    getting_started
    numpy_images
    data_types
-   plugins
    video
    visualization
    transforming_image_data

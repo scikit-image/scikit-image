@@ -34,7 +34,6 @@ python_sources = [
   '__init__.py',
   '_dependency_checks.py',
   '_geometry.py',
-  '_tempfile.py',
   '_warnings.py',
   'compat.py',
   'dtype.py',

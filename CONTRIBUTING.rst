@@ -483,13 +483,6 @@ More rarely, you may also need:
   The ``pyamg`` module is used for the fast ``cg_mg`` mode of random
   walker segmentation.
 
-* `Astropy <https://www.astropy.org>`__
-  Provides FITS I/O capability.
-
-* `SimpleITK <http://www.simpleitk.org/>`__
-  Optional I/O plugin providing a wide variety of `formats <https://itk.org/Wiki/ITK_File_Formats>`__.
-  including specialized formats used in biomedical imaging.
-
 .. include:: ../../../requirements/optional.txt
   :literal:
 
@@ -669,8 +662,8 @@ mark a test as thread-unsafe using a pytest mark:
 
 .. code-block:: python
 
-   @pytest.mark.thread_unsafe(reason="Test mutates global plugin state")
-   def test_plugins():
+   @pytest.mark.thread_unsafe(reason="Test mutates global state")
+   def test_mutates_global_state():
        ...
 
 This test will still run under a free-threaded interpreter, but it will execute

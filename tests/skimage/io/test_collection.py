@@ -3,9 +3,8 @@ import itertools
 
 import numpy as np
 import imageio.v3 as iio3
-from skimage import data_dir
+from skimage.data import data_dir
 from skimage.io.collection import ImageCollection, MultiImage, alphanumeric_key
-from skimage.io import reset_plugins
 
 from _skimage2._shared import testing
 from _skimage2._shared.testing import assert_equal, assert_allclose, fetch
@@ -76,7 +75,6 @@ class TestImageCollection:
     pattern_same_shape = pics[::2]
 
     def setup_method(self):
-        reset_plugins()
         # Generic image collection with images of different shapes.
         self.images = ImageCollection(self.pattern)
         # Image collection with images having shapes that match.
