@@ -38,6 +38,9 @@ doc/gh-pages
 wheels
 skimage/morphology/_skeletonize_lee_cy.pyx
 .asv
+# Written by .github/scripts/resolve-benchmark-params.py
+benchmark-params.json
+.benchmark-wheels/
 .vscode/
 .mesonpy-native-file.ini
 stubs/

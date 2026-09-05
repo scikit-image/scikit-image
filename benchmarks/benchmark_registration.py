@@ -4,6 +4,8 @@ from scipy import ndimage as ndi
 from skimage.color import rgb2gray
 from skimage import data, img_as_float
 
+from . import _resolve_param
+
 # guard against import of a non-existent registration module in older skimage
 try:
     from skimage import registration
@@ -44,7 +46,12 @@ class PhaseCrossCorrelationRegistration:
     """Benchmarks for registration.phase_cross_correlation in scikit-image"""
 
     param_names = ["ndims", "image_size", "upsample_factor", "dtype"]
-    params = [(2, 3), (32, 100), (1, 5, 10), (np.complex64, np.complex128)]
+    params = [
+        (2, 3),
+        _resolve_param(reduced=(100,), full=(32, 100)),
+        _resolve_param(reduced=(1, 10), full=(1, 5, 10)),
+        (np.complex64, np.complex128),
+    ]
 
     def setup(self, ndims, image_size, upsample_factor, dtype, *args):
         if phase_cross_correlation is None:

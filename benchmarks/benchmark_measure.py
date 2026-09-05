@@ -2,6 +2,8 @@ import numpy as np
 
 from skimage import data, filters, measure
 
+from . import _resolve_param
+
 try:
     from skimage.measure._regionprops import PROP_VALS
 except ImportError:
@@ -19,7 +21,12 @@ def init_regionprops_data():
 
 class RegionpropsTableIndividual:
     param_names = ['prop']
-    params = sorted(list(PROP_VALS))
+    # Sample every 3rd property (alphabetical) to keep breadth while
+    # cutting the near-fixed-cost combinations.
+    params = _resolve_param(
+        reduced=sorted(list(PROP_VALS))[::3],
+        full=sorted(list(PROP_VALS)),
+    )
 
     def setup(self, prop):
         self.label_image, self.intensity_image = init_regionprops_data()
@@ -51,9 +58,8 @@ class MomentsSuite:
     params = (
         [(64, 64), (4096, 2048), (32, 32, 32), (256, 256, 192)],
         [np.uint8, np.float32, np.float64],
-        [1, 2, 3],
     )
-    param_names = ['shape', 'dtype', 'order']
+    param_names = ['shape', 'dtype']
 
     """Benchmark for filter routines in scikit-image."""
 
@@ -64,14 +70,14 @@ class MomentsSuite:
         else:
             self.image = rng.standard_normal(shape, dtype=dtype)
 
-    def time_moments_raw(self, shape, dtype, order):
+    def time_moments_raw(self, shape, dtype):
         measure.moments(self.image)
 
-    def time_moments_central(self, shape, dtype, order):
+    def time_moments_central(self, shape, dtype):
         measure.moments_central(self.image)
 
-    def peakmem_reference(self, shape, dtype, order):
+    def peakmem_reference(self, shape, dtype):
         pass
 
-    def peakmem_moments_central(self, shape, dtype, order):
+    def peakmem_moments_central(self, shape, dtype):
         measure.moments_central(self.image)

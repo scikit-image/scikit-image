@@ -11,13 +11,15 @@
     "install_timeout": 1200,
     "show_commit_url": "https://github.com/scikit-image/scikit-image/commit/",
 
+    "build_command": [
+        "CC='ccache gcc' CXX='ccache g++' python -m build --wheel --no-isolation --skip-dependency-check -o {build_cache_dir} {build_dir}"
+    ],
+
     "pythons": ["3.12"],
     "matrix": {
          "virtualenv": [],
-         "cython": [],
-         "pythran": [],
-         "numpy": ["1.24"],
-         "scipy": [],
+         "numpy": ["2.1"],
+         "scipy": ["1.15"],
          "pooch": []
     },
 

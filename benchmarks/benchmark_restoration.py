@@ -11,7 +11,7 @@ try:
     from skimage.morphology import disk
 except ImportError:
     from skimage.morphology import circle as disk
-from . import _channel_kwarg, _skip_slow
+from . import _channel_kwarg, _resolve_param, _skip_slow
 
 # inspect signature to automatically handle API changes across versions
 if 'num_iter' in inspect.signature(restoration.richardson_lucy).parameters:
@@ -55,6 +55,10 @@ class RestorationSuite:
             **_channel_kwarg(False),
         )
 
+    # fast_mode=False is much slower and exercises the same underlying
+    # function; skip it in CI.
+    time_denoise_nl_means_f64.setup = _skip_slow
+
     def time_denoise_nl_means_f32(self):
         restoration.denoise_nl_means(
             self.volume_f32,
@@ -65,6 +69,8 @@ class RestorationSuite:
             fast_mode=False,
             **_channel_kwarg(False),
         )
+
+    time_denoise_nl_means_f32.setup = _skip_slow
 
     def time_denoise_nl_means_fast_f64(self):
         restoration.denoise_nl_means(
@@ -178,7 +184,7 @@ class RollingBall:
     def time_rollingball(self, radius):
         restoration.rolling_ball(data.coins(), radius=radius)
 
-    time_rollingball.params = [25, 50, 100, 200]
+    time_rollingball.params = _resolve_param(reduced=[25, 200], full=[25, 50, 100, 200])
     time_rollingball.param_names = ["radius"]
 
     def peakmem_reference(self, *args):
@@ -200,7 +206,9 @@ class RollingBall:
     def peakmem_rollingball(self, radius):
         restoration.rolling_ball(data.coins(), radius=radius)
 
-    peakmem_rollingball.params = [25, 50, 100, 200]
+    peakmem_rollingball.params = _resolve_param(
+        reduced=[25, 200], full=[25, 50, 100, 200]
+    )
     peakmem_rollingball.param_names = ["radius"]
 
     def time_rollingball_nan(self, radius):
@@ -209,7 +217,9 @@ class RollingBall:
         image[pos, pos] = np.nan
         restoration.rolling_ball(image, radius=radius, nansafe=True)
 
-    time_rollingball_nan.params = [25, 50, 100, 200]
+    time_rollingball_nan.params = _resolve_param(
+        reduced=[25, 200], full=[25, 50, 100, 200]
+    )
     time_rollingball_nan.param_names = ["radius"]
 
     def time_rollingball_ndim(self):
@@ -224,7 +234,7 @@ class RollingBall:
     def time_rollingball_parallel(self, workers):
         restoration.rolling_ball(data.coins(), radius=100, workers=workers)
 
-    time_rollingball_parallel.params = (0, 2, 4, 8)
+    time_rollingball_parallel.params = _resolve_param(reduced=(0, 4), full=(0, 2, 4, 8))
     time_rollingball_parallel.param_names = ["workers"]
 
 

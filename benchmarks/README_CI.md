@@ -1,34 +1,51 @@
 # Benchmark CI
 
 <!-- Author: @jaimergp -->
-<!-- Last updated: 2021.07.06 -->
+<!-- Last updated: 2026.08.02 -->
 <!-- Describes the work done as part of https://github.com/scikit-image/scikit-image/pull/5424 -->
 
 ## How it works
 
-The `asv` suite can be run for any PR on GitHub Actions (check workflow `.github/workflows/benchmarks.yml`) by adding a `run-benchmark` label to said PR. This will trigger a job that will run the benchmarking suite for the current PR head (merged commit) against the PR base (usually `main`).
+The `asv` suite runs automatically on every PR, scoped to whichever benchmark module(s) cover the `skimage` subpackage(s) touched (see `.github/scripts/resolve-benchmark-params.py`). A PR touching only `skimage/restoration/` runs just `benchmark_restoration.py`; a PR touching no mapped subpackage runs none. A label whose name contains `benchmark` (e.g. `run-benchmark`) overrides this and runs the full suite, for changes to shared code that could affect benchmarks outside the touched subpackage.
 
-We use `asv continuous` to run the job, which runs a relative performance measurement. This means that there's no state to be saved and that regressions are only caught in terms of performance ratio (absolute numbers are available but they are not useful since we do not use stable hardware over time). `asv continuous` will:
+The suite also runs nightly at 07:00 UTC against `main` (see "Full nightly runs" below), and can be triggered manually from the `workflow_dispatch` entry point on the `Actions` tab. `workflow_dispatch` offers a `baseline` choice: `parent-commit` (default) or `previous-nightly`, falling back to the immediate parent if no nightly run has succeeded yet. Merges to `main` don't trigger a run on their own; the nightly run covers that ground without the CI cost of running on every merge. A failing nightly or dispatched run on `main`, including a detected regression, opens or updates a `CI failure`-labeled issue, the same convention the repo's other main-branch checks use.
 
-- Compile `scikit-image` for _both_ commits. We use `ccache` to speed up the process, and `mamba` is used to create the build environments.
-- Run the benchmark suite for both commits, _twice_ (since `processes=2` by default).
-- Generate a report table with performance ratios:
-  - `ratio=1.0` -> performance didn't change.
-  - `ratio<1.0` -> PR made it slower.
-  - `ratio>1.0` -> PR made it faster.
+`asv continuous` runs a relative performance measurement: no state is saved, and a regression is only a ratio, since we don't have stable hardware over time to make absolute numbers meaningful.
 
-Due to the sensitivity of the test, we cannot guarantee that false positives are not produced. In practice, values between `(0.7, 1.5)` are to be considered part of the measurement noise. When in doubt, running the benchmark suite one more time will provide more information about the test being a false positive or not.
+Before `asv` runs, the baseline and contender commits build as wheels in two parallel jobs (`build-baseline`/`build-contender` in `.github/workflows/benchmarks.yaml`), reusing the repo's `_build_linux_for_python_x.yaml` build workflow instead of compiling sequentially inside `asv`. `asv`'s `build_command` copies the matching prebuilt wheel into place. `asv continuous` then:
+
+- Installs the prebuilt wheel for each commit.
+- Runs the suite for both commits, twice per commit (`processes=2`), trading time for statistical robustness (see `ASV_FACTOR`/`ASV_PROCESSES` below).
+- Reports a performance ratio per benchmark: 1.0 unchanged, below 1.0 slower, above 1.0 faster.
+
+Values within roughly `(0.91, 1.1)` are measurement noise (the `ASV_FACTOR` cutoff), not a reliable signal. When in doubt, rerun the suite.
+
+## How the run is parameterized
+
+`resolve-benchmark-params.py` decides everything about a run from the trigger event, reading the event payload from `GITHUB_EVENT_PATH` instead of the workflow's `env:` block. It publishes two things:
+
+- Three job outputs the earlier jobs need: `should_run`, `python_version` (from `asv.conf.json`, so it can't drift), and `baseline_sha`.
+- `benchmark-params.json`, an artifact holding the settings only the benchmark job needs: `ASV_FACTOR`, `ASV_PROCESSES`, `ASV_SKIP_SLOW`, `ASV_FULL_PARAMS`, `BASELINE_SHA`, `BASELINE_LABEL`, `CONTENDER_LABEL`, `BENCH_FILTER`. `prepare-benchmarks.sh` copies these into `$GITHUB_ENV` for `run-benchmarks.sh` and the benchmark processes.
+
+Its keys are the environment variable names, so adding a parameter is one entry in `resolve-benchmark-params.py`, not an edit to the workflow in several places.
+
+`MODULE_MAP` in the same script maps each subpackage — in any of the three package trees (`src/skimage/`, `src/_skimage2/`, `src/skimage2/`) — to the benchmark modules covering it, and is what scopes a pull request check. The diff is taken from the merge base, so a PR that has fallen behind `main` is scoped by its own changes, not by what `main` merged since it branched.
+
+The benchmark job splits along that seam: `prepare-benchmarks.sh` handles everything before measurement (parameters, thread pinning, pointing `build_command` at the prebuilt wheels, `asv machine`), and `run-benchmarks.sh` is just the `asv continuous` call and its pass/fail check.
 
 ## Running the benchmarks on GitHub Actions
 
-1. On a PR, add the label `run-benchmark`.
-2. The CI job will be started. Checks will appear in the usual dashboard panel above the comment box.
-3. If more commits are added, the label checks will be grouped with the last commit checks _before_ you added the label.
-4. Alternatively, you can always go to the `Actions` tab in the repo and [filter for `workflow:Benchmark`](https://github.com/scikit-image/scikit-image/actions?query=workflow%3ABenchmark). Your username will be assigned to the `actor` field, so you can also filter the results with that if you need it.
+1. Opening or updating a PR that touches a mapped subpackage runs that module's benchmarks automatically. Checks appear above the comment box.
+2. A label whose name contains `benchmark` (e.g. `run-benchmark`) forces the full suite, and stays in effect for that PR's later runs too.
+3. Filter the `Actions` tab for [`workflow:Benchmark`](https://github.com/scikit-image/scikit-image/actions?query=workflow%3ABenchmark); your username is the `actor`.
+
+## Full nightly runs
+
+Every night at 07:00 UTC, a scheduled run compares `main`'s tip against the commit the last successful nightly compared, not just its immediate parent, so a busy day of merges is covered cumulatively. It runs the complete suite: `ASV_SKIP_SLOW=0` includes the slow benchmarks, `ASV_FULL_PARAMS=1` uses each benchmark's full parameter matrix instead of the reduced one PR checks use. This is the only check unscoped by path or trimmed by time, so it's where a regression a fast PR check missed, including one from a merge to `main` itself, would surface.
 
 ## The artifacts
 
-The CI job will also generate an artifact. This is the `.asv/results` directory compressed in a zip file. Its contents include:
+The job also uploads `.asv/results` compressed into a zip. Its contents include:
 
 - `fv-xxxxx-xx/`. A directory for the machine that ran the suite. It contains three files:
   - `<baseline>.json`, `<contender>.json`: the benchmark results for each commit, with stats.
@@ -39,9 +56,9 @@ The CI job will also generate an artifact. This is the `.asv/results` directory 
 
 ## Re-running the analysis
 
-Although the CI logs should be enough to get an idea of what happened (check the table at the end), one can use `asv` to run the analysis routines again.
+Although the CI logs usually show enough to see what happened (check the table at the end), `asv` can rerun the analysis.
 
-1. Uncompress the artifact contents in the repo, under `.asv/results`. This is, you should see `.asv/results/benchmarks.log`, not `.asv/results/something_else/benchmarks.log`. Write down the machine directory name for later.
+1. Uncompress the artifact contents in the repo, under `.asv/results` (that is, `.asv/results/benchmarks.log`, not `.asv/results/something_else/benchmarks.log`). Write down the machine directory name for later.
 2. Run `asv show` to see your available results. You will see something like this:
 
 ```
@@ -61,10 +78,10 @@ Environment: conda-py3.7-cython-numpy1.17-pooch-scipy
     3a305096
 ```
 
-3. We are interested in the commits for `fv-az95-499` (the CI machine for this run). We can compare them with `asv compare` and some extra options. `--sort ratio` will show largest ratios first, instead of alphabetical order. `--split` will produce three tables: improved, worsened, no changes. `--factor 1.5` tells `asv` to only complain if deviations are above a 1.5 ratio. `-m` is used to indicate the machine ID (use the one you wrote down in step 1). Finally, specify your commit hashes: baseline first, then contender!
+3. Compare the commits for `fv-az95-499` (the CI machine for this run) with `asv compare` and some extra options. `--sort ratio` shows the largest ratios first instead of alphabetical order. `--split` produces three tables: improved, worsened, no changes. `--factor 1.1` only complains about deviations above a 1.1 ratio. `-m` gives the machine ID (the one you wrote down in step 1). Give your commit hashes baseline first, then contender.
 
 ```
-$> asv compare --sort ratio --split --factor 1.5 -m fv-az95-499 8db28f02 3a305096
+$> asv compare --sort ratio --split --factor 1.1 -m fv-az95-499 8db28f02 3a305096
 
 Benchmarks that have stayed the same:
 
@@ -84,7 +101,7 @@ Benchmarks that have stayed the same:
 ...
 ```
 
-If you want more details on a specific test, you can use `asv show`. Use `-b pattern` to filter which tests to show, and then specify a commit hash to inspect:
+For more details on a specific test, use `asv show`. Filter which tests to show with `-b pattern`, then specify a commit hash to inspect:
 
 ```
 $> asv show -b time_to_float64 8db28f02
@@ -110,10 +127,10 @@ benchmark_transform_warp.WarpSuite.time_to_float64 [fv-az95-499/conda-py3.7-cyth
 
 ### Skipping slow or demanding tests
 
-To minimize the time required to run the full suite, we trimmed the parameter matrix in some cases and, in others, directly skipped tests that ran for too long or require too much memory. Unlike `pytest`, `asv` does not have a notion of marks. However, you can `raise NotImplementedError` in the setup step to skip a test. In that vein, a new private function is defined at `benchmarks.__init__`: `_skip_slow`. This will check if the `ASV_SKIP_SLOW` environment variable has been defined. If set to `1`, it will raise `NotImplementedError` and skip the test. To implement this behavior in other tests, you can add the following attribute:
+To keep the full suite fast, we trimmed some parameter matrices and skipped tests that run too long or need too much memory. Unlike `pytest`, `asv` has no concept of marks; instead, raise `NotImplementedError` in a setup step. `benchmarks/__init__.py` ships `_skip_slow`, which does that when `ASV_SKIP_SLOW` is set to `1`. Attach it as a setup method or attribute:
 
 ```python
-from . import _skip_slow  # this function is defined in benchmarks.__init__
+from . import _skip_slow
 
 def time_something_slow():
     pass

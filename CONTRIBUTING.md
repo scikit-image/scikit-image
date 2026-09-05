@@ -905,7 +905,7 @@ PRs include a benchmark in order to clearly depict the use case that is being
 optimized for.
 
 In this section we will review how to setup the benchmarks,
-and three commands `spin asv -- dev`, `spin asv -- run` and
+and three commands `spin asv -- check`, `spin asv -- run` and
 `spin asv -- continuous`.
 
 ### Prerequisites
@@ -997,15 +997,15 @@ except ImportError:
 
 ### Testing the benchmarks locally
 
-Prior to running the true benchmark, it is often worthwhile to test that the
-code is free of typos. To do so, you may use the command:
+Before running the real benchmark, check that your code is free of typos. Use the command:
 
 ```
-spin asv -- dev -b TransformSuite
+spin asv -- check -v -E existing
 ```
 
-Where the `TransformSuite` above will be run once in your current environment
-to test that everything is in order.
+This imports every benchmark and checks that it is well-formed in your
+current environment, without timing anything, so typos surface in
+seconds. CI runs the same command.
 
 ### Running your benchmark
 

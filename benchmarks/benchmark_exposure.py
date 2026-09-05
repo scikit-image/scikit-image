@@ -8,6 +8,8 @@ from skimage import data, img_as_float
 from skimage.transform import rescale
 from skimage import exposure
 
+from . import _resolve_param
+
 
 class ExposureSuite:
     """Benchmark for exposure routines in scikit-image."""
@@ -45,8 +47,14 @@ class ExposureSuite:
 class MatchHistogramsSuite:
     param_names = ["shape", "dtype", "multichannel"]
     params = [
-        ((64, 64), (256, 256), (1024, 1024)),
-        (np.uint8, np.uint32, np.float32, np.float64),
+        _resolve_param(
+            reduced=((64, 64), (1024, 1024)),
+            full=((64, 64), (256, 256), (1024, 1024)),
+        ),
+        _resolve_param(
+            reduced=(np.uint8, np.float64),
+            full=(np.uint8, np.uint32, np.float32, np.float64),
+        ),
         (False, True),
     ]
 

@@ -9,11 +9,16 @@ try:
 except ImportError:
     from skimage.util.dtype import convert
 
+from . import _resolve_param
+
 
 class WarpSuite:
     params = (
-        [np.uint8, np.uint16, np.float32, np.float64],
-        [128, 1024, 4096],
+        _resolve_param(
+            reduced=[np.uint8, np.float64],
+            full=[np.uint8, np.uint16, np.float32, np.float64],
+        ),
+        _resolve_param(reduced=[128, 1024], full=[128, 1024, 4096]),
         [0, 1, 3],
         # [np.float32, np.float64]
     )
@@ -57,19 +62,36 @@ class WarpSuite:
 
 
 class ResizeLocalMeanSuite:
+    # only dimension-matched (shape_in, shape_out) pairs are valid, so
+    # enumerate them directly instead of a full cross product
     params = (
         [np.float32, np.float64],
-        [(512, 512), (2048, 2048), (48, 48, 48), (192, 192, 192)],
-        [(512, 512), (2048, 2048), (48, 48, 48), (192, 192, 192)],
+        _resolve_param(
+            reduced=[
+                ((512, 512), (2048, 2048)),
+                ((2048, 2048), (512, 512)),
+                ((48, 48, 48), (192, 192, 192)),
+            ],
+            full=[
+                ((512, 512), (512, 512)),
+                ((512, 512), (2048, 2048)),
+                ((2048, 2048), (512, 512)),
+                ((2048, 2048), (2048, 2048)),
+                ((48, 48, 48), (48, 48, 48)),
+                ((48, 48, 48), (192, 192, 192)),
+                ((192, 192, 192), (48, 48, 48)),
+                ((192, 192, 192), (192, 192, 192)),
+            ],
+        ),
     )
-    param_names = ['dtype', 'shape_in', 'shape_out']
+    param_names = ['dtype', 'shape_in_out']
 
     timeout = 180
 
-    def setup(self, dtype, shape_in, shape_out):
-        if len(shape_in) != len(shape_out):
-            raise NotImplementedError("shape_in, shape_out must have same dimension")
+    def setup(self, dtype, shape_in_out):
+        shape_in, shape_out = shape_in_out
         self.image = np.zeros(shape_in, dtype=dtype)
 
-    def time_resize_local_mean(self, dtype, shape_in, shape_out):
+    def time_resize_local_mean(self, dtype, shape_in_out):
+        _, shape_out = shape_in_out
         resize_local_mean(self.image, shape_out)

@@ -1,0 +1,243 @@
+#!/usr/bin/env python3
+"""Resolve what the benchmark workflow compares, and how.
+
+One resolver per trigger event. main() writes the values the build
+jobs need to $GITHUB_OUTPUT, and the asv settings to
+benchmark-params.json. benchmarks/README_CI.md describes the flow.
+
+Expects GITHUB_EVENT_NAME, GITHUB_SHA, GITHUB_REPOSITORY,
+GITHUB_EVENT_PATH, GITHUB_OUTPUT, and GH_TOKEN (`actions: read` for
+the nightly baseline lookup).
+"""
+
+import json
+import os
+import subprocess
+from dataclasses import dataclass
+
+PARAMS_FILE = "benchmark-params.json"
+ASV_CONF_FILE = "asv.conf.json"
+# All three package trees: src/skimage (legacy adapter), src/_skimage2
+# (implementations it re-exports), src/skimage2 (new public namespace).
+# Subpackage names line up across them, so MODULE_MAP covers all three.
+SOURCE_DIRS = ("src/skimage", "src/_skimage2", "src/skimage2")
+
+# Which benchmark modules cover each subpackage. Unmapped subpackages
+# (color, data, draw, future, io) have no benchmarks, and
+# benchmark_import_time covers the whole package; neither scopes a run.
+MODULE_MAP = {
+    "exposure": ["benchmark_exposure"],
+    "feature": ["benchmark_feature", "benchmark_peak_local_max"],
+    "filters": ["benchmark_filters", "benchmark_rank"],
+    "graph": ["benchmark_graph"],
+    "measure": ["benchmark_measure"],
+    "metrics": ["benchmark_metrics"],
+    "morphology": ["benchmark_morphology"],
+    "registration": ["benchmark_registration"],
+    "restoration": ["benchmark_restoration"],
+    "segmentation": ["benchmark_segmentation"],
+    "transform": [
+        "benchmark_transform",
+        "benchmark_transform_warp",
+        "benchmark_interpolation",
+    ],
+    "util": ["benchmark_util"],
+}
+
+# Trimmed for PRs and manual dispatches: slow benchmarks skipped and
+# reduced parameter matrices. ASV_FACTOR is asv's own default.
+FAST_PROFILE = {
+    "ASV_FACTOR": "1.1",
+    "ASV_PROCESSES": "2",
+    "ASV_SKIP_SLOW": "1",
+    "ASV_FULL_PARAMS": "0",
+}
+
+# Complete run for the nightly: slow benchmarks and full parameter
+# matrices included.
+FULL_PROFILE = {**FAST_PROFILE, "ASV_SKIP_SLOW": "0", "ASV_FULL_PARAMS": "1"}
+
+
+def run(*args: str) -> str:
+    """Stdout of a command that must succeed.
+
+    Stderr is left alone so git and gh report their own failures into
+    the job log.
+    """
+    result = subprocess.run(args, stdout=subprocess.PIPE, text=True, check=True)
+    return result.stdout.strip()
+
+
+def read_json(path: str):
+    with open(path) as f:
+        return json.load(f)
+
+
+def event_payload() -> dict:
+    """The github.event payload for this run."""
+    path = os.environ.get("GITHUB_EVENT_PATH")
+    return read_json(path) if path and os.path.exists(path) else {}
+
+
+@dataclass
+class Resolution:
+    """What one trigger event resolved to."""
+
+    baseline_sha: str
+    baseline_label: str
+    contender_label: str
+    profile: dict
+    should_run: bool = True
+    # Empty runs every benchmark; otherwise an asv -b regex.
+    bench_filter: str = ""
+
+    @classmethod
+    def between_shas(cls, baseline_sha: str, contender_sha: str, profile: dict):
+        """A resolution labelled by SHA, for events running off a branch
+        with no base/head labels to show.
+        """
+        return cls(baseline_sha, baseline_sha, contender_sha, profile)
+
+
+def last_nightly_sha() -> str:
+    """The commit the last successful nightly compared, or empty."""
+    output = run(
+        "gh", "run", "list",
+        "--repo", os.environ["GITHUB_REPOSITORY"],
+        "--workflow=benchmarks.yaml", "--event=schedule",
+        "--status=success", "--limit=1", "--json", "headSha"
+    )  # fmt: skip
+    runs = json.loads(output)
+    return runs[0]["headSha"] if runs else ""
+
+
+def baseline_or_parent(candidate: str, github_sha: str) -> str:
+    """candidate, or the parent commit when candidate isn't available
+    locally (no nightly has succeeded yet).
+    """
+    if candidate:
+        found = subprocess.run(
+            ["git", "cat-file", "-e", f"{candidate}^{{commit}}"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        if found.returncode == 0:
+            return candidate
+    return run("git", "rev-parse", f"{github_sha}~1")
+
+
+def has_benchmark_label(pr_number: int) -> bool:
+    """Whether the PR asks for the full suite by label, read live so a
+    re-run after adding the label picks up the new state.
+    """
+    labels = json.loads(run("gh", "pr", "view", str(pr_number), "--json", "labels"))
+    return any("benchmark" in label["name"].lower() for label in labels["labels"])
+
+
+def bench_filter_for_changes(base_sha: str, head_sha: str) -> str:
+    """An asv -b regex covering the subpackages a branch changed, or
+    empty if none. Diffed from the merge base, so a branch behind main
+    isn't credited with reverting commits merged since it branched.
+    Unmapped or out-of-tree paths neither force nor block a run.
+    """
+    changed = run(
+        "git", "diff", "--name-only", f"{base_sha}...{head_sha}", "--", *SOURCE_DIRS
+    ).splitlines()
+
+    modules = []
+    for pkg, pkg_modules in MODULE_MAP.items():
+        prefixes = tuple(f"{source_dir}/{pkg}/" for source_dir in SOURCE_DIRS)
+        if any(path.startswith(prefixes) for path in changed):
+            modules.extend(pkg_modules)
+
+    return f"^({'|'.join(modules)})\\." if modules else ""
+
+
+def resolve_pull_request(event: dict, github_sha: str) -> Resolution:
+    """Head against base, scoped to the subpackages touched.
+
+    A benchmark label runs everything instead, since a change to shared
+    code can move benchmarks outside the subpackage it lives in.
+    """
+    pull_request = event["pull_request"]
+    base_sha = pull_request["base"]["sha"]
+    resolution = Resolution(
+        baseline_sha=base_sha,
+        baseline_label=pull_request["base"]["label"],
+        contender_label=pull_request["head"]["label"],
+        profile=FAST_PROFILE,
+    )
+    if has_benchmark_label(pull_request["number"]):
+        return resolution
+
+    resolution.bench_filter = bench_filter_for_changes(
+        base_sha, pull_request["head"]["sha"]
+    )
+    # Nothing benchmarked changed, so there's nothing worth running.
+    resolution.should_run = bool(resolution.bench_filter)
+    return resolution
+
+
+def resolve_schedule(event: dict, github_sha: str) -> Resolution:
+    """Main's tip against the commit the last nightly compared.
+
+    Comparing against that rather than the immediate parent covers a
+    busy day of merges cumulatively, not just its last commit.
+    """
+    baseline_sha = baseline_or_parent(last_nightly_sha(), github_sha)
+    return Resolution.between_shas(baseline_sha, github_sha, FULL_PROFILE)
+
+
+def resolve_workflow_dispatch(event: dict, github_sha: str) -> Resolution:
+    """The parent commit, or the last nightly's, per the dispatch input."""
+    if event.get("inputs", {}).get("baseline") == "previous-nightly":
+        baseline_sha = baseline_or_parent(last_nightly_sha(), github_sha)
+    else:
+        baseline_sha = run("git", "rev-parse", f"{github_sha}~1")
+    return Resolution.between_shas(baseline_sha, github_sha, FAST_PROFILE)
+
+
+RESOLVERS = {
+    "pull_request": resolve_pull_request,
+    "schedule": resolve_schedule,
+    "workflow_dispatch": resolve_workflow_dispatch,
+}
+
+
+def write_outputs(resolution: Resolution) -> None:
+    """Publish what the build jobs need to start."""
+    outputs = {
+        "should_run": "true" if resolution.should_run else "false",
+        # Taking the version from asv's own config keeps the two in step.
+        "python_version": read_json(ASV_CONF_FILE)["pythons"][0],
+        "baseline_sha": resolution.baseline_sha,
+    }
+    with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+        f.writelines(f"{key}={value}\n" for key, value in outputs.items())
+
+
+def write_params(resolution: Resolution) -> None:
+    """Hand the benchmark job its asv settings, keyed by env-var name
+    so unpacking is a straight copy.
+    """
+    params = {
+        **resolution.profile,
+        "BASELINE_SHA": resolution.baseline_sha,
+        "BASELINE_LABEL": resolution.baseline_label,
+        "CONTENDER_LABEL": resolution.contender_label,
+        "BENCH_FILTER": resolution.bench_filter,
+    }
+    with open(PARAMS_FILE, "w") as f:
+        json.dump(params, f, indent=2)
+        f.write("\n")
+
+
+def main() -> None:
+    resolve = RESOLVERS[os.environ["GITHUB_EVENT_NAME"]]
+    resolution = resolve(event_payload(), os.environ["GITHUB_SHA"])
+    write_outputs(resolution)
+    write_params(resolution)
+
+
+if __name__ == "__main__":
+    main()
