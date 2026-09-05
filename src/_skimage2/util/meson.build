@@ -2,6 +2,7 @@ python_sources = [
   '__init__.py',
   '__init__.pyi',
   '_value_rescaling.py',
+  'apply_parallel.py',
 ]
 
 py3.install_sources(
