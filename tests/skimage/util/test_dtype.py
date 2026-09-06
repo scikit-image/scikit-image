@@ -12,10 +12,10 @@ from skimage import (
 )
 from skimage.util.dtype import _convert
 
-from skimage._shared._warnings import expected_warnings
-from skimage._shared import testing
-from skimage._shared.testing import assert_equal, parametrize
-from skimage._shared.dtype import numeric_dtype_min_max, numeric_types
+from _skimage2._shared._warnings import expected_warnings
+from _skimage2._shared import testing
+from _skimage2._shared.testing import assert_equal, parametrize
+from _skimage2._shared.dtype import numeric_dtype_min_max, numeric_types
 
 
 dtype_range = {
@@ -39,7 +39,9 @@ def _verify_range(msg, x, vmin, vmax, dtype):
     assert x.dtype == dtype
 
 
-@parametrize("dtype, f_and_dt", itertools.product(dtype_range, img_funcs_and_types))
+@parametrize(
+    "dtype, f_and_dt", list(itertools.product(dtype_range, img_funcs_and_types))
+)
 def test_range(dtype, f_and_dt):
     imin, imax = dtype_range[dtype]
     x = np.linspace(imin, imax, 10).astype(dtype)
@@ -140,9 +142,10 @@ def test_bool():
 
 def test_clobber():
     # The `img_as_*` functions should never modify input arrays.
+    rng = np.random.RandomState(2406839692)
     for func_input_type in img_funcs:
         for func_output_type in img_funcs:
-            img = np.random.rand(5, 5)
+            img = rng.rand(5, 5)
 
             img_in = func_input_type(img)
             img_in_before = img_in.copy()

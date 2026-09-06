@@ -4,7 +4,7 @@ from tempfile import NamedTemporaryFile
 import numpy as np
 import pytest
 from numpy.testing import assert_array_almost_equal, assert_array_equal
-from skimage._shared.testing import fetch
+from _skimage2._shared.testing import fetch
 from skimage.io import imread, imsave, reset_plugins, use_plugin
 
 
@@ -12,7 +12,6 @@ from skimage.io import imread, imsave, reset_plugins, use_plugin
 def _use_tifffile_plugin():
     """Ensure that PIL plugin is used in tests here."""
     use_plugin('tifffile')
-    np.random.seed(0)
     yield
     reset_plugins()
 
@@ -60,17 +59,22 @@ class TestSave:
         y = imread(fname)
         assert_array_equal(x, y)
 
-    shapes = ((10, 10), (10, 10, 3), (10, 10, 4))
+    shapes_seeds = (
+        ((10, 10), 2500279270),
+        ((10, 10, 3), 2439842967),
+        ((10, 10, 4), 337224809),
+    )
     dtypes = (np.uint8, np.uint16, np.float32, np.int16, np.float64)
 
-    @pytest.mark.parametrize("shape", shapes)
+    @pytest.mark.parametrize("shape,seed", shapes_seeds)
     @pytest.mark.parametrize("dtype", dtypes)
     @pytest.mark.parametrize("use_pathlib", [False, True])
     @pytest.mark.parametrize('explicit_photometric_kwarg', [False, True])
     def test_imsave_roundtrip(
-        self, shape, dtype, use_pathlib, explicit_photometric_kwarg
+        self, shape, seed, dtype, use_pathlib, explicit_photometric_kwarg
     ):
-        x = np.random.rand(*shape)
+        rng = np.random.RandomState(seed)
+        x = rng.rand(*shape)
 
         if not np.issubdtype(dtype, np.floating):
             x = (x * np.iinfo(dtype).max).astype(dtype)

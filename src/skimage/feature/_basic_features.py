@@ -3,7 +3,7 @@ import itertools
 import numpy as np
 from skimage import filters, feature
 from skimage.util.dtype import img_as_float32
-from .._shared._dependency_checks import is_wasm
+from _skimage2._shared._dependency_checks import is_wasm
 
 if not is_wasm:
     from concurrent.futures import ThreadPoolExecutor as PoolExecutor

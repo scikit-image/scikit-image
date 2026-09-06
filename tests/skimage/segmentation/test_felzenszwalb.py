@@ -4,8 +4,8 @@ import pytest
 from skimage import data
 from skimage.segmentation import felzenszwalb
 
-from skimage._shared import testing
-from skimage._shared.testing import (
+from _skimage2._shared import testing
+from _skimage2._shared.testing import (
     assert_greater,
     run_in_parallel,
     assert_equal,

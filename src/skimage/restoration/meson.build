@@ -9,7 +9,7 @@ foreach ext: extensions
   py3.extension_module(ext,
     cython_gen.process(ext + '.pyx'),
     c_args: cython_c_args,
-    include_directories: ['../_shared'],
+    include_directories: ['../../_skimage2/_shared'],
     dependencies: [np_dep],
     install: true,
     subdir: 'skimage/restoration'
@@ -17,16 +17,16 @@ foreach ext: extensions
 endforeach
 
 wrap_extensions = [
-  [['_unwrap_1d'], []],
-  [['_unwrap_2d'], ['unwrap_2d_ljmu.c']],
-  [['_unwrap_3d'], ['unwrap_3d_ljmu.c']]
+  ['_unwrap_1d', []],
+  ['_unwrap_2d', ['unwrap_2d_ljmu.c', 'unwrap_2d_ljmu.h', 'unwrap_common.h']],
+  ['_unwrap_3d', ['unwrap_3d_ljmu.c', 'unwrap_3d_ljmu.h', 'unwrap_common.h']],
 ]
 
 foreach ext: wrap_extensions
-  py3.extension_module(ext,
-    [cython_gen.process(ext[0][0] + '.pyx')] + ext[1],
+  py3.extension_module(ext[0],
+    [cython_gen.process(ext[0] + '.pyx')] + ext[1],
     c_args: cython_c_args,
-    include_directories: ['../_shared'],
+    include_directories: ['../../_skimage2/_shared'],
     dependencies: [np_dep],
     install: true,
     subdir: 'skimage/restoration'

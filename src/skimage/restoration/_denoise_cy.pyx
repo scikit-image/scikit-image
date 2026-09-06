@@ -7,8 +7,8 @@ cimport numpy as cnp
 import numpy as np
 from libc.math cimport sqrt
 from libc.float cimport DBL_MAX
-from .._shared.interpolation cimport get_pixel3d
-from .._shared.fused_numerics cimport np_floats
+from _skimage2._shared.interpolation cimport get_pixel3d
+from _skimage2._shared.fused_numerics cimport np_floats
 
 cnp.import_array()
 

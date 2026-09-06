@@ -1,4 +1,4 @@
-from .._shared.fused_numerics cimport np_floats
+from _skimage2._shared.fused_numerics cimport np_floats
 
 cpdef int _multiblock_lbp(np_floats[:, ::1] int_image,
                           Py_ssize_t r,

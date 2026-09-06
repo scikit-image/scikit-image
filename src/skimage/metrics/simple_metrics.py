@@ -3,7 +3,7 @@ from scipy.stats import entropy
 
 from ..util._backends import dispatchable
 from ..util.dtype import dtype_range
-from .._shared.utils import _supported_float_type, check_shape_equality, warn
+from _skimage2._shared.utils import _supported_float_type, check_shape_equality, warn
 
 __all__ = [
     'mean_squared_error',

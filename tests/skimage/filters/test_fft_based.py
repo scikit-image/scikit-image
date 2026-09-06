@@ -5,7 +5,7 @@ import pytest
 from numpy.testing import assert_allclose, assert_array_equal
 import scipy.fft as fftmodule
 
-from skimage._shared.utils import _supported_float_type
+from _skimage2._shared.utils import _supported_float_type
 from skimage.data import astronaut, coins
 from skimage.filters import butterworth
 from skimage.filters._fft_based import _get_nd_butterworth_filter
@@ -78,7 +78,7 @@ def test_butterworth_2D(high_pass, squared_butterworth):
     # adjust specified order so that lowpass stopband approaches 0
     order = 3 if squared_butterworth else 6
 
-    im = np.random.randn(64, 128)
+    im = np.random.RandomState(3042230419).randn(64, 128)
     filtered = butterworth(
         im,
         cutoff_frequency_ratio=0.20,
@@ -118,7 +118,7 @@ def test_butterworth_2D_realfft(high_pass, dtype, squared_butterworth):
     """Filtering a real-valued array is equivalent to filtering a
     complex-valued array where the imaginary part is zero.
     """
-    im = np.random.randn(32, 64).astype(dtype)
+    im = np.random.RandomState(2608335016).randn(32, 64).astype(dtype)
     kwargs = dict(
         cutoff_frequency_ratio=0.20,
         high_pass=high_pass,

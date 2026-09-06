@@ -45,6 +45,13 @@ Quick links
         A detailed description of scikit-image's public Python API. Assumes an
         understanding of the key concepts.
 
+    .. grid-item-card:: :octicon:`beaker` Experimental: skimage2 API reference
+        :link: api2/api2
+        :link-type: any
+
+        API reference for the **experimental** v2 namespace (``skimage2``).
+        The experimental API is subject to change without notice.
+
     .. grid-item-card:: :octicon:`tools` Contribute
         :link: development/contribute
         :link-type: any
@@ -81,7 +88,8 @@ See also our site-wide :ref:`genindex` our
 
     user_guide/index
     auto_examples/index
-    api/api
+    skimage API <api/api>
+    skimage2 API <api2/api2>
     release_notes/index
     development/index
     about/index

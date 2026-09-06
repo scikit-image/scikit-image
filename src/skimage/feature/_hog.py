@@ -1,7 +1,7 @@
 import numpy as np
 
 from . import _hoghistogram
-from .._shared import utils
+from _skimage2._shared import utils
 
 
 def _hog_normalize_block(block, method, eps=1e-5):

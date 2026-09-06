@@ -4,7 +4,7 @@ from numpy.testing import assert_array_equal
 import scipy.ndimage as ndi
 
 from skimage import io, draw
-from skimage._shared.testing import fetch
+from _skimage2._shared.testing import fetch
 from skimage.data import binary_blobs
 from skimage.morphology import medial_axis, skeletonize, thin
 from skimage.morphology._skeletonize import G123_LUT, G123P_LUT, _generate_thin_luts
@@ -150,7 +150,8 @@ class TestSkeletonize:
     @pytest.mark.parametrize("method", ["zhang", "lee"])
     def test_input_float_conv(self, method):
         # Check that the floats are correctly handled. Also check non-contiguous input
-        image = np.random.random((16, 16))[::2, ::2]
+        rng = np.random.RandomState(3127858794)
+        image = rng.random((16, 16))[::2, ::2]
         image[image < 0.5] = 0.0
 
         original = image.copy()

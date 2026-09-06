@@ -5,7 +5,7 @@ Algorithms for computing the skeleton of a binary image
 import numpy as np
 from scipy import ndimage as ndi
 
-from .._shared.utils import check_nD
+from _skimage2._shared.utils import check_nD
 from ..util import crop
 from ._skeletonize_lee_cy import _compute_thin_image
 from ._skeletonize_various_cy import (

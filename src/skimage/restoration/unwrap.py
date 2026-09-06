@@ -1,6 +1,6 @@
 import numpy as np
 
-from .._shared.utils import warn
+from _skimage2._shared.utils import warn
 
 from ._unwrap_1d import unwrap_1d
 from ._unwrap_2d import unwrap_2d
@@ -20,7 +20,10 @@ def unwrap_phase(image, wrap_around=False, rng=None):
         provided, the masked entries will not be changed, and their values
         will not be used to guide the unwrapping of neighboring, unmasked
         values. Masked 1D arrays are not allowed, and will raise a
-        `ValueError`.
+        `ValueError`.  NaN values in the image form an implicit mask.  We
+        combine this implicit mask with any mask from a masked array, with
+        logical OR.  The output values under the resulting mask are set to the
+        minimum of the unwrapped phase.
     wrap_around : bool or sequence of bool, optional
         When an element of the sequence is  `True`, the unwrapping process
         will regard the edges along the corresponding axis of the image to be
@@ -28,12 +31,10 @@ def unwrap_phase(image, wrap_around=False, rng=None):
         process. If only a single boolean is given, it will apply to all axes.
         Wrap around is not supported for 1D arrays.
     rng : {`numpy.random.Generator`, int}, optional
-        Pseudo-random number generator.
-        By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
-        If `rng` is an int, it is used to seed the generator.
-
-        Unwrapping relies on a random initialization. This sets the
-        PRNG to use to achieve deterministic behavior.
+        Unwrapping relies on a random per-pixel initialization.  If a ``numpy``
+        random number generator (RNG), then use that to generate the
+        initialization.  If ``None``, create a new RNG.  If an int, seed a new
+        RNG with this passed integer.
 
     Returns
     -------
@@ -46,6 +47,21 @@ def unwrap_phase(image, wrap_around=False, rng=None):
     ValueError
         If called with a masked 1D array or called with a 1D array and
         ``wrap_around=True``.
+
+    Notes
+    -----
+    The algorithm proceeds by calculating an *unreliability* score for each image
+    location, and unwrapping first through areas with the lowest scores
+    (lowest unreliability).  For some locations, such as corner pixels, border
+    pixels where `wrap_around` is ``False`` for the relevant edge, and pixels
+    that are neighbors to masked pixels, we cannot calculate unreliability due
+    to missing data in some neighbors. In this case we set unreliability to
+    a high value plus some random component, where the random component
+    prevents memory location bias in the order of unwrapping.  The random
+    component means there can be slight differences from run to run in the
+    corner pixels, border pixels (depending on `wrap_around`), or pixels next
+    to a masked pixel, unless you constrain the randomness with the `rng`
+    argument.
 
     Examples
     --------
@@ -83,9 +99,16 @@ def unwrap_phase(image, wrap_around=False, rng=None):
             '`wrap_around` must be a bool or a sequence with '
             'length equal to the dimensionality of image'
         )
+
+    # NaNs form an implicit mask.
+    nan_mask = np.isnan(image)
+    any_nans = np.any(nan_mask)
+
     if image.ndim == 1:
         if np.ma.isMaskedArray(image):
             raise ValueError('1D masked images cannot be unwrapped')
+        if any_nans:
+            raise ValueError('1D images with NaNs cannot be unwrapped')
         if wrap_around[0]:
             raise ValueError('`wrap_around` is not supported for 1D images')
     if image.ndim in (2, 3) and 1 in image.shape:
@@ -95,12 +118,17 @@ def unwrap_phase(image, wrap_around=False, rng=None):
             'algorithm'
         )
 
+    if not isinstance(rng, np.random.Generator):
+        rng = np.random.default_rng(rng)
+
     if np.ma.isMaskedArray(image):
-        mask = np.require(np.ma.getmaskarray(image), np.uint8, ['C'])
+        mask = nan_mask | np.require(np.ma.getmaskarray(image), np.uint8, ['C'])
     else:
-        mask = np.zeros_like(image, dtype=np.uint8, order='C')
+        mask = nan_mask
 
     image_not_masked = np.asarray(np.ma.getdata(image), dtype=np.float64, order='C')
+    if any_nans:
+        image_not_masked[nan_mask] = 0
     image_unwrapped = np.empty_like(image, dtype=np.float64, order='C', subok=False)
 
     if image.ndim == 1:

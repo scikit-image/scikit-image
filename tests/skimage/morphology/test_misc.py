@@ -10,9 +10,13 @@ from skimage.morphology import (
     label,
 )
 
-from skimage._shared import testing
-from skimage._shared.testing import assert_array_equal, assert_equal, assert_stacklevel
-from skimage._shared._warnings import expected_warnings
+from _skimage2._shared import testing
+from _skimage2._shared.testing import (
+    assert_array_equal,
+    assert_equal,
+    assert_stacklevel,
+)
+from _skimage2._shared._warnings import expected_warnings
 
 
 test_object_image = np.array([[0, 0, 0, 1, 0], [1, 1, 1, 0, 0], [1, 1, 1, 0, 1]], bool)
@@ -109,13 +113,15 @@ def test_single_label_warning():
 
 
 def test_float_input():
-    float_test = np.random.rand(5, 5)
+    rng = np.random.RandomState(1050268745)
+    float_test = rng.rand(5, 5)
     with testing.raises(TypeError):
         remove_small_objects(float_test)
 
 
 def test_negative_input():
-    negative_int = np.random.randint(-4, -1, size=(5, 5))
+    rng = np.random.RandomState(3417457980)
+    negative_int = rng.randint(-4, -1, size=(5, 5))
     with testing.raises(ValueError):
         remove_small_objects(negative_int)
 
@@ -345,7 +351,8 @@ def test_label_warning_holes():
 
 
 def test_float_input_holes():
-    float_test = np.random.rand(5, 5)
+    rng = np.random.RandomState(750711557)
+    float_test = rng.rand(5, 5)
     with testing.raises(TypeError):
         remove_small_holes(float_test)
 
@@ -416,7 +423,7 @@ class Test_remove_near_objects:
     @pytest.mark.parametrize("distance", [5, 50, 100])
     @pytest.mark.parametrize("p_norm", [1, 2, np.inf])
     def test_random(self, distance, p_norm):
-        rng = np.random.default_rng(1713648513)
+        rng = np.random.RandomState(1713648513)
         image = rng.random(size=(400, 400))
         maxima = local_maxima(image)
         objects = label(maxima)

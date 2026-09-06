@@ -4,8 +4,8 @@ import functools
 import numpy as np
 from scipy import ndimage as ndi
 
-from .._shared.utils import _supported_float_type
-from ..metrics import mean_squared_error
+from _skimage2._shared.utils import _supported_float_type
+from ..metrics.simple_metrics import mean_squared_error
 from ..util import img_as_float
 
 

@@ -1,8 +1,8 @@
 import numpy as np
 
-from .._shared._geometry import polygon_clip
-from .._shared.version_requirements import require
-from .._shared.compat import NP_COPY_IF_NEEDED
+from _skimage2._shared._geometry import polygon_clip
+from _skimage2._shared.version_requirements import require
+from _skimage2._shared.compat import NP_COPY_IF_NEEDED
 from ._draw import (
     _coords_inside_image,
     _line,
@@ -13,9 +13,6 @@ from ._draw import (
     _circle_perimeter_aa,
     _bezier_curve,
 )
-
-
-__doctest_requires__ = {("polygon_perimeter", "rectangle_perimeter"): ["matplotlib"]}
 
 
 def _ellipse_in_shape(shape, center, radii, rotation=0.0):
@@ -216,7 +213,7 @@ def disk(center, radius, *, shape=None):
     return ellipse(r, c, radius, radius, shape)
 
 
-@require("matplotlib", ">=3.3")
+@require("matplotlib", version=">=3.3")
 def polygon_perimeter(r, c, shape=None, clip=False):
     """Generate polygon perimeter coordinates.
 
@@ -869,7 +866,7 @@ def rectangle(start, end=None, extent=None, shape=None):
     return coords
 
 
-@require("matplotlib", ">=3.3")
+@require("matplotlib", version=">=3.3")
 def rectangle_perimeter(start, end=None, extent=None, shape=None, clip=False):
     """Generate coordinates of pixels that are exactly around a rectangle.
 

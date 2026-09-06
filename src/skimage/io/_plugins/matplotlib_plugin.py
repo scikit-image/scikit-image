@@ -2,7 +2,7 @@ from collections import namedtuple
 import numpy as np
 from ...util import dtype as dtypes
 from ...exposure import is_low_contrast
-from ..._shared.utils import warn
+from _skimage2._shared.utils import warn
 from math import floor, ceil
 
 

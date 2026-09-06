@@ -5,11 +5,9 @@ import pytest
 from numpy.testing import assert_array_almost_equal, assert_array_equal, assert_equal
 from scipy import ndimage as ndi
 
-from skimage._shared._warnings import expected_warnings
+from _skimage2._shared.testing import assert_stacklevel
 from skimage.feature import peak
-
-
-np.random.seed(21)
+from skimage.util import PendingSkimage2Change
 
 
 class TestPeakLocalMax:
@@ -21,9 +19,10 @@ class TestPeakLocalMax:
 
     def test_noisy_peaks(self):
         peak_locations = [(7, 7), (7, 13), (13, 7), (13, 13)]
+        rng = np.random.RandomState(3331877153)
 
         # image with noise of amplitude 0.8 and peaks of amplitude 1
-        image = 0.8 * np.random.rand(20, 20)
+        image = 0.8 * rng.rand(20, 20)
         for r, c in peak_locations:
             image[r, c] = 1
 
@@ -113,8 +112,8 @@ class TestPeakLocalMax:
         assert len(peaks_limited) == 2
 
     def test_num_peaks_tot_vs_labels_4quadrants(self):
-        np.random.seed(21)
-        image = np.random.uniform(size=(20, 30))
+        rng = np.random.RandomState(91180141)
+        image = rng.uniform(size=(20, 30))
         i, j = np.mgrid[0:20, 0:30]
         labels = 1 + (i >= 10) + (j >= 15) * 2
         result = peak.peak_local_max(
@@ -122,7 +121,6 @@ class TestPeakLocalMax:
             labels=labels,
             min_distance=1,
             threshold_rel=0,
-            num_peaks=np.inf,
             num_peaks_per_label=2,
         )
         assert len(result) == 8
@@ -131,7 +129,6 @@ class TestPeakLocalMax:
             labels=labels,
             min_distance=1,
             threshold_rel=0,
-            num_peaks=np.inf,
             num_peaks_per_label=1,
         )
         assert len(result) == 4
@@ -154,7 +151,8 @@ class TestPeakLocalMax:
         assert len(peaks_limited) == 2
 
     def test_reorder_labels(self):
-        image = np.random.uniform(size=(40, 60))
+        rng = np.random.RandomState(2681488943)
+        image = rng.uniform(size=(40, 60))
         i, j = np.mgrid[0:40, 0:60]
         labels = 1 + (i >= 20) + (j >= 30) * 2
         labels[labels == 4] = 5
@@ -180,7 +178,8 @@ class TestPeakLocalMax:
         assert (result == expected).all()
 
     def test_indices_with_labels(self):
-        image = np.random.uniform(size=(40, 60))
+        rng = np.random.RandomState(3341870942)
+        image = rng.uniform(size=(40, 60))
         i, j = np.mgrid[0:40, 0:60]
         labels = 1 + (i >= 20) + (j >= 30) * 2
         i, j = np.mgrid[-3:4, -3:4]
@@ -231,13 +230,14 @@ class TestPeakLocalMax:
         result[tuple(peak_idx.T)] = True
         assert_array_equal(result, nd_image.astype(bool))
 
-    def test_empty(self):
-        image = np.zeros((10, 20))
-        labels = np.zeros((10, 20), int)
+    @pytest.mark.parametrize("ndim", [1, 2, 3, 4])
+    def test_empty(self, ndim):
+        image = np.zeros((10,) * ndim)
+        labels = np.zeros_like(image, dtype=int)
         result = peak.peak_local_max(
             image,
             labels=labels,
-            footprint=np.ones((3, 3), bool),
+            footprint=np.ones((3,) * ndim, dtype=bool),
             min_distance=1,
             threshold_rel=0,
             exclude_border=False,
@@ -363,7 +363,8 @@ class TestPeakLocalMax:
         assert_array_equal(result, expected)
 
     def test_four_quadrants(self):
-        image = np.random.uniform(size=(20, 30))
+        rng = np.random.RandomState(2544711809)
+        image = rng.uniform(size=(20, 30))
         i, j = np.mgrid[0:20, 0:30]
         labels = 1 + (i >= 10) + (j >= 15) * 2
         i, j = np.mgrid[-3:4, -3:4]
@@ -391,7 +392,8 @@ class TestPeakLocalMax:
         '''regression test of img-1194, footprint = [1]
         Test peak.peak_local_max when every point is a local maximum
         '''
-        image = np.random.uniform(size=(10, 20))
+        rng = np.random.RandomState(2885157653)
+        image = rng.uniform(size=(10, 20))
         footprint = np.array([[1]])
         peak_idx = peak.peak_local_max(
             image,
@@ -462,8 +464,9 @@ class TestPeakLocalMax:
         assert_array_equal(peak.peak_local_max(image), [[2, 2]])
 
         image[2, 2] = 0
-        with expected_warnings(["When min_distance < 1"]):
+        with pytest.warns(RuntimeWarning, match=r"When `min_distance < 1`") as record:
             assert len(peak.peak_local_max(image, min_distance=0)) == image.size - 1
+        assert_stacklevel(record)
 
     def test_peak_at_border(self):
         image = np.full((10, 10), -2)
@@ -477,6 +480,68 @@ class TestPeakLocalMax:
         assert len(peaks) == 2
         assert [2, 4] in peaks
         assert [3, 0] in peaks
+
+    def test_p_norm_default(self):
+        image = np.zeros((10, 10))
+        image[2, 2] = 1
+        image[7, 7] = 1
+
+        # With default (p_norm=np.inf, Chebyshev distance), peaks are 5 apart
+        peaks = peak.peak_local_max(image, min_distance=5, exclude_border=0)
+        assert len(peaks) == 2
+        peaks = peak.peak_local_max(image, min_distance=6, exclude_border=0)
+        assert len(peaks) == 1
+
+    def test_p_norm(self):
+        image = np.zeros((10, 10))
+        image[2, 2] = 1
+        image[7, 7] = 1
+
+        # With p_norm=inf (Chebyshev distance), peaks are 5 apart
+        peaks = peak.peak_local_max(
+            image, min_distance=5, p_norm=np.inf, exclude_border=0
+        )
+        assert len(peaks) == 2
+        peaks = peak.peak_local_max(
+            image, min_distance=6, p_norm=np.inf, exclude_border=0
+        )
+        assert len(peaks) == 1
+
+        # With p_norm=2 (Euclidean distance), peaks are 7.07 apart
+        peaks = peak.peak_local_max(image, min_distance=7, p_norm=2, exclude_border=0)
+        assert len(peaks) == 2
+        peaks = peak.peak_local_max(image, min_distance=8, p_norm=2, exclude_border=0)
+        assert len(peaks) == 1
+
+        # With p_norm=1 (Manhattan distance), peaks are 10 apart
+        peaks = peak.peak_local_max(image, min_distance=10, p_norm=1, exclude_border=0)
+        assert len(peaks) == 2
+        peaks = peak.peak_local_max(image, min_distance=11, p_norm=1, exclude_border=0)
+        assert len(peaks) == 1
+
+    def test_num_peaks_deprecated_inf(self):
+        image = np.zeros((10, 10))
+
+        with pytest.warns(FutureWarning, match=r".*use `num_peaks=None`") as record:
+            peak.peak_local_max(image, num_peaks=np.inf)
+        assert_stacklevel(record)
+
+        with pytest.warns(
+            FutureWarning, match=r".*use `num_peaks_per_label=None`"
+        ) as record:
+            peak.peak_local_max(image, num_peaks_per_label=np.inf)
+        assert_stacklevel(record)
+
+    def test_min_distance_float(self):
+        # Peaks with a Euclidean distance of ~2.828
+        image = np.array([[1, 0, 0], [0, 0, 0], [0, 0, 1]])
+        image = np.pad(image, 2)
+
+        peaks = peak.peak_local_max(image, min_distance=2.82, p_norm=2)
+        assert_equal(peaks, [[2, 2], [4, 4]])
+
+        peaks = peak.peak_local_max(image, min_distance=2.83, p_norm=2)
+        assert_equal(peaks, [[2, 2]])
 
 
 @pytest.mark.parametrize(
@@ -549,8 +614,8 @@ def test_exclude_border_errors():
 
 def test_input_values_with_labels():
     # Issue #5235: input values may be modified when labels are used
-
-    img = np.random.rand(128, 128)
+    rng = np.random.RandomState(1961599875)
+    img = rng.rand(128, 128)
     labels = np.zeros((128, 128), int)
 
     labels[10:20, 10:20] = 1
@@ -561,6 +626,20 @@ def test_input_values_with_labels():
     _ = peak.peak_local_max(img, labels=labels)
 
     assert_array_equal(img, img_before)
+
+
+@pytest.mark.filterwarnings("default::skimage.util.PendingSkimage2Change")
+def test_peak_local_max_skimage2_warning():
+    image = np.zeros((5, 5), dtype=np.uint8)
+    image[1:3, 1:3] = 10
+    regex = (
+        r"`skimage.feature.peak_local_max` is deprecated in favor of\n"
+        r"`skimage2.feature.peak_local_max`"
+    )
+    with pytest.warns(PendingSkimage2Change, match=regex) as record:
+        peaks = peak.peak_local_max(image, min_distance=1)
+    assert_stacklevel(record)
+    assert len(peaks) == 4
 
 
 class TestProminentPeaks:

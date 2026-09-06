@@ -1,11 +1,22 @@
 # Workflow to generate and test type annotations
 name: Typing
 
-on: [push, pull_request, merge_group]
+on:
+  push:
+    branches:
+      - main
+      - pre-megamove-integration
+  pull_request:
+    branches:
+      - main
+      - pre-megamove-integration
+  merge_group:
+    branches:
+      - main
 
 concurrency:
   # Cancel previously triggered workflows for the same PR
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.base.ref || github.ref }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
 permissions:

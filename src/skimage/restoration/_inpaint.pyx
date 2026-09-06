@@ -1,6 +1,6 @@
 import cython
 
-from .._shared.fused_numerics cimport np_floats
+from _skimage2._shared.fused_numerics cimport np_floats
 
 
 @cython.boundscheck(False)  # Deactivate bounds checking
