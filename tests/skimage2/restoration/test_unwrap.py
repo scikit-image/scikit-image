@@ -1,3 +1,4 @@
+import pytest
 import numpy as np
 
 from _skimage2.restoration import unwrap_phase
@@ -270,3 +271,40 @@ def test_unwrap_positional_args():
     mask = np.zeros((10, 10), dtype=bool)
     result = unwrap_phase(image, True, 0, mask)
     assert result.shape == (10, 10)
+
+
+def test_unwrap_positional_args_and_mask():
+    image = np.zeros((10, 10))
+    mask = np.zeros((10, 10), dtype=bool)
+    mask[2, 2] = True
+
+    # Test positional call order: unwrap_phase(image, wrap_around, rng, mask)
+    result = unwrap_phase(image, True, 0, mask)
+
+    assert isinstance(result, np.ma.MaskedArray)
+    np.testing.assert_array_equal(result.mask, mask)
+
+
+def test_unwrap_mask_union():
+    # Test combining a MaskedArray input with an explicit mask parameter
+    base_image = np.zeros((10, 10))
+    img_mask = np.zeros((10, 10), dtype=bool)
+    img_mask[1, 1] = True
+    image = np.ma.array(base_image, mask=img_mask)
+
+    explicit_mask = np.zeros((10, 10), dtype=bool)
+    explicit_mask[5, 5] = True
+
+    result = unwrap_phase(image, mask=explicit_mask)
+
+    expected_mask = img_mask | explicit_mask
+    assert isinstance(result, np.ma.MaskedArray)
+    np.testing.assert_array_equal(result.mask, expected_mask)
+
+
+def test_unwrap_mask_shape_mismatch():
+    image = np.zeros((10, 10))
+    invalid_mask = np.zeros((5, 5), dtype=bool)
+
+    with pytest.raises(ValueError):
+        unwrap_phase(image, mask=invalid_mask)
