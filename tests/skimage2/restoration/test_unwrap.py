@@ -308,3 +308,10 @@ def test_unwrap_mask_shape_mismatch():
 
     with pytest.raises(ValueError):
         unwrap_phase(image, mask=invalid_mask)
+
+
+def test_unwrap_1d_explicit_mask_raises():
+    image = np.zeros(10)
+    mask = np.zeros(10, dtype=bool)
+    with pytest.raises(ValueError, match="1D images with a mask cannot be unwrapped"):
+        unwrap_phase(image, mask=mask)

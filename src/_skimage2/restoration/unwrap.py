@@ -120,7 +120,7 @@ def unwrap_phase(image, wrap_around=False, rng=None, mask=None):
 
     if image.ndim == 1:
         if combined_mask is not None:
-            raise ValueError('1D masked images cannot be unwrapped')
+            raise ValueError('1D images with a mask cannot be unwrapped')
         if wrap_around[0]:
             raise ValueError('`wrap_around` is not supported for 1D images')
 
