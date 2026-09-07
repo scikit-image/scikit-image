@@ -263,3 +263,10 @@ def test_unwrap_3d_all_masked():
     assert_(np.ma.isMaskedArray(unwrap))
     assert_(np.sum(unwrap.mask) == 999)  # all but one masked
     assert_(unwrap[0, 0, 0] == 0)
+
+
+def test_unwrap_positional_args():
+    image = np.zeros((10, 10))
+    mask = np.zeros((10, 10), dtype=bool)
+    result = unwrap_phase(image, True, 0, mask)
+    assert result.shape == (10, 10)
