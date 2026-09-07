@@ -1,0 +1,44 @@
+name: Setup ccache
+description: "Install ccache, restore cache, and zero stats"
+inputs:
+  key:
+    description: "Cache key for actions/cache"
+    required: true
+  restore-keys:
+    description: "Restore-key prefix for actions/cache"
+    required: true
+  maxsize:
+    description: "CCACHE_MAXSIZE"
+    required: false
+    default: "400M"
+  sloppiness:
+    description: "CCACHE_SLOPPINESS"
+    required: false
+    default: ""
+runs:
+  using: "composite"
+  steps:
+    - name: Install and configure ccache
+      shell: bash
+      run: |
+        sudo apt-get install -y ccache
+        sudo /usr/sbin/update-ccache-symlinks
+        echo "/usr/lib/ccache" >> $GITHUB_PATH
+
+    - name: Restore/save ccache
+      uses: actions/cache@v4
+      with:
+        path: ${{ github.workspace }}/.ccache
+        key: ${{ inputs.key }}
+        restore-keys: ${{ inputs.restore-keys }}
+
+    - name: Zero ccache stats
+      shell: bash
+      env:
+        CCACHE_BASEDIR: ${{ github.workspace }}
+        CCACHE_DIR: ${{ github.workspace }}/.ccache
+        CCACHE_COMPRESS: "true"
+        CCACHE_COMPRESSLEVEL: "6"
+        CCACHE_MAXSIZE: ${{ inputs.maxsize }}
+        CCACHE_SLOPPINESS: ${{ inputs.sloppiness }}
+      run: ccache --zero-stats

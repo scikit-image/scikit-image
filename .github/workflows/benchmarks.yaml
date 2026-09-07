@@ -49,22 +49,11 @@ jobs:
           sudo /usr/sbin/update-ccache-symlinks
           echo "/usr/lib/ccache" >> $GITHUB_PATH
 
-      - name: "Prepare ccache"
-        id: prepare-ccache
-        shell: bash -l {0}
-        run: |
-          echo "key=benchmark-$RUNNER_OS" >> $GITHUB_OUTPUT
-          echo "timestamp=$(date +%Y%m%d-%H%M%S)" >> $GITHUB_OUTPUT
-          ccache -p
-          ccache -z
-
-      - name: "Restore ccache"
-        uses: actions/cache@v4
+      - name: Setup ccache
+        uses: ./.github/actions/setup-ccache
         with:
-          path: .ccache
-          key: ccache-${{ secrets.CACHE_VERSION }}-${{ steps.prepare-ccache.outputs.key }}-${{ steps.prepare-ccache.outputs.timestamp }}
-          restore-keys: |
-            ccache-${{ secrets.CACHE_VERSION }}-${{ steps.prepare-ccache.outputs.key }}-
+          key: ccache-${{ secrets.CACHE_VERSION }}-benchmark-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: ccache-${{ secrets.CACHE_VERSION }}-benchmark-${{ runner.os }}-
 
       - name: Run benchmarks
         shell: bash -l {0}
