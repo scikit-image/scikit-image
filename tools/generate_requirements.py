@@ -137,7 +137,7 @@ def update_asv_conf(pyproject: dict) -> None:
                         rf'\1["{ver}"]',
                         conf_text,
                     )
-                break
+                    break
     conf_path.write_text(conf_text)
 
 
