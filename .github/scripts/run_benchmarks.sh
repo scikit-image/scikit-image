@@ -13,7 +13,7 @@
 #
 # Writes `has_baseline=true/false` to `$GITHUB_OUTPUT`.
 
-set -e
+set -eo pipefail
 
 asv machine --yes
 
