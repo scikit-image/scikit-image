@@ -1,17 +1,3 @@
-from ._grayscale_operators import (
-    erosion,
-    dilation,
-    opening,
-    closing,
-    white_tophat,
-    black_tophat,
-)
-
-__all__ = [
-    "erosion",
-    "dilation",
-    "opening",
-    "closing",
-    "white_tophat",
-    "black_tophat",
-]
+# Re-export _skimage2.morphology for type checkers
+from _skimage2.morphology import *
+from _skimage2.morphology import __all__ as __all__

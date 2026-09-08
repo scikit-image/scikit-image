@@ -1,59 +1,6 @@
 import numpy as np
-from scipy.spatial import cKDTree, distance
 
-
-def _ensure_spacing(coord, spacing, p_norm, max_out):
-    """Returns a subset of coord where a minimum spacing is guaranteed.
-
-    Parameters
-    ----------
-    coord : ndarray
-        The coordinates of the considered points.
-    spacing : float
-        the maximum allowed spacing between the points.
-    p_norm : float
-        Which Minkowski p-norm to use. Should be in the range [1, inf].
-        A finite large p may cause a ValueError if overflow can occur.
-        ``inf`` corresponds to the Chebyshev distance and 2 to the
-        Euclidean distance.
-    max_out : int
-        If not None, at most the first ``max_out`` candidates are
-        returned.
-
-    Returns
-    -------
-    output : ndarray
-        A subset of coord where a minimum spacing is guaranteed.
-
-    """
-
-    # Use KDtree to find the peaks that are too close to each other
-    tree = cKDTree(coord)
-
-    indices = tree.query_ball_point(coord, r=spacing, p=p_norm)
-    rejected_peaks_indices = set()
-    naccepted = 0
-    for idx, candidates in enumerate(indices):
-        if idx not in rejected_peaks_indices:
-            # keep current point and the points at exactly spacing from it
-            candidates.remove(idx)
-            dist = distance.cdist(
-                [coord[idx]], coord[candidates], "minkowski", p=p_norm
-            ).reshape(-1)
-            candidates = [c for c, d in zip(candidates, dist) if d < spacing]
-
-            # candidates.remove(keep)
-            rejected_peaks_indices.update(candidates)
-            naccepted += 1
-            if max_out is not None and naccepted >= max_out:
-                break
-
-    # Remove the peaks that are too close to each other
-    output = np.delete(coord, tuple(rejected_peaks_indices), axis=0)
-    if max_out is not None:
-        output = output[:max_out]
-
-    return output
+from _skimage2.feature._peaks import _ensure_spacing
 
 
 def ensure_spacing(
@@ -65,25 +12,26 @@ def ensure_spacing(
     *,
     max_split_size=2000,
 ):
-    """Returns a subset of coord where a minimum spacing is guaranteed.
+    """Return a subset of coord where a minimum spacing is guaranteed.
 
     Parameters
     ----------
-    coords : array_like
+    coords : ndarray of shape (P, D)
         The coordinates of the considered points.
-    spacing : float
-        the maximum allowed spacing between the points.
-    p_norm : float
+    spacing : float, optional
+        The minimal allowed distance separating points in `coords`. To find the
+        maximum number of peaks, use `spacing=1`. See also `p_norm`.
+    p_norm : float, optional
         Which Minkowski p-norm to use. Should be in the range [1, inf].
         A finite large p may cause a ValueError if overflow can occur.
         ``inf`` corresponds to the Chebyshev distance and 2 to the
-        Euclidean distance.
-    min_split_size : int
+        Euclidean distance. See also :func:`numpy.linalg.norm`.
+    min_split_size : int or None, optional
         Minimum split size used to process ``coords`` by batch to save
         memory. If None, the memory saving strategy is not applied.
-    max_out : int
+    max_out : int, optional
         If not None, only the first ``max_out`` candidates are returned.
-    max_split_size : int
+    max_split_size : int, optional
         Maximum split size used to process ``coords`` by batch to save
         memory. This number was decided by profiling with a large number
         of points. Too small a number results in too much looping in
@@ -95,30 +43,31 @@ def ensure_spacing(
 
     Returns
     -------
-    output : array_like
-        A subset of coord where a minimum spacing is guaranteed.
+    output : ndarray of shape (S, D), same dtype as `coords` and S < P
+        A subset of the points in `coords` where a minimum spacing is guaranteed.
 
+    Examples
+    --------
+    >>> coords = np.array([[0, 0], [1, 1], [2, 2], [3, 3]])
+    >>> _ensure_spacing(coords, spacing=3)
+    array([[0, 0],
+           [3, 3]])
+
+    # Use _Manhatten/rectilinear distance_
+    >>> _ensure_spacing(coords, spacing=3, p_norm=1)
+    array([[0, 0],
+           [2, 2]])
     """
-    output = coords
-    if len(coords):
-        coords = np.atleast_2d(coords)
-        if min_split_size is None:
-            batch_list = [coords]
-        else:
-            coord_count = len(coords)
-            split_idx = [min_split_size]
-            split_size = min_split_size
-            while coord_count - split_idx[-1] > max_split_size:
-                split_size *= 2
-                split_idx.append(split_idx[-1] + min(split_size, max_split_size))
-            batch_list = np.array_split(coords, split_idx)
+    return _ensure_spacing(
+        coords=coords,
+        spacing=spacing,
+        p_norm=p_norm,
+        min_split_size=min_split_size,
+        max_out=max_out,
+        max_split_size=max_split_size,
+    )
 
-        output = np.zeros((0, coords.shape[1]), dtype=coords.dtype)
-        for batch in batch_list:
-            output = _ensure_spacing(
-                np.vstack([output, batch]), spacing, p_norm, max_out
-            )
-            if max_out is not None and len(output) >= max_out:
-                break
 
-    return output
+from skimage._doctest_adapters import adapt_doctests  # noqa: E402
+
+adapt_doctests(globals())

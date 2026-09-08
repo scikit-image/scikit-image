@@ -1,15 +1,82 @@
-from textwrap import dedent
-
 import numpy as np
-import scipy.ndimage as ndi
 
-from .. import measure
-from ..util import PendingSkimage2Change
-from .._shared._warnings import warn_external
+import _skimage2 as ski2
+from _skimage2.feature._peaks import _prominent_peaks  # noqa: F401 (for test_peak.py)
+from _skimage2._shared._warnings import warn_external
 
-import skimage2 as ski2
+from .._migration import ski2_migration_decorator
 
 
+@ski2_migration_decorator(
+    """\
+``%(qname_old)s`` is deprecated in favor of
+``%(qname_new)s`` with new behavior:
+
+* Parameter `p_norm` defaults to 2 (Euclidean distance),
+  was `numpy.inf` (Chebyshev distance)
+* Parameter `exclude_border` defaults to 1, was ``True``
+* Parameter `exclude_border` no longer accepts ``False`` and ``True``;
+  pass 0 instead of ``False``, or `min_distance` instead of ``True``
+* Parameters after `image` are keyword-only
+
+To keep the old behavior when switching to `skimage2`, update your call
+according to the following cases:
+
+<!--- cond-start: warning -->
+* `exclude_border` not passed, use `exclude_border=<value_of_min_distance>`
+* `exclude_border=True`, same as above
+* `exclude_border=False`, use `exclude_border=0`
+* `exclude_border=<int>`, no change necessary
+* `p_norm` not passed, use `p_norm=numpy.inf`
+* `p_norm=<float>`, no change necessary
+<!--- cond-end -->
+<!--- cond-start: doc -->
+.. list-table::
+    :header-rows: 1
+
+    - - In `skimage`
+      - In `skimage2`
+
+    - - `exclude_border` not passed (default)
+      - Assign it the same value as `min_distance` which may be its default
+        value ``1``.
+
+    - - ``exclude_border=True``
+      - Same as above in the default case.
+
+    - - ``exclude_border=False``
+      - Use ``min_distance=0``.
+
+    - - ``exclude_border=<int>``
+      - No change necessary.
+
+    - - `p_norm` not passed (default)
+      - Pass the Skimage 1 default explicitly with ``p_norm=numpy.inf``.
+
+    - - ``p_norm=<float>``
+      - No change necessary.
+
+Other keyword parameters can be left unchanged.
+
+>>> import numpy as np
+>>>
+>>> import skimage as ski1
+>>> import skimage2 as ski2
+>>> image = ski1.data.camera()
+>>> res1 = ski1.feature.peak_local_max(image)
+>>> res2 = ski2.feature.peak_local_max(image, exclude_border=1, p_norm=np.inf)
+>>> assert np.all(res1 == res2)
+>>>
+>>> res1 = ski1.feature.peak_local_max(image, min_distance=10)
+>>> res2 = ski2.feature.peak_local_max(
+...     image, min_distance=10, exclude_border=10, p_norm=np.inf
+... )
+>>> assert np.all(res1 == res2)
+
+<!--- cond-end -->
+""",
+    qname_old='skimage.feature.peak_local_max',
+)
 def peak_local_max(
     image,
     min_distance=1,
@@ -134,33 +201,6 @@ def peak_local_max(
            [15, 15, 15]])
 
     """
-    warn_external(
-        dedent("""\
-        `skimage.feature.peak_local_max` is deprecated in favor of
-        `skimage2.feature.peak_local_max` with new behavior:
-
-        * Parameter `p_norm` defaults to 2 (Euclidean distance),
-          was `numpy.inf` (Chebyshev distance)
-        * Parameter `exclude_border` defaults to 1, was `True`
-        * Parameter `exclude_border` no longer accepts `False` and `True`,
-          pass 0 instead of `False`, or `min_distance` instead of `True`
-        * Parameters after `image` are keyword-only
-
-        To keep the old behavior when switching to `skimage2`, update your call
-        according to the following cases:
-
-        * `exclude_border` not passed, use `exclude_border=<value_of_min_distance>`
-        * `exclude_border=True`, same as above
-        * `exclude_border=False`, use `exclude_border=0`
-        * `exclude_border=<int>`, no change necessary
-        * `p_norm` not passed, use `p_norm=numpy.inf`
-        * `p_norm=<float>, no change necessary
-
-        Other keyword parameters can be left unchanged.
-        """),
-        category=PendingSkimage2Change,
-    )
-
     # Deprecate passing `np.inf` to `num_peaks` and `num_peaks_per_label`
     if num_peaks is not None and np.isinf(num_peaks):
         num_peaks = None
@@ -197,108 +237,6 @@ def peak_local_max(
     return coordinates
 
 
-def _prominent_peaks(
-    image, min_xdistance=1, min_ydistance=1, threshold=None, num_peaks=np.inf
-):
-    """Return peaks with non-maximum suppression.
+from skimage._doctest_adapters import adapt_doctests  # noqa: E402
 
-    Identifies most prominent features separated by certain distances.
-    Non-maximum suppression with different sizes is applied separately
-    in the first and second dimension of the image to identify peaks.
-
-    Parameters
-    ----------
-    image : (M, N) ndarray
-        Input image.
-    min_xdistance : int
-        Minimum distance separating features in the x dimension.
-    min_ydistance : int
-        Minimum distance separating features in the y dimension.
-    threshold : float
-        Minimum intensity of peaks. Default is `0.5 * max(image)`.
-    num_peaks : int
-        Maximum number of peaks. When the number of peaks exceeds `num_peaks`,
-        return `num_peaks` coordinates based on peak intensity.
-
-    Returns
-    -------
-    intensity, xcoords, ycoords : tuple of array
-        Peak intensity values, x and y indices.
-    """
-
-    img = image.copy()
-    rows, cols = img.shape
-
-    if threshold is None:
-        threshold = 0.5 * np.max(img)
-
-    ycoords_size = 2 * min_ydistance + 1
-    xcoords_size = 2 * min_xdistance + 1
-    img_max = ndi.maximum_filter1d(
-        img, size=ycoords_size, axis=0, mode='constant', cval=0
-    )
-    img_max = ndi.maximum_filter1d(
-        img_max, size=xcoords_size, axis=1, mode='constant', cval=0
-    )
-    mask = img == img_max
-    img *= mask
-    img_t = img > threshold
-
-    label_img = measure.label(img_t)
-    props = measure.regionprops(label_img, img_max)
-
-    # Sort the list of peaks by intensity, not left-right, so larger peaks
-    # in Hough space cannot be arbitrarily suppressed by smaller neighbors
-    props = sorted(props, key=lambda x: x.intensity_max)[::-1]
-    coords = np.array([np.round(p.centroid) for p in props], dtype=int)
-
-    img_peaks = []
-    ycoords_peaks = []
-    xcoords_peaks = []
-
-    # relative coordinate grid for local neighborhood suppression
-    ycoords_ext, xcoords_ext = np.mgrid[
-        -min_ydistance : min_ydistance + 1, -min_xdistance : min_xdistance + 1
-    ]
-
-    for ycoords_idx, xcoords_idx in coords:
-        accum = img_max[ycoords_idx, xcoords_idx]
-        if accum > threshold:
-            # absolute coordinate grid for local neighborhood suppression
-            ycoords_nh = ycoords_idx + ycoords_ext
-            xcoords_nh = xcoords_idx + xcoords_ext
-
-            # no reflection for distance neighborhood
-            ycoords_in = np.logical_and(ycoords_nh > 0, ycoords_nh < rows)
-            ycoords_nh = ycoords_nh[ycoords_in]
-            xcoords_nh = xcoords_nh[ycoords_in]
-
-            # reflect xcoords and assume xcoords are continuous,
-            # e.g. for angles:
-            # (..., 88, 89, -90, -89, ..., 89, -90, -89, ...)
-            xcoords_low = xcoords_nh < 0
-            ycoords_nh[xcoords_low] = rows - ycoords_nh[xcoords_low]
-            xcoords_nh[xcoords_low] += cols
-            xcoords_high = xcoords_nh >= cols
-            ycoords_nh[xcoords_high] = rows - ycoords_nh[xcoords_high]
-            xcoords_nh[xcoords_high] -= cols
-
-            # suppress neighborhood
-            img_max[ycoords_nh, xcoords_nh] = 0
-
-            # add current feature to peaks
-            img_peaks.append(accum)
-            ycoords_peaks.append(ycoords_idx)
-            xcoords_peaks.append(xcoords_idx)
-
-    img_peaks = np.array(img_peaks)
-    ycoords_peaks = np.array(ycoords_peaks)
-    xcoords_peaks = np.array(xcoords_peaks)
-
-    if num_peaks < len(img_peaks):
-        idx_maxsort = np.argsort(img_peaks)[::-1][:num_peaks]
-        img_peaks = img_peaks[idx_maxsort]
-        ycoords_peaks = ycoords_peaks[idx_maxsort]
-        xcoords_peaks = xcoords_peaks[idx_maxsort]
-
-    return img_peaks, xcoords_peaks, ycoords_peaks
+adapt_doctests(globals())

@@ -6,7 +6,7 @@ from scipy import ndimage as ndi
 from skimage import data, color, morphology
 from skimage.util import img_as_bool
 from skimage.morphology import binary, footprints, gray, footprint_rectangle
-from skimage._shared.testing import assert_stacklevel
+from _skimage2._shared.testing import assert_stacklevel
 
 
 img = color.rgb2gray(data.astronaut())
@@ -118,9 +118,7 @@ def test_rectangle_decomposition(function, nrows, ncols, decomposition):
 @pytest.mark.parametrize("m", (0, 1, 2, 3, 4, 5))
 @pytest.mark.parametrize("n", (0, 1, 2, 3, 4, 5))
 @pytest.mark.parametrize("decomposition", ['sequence'])
-@pytest.mark.filterwarnings(
-    "ignore:.*falling back to decomposition='separable':UserWarning"
-)
+@pytest.mark.filterwarnings("ignore:.*falling back to method='separable':UserWarning")
 def test_octagon_decomposition(function, m, n, decomposition):
     """Validate footprint decomposition for various shapes.
 
@@ -165,9 +163,7 @@ def test_diamond_decomposition(function, radius, decomposition):
 )
 @pytest.mark.parametrize("shape", [(3, 3, 3), (3, 4, 5)])
 @pytest.mark.parametrize("decomposition", ['separable', 'sequence'])
-@pytest.mark.filterwarnings(
-    "ignore:.*falling back to decomposition='separable':UserWarning"
-)
+@pytest.mark.filterwarnings("ignore:.*falling back to method='separable':UserWarning")
 def test_cube_decomposition(function, shape, decomposition):
     """Validate footprint decomposition for various shapes.
 

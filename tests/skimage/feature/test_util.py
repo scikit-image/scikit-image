@@ -1,7 +1,9 @@
+import io
+
 import numpy as np
 import pytest
 
-from skimage._shared._dependency_checks import has_mpl
+from ...dependency_checks import uses_matplotlib
 from skimage.feature.util import (
     FeatureDetector,
     DescriptorExtractor,
@@ -52,7 +54,7 @@ def test_mask_border_keypoints():
     )
 
 
-@pytest.mark.skipif(not has_mpl, reason="Matplotlib not installed")
+@uses_matplotlib
 @pytest.mark.parametrize(
     "shapes",
     [
@@ -66,18 +68,16 @@ def test_mask_border_keypoints():
     ],
 )
 def test_plot_matched_features(shapes):
-    from matplotlib import pyplot as plt
-    from matplotlib import use
+    from matplotlib.figure import Figure
 
-    use('Agg')
+    fig = Figure()
+    ax = fig.subplots()
 
-    fig, ax = plt.subplots()
-
-    rng = np.random.default_rng(202410101501)
+    rng = np.random.RandomState(2423194815)
     keypoints0 = 10 * rng.random((10, 2))
     keypoints1 = 10 * rng.random((10, 2))
-    idxs0 = rng.integers(10, size=10)
-    idxs1 = rng.integers(10, size=10)
+    idxs0 = rng.randint(10, size=10)
+    idxs1 = rng.randint(10, size=10)
     matches = np.column_stack((idxs0, idxs1))
 
     shape0, shape1 = shapes
@@ -119,7 +119,7 @@ def test_plot_matched_features(shapes):
         matches_color='r',
     )
     # Pass colors as random list of color strings
-    rng = np.random.default_rng(202409281822)
+    rng = np.random.RandomState(1123037303)
     random_matches_color = [
         rng.choice(['C0', '#abc', 'aquamarine']) for _ in range(len(matches))
     ]
@@ -151,23 +151,24 @@ def test_plot_matched_features(shapes):
         matches=matches,
         alignment='vertical',
     )
-    plt.close()
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png")
 
 
-@pytest.mark.skipif(not has_mpl, reason="Matplotlib not installed")
+@uses_matplotlib
 @pytest.mark.parametrize("matches_color", ([], ["C0"], ["C0", "C1"], np.arange(30)))
 def test_plot_matched_features_color_error(matches_color):
-    from matplotlib import pyplot as plt
-    from matplotlib import use
+    from matplotlib.figure import Figure
 
-    use('Agg')
+    fig = Figure()
+    ax = fig.subplots()
 
-    _, ax = plt.subplots()
+    rng = np.random.RandomState(3832133755)
 
-    keypoints0 = 10 * np.random.rand(10, 2)
-    keypoints1 = 10 * np.random.rand(10, 2)
-    idxs0 = np.random.randint(10, size=10)
-    idxs1 = np.random.randint(10, size=10)
+    keypoints0 = 10 * rng.rand(10, 2)
+    keypoints1 = 10 * rng.rand(10, 2)
+    idxs0 = rng.randint(10, size=10)
+    idxs1 = rng.randint(10, size=10)
     matches = np.column_stack((idxs0, idxs1))
     assert len(matches_color) != len(matches)
 
@@ -190,22 +191,22 @@ def test_plot_matched_features_color_error(matches_color):
         )
 
 
-@pytest.mark.skipif(not has_mpl, reason="Matplotlib not installed")
+@uses_matplotlib
 def test_plot_matched_features_matplotlib_color_error():
     # Error is raised from matplotlib itself if we pass a sequence of correct length
     # but with values that aren't colors
 
-    from matplotlib import pyplot as plt
-    from matplotlib import use
+    from matplotlib.figure import Figure
 
-    use('Agg')
+    fig = Figure()
+    ax = fig.subplots()
 
-    _, ax = plt.subplots()
+    rng = np.random.RandomState(3533696481)
 
-    keypoints0 = 10 * np.random.rand(10, 2)
-    keypoints1 = 10 * np.random.rand(10, 2)
-    idxs0 = np.random.randint(10, size=10)
-    idxs1 = np.random.randint(10, size=10)
+    keypoints0 = 10 * rng.rand(10, 2)
+    keypoints1 = 10 * rng.rand(10, 2)
+    idxs0 = rng.randint(10, size=10)
+    idxs1 = rng.randint(10, size=10)
     matches = np.column_stack((idxs0, idxs1))
 
     img0 = np.zeros((10, 10))

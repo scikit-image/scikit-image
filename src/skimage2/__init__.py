@@ -1,14 +1,36 @@
-"""skimage2 namespace"""
+"""Image Processing for Python (EXPERIMENTAL API version 2)."""
 
 import warnings
 
 import lazy_loader as _lazy
 
-from skimage import __version__
+from _skimage2 import __version__
+from _skimage2._shared._warnings import ExperimentalAPIWarning
 
 
-class ExperimentalAPIWarning(UserWarning):
-    """Mark unstable API that's intentionally not published (yet)."""
+# Each submodule is a shim package that forwards to its `_skimage2` counterpart.
+__getattr__, __dir__, __all__ = _lazy.attach(
+    __name__,
+    submodules=[
+        "color",
+        "data",
+        "draw",
+        "exposure",
+        "feature",
+        "filters",
+        "graph",
+        "io",
+        "measure",
+        "metrics",
+        "morphology",
+        "registration",
+        "restoration",
+        "segmentation",
+        "transform",
+        "util",
+    ],
+)
+__all__ += ["__version__", "ExperimentalAPIWarning"]
 
 
 warnings.warn(
@@ -17,6 +39,3 @@ warnings.warn(
     category=ExperimentalAPIWarning,
     stacklevel=2,
 )
-
-
-__getattr__, _, __all__ = _lazy.attach_stub(__name__, __file__)

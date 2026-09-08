@@ -1,7 +1,7 @@
-from .version_requirements import is_installed
-import sys
-import platform
+from _skimage2._shared._dependency_checks import is_wasm as is_wasm  # noqa: F401
 
-has_mpl = is_installed("matplotlib", ">=3.3")
+__all__ = ['is_wasm']
 
-is_wasm = (sys.platform == "emscripten") or (platform.machine() in ["wasm32", "wasm64"])
+from skimage._doctest_adapters import adapt_doctests
+
+adapt_doctests(globals())

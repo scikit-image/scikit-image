@@ -1,5 +1,3 @@
-__all__ = [
-    "peak_local_max",
-]
-
-from ._peaks import peak_local_max
+# Re-export _skimage2.feature for type checkers
+from _skimage2.feature import *
+from _skimage2.feature import __all__ as __all__

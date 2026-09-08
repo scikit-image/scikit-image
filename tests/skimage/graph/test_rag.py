@@ -6,7 +6,7 @@ import scipy as sp
 
 from skimage import graph
 from skimage import segmentation, data
-from skimage._shared import testing
+from _skimage2._shared import testing
 
 # Version is less than 1.17.0.dev0
 SCIPY_LT_1_17_DEV0 = parse(sp.__version__) < parse("1.17.0.dev0")

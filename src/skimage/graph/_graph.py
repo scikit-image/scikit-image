@@ -1,36 +1,43 @@
-import numpy as np
-from scipy import sparse
-from scipy.sparse import csgraph
-from ..morphology._util import _raveled_offsets_and_distances
-from ..util._map_array import map_array
-from ..segmentation.random_walker_segmentation import _safe_downcast_indices
+from _skimage2.graph._graph import (
+    central_pixel as central_pixel,
+)  # noqa: F401
+
+import scipy.sparse as sparse
+
+import _skimage2 as ski2
+
+from .._migration import ski2_migration_decorator
+
+__all__ = [
+    'central_pixel',
+    'pixel_graph',
+]
+
+from skimage._doctest_adapters import adapt_doctests  # noqa: E402
+
+adapt_doctests(globals())
 
 
-def _weighted_abs_diff(values0, values1, distances):
-    """A default edge function for complete image graphs.
+@ski2_migration_decorator(
+    """\
+    ``%(qname_old)s`` is deprecated in favor of
+    ``%(qname_new)s`` with new behavior:
 
-    A pixel graph on an image with no edge values and no mask is a very
-    boring regular lattice, so we define a default edge weight to be the
-    absolute difference between values *weighted* by the distance
-    between them.
+    * Parameter `sparse_type` was removed
+    * Returned `graph` is always a `scipy.sparse.csr_array`
 
-    Parameters
-    ----------
-    values0 : array
-        The pixel values for each node.
-    values1 : array
-        The pixel values for each neighbor.
-    distances : array
-        The distance between each node and its neighbor.
+    SciPy 2.0 deprecates the sparse matrix classes and will remove them no
+    earlier than SciPy 2.2. The two types define ``*`` differently: matrix
+    multiplication for `scipy.sparse.csr_matrix`, elementwise multiplication
+    for `scipy.sparse.csr_array`. ``@`` is matrix multiplication for both.
 
-    Returns
-    -------
-    edge_values : array of float
-        The computed values: abs(values0 - values1) * distances.
-    """
-    return np.abs(values0 - values1) * distances
+    To keep the old (``skimage``, v1.x) behavior, convert the result::
 
-
+        graph, nodes = skimage2.graph.pixel_graph(image, ...)
+        graph = scipy.sparse.csr_matrix(graph)
+    """,
+    qname_old="skimage.graph.pixel_graph",
+)
 def pixel_graph(
     image,
     *,
@@ -83,138 +90,18 @@ def pixel_graph(
         The nodes of the graph. These correspond to the raveled indices of the
         nonzero pixels in the mask.
     """
-    if mask is None:
-        if image.dtype == bool:
-            mask = image
-        else:
-            mask = np.ones_like(image, dtype=bool)
-
-    if edge_function is None:
-        if image.dtype == bool:
-
-            def edge_function(x, y, distances):
-                return distances
-
-        else:
-            edge_function = _weighted_abs_diff
-
-    # Strategy: we are going to build the (i, j, data) arrays of a scipy
-    # sparse CSR matrix.
-    # - grab the raveled IDs of the foreground (mask == True) parts of the
-    #   image **in the padded space**.
-    # - broadcast them together with the raveled offsets to their neighbors.
-    #   This gives us for each foreground pixel a list of neighbors (that
-    #   may or may not be selected by the mask). (We also track the *distance*
-    #   to each neighbor.)
-    # - select "valid" entries in the neighbors and distance arrays by indexing
-    #   into the mask, which we can do since these are raveled indices.
-    # - use np.repeat() to repeat each source index according to the number
-    #   of neighbors selected by the mask it has. Each of these repeated
-    #   indices will be lined up with its neighbor, i.e. **this is the row_ind
-    #   array** of the CSR format matrix.
-    # - use the mask as a boolean index to get a 1D view of the selected
-    #   neighbors. **This is the col_ind array.**
-    # - by default, the same boolean indexing can be applied to the distances
-    #   to each neighbor, to give the **data array.** Optionally, a
-    #   provided edge function can be computed on the pixel values and the
-    #   distances to give a different value for the edges.
-    # Note, we use map_array to map the raveled coordinates in the padded
-    # image to the ones in the original image, and those are the returned
-    # nodes.
-    padded = np.pad(mask, 1, mode='constant', constant_values=False)
-    nodes_padded = np.flatnonzero(padded)
-    neighbor_offsets_padded, distances_padded = _raveled_offsets_and_distances(
-        padded.shape, connectivity=connectivity, spacing=spacing
-    )
-    neighbors_padded = nodes_padded[:, np.newaxis] + neighbor_offsets_padded
-    neighbor_distances_full = np.broadcast_to(distances_padded, neighbors_padded.shape)
-    nodes = np.flatnonzero(mask)
-    nodes_sequential = np.arange(nodes.size)
-    # neighbors outside the mask get mapped to 0, which is a valid index,
-    # BUT, they will be masked out in the next step.
-    neighbors = map_array(neighbors_padded, nodes_padded, nodes)
-    neighbors_mask = padded.reshape(-1)[neighbors_padded]
-    num_neighbors = np.sum(neighbors_mask, axis=1)
-    indices = np.repeat(nodes, num_neighbors)
-    indices_sequential = np.repeat(nodes_sequential, num_neighbors)
-    neighbor_indices = neighbors[neighbors_mask]
-    neighbor_distances = neighbor_distances_full[neighbors_mask]
-    neighbor_indices_sequential = map_array(neighbor_indices, nodes, nodes_sequential)
-
-    image_r = image.reshape(-1)
-    data = edge_function(
-        image_r[indices], image_r[neighbor_indices], neighbor_distances
-    )
-
-    m = nodes_sequential.size
-    graph = sparse.csr_array(
-        (data, (indices_sequential, neighbor_indices_sequential)), shape=(m, m)
-    )
-
-    if sparse_type == "matrix":
-        graph = sparse.csr_matrix(graph)
-    elif sparse_type != "array":
+    if sparse_type not in ("array", "matrix"):
         msg = f"`sparse_type` must be 'array' or 'matrix', got {sparse_type}"
         raise ValueError(msg)
 
-    return graph, nodes
-
-
-def central_pixel(graph, nodes=None, shape=None, partition_size=100):
-    """Find the pixel with the highest closeness centrality.
-
-    Closeness centrality is the inverse of the total sum of shortest distances
-    from a node to every other node.
-
-    Parameters
-    ----------
-    graph : scipy.sparse.csr_array or scipy.sparse.csr_matrix
-        The sparse representation of the graph.
-    nodes : array of int
-        The raveled index of each node in graph in the image. If not provided,
-        the returned value will be the index in the input graph.
-    shape : tuple of int
-        The shape of the image in which the nodes are embedded. If provided,
-        the returned coordinates are a NumPy multi-index of the same
-        dimensionality as the input shape. Otherwise, the returned coordinate
-        is the raveled index provided in `nodes`.
-    partition_size : int
-        This function computes the shortest path distance between every pair
-        of nodes in the graph. This can result in a very large (N*N) matrix.
-        As a simple performance tweak, the distance values are computed in
-        lots of `partition_size`, resulting in a memory requirement of only
-        partition_size*N.
-
-    Returns
-    -------
-    position : int or tuple of int
-        If shape is given, the coordinate of the central pixel in the image.
-        Otherwise, the raveled index of that pixel.
-    distances : array of float
-        The total sum of distances from each node to each other reachable
-        node.
-    """
-    if nodes is None:
-        nodes = np.arange(graph.shape[0])
-    if partition_size is None:
-        num_splits = 1
-    else:
-        num_splits = max(2, graph.shape[0] // partition_size)
-    graph.indices, graph.indptr = _safe_downcast_indices(
-        graph, np.int32, 'index values too large for csgraph'
+    graph, nodes = ski2.graph.pixel_graph(
+        image,
+        mask=mask,
+        edge_function=edge_function,
+        connectivity=connectivity,
+        spacing=spacing,
     )
-    idxs = np.arange(graph.shape[0])
-    total_shortest_path_len_list = []
-    for partition in np.array_split(idxs, num_splits):
-        shortest_paths = csgraph.shortest_path(graph, directed=False, indices=partition)
-        shortest_paths_no_inf = np.nan_to_num(shortest_paths)
-        total_shortest_path_len_list.append(np.sum(shortest_paths_no_inf, axis=1))
-    total_shortest_path_len = np.concatenate(total_shortest_path_len_list)
-    nonzero = np.flatnonzero(total_shortest_path_len)
-    min_sp = np.argmin(total_shortest_path_len[nonzero])
-    raveled_index = nodes[nonzero[min_sp]]
-    if shape is not None:
-        central = np.unravel_index(raveled_index, shape)
-    else:
-        central = raveled_index
-    return central, total_shortest_path_len
+    if sparse_type == "matrix":
+        graph = sparse.csr_matrix(graph)
+
+    return graph, nodes

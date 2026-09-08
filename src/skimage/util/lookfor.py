@@ -1,9 +1,7 @@
 import sys
 
-from .._vendored.numpy_lookfor import lookfor as _lookfor
-
-
-__doctest_requires__ = {("lookfor",): ["SimpleITK"]}
+from _skimage2._vendored.numpy_lookfor import lookfor as _lookfor
+from _skimage2.util._lookfor import __doc__  # noqa: F401
 
 
 def lookfor(what):
@@ -30,4 +28,10 @@ def lookfor(what):
     skimage.util.lookfor
         Do a keyword search on scikit-image docstrings and print results.
     """
-    return _lookfor(what, sys.modules[__name__.split('.')[0]])
+    # Walk skimage public namespace; follow _skimage2 implementations only.
+    return _lookfor(
+        what,
+        sys.modules['skimage'],
+        namespace='skimage',
+        other_namespaces=('_skimage2',),
+    )

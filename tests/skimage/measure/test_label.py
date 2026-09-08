@@ -4,7 +4,7 @@ from skimage import data
 from skimage.measure._label import _label_bool, label
 from skimage.measure._ccomp import label_cython as clabel
 
-from skimage._shared import testing
+from _skimage2._shared import testing
 
 # In this testsuite, we ensure that the results provided by
 # label_cython are identical to the one from _label_bool,

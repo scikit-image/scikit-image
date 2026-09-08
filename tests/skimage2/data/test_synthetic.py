@@ -2,14 +2,19 @@ import numpy as np
 import pytest
 from numpy.testing import assert_almost_equal
 
-from skimage2.data import binary_blobs
-from skimage._shared.testing import assert_stacklevel
+from _skimage2.data import binary_blobs
+from _skimage2._shared.testing import assert_stacklevel
 
 
 SEED = 3  # Pin randomness of tests
 
 
 class Test_binary_blobs:
+    def test_required_args_positional(self):
+        blobs_kw = binary_blobs(shape=(32, 32), blob_size=5, rng=SEED)
+        blobs_pos = binary_blobs((32, 32), 5, rng=SEED)
+        np.testing.assert_array_equal(blobs_kw, blobs_pos)
+
     def test_volume_fraction(self):
         blobs = binary_blobs(shape=(128, 128), blob_size=13, rng=SEED)
         assert_almost_equal(blobs.mean(), 0.5, decimal=1)
@@ -63,6 +68,27 @@ class Test_binary_blobs:
             assert not np.all(result == 1)  # Features still exist
         else:
             np.testing.assert_equal(result, 1)
+
+    @pytest.mark.parametrize("blob_size", [81, 300])
+    @pytest.mark.parametrize("volume_fraction", [0.9, 0.1])
+    def test_large_blob_size(self, blob_size, volume_fraction):
+        shape = (80, 100)
+        # No warning, blob size warns when longer than shape
+        result = binary_blobs(
+            shape, blob_size=min(shape), volume_fraction=volume_fraction, rng=SEED
+        )
+        assert result.shape == shape
+
+        regex = r"`blob_size=.* is larger than a dimension"
+        with pytest.warns(RuntimeWarning, match=regex) as record:
+            result = binary_blobs(
+                shape, blob_size=blob_size, volume_fraction=volume_fraction, rng=SEED
+            )
+        assert_stacklevel(record, offset=-3)
+
+        # Volume fraction is still forced correctly
+        actual_fraction = result.sum() / result.size
+        np.testing.assert_allclose(actual_fraction, volume_fraction, rtol=0.01)
 
     @pytest.mark.filterwarnings("ignore:Requested `blob_size` .* is smaller than 1")
     def test_blob_size_clamping(self):

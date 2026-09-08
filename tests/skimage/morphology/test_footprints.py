@@ -9,7 +9,7 @@ import numpy as np
 import pytest
 from numpy.testing import assert_equal
 
-from skimage._shared.testing import fetch, assert_stacklevel
+from _skimage2._shared.testing import fetch, assert_stacklevel
 from skimage.morphology import footprints
 from skimage.morphology import footprint_rectangle, footprint_from_sequence
 
@@ -218,6 +218,9 @@ def test_ball_series_approximation_unavailable():
         footprints.ball(radius=10000, decomposition="sequence")
 
 
+# skimage.morphology.mirror_footprint --------------------------------------------------
+
+
 @pytest.mark.parametrize("as_sequence", [tuple, None])
 def test_mirror_footprint(as_sequence):
     footprint = np.array([[0, 0, 0], [0, 1, 1], [0, 1, 1]], np.uint8)
@@ -229,6 +232,9 @@ def test_mirror_footprint(as_sequence):
     actual_res = footprints.mirror_footprint(footprint)
     assert type(expected_res) is type(actual_res)
     assert_equal(expected_res, actual_res)
+
+
+# skimage.morphology.pad_footprint --------------------------------------------------
 
 
 @pytest.mark.parametrize("as_sequence", [tuple, None])
@@ -246,7 +252,7 @@ def test_pad_footprint(as_sequence, pad_end):
     assert_equal(expected_res, actual_res)
 
 
-class Test_footprint_rectangule:
+class Test_footprint_rectangle:
     @pytest.mark.parametrize("i", [0, 1, 2, 3, 4])
     @pytest.mark.parametrize("j", [0, 1, 2, 3, 4])
     def test_rectangle(self, i, j):
@@ -271,10 +277,11 @@ class Test_footprint_rectangule:
         assert_equal(recomposed, regular)
 
     @pytest.mark.parametrize("shape", [(2,), (3, 4)])
+    @pytest.mark.filterwarnings("ignore::skimage.util.PendingSkimage2Change")
     def test_uneven_sequence_decomposition_warning(self, shape):
         """Should fall back to decomposition="separable" for uneven footprint size."""
         desired = footprint_rectangle(shape, decomposition="separable")
-        regex = "decomposition='sequence' is only supported for uneven footprints"
+        regex = "method='sequence' is only supported for uneven footprints"
         with pytest.warns(UserWarning, match=regex) as record:
             actual = footprint_rectangle(shape, decomposition="sequence")
         assert_stacklevel(record)

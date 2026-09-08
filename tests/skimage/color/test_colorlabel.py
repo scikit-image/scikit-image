@@ -8,7 +8,7 @@ from numpy.testing import (
     assert_no_warnings,
 )
 
-from skimage._shared.testing import expected_warnings
+from _skimage2._shared.testing import expected_warnings
 from skimage.color.colorconv import hsv2rgb, rgb2hsv
 from skimage.color.colorlabel import label2rgb
 
@@ -31,7 +31,8 @@ def test_wrong_kind():
 
 @pytest.mark.parametrize("channel_axis", [0, 1, -1])
 def test_uint_image(channel_axis):
-    img = np.random.randint(0, 255, (10, 10), dtype=np.uint8)
+    rng = np.random.RandomState(483324358)
+    img = rng.randint(0, 255, (10, 10), dtype=np.uint8)
     labels = np.zeros((10, 10), dtype=np.int64)
     labels[1:3, 1:3] = 1
     labels[6:9, 6:9] = 2
@@ -57,8 +58,9 @@ def test_rgb():
 
 
 def test_alpha():
-    image = np.random.uniform(size=(3, 3))
-    label = np.random.randint(0, 9, size=(3, 3))
+    rng = np.random.RandomState(55422193)
+    image = rng.uniform(size=(3, 3))
+    label = rng.randint(0, 9, size=(3, 3))
     # If we set `alpha = 0`, then rgb should match image exactly.
     rgb = label2rgb(label, image=image, alpha=0, image_alpha=1, bg_label=-1)
     assert_array_almost_equal(rgb[..., 0], image)
@@ -74,7 +76,8 @@ def test_no_input_image():
 
 
 def test_image_alpha():
-    image = np.random.uniform(size=(1, 3))
+    rng = np.random.RandomState(2515737614)
+    image = rng.uniform(size=(1, 3))
     label = np.arange(3).reshape(1, -1)
     colors = [(1, 0, 0), (0, 1, 0), (0, 0, 1)]
     # If we set `image_alpha = 0`, then rgb should match label colors exactly.
@@ -212,7 +215,8 @@ def test_negative_intensity():
 
 
 def test_bg_color_rgb_string():
-    img = np.random.randint(0, 255, (10, 10), dtype=np.uint8)
+    rng = np.random.RandomState(2246337155)
+    img = rng.randint(0, 255, (10, 10), dtype=np.uint8)
     labels = np.zeros((10, 10), dtype=np.int64)
     labels[1:3, 1:3] = 1
     labels[6:9, 6:9] = 2
@@ -221,7 +225,8 @@ def test_bg_color_rgb_string():
 
 
 def test_avg_with_2d_image():
-    img = np.random.randint(0, 255, (10, 10), dtype=np.uint8)
+    rng = np.random.RandomState(1894758451)
+    img = rng.randint(0, 255, (10, 10), dtype=np.uint8)
     labels = np.zeros((10, 10), dtype=np.int64)
     labels[1:3, 1:3] = 1
     labels[6:9, 6:9] = 2
@@ -232,10 +237,11 @@ def test_avg_with_2d_image():
 def test_label2rgb_nd(image_type):
     # validate 1D and 3D cases by testing their output relative to the 2D case
     shape = (10, 10)
+    rng = np.random.RandomState(1215197315)
     if image_type == 'rgb':
-        img = np.random.randint(0, 255, shape + (3,), dtype=np.uint8)
+        img = rng.randint(0, 255, shape + (3,), dtype=np.uint8)
     elif image_type == 'gray':
-        img = np.random.randint(0, 255, shape, dtype=np.uint8)
+        img = rng.randint(0, 255, shape, dtype=np.uint8)
     else:
         img = None
 
@@ -264,7 +270,8 @@ def test_label2rgb_nd(image_type):
 
 
 def test_label2rgb_shape_errors():
-    img = np.random.randint(0, 255, (10, 10, 3), dtype=np.uint8)
+    rng = np.random.RandomState(2031390886)
+    img = rng.randint(0, 255, (10, 10, 3), dtype=np.uint8)
     labels = np.zeros((10, 10), dtype=np.int64)
     labels[2:5, 2:5] = 1
 
@@ -282,7 +289,8 @@ def test_label2rgb_shape_errors():
 
 
 def test_overlay_full_saturation():
-    rgb_img = np.random.uniform(size=(10, 10, 3))
+    rng = np.random.RandomState(3923675713)
+    rgb_img = rng.uniform(size=(10, 10, 3))
     labels = np.ones((10, 10), dtype=np.int64)
     labels[5:, 5:] = 2
     labels[:3, :3] = 0
@@ -293,7 +301,8 @@ def test_overlay_full_saturation():
 
 
 def test_overlay_custom_saturation():
-    rgb_img = np.random.uniform(size=(10, 10, 3))
+    rng = np.random.RandomState(1090170171)
+    rgb_img = rng.uniform(size=(10, 10, 3))
     labels = np.ones((10, 10), dtype=np.int64)
     labels[5:, 5:] = 2
     labels[:3, :3] = 0
@@ -312,7 +321,8 @@ def test_overlay_custom_saturation():
 
 
 def test_saturation_warning():
-    rgb_img = np.random.uniform(size=(10, 10, 3))
+    rng = np.random.RandomState(1315044155)
+    rgb_img = rng.uniform(size=(10, 10, 3))
     labels = np.ones((10, 10), dtype=np.int64)
     with expected_warnings(["saturation must be in range"]):
         label2rgb(labels, image=rgb_img, bg_label=0, saturation=2)

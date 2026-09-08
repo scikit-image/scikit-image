@@ -2,10 +2,10 @@ import numpy as np
 import pytest
 from numpy.testing import assert_almost_equal
 
-from skimage import color, data, draw, feature, img_as_float
-from skimage._shared import filters
-from skimage._shared.testing import fetch
-from skimage._shared.utils import _supported_float_type
+from skimage import color, data, draw, feature, img_as_float, filters
+
+from _skimage2._shared.testing import fetch
+from _skimage2._shared.utils import _supported_float_type
 
 
 def test_hog_output_size():
@@ -250,7 +250,7 @@ def test_hog_orientations_circle():
             plt.subplot(1, 2, 2)
             plt.imshow(hog_img)
             plt.colorbar()
-            plt.title('HOG result visualisation, ' f'orientations={orientations}')
+            plt.title(f'HOG result visualisation, orientations={orientations}')
             plt.show()
 
         # reshape resulting feature vector to matrix with N columns (each

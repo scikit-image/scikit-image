@@ -1,5 +1,8 @@
-"""Morphological algorithms, for example, closing, opening, and skeletonization."""
+"""Morphological algorithms, e.g., closing, opening, skeletonization."""
 
-import lazy_loader as _lazy
+from _skimage2 import morphology as _impl
 
-__getattr__, __dir__, __all__ = _lazy.attach_stub(__name__, __file__)
+# `_skimage2.morphology` resolves its own attributes lazily; forward to it.
+__getattr__ = _impl.__getattr__
+__dir__ = _impl.__dir__
+__all__ = _impl.__all__

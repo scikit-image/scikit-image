@@ -3,8 +3,8 @@ import pytest
 from numpy.testing import assert_allclose, assert_array_almost_equal, assert_array_equal
 from scipy.ndimage import map_coordinates
 
-from skimage._shared.testing import expected_warnings, run_in_parallel
-from skimage._shared.utils import _supported_float_type
+from _skimage2._shared.testing import expected_warnings, run_in_parallel
+from _skimage2._shared.utils import _supported_float_type
 from skimage.color.colorconv import rgb2gray
 from skimage.data import checkerboard, astronaut
 from skimage.draw.draw import circle_perimeter_aa
@@ -29,9 +29,6 @@ from skimage.transform._geometric import (
     SimilarityTransform,
 )
 from skimage.util.dtype import img_as_float, _convert
-
-
-np.random.seed(0)
 
 
 def test_stackcopy():
@@ -491,7 +488,8 @@ def test_swirl(dtype):
 
 
 def test_const_cval_out_of_range():
-    img = np.random.randn(100, 100)
+    rng = np.random.RandomState(3986604183)
+    img = rng.randn(100, 100)
     cval = -10
     warped = warp(img, AffineTransform(translation=(10, 10)), cval=cval)
     assert np.sum(warped == cval) == (2 * 100 * 10 - 10 * 10)
@@ -660,7 +658,8 @@ def test_downscale_anti_aliasing():
 
 
 def test_downscale_to_the_limit():
-    img = np.random.rand(3, 4)
+    rng = np.random.RandomState(2617748681)
+    img = rng.rand(3, 4)
     out = rescale(img, 1e-3)
 
     assert out.size == 1
@@ -699,7 +698,8 @@ def test_inverse():
 
 
 def test_slow_warp_nonint_oshape():
-    image = np.random.rand(5, 5)
+    rng = np.random.RandomState(2127960812)
+    image = rng.rand(5, 5)
 
     with pytest.raises(ValueError):
         warp(image, lambda xy: xy, output_shape=(13.1, 19.5))
@@ -939,24 +939,24 @@ def test_resize_local_mean2d():
 def test_resize_local_mean3d_keep(channel_axis):
     # keep 3rd dimension
     nch = 3
-    x = np.zeros((5, 5, nch), dtype=np.float64)
+    x = np.zeros((4, 5, nch), dtype=np.float64)
     x[1, 1, :] = 1
     # move channels to expected dimension
     x = np.moveaxis(x, -1, channel_axis)
-    resized = resize_local_mean(x, (10, 10), channel_axis=channel_axis)
+    resized = resize_local_mean(x, (8, 10), channel_axis=channel_axis)
     # move channels back to last axis to match the reference image
     resized = np.moveaxis(resized, channel_axis, -1)
     with pytest.raises(ValueError):
         # output_shape too short
         resize_local_mean(x, (10,))
-    ref = np.zeros((10, 10, nch))
+    ref = np.zeros((8, 10, nch))
     ref[2:4, 2:4, :] = 1
     assert_array_almost_equal(resized, ref)
 
     channel_axis = channel_axis % x.ndim
-    spatial_shape = (10, 10)
+    spatial_shape = (8, 10)
     out_shape = spatial_shape[:channel_axis] + (nch,) + spatial_shape[channel_axis:]
-    resized = resize_local_mean(x, out_shape)
+    resized = resize_local_mean(x, out_shape, channel_axis=channel_axis)
     # move channels back to last axis to match the reference image
     resized = np.moveaxis(resized, channel_axis, -1)
     assert_array_almost_equal(resized, ref)
@@ -1055,7 +1055,8 @@ def test_nn_resize_int_img():
 
 @pytest.mark.parametrize("_type", [tuple, np.asarray, list])
 def test_output_shape_arg_type(_type):
-    img = np.random.rand(3, 3)
+    rng = np.random.RandomState(1838506389)
+    img = rng.rand(3, 3)
     output_shape = _type([5, 5])
 
     assert resize(img, output_shape).shape == tuple(output_shape)

@@ -1,19 +1,15 @@
-import sys
-from datetime import date
-
 import numpy as np
-import pytest
 
 from skimage.restoration import unwrap_phase
 
-from skimage._shared import testing
-from skimage._shared.testing import (
+from _skimage2._shared import testing
+from _skimage2._shared.testing import (
     assert_array_almost_equal_nulp,
     assert_almost_equal,
     assert_array_equal,
     assert_,
 )
-from skimage._shared._warnings import expected_warnings
+from _skimage2._shared._warnings import expected_warnings
 
 
 def assert_phase_almost_equal(a, b, *args, **kwargs):
@@ -132,12 +128,6 @@ def check_wrap_around(ndim, axis):
 dim_axis = [(ndim, axis) for ndim in (2, 3) for axis in range(ndim)]
 
 
-@pytest.mark.xfail(
-    condition=sys.platform == "darwin" and date.today() < date(2026, 2, 1),
-    reason="Flakiness on macOS (gh-7964, xfail expires 2026-02-01)",
-    raises=AssertionError,
-    strict=False,
-)
 @testing.parametrize("ndim, axis", dim_axis)
 def test_wrap_around(ndim, axis):
     check_wrap_around(ndim, axis)
@@ -174,6 +164,40 @@ def test_mask():
             # remove phase shift
             image_unwrapped_3d -= image_unwrapped_3d[0, 0, 0]
         assert_array_almost_equal_nulp(image_unwrapped_3d[:, :, -1], image[i, -1])
+
+
+def _wrapped_ramp(n_pi, n):
+    ramp = np.linspace(0, n_pi * np.pi, n)
+    ramp[-1] = ramp[0]
+    return np.angle(np.exp(1j * ramp.reshape(n, 1)))
+
+
+def test_rng():
+    # Use a (100, 1) image with wrap_around: all pixel unreliabilities come
+    # from the random number generation (no interior pixels), so the result is
+    # sensitive to the seed.
+    image_wrapped = _wrapped_ramp(12, 100)
+
+    def unwrap(rng):
+        with expected_warnings(['length 1 dimension']):
+            return unwrap_phase(image_wrapped, wrap_around=[True, False], rng=rng)
+
+    # Assert that two identically seeded unwraps are about the same.
+    for seed in range(50):
+        assert_(np.allclose(unwrap(seed), unwrap(seed)))
+        assert_(
+            np.allclose(
+                unwrap(np.random.default_rng(seed)), unwrap(np.random.default_rng(seed))
+            )
+        )
+
+    # Check that `None` is also a valid seed value, and that, with a much
+    # larger image, it always differs.
+    big_wrap = _wrapped_ramp(1028, 10000)
+    with expected_warnings(['length 1 dimension']):
+        out0 = unwrap_phase(big_wrap, wrap_around=[True, False], rng=None)
+        out1 = unwrap_phase(big_wrap, wrap_around=[True, False], rng=None)
+    assert not np.allclose(out0, out1)
 
 
 def test_invalid_input():

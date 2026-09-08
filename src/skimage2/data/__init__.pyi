@@ -1,5 +1,3 @@
-__all__ = [
-    "binary_blobs",
-]
-
-from ._synthetic import binary_blobs
+# Re-export _skimage2.data for type checkers
+from _skimage2.data import *
+from _skimage2.data import __all__ as __all__
