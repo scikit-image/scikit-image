@@ -17,14 +17,6 @@ jobs:
     name: linux-cp${{ inputs.python-version }}
     runs-on: ubuntu-latest
 
-    env:
-      CCACHE_BASEDIR: "${{ github.workspace }}"
-      CCACHE_DIR: "${{ github.workspace }}/.ccache"
-      CCACHE_COMPRESS: true
-      CCACHE_COMPRESSLEVEL: 6
-      CCACHE_MAXSIZE: 400M
-      CCACHE_SLOPPINESS: "pch_defines,time_macros"
-
     steps:
       - name: Checkout scikit-image
         uses: actions/checkout@v5
@@ -50,7 +42,6 @@ jobs:
         with:
           key: ccache-${{ runner.os }}-py${{ inputs.python-version }}-${{ github.sha }}
           restore-keys: ccache-${{ runner.os }}-py${{ inputs.python-version }}-
-          sloppiness: "pch_defines,time_macros"
 
       - name: Build wheel
         run: |

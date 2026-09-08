@@ -14,11 +14,28 @@ inputs:
   sloppiness:
     description: "CCACHE_SLOPPINESS"
     required: false
-    default: ""
+    default: "pch_defines,time_macros"
 runs:
   using: "composite"
   steps:
-    - name: Install and configure ccache
+    - name: Configure ccache
+      shell: bash
+      env:
+        CCACHE_MAXSIZE: ${{ inputs.maxsize }}
+        CCACHE_SLOPPINESS: ${{ inputs.sloppiness }}
+      run: |
+        # Export the default ccache settings so later steps in the job
+        # (e.g. the build or benchmark run) inherit them.
+        {
+          echo "CCACHE_BASEDIR=$GITHUB_WORKSPACE"
+          echo "CCACHE_DIR=$GITHUB_WORKSPACE/.ccache"
+          echo "CCACHE_COMPRESS=true"
+          echo "CCACHE_COMPRESSLEVEL=6"
+          echo "CCACHE_MAXSIZE=$CCACHE_MAXSIZE"
+          echo "CCACHE_SLOPPINESS=$CCACHE_SLOPPINESS"
+        } >> "$GITHUB_ENV"
+
+    - name: Install ccache
       shell: bash
       run: |
         sudo apt-get install -y ccache
@@ -34,11 +51,4 @@ runs:
 
     - name: Zero ccache stats
       shell: bash
-      env:
-        CCACHE_BASEDIR: ${{ github.workspace }}
-        CCACHE_DIR: ${{ github.workspace }}/.ccache
-        CCACHE_COMPRESS: "true"
-        CCACHE_COMPRESSLEVEL: "6"
-        CCACHE_MAXSIZE: ${{ inputs.maxsize }}
-        CCACHE_SLOPPINESS: ${{ inputs.sloppiness }}
       run: ccache --zero-stats
