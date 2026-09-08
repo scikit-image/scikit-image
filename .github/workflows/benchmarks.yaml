@@ -69,9 +69,8 @@ jobs:
           MKL_NUM_THREADS: 1
           OMP_NUM_THREADS: 1
           ASV_SKIP_SLOW: 1
-          # PR runs compare against the PR base at a 1.5 factor; scheduled
-          # runs compare against the previous night at a tighter 1.1.
-          FACTOR: ${{ github.event_name == 'pull_request' && 1.5 || 1.1 }}
+          # PR and scheduled runs both compare at a 1.1 factor.
+          FACTOR: 1.1
           BASELINE_SHA: ${{ github.event.pull_request.base.sha || '' }}
         run: .github/scripts/run_benchmarks.sh
 
