@@ -13,6 +13,7 @@ from ._draw import (
     _circle_perimeter_aa,
     _bezier_curve,
 )
+from _skimage2._shared.utils import deprecate_parameter, DEPRECATED
 
 
 def _ellipse_in_shape(shape, center, radii, rotation=0.0):
@@ -51,7 +52,27 @@ def _ellipse_in_shape(shape, center, radii, rotation=0.0):
     return np.nonzero(distances < 1)
 
 
-def ellipse(r, c, r_radius, c_radius, shape=None, rotation=0.0):
+@deprecate_parameter(
+    ('r', 'c'), new_name='center', start_version=0.26, stop_version=0.28, multi=True
+)
+@deprecate_parameter(
+    ('r_radius', 'c_radius'),
+    new_name='radius',
+    start_version=0.26,
+    stop_version=0.28,
+    multi=True,
+)
+def ellipse(
+    r=DEPRECATED,
+    c=DEPRECATED,
+    r_radius=DEPRECATED,
+    c_radius=DEPRECATED,
+    shape=None,
+    rotation=0.0,
+    *,
+    center=None,
+    radius=None,
+):
     """Generate coordinates of pixels within ellipse.
 
     Parameters
@@ -119,8 +140,10 @@ def ellipse(r, c, r_radius, c_radius, shape=None, rotation=0.0):
            [1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1]], dtype=uint8)
     """
 
-    center = np.array([r, c])
-    radii = np.array([r_radius, c_radius])
+    center = center
+    radii = radius
+    r, c = center
+    r_radius, c_radius = radii
     # allow just rotation with in range +/- 180 degree
     rotation %= np.pi
 
@@ -209,8 +232,7 @@ def disk(center, radius, *, shape=None):
            [0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
     """
-    r, c = center
-    return ellipse(r, c, radius, radius, shape)
+    return ellipse(shape=shape, center=center, radius=(radius, radius))
 
 
 @require("matplotlib", version=">=3.3")
@@ -279,7 +301,7 @@ def polygon_perimeter(r, c, shape=None, clip=False):
     # Construct line segments
     rr, cc = [], []
     for i in range(len(r) - 1):
-        line_r, line_c = line(r[i], c[i], r[i + 1], c[i + 1])
+        line_r, line_c = line(start_pos=(r[i], c[i]), end_pos=(r[i + 1], c[i + 1]))
         rr.extend(line_r)
         cc.extend(line_c)
 
@@ -357,7 +379,25 @@ def set_color(image, coords, color, alpha=1):
     image[rr, cc] = vals + color
 
 
-def line(r0, c0, r1, c1):
+@deprecate_parameter(
+    ('r0', 'c0'),
+    new_name='start_pos',
+    start_version=0.26,
+    stop_version=0.28,
+    multi=True,
+)
+@deprecate_parameter(
+    ('r1', 'c1'), new_name='end_pos', start_version=0.26, stop_version=0.28, multi=True
+)
+def line(
+    r0=DEPRECATED,
+    c0=DEPRECATED,
+    r1=DEPRECATED,
+    c1=DEPRECATED,
+    *,
+    start_pos=None,
+    end_pos=None,
+):
     """Generate line pixel coordinates.
 
     Parameters
@@ -396,10 +436,30 @@ def line(r0, c0, r1, c1):
            [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
     """
+    r0, c0 = start_pos
+    r1, c1 = end_pos
     return _line(r0, c0, r1, c1)
 
 
-def line_aa(r0, c0, r1, c1):
+@deprecate_parameter(
+    ('r0', 'c0'),
+    new_name='start_pos',
+    start_version=0.26,
+    stop_version=0.28,
+    multi=True,
+)
+@deprecate_parameter(
+    ('r1', 'c1'), new_name='end_pos', start_version=0.26, stop_version=0.28, multi=True
+)
+def line_aa(
+    r0=DEPRECATED,
+    c0=DEPRECATED,
+    r1=DEPRECATED,
+    c1=DEPRECATED,
+    *,
+    start_pos=None,
+    end_pos=None,
+):
     """Generate anti-aliased line pixel coordinates.
 
     Parameters
@@ -438,6 +498,8 @@ def line_aa(r0, c0, r1, c1):
            [  0,   0,   0,   0,   0,   0,   0,  74, 255,   0],
            [  0,   0,   0,   0,   0,   0,   0,   0,   0,   0]], dtype=uint8)
     """
+    r0, c0 = start_pos
+    r1, c1 = end_pos
     return _line_aa(r0, c0, r1, c1)
 
 
@@ -519,7 +581,18 @@ def polygon(r, c, shape=None):
     return _polygon(r, c, shape)
 
 
-def circle_perimeter(r, c, radius, method='bresenham', shape=None):
+@deprecate_parameter(
+    ('r', 'c'), new_name='center', start_version=0.26, stop_version=0.28, multi=True
+)
+def circle_perimeter(
+    r=DEPRECATED,
+    c=DEPRECATED,
+    radius=None,
+    method='bresenham',
+    shape=None,
+    *,
+    center=None,
+):
     """Generate circle perimeter coordinates.
 
     Parameters
@@ -579,10 +652,16 @@ def circle_perimeter(r, c, radius, method='bresenham', shape=None):
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
     """
+    r, c = center
     return _circle_perimeter(r, c, radius, method, shape)
 
 
-def circle_perimeter_aa(r, c, radius, shape=None):
+@deprecate_parameter(
+    ('r', 'c'), new_name='center', start_version=0.26, stop_version=0.28, multi=True
+)
+def circle_perimeter_aa(
+    r=DEPRECATED, c=DEPRECATED, radius=None, shape=None, *, center=None
+):
     """Generate anti-aliased circle perimeter coordinates.
 
     Parameters
@@ -640,10 +719,31 @@ def circle_perimeter_aa(r, c, radius, shape=None):
     >>> rr, cc, val = draw.circle_perimeter_aa(r=100, c=100, radius=75)
     >>> draw.set_color(image, (rr, cc), [1, 0, 0], alpha=val)
     """
+    r, c = center
     return _circle_perimeter_aa(r, c, radius, shape)
 
 
-def ellipse_perimeter(r, c, r_radius, c_radius, orientation=0, shape=None):
+@deprecate_parameter(
+    ('r', 'c'), new_name='center', start_version=0.26, stop_version=0.28, multi=True
+)
+@deprecate_parameter(
+    ('r_radius', 'c_radius'),
+    new_name='semi_axes',
+    start_version=0.26,
+    stop_version=0.28,
+    multi=True,
+)
+def ellipse_perimeter(
+    r=DEPRECATED,
+    c=DEPRECATED,
+    r_radius=DEPRECATED,
+    c_radius=DEPRECATED,
+    orientation=0,
+    shape=None,
+    *,
+    center=None,
+    semi_axes=None,
+):
     """Generate ellipse perimeter coordinates.
 
     Parameters
@@ -711,10 +811,46 @@ def ellipse_perimeter(r, c, r_radius, c_radius, orientation=0, shape=None):
            [0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
            [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]], dtype=uint8)
     """
+    r, c = center
+    r_radius, c_radius = semi_axes
     return _ellipse_perimeter(r, c, r_radius, c_radius, orientation, shape)
 
 
-def bezier_curve(r0, c0, r1, c1, r2, c2, weight, shape=None):
+@deprecate_parameter(
+    ('r0', 'c0'),
+    new_name='first_control_point',
+    start_version=0.26,
+    stop_version=0.28,
+    multi=True,
+)
+@deprecate_parameter(
+    ('r1', 'c1'),
+    new_name='middle_control_point',
+    start_version=0.26,
+    stop_version=0.28,
+    multi=True,
+)
+@deprecate_parameter(
+    ('r2', 'c2'),
+    new_name='last_control_point',
+    start_version=0.26,
+    stop_version=0.28,
+    multi=True,
+)
+def bezier_curve(
+    r0=DEPRECATED,
+    c0=DEPRECATED,
+    r1=DEPRECATED,
+    c1=DEPRECATED,
+    r2=DEPRECATED,
+    c2=DEPRECATED,
+    weight=None,
+    shape=None,
+    *,
+    first_control_point=None,
+    middle_control_point=None,
+    last_control_point=None,
+):
     """Generate Bezier curve coordinates.
 
     Parameters
@@ -768,6 +904,9 @@ def bezier_curve(r0, c0, r1, c1, r2, c2, weight, shape=None):
            [0, 0, 0, 0, 0, 0, 0, 1, 1, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
     """
+    r0, c0 = first_control_point
+    r1, c1 = middle_control_point
+    r2, c2 = last_control_point
     return _bezier_curve(r0, c0, r1, c1, r2, c2, weight, shape)
 
 
