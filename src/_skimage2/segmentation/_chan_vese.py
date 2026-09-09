@@ -325,8 +325,7 @@ def chan_vese(
 
     if type(phi) != np.ndarray or phi.shape != image.shape:
         raise ValueError(
-            "The dimensions of initial level set do not "
-            "match the dimensions of image."
+            "The dimensions of initial level set do not match the dimensions of image."
         )
 
     image = image.astype(float_dtype, copy=False)

@@ -234,6 +234,7 @@ def _table_lookup_index(cnp.uint8_t[:, ::1] image):
         Py_ssize_t j_shape
         Py_ssize_t i
         Py_ssize_t j
+        Py_ssize_t _j
         Py_ssize_t offset
 
     i_shape   = image.shape[0]
@@ -247,7 +248,7 @@ def _table_lookup_index(cnp.uint8_t[:, ::1] image):
     with nogil:
         for i in range(1, i_shape-1):
             offset = i_stride* i + 1
-            for j in range(1, j_shape - 1):
+            for _j in range(1, j_shape - 1):
                 if p_image[offset]:
                     p_indexer[offset + i_stride + 1] += 1
                     p_indexer[offset + i_stride] += 2

@@ -649,7 +649,7 @@ def _sigma_est_dwt(detail_coeffs, distribution='Gaussian'):
         denom = scipy.stats.norm.ppf(0.75)
         sigma = np.median(np.abs(detail_coeffs)) / denom
     else:
-        raise ValueError("Only Gaussian noise estimation is currently " "supported")
+        raise ValueError("Only Gaussian noise estimation is currently supported")
     return sigma
 
 
