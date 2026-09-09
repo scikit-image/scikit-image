@@ -22,7 +22,7 @@ For a one-off solution, the simplest, surest route is to convert the video to a
 collection of sequentially-numbered image files, often called an image
 sequence. Then the images files can be read into an `ImageCollection` by
 `skimage.io.imread_collection`. Converting the video to frames can be done
-easily in `ImageJ <https://imagej.nih.gov/ij/>`__, a cross-platform, GUI-based
+easily in `ImageJ <https://imagej.net/ij/>`__, a cross-platform, GUI-based
 program from the bio-imaging community, or `FFmpeg <https://www.ffmpeg.org/>`__, a
 powerful command-line utility for manipulating video files.
 
@@ -49,7 +49,7 @@ has some disadvantages.
 PyAV
 ^^^^
 
-`PyAV <http://docs.mikeboers.com/pyav/develop/>`__ uses FFmpeg's (or LibAV's) libraries
+`PyAV <https://pyav.org/docs/develop/>`__ uses FFmpeg's (or LibAV's) libraries
 to read image data directly from the video file. It invokes them using Cython
 bindings, so it is very fast.
 
@@ -73,7 +73,7 @@ PyAV's API reflects the way frames are stored in a video file.
 Adding Random Access to PyAV
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The `Video` class in `PIMS <https://github.com/soft-matter/pims>`__
+The `Video` class in `PIMS <https://soft-matter.github.io/pims>`__
 invokes PyAV and adds additional functionality to solve a common
 problem in scientific applications, accessing a video by frame
 number. Video file formats are designed to be searched in an
@@ -109,7 +109,7 @@ install but about `half as fast <https://gist.github.com/mikeboers/6843684>`__.
 Imageio
 ^^^^^^^^
 
-`Imageio <http://imageio.github.io/>`_ takes the same approach as MoviePy. It
+`Imageio <https://imageio.readthedocs.io/en/stable/>`_ takes the same approach as MoviePy. It
 supports a wide range of other image file formats as well.
 
 .. code-block:: python
@@ -126,7 +126,7 @@ supports a wide range of other image file formats as well.
 OpenCV
 ^^^^^^
 
-Finally, another solution is the `VideoReader
-<https://docs.opencv.org/2.4/modules/highgui/doc/reading_and_writing_images_and_video.html#videocapture-open>`__
+Finally, another solution is the `VideoCapture
+<https://docs.opencv.org/5.0/main_modules/classcv_1_1VideoCapture.html>`__
 class in OpenCV, which has bindings to FFmpeg. If you need OpenCV for other reasons,
 then this may be the best approach.

@@ -241,6 +241,6 @@ just the positive range of a signed dtype.
 References
 ==========
 
-.. _numpy: https://docs.scipy.org/doc/numpy/user/
-.. [1] https://docs.scipy.org/doc/numpy/user/basics.types.html
+.. _numpy: https://numpy.org/doc/stable/user/
+.. [1] https://numpy.org/doc/stable/user/basics.types.html
 .. _OpenCV: https://opencv.org/
