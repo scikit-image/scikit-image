@@ -342,3 +342,88 @@ def test_adapt_obj_doctest_adapts_init_docstring():
 
     # Original unmodified
     assert '_skimage2' in Impl.__init__.__doc__
+
+
+def test_adapt_obj_doctest_always_wraps_class_without_doc_rewrite():
+    """Classes are always wrapped so shim patches cannot mutate implementation
+    """
+
+    class Impl:
+        """Plain class with no skimage2 doctest imports."""
+
+        def method(self):
+            """Also plain."""
+            return 1
+
+    proxy = _adapt_obj_doctest(Impl, shim_module='skimage.tests.example')
+    assert proxy is not Impl
+    assert issubclass(proxy, Impl)
+    assert proxy.__module__ == 'skimage.tests.example'
+    assert proxy.__doc__ == Impl.__doc__
+    # "method" defined in Impl, but not proxy class.
+    assert 'method' in vars(Impl)
+    assert 'method' not in vars(proxy)
+
+
+def test_adapt_obj_doctest_always_wraps_class_with_none_doc():
+    class Impl:
+        pass
+
+    Impl.__doc__ = None  # Simulates optimize doctest strips.
+    proxy = _adapt_obj_doctest(Impl, shim_module='skimage.tests.example')
+    assert proxy is not Impl
+    assert issubclass(proxy, Impl)
+    assert proxy.__module__ == 'skimage.tests.example'
+    assert proxy.__doc__ is None
+
+
+def test_adapt_obj_doctest_leaves_shim_local_class_unchanged():
+    # Check class already owned by shim module does not get reshimmed.
+    class AlreadyShimmed:
+        """>>> from _skimage2 import data"""
+
+    AlreadyShimmed.__module__ = 'skimage.tests.example'
+    out = _adapt_obj_doctest(AlreadyShimmed, shim_module='skimage.tests.example')
+    assert out is AlreadyShimmed
+
+
+def test_adapt_doctests_wraps_class_without_mutating_impl_add():
+    """Shim-only __add__ patch must not land on the implementation class."""
+
+    class Impl:
+        def __add__(self, other):
+            return 'impl'
+
+    Impl.__module__ = 'impl.module'
+    impl_add = Impl.__add__
+
+    ns = {
+        'Impl': Impl,
+        '__name__': 'skimage.tests.example_shim',
+    }
+    adapt_doctests(ns)
+    shim = ns['Impl']
+    assert shim is not Impl
+    shim.__add__ = lambda self, other: 'shim'
+    assert Impl.__add__ is impl_add  # __add__ not changed in implementation.
+    assert Impl().__add__(None) == 'impl'
+    assert shim().__add__(None) == 'shim'
+
+
+def test_geometric_shim_does_not_patch_skimage2_affine_add():
+    """Importing skimage geometric shims must leave _skimage2.__add__ intact."""
+    import _skimage2.transform._geometric as ski2_g
+    import skimage.transform._geometric as ski_g
+
+    Ski2Affine, Ski2Projective, Ski2Similarity = (ski2_g.AffineTransform,
+                                                  ski2_g.ProjectiveTransform,
+                                                  ski_g.SimilarityTransform)
+
+    assert ski_g.AffineTransform is not Ski2Affine
+    assert ski_g.AffineTransform.__add__ is not Ski2Affine.__add__
+
+    # Check can be combined (not so when shims not correctly adapted).
+    tform1 = Ski2Affine(scale=(0.1, 0.1), rotation=0.3)
+    tform2 = Ski2Similarity(scale=0.1, rotation=0.9)
+    combined = tform1 + tform2
+    assert isinstance(combined, Ski2Projective)
