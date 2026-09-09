@@ -17,6 +17,7 @@ ipywidgets
 ipykernel
 plotly>=5.20
 kaleido==0.2.1
+psutil
 scikit-learn>=1.6
 sphinx_design>=0.5
 pydata-sphinx-theme>=0.16
