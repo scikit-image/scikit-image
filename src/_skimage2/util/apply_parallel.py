@@ -144,7 +144,7 @@ def apply_parallel(
         import dask.array as da
     except ImportError:
         raise RuntimeError(
-            "Could not import 'dask'.  Please install " "using 'pip install dask'"
+            "Could not import 'dask'.  Please install using 'pip install dask'"
         )
 
     if extra_keywords is None:

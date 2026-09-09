@@ -73,7 +73,7 @@ plot_matched_features(
     ax=ax[0, 0],
 )
 ax[0, 0].axis('off')
-ax[0, 0].set_title("Original Image vs. Flipped Image\n" "(all keypoints and matches)")
+ax[0, 0].set_title("Original Image vs. Flipped Image\n(all keypoints and matches)")
 
 plot_matched_features(
     img1,
@@ -84,9 +84,7 @@ plot_matched_features(
     ax=ax[1, 0],
 )
 ax[1, 0].axis('off')
-ax[1, 0].set_title(
-    "Original Image vs. Transformed Image\n" "(all keypoints and matches)"
-)
+ax[1, 0].set_title("Original Image vs. Transformed Image\n(all keypoints and matches)")
 
 plot_matched_features(
     img1,
@@ -99,7 +97,7 @@ plot_matched_features(
 )
 ax[0, 1].axis('off')
 ax[0, 1].set_title(
-    "Original Image vs. Flipped Image\n" "(subset of matches for visibility)"
+    "Original Image vs. Flipped Image\n(subset of matches for visibility)"
 )
 
 plot_matched_features(
@@ -113,7 +111,7 @@ plot_matched_features(
 )
 ax[1, 1].axis('off')
 ax[1, 1].set_title(
-    "Original Image vs. Transformed Image\n" "(subset of matches for visibility)"
+    "Original Image vs. Transformed Image\n(subset of matches for visibility)"
 )
 
 plt.tight_layout()

@@ -37,9 +37,7 @@ def unique_rows(ar):
            [1, 0, 1]], dtype=uint8)
     """
     if ar.ndim != 2:
-        raise ValueError(
-            "unique_rows() only makes sense for 2D arrays, " f"got {ar.ndim}"
-        )
+        raise ValueError(f"unique_rows() only makes sense for 2D arrays, got {ar.ndim}")
     # the view in the next line only works if the array is C-contiguous
     ar = np.ascontiguousarray(ar)
     # np.unique() finds identical items in a raveled array. To make it

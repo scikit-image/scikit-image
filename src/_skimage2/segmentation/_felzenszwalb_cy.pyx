@@ -94,7 +94,7 @@ def _felzenszwalb_cython(image, cnp.float64_t scale=1, sigma=0.8,
 
     # inner cost of segments
     cdef cnp.ndarray[cnp.float64_t, ndim=1] cint = np.zeros(width * height)
-    cdef cnp.intp_t seg0, seg1, seg_new, e
+    cdef cnp.intp_t seg0, seg1, seg_new, _e
     cdef cnp.float32_t inner_cost0, inner_cost1
     cdef Py_ssize_t num_costs = costs.size
 
@@ -102,7 +102,7 @@ def _felzenszwalb_cython(image, cnp.float64_t scale=1, sigma=0.8,
         # set costs_p back one. we increase it before we use it
         # since we might continue before that.
         costs_p -= 1
-        for e in range(num_costs):
+        for _e in range(num_costs):
             seg0 = find_root(segments_p, edges_p[0])
             seg1 = find_root(segments_p, edges_p[1])
             edges_p += 2
@@ -120,7 +120,7 @@ def _felzenszwalb_cython(image, cnp.float64_t scale=1, sigma=0.8,
 
         # postprocessing to remove small segments
         edges_p = <cnp.intp_t*>edges.data
-        for e in range(num_costs):
+        for _e in range(num_costs):
             seg0 = find_root(segments_p, edges_p[0])
             seg1 = find_root(segments_p, edges_p[1])
             edges_p += 2

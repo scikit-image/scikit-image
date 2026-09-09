@@ -9,16 +9,14 @@ from .isotropic import (
 
 from .footprints import (
     ball,
-    cube,
     diamond,
     disk,
     ellipse,
     footprint_from_sequence,
     footprint_rectangle,
+    footprint_rectangle_decomposed,
     octagon,
     octahedron,
-    rectangle,
-    square,
     star,
 )
 
@@ -69,6 +67,7 @@ __all__ = [
     'flood_fill',
     'footprint_from_sequence',
     'footprint_rectangle',
+    'footprint_rectangle_decomposed',
     'h_maxima',
     'h_minima',
     'isotropic_closing',
