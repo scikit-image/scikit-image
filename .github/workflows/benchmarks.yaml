@@ -3,27 +3,25 @@ name: Benchmark
 on:
   pull_request:
     types: [labeled]
+  schedule:
+    - cron: "0 6 * * *"
   workflow_dispatch:
 
 concurrency:
-  # Cancel previous workflows of the same PR, but only for PRs
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
 permissions:
   contents: read
+  issues: write
 
 jobs:
   benchmark:
-    if: contains(github.event.label.name, 'benchmark') || github.event_name == 'workflow_dispatch'
+    # Skip PR runs that do not carry the 'benchmark' label; schedule and
+    # manual runs always execute.
+    if: github.event_name != 'pull_request' || contains(github.event.label.name, 'benchmark')
     name: Linux
     runs-on: ubuntu-latest
-    env:
-      CCACHE_BASEDIR: "${{ github.workspace }}"
-      CCACHE_DIR: "${{ github.workspace }}/.ccache"
-      CCACHE_COMPRESS: true
-      CCACHE_COMPRESSLEVEL: 6
-      CCACHE_MAXSIZE: 400M
 
     steps:
       # We need the full repo to avoid this issue
@@ -40,71 +38,56 @@ jobs:
           cache: "pip"
           cache-dependency-path: "requirements/*.txt"
 
-      - name: Setup some dependencies
-        shell: bash -l {0}
-        run: |
-          pip install asv
-          sudo apt-get update -y && sudo apt-get install -y ccache
-          # Make gcc/gxx symlinks first in path
-          sudo /usr/sbin/update-ccache-symlinks
-          echo "/usr/lib/ccache" >> $GITHUB_PATH
+      - name: Install asv
+        shell: bash
+        run: pip install -U -r requirements/asv.txt
 
-      - name: "Prepare ccache"
-        id: prepare-ccache
-        shell: bash -l {0}
-        run: |
-          echo "key=benchmark-$RUNNER_OS" >> $GITHUB_OUTPUT
-          echo "timestamp=$(date +%Y%m%d-%H%M%S)" >> $GITHUB_OUTPUT
-          ccache -p
-          ccache -z
+      - name: Setup ccache
+        uses: ./.github/actions/setup-ccache
+        with:
+          key: ccache-${{ secrets.CACHE_VERSION }}-benchmark-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: ccache-${{ secrets.CACHE_VERSION }}-benchmark-${{ runner.os }}-
 
-      - name: "Restore ccache"
+      - name: Restore asv state
+        if: github.event_name != 'pull_request'
+        id: asv-state
         uses: actions/cache@v4
         with:
-          path: .ccache
-          key: ccache-${{ secrets.CACHE_VERSION }}-${{ steps.prepare-ccache.outputs.key }}-${{ steps.prepare-ccache.outputs.timestamp }}
+          path: |
+            .asv/env
+            .asv/results
+            last_contender_sha
+          key: benchmark-${{ runner.os }}-${{ github.run_id }}
           restore-keys: |
-            ccache-${{ secrets.CACHE_VERSION }}-${{ steps.prepare-ccache.outputs.key }}-
+            benchmark-${{ runner.os }}-
 
       - name: Run benchmarks
-        shell: bash -l {0}
         id: benchmark
+        shell: bash
         env:
           OPENBLAS_NUM_THREADS: 1
           MKL_NUM_THREADS: 1
           OMP_NUM_THREADS: 1
-          ASV_FACTOR: 1.5
           ASV_SKIP_SLOW: 1
-          # Escape user controlled variables
-          BASELINE_SHA: "${{ github.event.pull_request.base.sha }}"
-          BASELINE_LABEL: "${{ github.event.pull_request.base.label }}"
-          CONTENDER_LABEL: "${{ github.event.pull_request.head.label }}"
-        run: |
-          set -x
+          # PR and scheduled runs both compare at a 1.1 factor.
+          FACTOR: 1.1
+          BASELINE_SHA: ${{ github.event.pull_request.base.sha || '' }}
+        run: .github/scripts/run_benchmarks.sh
 
-          python -m pip install virtualenv
+      - name: Advance baseline on clean run
+        if: success() && github.event_name != 'pull_request' && steps.benchmark.outputs.has_baseline != 'false'
+        shell: bash
+        run: echo "$GITHUB_SHA" > last_contender_sha
 
-          # ID this runner
-          asv machine --yes
+      - name: Record baseline for first run
+        if: success() && github.event_name != 'pull_request' && steps.benchmark.outputs.has_baseline == 'false'
+        shell: bash
+        run: echo "$GITHUB_SHA" > last_contender_sha
 
-          echo "Baseline: $BASELINE_SHA ($BASELINE_LABEL)"
-          echo "Contender: $GITHUB_SHA ($CONTENDER_LABEL)"
-
-          # Run benchmarks for current commit against base
-          ASV_OPTIONS="--split --show-stderr --factor $ASV_FACTOR"
-          asv continuous $ASV_OPTIONS $BASELINE_SHA $GITHUB_SHA \
-              | sed "/Traceback \|failed$\|PERFORMANCE DECREASED/ s/^/::error::/" \
-              | tee benchmarks.log
-
-          # Report and export results for subsequent steps
-          if grep "Traceback \|failed\|PERFORMANCE DECREASED" benchmarks.log > /dev/null ; then
-              exit 1
-          fi
-
-      - name: "Check ccache performance"
-        shell: bash -l {0}
-        run: ccache -s
+      - name: Check ccache performance
         if: always()
+        shell: bash
+        run: ccache -s
 
       - name: Add instructions to artifact
         if: always()
@@ -115,3 +98,13 @@ jobs:
         with:
           name: asv-benchmark-results-${{ runner.os }}
           path: .asv/results
+
+      - name: "Job has failed: reporting"
+        if: ${{ failure() && github.event_name != 'pull_request' }}
+        uses: JasonEtco/create-an-issue@1b14a70e4d8dc185e5cc76d3bec9eab20257b2c5 # v2.9.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BUILD_TYPE: "nightly benchmark"
+        with:
+          filename: .github/MAIN_FAIL_TEMPLATE.md
+          update_existing: true

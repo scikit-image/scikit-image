@@ -41,7 +41,7 @@ repos:
         name: generate_requirements.py
         language: system
         entry: python tools/generate_requirements.py
-        files: "pyproject.toml|requirements/.*\\.txt|tools/generate_requirements.py"
+        files: "pyproject.toml|requirements/.*\\.txt|asv.conf.json|tools/generate_requirements.py"
 
   - repo: https://github.com/woodruffw/zizmor-pre-commit
     rev: 451b56af716f9f0d0c2b816503a3fd0cf8b036fa # frozen: v1.29.0

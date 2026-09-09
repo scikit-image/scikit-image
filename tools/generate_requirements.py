@@ -107,6 +107,40 @@ def expand_dependencies(
     return exploded
 
 
+def _min_version(dep_spec: str) -> str | None:
+    """Extract the minimum version from a dependency specifier.
+
+    Returns the version string from 'pkg>=X.Y' (stripped at the first
+    ',' or ';'), or None if no lower bound is present. Specifiers that
+    apply only to emscripten are skipped.
+    """
+    if '== "emscripten"' in dep_spec:
+        return None
+    m = re.search(r'>=\s*([^,\s;]+)', dep_spec)
+    if m:
+        return m.group(1)
+    return None
+
+
+def update_asv_conf(pyproject: dict) -> None:
+    """Sync asv.conf.json numpy/scipy matrix with pyproject minimums."""
+    deps = pyproject["project"]["dependencies"]
+    conf_path = repo_dir / "asv.conf.json"
+    conf_text = conf_path.read_text()
+    for pkg in ("numpy", "scipy"):
+        for dep in deps:
+            if dep.split('>')[0].strip().lower() == pkg:
+                ver = _min_version(dep)
+                if ver:
+                    conf_text = re.sub(
+                        rf'("{pkg}"\s*:\s*)\[[^\]]*\]',
+                        rf'\1["{ver}"]',
+                        conf_text,
+                    )
+                    break
+    conf_path.write_text(conf_text)
+
+
 def main() -> None:
     pyproject = toml.loads((repo_dir / "pyproject.toml").read_text())
 
@@ -128,6 +162,8 @@ def main() -> None:
             **pyproject["project"]["optional-dependencies"],
         }
     )
+
+    update_asv_conf(pyproject)
 
 
 if __name__ == "__main__":
