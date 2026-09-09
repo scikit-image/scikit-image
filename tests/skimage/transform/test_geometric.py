@@ -1304,7 +1304,6 @@ def test_array_protocol():
     assert params is tf.params
 
     assert_equal(np.array(tf, dtype=int), mat.astype(int))
-    with pytest.raises(ValueError):
     with pytest.raises(ValueError, match=r"Unable to avoid copy"):
         np.array(tf, dtype=int, copy=False)
 

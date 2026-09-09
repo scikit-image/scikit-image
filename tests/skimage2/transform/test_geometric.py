@@ -1300,12 +1300,11 @@ def test_array_protocol():
     assert_equal(copied, mat)
     assert not np.shares_memory(copied, tf.params)
 
-    view = np.array(tf, copy=False)
-    assert_equal(view, mat)
-    assert np.shares_memory(view, tf.params)
+    params = np.array(tf, copy=False)
+    assert params is tf.params
 
     assert_equal(np.array(tf, dtype=int), mat.astype(int))
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=r"Unable to avoid copy"):
         np.array(tf, dtype=int, copy=False)
 
 
