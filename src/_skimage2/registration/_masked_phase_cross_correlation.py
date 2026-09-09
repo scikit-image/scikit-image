@@ -91,11 +91,7 @@ def _masked_phase_cross_correlation(
     center = np.mean(maxima, axis=0)
     shifts = center - np.array(reference_image.shape) + 1
 
-    # The mismatch in size will impact the center location of the
-    # cross-correlation
-    size_mismatch = np.array(moving_image.shape) - np.array(reference_image.shape)
-
-    return -shifts + (size_mismatch / 2)
+    return -shifts
 
 
 def cross_correlate_masked(
