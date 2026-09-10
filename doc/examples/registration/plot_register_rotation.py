@@ -63,8 +63,8 @@ plt.show()
 shifts, error, phasediff = phase_cross_correlation(
     image_polar, rotated_polar, normalization=None
 )
-print(f'Expected value for counterclockwise rotation in degrees: ' f'{angle}')
-print(f'Recovered value for counterclockwise rotation: ' f'{shifts[0]}')
+print(f'Expected value for counterclockwise rotation in degrees: {angle}')
+print(f'Recovered value for counterclockwise rotation: {shifts[0]}')
 
 ######################################################################
 # Recover rotation and scaling differences with log-polar transform

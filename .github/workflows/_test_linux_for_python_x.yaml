@@ -102,7 +102,7 @@ jobs:
         run: bash .github/scripts/check-run-all-tests-label.sh
 
       - name: Run tests
-        if: ${{ inputs.python-version != '3.14t' }}
+        if: ${{ !endsWith(inputs.python-version, 't') }}
         env:
           TEST_MODIFIED: ${{ steps.check-run-all-tests-label.outputs.test_modified }}
           GITHUB_BASE_REF: ${{ github.base_ref }}
@@ -123,8 +123,8 @@ jobs:
         run: |
           python doc/tools/run_migration_doctests.py
 
-      - name: Run multithreaded tests (3.14t only)
-        if: ${{ inputs.python-version == '3.14t' }}
+      - name: Run multithreaded tests (free-threaded only)
+        if: ${{ endsWith(inputs.python-version, 't') }}
         env:
           # A lazy loader configuration parameter
           EAGER_IMPORT: ${{ inputs.EAGER_IMPORT }}

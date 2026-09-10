@@ -2,19 +2,18 @@
 
 import warnings
 
-from .manage_plugins import *
-from .manage_plugins import _hide_plugin_deprecation_warnings
-from .sift import *
-from .collection import *
+import lazy_loader as _lazy
 
-from ._io import *
-from ._image_stack import *
+from .manage_plugins import (
+    _available_plugins,
+    _hide_plugin_deprecation_warnings,
+    reset_plugins,
+)
 
+_lazy_getattr, __dir__, _ = _lazy.attach_stub(__name__, __file__)
 
-with _hide_plugin_deprecation_warnings():
-    reset_plugins()
-
-
+# Don't use the `__all__` returned by `attach_stub`; the plugin management
+# functions are importable but not advertised as part of the public API.
 __all__ = [
     "concatenate_images",
     "imread",
@@ -29,6 +28,9 @@ __all__ = [
     "MultiImage",
 ]
 
+with _hide_plugin_deprecation_warnings():
+    reset_plugins()
+
 
 def __getattr__(name):
     if name == "available_plugins":
@@ -39,5 +41,5 @@ def __getattr__(name):
             category=FutureWarning,
             stacklevel=2,
         )
-        return globals()["_available_plugins"]
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+        return _available_plugins
+    return _lazy_getattr(name)

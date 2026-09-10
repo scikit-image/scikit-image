@@ -4,7 +4,12 @@ from scipy import ndimage as ndi
 from numpy.testing import assert_allclose, assert_array_equal
 
 import _skimage2 as ski2
-from _skimage2.morphology import footprint_rectangle, mirror_footprint, pad_footprint
+from _skimage2.morphology import (
+    footprint_rectangle,
+    footprint_rectangle_decomposed,
+    mirror_footprint,
+    pad_footprint,
+)
 from _skimage2.morphology import _grayscale_operators as gray
 from _skimage2._shared.testing import fetch
 
@@ -432,14 +437,14 @@ def test_1d_erosion():
 @pytest.mark.parametrize("func", gray_operators)
 @pytest.mark.parametrize("nrows", [3, 7, 11])
 @pytest.mark.parametrize("ncols", [3, 7, 11])
-@pytest.mark.parametrize("decomposition", ['separable', 'sequence'])
-def test_rectangle_decomposition(cam_image, func, nrows, ncols, decomposition):
+@pytest.mark.parametrize("method", ['separable', 'sequence'])
+def test_rectangle_decomposition(cam_image, func, nrows, ncols, method):
     """Validate footprint decomposition for various shapes.
 
     comparison is made to the case without decomposition.
     """
-    footprint_ndarray = footprint_rectangle((nrows, ncols), decomposition=None)
-    footprint = footprint_rectangle((nrows, ncols), decomposition=decomposition)
+    footprint_ndarray = footprint_rectangle((nrows, ncols))
+    footprint = footprint_rectangle_decomposed((nrows, ncols), method=method)
     expected = func(cam_image, footprint=footprint_ndarray)
     out = func(cam_image, footprint=footprint)
     assert_array_equal(expected, out)
@@ -464,9 +469,7 @@ def test_diamond_decomposition(cam_image, func, radius, decomposition):
 @pytest.mark.parametrize("m", (0, 1, 3, 5))
 @pytest.mark.parametrize("n", (0, 1, 2, 3))
 @pytest.mark.parametrize("decomposition", ['sequence'])
-@pytest.mark.filterwarnings(
-    "ignore:.*falling back to decomposition='separable':UserWarning"
-)
+@pytest.mark.filterwarnings("ignore:.*falling back to method='separable':UserWarning")
 def test_octagon_decomposition(cam_image, func, m, n, decomposition):
     """Validate footprint decomposition for various shapes.
 
@@ -485,14 +488,14 @@ def test_octagon_decomposition(cam_image, func, m, n, decomposition):
 
 @pytest.mark.parametrize("func", gray_operators)
 @pytest.mark.parametrize("shape", [(5, 5, 5), (5, 5, 7)])
-@pytest.mark.parametrize("decomposition", ['separable', 'sequence'])
-def test_cube_decomposition(cell3d_image, func, shape, decomposition):
+@pytest.mark.parametrize("method", ['separable', 'sequence'])
+def test_cube_decomposition(cell3d_image, func, shape, method):
     """Validate footprint decomposition for various shapes.
 
     comparison is made to the case without decomposition.
     """
-    footprint_ndarray = footprint_rectangle(shape, decomposition=None)
-    footprint = footprint_rectangle(shape, decomposition=decomposition)
+    footprint_ndarray = footprint_rectangle(shape)
+    footprint = footprint_rectangle_decomposed(shape, method=method)
     expected = func(cell3d_image, footprint=footprint_ndarray)
     out = func(cell3d_image, footprint=footprint)
     assert_array_equal(expected, out)

@@ -1,0 +1,8 @@
+"""Feature detection and extraction, e.g., texture analysis, corners, etc."""
+
+from _skimage2 import feature as _impl
+
+# `_skimage2.feature` resolves its own attributes lazily; forward to it.
+__getattr__ = _impl.__getattr__
+__dir__ = _impl.__dir__
+__all__ = _impl.__all__

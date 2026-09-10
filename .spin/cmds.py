@@ -19,6 +19,16 @@ def docs(*, parent_callback, install_deps, **kwargs):
     if install_deps:
         spin.util.run(['pip', 'install', '-q', '-r', 'requirements/docs.txt'])
 
+    # `doc/source/api2/` is not removed/coverd by `--clean` flag with default
+    # `spin.cmds.meson.docs`. So we provide our own `clean_dirs`
+    kwargs["clean_dirs"] = kwargs.get("clean_dirs", []) + [
+        "./doc/build/",
+        "./doc/source/api/",
+        "./doc/source/api2/",
+        "./doc/source/auto_examples/",
+        "./doc/source/jupyterlite_contents/",
+    ]
+
     parent_callback(**kwargs)
 
 

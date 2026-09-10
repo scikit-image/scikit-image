@@ -33,6 +33,16 @@ jobs:
     with:
       python-version: 3.14t
 
+  build-linux-315:
+    uses: ./.github/workflows/_build_linux_for_python_x.yaml
+    with:
+      python-version: 3.15
+
+  build-linux-315t:
+    uses: ./.github/workflows/_build_linux_for_python_x.yaml
+    with:
+      python-version: 3.15t
+
   test-linux-312:
     name: test-linux-cp3.12-${{ matrix.OPTIONS_NAME }}
     needs: [build-linux-312]
@@ -96,6 +106,22 @@ jobs:
       python-version: 3.14t
       OPTIONS_NAME: "main"
 
+  test-linux-315:
+    name: test-linux-cp3.15-main
+    needs: [build-linux-315]
+    uses: ./.github/workflows/_test_linux_for_python_x.yaml
+    with:
+      python-version: 3.15
+      OPTIONS_NAME: "main"
+
+  test-linux-315t:
+    name: test-linux-cp3.15t-main
+    needs: [build-linux-315t]
+    uses: ./.github/workflows/_test_linux_for_python_x.yaml
+    with:
+      python-version: 3.15t
+      OPTIONS_NAME: "main"
+
   report-failures:
     runs-on: ubuntu-latest
     needs:
@@ -104,10 +130,14 @@ jobs:
         build-linux-313,
         build-linux-314,
         build-linux-314t,
+        build-linux-315,
+        build-linux-315t,
         test-linux-312,
         test-linux-313,
         test-linux-314,
         test-linux-314t,
+        test-linux-315,
+        test-linux-315t,
       ]
     if: ${{ always() && github.ref == 'refs/heads/main' && contains(needs.*.result, 'failure') }}
     permissions:

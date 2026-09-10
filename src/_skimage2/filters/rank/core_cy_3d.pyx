@@ -205,7 +205,7 @@ cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t[::1], cnp.fl
     cdef char* mask_data = &mask[0, 0, 0]
 
     # define local variable types
-    cdef Py_ssize_t p, r, c, even_row
+    cdef Py_ssize_t p, r, c, _even_row
 
     # number of pixels actually inside the neighborhood (cnp.float64_t)
     cdef cnp.float64_t pop = 0
@@ -242,7 +242,7 @@ cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t[::1], cnp.fl
         with nogil:
             # main loop
 
-            for even_row in range(0, rows, 2):
+            for _even_row in range(0, rows, 2):
 
                 # ---> west to east
                 for c in range(1, cols):
