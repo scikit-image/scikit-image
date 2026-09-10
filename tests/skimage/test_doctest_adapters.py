@@ -345,8 +345,7 @@ def test_adapt_obj_doctest_adapts_init_docstring():
 
 
 def test_adapt_obj_doctest_always_wraps_class_without_doc_rewrite():
-    """Classes are always wrapped so shim patches cannot mutate implementation
-    """
+    """Classes are always wrapped so shim patches cannot mutate implementation"""
 
     class Impl:
         """Plain class with no skimage2 doctest imports."""
@@ -415,9 +414,11 @@ def test_geometric_shim_does_not_patch_skimage2_affine_add():
     import _skimage2.transform._geometric as ski2_g
     import skimage.transform._geometric as ski_g
 
-    Ski2Affine, Ski2Projective, Ski2Similarity = (ski2_g.AffineTransform,
-                                                  ski2_g.ProjectiveTransform,
-                                                  ski_g.SimilarityTransform)
+    Ski2Affine, Ski2Projective, Ski2Similarity = (
+        ski2_g.AffineTransform,
+        ski2_g.ProjectiveTransform,
+        ski_g.SimilarityTransform,
+    )
 
     assert ski_g.AffineTransform is not Ski2Affine
     assert ski_g.AffineTransform.__add__ is not Ski2Affine.__add__
