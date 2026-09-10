@@ -333,8 +333,17 @@ def test_deltaE_ciede2000_mismatched_broadcasting(channel_axis):
     np.testing.assert_allclose(res1, res2)
 
 
+try:
+    from numpy.exceptions import AxisError
+except ImportError:
+    from numpy import AxisError
+
+
 def test_deltaE_ciede2000_invalid_channel_axis():
     c1 = np.ones((4, 5, 3))
     c2 = np.ones(3)
-    with pytest.raises(np.exceptions.AxisError):
+    with pytest.raises(AxisError):
         deltaE_ciede2000(c1, c2, channel_axis=5)
+
+    with pytest.raises(AxisError):
+        deltaE_ciede2000(c2, c2, channel_axis=-2)

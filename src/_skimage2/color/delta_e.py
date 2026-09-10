@@ -199,6 +199,7 @@ def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1, *, channel_axis=-1):
     unroll = False
     if lab1.ndim == 1 and lab2.ndim == 1:
         unroll = True
+        np.moveaxis(lab1, source=channel_axis, destination=0)
         lab1 = lab1[None, :]
         lab2 = lab2[None, :]
         if channel_axis >= 0:
