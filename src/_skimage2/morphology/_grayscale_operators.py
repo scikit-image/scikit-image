@@ -115,7 +115,8 @@ def erosion(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     image : ndarray
         Input image.
     footprint : ndarray or tuple, optional
-        The neighborhood expressed as a 2-D array of 1's and 0's.
+        The footprint that defines the active neighborhood. Nonzero elements
+        are considered part of the neighborhood.
         If None, use a cross-shaped footprint (so-called *1-connectivity*).
         The footprint can also be provided as a sequence of smaller footprints
         as described in the notes below. See _Notes_ for more.
@@ -216,7 +217,8 @@ def dilation(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     image : ndarray
         Input image.
     footprint : ndarray or tuple, optional
-        The neighborhood expressed as a 2-D array of 1's and 0's.
+        The footprint that defines the active neighborhood. Nonzero elements
+        are considered part of the neighborhood.
         If None, use a cross-shaped footprint (so-called *1-connectivity*).
         The footprint can also be provided as a sequence of smaller footprints
         as described in the notes below. See _Notes_ for more.
@@ -318,7 +320,8 @@ def opening(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     image : ndarray
         Input image.
     footprint : ndarray or tuple, optional
-        The neighborhood expressed as a 2-D array of 1's and 0's.
+        The footprint that defines the active neighborhood. Nonzero elements
+        are considered part of the neighborhood.
         If None, use a cross-shaped footprint (so-called *1-connectivity*).
         The footprint can also be provided as a sequence of smaller footprints
         as described in the notes below. See _Notes_ for more.
@@ -397,7 +400,8 @@ def closing(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     image : ndarray
         Input image.
     footprint : ndarray or tuple, optional
-        The neighborhood expressed as a 2-D array of 1's and 0's.
+        The footprint that defines the active neighborhood. Nonzero elements
+        are considered part of the neighborhood.
         If None, use a cross-shaped footprint (so-called *1-connectivity*).
         The footprint can also be provided as a sequence of smaller footprints
         as described in the notes below. See _Notes_ for more.
@@ -475,7 +479,8 @@ def white_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     image : ndarray
         Input image.
     footprint : ndarray or tuple, optional
-        The neighborhood expressed as a 2-D array of 1's and 0's.
+        The footprint that defines the active neighborhood. Nonzero elements
+        are considered part of the neighborhood.
         If None, use a cross-shaped footprint (so-called *1-connectivity*).
         The footprint can also be provided as a sequence of smaller footprints
         as described in the notes below. See _Notes_ for more.
@@ -570,7 +575,8 @@ def black_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     image : ndarray
         Input image.
     footprint : ndarray or tuple, optional
-        The neighborhood expressed as a 2-D array of 1's and 0's.
+        The footprint that defines the active neighborhood. Nonzero elements
+        are considered part of the neighborhood.
         If None, use a cross-shaped footprint (so-called *1-connectivity*).
         The footprint can also be provided as a sequence of smaller footprints
         as described in the notes below. See _Notes_ for more.
