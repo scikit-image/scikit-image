@@ -295,3 +295,46 @@ def test_single_color_cmc():
     lab1 = (0.5, 0.5, 0.5)
     lab2 = (0.4, 0.4, 0.4)
     deltaE_cmc(lab1, lab2)
+
+
+def test_deltaE_ciede2000_mismatched_ndim():
+    # Regression test for gh-8326: mismatched ndim input broadcasting
+    lab1 = np.array([[50.0, 20.0, 30.0], [60.0, -10.0, 15.0]])
+    lab2 = np.array([55.0, 18.0, 28.0])
+
+    res1 = deltaE_ciede2000(lab1, lab2)
+    res2 = deltaE_ciede2000(lab2, lab1)
+
+    assert res1.shape == (2,)
+    assert res2.shape == (2,)
+    np.testing.assert_allclose(res1, res2)
+
+
+@pytest.mark.parametrize("channel_axis", [-1, 0])
+def test_deltaE_ciede2000_1d_both(channel_axis):
+    c1 = np.array([50.0, 20.0, 30.0])
+    c2 = np.array([55.0, 18.0, 28.0])
+    res = deltaE_ciede2000(c1, c2, channel_axis=channel_axis)
+    assert np.isscalar(res) or res.ndim == 0
+
+
+@pytest.mark.parametrize("channel_axis", [-1, 0, 1])
+def test_deltaE_ciede2000_mismatched_broadcasting(channel_axis):
+    c1 = np.array([55.0, 18.0, 28.0])
+    shape = [4, 5]
+    shape.insert(channel_axis if channel_axis >= 0 else channel_axis + 3, 3)
+    img = np.ones(shape) * 50.0
+
+    res1 = deltaE_ciede2000(img, c1, channel_axis=channel_axis)
+    res2 = deltaE_ciede2000(c1, img, channel_axis=channel_axis)
+
+    assert res1.shape == (4, 5)
+    assert res2.shape == (4, 5)
+    np.testing.assert_allclose(res1, res2)
+
+
+def test_deltaE_ciede2000_invalid_channel_axis():
+    c1 = np.ones((4, 5, 3))
+    c2 = np.ones(3)
+    with pytest.raises(np.exceptions.AxisError):
+        deltaE_ciede2000(c1, c2, channel_axis=5)
