@@ -131,9 +131,8 @@ def _make_inheritor(old_class, doc, mod_name):
     return new_class
 
 
-def _is_from_shim(obj, shim_module):
+def _is_from_shim(obj, shim_module: str):
     """ True if `obj` owned by `shim_module`"""
-    assert shim_module is not None
     return getattr(obj, '__module__', None) == shim_module
 
 
