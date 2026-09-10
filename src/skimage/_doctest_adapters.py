@@ -131,7 +131,13 @@ def _make_inheritor(old_class, doc, mod_name):
     return new_class
 
 
-def _adapt_obj_doctest(obj, shim_module: str = None):
+def _is_from_shim(obj, shim_module):
+    """ True if `obj` owned by `shim_module`"""
+    assert shim_module is not None
+    return getattr(obj, '__module__', None) == shim_module
+
+
+def _adapt_obj_doctest(obj, shim_module: str):
     """Return a shim-local view with adapted doctest examples, as necessary
 
     If a function needs a modified docstring, we return a copy of that
@@ -147,14 +153,14 @@ def _adapt_obj_doctest(obj, shim_module: str = None):
     neither a function nor a class, we return the original object.  We do not
     change classes already owned by `shim_module`.
     """
+    # Do not adapt anything that is defined in this module.
+    if _is_from_shim(obj, shim_module):
+        return obj
     original_doc = getattr(obj, '__doc__', None)
     adapted_doc = _adapt_doctest_doc(original_doc)
     if inspect.isroutine(obj) and original_doc != adapted_doc:
         return _copy_callable(obj, adapted_doc, shim_module)
     if inspect.isclass(obj):
-        # Do not adapt class if defined in this module.
-        if shim_module is not None and getattr(obj, '__module__', None) == shim_module:
-            return obj
         return _adapt_class(obj, adapted_doc, shim_module)
     return obj
 
