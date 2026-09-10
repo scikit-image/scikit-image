@@ -318,7 +318,7 @@ def test_deltaE_ciede2000_1d_both(channel_axis):
     assert np.isscalar(res) or res.ndim == 0
 
 
-@pytest.mark.parametrize("channel_axis", [-1, 0, 1])
+@pytest.mark.parametrize("channel_axis", [-1, 0])
 def test_deltaE_ciede2000_mismatched_broadcasting(channel_axis):
     c1 = np.array([55.0, 18.0, 28.0])
     shape = [4, 5]
@@ -331,6 +331,18 @@ def test_deltaE_ciede2000_mismatched_broadcasting(channel_axis):
     assert res1.shape == (4, 5)
     assert res2.shape == (4, 5)
     np.testing.assert_allclose(res1, res2)
+
+
+def test_deltaE_ciede2000_mismatched_broadcasting_invalid_axis():
+    # A channel_axis that is valid for the N-D operand but not meaningful
+    # for the 1-D operand should raise, matching deltaE_cie76 /
+    # deltaE_ciede94 behavior rather than silently succeeding.
+    c1 = np.array([55.0, 18.0, 28.0])
+    img = np.ones((4, 3, 5)) * 50.0
+    with pytest.raises(AxisError):
+        deltaE_ciede2000(img, c1, channel_axis=1)
+    with pytest.raises(AxisError):
+        deltaE_ciede2000(c1, img, channel_axis=1)
 
 
 try:

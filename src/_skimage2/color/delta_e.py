@@ -205,11 +205,8 @@ def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1, *, channel_axis=-1):
         if channel_axis >= 0:
             channel_axis = channel_axis + 1
 
-    c_axis1 = (0 if channel_axis >= 0 else -1) if lab1.ndim == 1 else channel_axis
-    c_axis2 = (0 if channel_axis >= 0 else -1) if lab2.ndim == 1 else channel_axis
-
-    L1, a1, b1 = np.moveaxis(lab1, source=c_axis1, destination=0)[:3]
-    L2, a2, b2 = np.moveaxis(lab2, source=c_axis2, destination=0)[:3]
+    L1, a1, b1 = np.moveaxis(lab1, source=channel_axis, destination=0)[:3]
+    L2, a2, b2 = np.moveaxis(lab2, source=channel_axis, destination=0)[:3]
 
     # distort `a` based on average chroma
     # then convert to lch coordinates from distorted `a`
