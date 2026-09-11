@@ -41,8 +41,6 @@ def denoise_nl_means(
         at the expense of blurring features. For a Gaussian noise of standard
         deviation sigma, a rule of thumb is to choose the value of h to be
         sigma of slightly less.
-    is_array : bool, optional
-        Tells whether h is a scaler value or an array.
     fast_mode : bool, optional
         If True (default value), a fast version of the non-local means
         algorithm is used. If False, the original version of non-local means is
@@ -157,6 +155,11 @@ def denoise_nl_means(
         image = image[..., np.newaxis]
     else:
         multichannel = True
+
+    if is_array and fast_mode == True:
+        raise NotImplementedError(
+            "Spatially varying h has only been implemented for fast_mode = False"
+        )
 
     ndim_no_channel = image.ndim - 1
     if (ndim_no_channel < 2) or (ndim_no_channel > 4):
