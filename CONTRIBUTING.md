@@ -220,9 +220,11 @@ If you want to make use of LLMs in a significant way and have your
 contributions reviewed, safest is to **check in with us first** to
 discuss your strategy.
 
+### AI do's and don'ts
+
 Do not use AI for:
 
-1. Creating novel code (algorithmic additions, writing tests, etc.).
+1. Creating novel code (algorithmic additions, writing tests, etc.).[^why-no-ai-tests]
 2. Writing pull request descriptions, or commenting on issues or PRs.
 
 How you may use AI:
@@ -231,19 +233,41 @@ How you may use AI:
 2. To automate mechanical tasks. E.g., if you discover that you need to add a decorator across the code-base.
 3. For infrastructure code, such as CI, as long as the changes are easy to review.
 
+[^why-no-ai-tests] The decision about _what to test_ relies on
+understanding _how_ code could give the wrong answer. It is
+important to think about algorithm edge cases: for example, if you
+implement `sin(x)/x`, you know that you need to be particularly
+careful around 0; or for `sqrt(x)` what happens when input is
+negative. We do not want to test simply for the sake of coverage
+either (e.g., trivial input parameter verification); so, while AI
+will happily add a ton of tests, those may not be the _right_
+tests. That said, tests contain a lot of scaffolding,
+and there's no problem using AI to help with creating that
+structure, or with fixing broken tests.
+
+### AI requirements
+
 If you use AI as above, you must:
 
 1. **Always declare tool usage**: say specifically what part of the task you used AI for in the PR description.
-2. **Write PR descriptions and comments by hand.** If you do quote AI text, do so sparingly, and indicate where you're doing so,e.g. by writing `:robot: _AI text below_ :robot:`.
+2. **Write PR descriptions and comments by hand.** If you do quote AI text, do so sparingly, and indicate where you're doing so, e.g. by writing `:robot: _AI text below_ :robot:`.
    You can also use a `<details>...</details>` block to "fold up" that text by default.
 3. As far as possible, **separate AI-generated code from human-generated** code with individual commits.
    Tag AI commits with an `Assisted-by:` tag as recommended by the [Linux kernel](https://docs.kernel.org/process/coding-assistants.html).
+   (Commits where AI was predominantly used to tidy up hand-written code or language don't need to carry the tag.)
 4. **AI-generated code must be trivial to review:** the reviewer must be able to review the AI-generated code with little background in image-processing or experience working on the code-base, and see that the changes are correct.
-   Note that _tests, specifically, are rarely trivial_, as the decision about _what to test_ relies on understanding how the code could give the wrong answer.
+   Note that _tests, specifically, are rarely trivial_ [^why-no-ai-tests].
 5. You must **take responsibility for copyright** of the AI-generated code; the simplest and best way to do this, is to make sure the code changes are trivial, in the sense that they cannot reasonably be done differently to solve the given problem.
 6. **Expect the team to ask questions** about your work - and you must answer these questions yourself, without deferring to AI.
 
 The landscape around AI is changing quickly, and we will continue to update this policy as informed by our current experience.
+
+### Core maintainers requirements
+
+Core maintainers may use their own judgment on when and how to use AI,
+including for tasks outside the "how you may use AI" list above. They
+must still follow the requirements section: declaring tool usage,
+tagging commits, etc.
 
 (guidelines)=
 
