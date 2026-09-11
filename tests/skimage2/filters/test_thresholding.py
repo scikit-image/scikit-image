@@ -778,11 +778,9 @@ def test_multiotsu_output():
     assert np.array_equal(thresholds, threshold_multiotsu(image, classes=4))
 
 
-def test_multiotsu_first_bin_zero_weight():
-    # The first histogram bin has intensity index 0 and must contribute
-    # zero to the first-order moment; it used to be weighted by 1 instead,
-    # shifting low thresholds on histograms with a heavily populated
-    # first bin.
+def _first_bin_heavy_histogram():
+    # A histogram whose first bin dominates; the case that exposed the
+    # first-bin weighting bug.
     # fmt: off
     counts = np.array(
         [
@@ -797,15 +795,23 @@ def test_multiotsu_first_bin_zero_weight():
     # fmt: on
     nbins = len(counts)
     bin_centers = (np.arange(nbins) + 0.5) / nbins
+    return counts, bin_centers
 
-    thresholds = threshold_multiotsu(classes=5, hist=(counts, bin_centers))
+
+def test_multiotsu_first_bin_zero_weight():
+    # The first histogram bin has intensity index 0 and must contribute
+    # zero to the first-order moment; it used to be weighted by 1 instead,
+    # shifting low thresholds on histograms with a heavily populated
+    # first bin.
+    hist = _first_bin_heavy_histogram()
+    thresholds = threshold_multiotsu(classes=5, hist=hist)
     assert_array_equal(thresholds, [0.0390625, 0.1796875, 0.5078125, 0.8359375])
 
-    data = np.repeat(bin_centers, counts.astype(int))
-    assert (
-        threshold_otsu(data, nbins=nbins)
-        == (threshold_multiotsu(data, classes=2, nbins=nbins)[0])
-    )
+
+def test_multiotsu_two_classes_matches_otsu():
+    # With two classes, multi-Otsu must reduce to Otsu on the same histogram.
+    hist = _first_bin_heavy_histogram()
+    assert threshold_otsu(hist=hist) == threshold_multiotsu(classes=2, hist=hist)[0]
 
 
 def test_multiotsu_astro_image():
