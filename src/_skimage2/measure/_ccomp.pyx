@@ -485,11 +485,11 @@ cdef void scan1D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
     if shapeinfo.numels == 0:
         return
     # Initialize the first row
-    cdef DTYPE_t x, rindex, bgval = bg.background_val
+    cdef DTYPE_t _x, rindex, bgval = bg.background_val
     cdef DTYPE_t *DEX = shapeinfo.DEX
     rindex = shapeinfo.ravel_index(0, y, z, shapeinfo)
 
-    for x in range(1, shapeinfo.x):
+    for _x in range(1, shapeinfo.x):
         rindex += 1
         # Handle the first row
         if data_p[rindex] == bgval:
@@ -506,7 +506,7 @@ cdef void scan2D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
     """
     if shapeinfo.numels == 0:
         return
-    cdef DTYPE_t x, y, rindex, bgval = bg.background_val
+    cdef DTYPE_t _x, y, rindex, bgval = bg.background_val
     cdef DTYPE_t *DEX = shapeinfo.DEX
     scan1D(data_p, forest_p, shapeinfo, bg, connectivity, 0, z)
     for y in range(1, shapeinfo.y):
@@ -522,7 +522,7 @@ cdef void scan2D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
                 join_trees_wrapper(data_p, forest_p, rindex, DEX[D_ec])
         # END of x = 0
 
-        for x in range(1, shapeinfo.x - 1):
+        for _x in range(1, shapeinfo.x - 1):
             # We have just moved to another column (of the same row)
             # so we increment the raveled index. It will be reset when we get
             # to another row, so we don't have to worry about altering it here.
@@ -560,7 +560,7 @@ cdef void scan3D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
     """
     if shapeinfo.numels == 0:
         return
-    cdef DTYPE_t x, y, z, rindex, bgval = bg.background_val
+    cdef DTYPE_t _x, y, z, rindex, bgval = bg.background_val
     cdef DTYPE_t *DEX = shapeinfo.DEX
     # Handle first plane
     scan2D(data_p, forest_p, shapeinfo, bg, connectivity, 0)
@@ -582,7 +582,7 @@ cdef void scan3D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
                     join_trees_wrapper(data_p, forest_p, rindex, DEX[D_en])
         # END of x = 0
 
-        for x in range(1, shapeinfo.x - 1):
+        for _x in range(1, shapeinfo.x - 1):
             rindex += 1
             # Handle the first row
             if data_p[rindex] == bgval:
@@ -639,7 +639,7 @@ cdef void scan3D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
             # END of x = 0
 
             # Handle the rest of columns
-            for x in range(1, shapeinfo.x - 1):
+            for _x in range(1, shapeinfo.x - 1):
                 rindex += 1
                 if data_p[rindex] == bgval:
                     # Nothing to do if we are background
@@ -701,7 +701,7 @@ cdef void scan3D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
         # END of x = 0
 
         # Handle the rest of columns
-        for x in range(1, shapeinfo.x - 1):
+        for _x in range(1, shapeinfo.x - 1):
             rindex += 1
             if data_p[rindex] == bgval:
                 # Nothing to do if we are background

@@ -41,7 +41,7 @@ def _generate_shifts(ndim, multichannel, max_shifts, shift_steps=1):
 
     if multichannel and max_shifts[-1] != 0:
         raise ValueError(
-            "Multichannel cycle spinning should not have shifts along the " "last axis."
+            "Multichannel cycle spinning should not have shifts along the last axis."
         )
 
     return product(*[range(0, s + 1, t) for s, t in zip(max_shifts, shift_steps)])

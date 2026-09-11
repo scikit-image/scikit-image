@@ -28,17 +28,21 @@ except ModuleNotFoundError:
     def file_hash(fname, alg="sha256"):
         """
         Calculate the hash of a given file.
+
         Useful for checking if a file has changed or been corrupted.
+
         Parameters
         ----------
         fname : str
             The name of the file.
         alg : str
             The type of the hashing algorithm
+
         Returns
         -------
         hash : str
             The hash of the file.
+
         Examples
         --------
         >>> fname = "test-file-for-hash.txt"
@@ -46,6 +50,7 @@ except ModuleNotFoundError:
         ...     __ = f.write("content of the file")
         >>> print(file_hash(fname))
         0fc74468e6a9a829f103d069aeb2bb4f8646bad58bf146bb0e3379b759ec4a00
+
         >>> import os
         >>> os.remove(fname)
         """
@@ -408,7 +413,7 @@ def astronaut():
     1995. She retired in 2006 after spending a total of 38 days, 8 hours
     and 10 minutes in outer space.
 
-    This image was downloaded from the NASA Great Images database
+    This image was downloaded from the `NASA Great Images database
     <https://flic.kr/p/r9qvLn>`__.
 
     No known copyright restrictions, released into the public domain.

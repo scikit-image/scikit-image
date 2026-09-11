@@ -107,7 +107,7 @@ def _slic_cython(np_floats[:, :, :, ::1] image_zyx,
         = np.empty((depth, height, width), dtype=dtype)
     cdef Py_ssize_t[::1] n_segment_elems = np.empty(n_segments, dtype=np.intp)
 
-    cdef Py_ssize_t i, c, k, x, y, z, x_min, x_max, y_min, y_max, z_min, z_max
+    cdef Py_ssize_t _i, c, k, x, y, z, x_min, x_max, y_min, y_max, z_min, z_max
     cdef bint change
     cdef np_floats dist_center, cx, cy, cz, dx, dy, dz, t
 
@@ -125,7 +125,7 @@ def _slic_cython(np_floats[:, :, :, ::1] image_zyx,
     cdef np_floats spatial_weight = 1.0 / (step * step)
 
     with nogil:
-        for i in range(max_num_iter):
+        for _i in range(max_num_iter):
             change = False
             distance[:, :, :] = DBL_MAX
 

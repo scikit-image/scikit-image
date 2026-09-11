@@ -151,10 +151,10 @@ a long time ago and many changes have taken place in the meantime.
 
 When squashing commits GitHub concatenates all commit messages.
 Please edit the resulting message so that it gives a concise, tidy
-overview of changes. For example, you may want to grab the
-description from the PR itself, and delete lines such as "pep8 fix",
-"apply review comments", etc. Please retain all Co-authored-by
-entries.
+overview of changes. For example, you may want to grab the description
+from the PR itself, and delete lines such as "pep8 fix", "apply review
+comments", etc. Please retain all `Co-authored-by` and `Assisted-by`
+tags.
 
 ## Closing issues and pull requests
 
