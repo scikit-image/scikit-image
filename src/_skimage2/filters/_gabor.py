@@ -46,8 +46,8 @@ def gabor_kernel(
     sigma_x, sigma_y : float, optional
         Standard deviation in x- and y-directions. These directions apply to
         the kernel *before* rotation. If `theta = pi/2`, then the kernel is
-        rotated 90 degrees so that ``sigma_x`` controls the *vertical*
-        direction.
+        rotated by pi/2 radians (90 degrees) so that ``sigma_x`` controls the
+        *vertical* direction.
     n_stds : scalar, optional
         The linear size of the kernel is n_stds (3 by default) standard
         deviations
@@ -151,8 +151,8 @@ def gabor(
     sigma_x, sigma_y : float, optional
         Standard deviation in x- and y-directions. These directions apply to
         the kernel *before* rotation. If ``theta = pi/2``, then the kernel is
-        rotated 90 degrees so that `sigma_x` controls the *vertical*
-        direction.
+        rotated by pi/2 radians (90 degrees) so that `sigma_x` controls the
+        *vertical* direction.
     n_stds : scalar, optional
         The linear size of the kernel is n_stds (3 by default) standard
         deviations.
