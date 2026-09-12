@@ -8,23 +8,13 @@ from libc.math cimport sqrt, atan2, fabs, cos, sin
 from cython.parallel cimport prange
 from scipy.special.cython_special cimport binom
 from scipy.linalg cimport cython_lapack
+from .zernike import ZernikeValueError
 
 cnp.import_array()
 
 # constants used in PupilGrid class
 cdef double PI = 3.14159265358979323846
 cdef double SQRT3 = 1.7320508075688772935
-
-
-class ZernikeTypeError(TypeError):
-    # defined here instead of zernike.py to avoid circular imports
-    pass
-
-
-class ZernikeValueError(ValueError):
-    # defined here instead of zernike.py to avoid circular imports
-    pass
-
 
 # Below is the overview and brief explanation for the implementation of Zernike
 # features computation based on Cython classes and methods.
@@ -158,12 +148,12 @@ cdef class PupilGrid:
         cdef cnp.uint8_t[:,::1] mask = self._pupil_mask
 
         for i in prange(self._num_rows, nogil=True):
-            dr = <double>i - self._center_row
+            dr = self._center_row - <double>i
             for j in range(self._num_cols):
                 dc = <double>j - self._center_col
                 vrho = sqrt(dc * dc + dr * dr) * inv_radius
                 rho[i, j] = vrho
-                theta[i, j] = atan2(dr, dc) + PI
+                theta[i, j] = (atan2(dr, dc)+(2*PI)) % (2*PI)
                 if vrho <= 1.0:
                     mask[i, j] = 1
                 else:
@@ -208,14 +198,14 @@ cdef class PupilGrid:
         self._ellipse_semi_minor = ellipse_semi_minor
 
         for i in prange(self._num_rows, nogil=True):
-            dr = <double>i - self._center_row
+            dr = self._center_row - <double>i
             dr_scaled = dr / ellipse_semi_minor
             for j in range(self._num_cols):
                 dc = <double>j - self._center_col
                 dc_scaled = dc / ellipse_semi_major
                 vrho = sqrt(dr_scaled * dr_scaled + dc_scaled * dc_scaled)
                 rho[i, j] = vrho
-                theta[i, j] = atan2(dr_scaled, dc_scaled) + PI
+                theta[i, j] = (atan2(dr_scaled, dc_scaled)+(2*PI)) % (2*PI)
                 if vrho <= 1.0:
                     mask[i, j] = 1
                 else:
@@ -240,12 +230,12 @@ cdef class PupilGrid:
                             rectangle_semi_height * rectangle_semi_height)
         inv_radius = 1.0 / self._radius
         for i in prange(self._num_rows, nogil=True):
-            dr = <double>i - self._center_row
+            dr = self._center_row - <double>i
             for j in range(self._num_cols):
                 dc = <double>j - self._center_col
                 vrho = sqrt(dc * dc + dr * dr) * inv_radius
                 rho[i, j] = vrho
-                theta[i, j] = atan2(dr, dc) + PI
+                theta[i, j] = (atan2(dr, dc)+(2*PI)) % (2*PI)
                 if (fabs(dc) <= rectangle_semi_width) and (fabs(dr) <= rectangle_semi_height):
                     mask[i, j] = 1
                 else:
@@ -272,14 +262,14 @@ cdef class PupilGrid:
         self._hexagon_side = hexagon_side
 
         for i in prange(self._num_rows, nogil=True):
-            dr = <double>i - self._center_row
+            dr = self._center_row - <double>i
             dr_norm = dr * inv_radius
             for j in range(self._num_cols):
                 dc = <double>j - self._center_col
                 dc_norm = dc * inv_radius
                 vrho = sqrt(dr_norm * dr_norm + dc_norm * dc_norm)
                 rho[i, j] = vrho
-                theta[i, j] = atan2(dr, dc) + PI
+                theta[i, j] = (atan2(dr, dc)+(2*PI)) % (2*PI)
                 if (vrho <= 1.0 and
                     fabs(dr_norm) <= apothem and
                     fabs(SQRT3 * dc_norm + dr_norm) <= SQRT3 and
@@ -577,7 +567,7 @@ cdef class ZernikeOrthonormalization:
             # are F = Z*(L^-1)^H. The shape of F is (P, J), and satisfies
             # the condition (F^H)*W*F = I
         # 5. The final step is computing complex moments, though not implemented
-            # in this class, but in the main class ZernikeFeatures below.
+            # in this class, but in ZernikeFeatures class below.
             # These are computed for the given pupil as zm = (F^H)*W*pv.
             # The shape of zm is (J,), and of valid pixel vector is (P,).
             # The magnitude of these zm complex moments are Zernike features.
@@ -608,6 +598,7 @@ cdef class ZernikeOrthonormalization:
         cdef int info = 0
         cdef char uplo = b'L'
         cdef char diag = b'N'
+        cdef double h_check = 0.0
 
         cdef cnp.ndarray[cnp.complex128_t, ndim=2] gram = (np.transpose(np.conjugate(self._complex_basis)) * self._weights) @ self._complex_basis
 
@@ -616,9 +607,33 @@ cdef class ZernikeOrthonormalization:
         cdef cnp.ndarray[cnp.complex128_t, ndim=2] cholesky_inv = np.empty((J, J), dtype=np.complex128, order='F')
         # Cholesky decomposition of Gram matrix (L * L^H = M)
         cython_lapack.zpotrf(&uplo, &J, <double complex*>cholesky.data, &J, &info)
-        if info != 0:
+        if info < 0:
             raise ZernikeValueError(
-                f"LAPACK Cholesky decomposition failed. Code: {info}. Either number of pixels inside pupil, or degree value are too small. Change pupil size or degree value.")
+                f"LAPACK Cholesky decomposition failed. Function argument {-info} value is invalid."
+            )
+        elif info > 0:
+            # Below checks are intentionally put here and not right after Gram matrix
+            # as matrix checks can be computationally intensive. Do not want to waste compute,
+            # assuming Gram is valid most of the time. EAFP style programming.
+            # check for gram being hermitian
+            h_check = (np.linalg.norm(gram - np.transpose(np.conjugate(gram)), "fro")) \
+                /(np.linalg.norm(gram, "fro"))
+            if not (0.0 <= h_check <= 1e-9):
+                raise ZernikeValueError("Gram matrix is not Hermitian.")
+            # check for gram diagonals being positive and imaginary is 0
+            if not np.all(np.diag(gram)>0.0):
+                raise ZernikeValueError(
+                    "Gram matix diagonals contain non-positive values. Change 'feature_type' or 'degree'."
+                )
+            # Gram is not positive definite matrix
+            raise ZernikeValueError(
+                f"LAPACK Cholesky decomposition failed. "
+                f"Gram matrix is not positive definite as basis polynomial {info} was erroneous. "
+                f"Change one of: pupil type, size or degree."
+            )
+        else:
+            # info=0, successfully decomposed. avoid dangling else
+            pass
 
         # explicitly set upper triangle to 0.0
         cholesky = cholesky.copy(order="C")
@@ -629,14 +644,39 @@ cdef class ZernikeOrthonormalization:
 
         cholesky_inv = cholesky.copy(order="F")
         cython_lapack.ztrtri(&uplo, &diag, &J, <double complex*>cholesky_inv.data, &J, &info)
-        if info != 0:
-            raise ZernikeValueError(f"LAPACK Choleskky inversion failed. Code: {info}. Either number of pixels inside pupil, or degree value are too small. Change pupil size or degree value.")
+        if info < 0:
+            raise ZernikeValueError(
+                f"LAPACK Cholesky inversion failed. Function argument {-info} value is invalid."
+            )
+        elif info > 0:
+            # check for gram being hermitian with reconstruction i.e. M = L*L^H
+            cholesky = cholesky.copy(order="C")
+            h_check = (np.linalg.norm(gram - (cholesky @ np.transpose(np.conjugate(cholesky))), "fro")) \
+                /(np.linalg.norm(gram, "fro"))
+            if not (0.0 <= h_check <= 1e-9):
+                raise ZernikeValueError("Gram matrix is not Hermitian.")
+            # check for cholesky diagonals being positive and imaginary is 0
+            if not np.all(np.diag(cholesky)>0.0):
+                raise ZernikeValueError(
+                    "Cholesky decomposition diagonals contain non-positive values. "
+                    "Cannot orthonormalize basis for current pupil."
+                )
+            raise ZernikeValueError(
+                f"LAPACK Cholesky inversion failed. "
+                f"Singular value at {info} in lower triangle Cholesky decomposition."
+                f"Change one of: feature type, pupil type, size or degree."
+            )
+        else:
+            # info=0, successfully inverted. avoid dangling else
+            pass
 
         # transformation matrix (L^-1)^H
         cdef cnp.ndarray[cnp.complex128_t, ndim=2] transform = np.transpose(np.conjugate(cholesky_inv))
 
         # orthonormal basis: F = Z @ (L^-1)^H
         self._orthonormal_basis = self._complex_basis @ transform
+        # orthonormality check
+        # (||F^H * W * F - I||) / sqrt(num features) <= 1e-9
 
 cdef class ImageReconstruction:
     """Reconstruct the pixel intensities inside the pupil using basis polynomials and complex moments."""
@@ -789,11 +829,12 @@ cdef class ZernikeFeatures:
     .. [5] Michael Reed Teague, J. Opt. Soc. Am. 70, 920-930 (1980). https://doi.org/10.1364/JOSA.70.000920
     .. [6] Cosmas Mafusire and Tjaart P. J. Krüger, J. Opt. Soc. Am. A 35, 840-849 (2018). https://doi.org/10.1364/JOSAA.35.000840
     .. [7] Charles E. Campbell, J. Opt. Soc. Am. A 20, 209-217 (2003). https://doi.org/10.1364/JOSAA.20.000209
-    .. [8] Zernike Polynomials Wikipedia: https://en.wikipedia.org/wiki/Zernike_polynomials
-    .. [9] Pseudo Zernike Polynomials Wikipedia: https://en.wikipedia.org/wiki/Pseudo-Zernike_polynomials
-    .. [10] Image reconstruction example using Zernike moments: https://stackoverflow.com/a/33339289
-    .. [11] Gram matrix Wikipedia: https://en.wikipedia.org/wiki/Gram_matrix
-    .. [12] Cholesky decomposition Wikipedia: https://en.wikipedia.org/wiki/Cholesky_decomposition
+    .. [8] Galaktionov, I. (2026). Applied System Innovation, 9(3), 51. https://doi.org/10.3390/asi9030051
+    .. [9] Zernike Polynomials Wikipedia: https://en.wikipedia.org/wiki/Zernike_polynomials
+    .. [10] Pseudo Zernike Polynomials Wikipedia: https://en.wikipedia.org/wiki/Pseudo-Zernike_polynomials
+    .. [11] Image reconstruction example using Zernike moments: https://stackoverflow.com/a/33339289
+    .. [12] Gram matrix Wikipedia: https://en.wikipedia.org/wiki/Gram_matrix
+    .. [13] Cholesky decomposition Wikipedia: https://en.wikipedia.org/wiki/Cholesky_decomposition
 
     """
     cdef int _feature_type, _pupil_type, _degree, _num_threads
@@ -882,7 +923,7 @@ cdef class ZernikeFeatures:
 
         if self._pupil_type == 0:
             self._complex_moments = np.array(self._zcb._scale_factors) * \
-                                    (np.transpose(self._zcb._complex_basis) @ \
+                                    (np.transpose(np.conjugate(self._zcb._complex_basis)) @ \
                                     np.array(pixel_vector, dtype=np.float64))
             self._imgrc = ImageReconstruction(
                 image=np.array(self._pg._image, dtype=np.float64),
@@ -897,7 +938,7 @@ cdef class ZernikeFeatures:
             )
         else:
             self._zon = ZernikeOrthonormalization(
-                weights=np.array(self._pg._weights,np.float64),
+                weights=np.array(self._pg._weights,dtype=np.float64),
                 complex_basis=np.array(self._zcb._complex_basis,dtype=np.complex128),
                 num_features=self._zcb._num_features
             )

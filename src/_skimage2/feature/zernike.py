@@ -5,10 +5,18 @@ from typing import NamedTuple
 
 from _skimage2.measure import regionprops, label
 
-from .zernike_cy import ZernikeFeatures, ZernikeTypeError, ZernikeValueError
 
 # ZernikeTypeError, ZernikeValueError are created to allow users to catch these
 # errors if need be, over generic TypeError, ValueError.
+class ZernikeTypeError(TypeError):
+    # defined here instead of zernike_cy.pyx to avoid circular imports
+    pass
+
+
+class ZernikeValueError(ValueError):
+    # defined here instead of zernike_cy.pyx to avoid circular imports
+    pass
+
 
 # map strings to integers to pass to cython
 FEATURE_OPTIONS = {"conventional": 0, "pseudo": 1}
@@ -484,11 +492,12 @@ def zernike_features(
     .. [5] Michael Reed Teague, J. Opt. Soc. Am. 70, 920-930 (1980). https://doi.org/10.1364/JOSA.70.000920
     .. [6] Cosmas Mafusire and Tjaart P. J. Krüger, J. Opt. Soc. Am. A 35, 840-849 (2018). https://doi.org/10.1364/JOSAA.35.000840
     .. [7] Charles E. Campbell, J. Opt. Soc. Am. A 20, 209-217 (2003). https://doi.org/10.1364/JOSAA.20.000209
-    .. [8] Zernike Polynomials Wikipedia: https://en.wikipedia.org/wiki/Zernike_polynomials
-    .. [9] Pseudo Zernike Polynomials Wikipedia: https://en.wikipedia.org/wiki/Pseudo-Zernike_polynomials
-    .. [10] Image reconstruction example using Zernike moments: https://stackoverflow.com/a/33339289
-    .. [11] Gram matrix Wikipedia: https://en.wikipedia.org/wiki/Gram_matrix
-    .. [12] Cholesky decomposition Wikipedia: https://en.wikipedia.org/wiki/Cholesky_decomposition
+    .. [8] Galaktionov, I. (2026). Applied System Innovation, 9(3), 51. https://doi.org/10.3390/asi9030051
+    .. [9] Zernike Polynomials Wikipedia: https://en.wikipedia.org/wiki/Zernike_polynomials
+    .. [10] Pseudo Zernike Polynomials Wikipedia: https://en.wikipedia.org/wiki/Pseudo-Zernike_polynomials
+    .. [11] Image reconstruction example using Zernike moments: https://stackoverflow.com/a/33339289
+    .. [12] Gram matrix Wikipedia: https://en.wikipedia.org/wiki/Gram_matrix
+    .. [13] Cholesky decomposition Wikipedia: https://en.wikipedia.org/wiki/Cholesky_decomposition
 
     Examples
     --------
@@ -498,12 +507,19 @@ def zernike_features(
     >>> img[38:89, 38:89] = 255  # create 50x50 white square
     >>> zf = zernike_features(img, degree=5, primary_dim=38.0, center_coord=np.array([63, 63]))
     >>> print(zf.features)
-    [5.76335032e-01 1.25962373e-16 6.91282739e-01 1.62363660e-18
-    1.25984971e-16 8.36823941e-18 1.27767584e-01 1.11472819e-16
-    1.55826037e-01 7.57203629e-17 7.72446795e-17 3.59631500e-17]
+    [5.76335032e-01 1.33511903e-16 6.91282739e-01 6.61289262e-17
+    1.25954839e-16 4.37525962e-17 1.27767584e-01 1.73882594e-17
+    1.55826037e-01 1.32655570e-16 9.91054948e-17 3.72709361e-17]
     >>> zf = zernike_features(image=img, feature_type="pseudo", pupil_type="square", degree=5)
     >>> print(zf.primary_dim)
     26.0
+    >>> from _skimage2.feature.zernike import ZernikeValueError
+    >>> try:
+    ...    zf = zernike_features(img, primary_dim="auto", secondary_dim=20)
+    ...    print(zf.primary_dim)
+    ... except ZernikeValueError as zexc:
+    ...    print(f"Caught exception: {zexc}")
+    Caught exception: 'secondary_dim' is expected to be set to 'None'.
 
     """
     image, degree, primary_dim, secondary_dim, center_coord = _validate_parse_args(
@@ -518,6 +534,9 @@ def zernike_features(
         return_pupil_mask,
         return_reconstructed_image,
     )
+
+    # importing here to avoid circular imports
+    from .zernike_cy import ZernikeFeatures
 
     zf = ZernikeFeatures(
         image=image,
