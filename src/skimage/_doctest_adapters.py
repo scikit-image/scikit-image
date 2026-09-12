@@ -36,6 +36,49 @@ _DOCTEST_PROMPT_RE = re.compile(
     flags=re.VERBOSE,
 )
 
+# Base names of the dataset fetchers in ``_skimage2.data`` (without the
+# ``fetch_`` prefix); see ``_skimage2/data/_fetchers.py``.
+_FETCHER_BASE_NAMES = (
+    'astronaut',
+    'brain',
+    'brick',
+    'camera',
+    'cat',
+    'cell',
+    'cells3d',
+    'checkerboard',
+    'chelsea',
+    'clock',
+    'coffee',
+    'coins',
+    'colorwheel',
+    'eagle',
+    'grass',
+    'gravel',
+    'horse',
+    'hubble_deep_field',
+    'human_mitosis',
+    'immunohistochemistry',
+    'kidney',
+    'lbp_frontal_face_cascade_filename',
+    'lfw_subset',
+    'lily',
+    'logo',
+    'microaneurysms',
+    'moon',
+    'nickel_solidification',
+    'page',
+    'palisades_of_vogt',
+    'protein_transport',
+    'retina',
+    'rocket',
+    'shepp_logan_phantom',
+    'skin',
+    'stereo_motorcycle',
+    'text',
+    'vortex',
+)
+
 # Search / replace pairs.
 _SEARCH_REP_PAIRS = (
     (re.compile(r'import _?skimage2 as ski2'), 'import skimage as ski'),
@@ -53,8 +96,13 @@ _SEARCH_REP_PAIRS = (
     (re.compile(r'_?skimage2\.'), 'skimage.'),
     # skimage2's data fetchers are named `fetch_<name>` (e.g. `fetch_astronaut`),
     # but skimage (v1) keeps the old bare names (e.g. `astronaut`) for backwards
-    # compatibility, so strip the prefix for adapted doctests.
-    (re.compile(r'\bfetch_(\w+)\b'), r'\1'),
+    # compatibility, so strip the prefix for adapted doctests. Scope the match to
+    # the known dataset fetcher names so unrelated `fetch_*` identifiers (e.g.
+    # `fetch_20newsgroups`) are left untouched.
+    (
+        re.compile(r'\b(?:fetch_((?:' + '|'.join(_FETCHER_BASE_NAMES) + r')))\b'),
+        r'\1',
+    ),
 )
 
 

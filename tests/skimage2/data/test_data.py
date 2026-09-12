@@ -272,6 +272,19 @@ def test_bare_v1_name_is_importable():
     assert astronaut is fetch_astronaut
 
 
+def test_bare_v1_name_usable_but_unadvertised():
+    """data.astronaut stays importable and usable, but is not in __all__."""
+    assert 'astronaut' not in data.__all__
+    assert 'fetch_astronaut' in data.__all__
+
+    from _skimage2.data import astronaut
+
+    img = astronaut()
+    np.testing.assert_array_equal(img, data.fetch_astronaut())
+    assert img.ndim == 3
+    assert img.shape == (512, 512, 3)
+
+
 def test_public_skimage2_data_surface():
     """The v1 aliases and __all__ reach users through skimage2.data."""
     with warnings.catch_warnings():
