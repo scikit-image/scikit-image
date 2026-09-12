@@ -243,7 +243,7 @@ def sobel(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
     --------
     >>> from _skimage2 import data
     >>> from _skimage2 import filters
-    >>> camera = data.camera()
+    >>> camera = data.fetch_camera()
     >>> edges = filters.sobel(camera)
     """
     output = _generic_edge_filter(
@@ -365,7 +365,7 @@ def scharr(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
     --------
     >>> from _skimage2 import data
     >>> from _skimage2 import filters
-    >>> camera = data.camera()
+    >>> camera = data.fetch_camera()
     >>> edges = filters.scharr(camera)
     """
     output = _generic_edge_filter(
@@ -493,7 +493,7 @@ def prewitt(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
     --------
     >>> from _skimage2 import data
     >>> from _skimage2 import filters
-    >>> camera = data.camera()
+    >>> camera = data.fetch_camera()
     >>> edges = filters.prewitt(camera)
     """
     output = _generic_edge_filter(
@@ -588,7 +588,7 @@ def roberts(image, mask=None):
     Examples
     --------
     >>> from _skimage2 import data
-    >>> camera = data.camera()
+    >>> camera = data.fetch_camera()
     >>> from _skimage2 import filters
     >>> edges = filters.roberts(camera)
 
@@ -769,7 +769,7 @@ def farid(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
     Examples
     --------
     >>> from _skimage2 import data
-    >>> camera = data.camera()
+    >>> camera = data.fetch_camera()
     >>> from _skimage2 import filters
     >>> edges = filters.farid(camera)
     """

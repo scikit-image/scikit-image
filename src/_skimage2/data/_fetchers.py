@@ -265,6 +265,48 @@ def _fetch(data_filename, prefix=None):
         ) from err
 
 
+def fetch(data_filename):
+    """Fetch a scikit-image example dataset file, returning its local path.
+
+    Resolves ``data_filename`` to a path on disk: a copy shipped with the
+    distribution, an already-cached download, or a fresh download using pooch,
+    in that order.
+
+    Use this for registry entries that have no ``fetch_*()`` wrapper, or when
+    you want the file path rather than a loaded array.
+
+    Parameters
+    ----------
+    data_filename : str
+        Registry key of the file, e.g. ``'data/astronaut.png'`` or
+        ``'data/kidney.tif'``; see the keys of
+        ``_skimage2.data._registry.registry`` for the full list.
+
+    Returns
+    -------
+    file_path : str
+        Path of the local file.
+
+    Raises
+    ------
+    KeyError:
+        If ``data_filename`` is not known to the scikit-image distribution.
+
+    ModuleNotFoundError:
+        If the filename is known to the scikit-image distribution but pooch
+        is not installed.
+
+    ConnectionError:
+        If scikit-image is unable to connect to the internet but the
+        dataset has not been downloaded yet.
+
+    ValueError:
+        If a file is downloaded but its hash does not match the expected
+        value.
+    """
+    return _fetch(data_filename)
+
+
 def download_all(directory=None):
     """Download all datasets for use with scikit-image offline.
 
@@ -1275,3 +1317,47 @@ def vortex():
         _load('data/pivchallenge-B-B001_1.tif'),
         _load('data/pivchallenge-B-B001_2.tif'),
     )
+
+
+# The fetch_* names, after sklearn.datasets.fetch_*, are the canonical API:
+# the prefix shows at the call site that a dataset may need downloading.
+# skimage2.data also exposes the bare names above as unadvertised aliases
+# (see data/__init__.pyi); the skimage (v1) shim imports them from here.
+fetch_astronaut = astronaut
+fetch_brain = brain
+fetch_brick = brick
+fetch_camera = camera
+fetch_cat = cat
+fetch_cell = cell
+fetch_cells3d = cells3d
+fetch_checkerboard = checkerboard
+fetch_chelsea = chelsea
+fetch_clock = clock
+fetch_coffee = coffee
+fetch_coins = coins
+fetch_colorwheel = colorwheel
+fetch_eagle = eagle
+fetch_grass = grass
+fetch_gravel = gravel
+fetch_horse = horse
+fetch_hubble_deep_field = hubble_deep_field
+fetch_human_mitosis = human_mitosis
+fetch_immunohistochemistry = immunohistochemistry
+fetch_kidney = kidney
+fetch_lbp_frontal_face_cascade_filename = lbp_frontal_face_cascade_filename
+fetch_lfw_subset = lfw_subset
+fetch_lily = lily
+fetch_logo = logo
+fetch_microaneurysms = microaneurysms
+fetch_moon = moon
+fetch_nickel_solidification = nickel_solidification
+fetch_page = page
+fetch_palisades_of_vogt = palisades_of_vogt
+fetch_protein_transport = protein_transport
+fetch_retina = retina
+fetch_rocket = rocket
+fetch_shepp_logan_phantom = shepp_logan_phantom
+fetch_skin = skin
+fetch_stereo_motorcycle = stereo_motorcycle
+fetch_text = text
+fetch_vortex = vortex

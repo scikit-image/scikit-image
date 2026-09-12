@@ -66,8 +66,8 @@ except ImportError:
 
 
 class TestColorconv:
-    img_rgb = data.colorwheel()
-    img_grayscale = data.camera()
+    img_rgb = data.fetch_colorwheel()
+    img_grayscale = data.fetch_camera()
     img_rgba = np.array([[[0, 0.5, 1, 0], [0, 0.5, 1, 1], [0, 0.5, 1, 0.5]]]).astype(
         float
     )
@@ -1062,7 +1062,7 @@ def test_rgba2rgb_dtypes(dtype):
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_lab_lch_roundtrip_dtypes(dtype):
-    rgb = img_as_float(data.colorwheel()).astype(dtype=dtype, copy=False)
+    rgb = img_as_float(data.fetch_colorwheel()).astype(dtype=dtype, copy=False)
     lab = rgb2lab(rgb)
     float_dtype = _supported_float_type(dtype)
     assert lab.dtype == float_dtype
@@ -1073,7 +1073,7 @@ def test_lab_lch_roundtrip_dtypes(dtype):
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_rgb2hsv_dtypes(dtype):
-    rgb = img_as_float(data.colorwheel())[::16, ::16]
+    rgb = img_as_float(data.fetch_colorwheel())[::16, ::16]
     rgb = rgb.astype(dtype=dtype, copy=False)
     hsv = rgb2hsv(rgb).reshape(-1, 3)
     float_dtype = _supported_float_type(dtype)

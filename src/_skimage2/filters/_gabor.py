@@ -181,7 +181,7 @@ def gabor(
     >>> from _skimage2 import data
     >>> from matplotlib import pyplot as plt  # doctest: +SKIP
 
-    >>> image = data.coins()
+    >>> image = data.fetch_coins()
     >>> # detecting edges in a coin image
     >>> filt_real, filt_imag = gabor(image, frequency=0.6)
     >>> fix, ax = plt.subplots()  # doctest: +SKIP

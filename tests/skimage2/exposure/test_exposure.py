@@ -174,7 +174,7 @@ def test_multichannel_hist_common_bins_uint8(dtype, source_range, channel_axis):
 
 np.random.seed(0)
 
-test_img_int = data.camera()
+test_img_int = data.fetch_camera()
 # squeeze image intensities to lower image contrast
 test_img = util.img_as_float(test_img_int)
 test_img = exposure.rescale_intensity(test_img / 5.0 + 100)
@@ -418,7 +418,7 @@ def test_rescale_raises_on_incorrect_out_range():
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_adapthist_grayscale(dtype):
     """Test a grayscale float image"""
-    img = util.img_as_float(data.astronaut()).astype(dtype, copy=False)
+    img = util.img_as_float(data.fetch_astronaut()).astype(dtype, copy=False)
     img = rgb2gray(img)
     img = np.dstack((img, img, img))
     adapted = exposure.equalize_adapthist(
@@ -433,7 +433,7 @@ def test_adapthist_grayscale(dtype):
 
 def test_adapthist_color():
     """Test an RGB color uint16 image"""
-    img = util.img_as_uint(data.astronaut())
+    img = util.img_as_uint(data.fetch_astronaut())
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter('always')
         hist, bin_centers = exposure.histogram(img)
@@ -450,7 +450,7 @@ def test_adapthist_color():
 
 def test_adapthist_alpha():
     """Test an RGBA color image"""
-    img = util.img_as_float(data.astronaut())
+    img = util.img_as_float(data.fetch_astronaut())
     alpha = np.ones((img.shape[0], img.shape[1]), dtype=float)
     img = np.dstack((img, alpha))
     adapted = exposure.equalize_adapthist(img)
@@ -469,7 +469,7 @@ def test_adapthist_grayscale_Nd():
     not to be interpreted as a color image by @adapt_rgb
     """
     # take 2d image, subsample and stack it
-    img = util.img_as_float(data.astronaut())
+    img = util.img_as_float(data.fetch_astronaut())
     img = rgb2gray(img)
     a = 15
     img2d = util.img_as_float(img[0:-1:a, 0:-1:a])
@@ -505,7 +505,7 @@ def test_adapthist_constant():
 
 def test_adapthist_borders():
     """Test border processing"""
-    img = rgb2gray(util.img_as_float(data.astronaut()))
+    img = rgb2gray(util.img_as_float(data.fetch_astronaut()))
 
     # maximize difference between orig and processed img
     img /= 100.0
@@ -522,7 +522,7 @@ def test_adapthist_borders():
 
 
 def test_adapthist_clip_limit():
-    img_u = data.moon()
+    img_u = data.fetch_moon()
     img_f = util.img_as_float(img_u)
 
     # uint8 input

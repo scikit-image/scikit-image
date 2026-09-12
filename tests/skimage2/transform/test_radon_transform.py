@@ -7,11 +7,11 @@ from ...dependency_checks import has_mpl
 from _skimage2._shared._warnings import expected_warnings
 from _skimage2._shared.testing import run_in_parallel
 from _skimage2._shared.utils import _supported_float_type, convert_to_float
-from _skimage2.data import shepp_logan_phantom
+from _skimage2.data import fetch_shepp_logan_phantom
 from _skimage2.transform import radon, iradon, iradon_sart, rescale
 
 
-PHANTOM = shepp_logan_phantom()[::2, ::2]
+PHANTOM = fetch_shepp_logan_phantom()[::2, ::2]
 PHANTOM = rescale(
     PHANTOM, 0.5, order=1, mode='constant', anti_aliasing=False, channel_axis=None
 )

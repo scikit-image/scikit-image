@@ -132,10 +132,10 @@ def butterworth(
     Apply a high-pass and low-pass Butterworth filter to a grayscale and
     color image respectively:
 
-    >>> from _skimage2.data import camera, astronaut
+    >>> from _skimage2.data import fetch_camera, fetch_astronaut
     >>> from _skimage2.filters import butterworth
-    >>> high_pass = butterworth(camera(), 0.07, True, 8)
-    >>> low_pass = butterworth(astronaut(), 0.01, False, 4, channel_axis=-1)
+    >>> high_pass = butterworth(fetch_camera(), 0.07, True, 8)
+    >>> low_pass = butterworth(fetch_astronaut(), 0.01, False, 4, channel_axis=-1)
 
     References
     ----------

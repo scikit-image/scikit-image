@@ -582,7 +582,7 @@ def test_rotated_img():
     The harris filter should yield the same results with an image and it's
     rotation.
     """
-    im = img_as_float(data.astronaut().mean(axis=2))
+    im = img_as_float(data.fetch_astronaut().mean(axis=2))
     im_rotated = im.T
 
     # Moravec
@@ -668,7 +668,7 @@ def test_num_peaks():
     corners.
     """
 
-    img_corners = corner_harris(rgb2gray(data.astronaut()))
+    img_corners = corner_harris(rgb2gray(data.fetch_astronaut()))
     rng = np.random.RandomState(3095879451)
 
     for i in range(20):
@@ -747,7 +747,7 @@ def test_corner_fast_image_unsupported_error():
 
 @run_in_parallel()
 def test_corner_fast_astronaut():
-    img = rgb2gray(data.astronaut())
+    img = rgb2gray(data.fetch_astronaut())
     expected = np.array(
         [
             [444, 310],
@@ -809,7 +809,7 @@ def test_corner_orientations_even_shape_error():
 
 @run_in_parallel()
 def test_corner_orientations_astronaut():
-    img = rgb2gray(data.astronaut())
+    img = rgb2gray(data.fetch_astronaut())
     corners = corner_peaks(
         corner_fast(img, 11, 0.35),
         exclude_border=10,

@@ -636,7 +636,7 @@ def circle_perimeter_aa(r, c, radius, shape=None):
            [  0,   0,   0,   0,   0,   0,   0,   0,   0,   0]], dtype=uint8)
 
     >>> from _skimage2 import data, draw
-    >>> image = data.chelsea()
+    >>> image = data.fetch_chelsea()
     >>> rr, cc, val = draw.circle_perimeter_aa(r=100, c=100, radius=75)
     >>> draw.set_color(image, (rr, cc), [1, 0, 0], alpha=val)
     """

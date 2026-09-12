@@ -94,7 +94,7 @@ def _check_segment_labels(seg1, seg2, allowed_mismatch_ratio=0.1):
 def test_slic_consistency_across_image_magnitude():
     # verify that that images of various scales across integer and float dtypes
     # give the same segmentation result
-    img_uint8 = data.cat()[:256, :128]
+    img_uint8 = data.fetch_cat()[:256, :128]
     img_uint16 = 256 * img_uint8.astype(np.uint16)
     img_float32 = img_as_float(img_uint8)
     img_float32_norm = img_float32 / img_float32.max()
