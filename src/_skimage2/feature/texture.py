@@ -221,7 +221,7 @@ def graycoprops(P, prop='contrast'):
     Examples
     --------
     Compute the contrast for GLCMs with distances [1, 2] and angles
-    [0 degrees, 90 degrees]
+    [0, pi/2] radians
 
     >>> image = np.array([[0, 0, 1, 1],
     ...                   [0, 0, 1, 1],

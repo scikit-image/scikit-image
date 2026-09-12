@@ -559,7 +559,7 @@ def swirl(
         The extent of the swirl in pixels.  The effect dies out
         rapidly beyond `radius`.
     rotation : float, optional
-        Additional rotation applied to the image.
+        Additional rotation applied to the image, in radians.
 
     Returns
     -------
