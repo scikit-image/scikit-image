@@ -44,6 +44,7 @@ __all__ = [
     'multiscale_basic_features',
     'learn_gmm',
     'fisher_vector',
+    'zernike_features',
 ]
 
 from ._canny import canny
@@ -86,3 +87,4 @@ from .blob import blob_dog, blob_log, blob_doh
 from .haar import haar_like_feature, haar_like_feature_coord, draw_haar_like_feature
 from ._basic_features import multiscale_basic_features
 from ._fisher_vector import learn_gmm, fisher_vector
+from .zernike import zernike_features

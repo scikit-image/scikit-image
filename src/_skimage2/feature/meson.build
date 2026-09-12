@@ -8,6 +8,7 @@ pyx_files = [
   ['_cascade', cython_gen_cpp],
   ['_haar', cython_gen_cpp],
   ['_canny_cy', cython_gen],
+  ['zernike_cy', cython_gen],
 ]
 
 foreach pyx_file: pyx_files
@@ -73,6 +74,7 @@ python_sources = [
   'template.py',
   'texture.py',
   'util.py',
+  'zernike.py',
 ]
 
 py3.install_sources(
