@@ -135,6 +135,8 @@ class ArrayMap:
         This array can be very large: it is the size of the largest value
         in the ``in_vals`` array, plus one.
         """
+        if copy is False:
+            raise ValueError('Unable to avoid a copy while creating an ArrayMap array.')
         if dtype is None:
             dtype = self.out_values.dtype
         output = np.zeros(np.max(self.in_values) + 1, dtype=dtype)
