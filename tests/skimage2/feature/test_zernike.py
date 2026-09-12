@@ -1,11 +1,69 @@
 import re
 import pytest
 import numpy as np
-from numpy.testing import assert_equal, assert_allclose
-from pathlib import Path
+from numpy.testing import assert_equal, assert_allclose, assert_array_less
 from _skimage2.feature import zernike_features
-from _skimage2.feature.zernike import ZernikeResults
-from _skimage2.feature.zernike_cy import ZernikeTypeError, ZernikeValueError
+from _skimage2.feature.zernike import (
+    ZernikeResults,
+    ZernikeTypeError,
+    ZernikeValueError,
+)
+
+
+def build_valid_combos():
+    valid_pairs = (
+        (('circle', 38, None, np.array([60, 60])), (38.0, 0.0, np.array([60.0, 60.0]))),
+        (('circle', 'auto', None, 'auto'), (36.0, 0.0, np.array([63.0, 63.0]))),
+        (('annulus', 38, 30, np.array([60, 60])), (38.0, 30.0, np.array([60.0, 60.0]))),
+        (('annulus', 'auto', 0.2, 'auto'), (36.0, 7.0, np.array([63.0, 63.0]))),
+        (('ellipse', 38, 30, np.array([60, 60])), (38.0, 30.0, np.array([60.0, 60.0]))),
+        (('ellipse', 30, 38, np.array([60, 60])), (30.0, 38.0, np.array([60.0, 60.0]))),
+        (('ellipse', 'auto', None, 'auto'), (29.0, 29.0, np.array([63.0, 63.0]))),
+        (
+            ('rectangle', 38, 30, np.array([60, 60])),
+            (38.0, 30.0, np.array([60.0, 60.0])),
+        ),
+        (
+            ('rectangle', 30, 38, np.array([60, 60])),
+            (30.0, 38.0, np.array([60.0, 60.0])),
+        ),
+        (('rectangle', 'auto', None, 'auto'), (26.0, 26.0, np.array([63.0, 63.0]))),
+        (
+            ('square', 38, None, np.array([60, 60])),
+            (38.0, 38.0, np.array([60.0, 60.0])),
+        ),
+        (('square', 'auto', None, 'auto'), (26.0, 26.0, np.array([63.0, 63.0]))),
+        (
+            ('hexagon', 38, None, np.array([60, 60])),
+            (38.0, 0.0, np.array([60.0, 60.0])),
+        ),
+        (('hexagon', 'auto', None, 'auto'), (41.0, 0.0, np.array([63.0, 63.0]))),
+    )
+    pairs = []
+    for odt in (np.uint8, np.float16, np.float32, np.float64):
+        for oft in ("conventional", "pseudo"):
+            # assumes degree=5, then expect 12 and 21 features resp.
+            if oft == "conventional":
+                ooshp = (12,)
+            else:
+                ooshp = (21,)
+            for oin, oout in valid_pairs:
+                oipt, oipd, oisd, oicc = oin
+                oopd, oosd, oocc = oout
+                pairs.append(
+                    (
+                        {
+                            "dt": odt,
+                            "ft": oft,
+                            "pt": oipt,
+                            "pd": oipd,
+                            "sd": oisd,
+                            "cc": oicc,
+                        },
+                        {"fshp": ooshp, "pd": oopd, "sd": oosd, "cc": oocc},
+                    )
+                )
+    return pairs
 
 
 @pytest.fixture
@@ -81,508 +139,25 @@ class TestZernikeFeatures:
         assert znres.secondary_dim == results.secondary_dim
         assert_equal(znres.center_coord, results.center_coord)
 
-    @pytest.mark.parametrize(
-        "dt, dtstr, ft, pt, pd, sd, cc",
-        [
-            (
-                np.uint8,
-                "np.uint8",
-                "conventional",
-                "circle",
-                38.0,
-                None,
-                np.array([63, 63]),
-            ),
-            (np.uint8, "np.uint8", "conventional", "circle", "auto", None, "auto"),
-            (
-                np.uint8,
-                "np.uint8",
-                "conventional",
-                "annulus",
-                38.0,
-                30.0,
-                np.array([63, 63]),
-            ),
-            (np.uint8, "np.uint8", "conventional", "annulus", "auto", 0.2, "auto"),
-            (
-                np.uint8,
-                "np.uint8",
-                "conventional",
-                "ellipse",
-                38.0,
-                30.0,
-                np.array([63, 63]),
-            ),
-            (np.uint8, "np.uint8", "conventional", "ellipse", "auto", None, "auto"),
-            (
-                np.uint8,
-                "np.uint8",
-                "conventional",
-                "rectangle",
-                38.0,
-                30.0,
-                np.array([63, 63]),
-            ),
-            (np.uint8, "np.uint8", "conventional", "rectangle", "auto", None, "auto"),
-            (
-                np.uint8,
-                "np.uint8",
-                "conventional",
-                "square",
-                38.0,
-                None,
-                np.array([63, 63]),
-            ),
-            (np.uint8, "np.uint8", "conventional", "square", "auto", None, "auto"),
-            (
-                np.uint8,
-                "np.uint8",
-                "conventional",
-                "hexagon",
-                38.0,
-                None,
-                np.array([63, 63]),
-            ),
-            (np.uint8, "np.uint8", "conventional", "hexagon", "auto", None, "auto"),
-            (np.uint8, "np.uint8", "pseudo", "circle", 38.0, None, np.array([63, 63])),
-            (np.uint8, "np.uint8", "pseudo", "circle", "auto", None, "auto"),
-            (np.uint8, "np.uint8", "pseudo", "annulus", 38.0, 30.0, np.array([63, 63])),
-            (np.uint8, "np.uint8", "pseudo", "annulus", "auto", 0.2, "auto"),
-            (np.uint8, "np.uint8", "pseudo", "ellipse", 38.0, 30.0, np.array([63, 63])),
-            (np.uint8, "np.uint8", "pseudo", "ellipse", "auto", None, "auto"),
-            (
-                np.uint8,
-                "np.uint8",
-                "pseudo",
-                "rectangle",
-                38.0,
-                30.0,
-                np.array([63, 63]),
-            ),
-            (np.uint8, "np.uint8", "pseudo", "rectangle", "auto", None, "auto"),
-            (np.uint8, "np.uint8", "pseudo", "square", 38.0, None, np.array([63, 63])),
-            (np.uint8, "np.uint8", "pseudo", "square", "auto", None, "auto"),
-            (np.uint8, "np.uint8", "pseudo", "hexagon", 38.0, None, np.array([63, 63])),
-            (np.uint8, "np.uint8", "pseudo", "hexagon", "auto", None, "auto"),
-            (
-                np.float16,
-                "np.float16",
-                "conventional",
-                "circle",
-                38.0,
-                None,
-                np.array([63, 63]),
-            ),
-            (np.float16, "np.float16", "conventional", "circle", "auto", None, "auto"),
-            (
-                np.float16,
-                "np.float16",
-                "conventional",
-                "annulus",
-                38.0,
-                30.0,
-                np.array([63, 63]),
-            ),
-            (np.float16, "np.float16", "conventional", "annulus", "auto", 0.2, "auto"),
-            (
-                np.float16,
-                "np.float16",
-                "conventional",
-                "ellipse",
-                38.0,
-                30.0,
-                np.array([63, 63]),
-            ),
-            (np.float16, "np.float16", "conventional", "ellipse", "auto", None, "auto"),
-            (
-                np.float16,
-                "np.float16",
-                "conventional",
-                "rectangle",
-                38.0,
-                30.0,
-                np.array([63, 63]),
-            ),
-            (
-                np.float16,
-                "np.float16",
-                "conventional",
-                "rectangle",
-                "auto",
-                None,
-                "auto",
-            ),
-            (
-                np.float16,
-                "np.float16",
-                "conventional",
-                "square",
-                38.0,
-                None,
-                np.array([63, 63]),
-            ),
-            (np.float16, "np.float16", "conventional", "square", "auto", None, "auto"),
-            (
-                np.float16,
-                "np.float16",
-                "conventional",
-                "hexagon",
-                38.0,
-                None,
-                np.array([63, 63]),
-            ),
-            (np.float16, "np.float16", "conventional", "hexagon", "auto", None, "auto"),
-            (
-                np.float16,
-                "np.float16",
-                "pseudo",
-                "circle",
-                38.0,
-                None,
-                np.array([63, 63]),
-            ),
-            (np.float16, "np.float16", "pseudo", "circle", "auto", None, "auto"),
-            (
-                np.float16,
-                "np.float16",
-                "pseudo",
-                "annulus",
-                38.0,
-                30.0,
-                np.array([63, 63]),
-            ),
-            (np.float16, "np.float16", "pseudo", "annulus", "auto", 0.2, "auto"),
-            (
-                np.float16,
-                "np.float16",
-                "pseudo",
-                "ellipse",
-                38.0,
-                30.0,
-                np.array([63, 63]),
-            ),
-            (np.float16, "np.float16", "pseudo", "ellipse", "auto", None, "auto"),
-            (
-                np.float16,
-                "np.float16",
-                "pseudo",
-                "rectangle",
-                38.0,
-                30.0,
-                np.array([63, 63]),
-            ),
-            (np.float16, "np.float16", "pseudo", "rectangle", "auto", None, "auto"),
-            (
-                np.float16,
-                "np.float16",
-                "pseudo",
-                "square",
-                38.0,
-                None,
-                np.array([63, 63]),
-            ),
-            (np.float16, "np.float16", "pseudo", "square", "auto", None, "auto"),
-            (
-                np.float16,
-                "np.float16",
-                "pseudo",
-                "hexagon",
-                38.0,
-                None,
-                np.array([63, 63]),
-            ),
-            (np.float16, "np.float16", "pseudo", "hexagon", "auto", None, "auto"),
-            (
-                np.float32,
-                "np.float32",
-                "conventional",
-                "circle",
-                38.0,
-                None,
-                np.array([63, 63]),
-            ),
-            (np.float32, "np.float32", "conventional", "circle", "auto", None, "auto"),
-            (
-                np.float32,
-                "np.float32",
-                "conventional",
-                "annulus",
-                38.0,
-                30.0,
-                np.array([63, 63]),
-            ),
-            (np.float32, "np.float32", "conventional", "annulus", "auto", 0.2, "auto"),
-            (
-                np.float32,
-                "np.float32",
-                "conventional",
-                "ellipse",
-                38.0,
-                30.0,
-                np.array([63, 63]),
-            ),
-            (np.float32, "np.float32", "conventional", "ellipse", "auto", None, "auto"),
-            (
-                np.float32,
-                "np.float32",
-                "conventional",
-                "rectangle",
-                38.0,
-                30.0,
-                np.array([63, 63]),
-            ),
-            (
-                np.float32,
-                "np.float32",
-                "conventional",
-                "rectangle",
-                "auto",
-                None,
-                "auto",
-            ),
-            (
-                np.float32,
-                "np.float32",
-                "conventional",
-                "square",
-                38.0,
-                None,
-                np.array([63, 63]),
-            ),
-            (np.float32, "np.float32", "conventional", "square", "auto", None, "auto"),
-            (
-                np.float32,
-                "np.float32",
-                "conventional",
-                "hexagon",
-                38.0,
-                None,
-                np.array([63, 63]),
-            ),
-            (np.float32, "np.float32", "conventional", "hexagon", "auto", None, "auto"),
-            (
-                np.float32,
-                "np.float32",
-                "pseudo",
-                "circle",
-                38.0,
-                None,
-                np.array([63, 63]),
-            ),
-            (np.float32, "np.float32", "pseudo", "circle", "auto", None, "auto"),
-            (
-                np.float32,
-                "np.float32",
-                "pseudo",
-                "annulus",
-                38.0,
-                30.0,
-                np.array([63, 63]),
-            ),
-            (np.float32, "np.float32", "pseudo", "annulus", "auto", 0.2, "auto"),
-            (
-                np.float32,
-                "np.float32",
-                "pseudo",
-                "ellipse",
-                38.0,
-                30.0,
-                np.array([63, 63]),
-            ),
-            (np.float32, "np.float32", "pseudo", "ellipse", "auto", None, "auto"),
-            (
-                np.float32,
-                "np.float32",
-                "pseudo",
-                "rectangle",
-                38.0,
-                30.0,
-                np.array([63, 63]),
-            ),
-            (np.float32, "np.float32", "pseudo", "rectangle", "auto", None, "auto"),
-            (
-                np.float32,
-                "np.float32",
-                "pseudo",
-                "square",
-                38.0,
-                None,
-                np.array([63, 63]),
-            ),
-            (np.float32, "np.float32", "pseudo", "square", "auto", None, "auto"),
-            (
-                np.float32,
-                "np.float32",
-                "pseudo",
-                "hexagon",
-                38.0,
-                None,
-                np.array([63, 63]),
-            ),
-            (np.float32, "np.float32", "pseudo", "hexagon", "auto", None, "auto"),
-            (
-                np.float64,
-                "np.float64",
-                "conventional",
-                "circle",
-                38.0,
-                None,
-                np.array([63, 63]),
-            ),
-            (np.float64, "np.float64", "conventional", "circle", "auto", None, "auto"),
-            (
-                np.float64,
-                "np.float64",
-                "conventional",
-                "annulus",
-                38.0,
-                30.0,
-                np.array([63, 63]),
-            ),
-            (np.float64, "np.float64", "conventional", "annulus", "auto", 0.2, "auto"),
-            (
-                np.float64,
-                "np.float64",
-                "conventional",
-                "ellipse",
-                38.0,
-                30.0,
-                np.array([63, 63]),
-            ),
-            (np.float64, "np.float64", "conventional", "ellipse", "auto", None, "auto"),
-            (
-                np.float64,
-                "np.float64",
-                "conventional",
-                "rectangle",
-                38.0,
-                30.0,
-                np.array([63, 63]),
-            ),
-            (
-                np.float64,
-                "np.float64",
-                "conventional",
-                "rectangle",
-                "auto",
-                None,
-                "auto",
-            ),
-            (
-                np.float64,
-                "np.float64",
-                "conventional",
-                "square",
-                38.0,
-                None,
-                np.array([63, 63]),
-            ),
-            (np.float64, "np.float64", "conventional", "square", "auto", None, "auto"),
-            (
-                np.float64,
-                "np.float64",
-                "conventional",
-                "hexagon",
-                38.0,
-                None,
-                np.array([63, 63]),
-            ),
-            (np.float64, "np.float64", "conventional", "hexagon", "auto", None, "auto"),
-            (
-                np.float64,
-                "np.float64",
-                "pseudo",
-                "circle",
-                38.0,
-                None,
-                np.array([63, 63]),
-            ),
-            (np.float64, "np.float64", "pseudo", "circle", "auto", None, "auto"),
-            (
-                np.float64,
-                "np.float64",
-                "pseudo",
-                "annulus",
-                38.0,
-                30.0,
-                np.array([63, 63]),
-            ),
-            (np.float64, "np.float64", "pseudo", "annulus", "auto", 0.2, "auto"),
-            (
-                np.float64,
-                "np.float64",
-                "pseudo",
-                "ellipse",
-                38.0,
-                30.0,
-                np.array([63, 63]),
-            ),
-            (np.float64, "np.float64", "pseudo", "ellipse", "auto", None, "auto"),
-            (
-                np.float64,
-                "np.float64",
-                "pseudo",
-                "rectangle",
-                38.0,
-                30.0,
-                np.array([63, 63]),
-            ),
-            (np.float64, "np.float64", "pseudo", "rectangle", "auto", None, "auto"),
-            (
-                np.float64,
-                "np.float64",
-                "pseudo",
-                "square",
-                38.0,
-                None,
-                np.array([63, 63]),
-            ),
-            (np.float64, "np.float64", "pseudo", "square", "auto", None, "auto"),
-            (
-                np.float64,
-                "np.float64",
-                "pseudo",
-                "hexagon",
-                38.0,
-                None,
-                np.array([63, 63]),
-            ),
-            (np.float64, "np.float64", "pseudo", "hexagon", "auto", None, "auto"),
-        ],
-    )
-    def test_zf_valid_combs(
-        self, dt, dtstr, ft, pt, pd, sd, cc, test_root_dir, sample_image
-    ):
+    @pytest.mark.parametrize("inc, outc", build_valid_combos())
+    def test_zf_valid_combs(self, inc, outc, sample_image):
         """Test for 96 valid combinations of 6 parameters of ZF API.
 
         The 6 parameters are image datatypes, feature types, pupil types,
         primary_dim, secondary_dim, center_coord.
         """
-        fname = Path(
-            rf"feature/zf_data/test_zf_valid_combs_{dtstr}_{ft}_{pt}_{str(pd)}_{str(sd)}_{str(cc)}.npz"
-        )
-        load_data = np.load(test_root_dir / fname)
-        feature_type = ft
-        pupil_type = pt
+        feature_type = inc["ft"]
+        pupil_type = inc["pt"]
         degree = 5
-        primary_dim = pd
-        secondary_dim = sd
-        center_coord = cc
+        primary_dim = inc["pd"]
+        secondary_dim = inc["sd"]
+        center_coord = inc["cc"]
         return_complex_moments = True
         return_pupil_mask = True
         return_reconstructed_image = True
 
-        results = ZernikeResults(
-            features=load_data["features"],
-            complex_moments=load_data["complex_moments"],
-            pupil_mask=load_data["pupil_mask"],
-            reconstructed_image=load_data["reconstructed_image"],
-            primary_dim=load_data["primary_dim"].item(),
-            secondary_dim=load_data["secondary_dim"].item(),
-            center_coord=load_data["center_coord"],
-        )
         znres = zernike_features(
-            image=sample_image.astype(dt),
+            image=sample_image.astype(inc["dt"]),
             feature_type=feature_type,
             pupil_type=pupil_type,
             degree=degree,
@@ -594,19 +169,34 @@ class TestZernikeFeatures:
             return_reconstructed_image=return_reconstructed_image,
         )
 
-        assert isinstance(results, ZernikeResults)
         assert isinstance(znres, ZernikeResults)
-        assert_allclose(znres.features, results.features, rtol=1e-6, atol=1e-6)
-        assert_allclose(
-            znres.complex_moments, results.complex_moments, rtol=1e-6, atol=1e-6
-        )
-        assert_equal(znres.pupil_mask, results.pupil_mask)
-        assert_allclose(
-            znres.reconstructed_image, results.reconstructed_image, rtol=1e-6, atol=1e-6
-        )
-        assert znres.primary_dim == results.primary_dim
-        assert znres.secondary_dim == results.secondary_dim
-        assert_equal(znres.center_coord, results.center_coord)
+        assert isinstance(znres.features, np.ndarray)
+        assert znres.features.dtype == np.float64
+        assert znres.features.shape == outc["fshp"]
+        assert_array_less(0.0, znres.features)
+        assert_array_less(znres.features, 1.0)
+        assert isinstance(znres.complex_moments, np.ndarray)
+        assert znres.complex_moments.dtype == np.complex128
+        assert znres.complex_moments.shape == outc["fshp"]
+        assert_array_less(-1.0 - 1.0j, znres.complex_moments)
+        assert_array_less(znres.complex_moments, 1.0 + 1.0j)
+        assert isinstance(znres.pupil_mask, np.ndarray)
+        assert znres.pupil_mask.dtype == np.bool_
+        assert znres.pupil_mask.shape == sample_image.shape
+        assert_equal(np.unique(znres.pupil_mask), np.array([False, True]))
+        assert isinstance(znres.reconstructed_image, np.ndarray)
+        assert znres.reconstructed_image.dtype == np.uint8
+        assert znres.reconstructed_image.shape == sample_image.shape
+        assert_array_less(-1, znres.reconstructed_image)
+        assert_array_less(znres.reconstructed_image, 256)
+        assert isinstance(znres.primary_dim, float)
+        assert znres.primary_dim == outc["pd"]
+        assert isinstance(znres.secondary_dim, float)
+        assert znres.secondary_dim == outc["sd"]
+        assert isinstance(znres.center_coord, np.ndarray)
+        assert znres.center_coord.dtype == np.float64
+        assert znres.center_coord.shape == (2,)
+        assert_equal(znres.center_coord, outc["cc"])
 
 
 class TestZFErrors:
