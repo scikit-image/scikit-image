@@ -292,7 +292,12 @@ def test_public_skimage2_data_surface():
         import skimage2
 
     public_data = skimage2.data
-    assert public_data is data
+    # skimage2.data is a shim that forwards to `_skimage2.data`; the same
+    # objects (not the same module) must be reachable through it.
+    assert public_data is not data
+    assert public_data.__all__ == data.__all__
+    assert public_data.astronaut is data.astronaut
+    assert public_data.fetch_astronaut is data.fetch_astronaut
     assert public_data.astronaut is public_data.fetch_astronaut
     assert 'fetch_astronaut' in public_data.__all__
     assert 'astronaut' not in public_data.__all__
