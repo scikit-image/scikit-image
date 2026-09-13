@@ -254,22 +254,26 @@ FETCH_FUNCTION_NAMES = [
 @pytest.mark.parametrize('function_name', FETCH_FUNCTION_NAMES)
 def test_bare_v1_names_are_unadvertised_aliases(function_name):
     """fetch_<name>() is public API; the bare v1 name (e.g. astronaut for
-    fetch_astronaut) resolves to the same function but is absent from
-    __all__ and __dir__."""
+    fetch_astronaut) is a deprecated wrapper and is absent from __all__ and
+    __dir__."""
     bare_name = function_name.removeprefix('fetch_')
     assert hasattr(data, function_name)
     assert hasattr(data, bare_name)
-    assert getattr(data, function_name) is getattr(data, bare_name)
+    with pytest.warns(DeprecationWarning, match=f'skimage2.data.{bare_name}'):
+        bare = getattr(data, bare_name)()
+    assert_equal(bare, getattr(data, function_name)())
     assert function_name in data.__all__
     assert bare_name not in data.__all__
     assert bare_name not in dir(data)
 
 
 def test_bare_v1_name_is_importable():
-    """The v1 alias imports the same way the fetch_ name does."""
+    """The v1 alias imports and works, warning about the deprecation."""
     from _skimage2.data import astronaut, fetch_astronaut
 
-    assert astronaut is fetch_astronaut
+    with pytest.warns(DeprecationWarning, match='fetch_astronaut'):
+        bare = astronaut()
+    assert_equal(bare, fetch_astronaut())
 
 
 def test_bare_v1_name_usable_but_unadvertised():
@@ -279,7 +283,8 @@ def test_bare_v1_name_usable_but_unadvertised():
 
     from _skimage2.data import astronaut
 
-    img = astronaut()
+    with pytest.warns(DeprecationWarning, match='fetch_astronaut'):
+        img = astronaut()
     np.testing.assert_array_equal(img, data.fetch_astronaut())
     assert img.ndim == 3
     assert img.shape == (512, 512, 3)
@@ -296,9 +301,9 @@ def test_public_skimage2_data_surface():
     # objects (not the same module) must be reachable through it.
     assert public_data is not data
     assert public_data.__all__ == data.__all__
-    assert public_data.astronaut is data.astronaut
-    assert public_data.fetch_astronaut is data.fetch_astronaut
-    assert public_data.astronaut is public_data.fetch_astronaut
+    with pytest.warns(DeprecationWarning, match='fetch_astronaut'):
+        bare = public_data.astronaut()
+    assert_equal(bare, public_data.fetch_astronaut())
     assert 'fetch_astronaut' in public_data.__all__
     assert 'astronaut' not in public_data.__all__
 

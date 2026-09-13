@@ -129,14 +129,18 @@ begins with ``fetch_``, following the convention used by ``sklearn.datasets``:
 
 The prefix makes it explicit at the call site that a dataset may need to be
 downloaded and cached the first time it is used. The bare names from
-``skimage.data`` (e.g. ``ski2.data.astronaut()``) still call the same
-functions, but they are backward-compatibility aliases only: they are absent
-from ``skimage2.data.__all__`` and from the API reference, so use the
-``fetch_`` names in new code. For registry entries without a dedicated
-wrapper, ``skimage2.data.fetch()`` takes a key such as
-``'data/astronaut.png'`` and returns the path to the local file.
+``skimage.data`` (e.g. ``ski2.data.astronaut()``) still work, but they are
+deprecated in favor of the ``fetch_`` names and emit a
+:class:`DeprecationWarning`. They will be dropped when support for ``skimage``
+(v1) is removed. They are also absent from ``skimage2.data.__all__`` and from
+the API reference, so use the ``fetch_`` names in new code. For registry
+entries without a dedicated wrapper, ``skimage2.data.fetch()`` takes a key such
+as ``'data/astronaut.png'`` and returns the path to the local file.
 
-``skimage.data`` is unchanged.
+On the ``skimage`` (v1) side, the bare names still serve as the primary API
+and emit a :class:`~skimage.util.PendingSkimage2Change` warning to point users
+at the ``skimage2`` replacements. Both namespaces are maintained in parallel,
+so the bare names remain available during the overlap period.
 
 Removal of ``skimage.future``
 -----------------------------

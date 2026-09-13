@@ -89,9 +89,12 @@ from ._fetchers import (
     fetch_stereo_motorcycle,
     fetch_text,
     fetch_vortex,
-    # v1 data API names (e.g. `skimage.data.astronaut`), re-exported with the
-    # `x as x` convention for type checkers; importable aliases of the
-    # `fetch_*()` functions above, but not in `__all__`.
+    # The v1 bare names (e.g. `astronaut`) are runtime aliases of the `fetch_*`
+    # functions. They are importable for the overlap period while `skimage`
+    # (v1) is maintained, but are deprecated and absent from `__all__`, so they
+    # are not public API and do not appear in the API reference. Declaring them
+    # here (`x as x`, no `__all__` entry) keeps them importable to type
+    # checkers while leaving them out of autodoc.
     astronaut as astronaut,
     brain as brain,
     brick as brick,
