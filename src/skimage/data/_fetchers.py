@@ -11,6 +11,8 @@ For more images, see
 from functools import wraps
 import warnings
 
+from skimage._doctest_adapters import adapt_doctests
+
 from _skimage2.data._fetchers import (
     astronaut as astronaut,
     brain as brain,
@@ -140,6 +142,5 @@ def _warn_dataset_replacement(name, func):
 for _name in _DATASET_FETCHERS:
     globals()[_name] = _warn_dataset_replacement(_name, globals()[_name])
 
-from skimage._doctest_adapters import adapt_doctests  # noqa: E402
 
 adapt_doctests(globals())
