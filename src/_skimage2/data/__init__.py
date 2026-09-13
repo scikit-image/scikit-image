@@ -17,10 +17,9 @@ import lazy_loader as _lazy
 __getattr__, *_ = _lazy.attach_stub(__name__, __file__)
 _stub_getattr = __getattr__
 
-# Don't use the `__all__` and `__dir__` returned by `attach_stub`; those
-# also advertise the bare v1 dataset names (e.g. `astronaut`), which stay
-# importable as deprecated wrappers of the `fetch_*()` functions but are not
-# public API. Keep this list in sync with `__all__` in `__init__.pyi`.
+# Unlike `attach_stub`, this `__all__`/`__dir__` omit the bare v1 names (e.g.
+# `astronaut`), which stay importable but are not public API. Keep in sync with
+# `__all__` in `__init__.pyi`.
 __all__ = [
     'binary_blobs',
     'data_dir',
@@ -68,17 +67,12 @@ __all__ = [
     'file_hash',
 ]
 
-# The bare v1 dataset names (e.g. `astronaut`) are replaced by the `fetch_*()`
-# counterparts (e.g. `fetch_astronaut`): they are the `fetch_*` entries of
-# `__all__` with the prefix stripped. They stay importable for the overlap
-# period while `skimage` (v1) is maintained, but calling them via `skimage2`
-# is deprecated: they will be dropped when `skimage` (v1) support is removed.
+# Bare v1 names, deprecated in favor of their `fetch_*()` counterparts and
+# dropped when `skimage` (v1) support is removed.
 _DEPRECATED_FETCHERS = frozenset(
     name.removeprefix('fetch_') for name in __all__ if name.startswith('fetch_')
 )
 
-# Cache wrappers so repeated attribute access returns the same object, as it
-# does for the `fetch_*` names.
 _deprecated_wrappers: dict[str, Callable] = {}
 
 
@@ -92,12 +86,7 @@ def __getattr__(name):
 
 
 def _make_deprecation_wrapper(name, func):
-    """Return a wrapper that warns before delegating to a bare-named fetcher.
-
-    The bare name (e.g. `astronaut`) is deprecated in favor of its `fetch_`
-    counterpart (e.g. `fetch_astronaut`). It will be removed when support for
-    `skimage` (v1) is dropped.
-    """
+    """Wrap a bare-named fetcher to warn about its `fetch_` replacement."""
 
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
