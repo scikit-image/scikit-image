@@ -20,13 +20,16 @@ jobs:
             sudo apt-get update
             sudo apt-get install ccache python3-venv
       - run:
-          name: Create a virtual environment
+          name: Set up the build environment
           # The system Python is externally managed (PEP 668), so pip refuses
           # to install into it. CircleCI sources $BASH_ENV before every step,
-          # so this activates the venv for the rest of the job.
+          # so this activates the venv for the rest of the job. CCACHE_DIR is
+          # pinned because ccache only falls back to ~/.cache/ccache when the
+          # legacy ~/.ccache is absent, and the caches below use a fixed path.
           command: |
             python3 -m venv ~/venv
             echo "source ~/venv/bin/activate" >> $BASH_ENV
+            echo "export CCACHE_DIR=$HOME/.cache/ccache" >> $BASH_ENV
       - run:
           name: Concatenate requirement files
           command: cat requirements/*.txt > requirements/all_requirements
@@ -35,22 +38,34 @@ jobs:
           keys:
             - data-v1-{{ checksum "src/skimage/data/_registry.py" }}
       - restore_cache:
-          name: Restore cached pip dependencies
+          name: Restore cached uv dependencies
+          # Caches are immutable on CircleCI, so the exact key freezes the
+          # cache the first time it is written; the prefix-only fallback still
+          # gets a warm (if slightly stale) cache when requirements change.
           keys:
-            - packages-v1-{{ checksum "requirements/all_requirements" }}
+            - uv-v1-{{ checksum "requirements/all_requirements" }}
+            - uv-v1-
       - restore_cache:
           name: Restore cached build files (ccache)
+          # Same immutability: keying the save on the revision lets every run
+          # write a fresh cache, while the fallbacks warm-start a new branch
+          # from its own last run, then from main's.
           keys:
-            - ccache-v2-{{ .Branch }}
+            - ccache-v3-{{ .Branch }}-{{ .Revision }}
+            - ccache-v3-{{ .Branch }}-
+            - ccache-v3-main-
+            - ccache-v3-
       - run:
           name: Install dependencies and build package
           command: |
-            python3 -m pip install --upgrade pip
-            python3 -m pip install -r requirements/build.txt
-            python3 -m pip install -vv --no-build-isolation .
+            python3 -m pip install --upgrade pip uv
+            # so the stats printed below describe this run, not the restored cache
+            ccache --zero-stats
+            uv pip install -r requirements/build.txt
+            uv pip install --no-build-isolation .
             # Ensure build succeeds without runtime requirements
-            python3 -m pip install -r requirements/default.txt
-            python3 -m pip install -r requirements/docs.txt
+            uv pip install -r requirements/default.txt
+            uv pip install -r requirements/docs.txt
       - run:
           name: Install Chrome for kaleido
           # Installs via apt like test-docs.yaml (see there for why). This
@@ -72,13 +87,13 @@ jobs:
           command: |
             ccache -s
       - save_cache:
-          name: Cache pip dependencies
-          key: packages-v1-{{ checksum "requirements/all_requirements" }}
+          name: Cache uv dependencies
+          key: uv-v1-{{ checksum "requirements/all_requirements" }}
           paths:
-            - ~/.cache/pip
+            - ~/.cache/uv
       - save_cache:
           name: Cache build files (ccache)
-          key: ccache-v2-{{ .Branch }}
+          key: ccache-v3-{{ .Branch }}-{{ .Revision }}
           paths:
             - ~/.cache/ccache
       - run:
