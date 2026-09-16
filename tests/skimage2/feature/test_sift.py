@@ -177,3 +177,22 @@ def test_no_descriptors_extracted_sift():
     detector_extractor = SIFT()
     with pytest.raises(RuntimeError):
         detector_extractor.detect_and_extract(img)
+
+
+def test_sift_sigma_in_exceeds_sigma_min_raises():
+    # Regression test: sigma_in > sigma_min / upsampling used to reach
+    # math.sqrt() with a negative argument inside _create_scalespace,
+    # raising an unhelpful ValueError/"math domain error" instead of a
+    # clear validation error. See gh-8303.
+    with pytest.raises(
+        ValueError, match="sigma_in must not exceed sigma_min / upsampling"
+    ):
+        SIFT(sigma_in=2.0)
+
+
+def test_sift_sigma_in_equal_to_sigma_min_is_valid():
+    # sigma_in == sigma_min / upsampling means zero additional blur is
+    # needed (sqrt(0) == 0), which is a valid, non-crashing configuration.
+    # This locks in that the boundary itself must not be rejected.
+    detector_extractor = SIFT(upsampling=1, sigma_min=1.6, sigma_in=1.6)
+    assert detector_extractor.sigma_in == 1.6
