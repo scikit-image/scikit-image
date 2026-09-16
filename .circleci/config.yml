@@ -40,12 +40,12 @@ jobs:
       - restore_cache:
           name: Restore cached build files (ccache)
           # Revision in the save key so each run writes a fresh cache; the
-          # fallbacks warm-start a new branch.
+          # fallbacks warm-start a new branch off the existing v2 caches.
           keys:
-            - ccache-v3-{{ .Branch }}-{{ .Revision }}
-            - ccache-v3-{{ .Branch }}-
-            - ccache-v3-main-
-            - ccache-v3-
+            - ccache-v2-{{ .Branch }}-{{ .Revision }}
+            - ccache-v2-{{ .Branch }}-
+            - ccache-v2-main-
+            - ccache-v2-
       - run:
           name: Install dependencies and build package
           command: |
@@ -84,7 +84,7 @@ jobs:
             - ~/.cache/uv
       - save_cache:
           name: Cache build files (ccache)
-          key: ccache-v3-{{ .Branch }}-{{ .Revision }}
+          key: ccache-v2-{{ .Branch }}-{{ .Revision }}
           paths:
             - ~/.cache/ccache
       - run:
