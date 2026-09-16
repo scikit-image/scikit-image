@@ -3,14 +3,26 @@ version: 2
 jobs:
   doc:
     machine:
-      image: ubuntu-2204:current
+      # gen3 needs the `current` tag; a pinned dated tag is rejected
+      image: ubuntu-2604:current
+    # 4 vCPUs/16GiB; gen3 is beta, but faster and cheaper than gen1 `large`
+    resource_class: large.gen3
     steps:
       - checkout
       - run:
           name: Install apt packages
           command: |
             sudo apt-get update
-            sudo apt-get install ccache
+            sudo apt-get install ccache python3-venv
+      - run:
+          name: Set up the build environment
+          # $BASH_ENV is sourced before every step. The venv is needed because
+          # the system Python is PEP 668-managed; CCACHE_DIR is pinned because
+          # ccache only defaults there when the legacy ~/.ccache is absent.
+          command: |
+            python3 -m venv ~/venv
+            echo "source ~/venv/bin/activate" >> $BASH_ENV
+            echo "export CCACHE_DIR=$HOME/.cache/ccache" >> $BASH_ENV
       - run:
           name: Concatenate requirement files
           command: cat requirements/*.txt > requirements/all_requirements
@@ -19,22 +31,32 @@ jobs:
           keys:
             - data-v1-{{ checksum "src/skimage/data/_registry.py" }}
       - restore_cache:
-          name: Restore cached pip dependencies
+          name: Restore cached uv dependencies
+          # Caches are immutable, so the fallback is what keeps this warm
+          # when the requirements change.
           keys:
-            - packages-v1-{{ checksum "requirements/all_requirements" }}
+            - uv-v1-{{ checksum "requirements/all_requirements" }}
+            - uv-v1-
       - restore_cache:
           name: Restore cached build files (ccache)
+          # Revision in the save key so each run writes a fresh cache; the
+          # fallbacks warm-start a new branch off the existing v2 caches.
           keys:
-            - ccache-v2-{{ .Branch }}
+            - ccache-v2-{{ .Branch }}-{{ .Revision }}
+            - ccache-v2-{{ .Branch }}-
+            - ccache-v2-main-
+            - ccache-v2-
       - run:
           name: Install dependencies and build package
           command: |
-            python3 -m pip install --upgrade pip
-            python3 -m pip install -r requirements/build.txt
-            python3 -m pip install -vv --no-build-isolation .
+            python3 -m pip install --upgrade pip uv
+            # so the stats below describe this run, not the restored cache
+            ccache --zero-stats
+            uv pip install -r requirements/build.txt
+            uv pip install --no-build-isolation .
             # Ensure build succeeds without runtime requirements
-            python3 -m pip install -r requirements/default.txt
-            python3 -m pip install -r requirements/docs.txt
+            uv pip install -r requirements/default.txt
+            uv pip install -r requirements/docs.txt
       - run:
           name: Install Chrome for kaleido
           # Installs via apt like test-docs.yaml (see there for why). This
@@ -56,13 +78,13 @@ jobs:
           command: |
             ccache -s
       - save_cache:
-          name: Cache pip dependencies
-          key: packages-v1-{{ checksum "requirements/all_requirements" }}
+          name: Cache uv dependencies
+          key: uv-v1-{{ checksum "requirements/all_requirements" }}
           paths:
-            - ~/.cache/pip
+            - ~/.cache/uv
       - save_cache:
           name: Cache build files (ccache)
-          key: ccache-v2-{{ .Branch }}
+          key: ccache-v2-{{ .Branch }}-{{ .Revision }}
           paths:
             - ~/.cache/ccache
       - run:
@@ -71,7 +93,7 @@ jobs:
           command: |
             cd doc
             PYTHON=python3 make clean
-            PYTHON=python3 SPHINXOPTS="-j 1" make html
+            PYTHON=python3 make html
       - save_cache:
           name: Cache data files
           key: data-v1-{{ checksum "src/skimage/data/_registry.py" }}
