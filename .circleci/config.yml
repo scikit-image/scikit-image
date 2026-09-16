@@ -3,14 +3,30 @@ version: 2
 jobs:
   doc:
     machine:
-      image: ubuntu-2204:current
+      # gen3 resource classes are only valid with the `current` tag, not a
+      # pinned dated tag -- a pinned tag is rejected with "is not a valid
+      # resource class"
+      image: ubuntu-2604:current
+    # large.gen3 4 vCPUs 16GiB mem -- gen3 is an open beta, and is both faster
+    # and cheaper per minute than gen1 large (14 vs 20 credits/min); revert to
+    # `large` if beta queue times or reliability become a problem
+    # https://discuss.circleci.com/t/changes-to-remote-docker-reporting-pricing/47759
+    resource_class: large.gen3
     steps:
       - checkout
       - run:
           name: Install apt packages
           command: |
             sudo apt-get update
-            sudo apt-get install ccache
+            sudo apt-get install ccache python3-venv
+      - run:
+          name: Create a virtual environment
+          # The system Python is externally managed (PEP 668), so pip refuses
+          # to install into it. CircleCI sources $BASH_ENV before every step,
+          # so this activates the venv for the rest of the job.
+          command: |
+            python3 -m venv ~/venv
+            echo "source ~/venv/bin/activate" >> $BASH_ENV
       - run:
           name: Concatenate requirement files
           command: cat requirements/*.txt > requirements/all_requirements
@@ -71,7 +87,7 @@ jobs:
           command: |
             cd doc
             PYTHON=python3 make clean
-            PYTHON=python3 SPHINXOPTS="-j 1" make html
+            PYTHON=python3 make html
       - save_cache:
           name: Cache data files
           key: data-v1-{{ checksum "src/skimage/data/_registry.py" }}

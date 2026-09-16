@@ -68,7 +68,9 @@ asv = [
 ]
 docs = [
     'sphinx>=8.0',
-    'sphinx-gallery[parallel]>=0.18',
+    # 0.22 resolves the image scrapers before each example runs, which is how
+    # parallel workers get plotly's sphinx-gallery renderer selected
+    'sphinx-gallery[parallel]>=0.22',
     'numpydoc>=1.7',
     'sphinx-copybutton',
     'sphinx-togglebutton',
@@ -82,7 +84,8 @@ docs = [
     'intersphinx-registry>=0.2411.14',
     'ipywidgets',
     'ipykernel',  # needed until https://github.com/jupyter-widgets/ipywidgets/issues/3731 is resolved
-    'plotly>=6.1.1',
+    # 7.1.0 makes the sphinx-gallery scraper parallel-safe
+    'plotly>=7.1.0',
     'kaleido>=1.0',
     'scikit-learn>=1.6',
     'sphinx_design>=0.5',
