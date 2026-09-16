@@ -68,8 +68,8 @@ asv = [
 ]
 docs = [
     'sphinx>=8.0',
-    # 0.22 resolves the image scrapers before each example runs, which is how
-    # parallel workers get plotly's sphinx-gallery renderer selected
+    # 0.22 resolves scrapers before each example runs, so parallel workers
+    # get plotly's renderer selected
     'sphinx-gallery[parallel]>=0.22',
     'numpydoc>=1.7',
     'sphinx-copybutton',

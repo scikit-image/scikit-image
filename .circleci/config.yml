@@ -3,14 +3,9 @@ version: 2
 jobs:
   doc:
     machine:
-      # gen3 resource classes are only valid with the `current` tag, not a
-      # pinned dated tag -- a pinned tag is rejected with "is not a valid
-      # resource class"
+      # gen3 needs the `current` tag; a pinned dated tag is rejected
       image: ubuntu-2604:current
-    # large.gen3 4 vCPUs 16GiB mem -- gen3 is an open beta, and is both faster
-    # and cheaper per minute than gen1 large (14 vs 20 credits/min); revert to
-    # `large` if beta queue times or reliability become a problem
-    # https://discuss.circleci.com/t/changes-to-remote-docker-reporting-pricing/47759
+    # 4 vCPUs/16GiB; gen3 is beta, but faster and cheaper than gen1 `large`
     resource_class: large.gen3
     steps:
       - checkout
@@ -21,11 +16,9 @@ jobs:
             sudo apt-get install ccache python3-venv
       - run:
           name: Set up the build environment
-          # The system Python is externally managed (PEP 668), so pip refuses
-          # to install into it. CircleCI sources $BASH_ENV before every step,
-          # so this activates the venv for the rest of the job. CCACHE_DIR is
-          # pinned because ccache only falls back to ~/.cache/ccache when the
-          # legacy ~/.ccache is absent, and the caches below use a fixed path.
+          # $BASH_ENV is sourced before every step. The venv is needed because
+          # the system Python is PEP 668-managed; CCACHE_DIR is pinned because
+          # ccache only defaults there when the legacy ~/.ccache is absent.
           command: |
             python3 -m venv ~/venv
             echo "source ~/venv/bin/activate" >> $BASH_ENV
@@ -39,17 +32,15 @@ jobs:
             - data-v1-{{ checksum "src/skimage/data/_registry.py" }}
       - restore_cache:
           name: Restore cached uv dependencies
-          # Caches are immutable on CircleCI, so the exact key freezes the
-          # cache the first time it is written; the prefix-only fallback still
-          # gets a warm (if slightly stale) cache when requirements change.
+          # Caches are immutable, so the fallback is what keeps this warm
+          # when the requirements change.
           keys:
             - uv-v1-{{ checksum "requirements/all_requirements" }}
             - uv-v1-
       - restore_cache:
           name: Restore cached build files (ccache)
-          # Same immutability: keying the save on the revision lets every run
-          # write a fresh cache, while the fallbacks warm-start a new branch
-          # from its own last run, then from main's.
+          # Revision in the save key so each run writes a fresh cache; the
+          # fallbacks warm-start a new branch.
           keys:
             - ccache-v3-{{ .Branch }}-{{ .Revision }}
             - ccache-v3-{{ .Branch }}-
@@ -59,7 +50,7 @@ jobs:
           name: Install dependencies and build package
           command: |
             python3 -m pip install --upgrade pip uv
-            # so the stats printed below describe this run, not the restored cache
+            # so the stats below describe this run, not the restored cache
             ccache --zero-stats
             uv pip install -r requirements/build.txt
             uv pip install --no-build-isolation .
