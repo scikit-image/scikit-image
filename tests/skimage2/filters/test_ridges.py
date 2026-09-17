@@ -368,10 +368,14 @@ def test_meijering_alpha_scores_a_dot_at_two_thirds_of_a_line(ndim, size):
 
     n (below) is the dimensionality of the input image (n == 2 for 2D).
 
-    alpha = -1/(n+1) scales the dot by 2/(n+1) and the line by 3/(n+1), so the
-    n cancels.  The shipped +1/(n+1) gives 2n/(2n-1), always above one.  Do not
-    extend this past 3-D: from n = 5 the filter reads the line's flat direction
-    instead, and the default takes its score to zero.
+    After black_ridges=False normalizes the bright line to a dark one, its ideal
+    Hessian eigenvalues are (a, ..., a, 0), with a > 0.  Alpha=-1/(n+1) gives
+    3a/(n+1) for each transverse direction and -(n-1)a/(n+1) for the flat
+    direction.  The transverse value is selected in 2-D and 3-D; the magnitudes
+    tie in 4-D; and the negative flat value is selected and clipped to zero from
+    5-D onward.  Do not extend this ratio assertion past 3-D without defining
+    the intended n-D behavior.  The shipped +1/(n+1) gives 2n/(2n-1), always
+    above one.
     """
     image, dot_at, line_at = _dot_and_line(ndim, size)
     # Ratio should be 2 / 3 for default alpha, preferring line to dot.
