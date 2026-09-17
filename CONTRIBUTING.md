@@ -210,10 +210,10 @@ PRs anyway, so we don't mind merge commits.
 
 Regardless of how a PR was produced, scikit-image requires that
 authors illustrate a thorough understanding of any proposed changes.
-You **must review such code line-by-line**—it is **your
-responsibility** to ensure that it is correct, and that it does not
-breach copyright. You should expect the team to ask questions about
-your work.
+You **must review submitted code line-by-line with your own eyes**—it is
+**your responsibility** to ensure that it is correct, and that it does
+not breach copyright. You should expect the team to ask questions
+about your work.
 
 scikit-image is technically complex, key infrastructure; therefore, we
 place a high premium on correctness, and on avoiding technical
@@ -224,14 +224,17 @@ first** to discuss your strategy.
 **Always declare tool usage**. Use an `Assisted-by:` tag in the commit
 message, as recommended by the
 [Linux kernel](https://docs.kernel.org/process/coding-assistants.html).
+If there are multiple commits in your PR, include the `Assisted-by:`
+text in the PR description, since that message is often used when merging.
 
 We (the human maintainers) need to know that you (the human author)
 fully understand the code you have submitted, and its implications for
 the code-base. So, even if you have a summary from an AI system
-available to you, please write PR descriptions by hand. If you do
-quote AI text, do so sparingly, and indicate where you're doing so,
-e.g. by writing `:robot: _AI text below_ :robot:`. You can also use a
-`<details>...</details>` block to "fold up" that text by default.
+available to you, please write PR descriptions by hand
+(yes, seriously!). If you do quote AI text, do so sparingly, and indicate
+explicitly where you're doing so, e.g. by writing `:robot: _AI text
+below_ :robot:`. You can also use a `<details>...</details>` block to
+"fold up" that text by default.
 
 (guidelines)=
 
