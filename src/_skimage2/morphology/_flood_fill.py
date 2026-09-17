@@ -35,7 +35,7 @@ def flood_fill(
     ----------
     image : ndarray
         An n-dimensional array.
-    seed_point : tuple or int
+    seed_point : int or sequence of int
         The point in `image` used as the starting point for the flood fill.  If
         the image is 1D, this point may be given as an integer.
     new_value : `image` type
@@ -136,7 +136,7 @@ def flood(image, seed_point, *, footprint=None, connectivity=None, tolerance=Non
     ----------
     image : ndarray
         An n-dimensional array.
-    seed_point : tuple or int
+    seed_point : int or sequence of int
         The point in `image` used as the starting point for the flood fill.  If
         the image is 1D, this point may be given as an integer.
     footprint : ndarray, optional
@@ -239,7 +239,12 @@ def flood(image, seed_point, *, footprint=None, connectivity=None, tolerance=Non
     except TypeError:
         seed_point = (seed_point,)
 
-    seed_value = image[seed_point]
+    if np.iterable(seed_point):
+        index_point = tuple(seed_point)
+    else:
+        index_point = seed_point
+
+    seed_value = image[index_point]
     seed_point = tuple(np.asarray(seed_point) % image.shape)
 
     footprint = _resolve_neighborhood(
