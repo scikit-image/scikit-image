@@ -174,6 +174,59 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True, mode='reflect', cval=
     return filtered_max  # Return pixel-wise max over all sigmas.
 
 
+def _frangi_shape_norm(image, sigma, alpha, beta, mode, cval):
+    """One scale of Frangi's vesselness, less the structuredness factor.
+
+    Returns `shape`, the plate-and-blobness product of eqs. (13) and (15), and
+    `norm`, the Frobenius norm `S` of eq. (12).  `shape` is zero where the
+    eigenvalue signs rule the structure out.
+
+    The two are returned separately rather than combined into the vesselness
+    `V`, because the threshold `c` that `S` is measured against appears in
+    eqs. (13) and (15) as a constant, and eq. (14) maximises over scale with
+    it held fixed.  It can only be resolved once every scale is known.
+    """
+    # Avoid circular import
+    from ..feature.corner import hessian_matrix, hessian_matrix_eigvals
+
+    # For 2D image size I, J, eigvals is shape (2, I, J).
+    eigvals = hessian_matrix_eigvals(
+        hessian_matrix(
+            image, sigma, mode=mode, cval=cval, use_gaussian_derivatives=True
+        )
+    )
+    # Sort eigenvalues by magnitude.
+    eigvals = np.take_along_axis(eigvals,
+                                 np.argsort(np.abs(eigvals), axis=0),
+                                 axis=0)
+    # Normalised derivatives, eq. (2), at the gamma of unity the paper sets
+    # "when no scale is preferred".  The Hessian is a second derivative, so it
+    # carries sigma ** (2 * gamma) = sigma ** 2.  Without this the response of
+    # an ideal ridge falls monotonically with sigma.
+    eigvals = eigvals * sigma**2
+
+    # Eqs. (13) (3D) and (15) (2D) are zero unless every eigenvalue but the
+    # first has the sign the sought polarity implies.  `frangi` negates the
+    # image for `black_ridges=False`, so the sign wanted here is always
+    # positive.
+    wanted = np.all(eigvals[1:] > 0, axis=0)  # N-D mask.
+    selected_eigvals = eigvals[:, wanted]
+    lambda1, lambda2 = selected_eigvals[0:2]
+    shape = np.zeros_like(image, order='C')
+    if image.ndim == 2:
+        # No plate factor in 2-D; implied by eq. (15).
+        r_b_sq = (lambda1 / lambda2) ** 2  # eq. (15)
+        shape[wanted] = np.exp(-r_b_sq / (2 * beta**2))  # blobness
+    else:  # ndim == 3
+        lambda3 = selected_eigvals[2]
+        r_a_sq = (lambda2 / lambda3) ** 2  # eq. (11)
+        r_b_sq = lambda1**2 / (lambda2 * lambda3)  # eq. (10)
+        plateness = 1.0 - np.exp(-r_a_sq / (2 * alpha**2))  # eq. (13)
+        blobness = np.exp(-r_b_sq / (2 * beta**2))
+        shape[wanted] = plateness * blobness
+    return shape, np.sqrt(np.sum(eigvals**2, axis=0))
+
+
 def frangi(
     image,
     sigmas=range(1, 10, 2),
@@ -209,14 +262,27 @@ def frangi(
     scale_step : float, optional
         Step size between sigmas.
     alpha : float, optional
-        Frangi correction constant that adjusts the filter's
-        sensitivity to deviation from a plate-like structure.
+        Frangi correction constant that adjusts the filter's sensitivity to
+        deviation from a plate-like structure.  It has no effect on 2-D images:
+        the plate-sensitivity factor of eq. (13) is absent from the 2-D
+        vesselness of eq. (15) in [1]_.
     beta : float, optional
-        Frangi correction constant that adjusts the filter's
-        sensitivity to deviation from a blob-like structure.
+        Frangi correction constant that adjusts the filter's sensitivity to
+        deviation from a blob-like structure.
     gamma : float, optional
         Frangi correction constant that adjusts the filter's
-        sensitivity to areas of high variance/texture/structure.
+        sensitivity to areas of high variance/texture/structure.  This is the
+        filter's only absolute contrast reference; every other quantity is a
+        ratio.
+
+        The default, None, resolves it to half the largest Hessian norm over
+        the whole image and every scale, which is the heuristic [1]_
+        recommends.  Being a whole-image statistic, it makes the result at any
+        pixel depend on every other pixel: one bright speck anywhere changes
+        the output everywhere.  Pass an explicit `gamma` where that matters.
+        [1]_ anticipates this, expecting the threshold "can be fixed for a
+        given application where images are routinely acquired according to a
+        standard protocol".
 
         .. versionchanged:: 0.20
             The default, None, uses half of the maximum Hessian norm.
@@ -241,8 +307,26 @@ def frangi(
         The filter is now set to zero whenever one of the Hessian eigenvalues
         has a sign which is incompatible with a ridge of the desired polarity.
 
+    .. versionchanged:: 0.27
+        The Hessian is again normalised by ``sigma ** 2``, as it was before
+        version 0.20 and as ``sato`` has been throughout.  Without it the
+        response of a ridge falls with ``sigma``, so the smallest scale always
+        won and wide structures scored far below narrow ones.  Output values
+        change on every image.
+
+    .. versionchanged:: 0.27
+        ``gamma=None`` is resolved from every scale rather than from
+        ``sigmas[0]``, so the result no longer depends on the order of
+        ``sigmas``.  For an ascending ``sigmas`` the output is unchanged.
+
     Notes
     -----
+    The derivatives are normalised across scale as in eq. (2) of [1]_, with
+    Lindeberg's ``gamma`` set to unity as that paper prescribes "when no scale
+    is preferred".  The Hessian is a second derivative, so it carries a factor
+    ``sigma ** 2``.  This is what lets the maximum over scales in eq. (14)
+    select a structure's width; ``sato`` uses the same convention.
+
     Earlier versions of this filter were implemented by Marc Schrijver,
     (November 2001), D. J. Kroon, University of Twente (May 2009) [2]_, and
     D. G. Ellis (January 2017) [3]_.
@@ -263,9 +347,6 @@ def frangi(
     .. [2] Kroon, D. J.: Hessian based Frangi vesselness filter.
     .. [3] Ellis, D. G.: https://github.com/ellisdg/frangi3d/tree/master/frangi
     """
-    # Avoid circular import
-    from ..feature.corner import hessian_matrix, hessian_matrix_eigvals
-
     if scale_range is not None and scale_step is not None:
         warn(
             'Use keyword parameter `sigmas` instead of `scale_range` and '
@@ -279,43 +360,25 @@ def frangi(
     if not black_ridges:  # Normalize to black ridges.
         image = -image
 
-    # Generate empty array for storing maximum value
-    # from different (sigma) scales
+    # Every scale first, then `gamma`, then the maximum of eq. (14).
+    shapes_norms = [
+        _frangi_shape_norm(image, sigma, alpha, beta, mode, cval)
+        for sigma in sigmas
+    ]
+
+    if gamma is None:
+        # Half the largest Hessian norm, over every scale given.
+        gamma = max(norm.max() for _, norm in shapes_norms) / 2
+        if gamma == 0:
+            gamma = 1  # If S == 0 everywhere, gamma doesn't matter.
+
+    # Filtered image, eqs. (13) and (15), then the maximum over scales.
     filtered_max = np.zeros_like(image)
-    for sigma in sigmas:  # Filter for all sigmas.
-        eigvals = hessian_matrix_eigvals(
-            hessian_matrix(
-                image, sigma, mode=mode, cval=cval, use_gaussian_derivatives=True
-            )
+    for shape, norm in shapes_norms:
+        structuredness = 1.0 - np.exp(
+            -(norm**2) / (2 * gamma**2), dtype=image.dtype
         )
-        # Sort eigenvalues by magnitude.
-        eigvals = np.take_along_axis(eigvals, abs(eigvals).argsort(0), 0)
-        lambda1 = eigvals[0]
-        if image.ndim == 2:
-            (lambda2,) = np.maximum(eigvals[1:], 1e-10)
-            r_a = np.inf  # implied by eq. (15).
-            r_b = abs(lambda1) / lambda2  # eq. (15).
-        else:  # ndim == 3
-            lambda2, lambda3 = np.maximum(eigvals[1:], 1e-10)
-            r_a = lambda2 / lambda3  # eq. (11).
-            r_b = abs(lambda1) / np.sqrt(lambda2 * lambda3)  # eq. (10).
-        s = np.sqrt((eigvals**2).sum(0))  # eq. (12).
-        if gamma is None:
-            gamma = s.max() / 2
-            if gamma == 0:
-                gamma = 1  # If s == 0 everywhere, gamma doesn't matter.
-        # Filtered image, eq. (13) and (15).  Our implementation relies on the
-        # blobness exponential factor underflowing to zero whenever the second
-        # or third eigenvalues are negative (we clip them to 1e-10, to make r_b
-        # very large).
-        vals = 1.0 - np.exp(
-            -(r_a**2) / (2 * alpha**2), dtype=image.dtype
-        )  # plate sensitivity
-        vals *= np.exp(-(r_b**2) / (2 * beta**2), dtype=image.dtype)  # blobness
-        vals *= 1.0 - np.exp(
-            -(s**2) / (2 * gamma**2), dtype=image.dtype
-        )  # structuredness
-        filtered_max = np.maximum(filtered_max, vals)
+        filtered_max = np.maximum(filtered_max, shape * structuredness)
     return filtered_max  # Return pixel-wise max over all sigmas.
 
 
