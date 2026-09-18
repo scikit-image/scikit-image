@@ -108,13 +108,14 @@ from skimage.transform.radon_transform import _get_fourier_filter
 
 filters = ['ramp', 'shepp-logan', 'cosine', 'hamming', 'hann']
 
+fig, ax = plt.subplots()
 for ix, f in enumerate(filters):
     response = _get_fourier_filter(2000, f)
-    plt.plot(response, label=f)
+    ax.plot(response, label=f)
 
-plt.xlim([0, 1000])
-plt.xlabel('frequency')
-plt.legend()
+ax.set_xlim([0, 1000])
+ax.set_xlabel('frequency')
+ax.legend()
 plt.show()
 
 ######################################################################
