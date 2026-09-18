@@ -315,9 +315,7 @@ def test_border_management(func, tol):
 #
 # Every constant below is measured in the workbooks notebook
 # https://scikit-image.org/skimage-workbooks/frangi_testing, which shows what
-# each test catches and which of these an unrepaired `frangi` fails.  Two rules
-# matter: the first governs the one test below that compares scales, the second
-# is for whoever adds a turned ridge later.
+# each test catches and which of these an unrepaired `frangi` fails.
 
 
 def _resolved_gamma(image, sigmas, alpha=0.5, beta=0.5, mode='reflect', cval=0):
@@ -417,7 +415,7 @@ def test_frangi_agrees_with_sato_about_scale(frangi_bars):
             frangi_scales.append(
                 frangi(image, sigmas=[s], gamma=gamma, mode='reflect')[probe]
             )
-        # The identify the same scale.
+        # They identify the same scale.
         assert np.argmax(sato_scales) == np.argmax(frangi_scales)
 
 
@@ -466,3 +464,12 @@ def test_frangi_alpha_has_no_effect_in_2d():
         frangi(volume, sigmas=(1, 3), alpha=0.1),
         frangi(volume, sigmas=(1, 3), alpha=5.0),
     )
+
+
+def test_frangi_sigma_iterable():
+    """Check sigmas can be generator."""
+    rng = np.random.default_rng(0)
+    img = rng.random((48, 48))
+    res = frangi(img, sigmas=(1, 3))
+    sigmas = (i for i in (1, 3))
+    assert_array_equal(res, frangi(img, sigmas=sigmas))

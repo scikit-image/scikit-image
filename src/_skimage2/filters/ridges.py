@@ -174,6 +174,42 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True, mode='reflect', cval=
     return filtered_max  # Return pixel-wise max over all sigmas.
 
 
+def _frobenius_sigma_sq(H_elems, sigma):
+    """Sigma-scaled Frobenius norm `S` of eq. (12).
+
+    The Frobenius norm of the Hessian is the root of the sum of its squared
+    elements.  The Hessian is symmetric, so the upper triangle returned by
+    `hessian_matrix` is the whole matrix: summing it with each off-diagonal
+    element counted twice is the sum over all elements.
+
+    In fact, eq. (12) uses a calculation of the same value that is equivalent
+    on a symmetric real matrix (as here), from the root of the sum of the
+    squared eigenvalues.
+    """
+    rows, cols = np.triu_indices(H_elems[0].ndim)
+    weight = 1 + (rows != cols)  # Off-diagonal elements count twice.
+    norm_sq = np.zeros_like(H_elems[0])
+    for H_elem, w in zip(H_elems, weight):
+        norm_sq += w * H_elem**2
+    return sigma**2 * np.sqrt(norm_sq)
+
+
+def _frangi_norm(image, sigma, mode, cval):
+    """The sigma-scaled Frobenius norm `S` of eq. (12), for one scale.
+
+    Unlike `_frangi_shape_norm`, this needs no eigenvalue decomposition, so it
+    is somewhat quicker as a method to calculate S during a first pass through
+    sigmas to calculate default gamma.
+    """
+    # Avoid circular import.
+    from ..feature.corner import hessian_matrix
+
+    H_elems = hessian_matrix(
+        image, sigma, mode=mode, cval=cval, use_gaussian_derivatives=True
+    )
+    return _frobenius_sigma_sq(H_elems, sigma)
+
+
 def _frangi_shape_norm(image, sigma, alpha, beta, mode, cval):
     """One scale of Frangi's vesselness, less the structuredness factor.
 
@@ -189,19 +225,14 @@ def _frangi_shape_norm(image, sigma, alpha, beta, mode, cval):
     # Avoid circular import
     from ..feature.corner import hessian_matrix, hessian_matrix_eigvals
 
-    # For 2D image size I, J, eigvals is shape (2, I, J).
-    eigvals = hessian_matrix_eigvals(
-        hessian_matrix(
-            image, sigma, mode=mode, cval=cval, use_gaussian_derivatives=True
-        )
+    # List containing upper diagonal elements of Hessian.
+    H_elems = hessian_matrix(
+        image, sigma, mode=mode, cval=cval, use_gaussian_derivatives=True
     )
+    # For 2D image size I, J, eigvals is shape (2, I, J).
+    eigvals = hessian_matrix_eigvals(H_elems)
     # Sort eigenvalues by magnitude.
     eigvals = np.take_along_axis(eigvals, np.argsort(np.abs(eigvals), axis=0), axis=0)
-    # Normalised derivatives, eq. (2), at the gamma of unity the paper sets
-    # "when no scale is preferred".  The Hessian is a second derivative, so it
-    # carries sigma ** (2 * gamma) = sigma ** 2.  Without this the response of
-    # an ideal ridge falls monotonically with sigma.
-    eigvals = eigvals * sigma**2
 
     # Eqs. (13) (3D) and (15) (2D) are zero unless every eigenvalue but the
     # first has the sign the sought polarity implies.  `frangi` negates the
@@ -222,7 +253,13 @@ def _frangi_shape_norm(image, sigma, alpha, beta, mode, cval):
         plateness = 1.0 - np.exp(-r_a_sq / (2 * alpha**2))  # eq. (13)
         blobness = np.exp(-r_b_sq / (2 * beta**2))
         shape[wanted] = plateness * blobness
-    return shape, np.sqrt(np.sum(eigvals**2, axis=0))
+    # S (below) can also be calculated - as in the paper, eq. (12) - with the
+    # root summed squared eigenvalues.  We choose to calculate on the Hessian
+    # directly for compatibility with _frangi_norm above, used to calculate
+    # default gamma.  Notice _frobenius_sigma_sq normalizes by sigma ** 2,
+    # giving matched weights for features at different sigma levels.
+    S = _frobenius_sigma_sq(H_elems, sigma)
+    return shape, S
 
 
 def frangi(
@@ -352,6 +389,8 @@ def frangi(
             stacklevel=2,
         )
         sigmas = np.arange(scale_range[0], scale_range[1], scale_step)
+    else:  # Pull out values from potential iterator.
+        sigmas = list(sigmas)
 
     check_nD(image, [2, 3])  # Check image dimensions.
     image = image.astype(_supported_float_type(image.dtype), copy=False)
@@ -360,13 +399,11 @@ def frangi(
 
     # `gamma` is a constant of eqs. (13) and (15), and eq. (14) maximises over
     # scale with it held fixed, so it cannot be resolved from one scale inside
-    # the loop. Resolving it needs only each scale's *maximum* of `S`, which is
-    # a scalar.
+    # the loop. Resolving it needs each scale's *maximum* of `S`, which is a
+    # scalar, and `S` is the sigma-scaled Frobenius norm, needing no
+    # eigenvalue decomposition.
     if gamma is None:
-        peaks = [
-            _frangi_shape_norm(image, sigma, alpha, beta, mode, cval)[1].max()
-            for sigma in sigmas
-        ]
+        peaks = [_frangi_norm(image, sigma, mode, cval).max() for sigma in sigmas]
         # Half the largest Hessian norm, over every scale given.
         gamma = max(peaks) / 2 if peaks else 1.0
         if gamma == 0:
@@ -377,9 +414,7 @@ def frangi(
     filtered_max = np.zeros_like(image)
     for sigma in sigmas:
         shape, norm = _frangi_shape_norm(image, sigma, alpha, beta, mode, cval)
-        structuredness = 1.0 - np.exp(
-            -(norm**2) / (2 * gamma**2), dtype=image.dtype
-        )
+        structuredness = 1.0 - np.exp(-(norm**2) / (2 * gamma**2), dtype=image.dtype)
         filtered_max = np.maximum(filtered_max, shape * structuredness)
     return filtered_max  # Return pixel-wise max over all sigmas.
 
