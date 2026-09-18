@@ -196,9 +196,7 @@ def _frangi_shape_norm(image, sigma, alpha, beta, mode, cval):
         )
     )
     # Sort eigenvalues by magnitude.
-    eigvals = np.take_along_axis(eigvals,
-                                 np.argsort(np.abs(eigvals), axis=0),
-                                 axis=0)
+    eigvals = np.take_along_axis(eigvals, np.argsort(np.abs(eigvals), axis=0), axis=0)
     # Normalised derivatives, eq. (2), at the gamma of unity the paper sets
     # "when no scale is preferred".  The Hessian is a second derivative, so it
     # carries sigma ** (2 * gamma) = sigma ** 2.  Without this the response of
@@ -360,21 +358,25 @@ def frangi(
     if not black_ridges:  # Normalize to black ridges.
         image = -image
 
-    # Every scale first, then `gamma`, then the maximum of eq. (14).
-    shapes_norms = [
-        _frangi_shape_norm(image, sigma, alpha, beta, mode, cval)
-        for sigma in sigmas
-    ]
-
+    # `gamma` is a constant of eqs. (13) and (15), and eq. (14) maximises over
+    # scale with it held fixed, so it cannot be resolved from one scale inside
+    # the loop. Resolving it needs only each scale's *maximum* of `S`, which is
+    # a scalar.
     if gamma is None:
+        peaks = [
+            _frangi_shape_norm(image, sigma, alpha, beta, mode, cval)[1].max()
+            for sigma in sigmas
+        ]
         # Half the largest Hessian norm, over every scale given.
-        gamma = max(norm.max() for _, norm in shapes_norms) / 2
+        gamma = max(peaks) / 2 if peaks else 1.0
         if gamma == 0:
             gamma = 1  # If S == 0 everywhere, gamma doesn't matter.
 
-    # Filtered image, eqs. (13) and (15), then the maximum over scales.
+    # Filtered image, eqs. (13) and (15), then the maximum over scales.  With
+    # `gamma` known, each scale is fused and discarded as it is computed.
     filtered_max = np.zeros_like(image)
-    for shape, norm in shapes_norms:
+    for sigma in sigmas:
+        shape, norm = _frangi_shape_norm(image, sigma, alpha, beta, mode, cval)
         structuredness = 1.0 - np.exp(
             -(norm**2) / (2 * gamma**2), dtype=image.dtype
         )

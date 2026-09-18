@@ -318,12 +318,7 @@ def test_border_management(func, tol):
 # is for whoever adds a turned ridge later.
 
 
-def _resolved_gamma(image,
-                    sigmas,
-                    alpha=0.5,
-                    beta=0.5,
-                    mode='reflect',
-                    cval=0):
+def _resolved_gamma(image, sigmas, alpha=0.5, beta=0.5, mode='reflect', cval=0):
     """Half largest Hessian norm over `sigmas`: the value `gamma=None` gives.
 
     Any constant held fixed across a scale scan satisfies the rule above, but
@@ -332,12 +327,15 @@ def _resolved_gamma(image,
     at every scale, and the scan across sigmas then picks a scale from blobness
     alone.
     """
-    return max(
-        _frangi_shape_norm(
-            image, sigma, alpha=alpha, beta=beta, mode=mode, cval=cval
-        )[1].max()
-        for sigma in sigmas
-    ) / 2
+    return (
+        max(
+            _frangi_shape_norm(
+                image, sigma, alpha=alpha, beta=beta, mode=mode, cval=cval
+            )[1].max()
+            for sigma in sigmas
+        )
+        / 2
+    )
 
 
 FRANGI_WIDTHS = (1.0, 2.0, 4.0, 8.0)
@@ -390,8 +388,7 @@ def test_frangi_gamma_is_resolved_over_every_scale(frangi_bars):
     resolved = _resolved_gamma(image, sigmas)
     # Test passing calculated gamma explicitly gives same answer as default.
     assert_array_equal(
-        frangi(image, sigmas=sigmas),
-        frangi(image, sigmas=sigmas, gamma=resolved)
+        frangi(image, sigmas=sigmas), frangi(image, sigmas=sigmas, gamma=resolved)
     )
 
 
@@ -414,13 +411,10 @@ def test_frangi_agrees_with_sato_about_scale(frangi_bars):
         sato_scales = []
         frangi_scales = []
         for s in FRANGI_SIGMAS:
-            sato_scales.append(sato(image,
-                                    sigmas=[s],
-                                    mode='reflect')[probe])
-            frangi_scales.append(frangi(image,
-                                        sigmas=[s],
-                                        gamma=gamma,
-                                        mode='reflect')[probe])
+            sato_scales.append(sato(image, sigmas=[s], mode='reflect')[probe])
+            frangi_scales.append(
+                frangi(image, sigmas=[s], gamma=gamma, mode='reflect')[probe]
+            )
         # The identify the same scale.
         assert np.argmax(sato_scales) == np.argmax(frangi_scales)
 
