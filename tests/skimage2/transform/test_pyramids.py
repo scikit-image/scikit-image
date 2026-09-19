@@ -10,13 +10,13 @@ from _skimage2._shared.utils import _supported_float_type
 from _skimage2.transform import pyramids
 
 
-image = data.astronaut()
+image = data.fetch_astronaut()
 image_gray = image[..., 0]
 
 
 @pytest.mark.parametrize('channel_axis', [0, 1, -1])
 def test_pyramid_reduce_rgb(channel_axis):
-    image = data.astronaut()
+    image = data.fetch_astronaut()
     rows, cols, dim = image.shape
     image = np.moveaxis(image, source=-1, destination=channel_axis)
     out_ = pyramids.pyramid_reduce(image, downscale=2, channel_axis=channel_axis)
@@ -55,7 +55,7 @@ def test_pyramid_reduce_nd():
 
 @pytest.mark.parametrize('channel_axis', [0, 1, 2, -1, -2, -3])
 def test_pyramid_expand_rgb(channel_axis):
-    image = data.astronaut()
+    image = data.fetch_astronaut()
     rows, cols, dim = image.shape
     image = np.moveaxis(image, source=-1, destination=channel_axis)
     out = pyramids.pyramid_expand(image, upscale=2, channel_axis=channel_axis)
@@ -81,7 +81,7 @@ def test_pyramid_expand_nd():
 
 @pytest.mark.parametrize('channel_axis', [0, 1, 2, -1, -2, -3])
 def test_build_gaussian_pyramid_rgb(channel_axis):
-    image = data.astronaut()
+    image = data.fetch_astronaut()
     rows, cols, dim = image.shape
     image = np.moveaxis(image, source=-1, destination=channel_axis)
     pyramid = pyramids.pyramid_gaussian(image, downscale=2, channel_axis=channel_axis)
@@ -120,7 +120,7 @@ def test_build_gaussian_pyramid_nd():
 
 @pytest.mark.parametrize('channel_axis', [0, 1, 2, -1, -2, -3])
 def test_build_laplacian_pyramid_rgb(channel_axis):
-    image = data.astronaut()
+    image = data.fetch_astronaut()
     rows, cols, dim = image.shape
     image = np.moveaxis(image, source=-1, destination=channel_axis)
     pyramid = pyramids.pyramid_laplacian(image, downscale=2, channel_axis=channel_axis)

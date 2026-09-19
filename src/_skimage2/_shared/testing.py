@@ -137,7 +137,7 @@ def color_check(plugin, fmt='png'):
     from _skimage2 import data
     from _skimage2.util import img_as_ubyte, img_as_float, img_as_int, img_as_uint
 
-    img = img_as_ubyte(data.chelsea())
+    img = img_as_ubyte(data.fetch_chelsea())
     r1 = roundtrip(img, plugin, fmt)
     testing.assert_allclose(img, r1)
 
@@ -171,7 +171,7 @@ def mono_check(plugin, fmt='png'):
     from _skimage2 import data
     from _skimage2.util import img_as_ubyte, img_as_float, img_as_int, img_as_uint
 
-    img = img_as_ubyte(data.moon())
+    img = img_as_ubyte(data.fetch_moon())
     r1 = roundtrip(img, plugin, fmt)
     testing.assert_allclose(img, r1)
 

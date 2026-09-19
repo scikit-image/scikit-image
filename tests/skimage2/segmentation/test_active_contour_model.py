@@ -12,7 +12,7 @@ from _skimage2.util import rescale_legacy
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_periodic_reference(dtype):
-    img = data.astronaut()
+    img = data.fetch_astronaut()
     img = rgb2gray(img)
     s = np.linspace(0, 2 * np.pi, 400)
     r = 100 + 100 * np.sin(s)
@@ -31,7 +31,7 @@ def test_periodic_reference(dtype):
 
 @pytest.mark.parametrize('dtype', [np.float32, np.float64])
 def test_fixed_reference(dtype):
-    img = data.text()
+    img = data.fetch_text()
     r = np.linspace(136, 50, 100)
     c = np.linspace(5, 424, 100)
     init = np.array([r, c]).T
@@ -56,7 +56,7 @@ def test_fixed_reference(dtype):
 
 @pytest.mark.parametrize('dtype', [np.float32, np.float64])
 def test_free_reference(dtype):
-    img = data.text()
+    img = data.fetch_text()
     r = np.linspace(70, 40, 100)
     c = np.linspace(5, 424, 100)
     init = np.array([r, c]).T
@@ -82,7 +82,7 @@ def test_free_reference(dtype):
 @pytest.mark.parametrize('dtype', [np.float32, np.float64])
 def test_RGB(dtype):
     # TODO - ski2: consider test with actual value range.
-    img = gaussian(rescale_legacy(data.text()), sigma=1)
+    img = gaussian(rescale_legacy(data.fetch_text()), sigma=1)
     imgR = np.zeros((img.shape[0], img.shape[1], 3), dtype=dtype)
     imgG = np.zeros((img.shape[0], img.shape[1], 3), dtype=dtype)
     imgRGB = np.zeros((img.shape[0], img.shape[1], 3), dtype=dtype)
@@ -137,7 +137,7 @@ def test_RGB(dtype):
 
 
 def test_end_points():
-    img = data.astronaut()
+    img = data.fetch_astronaut()
     img = rgb2gray(img)
     s = np.linspace(0, 2 * np.pi, 400)
     r = 100 + 100 * np.sin(s)

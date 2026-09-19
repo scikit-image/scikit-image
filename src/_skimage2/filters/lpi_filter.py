@@ -159,7 +159,7 @@ def filter_forward(
     ...     return np.exp(-(r**2 + c**2)/(2 * sigma**2))
     >>>
     >>> from _skimage2 import data
-    >>> filtered = filter_forward(data.coins(), filt_func)
+    >>> filtered = filter_forward(data.fetch_coins(), filt_func)
 
     """
     if filter_params is None:

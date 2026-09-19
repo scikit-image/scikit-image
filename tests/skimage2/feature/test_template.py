@@ -180,7 +180,7 @@ def test_wrong_input():
 
 
 def test_bounding_values():
-    image = img_as_float(data.page())
+    image = img_as_float(data.fetch_page())
     template = np.zeros((3, 3))
     template[1, 1] = 1
     result = match_template(image, template)
