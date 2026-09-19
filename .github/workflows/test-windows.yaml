@@ -15,6 +15,9 @@ env:
   CC: ccache clang
   CXX: ccache clang
   CCACHE_DIR: C:\ccache
+  # Hosted Windows runners intermittently ship an unreadable Tcl install, so
+  # matplotlib's default TkAgg backend fails; see gh-8194.
+  MPLBACKEND: Agg
 
 jobs:
   test_skimage_windows:
