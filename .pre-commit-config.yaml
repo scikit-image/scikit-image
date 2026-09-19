@@ -39,7 +39,8 @@ repos:
     hooks:
       - id: generate_requirements.py
         name: generate_requirements.py
-        language: system
+        language: python
+        additional_dependencies: [packaging]
         entry: python tools/generate_requirements.py
         files: "pyproject.toml|requirements/.*\\.txt|asv.conf.json|tools/generate_requirements.py"
 
