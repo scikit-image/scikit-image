@@ -72,7 +72,7 @@ jobs:
           # PR and scheduled runs both compare at a 1.1 factor.
           FACTOR: 1.1
           BASELINE_SHA: ${{ github.event.pull_request.base.sha || '' }}
-        run: .github/scripts/run_benchmarks.sh
+        run: .github/scripts/run-benchmarks.sh
 
       - name: Advance baseline on clean run
         if: success() && github.event_name != 'pull_request' && steps.benchmark.outputs.has_baseline != 'false'
