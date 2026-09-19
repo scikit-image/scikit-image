@@ -51,7 +51,7 @@ jobs:
       - name: Restore asv state
         if: github.event_name != 'pull_request'
         id: asv-state
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: |
             .asv/env
@@ -83,6 +83,16 @@ jobs:
         if: success() && github.event_name != 'pull_request' && steps.benchmark.outputs.has_baseline == 'false'
         shell: bash
         run: echo "$GITHUB_SHA" > last_contender_sha
+
+      - name: Save asv state
+        if: success() && github.event_name != 'pull_request'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            .asv/env
+            .asv/results
+            last_contender_sha
+          key: benchmark-${{ runner.os }}-${{ github.run_id }}
 
       - name: Check ccache performance
         if: always()
