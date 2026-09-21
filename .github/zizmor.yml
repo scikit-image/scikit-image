@@ -1,0 +1,11 @@
+# https://docs.zizmor.sh/configuration/
+
+rules:
+  unpinned-uses:
+    config:
+      policies:
+        # Actions published by GitHub itself are updated by Dependabot and are
+        # trusted to the same degree as the runner, so a version tag suffices.
+        "actions/*": ref-pin
+        # Everything else must be pinned to a full commit hash.
+        "*": hash-pin

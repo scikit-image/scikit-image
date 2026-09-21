@@ -4,7 +4,7 @@ from numpy.testing import assert_equal
 from scipy.ndimage import binary_dilation, binary_erosion
 
 from _skimage2.feature import canny
-import skimage as ski
+import _skimage2 as ski2
 
 
 class TestCanny:
@@ -106,7 +106,7 @@ class TestCanny:
         assert_equal(result1, result2)
 
     def test_use_quantiles(self):
-        image = ski.util.img_as_float(ski.data.camera()[::100, ::100])
+        image = ski2.util.img_as_float(ski2.data.camera()[::100, ::100])
 
         # Correct output produced manually with quantiles
         # of 0.8 and 0.6 for high and low respectively
@@ -130,7 +130,7 @@ class TestCanny:
         assert np.all(canny(image) == 0)
 
     def test_invalid_use_quantiles(self):
-        image = ski.util.img_as_float(ski.data.camera()[::50, ::50])
+        image = ski2.util.img_as_float(ski2.data.camera()[::50, ::50])
         regex = r"Quantile thresholds must be between 0 and 1"
 
         with pytest.raises(ValueError, match=regex):
@@ -156,7 +156,7 @@ class TestCanny:
             canny(image, use_quantiles=True, low_threshold=0.5, high_threshold=-100)
 
         # Example from issue #4282
-        image = ski.data.camera()
+        image = ski2.data.camera()
         with pytest.raises(ValueError, match=regex):
             canny(
                 image,
@@ -167,8 +167,8 @@ class TestCanny:
 
     def test_dtype(self):
         """Check that the same output is produced regardless of image dtype."""
-        image_uint8 = ski.data.camera()
-        image_float = ski.util.img_as_float(image_uint8)
+        image_uint8 = ski2.data.camera()
+        image_float = ski2.util.img_as_float(image_uint8)
 
         result_uint8 = canny(image_uint8)
         result_float = canny(image_float)
@@ -189,7 +189,7 @@ class TestCanny:
     @pytest.mark.parametrize("mode", ['constant', 'nearest', 'reflect'])
     def test_full_mask_matches_no_mask(self, mode):
         """The masked and unmasked algorithms should return the same result."""
-        image = ski.data.camera()
+        image = ski2.data.camera()
         result_none = canny(image, mode=mode)
         result_mask = canny(image, mode=mode, mask=np.ones_like(image, dtype=bool))
         assert_equal(result_none, result_mask)

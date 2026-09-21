@@ -628,7 +628,6 @@ def test_input_values_with_labels():
     assert_array_equal(img, img_before)
 
 
-@pytest.mark.filterwarnings("default::skimage.util.PendingSkimage2Change")
 def test_peak_local_max_skimage2_warning():
     image = np.zeros((5, 5), dtype=np.uint8)
     image[1:3, 1:3] = 10

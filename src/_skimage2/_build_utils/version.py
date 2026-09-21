@@ -10,8 +10,8 @@ from pathlib import Path
 
 
 def version_from_init():
-    """Extract version string from ``skimage/__init__.py``."""
-    skimage_init = Path(__file__).parent / '../../skimage/__init__.py'
+    """Extract version string from ``_skimage2/__init__.py``."""
+    skimage_init = Path(__file__).parent / '../../_skimage2/__init__.py'
     assert skimage_init.is_file()
 
     with skimage_init.open("r") as file:

@@ -41,7 +41,9 @@ def test_map_array_simple(dtype_in, dtype_out, out_array):
         assert out is result
 
 
-@pytest.mark.parametrize("writeable_flags", itertools.product([True, False], repeat=3))
+@pytest.mark.parametrize(
+    "writeable_flags", list(itertools.product([True, False], repeat=3))
+)
 @pytest.mark.parametrize("dtype", _map_array_dtypes_in)
 def test_map_array_read_only(writeable_flags, dtype):
     """Check that input arrays can be read-only, but output_arr must not be.
@@ -100,6 +102,14 @@ def test_arraymap_long_str():
     out_values = rng.random(in_values.shape)
     m = ArrayMap(in_values, out_values)
     assert len(str(m).split('\n')) == m._max_str_lines + 2
+
+
+def test_arraymap_array_protocol():
+    m = ArrayMap(np.array([0, 2]), np.array([1.0, 3.0]))
+    np.testing.assert_array_equal(np.array(m, copy=True), [1.0, 0.0, 3.0])
+
+    with pytest.raises(ValueError, match='Unable to avoid a copy'):
+        np.array(m, copy=False)
 
 
 def test_arraymap_update():

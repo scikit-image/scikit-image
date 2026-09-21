@@ -1,4 +1,4 @@
-"""Sharpening, edge finding, filters, thresholding, etc."""
+"""Sharpening, edge finding, rank filters, thresholding, etc."""
 
 import lazy_loader as _lazy
 

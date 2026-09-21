@@ -197,7 +197,7 @@ def canny(
 
     """
     # TODO Undo inlined imports once ported
-    from skimage.util.dtype import dtype_limits
+    from _skimage2.util.dtype import dtype_limits
 
     # Regarding masks, any point touching a masked point will have a gradient
     # that is "infected" by the masked point, so it's enough to erode the

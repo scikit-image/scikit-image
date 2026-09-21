@@ -1,5 +1,7 @@
-"""Morphological algorithms, for example, closing, opening, and skeletonization."""
+"""Morphological algorithms, e.g., closing, opening, skeletonization."""
 
 import lazy_loader as _lazy
 
 __getattr__, __dir__, __all__ = _lazy.attach_stub(__name__, __file__)
+
+from ..measure._label import label  # noqa: F401

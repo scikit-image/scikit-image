@@ -23,7 +23,7 @@ X, Y = np.ogrid[:l_x, :l_y]
 outer_disk_mask = (X - l_x / 2) ** 2 + (Y - l_y / 2) ** 2 > (l_x / 2) ** 2
 camera[outer_disk_mask] = 0
 
-plt.figure(figsize=(4, 4))
-plt.imshow(camera, cmap='gray')
-plt.axis('off')
+fig, ax = plt.subplots(figsize=(4, 4))
+ax.imshow(camera, cmap='gray')
+ax.axis('off')
 plt.show()

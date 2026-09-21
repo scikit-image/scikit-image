@@ -4,7 +4,7 @@ from numpy.testing import assert_equal, assert_allclose
 
 from _skimage2._shared.utils import _supported_float_type
 import _skimage2 as ski2
-from _skimage2.filters import gaussian
+from _skimage2.filters import difference_of_gaussians, gaussian
 
 
 # skimage2.filters.gaussian ------------------------------------------------------------
@@ -120,3 +120,50 @@ def test_gaussian_output_error():
     out = np.zeros_like(image, dtype=np.uint8)
     with pytest.raises(ValueError, match="dtype of `out` must be float"):
         gaussian(image, sigma=1, out=out)
+
+
+# skimage.filters.difference_of_gaussians ----------------------------------------------
+
+
+@pytest.mark.parametrize("s", [1, (2, 3)])
+@pytest.mark.parametrize("s2", [4, (5, 6)])
+@pytest.mark.parametrize("channel_axis", [None, 0, 1, -1])
+def test_difference_of_gaussians(s, s2, channel_axis):
+    image = np.random.RandomState(660029026).rand(10, 10)
+    if channel_axis is not None:
+        n_channels = 5
+        image = np.stack((image,) * n_channels, channel_axis)
+    im1 = gaussian(image, sigma=s, channel_axis=channel_axis)
+    im2 = gaussian(image, sigma=s2, channel_axis=channel_axis)
+    dog = im1 - im2
+    dog2 = difference_of_gaussians(image, s, s2, channel_axis=channel_axis)
+    assert np.allclose(dog, dog2)
+
+
+@pytest.mark.parametrize("s", [1, (1, 2)])
+def test_auto_sigma2(s):
+    image = np.random.RandomState(2627489853).rand(10, 10)
+    im1 = gaussian(image, sigma=s)
+    s2 = 1.6 * np.array(s)
+    im2 = gaussian(image, sigma=s2)
+    dog = im1 - im2
+    dog2 = difference_of_gaussians(image, s, s2)
+    assert np.allclose(dog, dog2)
+
+
+def test_dog_invalid_sigma_dims():
+    image = np.ones((5, 5, 3))
+    with pytest.raises(ValueError):
+        difference_of_gaussians(image, (1, 2))
+    with pytest.raises(ValueError):
+        difference_of_gaussians(image, 1, (3, 4))
+    with pytest.raises(ValueError):
+        difference_of_gaussians(image, (1, 2, 3), channel_axis=-1)
+
+
+def test_dog_invalid_sigma2():
+    image = np.ones((3, 3))
+    with pytest.raises(ValueError):
+        difference_of_gaussians(image, 3, 2)
+    with pytest.raises(ValueError):
+        difference_of_gaussians(image, (1, 5), (2, 4))

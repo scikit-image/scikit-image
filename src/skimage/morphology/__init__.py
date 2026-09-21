@@ -1,87 +1,48 @@
 """Morphological algorithms, e.g., closing, opening, skeletonization."""
 
-from .binary import binary_closing, binary_dilation, binary_erosion, binary_opening
-from .gray import black_tophat, closing, dilation, erosion, opening, white_tophat
-from .isotropic import (
-    isotropic_erosion,
-    isotropic_dilation,
-    isotropic_opening,
-    isotropic_closing,
-)
-from .footprints import (
-    ball,
-    cube,
-    diamond,
-    disk,
-    ellipse,
-    footprint_from_sequence,
-    footprint_rectangle,
-    mirror_footprint,
-    octagon,
-    octahedron,
-    pad_footprint,
-    rectangle,
-    square,
-    star,
-)
-from ..measure._label import label
-from ._skeletonize import medial_axis, skeletonize, thin
-from .convex_hull import convex_hull_image, convex_hull_object
-from .grayreconstruct import reconstruction
-from .misc import remove_small_holes, remove_small_objects, remove_objects_by_distance
-from .extrema import h_maxima, h_minima, local_minima, local_maxima
-from ._flood_fill import flood, flood_fill
-from .max_tree import (
-    area_opening,
-    area_closing,
-    diameter_closing,
-    diameter_opening,
-    max_tree,
-    max_tree_local_maxima,
-)
+import lazy_loader as _lazy
 
-__all__ = [
-    'area_closing',
-    'area_opening',
-    'ball',
-    'black_tophat',
-    'closing',
-    'convex_hull_image',
-    'convex_hull_object',
-    'diameter_closing',
-    'diameter_opening',
-    'diamond',
-    'dilation',
-    'disk',
-    'ellipse',
-    'erosion',
-    'flood',
-    'flood_fill',
-    'footprint_from_sequence',
-    'footprint_rectangle',
-    'h_maxima',
-    'h_minima',
-    'isotropic_closing',
-    'isotropic_dilation',
-    'isotropic_erosion',
-    'isotropic_opening',
-    'label',
-    'local_maxima',
-    'local_minima',
-    'max_tree',
-    'max_tree_local_maxima',
-    'medial_axis',
-    'mirror_footprint',
-    'octagon',
-    'octahedron',
-    'opening',
-    'pad_footprint',
-    'reconstruction',
-    'remove_small_holes',
-    'remove_small_objects',
-    'remove_objects_by_distance',
-    'skeletonize',
-    'star',
-    'thin',
-    'white_tophat',
-]
+__getattr__, _, __all__ = _lazy.attach_stub(__name__, __file__)
+
+# lazy_loader ignores the manually defined `__all__` in the PYI file. Instead,
+# it populates `__all__` from what is imported. So patch in differences that we
+# actually want to have in `__all__` and `__dir__`. For example, we want to keep
+# deprecated functions available but not advertise them
+# (see https://github.com/scientific-python/lazy-loader/pull/133)
+to_strip = {
+    # Deprecated
+    'binary_closing',
+    'binary_dilation',
+    'binary_erosion',
+    'binary_opening',
+    'cube',
+    'rectangle',
+    'square',
+    # Allow backwards-compatible submodule access but don't advertise
+    # or include in HTML docs
+    'binary',
+    'convex_hull',
+    'extrema',
+    'footprints',
+    'gray',
+    'grayreconstruct',
+    'isotropic',
+    'misc',
+}
+__all__ = list(set(__all__) - to_strip)
+
+# Lazy loader can only include submodules, so include `label` manually
+__all__.append("label")
+
+
+def __dir__():
+    return __all__.copy()
+
+
+from ..measure._label import label  # noqa: F401
+
+# Bypass lazy_loader to maintain old behavior, that is, make the following pass:
+#   from skimage.morphology.max_tree import max_tree
+#   import skimage
+#   assert callable(skimage.morphology.max_tree)
+from .max_tree import max_tree  # noqa: F401

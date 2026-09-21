@@ -152,7 +152,7 @@ Using an image from OpenCV with ``skimage``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If cv_image is an array of unsigned bytes, ``skimage`` will understand it by
-default. If you prefer working with floating point images, :func:`~.img_as_float`
+default. If you prefer working with floating point images, :func:`skimage.util.img_as_float`
 can be used to convert the image::
 
     >>> import skimage as ski
@@ -161,7 +161,7 @@ can be used to convert the image::
 Using an image from ``skimage`` with OpenCV
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The reverse can be achieved with :func:`~.img_as_ubyte`::
+The reverse can be achieved with :func:`skimage.util.img_as_ubyte`::
 
     >>> import skimage as ski
     >>> cv_image = ski.util.img_as_ubyte(any_skimage_image)
@@ -205,15 +205,15 @@ range but do not. For example, some cameras store images with 10-, 12-, or
 14-bit depth per pixel. If these images are stored in an array with dtype
 uint16, then the image won't extend over the full intensity range, and thus,
 would appear dimmer than it should. To correct for this, you can use the
-:func:`~.rescale_intensity` function to rescale the image so that it uses the full
+:func:`skimage.exposure.rescale_intensity` function to rescale the image so that it uses the full
 dtype range::
 
    >>> import skimage as ski
    >>> image = ski.exposure.rescale_intensity(img10bit, in_range=(0, 2**10 - 1))
 
 Here, the ``in_range`` argument is set to the maximum range for a 10-bit image.
-By default, :func:`~.rescale_intensity` stretches the values of ``in_range`` to match
-the range of the dtype. :func:`~.rescale_intensity` also accepts strings as inputs
+By default, :func:`skimage.exposure.rescale_intensity` stretches the values of ``in_range`` to match
+the range of the dtype. :func:`skimage.exposure.rescale_intensity` also accepts strings as inputs
 to ``in_range`` and ``out_range``, so the example above could also be written
 as::
 

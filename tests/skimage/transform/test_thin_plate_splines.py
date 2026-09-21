@@ -36,6 +36,7 @@ class TestThinPlateSplineTransform:
         with pytest.raises(NotImplementedError):
             tps.inverse()
 
+    @pytest.mark.thread_unsafe("Warning filter state is not thread safe")
     def test_tps_estimation_faulty_input(self):
         src = np.array([[0, 0], [0, 5], [5, 5], [5, 0]])
         dst = np.array([[5, 0], [0, 0], [0, 5]])
@@ -67,6 +68,9 @@ class TestThinPlateSplineTransform:
                 tps.estimate(src, not_2d)
         assert tps.src is None
 
+    @pytest.mark.thread_unsafe(
+        "scipy.ndimage spline prefiltering in `warp` is not thread-safe"
+    )
     def test_rotate(self):
         image = ski.data.astronaut()
         desired = ski.transform.rotate(image, angle=90)

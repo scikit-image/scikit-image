@@ -112,7 +112,7 @@ def doctest_skip_parser(func):
 def roundtrip(image, plugin, suffix):
     """Save and read an image using a specified plugin"""
     # TODO Undo inlined imports once available in _skimage2 namespace
-    from skimage import io
+    from _skimage2 import io
 
     if '.' not in suffix:
         suffix = '.' + suffix
@@ -134,8 +134,8 @@ def color_check(plugin, fmt='png'):
     back correctly.
     """
     # TODO Undo inlined imports once available in _skimage2 namespace
-    from skimage import data
-    from skimage.util import img_as_ubyte, img_as_float, img_as_int, img_as_uint
+    from _skimage2 import data
+    from _skimage2.util import img_as_ubyte, img_as_float, img_as_int, img_as_uint
 
     img = img_as_ubyte(data.chelsea())
     r1 = roundtrip(img, plugin, fmt)
@@ -168,8 +168,8 @@ def mono_check(plugin, fmt='png'):
 
     All major input types should be handled.
     """
-    from skimage import data
-    from skimage.util import img_as_ubyte, img_as_float, img_as_int, img_as_uint
+    from _skimage2 import data
+    from _skimage2.util import img_as_ubyte, img_as_float, img_as_int, img_as_uint
 
     img = img_as_ubyte(data.moon())
     r1 = roundtrip(img, plugin, fmt)
@@ -219,7 +219,7 @@ def fetch(data_filename, prefix=None):
         Path of the local file, possibly pointing to a remote location.
 
     """
-    from skimage.data._fetchers import _fetch
+    from _skimage2.data._fetchers import _fetch
 
     try:
         return _fetch(data_filename, prefix=prefix)

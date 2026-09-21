@@ -30,6 +30,11 @@ jobs:
             os: macos-15-intel
             OPTIONAL_DEPS: 1
             OPTIONS_NAME: "default"
+          - python-version: "3.15"
+            os: macos-latest
+            # Optional deps have no cp315 wheels yet
+            OPTIONAL_DEPS: 0
+            OPTIONS_NAME: "default"
     env:
       CC: ccache /usr/bin/clang
       CXX: ccache /usr/bin/clang++
