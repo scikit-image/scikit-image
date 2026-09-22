@@ -568,6 +568,9 @@ Examples of running `spin test`:
 # All tests
 spin test
 
+# Doctests only (tests in docstrings)
+spin test -- skimage _skimage2
+
 # Tests inside directory(s)
 spin test -- tests/skimage/morphology
 spin test -- src/skimage/morphology tests/skimage/morphology
