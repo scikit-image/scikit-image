@@ -1519,7 +1519,7 @@ def test_extra_properties_table():
 @pytest.mark.parametrize("prop_name", [*PROPS.keys(), "custom_intensity_median"])
 def test_multichannel(prop_name):
     """Test that computing multichannel properties works."""
-    astro = data.astronaut()[::4, ::4]
+    astro = data.fetch_astronaut()[::4, ::4]
     astro_green = astro[..., 1]
     labels = slic(astro.astype(float), start_label=1)
 

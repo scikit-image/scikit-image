@@ -8,11 +8,11 @@ from _skimage2._shared.utils import _supported_float_type
 
 from _skimage2 import restoration, util, filters
 from _skimage2.color import rgb2gray
-from _skimage2.data import astronaut, camera
+from _skimage2.data import fetch_astronaut, fetch_camera
 from _skimage2.restoration import uft
 
 
-test_img = util.img_as_float(camera())
+test_img = util.img_as_float(fetch_camera())
 
 
 def _get_rtol_atol(dtype):
@@ -42,7 +42,7 @@ def test_wiener(dtype, ndim, test_root_dir):
     if ndim != 2:
         test_img = rng.randint(0, 100, [50] * ndim)
     else:
-        test_img = util.img_as_float(camera())
+        test_img = util.img_as_float(fetch_camera())
 
     data = convolve(test_img, psf, 'same')
     data += 0.1 * data.std() * rng.standard_normal(data.shape)
@@ -131,7 +131,7 @@ def test_image_shape():
     point[2, 2] = 1.0
     psf = filters.gaussian(point, sigma=1.0, mode='reflect')
     # image shape: (45, 45), as reported in #1172
-    image = util.img_as_float(camera()[65:165, 215:315])  # just the face
+    image = util.img_as_float(fetch_camera()[65:165, 215:315])  # just the face
     image_conv = ndi.convolve(image, psf)
     deconv_sup = restoration.wiener(image_conv, psf, 1)
     deconv_un = restoration.unsupervised_wiener(image_conv, psf)[0]
@@ -153,7 +153,7 @@ def test_richardson_lucy(ndim, test_root_dir):
     if ndim != 2:
         test_img = rng.randint(0, 100, [30] * ndim)
     else:
-        test_img = util.img_as_float(camera())
+        test_img = util.img_as_float(fetch_camera())
     data = convolve(test_img, psf, 'same')
 
     data += 0.1 * data.std() * rng.standard_normal(data.shape)
@@ -171,7 +171,7 @@ def test_richardson_lucy_filtered(dtype_image, dtype_psf, test_root_dir):
         atol = 1e-8
     else:
         atol = 1e-5
-    test_img_astro = rgb2gray(astronaut())
+    test_img_astro = rgb2gray(fetch_astronaut())
 
     psf = np.ones((5, 5), dtype=dtype_psf) / 25
     data = convolve2d(test_img_astro, psf, 'same')

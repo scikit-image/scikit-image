@@ -196,10 +196,10 @@ class CENSURE(FeatureDetector):
 
     Examples
     --------
-    >>> from _skimage2.data import astronaut
+    >>> from _skimage2.data import fetch_astronaut
     >>> from _skimage2.color import rgb2gray
     >>> from _skimage2.feature import CENSURE
-    >>> img = rgb2gray(astronaut()[100:300, 100:300])
+    >>> img = rgb2gray(fetch_astronaut()[100:300, 100:300])
     >>> censure = CENSURE()
     >>> censure.detect(img)
     >>> censure.keypoints

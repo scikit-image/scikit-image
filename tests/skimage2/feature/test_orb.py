@@ -8,7 +8,7 @@ from _skimage2.feature import ORB
 from _skimage2.util.dtype import _convert
 
 
-img = data.coins()
+img = data.fetch_coins()
 
 
 @run_in_parallel()
@@ -175,7 +175,7 @@ def test_no_descriptors_extracted_orb():
 
 
 def test_img_too_small_orb():
-    img = data.brick()[:64, :64]
+    img = data.fetch_brick()[:64, :64]
     detector_extractor = ORB(downscale=2, n_scales=8)
     detector_extractor.detect(img)
     detector_extractor.detect_and_extract(img)

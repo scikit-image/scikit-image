@@ -472,7 +472,7 @@ def autolevel(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift
     >>> from _skimage2.morphology import disk, ball
     >>> from _skimage2.filters.rank import autolevel
     >>> import numpy as np
-    >>> img = data.camera()
+    >>> img = data.fetch_camera()
     >>> rng = np.random.default_rng()
     >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> auto = autolevel(img, disk(5))
@@ -534,7 +534,7 @@ def equalize(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_
     >>> from _skimage2.morphology import disk, ball
     >>> from _skimage2.filters.rank import equalize
     >>> import numpy as np
-    >>> img = data.camera()
+    >>> img = data.fetch_camera()
     >>> rng = np.random.default_rng()
     >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> equ = equalize(img, disk(5))
@@ -596,7 +596,7 @@ def gradient(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_
     >>> from _skimage2.morphology import disk, ball
     >>> from _skimage2.filters.rank import gradient
     >>> import numpy as np
-    >>> img = data.camera()
+    >>> img = data.fetch_camera()
     >>> rng = np.random.default_rng()
     >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> out = gradient(img, disk(5))
@@ -667,7 +667,7 @@ def maximum(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z
     >>> from _skimage2.morphology import disk, ball
     >>> from _skimage2.filters.rank import maximum
     >>> import numpy as np
-    >>> img = data.camera()
+    >>> img = data.fetch_camera()
     >>> rng = np.random.default_rng()
     >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> out = maximum(img, disk(5))
@@ -729,7 +729,7 @@ def mean(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0)
     >>> from _skimage2.morphology import disk, ball
     >>> from _skimage2.filters.rank import mean
     >>> import numpy as np
-    >>> img = data.camera()
+    >>> img = data.fetch_camera()
     >>> rng = np.random.default_rng()
     >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> avg = mean(img, disk(5))
@@ -793,7 +793,7 @@ def geometric_mean(
     >>> from _skimage2.morphology import disk, ball
     >>> from _skimage2.filters.rank import mean
     >>> import numpy as np
-    >>> img = data.camera()
+    >>> img = data.fetch_camera()
     >>> rng = np.random.default_rng()
     >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> avg = geometric_mean(img, disk(5))
@@ -870,7 +870,7 @@ def subtract_mean(
     >>> from _skimage2.morphology import disk, ball
     >>> from _skimage2.filters.rank import subtract_mean
     >>> import numpy as np
-    >>> img = data.camera()
+    >>> img = data.fetch_camera()
     >>> rng = np.random.default_rng()
     >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> out = subtract_mean(img, disk(5))
@@ -946,7 +946,7 @@ def median(
     >>> from _skimage2.morphology import disk, ball
     >>> from _skimage2.filters.rank import median
     >>> import numpy as np
-    >>> img = data.camera()
+    >>> img = data.fetch_camera()
     >>> rng = np.random.default_rng()
     >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> med = median(img, disk(5))
@@ -1019,7 +1019,7 @@ def minimum(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z
     >>> from _skimage2.morphology import disk, ball
     >>> from _skimage2.filters.rank import minimum
     >>> import numpy as np
-    >>> img = data.camera()
+    >>> img = data.fetch_camera()
     >>> rng = np.random.default_rng()
     >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> out = minimum(img, disk(5))
@@ -1083,7 +1083,7 @@ def modal(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0
     >>> from _skimage2.morphology import disk, ball
     >>> from _skimage2.filters.rank import modal
     >>> import numpy as np
-    >>> img = data.camera()
+    >>> img = data.fetch_camera()
     >>> rng = np.random.default_rng()
     >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> out = modal(img, disk(5))
@@ -1151,7 +1151,7 @@ def enhance_contrast(
     >>> from _skimage2.morphology import disk, ball
     >>> from _skimage2.filters.rank import enhance_contrast
     >>> import numpy as np
-    >>> img = data.camera()
+    >>> img = data.fetch_camera()
     >>> rng = np.random.default_rng()
     >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> out = enhance_contrast(img, disk(5))
@@ -1427,7 +1427,7 @@ def noise_filter(
     >>> from _skimage2.morphology import disk, ball
     >>> from _skimage2.filters.rank import noise_filter
     >>> import numpy as np
-    >>> img = data.camera()
+    >>> img = data.fetch_camera()
     >>> rng = np.random.default_rng()
     >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> out = noise_filter(img, disk(5))
@@ -1517,7 +1517,7 @@ def entropy(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z
     >>> from _skimage2.filters.rank import entropy
     >>> from _skimage2.morphology import disk, ball
     >>> import numpy as np
-    >>> img = data.camera()
+    >>> img = data.fetch_camera()
     >>> rng = np.random.default_rng()
     >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> ent = entropy(img, disk(5))
@@ -1585,7 +1585,7 @@ def otsu(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0)
     >>> from _skimage2.filters.rank import otsu
     >>> from _skimage2.morphology import disk, ball
     >>> import numpy as np
-    >>> img = data.camera()
+    >>> img = data.fetch_camera()
     >>> rng = np.random.default_rng()
     >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> local_otsu = otsu(img, disk(5))
@@ -1658,7 +1658,7 @@ def windowed_histogram(
     >>> from _skimage2.filters.rank import windowed_histogram
     >>> from _skimage2.morphology import disk, ball
     >>> import numpy as np
-    >>> img = data.camera()
+    >>> img = data.fetch_camera()
     >>> rng = np.random.default_rng()
     >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
     >>> hist_img = windowed_histogram(img, disk(5))
@@ -1717,7 +1717,7 @@ def majority(
     --------
     >>> import numpy as np
     >>> import _skimage2 as ski2
-    >>> img = ski2.data.camera()
+    >>> img = ski2.data.fetch_camera()
     >>> rng = np.random.default_rng()
     >>> volume = rng.integers(0, 255, size=(10, 10, 10), dtype=np.uint8)
     >>> maj_img = ski2.filters.rank.majority(img, ski2.morphology.disk(5))

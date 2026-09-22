@@ -89,13 +89,13 @@ def rolling_ball(
     --------
     >>> import numpy as np
     >>> import _skimage2 as ski2
-    >>> image = ski2.data.coins()
+    >>> image = ski2.data.fetch_coins()
     >>> background = ski2.restoration.rolling_ball(image)
     >>> filtered_image = image - background
 
     >>> import numpy as np
     >>> import _skimage2 as ski2
-    >>> image = ski2.data.coins()
+    >>> image = ski2.data.fetch_coins()
     >>> kernel = ski2.restoration.ellipsoid_kernel((101, 101), 75)
     >>> background = ski2.restoration.rolling_ball(image, kernel=kernel)
     >>> filtered_image = image - background

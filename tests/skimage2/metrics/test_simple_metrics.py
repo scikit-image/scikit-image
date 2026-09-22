@@ -13,7 +13,7 @@ from _skimage2.metrics import (
 
 # test results depend on this seed
 MODULE_RNG = np.random.RandomState(5)
-cam = data.camera()
+cam = data.fetch_camera()
 sigma = 20.0
 cam_noisy = np.clip(cam + sigma * MODULE_RNG.randn(*cam.shape), 0, 255)
 cam_noisy = cam_noisy.astype(cam.dtype)
@@ -33,7 +33,7 @@ def test_PSNR_vs_IPOL():
     Then, we use the following command:
     $ ./imdiff -m psnr <path to camera.png>/camera.png /tmp/cam_noisy.png
 
-    Values for current data.camera() calculated by Gregory Lee on Sep, 2020.
+    Values for current data.fetch_camera() calculated by Gregory Lee on Sep, 2020.
     Available at:
     https://github.com/scikit-image/scikit-image/pull/4913#issuecomment-700653165
     """

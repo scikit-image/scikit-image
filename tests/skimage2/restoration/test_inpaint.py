@@ -37,7 +37,7 @@ def test_inpaint_biharmonic_2d(dtype, split_into_regions):
 
 @testing.parametrize('channel_axis', [0, 1, -1])
 def test_inpaint_biharmonic_2d_color(channel_axis):
-    img = img_as_float(data.astronaut()[:64, :64])
+    img = img_as_float(data.fetch_astronaut()[:64, :64])
 
     mask = np.zeros(img.shape[:2], dtype=bool)
     mask[8:16, :16] = 1
@@ -132,7 +132,7 @@ def test_invalid_input():
 @testing.parametrize('channel_axis', [None, -1])
 @testing.parametrize('split_into_regions', [False, True])
 def test_inpaint_nrmse(dtype, order, channel_axis, split_into_regions):
-    image_orig = data.astronaut()[:, :200]
+    image_orig = data.fetch_astronaut()[:, :200]
     float_dtype = np.float32 if dtype == np.float32 else np.float64
     image_orig = image_orig.astype(float_dtype, copy=False)
 

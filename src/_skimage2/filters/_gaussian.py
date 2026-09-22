@@ -90,7 +90,7 @@ def gaussian(
            [0.12075024, 0.16630671, 0.12075024],
            [0.08767308, 0.12075024, 0.08767308]])
     >>> # For RGB images, each is filtered separately
-    >>> image = ski2.data.astronaut()
+    >>> image = ski2.data.fetch_astronaut()
     >>> filtered_img = ski2.filters.gaussian(image, sigma=1, channel_axis=-1)
 
     """
@@ -197,22 +197,22 @@ def difference_of_gaussians(
     --------
     Apply a simple Difference of Gaussians filter to a color image:
 
-    >>> from _skimage2.data import astronaut
+    >>> from _skimage2.data import fetch_astronaut
     >>> from _skimage2.filters import difference_of_gaussians
-    >>> filtered_image = difference_of_gaussians(astronaut(), 2, 10,
+    >>> filtered_image = difference_of_gaussians(fetch_astronaut(), 2, 10,
     ...                                          channel_axis=-1)
 
     Apply a Laplacian of Gaussian filter as approximated by the Difference
     of Gaussians filter:
 
-    >>> filtered_image = difference_of_gaussians(astronaut(), 2,
+    >>> filtered_image = difference_of_gaussians(fetch_astronaut(), 2,
     ...                                          channel_axis=-1)
 
     Apply a Difference of Gaussians filter to a grayscale image using different
     sigma values for each axis:
 
-    >>> from _skimage2.data import camera
-    >>> filtered_image = difference_of_gaussians(camera(), (2,5), (3,20))
+    >>> from _skimage2.data import fetch_camera
+    >>> filtered_image = difference_of_gaussians(fetch_camera(), (2,5), (3,20))
 
     References
     ----------

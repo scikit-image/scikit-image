@@ -6,7 +6,7 @@ from numpy.testing import assert_allclose, assert_array_equal
 import scipy.fft as fftmodule
 
 from _skimage2._shared.utils import _supported_float_type
-from _skimage2.data import astronaut, coins
+from _skimage2.data import fetch_astronaut, fetch_coins
 from _skimage2.filters import butterworth
 from _skimage2.filters._fft_based import _get_nd_butterworth_filter
 
@@ -165,7 +165,7 @@ def test_butterworth_4D_channel(chan, dtype):
 
 
 def test_butterworth_correctness_bw():
-    small = coins()[180:190, 260:270]
+    small = fetch_coins()[180:190, 260:270]
     filtered = butterworth(small, cutoff_frequency_ratio=0.2)
     # fmt: off
     correct = np.array(
@@ -187,7 +187,7 @@ def test_butterworth_correctness_bw():
 
 
 def test_butterworth_correctness_rgb():
-    small = astronaut()[135:145, 205:215]
+    small = fetch_astronaut()[135:145, 205:215]
     filtered = butterworth(
         small, cutoff_frequency_ratio=0.3, high_pass=True, channel_axis=-1
     )
