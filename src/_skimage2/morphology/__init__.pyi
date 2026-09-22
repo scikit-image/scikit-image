@@ -9,14 +9,14 @@ from .isotropic import (
 
 from .footprints import (
     ball,
-    diamond,
+    footprint_diamond,
+    footprint_diamond_decomposed,
     disk,
     ellipse,
     footprint_from_sequence,
     footprint_rectangle,
     footprint_rectangle_decomposed,
     octagon,
-    octahedron,
     star,
 )
 
@@ -58,7 +58,8 @@ __all__ = [
     'convex_hull_object',
     'diameter_closing',
     'diameter_opening',
-    'diamond',
+    'footprint_diamond',
+    'footprint_diamond_decomposed',
     'dilation',
     'disk',
     'ellipse',
@@ -82,7 +83,6 @@ __all__ = [
     'medial_axis',
     'mirror_footprint',
     'octagon',
-    'octahedron',
     'opening',
     'pad_footprint',
     'reconstruction',
