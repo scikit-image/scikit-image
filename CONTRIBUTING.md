@@ -233,17 +233,18 @@ How you may use AI:
 2. To automate mechanical tasks. E.g., if you discover that you need to add a decorator across the code-base.
 3. For infrastructure code, such as CI, as long as the changes are easy to review.
 
-[^why-no-ai-tests] The decision about _what to test_ relies on
-understanding _how_ code could give the wrong answer. It is
-important to think about algorithm edge cases: for example, if you
-implement `sin(x)/x`, you know that you need to be particularly
-careful around 0; or for `sqrt(x)` what happens when input is
-negative. We do not want to test simply for the sake of coverage
-either (e.g., trivial input parameter verification); so, while AI
-will happily add a ton of tests, those may not be the _right_
-tests. That said, tests contain a lot of scaffolding,
-and there's no problem using AI to help with creating that
-structure, or with fixing broken tests.
+[^why-no-ai-tests]:
+    The decision about _what to test_ relies on
+    understanding _how_ code could give the wrong answer. It is
+    important to think about algorithm edge cases: for example, if you
+    implement `sin(x)/x`, you know that you need to be particularly
+    careful around 0; or for `sqrt(x)` what happens when input is
+    negative. We do not want to test simply for the sake of coverage
+    either (e.g., trivial input parameter verification); so, while AI
+    will happily add a ton of tests, those may not be the _right_
+    tests. That said, tests contain a lot of scaffolding,
+    and there's no problem using AI to help with creating that
+    structure, or with fixing broken tests.
 
 ### AI requirements
 
