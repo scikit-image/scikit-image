@@ -778,6 +778,42 @@ def test_multiotsu_output():
     assert np.array_equal(thresholds, threshold_multiotsu(image, classes=4))
 
 
+def _first_bin_heavy_histogram():
+    # A histogram whose first bin dominates; the case that exposed the
+    # first-bin weighting bug.
+    # fmt: off
+    counts = np.array(
+        [
+            14807, 2152, 1241, 806, 410, 198, 250, 142, 68, 108, 66, 72,
+            48, 6, 66, 84, 30, 66, 83, 109, 12, 0, 0, 6, 0, 6, 24, 24, 12,
+            12, 0, 6, 24, 0, 6, 12, 0, 24, 0, 30, 12, 12, 42, 18, 36, 18,
+            42, 38, 66, 84, 30, 54, 42, 24, 28, 72, 84, 30, 30, 31, 13,
+            48, 334, 302,
+        ],
+        dtype=float,
+    )
+    # fmt: on
+    nbins = len(counts)
+    bin_centers = (np.arange(nbins) + 0.5) / nbins
+    return counts, bin_centers
+
+
+def test_multiotsu_first_bin_zero_weight():
+    # The first histogram bin has intensity index 0 and must contribute
+    # zero to the first-order moment; it used to be weighted by 1 instead,
+    # shifting low thresholds on histograms with a heavily populated
+    # first bin.
+    hist = _first_bin_heavy_histogram()
+    thresholds = threshold_multiotsu(classes=5, hist=hist)
+    assert_array_equal(thresholds, [0.0390625, 0.1796875, 0.5078125, 0.8359375])
+
+
+def test_multiotsu_two_classes_matches_otsu():
+    # With two classes, multi-Otsu must reduce to Otsu on the same histogram.
+    hist = _first_bin_heavy_histogram()
+    assert threshold_otsu(hist=hist) == threshold_multiotsu(classes=2, hist=hist)[0]
+
+
 def test_multiotsu_astro_image():
     img = util.img_as_ubyte(data.astronaut())
     with expected_warnings(['grayscale']):
