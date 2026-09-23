@@ -109,9 +109,23 @@ cdef inline np_floats patch_distance_3d(np_floats [:, :, :] p1,
                 distance += w[i, j, k] * (tmp_diff * tmp_diff - var)
     return _fast_exp(-max(0.0, distance))
 
+cdef inline void return_weight2d(np_floats[:, ::1] w, np_floats[:, ::1] W,
+                                            np_floats scale, Py_ssize_t s,
+                                             np_floats H) noexcept nogil:
+    for wi in range(s):
+        for wj in range(s):
+            w[wi, wj] = W[wi, wj] * scale
+
+cdef inline void return_weight3d(np_floats[:, :, ::1] w, np_floats[:, :, ::1] W,
+                                            np_floats scale, Py_ssize_t s,
+                                             np_floats H) noexcept nogil:
+    for wk in range(s):
+        for wi in range(s):
+            for wj in range(s):
+                w[wk, wi, wj] = W[wk, wi, wj] * scale
 
 def _nl_means_denoising_2d(cnp.ndarray[np_floats, ndim=3] image, Py_ssize_t s,
-                           Py_ssize_t d, cnp.float64_t h, cnp.float64_t var):
+                           Py_ssize_t d, h, Py_ssize_t is_array, cnp.float64_t var):
     """
     Perform non-local means denoising on 2-D RGB image
 
@@ -123,9 +137,11 @@ def _nl_means_denoising_2d(cnp.ndarray[np_floats, ndim=3] image, Py_ssize_t s,
         Size of patches used for denoising
     d : Py_ssize_t, optional
         Maximal distance in pixels where to search patches used for denoising
-    h : np_floats, optional
+    h : object, optional
         Cut-off distance (in gray levels). The higher h, the more permissive
         one is in accepting patches.
+    is_array : Py_ssize_t, optional
+        Tells whether h is an array or not.
     var : np_floats
         Expected noise variance.  If non-zero, this is used to reduce the
         apparent patch distances by the expected distance due to the noise.
@@ -153,8 +169,12 @@ def _nl_means_denoising_2d(cnp.ndarray[np_floats, ndim=3] image, Py_ssize_t s,
     cdef Py_ssize_t n_row, n_col, n_channels
     n_row, n_col, n_channels = image.shape[0], image.shape[1], image.shape[2]
     cdef Py_ssize_t offset = s / 2
+    cdef np_floats H
+    cdef np_floats scale
     cdef Py_ssize_t row, col, i, j, channel, i_start, i_end, j_start, j_end
     cdef np_floats[::1] new_values = np.zeros(n_channels, dtype=dtype)
+    cdef np_floats h_scaler
+    cdef np_floats[:, :] h_array
     cdef np_floats[:, :, ::1] padded = np.ascontiguousarray(
         np.pad(image, ((offset, offset), (offset, offset), (0, 0)),
                mode='reflect'))
@@ -165,9 +185,18 @@ def _nl_means_denoising_2d(cnp.ndarray[np_floats, ndim=3] image, Py_ssize_t s,
     cdef np_floats [::1] range_vals = np.arange(-offset, offset + 1,
                                                 dtype=dtype)
     xg_row, xg_col = np.meshgrid(range_vals, range_vals, indexing='ij')
-    cdef np_floats [:, ::1] w = np.ascontiguousarray(
+    cdef np_floats [:, ::1] W = np.ascontiguousarray(
         np.exp(-(xg_row * xg_row + xg_col * xg_col) / (2 * A * A)))
-    w *= 1. / (n_channels * np.sum(w) * h * h)
+    cdef np_floats[:, ::1] w = np.empty_like(W, dtype=dtype)
+    cdef np_floats W_sum = np.sum(W)
+    if is_array:
+        h_array = h
+    else:
+        h_scaler = h
+        scale = 1. / (n_channels * W_sum * h_scaler * h_scaler)
+        return_weight2d(w, W, scale, s, h_scaler)
+
+
 
     cdef np_floats [:, :, :] central_patch
     var *= 2
@@ -181,6 +210,11 @@ def _nl_means_denoising_2d(cnp.ndarray[np_floats, ndim=3] image, Py_ssize_t s,
 
             for col in range(n_col):
                 # Initialize per-channel bins
+                if is_array:
+                    H = h_array[row, col]
+                    scale = (1. / (n_channels * W_sum * H * H))
+                    return_weight2d(w, W, scale, s, H)
+
                 new_values[:] = 0
                 # Reset weights for each local region
                 weight_sum = 0
@@ -214,7 +248,7 @@ def _nl_means_denoising_2d(cnp.ndarray[np_floats, ndim=3] image, Py_ssize_t s,
 
 def _nl_means_denoising_3d(cnp.ndarray[np_floats, ndim=3] image,
                            Py_ssize_t s, Py_ssize_t d,
-                           cnp.float64_t h, cnp.float64_t var):
+                           h, Py_ssize_t is_array, cnp.float64_t var):
     """
     Perform non-local means denoising on 3-D array
 
@@ -228,6 +262,8 @@ def _nl_means_denoising_3d(cnp.ndarray[np_floats, ndim=3] image,
         Maximal distance in pixels where to search patches used for denoising.
     h : np_floats, optional
         Cut-off distance (in gray levels).
+    is_array : Py_ssize_t, optional
+        Tells whether h is an array or not.
     var : np_floats
         Expected noise variance.  If non-zero, this is used to reduce the
         apparent patch distances by the expected distance due to the noise.
@@ -257,16 +293,25 @@ def _nl_means_denoising_3d(cnp.ndarray[np_floats, ndim=3] image,
     cdef np_floats [:, :, ::1] result = np.empty_like(image)
     cdef np_floats new_value
     cdef np_floats weight_sum, weight
+    cdef np_floats h_scaler, scale, H
+    cdef np_floats[:, :, ::1] h_array
 
     cdef np_floats A = ((s - 1.) / 4.)
     cdef np_floats [::] range_vals = np.arange(-offset, offset + 1,
                                                dtype=dtype)
     xg_pln, xg_row, xg_col = np.meshgrid(range_vals, range_vals, range_vals,
                                          indexing='ij')
-    cdef np_floats [:, :, ::1] w = np.ascontiguousarray(
+    cdef np_floats [:, :, ::1] W = np.ascontiguousarray(
         np.exp(-(xg_pln * xg_pln + xg_row * xg_row + xg_col * xg_col) /
                (2 * A * A)))
-    w *= 1. / (np.sum(w) * h * h)
+    cdef np_floats[:, :, ::1] w = np.empty_like(W, dtype=dtype)
+    cdef np_floats W_sum = np.sum(W)
+    if is_array:
+        h_array = h
+    else:
+        h_scaler = h
+        scale = 1. / (W_sum * h_scaler * h_scaler)
+        return_weight3d(w, W, scale, s, h_scaler)
 
     cdef np_floats [:, :, :] central_patch
     var *= 2
@@ -282,6 +327,10 @@ def _nl_means_denoising_3d(cnp.ndarray[np_floats, ndim=3] image,
                 j_end = row + min(d + 1, n_row - row)
                 # Iterate over columns, taking padding into account
                 for col in range(n_col):
+                    if is_array:
+                        H = h_array[pln, row, col]
+                        scale = (1. / (W_sum * H * H))
+                        return_weight3d(w, W, scale, s, H)
                     k_start = col - min(d, col)
                     k_end = col + min(d + 1, n_col - col)
 

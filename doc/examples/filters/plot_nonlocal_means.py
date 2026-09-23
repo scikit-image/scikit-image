@@ -50,6 +50,10 @@ noisy = random_noise(astro, var=sigma**2)
 sigma_est = np.mean(estimate_sigma(noisy, channel_axis=-1))
 print(f'estimated noise standard deviation = {sigma_est}')
 
+h_map = np.full(noisy.shape[:2], 1.15 * sigma_est)
+h_map[:, : noisy.shape[1] // 2] *= 0.7
+h_map[:, noisy.shape[1] // 2 :] *= 1.3
+
 patch_kw = dict(
     patch_size=5,  # 5x5 patches
     patch_distance=6,  # 13x13 search area
@@ -72,7 +76,9 @@ denoise2_fast = denoise_nl_means(
     noisy, h=0.6 * sigma_est, sigma=sigma_est, fast_mode=True, **patch_kw
 )
 
-fig, ax = plt.subplots(nrows=2, ncols=3, figsize=(8, 6), sharex=True, sharey=True)
+denoise_spatial = denoise_nl_means(noisy, h=h_map, fast_mode=False, **patch_kw)
+
+fig, ax = plt.subplots(nrows=2, ncols=4, figsize=(10, 6), sharex=True, sharey=True)
 
 ax[0, 0].imshow(noisy)
 ax[0, 0].axis('off')
@@ -83,6 +89,9 @@ ax[0, 1].set_title('non-local means\n(slow)')
 ax[0, 2].imshow(denoise2)
 ax[0, 2].axis('off')
 ax[0, 2].set_title('non-local means\n(slow, using $\\sigma_{est}$)')
+ax[0, 3].imshow(h_map)
+ax[0, 3].axis('off')
+ax[0, 3].set_title('spatially varying $h$')
 ax[1, 0].imshow(astro)
 ax[1, 0].axis('off')
 ax[1, 0].set_title('original\n(noise free)')
@@ -92,6 +101,9 @@ ax[1, 1].set_title('non-local means\n(fast)')
 ax[1, 2].imshow(denoise2_fast)
 ax[1, 2].axis('off')
 ax[1, 2].set_title('non-local means\n(fast, using $\\sigma_{est}$)')
+ax[1, 3].imshow(denoise_spatial)
+ax[1, 3].axis('off')
+ax[1, 3].set_title('non-local means\n(spatially varying $h$)')
 
 fig.tight_layout()
 
@@ -101,11 +113,13 @@ psnr = peak_signal_noise_ratio(astro, denoise)
 psnr2 = peak_signal_noise_ratio(astro, denoise2)
 psnr_fast = peak_signal_noise_ratio(astro, denoise_fast)
 psnr2_fast = peak_signal_noise_ratio(astro, denoise2_fast)
+psnr_spatial = peak_signal_noise_ratio(astro, denoise_spatial)
 
 print(f'PSNR (noisy) = {psnr_noisy:0.2f}')
 print(f'PSNR (slow) = {psnr:0.2f}')
 print(f'PSNR (slow, using sigma) = {psnr2:0.2f}')
 print(f'PSNR (fast) = {psnr_fast:0.2f}')
 print(f'PSNR (fast, using sigma) = {psnr2_fast:0.2f}')
+print(f'PSNR (spatially varying h) = {psnr_spatial:0.2f}')
 
 plt.show()
