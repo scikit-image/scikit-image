@@ -1,8 +1,12 @@
 import numpy as np
+from scipy import ndimage as ndi
 from scipy.spatial import cKDTree
 
+from ..feature import hessian_matrix, hessian_matrix_eigvals
+from ..util.dtype import img_as_float
 from ._hough_transform import _hough_circle, _hough_ellipse, _hough_line
 from ._hough_transform import _probabilistic_hough_line as _prob_hough_line
+from ._hough_transform_ridge import _hough_ridge
 
 
 def hough_line_peaks(
@@ -421,6 +425,159 @@ def hough_circle_peaks(
         cy_sorted[should_keep],
         r_sorted[should_keep],
     )
+
+
+def hough_ridge(
+    image,
+    radii,
+    *,
+    sigma=1.8,
+    curvature_threshold=None,
+    vote_threshold=3,
+    circle_threshold=0.66 * np.pi,
+    ring_width=3,
+):
+    """Detect circular rings using their ridge directions.
+
+    The local normal of each ridge pixel restricts its votes to two lines in
+    the circle Hough space. Candidate circles are refined by fitting their
+    nearby ridge pixels, yielding subpixel center and radius estimates.
+
+    Parameters
+    ----------
+    image : ndarray of shape (M, N)
+        Input image. Bright ridges on a dark background are detected.
+    radii : (2,) array-like of int
+        Inclusive minimum and maximum radii to search.
+    sigma : float
+        Standard deviation of the Gaussian used to compute the Hessian.
+    curvature_threshold : float, optional
+        Maximum least principal curvature considered to be a ridge. Negative
+        values select bright ridges. By default, the median of the
+        negative curvatures is used.
+    vote_threshold : int
+        Minimum number of votes retained at an accumulator location.
+    circle_threshold : float
+        Minimum number of votes divided by radius for a ring candidate.
+        A complete ideal ring has a score close to ``2 * pi``.
+    ring_width : float
+        Half-width of the annulus used for subpixel circle fitting.
+
+    Returns
+    -------
+    rings : ndarray of shape (N, 3)
+        Detected ``(row, column, radius)`` values at subpixel precision, sorted
+        by decreasing Hough score.
+
+    References
+    ----------
+    .. [1] E. Afik, "Robust and highly performant ring detection algorithm for
+           3D particle tracking using 2D microscope imaging", Scientific
+           Reports 5, 13584 (2015). :doi:`10.1038/srep13584`
+    """
+    image = np.asarray(image)
+    if image.ndim != 2:
+        raise ValueError('The input image `image` must be 2D.')
+    if image.size == 0:
+        raise ValueError('The input image `image` must not be empty.')
+
+    radii_array = np.asarray(radii)
+    if radii_array.shape != (2,) or not np.issubdtype(radii_array.dtype, np.integer):
+        raise ValueError('`radii` must contain two integers.')
+    min_radius, max_radius = (int(value) for value in radii_array)
+    if min_radius < 3 or min_radius > max_radius:
+        raise ValueError('`radii` must satisfy 3 <= min_radius <= max_radius.')
+    if max_radius >= max(image.shape):
+        raise ValueError(
+            'The maximum radius must be smaller than the largest image dimension.'
+        )
+
+    for name, value in (
+        ('sigma', sigma),
+        ('circle_threshold', circle_threshold),
+        ('ring_width', ring_width),
+    ):
+        if not np.isscalar(value) or not np.isfinite(value) or value <= 0:
+            raise ValueError(f'`{name}` must be a positive finite scalar.')
+    if not isinstance(vote_threshold, (int, np.integer)) or vote_threshold <= 0:
+        raise ValueError('`vote_threshold` must be a positive integer.')
+
+    image = img_as_float(image)
+    hessian = hessian_matrix(
+        image,
+        sigma=sigma,
+        order='rc',
+        use_gaussian_derivatives=False,
+    )
+    hrr, hrc, hcc = (np.ascontiguousarray(part, dtype=np.float64) for part in hessian)
+    curvature = np.ascontiguousarray(
+        hessian_matrix_eigvals((hrr, hrc, hcc))[-1], dtype=np.float64
+    )
+
+    if curvature_threshold is None:
+        negative_curvature = curvature[curvature < 0]
+        if negative_curvature.size == 0:
+            return np.empty((0, 3), dtype=float)
+        curvature_threshold = np.median(negative_curvature)
+    elif not np.isscalar(curvature_threshold) or not np.isfinite(curvature_threshold):
+        raise ValueError('`curvature_threshold` must be a finite scalar or None.')
+
+    accumulator, ridge_mask = _hough_ridge(
+        hrr,
+        hrc,
+        hcc,
+        curvature,
+        float(curvature_threshold),
+        min_radius,
+        max_radius,
+    )
+    accumulator[accumulator < vote_threshold] = 0
+    radius_values = np.arange(min_radius, max_radius + 1, dtype=float)
+    scores = np.empty_like(accumulator)
+    for radius_index, radius in enumerate(radius_values):
+        smoothing_sigma = 0.05 * radius + 0.25
+        scores[radius_index] = ndi.gaussian_filter(
+            accumulator[radius_index], smoothing_sigma
+        )
+        # gaussian_filter uses a unit-sum kernel, while the method's score is
+        # defined using a Gaussian with unit height at its center.
+        scores[radius_index] *= 2 * np.pi * smoothing_sigma**2 / radius
+    maxima = ndi.maximum_filter(scores, size=3, mode='constant')
+    candidates = np.argwhere(
+        (scores == maxima) & (scores >= circle_threshold) & (scores > 0)
+    )
+    if candidates.size == 0:
+        return np.empty((0, 3), dtype=float)
+
+    ridge_rows, ridge_cols = np.nonzero(ridge_mask)
+    fitted = []
+    accepted_candidates = []
+    candidate_scores = scores[tuple(candidates.T)]
+    for candidate in candidates[np.argsort(candidate_scores)[::-1]]:
+        radius_index, row, col = candidate
+        radius = radius_values[radius_index]
+        if any(
+            abs(radius - other_radius) <= 1
+            and np.hypot(row - other_row, col - other_col) <= 1
+            for other_row, other_col, other_radius in accepted_candidates
+        ):
+            continue
+        accepted_candidates.append((row, col, radius))
+        distance = np.hypot(ridge_rows - row, ridge_cols - col)
+        selected = np.abs(distance - radius) <= ring_width
+        if np.count_nonzero(selected) >= 4:
+            rows = ridge_rows[selected].astype(float)
+            cols = ridge_cols[selected].astype(float)
+            system = np.column_stack((2 * rows, 2 * cols, np.ones(rows.size)))
+            solution = np.linalg.lstsq(system, rows**2 + cols**2, rcond=None)[0]
+            fitted_row, fitted_col, offset = solution
+            fitted_radius = np.sqrt(max(0, offset + fitted_row**2 + fitted_col**2))
+            if min_radius - 0.5 <= fitted_radius <= max_radius + 0.5:
+                fitted.append((fitted_row, fitted_col, fitted_radius))
+                continue
+        fitted.append((float(row), float(col), radius))
+
+    return np.asarray(fitted, dtype=float)
 
 
 def label_distant_points(xs, ys, min_xdistance, min_ydistance, max_points):

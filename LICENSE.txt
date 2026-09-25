@@ -2,6 +2,10 @@ Files: *
 Copyright: 2009-2022 the scikit-image team
 License: BSD-3-Clause
 
+File: src/skimage/transform/_hough_transform_ridge.pyx
+Copyright: 2012 Eldad Afik
+License: BSD-3-Clause
+
 Files: doc/source/themes/scikit-image/layout.html
 Copyright: 2007-2010 the Sphinx team
 License: BSD-3-Clause
