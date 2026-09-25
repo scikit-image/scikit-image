@@ -65,4 +65,3 @@ Just for your own satisfaction, show yourself that you now have a new
    origin	git@github.com:your-user-name/scikit-image.git (push)
 
 .. include:: links.inc
-

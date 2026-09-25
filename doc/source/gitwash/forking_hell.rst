@@ -30,4 +30,3 @@ Create your own forked copy of `scikit-image`_
    should find yourself at the home page for your own forked copy of `scikit-image`_.
 
 .. include:: links.inc
-

@@ -9,25 +9,31 @@ loops. Here is an example of such repetitive tasks:
 
 .. code-block:: python
 
-    from skimage import data, color, util
-    from skimage.restoration import denoise_tv_chambolle
-    from skimage.feature import hog
+    import skimage as ski
 
     def task(image):
         """
         Apply some functions and return an image.
         """
-        image = denoise_tv_chambolle(image[0][0], weight=0.1, channel_axis=-1)
-        fd, hog_image = hog(color.rgb2gray(image), orientations=8,
-                            pixels_per_cell=(16, 16), cells_per_block=(1, 1),
-                            visualize=True)
+        image = ski.restoration.denoise_tv_chambolle(
+            image[0][0], weight=0.1, channel_axis=-1
+        )
+        fd, hog_image = ski.feature.hog(
+            ski.color.rgb2gray(image),
+            orientations=8,
+            pixels_per_cell=(16, 16),
+            cells_per_block=(1, 1),
+            visualize=True
+        )
         return hog_image
 
 
     # Prepare images
-    hubble = data.hubble_deep_field()
+    hubble = ski.data.hubble_deep_field()
     width = 10
-    pics = util.view_as_windows(hubble, (width, hubble.shape[1], hubble.shape[2]), step=width)
+    pics = ski.util.view_as_windows(
+        hubble, (width, hubble.shape[1], hubble.shape[2]), step=width
+    )
 
 To call the function ``task`` on each element of the list ``pics``, it is
 usual to write a for loop. To measure the execution time of this loop, you can

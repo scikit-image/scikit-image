@@ -32,8 +32,7 @@ ax1, ax2, ax3, ax4 = ax.ravel()
 fig.colorbar(ax1.imshow(image, cmap='gray', vmin=0, vmax=4 * np.pi), ax=ax1)
 ax1.set_title('Original')
 
-fig.colorbar(ax2.imshow(image_wrapped, cmap='gray', vmin=-np.pi, vmax=np.pi),
-             ax=ax2)
+fig.colorbar(ax2.imshow(image_wrapped, cmap='gray', vmin=-np.pi, vmax=np.pi), ax=ax2)
 ax2.set_title('Wrapped phase')
 
 fig.colorbar(ax3.imshow(image_unwrapped, cmap='gray'), ax=ax3)
@@ -57,11 +56,9 @@ mask[image.shape[0] // 2, :] = True
 
 image_wrapped = np.ma.array(np.angle(np.exp(1j * image)), mask=mask)
 # Unwrap image without wrap around
-image_unwrapped_no_wrap_around = unwrap_phase(image_wrapped,
-                                              wrap_around=(False, False))
+image_unwrapped_no_wrap_around = unwrap_phase(image_wrapped, wrap_around=(False, False))
 # Unwrap with wrap around enabled for the 0th dimension
-image_unwrapped_wrap_around = unwrap_phase(image_wrapped,
-                                           wrap_around=(True, False))
+image_unwrapped_wrap_around = unwrap_phase(image_wrapped, wrap_around=(True, False))
 
 fig, ax = plt.subplots(2, 2)
 ax1, ax2, ax3, ax4 = ax.ravel()
@@ -69,12 +66,10 @@ ax1, ax2, ax3, ax4 = ax.ravel()
 fig.colorbar(ax1.imshow(np.ma.array(image, mask=mask), cmap='rainbow'), ax=ax1)
 ax1.set_title('Original')
 
-fig.colorbar(ax2.imshow(image_wrapped, cmap='rainbow', vmin=-np.pi, vmax=np.pi),
-             ax=ax2)
+fig.colorbar(ax2.imshow(image_wrapped, cmap='rainbow', vmin=-np.pi, vmax=np.pi), ax=ax2)
 ax2.set_title('Wrapped phase')
 
-fig.colorbar(ax3.imshow(image_unwrapped_no_wrap_around, cmap='rainbow'),
-             ax=ax3)
+fig.colorbar(ax3.imshow(image_unwrapped_no_wrap_around, cmap='rainbow'), ax=ax3)
 ax3.set_title('Unwrapped without wrap_around')
 
 fig.colorbar(ax4.imshow(image_unwrapped_wrap_around, cmap='rainbow'), ax=ax4)

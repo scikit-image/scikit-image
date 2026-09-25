@@ -7,6 +7,7 @@ This example adjusts image contrast by performing a Gamma and a Logarithmic
 correction on the input image.
 
 """
+
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
@@ -18,9 +19,7 @@ matplotlib.rcParams['font.size'] = 8
 
 
 def plot_img_and_hist(image, axes, bins=256):
-    """Plot an image along with its histogram and cumulative histogram.
-
-    """
+    """Plot an image along with its histogram and cumulative histogram."""
     image = img_as_float(image)
     ax_img, ax_hist = axes
     ax_cdf = ax_hist.twinx()
@@ -55,7 +54,7 @@ logarithmic_corrected = exposure.adjust_log(img, 1)
 
 # Display results
 fig = plt.figure(figsize=(8, 5))
-axes = np.zeros((2, 3), dtype=np.object)
+axes = np.zeros((2, 3), dtype=object)
 axes[0, 0] = plt.subplot(2, 3, 1)
 axes[0, 1] = plt.subplot(2, 3, 2, sharex=axes[0, 0], sharey=axes[0, 0])
 axes[0, 2] = plt.subplot(2, 3, 3, sharex=axes[0, 0], sharey=axes[0, 0])

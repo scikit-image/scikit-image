@@ -19,7 +19,7 @@ from skimage import data
 from skimage.filters import threshold_otsu
 from skimage.segmentation import clear_border
 from skimage.measure import label, regionprops
-from skimage.morphology import closing, square
+from skimage.morphology import closing, footprint_rectangle
 from skimage.color import label2rgb
 
 
@@ -27,7 +27,7 @@ image = data.coins()[50:-50, 50:-50]
 
 # apply threshold
 thresh = threshold_otsu(image)
-bw = closing(image > thresh, square(3))
+bw = closing(image > thresh, footprint_rectangle((3, 3)))
 
 # remove artifacts connected to image border
 cleared = clear_border(bw)
@@ -46,8 +46,14 @@ for region in regionprops(label_image):
     if region.area >= 100:
         # draw rectangle around segmented coins
         minr, minc, maxr, maxc = region.bbox
-        rect = mpatches.Rectangle((minc, minr), maxc - minc, maxr - minr,
-                                  fill=False, edgecolor='red', linewidth=2)
+        rect = mpatches.Rectangle(
+            (minc, minr),
+            maxc - minc,
+            maxr - minr,
+            fill=False,
+            edgecolor='red',
+            linewidth=2,
+        )
         ax.add_patch(rect)
 
 ax.set_axis_off()

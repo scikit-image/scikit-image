@@ -58,9 +58,11 @@ ax[1].set_axis_off()
 ax[2].plot(thresholds, entropies)
 ax[2].set_xlabel('thresholds')
 ax[2].set_ylabel('cross-entropy')
-ax[2].vlines(optimal_camera_threshold,
-             ymin=np.min(entropies) - 0.05 * np.ptp(entropies),
-             ymax=np.max(entropies) - 0.05 * np.ptp(entropies))
+ax[2].vlines(
+    optimal_camera_threshold,
+    ymin=np.min(entropies) - 0.05 * np.ptp(entropies),
+    ymax=np.max(entropies) - 0.05 * np.ptp(entropies),
+)
 ax[2].set_title('optimal threshold')
 
 fig.tight_layout()
@@ -76,8 +78,7 @@ plt.show()
 
 iter_thresholds = []
 
-optimal_threshold = filters.threshold_li(camera,
-                                         iter_callback=iter_thresholds.append)
+optimal_threshold = filters.threshold_li(camera, iter_callback=iter_thresholds.append)
 iter_entropies = [_cross_entropy(camera, t) for t in iter_thresholds]
 
 print('Only', len(iter_thresholds), 'thresholds examined.')
@@ -100,8 +101,9 @@ plt.show()
 
 iter_thresholds2 = []
 
-opt_threshold2 = filters.threshold_li(cell, initial_guess=64,
-                                      iter_callback=iter_thresholds2.append)
+opt_threshold2 = filters.threshold_li(
+    cell, initial_guess=64, iter_callback=iter_thresholds2.append
+)
 
 thresholds2 = np.arange(np.min(cell) + 1.5, np.max(cell) - 1.5)
 entropies2 = [_cross_entropy(cell, t) for t in thresholds]
@@ -132,8 +134,7 @@ plt.show()
 
 iter_thresholds3 = []
 
-opt_threshold3 = filters.threshold_li(cell,
-                                      iter_callback=iter_thresholds3.append)
+opt_threshold3 = filters.threshold_li(cell, iter_callback=iter_thresholds3.append)
 
 iter_entropies3 = [_cross_entropy(cell, t) for t in iter_thresholds3]
 
@@ -167,20 +168,21 @@ plt.show()
 # threshold update gradient, marking the 0 gradient line and the default
 # initial guess by ``threshold_li``.
 
+
 def li_gradient(image, t):
     """Find the threshold update at a given threshold."""
     foreground = image > t
     mean_fore = np.mean(image[foreground])
     mean_back = np.mean(image[~foreground])
-    t_next = ((mean_back - mean_fore) /
-              (np.log(mean_back) - np.log(mean_fore)))
+    t_next = (mean_back - mean_fore) / (np.log(mean_back) - np.log(mean_fore))
     dt = t_next - t
     return dt
 
 
 iter_thresholds4 = []
-opt_threshold4 = filters.threshold_li(cell, initial_guess=68,
-                                      iter_callback=iter_thresholds4.append)
+opt_threshold4 = filters.threshold_li(
+    cell, initial_guess=68, iter_callback=iter_thresholds4.append
+)
 iter_entropies4 = [_cross_entropy(cell, t) for t in iter_thresholds4]
 print(len(iter_thresholds4), 'examined, optimum:', opt_threshold4)
 
@@ -196,10 +198,16 @@ ax1.tick_params(axis='y', labelcolor='C0')
 
 ax2 = ax1.twinx()
 ax2.plot(thresholds2, gradients, c='C3')
-ax2.hlines([0], xmin=thresholds2[0], xmax=thresholds2[-1],
-           colors='gray', linestyles='dashed')
-ax2.vlines(np.mean(cell), ymin=np.min(gradients), ymax=np.max(gradients),
-           colors='gray', linestyles='dashed')
+ax2.hlines(
+    [0], xmin=thresholds2[0], xmax=thresholds2[-1], colors='gray', linestyles='dashed'
+)
+ax2.vlines(
+    np.mean(cell),
+    ymin=np.min(gradients),
+    ymax=np.max(gradients),
+    colors='gray',
+    linestyles='dashed',
+)
 ax2.set_ylabel(r'$\Delta$(threshold)', color='C3')
 ax2.tick_params(axis='y', labelcolor='C3')
 
@@ -214,13 +222,16 @@ plt.show()
 # default. This might be a good option when many images with different ranges
 # need to be processed.
 
+
 def quantile_95(image):
     # you can use np.quantile(image, 0.95) if you have NumPy>=1.15
     return np.percentile(image, 95)
 
+
 iter_thresholds5 = []
-opt_threshold5 = filters.threshold_li(cell, initial_guess=quantile_95,
-                                      iter_callback=iter_thresholds5.append)
+opt_threshold5 = filters.threshold_li(
+    cell, initial_guess=quantile_95, iter_callback=iter_thresholds5.append
+)
 iter_entropies5 = [_cross_entropy(cell, t) for t in iter_thresholds5]
 print(len(iter_thresholds5), 'examined, optimum:', opt_threshold5)
 

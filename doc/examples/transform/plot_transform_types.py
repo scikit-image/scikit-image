@@ -22,7 +22,7 @@ transformations, tutorial
 such transformations for various tasks such as image warping or parameter
 estimation.
 """
-import math
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -39,10 +39,7 @@ from skimage import img_as_float
 # pairs of points. It can be described as a rotation about the origin
 # followed by a translation.
 
-tform = transform.EuclideanTransform(
-    rotation=np.pi / 12.,
-    translation = (100, -20)
-    )
+tform = transform.EuclideanTransform(rotation=np.pi / 12.0, translation=(100, -20))
 print(tform.params)
 
 ######################################################################
@@ -61,11 +58,11 @@ ax.imshow(tf_img)
 _ = ax.set_title('Euclidean transformation')
 
 ######################################################################
-# For a rotation around the center of the image, one can 
+# For a rotation around the center of the image, one can
 # compose a translation to change the origin, a rotation, and finally
 # the inverse of the first translation.
 
-rotation = transform.EuclideanTransform(rotation=np.pi/3)
+rotation = transform.EuclideanTransform(rotation=np.pi / 3)
 shift = transform.EuclideanTransform(translation=-np.array(img.shape[:2]) / 2)
 # Compose transforms by multiplying their matrices
 matrix = np.linalg.inv(shift.params) @ rotation.params @ shift.params
@@ -82,9 +79,8 @@ _ = ax.imshow(tf_img)
 # preserves the shape of objects. It combines scaling, translation and rotation.
 
 tform = transform.SimilarityTransform(
-    scale=0.5,
-    rotation=np.pi/12,
-    translation=(100, 50))
+    scale=0.5, rotation=np.pi / 12, translation=(100, 50)
+)
 print(tform.params)
 tf_img = transform.warp(img, tform.inverse)
 fig, ax = plt.subplots()
@@ -101,8 +97,8 @@ _ = ax.set_title('Similarity transformation')
 # `shear transformation <https://en.wikipedia.org/wiki/Shear_mapping>`_.
 
 tform = transform.AffineTransform(
-        shear=np.pi/6,
-        )
+    shear=np.pi / 6,
+)
 print(tform.params)
 tf_img = transform.warp(img, tform.inverse)
 fig, ax = plt.subplots()
@@ -118,9 +114,7 @@ _ = ax.set_title('Affine transformation')
 # projective transformation, preserves lines but not necessarily
 # parallelism.
 
-matrix = np.array([[1, -0.5, 100],
-                   [0.1, 0.9, 50],
-                   [0.0015, 0.0015, 1]])
+matrix = np.array([[1, -0.5, 100], [0.1, 0.9, 50], [0.0015, 0.0015, 1]])
 tform = transform.ProjectiveTransform(matrix=matrix)
 tf_img = transform.warp(img, tform.inverse)
 fig, ax = plt.subplots()

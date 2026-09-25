@@ -1,0 +1,34 @@
+cff-version: 1.2.0
+title: scikit-image
+type: software
+authors:
+  - name: The scikit-image team
+message: "If you use scikit-image in a scientific publication, we would appreciate it if you would cite the following paper:"
+preferred-citation:
+  type: article
+  title: "scikit-image: image processing in Python"
+  authors:
+  - family-names: van der Walt
+    given-names: Stéfan J.
+  - family-names: Schönberger
+    given-names: Johannes L.
+  - family-names: Nunez-Iglesias
+    given-names: Juan
+  - family-names: Boulogne
+    given-names: François
+  - family-names: Warner
+    given-names: Joshua D.
+  - family-names: Yager
+    given-names: Neil
+  - family-names: Gouillart
+    given-names: Emmanuelle
+  - family-names: Yu
+    given-names: Tony
+  - family-names: the scikit-image contributors
+  journal: PeerJ
+  volume: 2
+  start: e453
+  year: 2014
+  month: 6
+  url: "https://doi.org/10.7717/peerj.453"
+  doi: 10.7717/peerj.453

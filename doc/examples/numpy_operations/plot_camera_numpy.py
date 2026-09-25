@@ -7,10 +7,10 @@ masking and fancy indexing, in order to modify the pixel values of an image.
 """
 
 import numpy as np
-from skimage import data
+import skimage as ski
 import matplotlib.pyplot as plt
 
-camera = data.camera()
+camera = ski.data.camera()
 camera[:10] = 0
 mask = camera < 87
 camera[mask] = 255
@@ -20,7 +20,7 @@ camera[inds_x, inds_y] = 0
 
 l_x, l_y = camera.shape[0], camera.shape[1]
 X, Y = np.ogrid[:l_x, :l_y]
-outer_disk_mask = (X - l_x / 2)**2 + (Y - l_y / 2)**2 > (l_x / 2)**2
+outer_disk_mask = (X - l_x / 2) ** 2 + (Y - l_y / 2) ** 2 > (l_x / 2) ** 2
 camera[outer_disk_mask] = 0
 
 plt.figure(figsize=(4, 4))

@@ -1,0 +1,27 @@
+reviews:
+  profile: "chill" # "assertive" — more nitpicky
+  review_status: false
+  review_details: false
+  high_level_summary: false
+  request_changes_workflow: false
+  estimate_code_review_effort: true
+  auto_apply_labels: false
+  in_progress_fortune: false
+  poem: false
+  enable_prompt_for_ai_agents: false
+  auto_review:
+    base_branches:
+      - main
+  pre_merge_checks:
+    title:
+      requirements: >-
+        Title should be concise and descriptive, ideally under 80 characters, and not end on `.`
+
+chat:
+  auto_reply: false
+
+knowledge_base:
+  code_guidelines:
+    filePatterns:
+      - CONTRIBUTING.rst
+      - doc/source/development/core_developer.md

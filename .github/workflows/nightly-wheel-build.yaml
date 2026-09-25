@@ -1,0 +1,72 @@
+name: Nightly wheels
+# Workflow to build nightly wheels and upload to
+# pypi.anaconda.org/scientific-python-nightly-wheels
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "27 11 * * SUN" # every Sunday at 11:27 UTC
+  push:
+    branches:
+      - maintenance/**
+  pull_request:
+    paths:
+      - ".github/workflows/nightly-wheel-build.yaml"
+
+concurrency:
+  # Cancel previous workflows on the same branch
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  call-workflow-build-wheels:
+    name: Wheels recipe
+    uses: ./.github/workflows/wheels-recipe.yaml
+
+  run-on-failure:
+    needs: call-workflow-build-wheels
+    runs-on: ubuntu-latest
+    if: ${{ failure() && github.ref == 'refs/heads/main' }}
+    steps:
+      - name: "Job has failed: reporting"
+        uses: JasonEtco/create-an-issue@1b14a70e4d8dc185e5cc76d3bec9eab20257b2c5 # v2.9.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BUILD_TYPE: "nightly build & test"
+        with:
+          filename: .github/MAIN_FAIL_TEMPLATE.md
+          update_existing: true
+
+  upload_anaconda:
+    permissions:
+      contents: write # for softprops/action-gh-release to create GitHub release
+    name: Release
+    needs: call-workflow-build-wheels
+    if: github.repository_owner == 'scikit-image' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v5
+        id: download
+        with:
+          pattern: wheels-*
+          merge-multiple: true
+          path: ./dist
+
+      - name: Upload wheel
+        uses: scientific-python/upload-nightly-action@b36e8c0c10dbcfd2e05bf95f17ef8c14fd708dbf # 0.6.2
+        with:
+          artifacts_path: dist
+          anaconda_nightly_upload_token: ${{secrets.UPLOAD_TOKEN}}
+
+      - name: "Job has failed: reporting"
+        if: ${{ failure() && github.ref == 'refs/heads/main' }}
+        uses: JasonEtco/create-an-issue@1b14a70e4d8dc185e5cc76d3bec9eab20257b2c5 # v2.9.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BUILD_TYPE: "nightly wheel upload"
+        with:
+          filename: .github/MAIN_FAIL_TEMPLATE.md
+          update_existing: true

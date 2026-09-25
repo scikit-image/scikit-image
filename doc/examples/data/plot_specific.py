@@ -4,10 +4,11 @@ Specific images
 ===============
 
 """
+
 import matplotlib.pyplot as plt
 import matplotlib
 
-from skimage import data
+import skimage as ski
 
 matplotlib.rcParams["font.size"] = 18
 
@@ -20,7 +21,7 @@ matplotlib.rcParams["font.size"] = 18
 fig, axes = plt.subplots(1, 2, figsize=(8, 4))
 ax = axes.ravel()
 
-cycle_images = data.stereo_motorcycle()
+cycle_images = ski.data.stereo_motorcycle()
 ax[0].imshow(cycle_images[0])
 ax[1].imshow(cycle_images[1])
 
@@ -34,10 +35,10 @@ plt.show()
 # =============
 
 
-fig, axes = plt.subplots(1, 2, figsize=(8, 4))
+fig, axes = plt.subplots(ncols=2, figsize=(8, 4))
 ax = axes.ravel()
 
-vortex_images = data.vortex()
+vortex_images = ski.data.vortex()
 ax[0].imshow(vortex_images[0])
 ax[1].imshow(vortex_images[1])
 
@@ -55,7 +56,7 @@ plt.show()
 
 fig, axes = plt.subplots(4, 5, figsize=(20, 20))
 ax = axes.ravel()
-lfw_images = data.lfw_subset()
+lfw_images = ski.data.lfw_subset()
 for i in range(20):
     ax[i].imshow(lfw_images[90 + i], cmap=plt.cm.gray)
     ax[i].axis("off")

@@ -39,20 +39,17 @@ noise[rng.random(size=noise.shape) > 0.5] *= -1
 img_noise = img + noise
 img_const = img + abs(noise)
 
-fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(10, 4),
-                         sharex=True, sharey=True)
+fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(10, 4), sharex=True, sharey=True)
 ax = axes.ravel()
 
 mse_none = mean_squared_error(img, img)
 ssim_none = ssim(img, img, data_range=img.max() - img.min())
 
 mse_noise = mean_squared_error(img, img_noise)
-ssim_noise = ssim(img, img_noise,
-                  data_range=img_noise.max() - img_noise.min())
+ssim_noise = ssim(img, img_noise, data_range=img_noise.max() - img_noise.min())
 
 mse_const = mean_squared_error(img, img_const)
-ssim_const = ssim(img, img_const,
-                  data_range=img_const.max() - img_const.min())
+ssim_const = ssim(img, img_const, data_range=img_const.max() - img_const.min())
 
 ax[0].imshow(img, cmap=plt.cm.gray, vmin=0, vmax=1)
 ax[0].set_xlabel(f'MSE: {mse_none:.2f}, SSIM: {ssim_none:.2f}')

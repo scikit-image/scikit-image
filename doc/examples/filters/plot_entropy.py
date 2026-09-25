@@ -38,8 +38,7 @@ rng = np.random.default_rng()
 noise_mask = np.full((128, 128), 28, dtype=np.uint8)
 noise_mask[32:-32, 32:-32] = 30
 
-noise = (noise_mask * rng.random(noise_mask.shape) - 0.5
-         * noise_mask).astype(np.uint8)
+noise = (noise_mask * rng.random(noise_mask.shape) - 0.5 * noise_mask).astype(np.uint8)
 img = noise + 128
 
 entr_img = entropy(img, disk(10))
@@ -61,8 +60,7 @@ fig.tight_layout()
 
 image = img_as_ubyte(data.camera())
 
-fig, (ax0, ax1) = plt.subplots(ncols=2, figsize=(12, 4),
-                               sharex=True, sharey=True)
+fig, (ax0, ax1) = plt.subplots(ncols=2, figsize=(12, 4), sharex=True, sharey=True)
 
 img0 = ax0.imshow(image, cmap=plt.cm.gray)
 ax0.set_title("Image")
