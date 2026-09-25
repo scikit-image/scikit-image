@@ -245,7 +245,7 @@ def flood(image, seed_point, *, footprint=None, connectivity=None, tolerance=Non
         index_point = seed_point
 
     seed_value = image[index_point]
-    seed_point = tuple(np.asarray(seed_point) % image.shape)
+    seed_point = tuple(np.asarray(index_point) % image.shape)
 
     footprint = _resolve_neighborhood(
         footprint, connectivity, image.ndim, enforce_adjacency=False
