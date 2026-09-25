@@ -150,6 +150,7 @@ def test_adapt_doctests_defaults_to_caller_globals():
 
 
 @skip_if_pyopt2
+@pytest.mark.thread_unsafe(reason="mutates sys.modules under a fixed module name")
 def test_adapt_doctests_copies_doctest_requires():
     impl = types.ModuleType('_skimage2.tests.example_impl')
     impl.__doctest_requires__ = {'func': ['matplotlib']}
