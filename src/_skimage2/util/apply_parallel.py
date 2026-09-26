@@ -206,7 +206,18 @@ def apply_parallel(
 
     darr = _ensure_dask_array(array, chunks=chunks)
 
-    res = darr.map_overlap(wrapped_func, depth, boundary=mode, dtype=dtype)
+    if dtype is None:
+        res = darr.map_overlap(wrapped_func, depth, boundary=mode)
+    else:
+        meta = numpy.empty((0,) * darr.ndim, dtype=dtype)
+        res = darr.map_overlap(
+            wrapped_func,
+            depth,
+            boundary=mode,
+            dtype=dtype,
+            meta=meta,
+        )
+
     if compute:
         res = res.compute()
 
