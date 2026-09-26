@@ -209,7 +209,7 @@ def apply_parallel(
     if dtype is None:
         res = darr.map_overlap(wrapped_func, depth, boundary=mode)
     else:
-        meta = numpy.empty((0,) * darr.ndim, dtype=dtype)
+        meta = darr._meta.astype(dtype, copy=False)
         res = darr.map_overlap(
             wrapped_func,
             depth,
