@@ -75,15 +75,6 @@ _DEPRECATED_FETCHERS = frozenset(
 _deprecated_wrappers: dict[str, Callable] = {}
 
 
-def __getattr__(name):
-    obj = _stub_getattr(name)
-    if name in _DEPRECATED_FETCHERS:
-        return _deprecated_wrappers.setdefault(
-            name, _make_deprecation_wrapper(name, obj)
-        )
-    return obj
-
-
 def _make_deprecation_wrapper(name, func):
     """Wrap a bare-named fetcher to warn about its `fetch_` replacement."""
 
@@ -100,6 +91,31 @@ def _make_deprecation_wrapper(name, func):
         return func(*args, **kwargs)
 
     return wrapper
+
+
+def _deprecated_wrapper(name):
+    wrapper = _deprecated_wrappers.get(name)
+    if wrapper is None:
+        # Resolve through the canonical `fetch_*` name so `attach_stub` caches
+        # that name, then cache the wrapper here so the raw bare name never
+        # shadows it on later accesses.
+        func = _stub_getattr(f'fetch_{name}')
+        wrapper = _deprecated_wrappers[name] = _make_deprecation_wrapper(name, func)
+        globals()[name] = wrapper
+    return wrapper
+
+
+def __getattr__(name):
+    if name in _DEPRECATED_FETCHERS:
+        return _deprecated_wrapper(name)
+    return _stub_getattr(name)
+
+
+# `attach_stub` eagerly imports every stub name when EAGER_IMPORT is set,
+# binding the raw bare names before this module's `__getattr__` can wrap them.
+for _name in _DEPRECATED_FETCHERS:
+    if _name in globals():
+        globals()[_name] = _deprecated_wrapper(_name)
 
 
 def __dir__():
