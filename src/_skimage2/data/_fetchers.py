@@ -268,41 +268,37 @@ def _fetch(data_filename, prefix=None):
 def fetch(data_filename):
     """Fetch a scikit-image example dataset file, returning its local path.
 
-    Resolves ``data_filename`` to a path on disk: a copy shipped with the
-    distribution, an already-cached download, or a fresh download using pooch,
-    in that order.
+    Resolves ``data_filename`` to a path on disk: a file shipped with the
+    distribution, an already-cached download, or a fresh download via pooch, in
+    that order.
 
-    Use this for registry entries that have no ``fetch_*()`` wrapper, or when
-    you want the file path rather than a loaded array.
+    Use this for registry entries without a ``fetch_*()`` wrapper, or when you
+    want the file path instead of a loaded array.
 
     Parameters
     ----------
     data_filename : str
-        Registry key of the file, e.g. ``'data/astronaut.png'`` or
-        ``'data/kidney.tif'``; see the keys of
-        ``_skimage2.data._registry.registry`` for the full list.
+        Registry key, e.g. ``'data/astronaut.png'``; see the keys of
+        ``_skimage2.data._registry.registry``.
 
     Returns
     -------
     file_path : str
-        Path of the local file.
+        Path to the local file.
 
     Raises
     ------
     KeyError:
-        If ``data_filename`` is not known to the scikit-image distribution.
+        If ``data_filename`` is not a known scikit-image file.
 
     ModuleNotFoundError:
-        If the filename is known to the scikit-image distribution but pooch
-        is not installed.
+        If the file is known but pooch is not installed.
 
     ConnectionError:
-        If scikit-image is unable to connect to the internet but the
-        dataset has not been downloaded yet.
+        If the file is not cached and scikit-image cannot reach the internet.
 
     ValueError:
-        If a file is downloaded but its hash does not match the expected
-        value.
+        If a downloaded file's hash does not match the expected value.
     """
     return _fetch(data_filename)
 
@@ -1319,10 +1315,10 @@ def vortex():
     )
 
 
-# The fetch_* names are the canonical API, following sklearn.datasets.fetch_*:
-# the prefix shows at the call site that a dataset may need downloading. The
-# bare names above stay defined here because the skimage (v1) shim imports
-# them directly; skimage2.data exposes them as deprecated wrappers.
+# `fetch_*` is the canonical API (following `sklearn.datasets.fetch_*`): the
+# prefix flags that a dataset may need downloading. The bare names stay here
+# because the skimage (v1) shim imports them directly; skimage2.data exposes
+# them as deprecated wrappers.
 fetch_astronaut = astronaut
 fetch_brain = brain
 fetch_brick = brick

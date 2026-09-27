@@ -36,8 +36,8 @@ _DOCTEST_PROMPT_RE = re.compile(
     flags=re.VERBOSE,
 )
 
-# Base names of the dataset fetchers in ``_skimage2.data`` (without the
-# ``fetch_`` prefix); see ``_skimage2/data/_fetchers.py``.
+# Dataset fetcher base names (without the ``fetch_`` prefix) in
+# ``_skimage2.data``; see ``_skimage2/data/_fetchers.py``.
 _FETCHER_BASE_NAMES = (
     'astronaut',
     'brain',
@@ -94,11 +94,9 @@ _SEARCH_REP_PAIRS = (
         r'\g<fi> skimage\g<connect>',
     ),
     (re.compile(r'_?skimage2\.'), 'skimage.'),
-    # skimage2's data fetchers are named `fetch_<name>` (e.g. `fetch_astronaut`),
-    # but skimage (v1) keeps the old bare names (e.g. `astronaut`) for backwards
-    # compatibility, so strip the prefix for adapted doctests. Scope the match to
-    # the known dataset fetcher names so unrelated `fetch_*` identifiers (e.g.
-    # `fetch_20newsgroups`) are left untouched.
+    # skimage2 names its data fetchers `fetch_<name>`; skimage (v1) keeps the
+    # bare names, so strip the prefix in adapted doctests. Match only the known
+    # fetcher names so unrelated `fetch_*` identifiers are left alone.
     (
         re.compile(r'\b(?:fetch_((?:' + '|'.join(_FETCHER_BASE_NAMES) + r')))\b'),
         r'\1',

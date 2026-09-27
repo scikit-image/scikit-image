@@ -17,9 +17,8 @@ import lazy_loader as _lazy
 __getattr__, *_ = _lazy.attach_stub(__name__, __file__)
 _stub_getattr = __getattr__
 
-# Unlike `attach_stub`, this `__all__`/`__dir__` omit the bare v1 names (e.g.
-# `astronaut`), which stay importable but are not public API. Keep in sync with
-# `__all__` in `__init__.pyi`.
+# Override `attach_stub`'s `__all__`/`__dir__` to hide the bare v1 names, which
+# stay importable but are not public API. Keep in sync with `__init__.pyi`.
 __all__ = [
     'binary_blobs',
     'data_dir',
@@ -67,8 +66,8 @@ __all__ = [
     'file_hash',
 ]
 
-# Bare v1 names, deprecated in favor of their `fetch_*()` counterparts and
-# dropped when `skimage` (v1) support is removed.
+# Bare v1 names: deprecated aliases of the `fetch_*()` wrappers, dropped when
+# `skimage` (v1) support is removed.
 _DEPRECATED_FETCHERS = frozenset(
     name.removeprefix('fetch_') for name in __all__ if name.startswith('fetch_')
 )

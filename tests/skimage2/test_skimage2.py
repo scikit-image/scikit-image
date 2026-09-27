@@ -77,9 +77,8 @@ def test_skimage2_modules_match():
 
     import _skimage2
 
-    # `skimage2` may already be imported (e.g. by an earlier test), in which
-    # case the import-time warning would not re-fire. Reload to guarantee a
-    # fresh import so the ExperimentalAPIWarning is emitted.
+    # `skimage2` may already be imported (e.g. by an earlier test), so the
+    # import-time warning would not re-fire. Reload to emit it reliably.
     with pytest.warns(_skimage2.ExperimentalAPIWarning):
         skimage2 = importlib.reload(importlib.import_module("skimage2"))
 

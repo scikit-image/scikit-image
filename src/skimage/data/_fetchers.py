@@ -109,12 +109,10 @@ from skimage.util import PendingSkimage2Change  # noqa: E402
 
 from _skimage2.data import _fetchers as _ski2_fetchers  # noqa: E402
 
-# The bare dataset names are replaced by `skimage2.data.fetch_<name>()`. During
-# the overlap period while `skimage` (v1) and `skimage2` are both maintained,
-# the bare names remain available here, but warn about the replacement. This is
-# documented once, in the "Dataset functions use a `fetch_` prefix" section of
-# the migration guide, so we only emit the warning rather than register a
-# per-function migration entry.
+# `skimage2` replaces the bare names with `fetch_<name>()`. While `skimage` (v1)
+# and `skimage2` are both maintained, the bare names stay available here but
+# warn about the replacement. The rename is documented once in the migration
+# guide, so warn instead of registering per-function migration entries.
 _DATASET_FETCHERS = [
     name for name in __all__ if hasattr(_ski2_fetchers, f'fetch_{name}')
 ]

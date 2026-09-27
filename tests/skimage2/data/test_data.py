@@ -253,9 +253,8 @@ FETCH_FUNCTION_NAMES = [
 
 @pytest.mark.parametrize('function_name', FETCH_FUNCTION_NAMES)
 def test_bare_v1_names_are_unadvertised_aliases(function_name):
-    """fetch_<name>() is public API; the bare v1 name (e.g. astronaut for
-    fetch_astronaut) is a deprecated wrapper and is absent from __all__ and
-    __dir__."""
+    """fetch_<name>() is public API; the bare v1 name is a deprecated wrapper,
+    absent from __all__ and __dir__."""
     bare_name = function_name.removeprefix('fetch_')
     assert hasattr(data, function_name)
     assert hasattr(data, bare_name)
@@ -297,8 +296,8 @@ def test_public_skimage2_data_surface():
         import skimage2
 
     public_data = skimage2.data
-    # skimage2.data is a shim that forwards to `_skimage2.data`; the same
-    # objects (not the same module) must be reachable through it.
+    # skimage2.data is a shim over `_skimage2.data`; the same objects (not the
+    # same module) must be reachable through it.
     assert public_data is not data
     assert public_data.__all__ == data.__all__
     with pytest.warns(DeprecationWarning, match='fetch_astronaut'):
@@ -309,7 +308,7 @@ def test_public_skimage2_data_surface():
 
 
 def test_runtime_all_matches_stub():
-    """Runtime __all__ lists exactly the names the stub declares in __all__."""
+    """Runtime __all__ matches the names declared in the stub's __all__."""
     stub_path = Path(data.__file__).with_name('__init__.pyi')
     tree = ast.parse(stub_path.read_text())
     stub_all = next(
@@ -326,6 +325,5 @@ def test_runtime_all_matches_stub():
 
 
 def test_fetch_public_wrapper_matches_internal_fetch():
-    """The public fetch() is a thin wrapper: it must resolve to the exact
-    same path _fetch() would for the same registry key."""
+    """The public fetch() is a thin wrapper resolving to _fetch()'s path."""
     assert data.fetch('data/camera.png') == _fetchers._fetch('data/camera.png')

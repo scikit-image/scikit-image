@@ -89,10 +89,9 @@ from ._fetchers import (
     fetch_stereo_motorcycle,
     fetch_text,
     fetch_vortex,
-    # V1 bare names: runtime aliases of the `fetch_*` functions, available
-    # during the `skimage` (v1) overlap period but deprecated and absent from
-    # `__all__`. The `x as x` re-export keeps them importable to type checkers
-    # without exposing them to autodoc.
+    # V1 bare names: aliases of the `fetch_*` functions, deprecated and absent
+    # from `__all__`. The `x as x` re-export keeps them importable to type
+    # checkers without exposing them to autodoc.
     astronaut as astronaut,
     brain as brain,
     brick as brick,
