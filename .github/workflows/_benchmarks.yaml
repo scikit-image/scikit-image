@@ -1,0 +1,126 @@
+name: Benchmark (shared)
+# Private reusable workflow. Not triggered directly; call it from the
+# pull-request (`benchmarks.yaml`) and nightly (`benchmarks-nightly.yaml`)
+# workflows, which own the trigger and failure reporting.
+
+on:
+  workflow_call:
+    secrets:
+      CACHE_VERSION:
+        description: "Cache-version prefix for ccache keys."
+        required: true
+    inputs:
+      factor:
+        description: "Regression factor passed to `asv continuous`."
+        required: false
+        type: number
+        default: 1.1
+      baseline-sha:
+        description: >-
+          Explicit baseline SHA. If empty, the baseline is read from the
+          cached `last_contender_sha` written by a previous nightly run.
+        required: false
+        type: string
+        default: ""
+      report-issues:
+        description: "Open or update a GitHub issue when the run fails."
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  benchmark:
+    name: Linux
+    runs-on: ubuntu-latest
+
+    steps:
+      # We need the full repo to avoid this issue
+      # https://github.com/actions/checkout/issues/23
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-python@v6
+        name: Install Python
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: "requirements/*.txt"
+
+      - name: Install asv
+        shell: bash
+        run: pip install -U -r requirements/asv.txt
+
+      - name: Setup ccache
+        uses: ./.github/actions/setup-ccache
+        with:
+          key: ccache-${{ secrets.CACHE_VERSION }}-benchmark-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: ccache-${{ secrets.CACHE_VERSION }}-benchmark-${{ runner.os }}-
+
+      # Persist the previous nightly's tip so the next run has a baseline.
+      # The wheels themselves are rebuilt on every run rather than restored
+      # from a cache whose scope is a single workflow run.
+      - name: Restore baseline SHA
+        if: inputs.baseline-sha == ''
+        uses: actions/cache/restore@v4
+        with:
+          path: last_contender_sha
+          key: benchmark-baseline-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            benchmark-baseline-${{ runner.os }}-
+
+      - name: Run benchmarks
+        id: benchmark
+        shell: bash
+        env:
+          OPENBLAS_NUM_THREADS: 1
+          MKL_NUM_THREADS: 1
+          OMP_NUM_THREADS: 1
+          ASV_SKIP_SLOW: 1
+          FACTOR: ${{ inputs.factor }}
+          BASELINE_SHA: ${{ inputs.baseline-sha }}
+        run: .github/scripts/run-benchmarks.sh
+
+      - name: Advance baseline on clean run
+        if: success() && inputs.baseline-sha == '' && steps.benchmark.outputs.has_baseline != 'false'
+        shell: bash
+        run: echo "$GITHUB_SHA" > last_contender_sha
+
+      - name: Record baseline for first run
+        if: success() && inputs.baseline-sha == '' && steps.benchmark.outputs.has_baseline == 'false'
+        shell: bash
+        run: echo "$GITHUB_SHA" > last_contender_sha
+
+      - name: Save baseline SHA
+        if: success() && inputs.baseline-sha == ''
+        uses: actions/cache/save@v4
+        with:
+          path: last_contender_sha
+          key: benchmark-baseline-${{ runner.os }}-${{ github.run_id }}
+
+      - name: Check ccache performance
+        if: always()
+        shell: bash
+        run: ccache -s
+
+      - name: Add instructions to artifact
+        if: always()
+        run: cp benchmarks/README_CI.md benchmarks.log .asv/results/
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: asv-benchmark-results-${{ runner.os }}
+          path: .asv/results
+
+      - name: "Job has failed: reporting"
+        if: ${{ failure() && inputs.report-issues }}
+        uses: JasonEtco/create-an-issue@1b14a70e4d8dc185e5cc76d3bec9eab20257b2c5 # v2.9.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BUILD_TYPE: "nightly benchmark"
+          DEPENDENCY_CHANGES: ${{ steps.benchmark.outputs.dependency_changes }}
+        with:
+          filename: .github/MAIN_FAIL_TEMPLATE.md
+          update_existing: true

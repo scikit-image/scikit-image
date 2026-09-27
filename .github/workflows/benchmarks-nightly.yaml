@@ -1,0 +1,28 @@
+name: Benchmark (nightly)
+# Run benchmarks nightly on `main`, comparing each night's tip against the
+# previous clean run's SHA and opening/updating a failure report on any
+# regression. See `_benchmarks.yaml` for the shared implementation.
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  benchmark:
+    name: Linux
+    uses: ./.github/workflows/_benchmarks.yaml
+    secrets:
+      CACHE_VERSION: ${{ secrets.CACHE_VERSION }}
+    with:
+      factor: 1.1
+      baseline-sha: ""
+      report-issues: true

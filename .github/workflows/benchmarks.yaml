@@ -3,8 +3,6 @@ name: Benchmark
 on:
   pull_request:
     types: [labeled]
-  schedule:
-    - cron: "0 6 * * *"
   workflow_dispatch:
 
 concurrency:
@@ -13,108 +11,18 @@ concurrency:
 
 permissions:
   contents: read
-  issues: write
 
 jobs:
   benchmark:
-    # Skip PR runs that do not carry the 'benchmark' label; schedule and
-    # manual runs always execute.
+    # Skip PR runs that do not carry the 'benchmark' label; manual runs
+    # always execute.
     if: github.event_name != 'pull_request' || contains(github.event.label.name, 'benchmark')
     name: Linux
-    runs-on: ubuntu-latest
-
-    steps:
-      # We need the full repo to avoid this issue
-      # https://github.com/actions/checkout/issues/23
-      - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-
-      - uses: actions/setup-python@v6
-        name: Install Python
-        with:
-          python-version: "3.12"
-          cache: "pip"
-          cache-dependency-path: "requirements/*.txt"
-
-      - name: Install asv
-        shell: bash
-        run: pip install -U -r requirements/asv.txt
-
-      - name: Setup ccache
-        uses: ./.github/actions/setup-ccache
-        with:
-          key: ccache-${{ secrets.CACHE_VERSION }}-benchmark-${{ runner.os }}-${{ github.run_id }}
-          restore-keys: ccache-${{ secrets.CACHE_VERSION }}-benchmark-${{ runner.os }}-
-
-      - name: Restore asv state
-        if: github.event_name != 'pull_request'
-        id: asv-state
-        uses: actions/cache/restore@v4
-        with:
-          path: |
-            .asv/env
-            .asv/results
-            last_contender_sha
-          key: benchmark-${{ runner.os }}-${{ github.run_id }}
-          restore-keys: |
-            benchmark-${{ runner.os }}-
-
-      - name: Run benchmarks
-        id: benchmark
-        shell: bash
-        env:
-          OPENBLAS_NUM_THREADS: 1
-          MKL_NUM_THREADS: 1
-          OMP_NUM_THREADS: 1
-          ASV_SKIP_SLOW: 1
-          # PR and scheduled runs both compare at a 1.1 factor.
-          FACTOR: 1.1
-          BASELINE_SHA: ${{ github.event.pull_request.base.sha || '' }}
-        run: .github/scripts/run-benchmarks.sh
-
-      - name: Advance baseline on clean run
-        if: success() && github.event_name != 'pull_request' && steps.benchmark.outputs.has_baseline != 'false'
-        shell: bash
-        run: echo "$GITHUB_SHA" > last_contender_sha
-
-      - name: Record baseline for first run
-        if: success() && github.event_name != 'pull_request' && steps.benchmark.outputs.has_baseline == 'false'
-        shell: bash
-        run: echo "$GITHUB_SHA" > last_contender_sha
-
-      - name: Save asv state
-        if: success() && github.event_name != 'pull_request'
-        uses: actions/cache/save@v4
-        with:
-          path: |
-            .asv/env
-            .asv/results
-            last_contender_sha
-          key: benchmark-${{ runner.os }}-${{ github.run_id }}
-
-      - name: Check ccache performance
-        if: always()
-        shell: bash
-        run: ccache -s
-
-      - name: Add instructions to artifact
-        if: always()
-        run: cp benchmarks/README_CI.md benchmarks.log .asv/results/
-
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: asv-benchmark-results-${{ runner.os }}
-          path: .asv/results
-
-      - name: "Job has failed: reporting"
-        if: ${{ failure() && github.event_name != 'pull_request' }}
-        uses: JasonEtco/create-an-issue@1b14a70e4d8dc185e5cc76d3bec9eab20257b2c5 # v2.9.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BUILD_TYPE: "nightly benchmark"
-        with:
-          filename: .github/MAIN_FAIL_TEMPLATE.md
-          update_existing: true
+    uses: ./.github/workflows/_benchmarks.yaml
+    secrets:
+      CACHE_VERSION: ${{ secrets.CACHE_VERSION }}
+    with:
+      factor: 1.1
+      # PR runs compare against the base branch; manual runs against `main`.
+      baseline-sha: ${{ github.event.pull_request.base.sha || 'main' }}
+      report-issues: false
