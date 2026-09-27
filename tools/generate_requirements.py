@@ -1,10 +1,15 @@
 #!/usr/bin/env python
+# /// script
+# dependencies = ["packaging"]
+# ///
 """Generate requirements/*.txt files from pyproject.toml.
 
 Also builds a conda environment.yml
 """
 
+import argparse
 import re
+import subprocess
 from pathlib import Path
 
 import tomllib as toml
@@ -125,6 +130,36 @@ def _min_version(dep_spec: str) -> str | None:
     return None
 
 
+def _dependency_versions(pyproject_text: str) -> dict[str, set[str]]:
+    """Map core dependency names to their version specifiers and markers."""
+    versions: dict[str, set[str]] = {}
+    for dep in toml.loads(pyproject_text)["project"]["dependencies"]:
+        req = Requirement(dep)
+        entry = str(req.specifier) or "(any)"
+        if req.marker is not None:
+            entry = f"{entry}; {req.marker}"
+        versions.setdefault(req.name.lower(), set()).add(entry)
+    return versions
+
+
+def dependency_changes(baseline_text: str, contender_text: str) -> list[str]:
+    """Describe core-dependency changes between two pyproject.toml contents.
+
+    Benchmarks compare a baseline and a contender commit, so a change in a
+    dependency version can be the cause of a reported regression. Returns a
+    sorted, human-readable list of changed packages.
+    """
+    baseline = _dependency_versions(baseline_text)
+    contender = _dependency_versions(contender_text)
+    changes = []
+    for name in sorted(set(baseline) | set(contender)):
+        before = ", ".join(sorted(baseline.get(name, {"(absent)"})))
+        after = ", ".join(sorted(contender.get(name, {"(absent)"})))
+        if before != after:
+            changes.append(f"{name}: {before} -> {after}")
+    return changes
+
+
 def update_asv_conf(pyproject: dict) -> None:
     """Sync asv.conf.json numpy/scipy matrix with pyproject minimums."""
     deps = pyproject["project"]["dependencies"]
@@ -145,7 +180,38 @@ def update_asv_conf(pyproject: dict) -> None:
     conf_path.write_text(conf_text)
 
 
+def _show_pyproject(ref: str) -> str:
+    """Return ``pyproject.toml`` as of a git ref."""
+    return subprocess.run(
+        ["git", "show", f"{ref}:pyproject.toml"],
+        cwd=repo_dir,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout
+
+
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--compare",
+        nargs=2,
+        metavar=("BASELINE", "CONTENDER"),
+        help="report core-dependency changes between two git refs",
+    )
+    # pre-commit passes the matched file names; ignore them.
+    parser.add_argument("files", nargs="*", help=argparse.SUPPRESS)
+    args = parser.parse_args()
+
+    if args.compare:
+        baseline_ref, contender_ref = args.compare
+        changes = dependency_changes(
+            _show_pyproject(baseline_ref), _show_pyproject(contender_ref)
+        )
+        for change in changes:
+            print(change)
+        return
+
     pyproject = toml.loads((repo_dir / "pyproject.toml").read_text())
 
     generate_requirement_file("default", pyproject["project"]["dependencies"])
