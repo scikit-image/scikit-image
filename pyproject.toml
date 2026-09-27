@@ -34,7 +34,7 @@ dependencies = [
     'imageio>=2.33,!=2.35.0',
     'tifffile>=2025.1.10',
     'packaging>=24',
-    'lazy-loader>=0.5',
+    'lazy-loader>=0.6',
 ]
 
 [[project.maintainers]]
@@ -128,7 +128,7 @@ requires = [
     'meson-python>=0.16',
     'Cython>=3.0.10,!=3.2.0b1',
     'pythran>=0.16',
-    'lazy_loader>=0.5',
+    'lazy-loader>=0.6',
     'numpy>=2.0',
 ]
 
