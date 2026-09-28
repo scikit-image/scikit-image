@@ -25,3 +25,4 @@ jobs:
       factor: 1.1
       baseline-sha: ""
       report-issues: true
+      advance-baseline: true

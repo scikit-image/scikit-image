@@ -22,6 +22,7 @@ jobs:
       CACHE_VERSION: ${{ secrets.CACHE_VERSION }}
     with:
       factor: 1.1
-      # PR runs compare against the base branch; manual runs against `main`.
-      baseline-sha: ${{ github.event.pull_request.base.sha || 'origin/main' }}
+      # PR runs compare against the base branch; manual runs fall back to the
+      # cached nightly baseline via the shared workflow.
+      baseline-sha: ${{ github.event.pull_request.base.sha || '' }}
       report-issues: false

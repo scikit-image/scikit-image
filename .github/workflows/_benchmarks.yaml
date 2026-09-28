@@ -27,6 +27,14 @@ on:
         required: false
         type: boolean
         default: false
+      advance-baseline:
+        description: >-
+          Persist the contender as the new baseline after a clean run. Set by
+          the nightly workflow; must stay false for PR and manual runs so they
+          cannot move the nightly baseline.
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   benchmark:
@@ -58,9 +66,10 @@ jobs:
           key: ccache-${{ secrets.CACHE_VERSION }}-benchmark-${{ runner.os }}-${{ github.run_id }}
           restore-keys: ccache-${{ secrets.CACHE_VERSION }}-benchmark-${{ runner.os }}-
 
-      # Persist the previous nightly's tip so the next run has a baseline.
-      # The wheels themselves are rebuilt on every run rather than restored
-      # from a cache whose scope is a single workflow run.
+      # Persist the previous nightly's tip so nightly and manual runs have a
+      # baseline. PR runs pass an explicit `baseline-sha` and skip this. The
+      # wheels themselves are rebuilt on every run rather than restored from
+      # a cache whose scope is a single workflow run.
       - name: Restore baseline SHA
         if: inputs.baseline-sha == ''
         uses: actions/cache/restore@v4
@@ -83,17 +92,17 @@ jobs:
         run: .github/scripts/run-benchmarks.sh
 
       - name: Advance baseline on clean run
-        if: success() && inputs.baseline-sha == '' && steps.benchmark.outputs.has_baseline != 'false'
+        if: success() && inputs.advance-baseline && steps.benchmark.outputs.has_baseline != 'false'
         shell: bash
         run: echo "$GITHUB_SHA" > last_contender_sha
 
       - name: Record baseline for first run
-        if: success() && inputs.baseline-sha == '' && steps.benchmark.outputs.has_baseline == 'false'
+        if: success() && inputs.advance-baseline && steps.benchmark.outputs.has_baseline == 'false'
         shell: bash
         run: echo "$GITHUB_SHA" > last_contender_sha
 
       - name: Save baseline SHA
-        if: success() && inputs.baseline-sha == ''
+        if: success() && inputs.advance-baseline
         uses: actions/cache/save@v4
         with:
           path: last_contender_sha
