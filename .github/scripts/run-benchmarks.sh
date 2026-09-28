@@ -33,7 +33,9 @@ record_dependency_changes() {
     [[ -n "$BASELINE_SHA" ]] || return 0
     {
         echo "dependency_changes<<EOF"
-        python tools/generate_requirements.py --compare "$BASELINE_SHA" "$CONTENDER_SHA" || true
+        if ! python tools/generate_requirements.py --compare "$BASELINE_SHA" "$CONTENDER_SHA"; then
+            echo "::warning::could not determine dependency changes between $BASELINE_SHA and $CONTENDER_SHA" >&2
+        fi
         echo "EOF"
     } >> "$GITHUB_OUTPUT"
 }

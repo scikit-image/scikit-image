@@ -9,20 +9,19 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
-permissions:
-  contents: read
-
 jobs:
   benchmark:
     # Skip PR runs that do not carry the 'benchmark' label; manual runs
     # always execute.
     if: github.event_name != 'pull_request' || contains(github.event.label.name, 'benchmark')
     name: Linux
+    permissions:
+      contents: read
     uses: ./.github/workflows/_benchmarks.yaml
     secrets:
       CACHE_VERSION: ${{ secrets.CACHE_VERSION }}
     with:
       factor: 1.1
       # PR runs compare against the base branch; manual runs against `main`.
-      baseline-sha: ${{ github.event.pull_request.base.sha || 'main' }}
+      baseline-sha: ${{ github.event.pull_request.base.sha || 'origin/main' }}
       report-issues: false

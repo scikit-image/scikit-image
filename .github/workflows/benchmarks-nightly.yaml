@@ -12,13 +12,12 @@ concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: false
 
-permissions:
-  contents: read
-  issues: write
-
 jobs:
   benchmark:
     name: Linux
+    permissions:
+      contents: read
+      issues: write
     uses: ./.github/workflows/_benchmarks.yaml
     secrets:
       CACHE_VERSION: ${{ secrets.CACHE_VERSION }}
