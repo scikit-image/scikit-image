@@ -469,6 +469,16 @@ def jerman(
     Notes
     -----
     This function was written based on the MATLAB implementation by Tim Jerman [2]_.
+    Results differ slightly from [2]_, which estimates the Hessian with a Gaussian
+    smoothing followed by two central finite differences. This function uses
+    Gaussian derivative kernels instead, which is a more accurate
+    estimate of the second derivatives, especially at small sigmas.
+
+    Note that the response is not local. At each scale, eigenvalues below ``tau`` times
+    the largest eigenvalue found anywhere in the image are regularized to that
+    fraction (eq. 13 in [1]_). Adding or removing a high-contrast structure in
+    one part of the image can therefore change the response in distant parts,
+    and cropping an image can change the response of the remaining region.
 
     References
     ----------
