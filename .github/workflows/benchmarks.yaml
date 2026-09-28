@@ -23,6 +23,7 @@ jobs:
     with:
       factor: 1.1
       # PR runs compare against the base branch; manual runs fall back to the
-      # cached nightly baseline via the shared workflow.
+      # cached nightly baseline and finally to `origin/main`.
       baseline-sha: ${{ github.event.pull_request.base.sha || '' }}
+      fallback-baseline-sha: origin/main
       report-issues: false

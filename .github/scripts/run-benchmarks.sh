@@ -7,8 +7,10 @@
 #
 # Optional env vars:
 #   BASELINE_SHA: SHA to compare against. If unset, a previous clean run's
-#     SHA is read from `last_contender_sha` (nightly mode). If neither is
-#     available, results are recorded only and no comparison is made.
+#     SHA is read from `last_contender_sha` (nightly mode).
+#   FALLBACK_BASELINE_SHA: SHA to compare against when neither BASELINE_SHA
+#     nor `last_contender_sha` is available. If none of the three is set,
+#     results are recorded only and no comparison is made.
 #   CONTENDER_SHA: SHA to benchmark. Defaults to `$GITHUB_SHA`.
 #
 # Writes `has_baseline=true/false` to `$GITHUB_OUTPUT`. On a comparison
@@ -24,6 +26,10 @@ BASELINE_SHA="${BASELINE_SHA:-}"
 
 if [[ -z "$BASELINE_SHA" && -f last_contender_sha ]]; then
     BASELINE_SHA="$(cat last_contender_sha)"
+fi
+
+if [[ -z "$BASELINE_SHA" ]]; then
+    BASELINE_SHA="${FALLBACK_BASELINE_SHA:-}"
 fi
 
 echo "Contender: $CONTENDER_SHA"

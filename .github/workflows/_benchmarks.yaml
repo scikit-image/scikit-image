@@ -22,6 +22,14 @@ on:
         required: false
         type: string
         default: ""
+      fallback-baseline-sha:
+        description: >-
+          Baseline used when `baseline-sha` is empty and no cached nightly
+          baseline exists. Manual runs fall back to `origin/main`; the nightly
+          workflow leaves this empty so its first run records only.
+        required: false
+        type: string
+        default: ""
       report-issues:
         description: "Open or update a GitHub issue when the run fails."
         required: false
@@ -89,6 +97,7 @@ jobs:
           ASV_SKIP_SLOW: 1
           FACTOR: ${{ inputs.factor }}
           BASELINE_SHA: ${{ inputs.baseline-sha }}
+          FALLBACK_BASELINE_SHA: ${{ inputs.fallback-baseline-sha }}
         run: .github/scripts/run-benchmarks.sh
 
       - name: Advance baseline on clean run
