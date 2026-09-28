@@ -10,8 +10,8 @@ from numpy.testing import (
     assert_equal,
 )
 
-from skimage import img_as_float
 from _skimage2._shared.utils import _supported_float_type
+from skimage import img_as_float
 from skimage.color import rgb2gray
 from skimage.data import camera, retina
 from skimage.filters import frangi, hessian, jerman, meijering, sato
@@ -392,3 +392,17 @@ def test_jerman_result_decrease_with_tau_increase():
         # expect a decrease in the sum of all values.
         assert out_next.sum() <= out.sum()
         out = out_next
+
+
+def test_jerman_straight_tube():
+    # Dark 2x2 tube running along axis 0 through a bright volume. Exercises the
+    # 3D branch, where lambda2 and lambda3 are distinct eigenvalues.
+    volume = np.ones((3, 6, 6))
+    volume[:, 2:4, 2:4] = 0
+
+    out = jerman(volume, sigmas=[1])
+
+    expected = np.zeros_like(volume)
+    expected[:, 2:4, 2:4] = 1
+
+    assert_equal(out, expected)
