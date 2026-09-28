@@ -511,6 +511,11 @@ def jerman(
     eigval_tol = 1e-10  # Tolerance to avoid division by zero and numerical instability
     # Process each scale
     for sigma in sigmas:
+        # The sigma**2 scale normalization of the Hessian (eq. 1 in the paper) is
+        # omitted on purpose: the response below depends on lambda2 and lambda_rho only
+        # through their ratio, and lambda_rho is linear in the eigenvalues, so any
+        # positive factor applied to the Hessian cancels out. This also allows
+        # reusing the same Hessian code as the other ridge filters in this module.
         eigvals = hessian_matrix_eigvals(
             hessian_matrix(
                 image, sigma, mode=mode, cval=cval, use_gaussian_derivatives=True
