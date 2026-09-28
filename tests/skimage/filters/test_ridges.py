@@ -406,3 +406,17 @@ def test_jerman_straight_tube():
     expected[:, 2:4, 2:4] = 1
 
     assert_equal(out, expected)
+
+
+@pytest.mark.parametrize('factor', [1e-4, 1e-8, 1e-12])
+def test_jerman_amplitude_invariance(factor):
+    # The response depends on the eigenvalues only through their ratio, so scaling
+    # the image by any positive factor must not change the output. This guards
+    # against absolute tolerances being reintroduced at some point.
+    img = rgb2gray(retina()[300:500, 700:900])
+    sigmas = [1, 3]
+
+    out = jerman(img, sigmas=sigmas)
+    out_scaled = jerman(img * factor, sigmas=sigmas)
+
+    assert_allclose(out_scaled, out, atol=1e-12)

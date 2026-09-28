@@ -508,7 +508,6 @@ def jerman(
     # Initialize output with zeros
     filtered = np.zeros_like(image)
 
-    eigval_tol = 1e-10  # Tolerance to avoid division by zero and numerical instability
     # Process each scale
     for sigma in sigmas:
         # The sigma**2 scale normalization of the Hessian (eq. 1 in the paper) is
@@ -528,18 +527,17 @@ def jerman(
 
         if image.ndim == 2:
             # 2D: Use only lambda2 (largest absolute eigenvalue)
-            (lambda2,) = np.maximum(eigvals[1:], eigval_tol)
-            lambda3 = lambda2.copy()
+            lambda2 = lambda3 = eigvals[1]
         else:  # ndim == 3
             # 3D: Use lambda2 and lambda3 (two largest absolute eigenvalues)
-            lambda2, lambda3 = np.maximum(eigvals[1:], eigval_tol)
+            lambda2, lambda3 = eigvals[1:]
 
         # tau threshold and lambda_rho computed from eq. 13
         tau_threshold = tau * lambda3.max()
         lambda_rho = np.ones_like(lambda3) * tau_threshold
 
         # Set to zero where lambda3 <= 0 (not vessel-like)
-        lambda_rho[lambda3 <= eigval_tol] = 0
+        lambda_rho[lambda3 <= 0] = 0
         # Set to lambda3 where lambda3 > tau * max(lambda3)
         lambda_rho[lambda3 > tau_threshold] = lambda3[lambda3 > tau_threshold]
 
@@ -547,15 +545,19 @@ def jerman(
         # V = lambda2**2 * (lambda_rho - lambda2) * 27 / (lambda2 + lambda_rho)**3 (eq. 14)
         numerator = lambda2**2 * (lambda_rho - lambda2) * 27
         denominator = (lambda2 + lambda_rho) ** 3
-        vals = numerator / denominator  # eq. 14
+        # Where the denominator is zero, so is the numerator; eq. 15 sets these
+        # pixels to zero below anyway, so skip the 0/0 division.
+        vals = np.divide(
+            numerator, denominator, out=np.zeros_like(numerator), where=denominator > 0
+        )  # eq. 14
 
         # Different cases implied by eq. 15
         # Case 1: Strong tubular structures -> V = 1
-        strong_tubular = (lambda2 >= lambda_rho / 2) & (lambda_rho > eigval_tol)
+        strong_tubular = (lambda2 >= lambda_rho / 2) & (lambda_rho > 0)
         vals[strong_tubular] = 1
 
         # Case 2: Not vessel-like -> V = 0
-        not_vessel = (lambda2 <= eigval_tol) | (lambda_rho <= eigval_tol)
+        not_vessel = (lambda2 <= 0) | (lambda_rho <= 0)
         vals[not_vessel] = 0
 
         # Take maximum across scales
