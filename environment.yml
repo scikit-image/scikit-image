@@ -28,7 +28,7 @@ dependencies:
   - asv
   # docs
   - sphinx>=8.0
-  - sphinx-gallery>=0.18
+  - sphinx-gallery>=0.22
   - numpydoc>=1.7
   - sphinx-copybutton
   - sphinx-togglebutton
@@ -42,7 +42,7 @@ dependencies:
   - intersphinx-registry>=0.2411.14
   - ipywidgets
   - ipykernel
-  - plotly>=6.1.1
+  - plotly>=7.1.0
   - python-kaleido>=1.0
   - scikit-learn>=1.6
   - sphinx-design>=0.5

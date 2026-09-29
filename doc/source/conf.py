@@ -12,11 +12,10 @@ from warnings import filterwarnings
 import importlib
 import pkgutil
 
-import plotly.io as pio
 import skimage
 from intersphinx_registry import get_intersphinx_mapping
 from packaging.version import parse
-from plotly.io._sg_scraper import plotly_sg_scraper
+from plotly.io.sg_scraper import plotly_sg_scraper
 from sphinx_gallery.sorting import ExplicitOrder
 from sphinx_gallery.utils import _has_optipng
 
@@ -109,10 +108,6 @@ if v.is_devrelease:
 else:
     binder_branch = f"v{release}"
 
-# set plotly renderer to capture _repr_html_ for sphinx-gallery
-
-pio.renderers.default = "sphinx_gallery_png"
-
 sphinx_gallery_conf = {
     "doc_module": ("skimage",),
     "examples_dirs": "../examples",
@@ -148,9 +143,7 @@ sphinx_gallery_conf = {
     # Remove sphinx_gallery_thumbnail_number from generated files
     "remove_config_comments": True,
     # `True` defaults to the number of jobs used by Sphinx (see its flag `-j`)
-    #   Temporarily disabled because plotly scraper isn't parallel-safe
-    #   (see https://github.com/plotly/plotly.py/issues/4959)!
-    # "parallel": True,
+    "parallel": True,
 }
 
 
