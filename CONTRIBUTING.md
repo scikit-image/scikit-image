@@ -269,3 +269,13 @@ Core maintainers may use their own judgment on when and how to use AI,
 including for tasks outside the "how you may use AI" list above. They
 must still follow the requirements section: declaring tool usage,
 tagging commits, etc.
+
+## Further reading
+
+- {doc}`Installing scikit-image for development <install>`
+- {doc}`Code and stylistic guidelines <guidelines>`
+- {doc}`Testing <testing>`
+- {doc}`Building the documentation <building_docs>`
+- {doc}`Deprecation cycle <deprecations>`
+- {doc}`Benchmarks <benchmarks>`
+- {doc}`Adding data <data>`
