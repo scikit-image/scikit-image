@@ -272,10 +272,10 @@ tagging commits, etc.
 
 ## Further reading
 
-- {doc}`Installing scikit-image for development <install>`
-- {doc}`Code and stylistic guidelines <guidelines>`
-- {doc}`Testing <testing>`
-- {doc}`Building the documentation <building_docs>`
-- {doc}`Deprecation cycle <deprecations>`
-- {doc}`Benchmarks <benchmarks>`
-- {doc}`Adding data <data>`
+- [Installing scikit-image for development](doc/source/development/install.md)
+- [Code and stylistic guidelines](doc/source/development/guidelines.md)
+- [Testing](doc/source/development/testing.md)
+- [Building the documentation](doc/source/development/building_docs.md)
+- [Deprecation cycle](doc/source/development/deprecations.md)
+- [Benchmarks](doc/source/development/benchmarks.md)
+- [Adding data](doc/source/development/data.md)
