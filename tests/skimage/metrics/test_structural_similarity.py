@@ -252,7 +252,7 @@ def test_ssim_warns_about_data_range():
     regex = (
         r'Inputs have mismatched dtypes'
         # Warning is raised twice, in wrapper with this optional bit and in
-        # _skimage2 implmentation without this bit:
+        # _skimage2 implementation without this bit:
         r'(\. Setting data_range based on im1\.dtype\.)?'
     )
     with pytest.warns(UserWarning, match=regex):
