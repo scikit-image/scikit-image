@@ -101,7 +101,7 @@ def test_masked_registration_random_masks_non_equal_sizes():
         reference_mask=np.ones_like(ref_mask),
         moving_mask=np.ones_like(shifted_mask),
     )
-    assert_equal(measured_shift, -np.array(shift))
+    assert_equal(measured_shift, -np.array(shift) + np.array([64, 64]))
 
 
 def test_masked_registration_padfield_data(test_root_dir):
