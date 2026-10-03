@@ -105,10 +105,10 @@ def mean_bilateral(
     --------
     >>> import numpy as np
     >>> from _skimage2 import data
-    >>> from _skimage2.morphology import disk
+    >>> from _skimage2.morphology import footprint_ellipse
     >>> from _skimage2.filters.rank import mean_bilateral
     >>> img = data.camera().astype(np.uint16)
-    >>> bilat_img = mean_bilateral(img, disk(20), s0=10,s1=10)
+    >>> bilat_img = mean_bilateral(img, footprint_ellipse(20), s0=10,s1=10)
 
     """
 
@@ -242,10 +242,10 @@ def sum_bilateral(
     --------
     >>> import numpy as np
     >>> from _skimage2 import data
-    >>> from _skimage2.morphology import disk
+    >>> from _skimage2.morphology import footprint_ellipse
     >>> from _skimage2.filters.rank import sum_bilateral
     >>> img = data.camera().astype(np.uint16)
-    >>> bilat_img = sum_bilateral(img, disk(10), s0=10, s1=10)
+    >>> bilat_img = sum_bilateral(img, footprint_ellipse(10), s0=10, s1=10)
 
     """
 

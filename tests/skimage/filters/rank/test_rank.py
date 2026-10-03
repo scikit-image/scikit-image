@@ -1,10 +1,10 @@
 import inspect
+from contextlib import nullcontext
 
 import numpy as np
 import pytest
 
 from skimage import data, morphology, util
-from _skimage2._shared._warnings import expected_warnings
 from _skimage2._shared.testing import (
     assert_allclose,
     assert_array_almost_equal,
@@ -322,10 +322,14 @@ class TestRank:
             max_val = 2**i - 1
             image = np.full((100, 100), max_val, dtype=np.uint16)
             if i > 10:
-                expected = ["Bad rank filter performance"]
+                conditional_warns = pytest.warns(
+                    UserWarning, match=r"Bad rank filter performance"
+                )
             else:
-                expected = []
-            with expected_warnings(expected):
+                # Use no-op context manager when no warning is expected
+                # (Quick fix, refactoring/parametrizing test might be cleaner)
+                conditional_warns = nullcontext()
+            with conditional_warns:
                 rank.mean_percentile(
                     image=image,
                     footprint=elem,
@@ -400,7 +404,7 @@ class TestRank:
         elem = np.ones((3, 3), dtype=np.uint8)
         out = np.empty_like(image)
         mask = np.ones(image.shape, dtype=np.uint8)
-        with expected_warnings(["Bad rank filter performance"]):
+        with pytest.warns(UserWarning, match="Bad rank filter performance"):
             rank.maximum(image=image, footprint=elem, out=out, mask=mask)
 
     def test_inplace_output(self):
@@ -459,7 +463,7 @@ class TestRank:
         for method in methods:
             func = getattr(rank, method)
             out_u = func(image_uint, disk(3))
-            with expected_warnings(["Possible precision loss"]):
+            with pytest.warns(UserWarning, match="Possible precision loss"):
                 out_f = func(image_float, disk(3))
             assert_equal(out_u, out_f)
 
@@ -493,7 +497,7 @@ class TestRank:
         for method in methods_3d:
             func = getattr(rank, method)
             out_u = func(volume_uint, ball(3))
-            with expected_warnings(["Possible precision loss"]):
+            with pytest.warns(UserWarning, match=r"Possible precision loss"):
                 out_f = func(volume_float, ball(3))
             assert_equal(out_u, out_f)
 
@@ -527,7 +531,7 @@ class TestRank:
         for method in methods:
             func = getattr(rank, method)
             out_u = func(image_u, disk(3))
-            with expected_warnings(["Possible precision loss"]):
+            with pytest.warns(UserWarning, match=r"Possible precision loss"):
                 out_s = func(image_s, disk(3))
             assert_equal(out_u, out_s)
 
@@ -565,7 +569,7 @@ class TestRank:
         for method in methods_3d:
             func = getattr(rank, method)
             out_u = func(volume_u, ball(3))
-            with expected_warnings(["Possible precision loss"]):
+            with pytest.warns(UserWarning, match=r"Possible precision loss"):
                 out_s = func(volume_s, ball(3))
             assert_equal(out_u, out_s)
 
@@ -826,11 +830,11 @@ class TestRank:
         footprint = np.ones((64, 64), dtype=np.uint8)
         data = np.zeros((65, 65), dtype=np.uint16)
         data[:64, :64] = np.reshape(np.arange(4096), (64, 64))
-        with expected_warnings(['Bad rank filter performance']):
+        with pytest.warns(UserWarning, match=r'Bad rank filter performance'):
             assert np.max(rank.entropy(data, footprint)) == 12
 
         # make sure output is of dtype double
-        with expected_warnings(['Bad rank filter performance']):
+        with pytest.warns(UserWarning, match=r'Bad rank filter performance'):
             out = rank.entropy(data, np.ones((16, 16), dtype=np.uint8))
         assert out.dtype == np.float64
 
@@ -873,10 +877,14 @@ class TestRank:
             value = 2**bitdepth - 1
             image[10, 10] = value
             if bitdepth >= 11:
-                expected = ['Bad rank filter performance']
+                conditional_warns = pytest.warns(
+                    UserWarning, match=r'Bad rank filter performance'
+                )
             else:
-                expected = []
-            with expected_warnings(expected):
+                # Use no-op context manager when no warning is expected
+                # (Quick fix, refactoring/parametrizing test might be cleaner)
+                conditional_warns = nullcontext()
+            with conditional_warns:
                 assert rank.minimum(image, footprint)[10, 10] == 0
                 assert rank.maximum(image, footprint)[10, 10] == value
                 mean_val = rank.mean(image, footprint)[10, 10]
