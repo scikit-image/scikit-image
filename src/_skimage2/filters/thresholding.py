@@ -706,8 +706,11 @@ def threshold_li(image, *, tolerance=None, initial_guess=None, iter_callback=Non
     if image.size == 0:
         return 0.0
 
-    # Li's algorithm requires positive image (because of log(mean))
-    image_min = np.min(image)
+    # Li's algorithm requires positive image (because of log(mean)).
+    # But the the constraint on which the algorithm is based depends on
+    # actual means of the thresholded image.
+    # Hense, keep original intensities when possible.
+    image_min = min(0, np.min(image))
     image -= image_min
     if image.dtype.kind in 'iu':
         tolerance = tolerance or 0.5
@@ -721,12 +724,13 @@ def threshold_li(image, *, tolerance=None, initial_guess=None, iter_callback=Non
         t_next = initial_guess(image)
     elif np.isscalar(initial_guess):  # convert to new, positive image range
         t_next = initial_guess - float(image_min)
-        image_max = np.max(image) + image_min
-        if not 0 < t_next < np.max(image):
+        actual_min = np.min(image) + image_min
+        actual_max = np.max(image) + image_min
+        if not np.min(image) < t_next < np.max(image):
             msg = (
                 f'The initial guess for threshold_li must be within the '
                 f'range of the image. Got {initial_guess} for image min '
-                f'{image_min} and max {image_max}.'
+                f'{actual_min} and max {actual_max}.'
             )
             raise ValueError(msg)
         t_next = image.dtype.type(t_next)
