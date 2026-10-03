@@ -46,16 +46,26 @@ def adapt_rgb(apply_to_rgb):
 
 
 def hsv_value(image_filter, image, *args, **kwargs):
-    """Return color image by applying `image_filter` on HSV-value of `image`.
+    """Return color image by applying `image_filter` to the HSV value channel.
 
     Note that this function is intended for use with `adapt_rgb`.
 
     Parameters
     ----------
-    image_filter : function
-        Function that filters a gray-scale image.
+    image_filter : callable
+        Function that filters a gray-scale image. Additional positional and
+        keyword arguments are forwarded to this function.
     image : array
         Input image. Note that RGBA images are treated as RGB.
+    *args : tuple
+        Additional positional arguments passed to `image_filter`.
+    **kwargs : dict
+        Additional keyword arguments passed to `image_filter`.
+
+    Returns
+    -------
+    filtered : ndarray
+        Color image with the filtered HSV value channel.
     """
     # Slice the first three channels so that we remove any alpha channels.
     hsv = color.rgb2hsv(image[:, :, :3])
