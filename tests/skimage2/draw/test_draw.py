@@ -759,6 +759,54 @@ def test_ellipse_perimeter_shape():
     assert_array_equal(img, img_[shift:-shift, :])
 
 
+def _assert_ellipse_matches_analytic(rr, cc, r_o, c_o, r_radius, c_radius,
+                                     orientation, rows):
+    """Assert drawn pixels lie on the analytic ellipse boundary."""
+    sin_a, cos_a = np.sin(orientation), np.cos(orientation)
+    img = np.zeros((rr.max() + 2, cc.max() + 2), dtype=np.uint8)
+    img[rr, cc] = 1
+    for row in rows:
+        dr = row - r_o
+        a = sin_a ** 2 / r_radius ** 2 + cos_a ** 2 / c_radius ** 2
+        b = (2 * dr * sin_a * cos_a) * (1 / r_radius ** 2 - 1 / c_radius ** 2)
+        c = dr ** 2 * (cos_a ** 2 / r_radius ** 2 + sin_a ** 2 / c_radius ** 2) - 1
+        disc = b * b - 4 * a * c
+        if disc < 0:
+            continue
+        lo = c_o + (-b - np.sqrt(disc)) / (2 * a)
+        hi = c_o + (-b + np.sqrt(disc)) / (2 * a)
+        drawn = np.where(img[row] == 1)[0]
+        # Both edges (that lie inside the image) must be drawn within a pixel
+        # of the true boundary
+        for edge in (lo, hi):
+            if 0 <= edge < img.shape[1]:
+                assert any(np.abs(drawn - edge) <= 1), (row, lo, hi, drawn)
+
+
+def test_ellipse_perimeter_flat_rotated():
+    # Regression test for gh-8277: the Bezier approximation used for rotated
+    # ellipses collapsed into a few disconnected lines when the radii were
+    # very asymmetric (299 vs 3). The perimeter must follow the true ellipse.
+    r_o, c_o, r_radius, c_radius = 400, 80, 299, 3
+    for orientation in [-0.02658832206488096, -0.02663673702513491]:
+        rr, cc = ellipse_perimeter(
+            r_o, c_o, r_radius, c_radius,
+            shape=(2 * r_o, 2 * c_o), orientation=orientation,
+        )
+        _assert_ellipse_matches_analytic(
+            rr, cc, r_o, c_o, r_radius, c_radius, orientation,
+            rows=range(110, 690, 20),
+        )
+
+
+def test_ellipse_perimeter_flat_rotated_small():
+    # Same failure mode with a smaller flat rotated ellipse (gh-8277)
+    rr, cc = ellipse_perimeter(50, 25, 40, 5, shape=(100, 80), orientation=-0.86)
+    _assert_ellipse_matches_analytic(
+        rr, cc, 50, 25, 40, 5, -0.86, rows=range(15, 86, 3),
+    )
+
+
 def test_bezier_segment_straight():
     image = np.zeros((200, 200), dtype=int)
     r0, r1, r2 = 50, 150, 150
