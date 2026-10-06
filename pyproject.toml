@@ -275,7 +275,7 @@ Path = "pathlib.Path"
 [tool.cibuildwheel]
 test-command = "pytest --doctest-plus"
 test-extras = ["test", "optional"]
-test-sources = ["tests", "pyproject.toml"]
+test-sources = ["tests", "tools", "pyproject.toml"]
 environment = {PIP_PREFER_BINARY=1}
 environment-pass = ["SKIMAGE_LINK_FLAGS", "PIP_EXTRA_INDEX_URL", "COLUMNS"]
 build-verbosity = 0
