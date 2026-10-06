@@ -730,8 +730,7 @@ mark a test as thread-unsafe using a pytest mark:
 
 ```python
 @pytest.mark.thread_unsafe(reason="Test mutates global plugin state")
-def test_plugins():
-    ...
+def test_plugins(): ...
 ```
 
 This test will still run under a free-threaded interpreter, but it will execute
@@ -861,8 +860,10 @@ def some_function(image, rescale=None):
         The resulting image.
     """
     if rescale is None:
-        warn('The default value of rescale will change '
-             'to `False` in version N+3.', stacklevel=2)
+        warn(
+            'The default value of rescale will change to `False` in version N+3.',
+            stacklevel=2,
+        )
         rescale = True
     out = do_something(image, rescale=rescale)
     return out
@@ -911,6 +912,7 @@ API, e.g.:
 
 ```python
 from skimage._shared._warnings import warn_external
+
 warn_external(
     "Automatic detection of the color channel was deprecated in "
     "v0.19, and `channel_axis=None` will be the new default in "
@@ -989,6 +991,7 @@ Take for example the `TransformSuite` benchmark:
 ```python
 import numpy as np
 from skimage import transform
+
 
 class TransformSuite:
     """Benchmark for transform routines in scikit-image."""

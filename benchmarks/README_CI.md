@@ -115,8 +115,10 @@ To minimize the time required to run the full suite, we trimmed the parameter ma
 ```python
 from . import _skip_slow  # this function is defined in benchmarks.__init__
 
+
 def time_something_slow():
     pass
+
 
 time_something.setup = _skip_slow
 ```
