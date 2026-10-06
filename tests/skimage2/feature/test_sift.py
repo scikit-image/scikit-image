@@ -7,7 +7,7 @@ from _skimage2._shared.testing import run_in_parallel
 from _skimage2.feature import SIFT
 from _skimage2.util.dtype import _convert
 
-img = data.coins()
+img = data.fetch_coins()
 
 
 @run_in_parallel()

@@ -222,7 +222,7 @@ def test_reproducibility():
     """ensure cut_normalized returns the same output for the same input,
     when specifying random seed
     """
-    img = data.coffee()
+    img = data.fetch_coffee()
     labels1 = segmentation.slic(img, compactness=30, n_segments=400, start_label=0)
     g = graph.rag_mean_color(img, labels1, mode='similarity')
     results = [None] * 4

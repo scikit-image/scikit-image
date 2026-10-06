@@ -32,7 +32,7 @@ def test_binary_descriptors_rotation_crosscheck_false():
     """Verify matched keypoints and their corresponding masks results between
     image and its rotated version with the expected keypoint pairs with
     cross_check disabled."""
-    img = data.astronaut()
+    img = data.fetch_astronaut()
     img = rgb2gray(img)
     tform = transform.SimilarityTransform(scale=1, rotation=0.15, translation=(0, 0))
     rotated_img = transform.warp(img, tform, clip=False)
@@ -128,7 +128,7 @@ def test_binary_descriptors_rotation_crosscheck_true():
     """Verify matched keypoints and their corresponding masks results between
     image and its rotated version with the expected keypoint pairs with
     cross_check enabled."""
-    img = data.astronaut()
+    img = data.fetch_astronaut()
     img = rgb2gray(img)
     tform = transform.SimilarityTransform(scale=1, rotation=0.15, translation=(0, 0))
     rotated_img = transform.warp(img, tform, clip=False)

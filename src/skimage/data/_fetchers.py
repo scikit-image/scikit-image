@@ -8,6 +8,11 @@ For more images, see
 
 """
 
+from functools import wraps
+import warnings
+
+from skimage._doctest_adapters import adapt_doctests
+
 from _skimage2.data._fetchers import (
     astronaut as astronaut,
     brain as brain,
@@ -100,6 +105,40 @@ __all__ = [
 
 from _skimage2.data._fetchers import _image_fetcher  # noqa: F401
 
-from skimage._doctest_adapters import adapt_doctests
+from skimage.util import PendingSkimage2Change  # noqa: E402
+
+from _skimage2.data import _fetchers as _ski2_fetchers  # noqa: E402
+
+# `skimage2` replaces the bare names with `fetch_<name>()`. While `skimage` (v1)
+# and `skimage2` are both maintained, the bare names stay available here but
+# warn about the replacement. The rename is documented once in the migration
+# guide, so warn instead of registering per-function migration entries.
+_DATASET_FETCHERS = [
+    name for name in __all__ if hasattr(_ski2_fetchers, f'fetch_{name}')
+]
+
+
+def _warn_dataset_replacement(name, func):
+    """Wrap a v1 dataset getter to warn about its `skimage2` replacement."""
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        warnings.warn(
+            f"`skimage.data.{name}` is deprecated in favor of "
+            f"`skimage2.data.fetch_{name}`. Both `skimage` (v1) and `skimage2` "
+            f"are maintained in parallel, so `skimage.data.{name}` remains "
+            f"available during the overlap period. Use "
+            f"`skimage2.data.fetch_{name}` in new code.",
+            PendingSkimage2Change,
+            stacklevel=2,
+        )
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
+for _name in _DATASET_FETCHERS:
+    globals()[_name] = _warn_dataset_replacement(_name, globals()[_name])
+
 
 adapt_doctests(globals())

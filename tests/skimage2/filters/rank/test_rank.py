@@ -418,7 +418,7 @@ class TestRank:
         # compare autolevel and percentile autolevel with p0=0.0 and p1=1.0
         # should returns the same arrays
 
-        image = util.img_as_ubyte(data.camera())
+        image = util.img_as_ubyte(data.fetch_camera())
 
         footprint = disk(20)
         loc_autolevel = rank.autolevel(image, footprint=footprint)
@@ -432,7 +432,7 @@ class TestRank:
         # compare autolevel(16-bit) and percentile autolevel(16-bit) with
         # p0=0.0 and p1=1.0 should returns the same arrays
 
-        image = data.camera().astype(np.uint16) * 4
+        image = data.fetch_camera().astype(np.uint16) * 4
 
         footprint = disk(20)
         loc_autolevel = rank.autolevel(image, footprint=footprint)
@@ -444,7 +444,7 @@ class TestRank:
 
     def test_compare_ubyte_vs_float(self):
         # Create signed int8 image that and convert it to uint8
-        image_uint = img_as_ubyte(data.camera()[:50, :50])
+        image_uint = img_as_ubyte(data.fetch_camera()[:50, :50])
         image_float = img_as_float(image_uint)
 
         methods = [
@@ -503,7 +503,7 @@ class TestRank:
         # of dynamic) should be identical
 
         # Create signed int8 image that and convert it to uint8
-        image = img_as_ubyte(data.camera())[::2, ::2]
+        image = img_as_ubyte(data.fetch_camera())[::2, ::2]
         image[image > 127] = 0
         image_s = image.astype(np.int8)
         image_u = img_as_ubyte(image_s)
@@ -590,7 +590,7 @@ class TestRank:
     def test_compare_8bit_vs_16bit(self, method):
         # filters applied on 8-bit image or 16-bit image (having only real 8-bit
         # of dynamic) should be identical
-        image8 = util.img_as_ubyte(data.camera())[::2, ::2]
+        image8 = util.img_as_ubyte(data.fetch_camera())[::2, ::2]
         image16 = image8.astype(np.uint16)
         assert_equal(image8, image16)
 
@@ -900,7 +900,7 @@ class TestRank:
 
     def test_percentile_min(self):
         # check that percentile p0 = 0 is identical to local min
-        img = data.camera()
+        img = data.fetch_camera()
         img16 = img.astype(np.uint16)
         footprint = disk(15)
         # check for 8bit
@@ -914,7 +914,7 @@ class TestRank:
 
     def test_percentile_max(self):
         # check that percentile p0 = 1 is identical to local max
-        img = data.camera()
+        img = data.fetch_camera()
         img16 = img.astype(np.uint16)
         footprint = disk(15)
         # check for 8bit
@@ -928,7 +928,7 @@ class TestRank:
 
     def test_percentile_median(self):
         # check that percentile p0 = 0.5 is identical to local median
-        img = data.camera()
+        img = data.fetch_camera()
         img16 = img.astype(np.uint16)
         footprint = disk(15)
         # check for 8bit
@@ -1085,7 +1085,7 @@ class TestRank:
         assert rank.median(a, disk(1))[1, 1] == 1
 
     def test_majority(self):
-        img = data.camera()
+        img = data.fetch_camera()
         elem = np.ones((3, 3), dtype=np.uint8)
         expected = rank.windowed_histogram(img, elem).argmax(-1).astype(np.uint8)
         assert_equal(expected, rank.majority(img, elem))

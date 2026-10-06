@@ -64,7 +64,7 @@ def median(
     Examples
     --------
     >>> import _skimage2 as ski2
-    >>> img = ski2.data.camera()
+    >>> img = ski2.data.fetch_camera()
     >>> med = ski2.filters.median(img, ski2.morphology.disk(5))
 
     """

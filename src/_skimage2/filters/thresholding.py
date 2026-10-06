@@ -137,8 +137,8 @@ def try_all_threshold(image, figsize=(8, 5), verbose=True):
 
     Examples
     --------
-    >>> from _skimage2.data import text
-    >>> fig, ax = try_all_threshold(text(), figsize=(10, 6), verbose=False)
+    >>> from _skimage2.data import fetch_text
+    >>> fig, ax = try_all_threshold(fetch_text(), figsize=(10, 6), verbose=False)
     """
 
     def thresh(func):
@@ -228,8 +228,8 @@ def threshold_local(
 
     Examples
     --------
-    >>> from _skimage2.data import camera
-    >>> image = camera()[:50, :50]
+    >>> from _skimage2.data import fetch_camera
+    >>> image = fetch_camera()[:50, :50]
     >>> binary_image1 = image > threshold_local(image, 15, 'mean')
     >>> func = lambda arr: arr.mean()
     >>> binary_image2 = image > threshold_local(image, 15, 'generic',
@@ -361,8 +361,8 @@ def threshold_otsu(image=None, nbins=256, *, hist=None):
 
     Examples
     --------
-    >>> from _skimage2.data import camera
-    >>> image = camera()
+    >>> from _skimage2.data import fetch_camera
+    >>> image = fetch_camera()
     >>> thresh = threshold_otsu(image)
     >>> binary = image <= thresh
 
@@ -440,8 +440,8 @@ def threshold_yen(image=None, nbins=256, *, hist=None):
 
     Examples
     --------
-    >>> from _skimage2.data import camera
-    >>> image = camera()
+    >>> from _skimage2.data import fetch_camera
+    >>> image = fetch_camera()
     >>> thresh = threshold_yen(image)
     >>> binary = image <= thresh
     """
@@ -519,8 +519,8 @@ def threshold_isodata(image=None, nbins=256, return_all=False, *, hist=None):
 
     Examples
     --------
-    >>> from _skimage2.data import coins
-    >>> image = coins()
+    >>> from _skimage2.data import fetch_coins
+    >>> image = fetch_coins()
     >>> thresh = threshold_isodata(image)
     >>> binary = image > thresh
     """
@@ -683,8 +683,8 @@ def threshold_li(image, *, tolerance=None, initial_guess=None, iter_callback=Non
 
     Examples
     --------
-    >>> from _skimage2.data import camera
-    >>> image = camera()
+    >>> from _skimage2.data import fetch_camera
+    >>> image = fetch_camera()
     >>> thresh = threshold_li(image)
     >>> binary = image > thresh
     """
@@ -836,8 +836,8 @@ def threshold_minimum(image=None, nbins=256, max_num_iter=10000, *, hist=None):
 
     Examples
     --------
-    >>> from _skimage2.data import camera
-    >>> image = camera()
+    >>> from _skimage2.data import fetch_camera
+    >>> image = fetch_camera()
     >>> thresh = threshold_minimum(image)
     >>> binary = image > thresh
     """
@@ -903,8 +903,8 @@ def threshold_mean(image):
 
     Examples
     --------
-    >>> from _skimage2.data import camera
-    >>> image = camera()
+    >>> from _skimage2.data import fetch_camera
+    >>> image = fetch_camera()
     >>> thresh = threshold_mean(image)
     >>> binary = image > thresh
     """
@@ -939,8 +939,8 @@ def threshold_triangle(image, nbins=256):
 
     Examples
     --------
-    >>> from _skimage2.data import camera
-    >>> image = camera()
+    >>> from _skimage2.data import fetch_camera
+    >>> image = fetch_camera()
     >>> thresh = threshold_triangle(image)
     >>> binary = image > thresh
     """
@@ -1095,7 +1095,7 @@ def threshold_niblack(image, window_size=15, k=0.2):
     one, being equivalent to
 
     >>> from _skimage2 import data
-    >>> image = data.page()
+    >>> image = data.fetch_page()
     >>> q = 1
     >>> threshold_image = threshold_niblack(image, k=0) * q
 
@@ -1113,7 +1113,7 @@ def threshold_niblack(image, window_size=15, k=0.2):
     Examples
     --------
     >>> from _skimage2 import data
-    >>> image = data.page()
+    >>> image = data.fetch_page()
     >>> threshold_image = threshold_niblack(image, window_size=7, k=0.1)
     """
     m, s = _mean_std(image, window_size)
@@ -1169,7 +1169,7 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
     Examples
     --------
     >>> from _skimage2 import data
-    >>> image = data.page()
+    >>> image = data.fetch_page()
     >>> t_sauvola = threshold_sauvola(image, window_size=15, k=0.2)
     >>> binary_image = image > t_sauvola
     """
@@ -1293,7 +1293,7 @@ def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None):
     --------
     >>> from _skimage2.color import label2rgb
     >>> from _skimage2 import data
-    >>> image = data.camera()
+    >>> image = data.fetch_camera()
     >>> thresholds = threshold_multiotsu(image)
     >>> regions = np.digitize(image, bins=thresholds)
     >>> regions_colorized = label2rgb(regions)

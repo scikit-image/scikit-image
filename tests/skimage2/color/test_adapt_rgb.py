@@ -7,8 +7,8 @@ from _skimage2 import color, data, filters
 from _skimage2.color.adapt_rgb import adapt_rgb, each_channel, hsv_value
 
 # Down-sample image for quicker testing.
-COLOR_IMAGE = data.astronaut()[::5, ::6]
-GRAY_IMAGE = data.camera()[::5, ::5]
+COLOR_IMAGE = data.fetch_astronaut()[::5, ::6]
+GRAY_IMAGE = data.fetch_camera()[::5, ::5]
 
 SIGMA = 3
 smooth = partial(filters.gaussian, sigma=SIGMA)

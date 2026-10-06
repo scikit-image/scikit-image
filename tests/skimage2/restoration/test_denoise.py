@@ -30,12 +30,12 @@ else:
     DASK_NOT_INSTALLED_WARNING = None
 
 
-astro = img_as_float(data.astronaut()[:128, :128])
+astro = img_as_float(data.fetch_astronaut()[:128, :128])
 astro_gray = color.rgb2gray(astro)
 # Make sure that all tests below that rely on 0-1 range are valid:
 assert np.max(astro_gray) <= 1.0
 
-checkerboard_gray = img_as_float(data.checkerboard())
+checkerboard_gray = img_as_float(data.fetch_checkerboard())
 checkerboard = color.gray2rgb(checkerboard_gray)
 assert np.max(checkerboard_gray) <= 1.0
 
@@ -282,7 +282,7 @@ def test_denoise_bilateral_2d():
 def test_denoise_bilateral_pad():
     """This test checks if the bilateral filter is returning an image
     correctly padded."""
-    img = img_as_float(data.chelsea())[100:200, 100:200]
+    img = img_as_float(data.fetch_chelsea())[100:200, 100:200]
     img_bil = restoration.denoise_bilateral(
         img, sigma_color=0.1, sigma_spatial=10, channel_axis=-1
     )
@@ -761,7 +761,7 @@ def test_wavelet_denoising_scaling(case, dtype, convert2ycbcr, estimate_sigma):
         x = np.linspace(0, 255, 1024)
     elif case == '2d multichannel':
         # 2D multichannel in range [0, 255]
-        x = data.astronaut()[:64, :64]
+        x = data.fetch_astronaut()[:64, :64]
     x = x.astype(dtype)
 
     # add noise and clip to original signal range

@@ -72,7 +72,7 @@ class TestThinPlateSplineTransform:
         "scipy.ndimage spline prefiltering in `warp` is not thread-safe"
     )
     def test_rotate(self):
-        image = ski2.data.astronaut()
+        image = ski2.data.fetch_astronaut()
         desired = ski2.transform.rotate(image, angle=90)
         src = np.array([[0, 0], [0, 511], [511, 511], [511, 0]])
         dst = np.array([[511, 0], [0, 0], [0, 511], [511, 511]])

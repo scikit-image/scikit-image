@@ -107,7 +107,7 @@ def mean_bilateral(
     >>> from _skimage2 import data
     >>> from _skimage2.morphology import disk
     >>> from _skimage2.filters.rank import mean_bilateral
-    >>> img = data.camera().astype(np.uint16)
+    >>> img = data.fetch_camera().astype(np.uint16)
     >>> bilat_img = mean_bilateral(img, disk(20), s0=10,s1=10)
 
     """
@@ -244,7 +244,7 @@ def sum_bilateral(
     >>> from _skimage2 import data
     >>> from _skimage2.morphology import disk
     >>> from _skimage2.filters.rank import sum_bilateral
-    >>> img = data.camera().astype(np.uint16)
+    >>> img = data.fetch_camera().astype(np.uint16)
     >>> bilat_img = sum_bilateral(img, disk(10), s0=10, s1=10)
 
     """
