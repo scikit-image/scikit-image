@@ -25,14 +25,14 @@ jobs:
         build: ["cp312*", "cp313*", "cp314*", "cp315*"]
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: pypa/cibuildwheel@1828c10ab37f080699c7b81cea34097c684a7074 # v4.2.0
+      - uses: pypa/cibuildwheel@e090b81e30c4d855ea63bf4b6e59204c09a101ae # v4.2.1
         env:
           CIBW_BUILD: ${{ matrix.build }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: wheels-${{ matrix.os }}-${{ matrix.arch }}-${{ github.job }}-${{ strategy.job-index }}
           path: ./wheelhouse/*.whl
@@ -48,7 +48,7 @@ jobs:
         build: ["cp312*", "cp313*", "cp314*", "cp315*"]
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -57,14 +57,14 @@ jobs:
         uses: ./.github/windows_arm64_steps
       # Wheel repair is disabled for Windows in pyproject.toml; see the comment
       # on repair-wheel-command under [tool.cibuildwheel.windows].
-      - uses: pypa/cibuildwheel@1828c10ab37f080699c7b81cea34097c684a7074 # v4.2.0
+      - uses: pypa/cibuildwheel@e090b81e30c4d855ea63bf4b6e59204c09a101ae # v4.2.1
         env:
           CIBW_BUILD: ${{ matrix.build }}
           CC: clang-cl
           CXX: clang-cl
           LDFLAGS: "-Wl,-S"
           CIBW_SKIP: "*-win32" # not provide 32 bits wheel
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: wheels-${{ matrix.os }}-${{ matrix.arch }}-${{ github.job }}-${{ strategy.job-index }}
           path: ./wheelhouse/*.whl
@@ -90,14 +90,14 @@ jobs:
           ]
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: pypa/cibuildwheel@1828c10ab37f080699c7b81cea34097c684a7074 # v4.2.0
+      - uses: pypa/cibuildwheel@e090b81e30c4d855ea63bf4b6e59204c09a101ae # v4.2.1
         env:
           CIBW_BUILD: ${{ matrix.build }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: wheels-${{ matrix.os }}-${{ matrix.arch }}-${{ github.job }}-${{ strategy.job-index }}
           path: ./wheelhouse/*.whl
@@ -107,17 +107,17 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
 
       - name: Build and test scikit-image for Pyodide
-        uses: pypa/cibuildwheel@1828c10ab37f080699c7b81cea34097c684a7074 # v4.2.0
+        uses: pypa/cibuildwheel@e090b81e30c4d855ea63bf4b6e59204c09a101ae # v4.2.1
         env:
           CIBW_PLATFORM: pyodide
           # cp313 only: skip cp314+ (pyodide 3.15 is 315.0.0a2 prerelease, not production)
           CIBW_BUILD: "cp313-pyodide_wasm32"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: wheels-pyodide-${{ github.job }}
           path: ./wheelhouse/*.whl

@@ -51,12 +51,12 @@ jobs:
 
     steps:
       - name: Checkout scikit-image
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
 
       - name: Setup Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version}}
           allow-prereleases: true
@@ -73,7 +73,7 @@ jobs:
           echo "$(brew --prefix)/opt/ccache/libexec" >> $GITHUB_PATH
 
       - name: Restore/save ccache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ github.workspace }}/.ccache
           key: ccache-${{ runner.os }}-py${{ matrix.python-version }}-${{ github.sha }}
