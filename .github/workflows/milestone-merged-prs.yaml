@@ -15,7 +15,7 @@ jobs:
 
     permissions:
       issues: write
-      pull-requests: read
+      pull-requests: write
 
     steps:
       - uses: scientific-python/attach-next-milestone-action@806bd518fa2d47c076046246efcbca38a829d53b
