@@ -31,6 +31,38 @@ def test_gabor_kernel_bandwidth():
     assert_equal(kernel.shape, (9, 9))
 
 
+@pytest.mark.parametrize('bandwidth', [0, -0.5, -1])
+def test_gabor_kernel_invalid_bandwidth(bandwidth):
+    # `bandwidth=0` makes `_sigma_prefactor`'s denominator exactly zero, and a
+    # negative `bandwidth` makes it return a negative sigma, which is not a
+    # meaningful standard deviation. Both are rejected up front now.
+    with pytest.raises(ValueError, match='bandwidth'):
+        gabor_kernel(0.1, bandwidth=bandwidth)
+    with pytest.raises(ValueError, match='bandwidth'):
+        gabor(np.zeros((10, 10)), frequency=0.1, bandwidth=bandwidth)
+
+
+@pytest.mark.parametrize('sigma_kwargs', [{'sigma_x': 5.0}, {'sigma_y': 5.0}])
+def test_gabor_kernel_invalid_bandwidth_with_one_sigma(sigma_kwargs):
+    # Only one sigma is user-supplied, so the other is still derived from
+    # `bandwidth` and the guard must fire. Previously `bandwidth=-1` here left
+    # exactly one sigma negative, which flipped the sign of the whole kernel
+    # rather than cancelling out.
+    with pytest.raises(ValueError, match='bandwidth'):
+        gabor_kernel(0.1, bandwidth=-1, **sigma_kwargs)
+    with pytest.raises(ValueError, match='bandwidth'):
+        gabor_kernel(0.1, bandwidth=0, **sigma_kwargs)
+
+
+@pytest.mark.parametrize('bandwidth', [0, -1])
+def test_gabor_kernel_bandwidth_ignored_when_sigmas_given(bandwidth):
+    # The docstring says `bandwidth` is ignored when both sigmas are set, so the
+    # new guard must not fire there.
+    expected = gabor_kernel(0.1, sigma_x=1.0, sigma_y=1.0)
+    kernel = gabor_kernel(0.1, bandwidth=bandwidth, sigma_x=1.0, sigma_y=1.0)
+    assert_array_almost_equal(kernel, expected)
+
+
 @pytest.mark.parametrize('dtype', [np.complex64, np.complex128])
 def test_gabor_kernel_dtype(dtype):
     kernel = gabor_kernel(1, bandwidth=1, dtype=dtype)
