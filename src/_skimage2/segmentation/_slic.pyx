@@ -336,8 +336,11 @@ def _enforce_label_connectivity_cython(Py_ssize_t[:, :, ::1] segments,
                                     adjacent = connected_segments[zz, yy, xx]
                         bfs_visited += 1
 
-                    # change to an adjacent one, like in the original paper
-                    if current_segment_size < min_size:
+                    # Merge into an already-relabeled neighbor, like in the
+                    # original paper. If none exists, keep this component's
+                    # label so a later disconnected region cannot reuse it.
+                    if (current_segment_size < min_size
+                            and adjacent != current_new_label):
                         for i in range(current_segment_size):
                             connected_segments[coord_list[i, 0],
                                                coord_list[i, 1],
