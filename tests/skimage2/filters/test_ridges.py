@@ -370,15 +370,12 @@ def test_meijering_alpha_dot_line_scores(ndim, size):
     def_alpha = -1 / (ndim + 1)  # Default alpha (alpha=None)
     image, dot_at, line_at = _dot_and_line(ndim, size)
     # With the shaping off (alpha=0), the two score the same.
-    assert_allclose(_dot_line_ratio(image, dot_at, line_at, alpha=0.0),
-                    1.0,
-                    rtol=1e-6)
+    assert_allclose(_dot_line_ratio(image, dot_at, line_at, alpha=0.0), 1.0, rtol=1e-6)
     # Ratio should be 2 / 3 for default alpha, preferring line to dot.
     def_dot_line = _dot_line_ratio(image, dot_at, line_at, alpha=None)
-    assert np.isclose(def_dot_line , expected_ratio, rtol=1e-6)
+    assert np.isclose(def_dot_line, expected_ratio, rtol=1e-6)
     # Check that alpha=None corresponds to stated default.
-    assert_equal(_dot_line_ratio(image, dot_at, line_at, alpha=def_alpha),
-                 def_dot_line)
+    assert_equal(_dot_line_ratio(image, dot_at, line_at, alpha=def_alpha), def_dot_line)
     # For a while we had a positive default alpha, that has the opposite to the
     # desired effect.  Assert that this (previous, positive, incorrect) default
     # gives the expected output for that alpha, but different to that above.
@@ -395,12 +392,12 @@ def test_meijering_alpha_dot_line_scores(ndim, size):
     rand_image = ndi.gaussian_filter(rng.random((32,) * ndim), 1.5)
     sigmas = [2.0]
     rand_def_dot_line = meijering(rand_image, sigmas=sigmas)
-    assert_array_equal(rand_def_dot_line,
-                       meijering(rand_image, sigmas=sigmas, alpha=def_alpha))
+    assert_array_equal(
+        rand_def_dot_line, meijering(rand_image, sigmas=sigmas, alpha=def_alpha)
+    )
     # Reversing the sign of alpha gives a different result.
     assert not np.allclose(
-        rand_def_dot_line,
-        meijering(rand_image, sigmas=sigmas, alpha=-def_alpha)
+        rand_def_dot_line, meijering(rand_image, sigmas=sigmas, alpha=-def_alpha)
     )
 
 
@@ -422,7 +419,7 @@ def test_meijering_alpha_linear_between_landmarks():
 def test_meijering_alpha_ignores_orientation():
     """Rotating the line must not change what alpha does to it."""
     straight, dot_at, line_at = _dot_and_line(angle=0)
-    straight_ratio = _dot_line_ratio(straight, dot_at, line_at, alpha=None),
+    straight_ratio = (_dot_line_ratio(straight, dot_at, line_at, alpha=None),)
     for angle in [15, 30, 45, 63, 90]:
         turned, turned_dot, turned_line = _dot_and_line(angle=angle)
         assert_allclose(
