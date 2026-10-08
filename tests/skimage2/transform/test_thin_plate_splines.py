@@ -9,6 +9,28 @@ SRC = np.array([[0, 0], [0, 5], [5, 5], [5, 0]])
 DST = np.array([[5, 0], [0, 0], [0, 5], [5, 5]])
 
 
+def _numpy_openblas_version():
+    """Return the version of NumPy's OpenBLAS as an int tuple, or None."""
+    try:
+        blas = np.show_config(mode="dicts")["Build Dependencies"]["blas"]
+        if "openblas" not in blas["name"]:
+            return None
+        return tuple(int(x) for x in blas["version"].split(".")[:3])
+    except (KeyError, TypeError, ValueError):
+        return None
+
+
+# OpenBLAS < 0.3.34 has data races in `np.linalg.solve`; see
+# https://github.com/scikit-image/scikit-image/issues/8212 and
+# https://github.com/OpenMathLib/OpenBLAS/pull/5876
+if (_numpy_openblas_version() or (0,)) >= (0, 3, 34):
+    openblas_thread_unsafe = lambda func: func  # noqa: E731
+else:
+    openblas_thread_unsafe = pytest.mark.thread_unsafe(
+        "`np.linalg.solve` is not thread-safe with OpenBLAS < 0.3.34"
+    )
+
+
 class TestThinPlateSplineTransform:
     tform_class = ThinPlateSplineTransform
 
@@ -68,9 +90,7 @@ class TestThinPlateSplineTransform:
                 tps.estimate(src, not_2d)
         assert tps.src is None
 
-    @pytest.mark.thread_unsafe(
-        "scipy.ndimage spline prefiltering in `warp` is not thread-safe"
-    )
+    @openblas_thread_unsafe
     def test_rotate(self):
         image = ski2.data.astronaut()
         desired = ski2.transform.rotate(image, angle=90)
