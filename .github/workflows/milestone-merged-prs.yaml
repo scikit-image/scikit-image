@@ -1,9 +1,7 @@
 name: Milestone
 
 on:
-  pull_request_target: # zizmor: ignore[dangerous-triggers]
-    types:
-      - closed
+  push:
     branches:
       - "main"
 
@@ -12,10 +10,15 @@ permissions: {}
 jobs:
   milestone_pr:
     name: attach to PR
-    if: github.event.pull_request.merged == true
+    if: github.repository == 'scikit-image/scikit-image'
     runs-on: ubuntu-latest
+
+    permissions:
+      issues: write
+      pull-requests: write
+
     steps:
-      - uses: scientific-python/attach-next-milestone@c9cfab10ad0c67fed91b01103db26b7f16634639
+      - uses: scientific-python/attach-next-milestone-action@806bd518fa2d47c076046246efcbca38a829d53b
         with:
-          token: ${{ secrets.MILESTONE_LABELER_TOKEN }}
+          token: ${{ github.token }}
           force: true

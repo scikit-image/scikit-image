@@ -1,4 +1,3 @@
-import time
 import pytest
 import itertools
 
@@ -66,25 +65,26 @@ def test_ensure_spacing_batch_processing(p, size):
 
 
 def test_ensure_spacing_max_batch_size():
-    """Small batches are slow, large batches -> large allocations -> also slow.
+    """Batch size must not affect the result.
+
+    Large batches used to cause large memory allocations, while small batches
+    are slower, so ``max_split_size`` is a performance/memory trade-off. The
+    choice of batch size must not change which coordinates are kept, though.
 
     https://github.com/scikit-image/scikit-image/pull/6035#discussion_r751518691
     """
     rng = np.random.RandomState(4215035982)
     coords = rng.randint(low=0, high=1848, size=(40000, 2))
-    tstart = time.time()
-    _ensure_spacing(coords, spacing=100, min_split_size=50, max_split_size=2000)
-    dur1 = time.time() - tstart
 
-    tstart = time.time()
-    _ensure_spacing(coords, spacing=100, min_split_size=50, max_split_size=20000)
-    dur2 = time.time() - tstart
+    out_small = _ensure_spacing(
+        coords, spacing=100, min_split_size=50, max_split_size=2000
+    )
+    out_large = _ensure_spacing(
+        coords, spacing=100, min_split_size=50, max_split_size=20000
+    )
 
-    # Originally checked dur1 < dur2 to assert that the default batch size was
-    # faster than a much larger batch size. However, on rare occasion a CI test
-    # case would fail with dur1 ~5% larger than dur2. To be more robust to
-    # variable load or differences across architectures, we relax this here.
-    assert dur1 < 1.33 * dur2
+    # A timing-based version of this test was flaky in CI (gh-8331).
+    assert_equal(out_small, out_large)
 
 
 @pytest.mark.parametrize("p", [1, 2, np.inf])
