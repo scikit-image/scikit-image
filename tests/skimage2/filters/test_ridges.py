@@ -314,10 +314,12 @@ def test_border_management(func, tol):
 # https://scikit-image.org/skimage-workbooks/meijering-alpha-testing.  Most of
 # the setup here is making a dot-and-line image in which we have scaled the
 # line and dot intensity so that they have matching peak heights under the
-# smoothing at which we test.  This is because blurring costs a round dot more
-# height than a long line.  Scaling the dot by ``sqrt(1 + sigma**2/width**2)``
-# cancels that, so dot and line tie exactly at ``alpha = 0`` and any later
-# inequality is result of the alpha parameter.
+# smoothing at which we test.  This is because blurring reduces peak blob
+# height more than it reduces peak line height (smoothing a blob pulls in low
+# signal in all directions, whereas smoothing a line pulls in some high signal
+# from the surrounding line).  Scaling the dot by ``sqrt(1 +
+# sigma**2/width**2)`` cancels that, so dot and line tie exactly at ``alpha =
+# 0`` and any later inequality is result of the alpha parameter.
 
 MEIJERING_WIDTH = 4.0  # structure half-width, and the sigma we filter at.
 
