@@ -22,8 +22,6 @@ chat:
 
 knowledge_base:
   code_guidelines:
-    filePatterns:
-      - CONTRIBUTING.md
 knowledge_base:
   code_guidelines:
     filePatterns:
