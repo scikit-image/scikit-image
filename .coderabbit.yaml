@@ -22,8 +22,6 @@ chat:
 
 knowledge_base:
   code_guidelines:
-knowledge_base:
-  code_guidelines:
     filePatterns:
       - CONTRIBUTING.md
       - doc/source/development/guidelines.md
