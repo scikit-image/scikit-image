@@ -105,9 +105,7 @@ def test_radon_circle_singleton(shape):
     assert sinogram.shape == (1, 180)
     assert sinogram_t.shape == (1, 180)
 
-    np.testing.assert_array_equal(
-        sinogram, np.roll(sinogram_t, 90, axis=1)
-    )
+    np.testing.assert_array_equal(sinogram, np.roll(sinogram_t, 90, axis=1))
 
 
 def check_iradon_center(size, theta, circle):
