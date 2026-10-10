@@ -23,5 +23,12 @@ chat:
 knowledge_base:
   code_guidelines:
     filePatterns:
-      - CONTRIBUTING.rst
+      - CONTRIBUTING.md
+      - doc/source/development/guidelines.md
+      - doc/source/development/testing.md
+      - doc/source/development/building_docs.md
+      - doc/source/development/deprecations.md
+      - doc/source/development/benchmarks.md
+      - doc/source/development/data.md
+      - doc/source/development/install.md
       - doc/source/development/core_developer.md
