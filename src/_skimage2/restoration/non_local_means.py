@@ -149,11 +149,18 @@ def denoise_nl_means(
     >>> a += 0.3 * rng.standard_normal(a.shape)
     >>> denoised_a = denoise_nl_means(a, 7, 5, 0.1)
     """
+    is_array = not np.isscalar(h)
     if channel_axis is None:
         multichannel = False
         image = image[..., np.newaxis]
     else:
         multichannel = True
+
+    if is_array and fast_mode == True:
+        raise NotImplementedError(
+            "Spatially varying h has only been implemented for fast_mode = False"
+            "and for 2D grayscale/multichannel and 3D grayscale"
+        )
 
     ndim_no_channel = image.ndim - 1
     if (ndim_no_channel < 2) or (ndim_no_channel > 4):
@@ -166,7 +173,21 @@ def denoise_nl_means(
     if not image.flags.c_contiguous:
         image = np.ascontiguousarray(image)
 
-    kwargs = dict(s=patch_size, d=patch_distance, h=h, var=sigma * sigma)
+    if is_array:
+        if np.shape(h) != np.shape(image)[:ndim_no_channel]:
+            raise ValueError(
+                "array h must have the same spatial shape as image. "
+                "For a 2D image, h must be 2D; (for other dimensions this functionality has not been implemented yet)"
+            )
+        else:
+            h = np.asarray(h, dtype=image.dtype)
+
+    if (ndim_no_channel == 2 or ndim_no_channel == 3) and fast_mode == False:
+        kwargs = dict(
+            s=patch_size, d=patch_distance, h=h, is_array=is_array, var=sigma * sigma
+        )
+    else:
+        kwargs = dict(s=patch_size, d=patch_distance, h=h, var=sigma * sigma)
     if ndim_no_channel == 2:
         nlm_func = _fast_nl_means_denoising_2d if fast_mode else _nl_means_denoising_2d
     elif ndim_no_channel == 3:
