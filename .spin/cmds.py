@@ -47,7 +47,7 @@ def asv(asv_args, build_dir):
 
     spin asv -- dev -b TransformSuite
 
-    Please see CONTRIBUTING.txt
+    Please see doc/source/development/benchmarks.md
     """
     site_path = spin.cmds.meson._get_site_packages(build_dir)
     if site_path is None:
