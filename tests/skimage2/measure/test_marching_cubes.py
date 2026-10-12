@@ -165,7 +165,23 @@ def test_masked_marching_cubes():
     ver, faces, _, _ = marching_cubes(ellipsoid_scalar, 0, mask=mask)
     area = mesh_surface_area(ver, faces)
 
-    assert_allclose(area, 299.56878662109375, rtol=0.01)
+    # Surface area of the unmasked region only; no vertex may fall on a
+    # masked voxel.
+    assert_allclose(area, 243.14218, rtol=0.01)
+    assert ver[:, 0].min() >= 10
+    assert ver[:, 2].max() <= 19
+
+
+def test_masked_marching_cubes_masked_corner_excludes_cube():
+    # Masking any single corner of the only cube must exclude that cube,
+    # including position 0 which was never checked before. See gh-8202.
+    vol = np.full((2, 2, 2), -1.0)
+    vol[0, 0, 0] = 1.0
+    for corner in np.ndindex(2, 2, 2):
+        mask = np.ones_like(vol, dtype=bool)
+        mask[corner] = False
+        with pytest.raises(RuntimeError):
+            marching_cubes(vol, 0, mask=mask)
 
 
 def test_masked_marching_cubes_empty():

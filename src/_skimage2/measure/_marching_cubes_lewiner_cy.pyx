@@ -980,7 +980,12 @@ def marching_cubes(cnp.float32_t[:, :, :] im not None, cnp.float64_t isovalue,
             while x < Nx_bound:
                 x += st
                 x_st = x + st
-                if no_mask or mask[z_st, y_st, x_st]:
+                # Only compute a cube if all eight of its corners are
+                # unmasked; checking a single corner leaves boundary
+                # positions unreachable by the mask (gh-8202).
+                if no_mask or (
+                        mask[z   ,y, x] and mask[z   ,y, x_st] and mask[z   ,y_st, x_st] and mask[z   ,y_st, x] and
+                        mask[z_st,y, x] and mask[z_st,y, x_st] and mask[z_st,y_st, x_st] and mask[z_st,y_st, x]):
                     # Initialize cell
                     cell.set_cube(isovalue, x, y, z, st,
                         im[z   ,y, x], im[z   ,y, x_st], im[z   ,y_st, x_st], im[z   ,y_st, x],
