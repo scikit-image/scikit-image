@@ -1,12 +1,12 @@
 # TODO merge contents of this file into _footprints.py
 
-import os
+import operator
+from pathlib import Path
 
 import numpy as np
 
-from ._footprints import _footprint_is_sequence
+from ._footprints import _footprint_is_sequence, mirror_footprint
 from .._shared._warnings import warn_external
-from ..draw.draw import ellipse as _draw_ellipse
 from ._grayscale_operators import dilation
 
 
@@ -15,14 +15,11 @@ from ._grayscale_operators import dilation
 # the array. The values at a given radius corresponds to the number of
 # repetitions of 3 different types elementary of structuring elements.
 #
-# See _nsphere_series_decomposition for full details.
-_nsphere_decompositions = {}
-_nsphere_decompositions[2] = np.load(
-    os.path.join(os.path.dirname(__file__), 'disk_decompositions.npy')
-)
-_nsphere_decompositions[3] = np.load(
-    os.path.join(os.path.dirname(__file__), 'ball_decompositions.npy')
-)
+# See `footprint_disk_decomposed` for full details.
+_nsphere_decompositions = {
+    2: np.load(Path(__file__).parent / 'disk_decompositions.npy'),  # shape (251, 3)
+    3: np.load(Path(__file__).parent / 'ball_decompositions.npy'),  # shape (101, 3)
+}
 
 
 def _shape_from_sequence(footprints, require_odd_size=False):
@@ -50,12 +47,12 @@ def _shape_from_sequence(footprints, require_odd_size=False):
     return tuple(shape)
 
 
-def footprint_from_sequence(footprints):
+def footprint_from_sequence(decomposed, *, dtype=None):
     """Convert a footprint sequence into an equivalent ndarray.
 
     Parameters
     ----------
-    footprints : tuple of 2-tuples
+    decomposed : tuple of 2-tuples
         A sequence of footprint tuples where the first element of each tuple
         is an array corresponding to a footprint and the second element is the
         number of times it is to be applied. Currently, all footprints should
@@ -64,14 +61,33 @@ def footprint_from_sequence(footprints):
     Returns
     -------
     footprint : ndarray
-        An single array equivalent to applying the sequence of ``footprints``.
+        An single array equivalent to applying the sequence of `decomposed`.
+
+    Examples
+    --------
+    >>> import _skimage2 as ski2
+    >>> decomposed = (
+    ...     (np.ones((3, 1), dtype=np.uint8), 1),
+    ...     (np.ones((1, 3), dtype=np.uint8), 2),
+    ... )
+    >>> ski2.morphology.footprint_from_sequence(decomposed)
+    array([[1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 1]], dtype=uint8)
     """
+    if not _footprint_is_sequence(decomposed):
+        msg = f"expected decomposed footprint, got {decomposed=!r}"
+        raise ValueError(msg)
+
+    if dtype is None:
+        dtype = decomposed[0][0].dtype
 
     # Create a single pixel image of sufficient size and apply binary dilation.
-    shape = _shape_from_sequence(footprints)
-    imag = np.zeros(shape, dtype=bool)
-    imag[tuple(s // 2 for s in shape)] = 1
-    return dilation(imag, footprints)
+    shape = _shape_from_sequence(decomposed)
+    composed = np.zeros(shape, dtype=dtype)
+    composed[tuple(s // 2 for s in shape)] = 1
+    dilation(composed, decomposed, out=composed)
+    return composed
 
 
 def footprint_rectangle(shape, *, dtype=np.uint8):
@@ -306,9 +322,35 @@ def diamond(radius, dtype=np.uint8, *, decomposition=None):
     return footprint
 
 
-def _nsphere_series_decomposition(radius, ndim, dtype=np.uint8):
-    """Generate a sequence of footprints approximating an n-sphere.
+def footprint_disk_decomposed(radius, *, ndim=2, dtype=np.uint8):
+    """Approximate a disk (2D) or ball (3D) with a decomposed footprint.
 
+    Approximate the footprint of a disk or ball with a series of smaller
+    pre-computed footprints of length 3 in each dimension.
+
+    Parameters
+    ----------
+    radius : int
+        The radius of the disk or ball.
+    ndim : {2, 3}, optional
+        The dimensionality of the footprint. Only 2D and 3D are supported.
+    dtype : data-type, optional
+        The data type of the footprint.
+
+    Returns
+    -------
+    decomposed :
+        Each element of the decomposed `footprint` tuple is a 2-tuple of the
+        form ``(ndarray, num_iter)`` that specifies a footprint array and the
+        number of iterations it is to be applied.
+
+    See Also
+    --------
+    cross_decompose_footprint
+        Decompose a symmetric convex 2D-footprint into cross-shaped elements.
+
+    Notes
+    -----
     Morphological operations with an n-sphere (hypersphere) footprint can be
     approximated by applying a series of smaller footprints of extent 3 along
     each axis. Specific solutions for this are given in [1]_ for the case of
@@ -321,7 +363,8 @@ def _nsphere_series_decomposition(radius, ndim, dtype=np.uint8):
     (in 2D) or ball (in 3D) computed with ``decomposition=None``.
 
     The approach can be extended to higher dimensions, but we have only stored
-    results for 2D and 3D at this point.
+    results for 2D and 3D at this point. These results only cover radii from
+    0 to 250 for the 2D case, and from 0 to 100 for the 3D case.
 
     Empirically, the shapes at large radius approach a hexadecagon
     (16-sides [2]_) in 2D and a rhombicuboctahedron (26-faces, [3]_) in 3D.
@@ -335,15 +378,54 @@ def _nsphere_series_decomposition(radius, ndim, dtype=np.uint8):
            https://www.iwaenc.org/proceedings/1997/nsip97/pdf/scan/ns970226.pdf
     .. [2] https://en.wikipedia.org/wiki/Hexadecagon
     .. [3] https://en.wikipedia.org/wiki/Rhombicuboctahedron
-    """
 
+    Examples
+    --------
+    Decomposition will return multiple smaller footprints that can be used
+    instead of a conventional "dense" footprint.
+
+    >>> import _skimage2 as ski2
+    >>> decomposed = ski2.morphology.footprint_disk_decomposed(radius=5)
+    >>> decomposed
+    ((array([[0, 1, 0],
+            [1, 1, 1],
+            [0, 1, 0]], dtype=uint8), 3), (array([[1, 1, 1],
+            [1, 1, 1],
+            [1, 1, 1]], dtype=uint8), 2))
+
+    Use ``decomposed`` as you would use a "dense" footprint with any function
+    in the library that accepts a footprint. Especially for larger footprints
+    this can improve performance.
+
+    Dilating an array with a single pixel in the middle with the decomposed
+    footprint reveals the composed shape of the footprint:
+
+    >>> dirac = np.zeros((11, 11), dtype=np.uint8)
+    >>> dirac[5, 5] = 1
+    >>> ski2.morphology.dilation(dirac, footprint=decomposed)
+    array([[0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+           [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+           [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+           [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+           [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0]], dtype=uint8)
+
+    The above operation is effectively what `footprint_from_sequence` does under
+    the hood.
+    """
     if radius == 1:
-        # for radius 1 just use the exact shape (3,) * ndim solution
-        kwargs = dict(dtype=dtype, strict_radius=False, decomposition=None)
-        if ndim == 2:
-            return ((disk(1, **kwargs), 1),)
-        elif ndim == 3:
-            return ((ball(1, **kwargs), 1),)
+        # For radius 1, we return a single footprint.
+        # We need `adjust_edge=0.5` because this keeps it consistent with
+        # results for other radii: `footprint_disk_decomposed` uses precomputed
+        # values that were generated with legacy `skimage.morphology.disk` with
+        # ``strict_radius=False`` (which added 0.5 to the radius internally).
+        footprint = footprint_ellipse((radius,) * ndim, adjust_edge=0.5, dtype=dtype)
+        return ((footprint, 1),)
 
     # load precomputed decompositions
     if ndim not in _nsphere_decompositions:
@@ -353,7 +435,7 @@ def _nsphere_series_decomposition(radius, ndim, dtype=np.uint8):
         )
     precomputed_decompositions = _nsphere_decompositions[ndim]
     max_radius = precomputed_decompositions.shape[0]
-    if radius > max_radius:
+    if radius >= max_radius:
         raise ValueError(
             f"precomputed {ndim}D decomposition unavailable for radius > {max_radius}"
         )
@@ -414,126 +496,145 @@ def _t_shaped_element_series(ndim=2, dtype=np.uint8):
     return tuple(all_t)
 
 
-def disk(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
-    """Generates a flat, disk-shaped footprint.
+def _footprint_cross(shape, *, dtype=np.uint8):
+    """Generate a cross-shaped n-dimensional footprint.
 
-    A pixel is within the neighborhood if the Euclidean distance between
-    it and the origin is no greater than radius (This is only approximately
-    True, when `decomposition == 'sequence'`).
+    Only the central axis are one.
 
     Parameters
     ----------
-    radius : int
-        The radius of the disk-shaped footprint.
-
-    Other Parameters
-    ----------------
-    dtype : dtype-like, optional
+    shape : Sequence of int(s)
+        Shape of the new footprint.
+    dtype : data-type, optional
         The data type of the footprint.
-    strict_radius : bool, optional
-        If False, extend the radius by 0.5. This allows the circle to expand
-        further within a cube that remains of size ``2 * radius + 1`` along
-        each axis. This parameter is ignored if decomposition is not None.
-    decomposition : {None, 'sequence', 'crosses'}, optional
-        If None, a single array is returned. For 'sequence', a tuple of smaller
-        footprints is returned. Applying this series of smaller footprints will
-        given a result equivalent to a single, larger footprint, but with
-        better computational performance. For disk footprints, the 'sequence'
-        or 'crosses' decompositions are not always exactly equivalent to
-        ``decomposition=None``. See Notes for more details.
 
     Returns
     -------
     footprint : ndarray
-        The footprint where elements of the neighborhood are 1 and 0 otherwise.
+        The footprint where elements. Depending on the requested `dtype`,
+        pixels that belong to the ellipse are *truthy* otherwise *falsy*.
+
+    Examples
+    --------
+    >>> _footprint_cross((3, 5))
+    array([[0, 0, 1, 0, 0],
+           [1, 1, 1, 1, 1],
+           [0, 0, 1, 0, 0]], dtype=uint8)
+    """
+    if np.any(np.array(shape) % 2 == 0):
+        msg = (
+            f"only footprints with odd length in each dimension are supported, "
+            f" got {shape=}"
+        )
+        raise ValueError(msg)
+
+    footprint = np.zeros(shape, dtype=dtype)
+    for axis, length in enumerate(shape):
+        radius = length // 2
+        sl = (slice(None),) * axis + (radius,)
+        footprint[sl] = 1
+    return footprint
+
+
+def cross_decompose_footprint(footprint, *, dtype=None):
+    """Decompose a symmetric convex 2D-footprint into cross-shaped elements.
+
+    Parameters
+    ----------
+    footprint : ndarray
+        A 2-dimensional footprint that is symmetric and convex along each
+        dimension. That is, slices of the footprint along any dimension and
+        index must never contain gaps, must be of odd length, and must be
+        symmetric.
+    dtype : data-type, optional
+        The data type of the footprint, defaults to the dtype of `footprint`.
+
+    Returns
+    -------
+    decomposed :
+        Each element of the decomposed `footprint` tuple is a 2-tuple of the
+        form ``(ndarray, num_iter)`` that specifies a footprint array and the
+        number of iterations it is to be applied.
+
+    See Also
+    --------
+    footprint_disk_decomposed
+        Approximate a disk (2D) or ball (3D) with a decomposed footprint.
 
     Notes
     -----
-    When `decomposition` is not None, each element of the `footprint`
-    tuple is a 2-tuple of the form ``(ndarray, num_iter)`` that specifies a
-    footprint array and the number of iterations it is to be applied.
-
-    The disk produced by the ``decomposition='sequence'`` mode may not be
-    identical to that with ``decomposition=None``. A disk footprint can be
-    approximated by applying a series of smaller footprints of extent 3 along
-    each axis. Specific solutions for this are given in [1]_ for the case of
-    2D disks with radius 2 through 10. Here, we numerically computed the number
-    of repetitions of each element that gives the closest match to the disk
-    computed with kwargs ``strict_radius=False, decomposition=None``.
-
-    Empirically, the series decomposition at large radius approaches a
-    hexadecagon (a 16-sided polygon [2]_). In [3]_, the authors demonstrate
-    that a hexadecagon is the closest approximation to a disk that can be
-    achieved for decomposition with footprints of shape (3, 3).
-
-    The disk produced by the ``decomposition='crosses'`` is often but not
-    always  identical to that with ``decomposition=None``. It tends to give a
-    closer approximation than ``decomposition='sequence'``, at a performance
-    that is fairly comparable. The individual cross-shaped elements are not
-    limited to extent (3, 3) in size. Unlike the 'seqeuence' decomposition, the
-    'crosses' decomposition can also accurately approximate the shape of disks
-    with ``strict_radius=True``. The method is based on an adaption of
-    algorithm 1 given in [4]_.
-
-    References
-    ----------
-    .. [1] Park, H and Chin R.T. Decomposition of structuring elements for
-           optimal implementation of morphological operations. In Proceedings:
-           1997 IEEE Workshop on Nonlinear Signal and Image Processing, London,
-           UK.
-           https://www.iwaenc.org/proceedings/1997/nsip97/pdf/scan/ns970226.pdf
-    .. [2] https://en.wikipedia.org/wiki/Hexadecagon
-    .. [3] Vanrell, M and Vitrià, J. Optimal 3 × 3 decomposable disks for
-           morphological transformations. Image and Vision Computing, Vol. 15,
-           Issue 11, 1997.
-           :DOI:`10.1016/S0262-8856(97)00026-7`
-    .. [4] Li, D. and Ritter, G.X. Decomposition of Separable and Symmetric
-           Convex Templates. Proc. SPIE 1350, Image Algebra and Morphological
-           Image Processing, (1 November 1990).
-           :DOI:`10.1117/12.23608`
-    """
-    if decomposition is None:
-        L = np.arange(-radius, radius + 1)
-        X, Y = np.meshgrid(L, L)
-        if not strict_radius:
-            radius += 0.5
-        return np.array((X**2 + Y**2) <= radius**2, dtype=dtype)
-    elif decomposition == 'sequence':
-        sequence = _nsphere_series_decomposition(radius, ndim=2, dtype=dtype)
-    elif decomposition == 'crosses':
-        fp = disk(radius, dtype, strict_radius=strict_radius, decomposition=None)
-        sequence = _cross_decomposition(fp)
-    return sequence
-
-
-def _cross(r0, r1, dtype=np.uint8):
-    """Cross-shaped structuring element of shape (r0, r1).
-
-    Only the central row and column are ones.
-    """
-    s0 = int(2 * r0 + 1)
-    s1 = int(2 * r1 + 1)
-    c = np.zeros((s0, s1), dtype=dtype)
-    if r1 != 0:
-        c[r0, :] = 1
-    if r0 != 0:
-        c[:, r1] = 1
-    return c
-
-
-def _cross_decomposition(footprint, dtype=np.uint8):
-    """Decompose a symmetric convex footprint into cross-shaped elements.
-
     This is a decomposition of the footprint into a sequence of
     (possibly asymmetric) cross-shaped elements. This technique was proposed in
     [1]_ and corresponds roughly to algorithm 1 of that publication (some
     details had to be modified to get reliable operation).
 
+    References
+    ----------
     .. [1] Li, D. and Ritter, G.X. Decomposition of Separable and Symmetric
            Convex Templates. Proc. SPIE 1350, Image Algebra and Morphological
            Image Processing, (1 November 1990).
            :DOI:`10.1117/12.23608`
+
+    Examples
+    --------
+    Decomposition will return multiple smaller footprints that can be used
+    instead of a conventional "dense" footprint.
+
+    Create a "dense" symmetric and convex footprint first:
+
+    >>> import _skimage2 as ski2
+    >>> footprint = ski2.morphology.footprint_ellipse((2, 3))
+
+    Then cross-decompose it:
+
+    >>> decomposed = ski2.morphology.cross_decompose_footprint(footprint)
+    >>> decomposed
+    ((array([[1, 1, 1]], dtype=uint8), 1),
+     (array([[0, 0, 1, 0, 0],
+             [1, 1, 1, 1, 1],
+             [0, 0, 1, 0, 0]], dtype=uint8),
+      1),
+     (array([[1],
+             [1],
+             [1]], dtype=uint8),
+      1))
+
+    Use ``decomposed`` as you would use a "dense" footprint with any function
+    in the library that accepts a footprint. Especially for larger footprints
+    this can improve performance.
+
+    Dilating an array with a single pixel in the middle with the decomposed
+    footprint reveals the composed shape of the footprint:
+
+    >>> dirac = np.zeros((7, 9), dtype=np.uint8)
+    >>> dirac[3, 4] = 1
+    >>> ski2.morphology.dilation(dirac, footprint=decomposed)
+    array([[0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 1, 1, 1, 0, 0, 0],
+           [0, 1, 1, 1, 1, 1, 1, 1, 0],
+           [0, 1, 1, 1, 1, 1, 1, 1, 0],
+           [0, 1, 1, 1, 1, 1, 1, 1, 0],
+           [0, 0, 0, 1, 1, 1, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
+
+    The above operation is effectively what `footprint_from_sequence` does under
+    the hood.
     """
+    if footprint.ndim != 2:
+        msg = f"footprint is not 2-dimensional, go {footprint.shape=}"
+        raise ValueError(msg)
+    if np.any(np.array(footprint.shape) % 2 == 0):
+        msg = f"footprint is not of uneven length, got {footprint.shape=}"
+        raise ValueError(msg)
+    # If entire footprint symmetric then we only need to check convexitivity
+    # for one quadrant later
+    is_symmetric = np.all(footprint == mirror_footprint(footprint))
+    if not is_symmetric:
+        raise ValueError("footprint is not symmetric along each dimension")
+
+    if dtype is None:
+        dtype = footprint.dtype
+
     quadrant = footprint[footprint.shape[0] // 2 :, footprint.shape[1] // 2 :]
     col_sums = quadrant.sum(0, dtype=int)
     col_sums = np.concatenate((col_sums, np.asarray([0], dtype=int)))
@@ -551,81 +652,205 @@ def _cross_decomposition(footprint, dtype=np.uint8):
             else:
                 idx[key] += 1
             i_prev = i
+        elif col_sums[i] < col_sums[i + 1]:
+            at_index = footprint.shape[0] + i
+            msg = f"footprint is not convex at [{at_index}:{at_index + 1}, :]"
+            raise ValueError(msg)
+
     n = quadrant.shape[0] - 1 - sum0
     if n > 0:
         key = (n, 0)
         idx[key] = idx.get(key, 0) + 1
-    return tuple([(_cross(r0, r1, dtype), n) for (r0, r1), n in idx.items()])
+
+    cross_shapes = tuple(((r0 * 2 + 1, r1 * 2 + 1), n) for (r0, r1), n in idx.items())
+    decomposed = tuple(
+        [(_footprint_cross(shape, dtype=dtype), n) for shape, n in cross_shapes]
+    )
+    return decomposed
 
 
-def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
-    """Generates a flat, ellipse-shaped footprint.
-
-    Every pixel along the perimeter of ellipse satisfies
-    the equation ``(x/width+1)**2 + (y/height+1)**2 = 1``.
+def _normalize_radii(radii):
+    """Normalize `radii` and create shape of matching dimensionality.
 
     Parameters
     ----------
-    width : int
-        The width of the ellipse-shaped footprint.
-    height : int
-        The height of the ellipse-shaped footprint.
+    radii : int or Sequence of int(s)
+        A tuple of floats that denote a radius in each dimension. If a single
+        scalar is given instead, it will be applied in two dimensions. The shape
+        is inferred from `radii`. If `radii` is a scalar, `shape` defaults to 2
+        dimensions. The length of each dimension is derived as
+        ``radius * 2 + 1``.
 
-    Other Parameters
-    ----------------
-    dtype : dtype-like, optional
+    Returns
+    -------
+    normalized_radii : tuple[float, ...]
+        Tuple of radii.
+    normalized_shape : tuple[int, ...]
+        Array shape matching `normalized_radii` in dimensionality.
+
+    Examples
+    --------
+    >>> _normalize_radii(radii=3)
+    ((3, 3), (7, 7))
+    >>> _normalize_radii(radii=(3,))
+    ((3,), (7,))
+    >>> _normalize_radii(radii=(3, 4, 5))
+    ((3, 4, 5), (7, 9, 11))
+    """
+    orig_radii = radii
+
+    # `radii` is source of truth for dimensionality
+    if np.isscalar(radii):
+        radii = (radii,) * 2  # Fallback to 2
+    # Derive `shape` from `radii`
+    shape = tuple(radius * 2 + 1 for radius in radii)
+
+    for radius in radii:
+        if radius < 0:
+            msg = f"got negative radius: radii={orig_radii!r}"
+            raise ValueError(msg)
+        try:
+            operator.index(radius)
+        except TypeError:
+            msg = f"expected `radii` with integers: radii={orig_radii!r}"
+            raise TypeError(msg) from None
+
+    return radii, shape
+
+
+def footprint_ellipse(radii, *, adjust_edge=0.4, dtype=np.uint8):
+    """Generates an elliptical or spherical footprint.
+
+    This function generates ellipsoids with any number of desired dimensions,
+    including spherical footprints. Use this function to generate shapes such
+    as a disk or an ellipse (2D), a ball or an ellipsoid (3D).
+
+    Parameters
+    ----------
+    radii : int or Sequence of int(s), optional
+        The radii of the ellipse for each dimension. If a single radius is
+        given instead of a tuple, it will be interpreted as the radius of a
+        2-dimensional disk. The default shape of the returned `footprint` is
+        derived from `radii` with ``radius * 2 + 1`` for each dimension.
+    adjust_edge : float or Sequence of float(s), optional
+        Adjust sampling at the edge by adjusting `radii` by a (subpixel-)amount
+        without affecting the shape of the returned `footprint` array. The
+        default value increases the radii slightly which leads to a smoother
+        edge. ``adjust_edge=0`` usually leads to a *pointier* ellipse that
+        touches the array's edge with only one pixel. Try other values like
+        0.3 or 0.5 to match other implementations [1]_, [2]_ pixel-by-pixel.
+    dtype : data-type, optional
         The data type of the footprint.
-    decomposition : {None, 'crosses'}, optional
-        If None, a single array is returned. For 'sequence', a tuple of smaller
-        footprints is returned. Applying this series of smaller footprints will
-        given an identical result to a single, larger footprint, but with
-        better computational performance. See Notes for more details.
 
     Returns
     -------
     footprint : ndarray
-        The footprint where elements of the neighborhood are 1 and 0 otherwise.
-        The footprint will have shape ``(2 * height + 1, 2 * width + 1)``.
+        The footprint where elements. Depending on the requested `dtype`,
+        pixels that belong to the ellipse are *truthy*, others are *falsy*.
+
+    See Also
+    --------
+    cross_decompose_footprint
+        Decompose a symmetric convex 2D-footprint into cross-shaped elements
+        (may increase performance for larger footprints).
+    footprint_disk_decomposed
+        Approximate a disk (2D) or ball (3D) with a decomposed footprint
+        (may increase performance for larger footprints).
 
     Notes
     -----
-    When `decomposition` is not None, each element of the `footprint`
-    tuple is a 2-tuple of the form ``(ndarray, num_iter)`` that specifies a
-    footprint array and the number of iterations it is to be applied.
+    This function compares the left side of the equation
 
-    The ellipse produced by the ``decomposition='crosses'`` is often but not
-    always  identical to that with ``decomposition=None``. The method is based
-    on an adaption of algorithm 1 given in [1]_.
+    .. math:: \\sum_{n=1}^{N} \\frac{x_n^2}{r_n^2} \\le 1
+
+    with 1 to determine which pixels belong to the footprint. :math:`x_n` is a
+    vector of evenly spaced numbers matching the requested length of the
+    respective dimension :math:`n \\in N`. Its minimum and maximum are derived
+    from `shape` with ``tuple(s // 2 for s in shape)`` for each dimension.
+
+    The defaults and underlying calculation in this function are different from
+    legacy `skimage` and that of other libraries [1]_ [2]_. Depending on the
+    platform and used precision, floating-point errors may compound this
+    difference further. `adjust_edge` can counter-act this to some extent.
+    MATLAB's disk can be approximated with ``adjust_edge=0.001``.
+
+    Use ``adjust_edge=0.5`` if you want to generate an approximate dense
+    equivalent to `footprint_disk_decomposed`.
 
     References
     ----------
-    .. [1] Li, D. and Ritter, G.X. Decomposition of Separable and Symmetric
-           Convex Templates. Proc. SPIE 1350, Image Algebra and Morphological
-           Image Processing, (1 November 1990).
-           :DOI:`10.1117/12.23608`
+    .. [1] https://usage.imagemagick.org/morphology/#disk, 2026-07-12
+    .. [2] https://www.mathworks.com/help/images/ref/strel.html, 2026-07-13
 
     Examples
     --------
-    >>> from _skimage2.morphology import footprints
-    >>> footprints.ellipse(5, 3)
-    array([[0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-           [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-           [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-           [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-           [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-           [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-           [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0]], dtype=uint8)
+    >>> import _skimage2 as ski2
+    >>> ski2.morphology.footprint_ellipse((2, 3))
+    array([[0, 0, 1, 1, 1, 0, 0],
+           [1, 1, 1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 1, 1, 1],
+           [0, 0, 1, 1, 1, 0, 0]], dtype=uint8)
 
+    Pass single value for radius as a shortcut for a 2-dimensional disk
+
+    >>> ski2.morphology.footprint_ellipse(2)
+    array([[0, 1, 1, 1, 0],
+           [1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 1],
+           [0, 1, 1, 1, 0]], dtype=uint8)
+
+    Produce ellipsis that strictly touches the edge (no smoothing/cropping)
+
+    >>> ski2.morphology.footprint_ellipse((2, 3), adjust_edge=0)
+    array([[0, 0, 0, 1, 0, 0, 0],
+           [0, 1, 1, 1, 1, 1, 0],
+           [1, 1, 1, 1, 1, 1, 1],
+           [0, 1, 1, 1, 1, 1, 0],
+           [0, 0, 0, 1, 0, 0, 0]], dtype=uint8)
+
+    Produce a 3-dimensional ellipsoid
+
+    >>> ellipsoid = ski2.morphology.footprint_ellipse((3, 4, 11))
+    >>> ellipsoid.shape
+    (7, 9, 23)
     """
-    if decomposition is None:
-        footprint = np.zeros((2 * height + 1, 2 * width + 1), dtype=dtype)
-        rows, cols = _draw_ellipse(height, width, height + 1, width + 1)
-        footprint[rows, cols] = 1
-        return footprint
-    elif decomposition == 'crosses':
-        fp = ellipse(width, height, dtype, decomposition=None)
-        sequence = _cross_decomposition(fp)
-    return sequence
+    radii, shape = _normalize_radii(radii)
+
+    if np.isscalar(adjust_edge):
+        adjust_edge = (adjust_edge,) * len(shape)
+    elif len(radii) != len(shape):
+        msg = f"`{adjust_edge=}` does not match requested shape={len(shape)}"
+        raise ValueError(msg)
+
+    radii_adjusted = tuple(
+        radius + adjust for radius, adjust in zip(radii, adjust_edge)
+    )
+
+    # Compute left side of the ellipsis equation (compare Notes)
+    _ellipse_field = np.zeros(shape, dtype=float)
+
+    for dim, (length, radius) in enumerate(zip(shape, radii_adjusted)):
+        if radius == 0:
+            # Avoid division by zero warning later on
+            _ellipse_field[...] = np.inf
+            break  # We can break loop early here
+
+        # Create coordinate space along current dimension. We use integer
+        # division to determine value of the border pixels because that is what
+        # legacy skimage and other libraries (like MATLAB, imagemagick) did or
+        # seem to be doing. It makes it easier to approximate their results.
+        coord_max = length // 2
+        coords = np.linspace(-coord_max, coord_max, num=length, endpoint=True)
+        coords = coords.reshape((1,) * dim + (length,) + (1,) * (len(shape) - dim - 1))
+
+        coords /= radius
+        _ellipse_field += coords**2
+
+    footprint = _ellipse_field <= 1
+    footprint = footprint.astype(dtype, copy=False)
+    return footprint
 
 
 def octahedron(radius, dtype=np.uint8, *, decomposition=None):
@@ -687,79 +912,6 @@ def octahedron(radius, dtype=np.uint8, *, decomposition=None):
     else:
         raise ValueError(f"Unrecognized decomposition: {decomposition}")
     return footprint
-
-
-def ball(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
-    """Generates a ball-shaped footprint.
-
-    This is the 3D equivalent of a disk.
-    A pixel is within the neighborhood if the Euclidean distance between
-    it and the origin is no greater than radius.
-
-    Parameters
-    ----------
-    radius : float
-        The radius of the ball-shaped footprint.
-
-    Other Parameters
-    ----------------
-    dtype : dtype-like, optional
-        The data type of the footprint.
-    strict_radius : bool, optional
-        If False, extend the radius by 0.5. This allows the circle to expand
-        further within a cube that remains of size ``2 * radius + 1`` along
-        each axis. This parameter is ignored if decomposition is not None.
-    decomposition : {None, 'sequence'}, optional
-        If None, a single array is returned. For 'sequence', a tuple of smaller
-        footprints is returned. Applying this series of smaller footprints will
-        given a result equivalent to a single, larger footprint, but with
-        better computational performance. For ball footprints, the sequence
-        decomposition is not exactly equivalent to decomposition=None.
-        See Notes for more details.
-
-    Returns
-    -------
-    footprint : ndarray or tuple
-        The footprint where elements of the neighborhood are 1 and 0 otherwise.
-
-    Notes
-    -----
-    The disk produced by the decomposition='sequence' mode is not identical
-    to that with decomposition=None. Here we extend the approach taken in [1]_
-    for disks to the 3D case, using 3-dimensional extensions of the "square",
-    "diamond" and "t-shaped" elements from that publication. All of these
-    elementary elements have size ``(3,) * ndim``. We numerically computed the
-    number of repetitions of each element that gives the closest match to the
-    ball computed with kwargs ``strict_radius=False, decomposition=None``.
-
-    Empirically, the equivalent composite footprint to the sequence
-    decomposition approaches a rhombicuboctahedron (26-faces [2]_).
-
-    References
-    ----------
-    .. [1] Park, H and Chin R.T. Decomposition of structuring elements for
-           optimal implementation of morphological operations. In Proceedings:
-           1997 IEEE Workshop on Nonlinear Signal and Image Processing, London,
-           UK.
-           https://www.iwaenc.org/proceedings/1997/nsip97/pdf/scan/ns970226.pdf
-    .. [2] https://en.wikipedia.org/wiki/Rhombicuboctahedron
-    """
-    if decomposition is None:
-        n = 2 * radius + 1
-        Z, Y, X = np.mgrid[
-            -radius : radius : n * 1j,
-            -radius : radius : n * 1j,
-            -radius : radius : n * 1j,
-        ]
-        s = X**2 + Y**2 + Z**2
-        if not strict_radius:
-            radius += 0.5
-        return np.array(s <= radius * radius, dtype=dtype)
-    elif decomposition == 'sequence':
-        sequence = _nsphere_series_decomposition(radius, ndim=3, dtype=dtype)
-    else:
-        raise ValueError(f"Unrecognized decomposition: {decomposition}")
-    return sequence
 
 
 def octagon(m, n, dtype=np.uint8, *, decomposition=None):
