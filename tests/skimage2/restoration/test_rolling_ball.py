@@ -93,7 +93,7 @@ def test_workers(workers):
 
 
 def test_ndim():
-    image = data.cells3d()[:5, 1, ...]
+    image = data.fetch_cells3d()[:5, 1, ...]
     kernel = ellipsoid_kernel((3, 100, 100), 100)
     rolling_ball(image, kernel=kernel)
 

@@ -6,7 +6,7 @@ from scipy.ndimage import map_coordinates
 from _skimage2._shared.testing import expected_warnings, run_in_parallel
 from _skimage2._shared.utils import _supported_float_type
 from _skimage2.color.colorconv import rgb2gray
-from _skimage2.data import checkerboard, astronaut
+from _skimage2.data import fetch_checkerboard, fetch_astronaut
 from _skimage2.draw.draw import circle_perimeter_aa
 from _skimage2.feature import peak_local_max
 from _skimage2.transform._warps import (
@@ -465,7 +465,7 @@ def test_resize_clip(order, preserve_range, anti_aliasing, dtype):
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_swirl(dtype):
-    image = img_as_float(checkerboard()).astype(dtype, copy=False)
+    image = img_as_float(fetch_checkerboard()).astype(dtype, copy=False)
     float_dtype = _supported_float_type(dtype)
 
     swirl_params = {'radius': 80, 'rotation': 0, 'order': 2, 'mode': 'reflect'}
@@ -496,7 +496,7 @@ def test_const_cval_out_of_range():
 
 
 def test_warp_identity():
-    img = img_as_float(rgb2gray(astronaut()))
+    img = img_as_float(rgb2gray(fetch_astronaut()))
     assert len(img.shape) == 2
     assert np.allclose(img, warp(img, AffineTransform(rotation=0)))
     assert not np.allclose(img, warp(img, AffineTransform(rotation=0.1)))
@@ -509,7 +509,7 @@ def test_warp_identity():
 
 
 def test_warp_coords_example():
-    image = astronaut().astype(np.float32)
+    image = fetch_astronaut().astype(np.float32)
     assert 3 == image.shape[2]
     tform = SimilarityTransform(translation=(0, -10))
     coords = warp_coords(tform, (30, 30, 3))
@@ -903,7 +903,7 @@ def test_bool_nonzero_order_errors(order):
 
 @pytest.mark.parametrize('dtype', [np.uint8, bool, np.float32, np.float64])
 def test_order_0_warp_dtype(dtype):
-    img = _convert(astronaut()[:10, :10, 0], dtype)
+    img = _convert(fetch_astronaut()[:10, :10, 0], dtype)
 
     assert resize(img, (12, 12), order=0).dtype == dtype
     assert rescale(img, 0.5, order=0).dtype == dtype
@@ -915,7 +915,7 @@ def test_order_0_warp_dtype(dtype):
 @pytest.mark.parametrize('dtype', [np.uint8, np.float16, np.float32, np.float64])
 @pytest.mark.parametrize('order', [1, 3, 5])
 def test_nonzero_order_warp_dtype(dtype, order):
-    img = _convert(astronaut()[:10, :10, 0], dtype)
+    img = _convert(fetch_astronaut()[:10, :10, 0], dtype)
 
     float_dtype = _supported_float_type(dtype)
 

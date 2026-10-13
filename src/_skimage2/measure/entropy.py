@@ -33,7 +33,7 @@ def shannon_entropy(image, base=2):
     --------
     >>> from _skimage2 import data
     >>> from _skimage2.measure import shannon_entropy
-    >>> shannon_entropy(data.camera())
+    >>> shannon_entropy(data.fetch_camera())
     7.231695011055706
     """
 

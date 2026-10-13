@@ -115,6 +115,32 @@ The new counterparts behave differently in the following ways:
 {% endfor -%}
 
 
+Dataset functions in ``skimage2.data`` use a ``fetch_`` prefix
+---------------------------------------------------------------
+
+Each dataset in ``skimage2.data`` is retrieved through a function whose name
+begins with ``fetch_``, following the convention used by ``sklearn.datasets``:
+
+.. code-block:: python
+
+    import skimage2 as ski2
+
+    image = ski2.data.fetch_astronaut()
+
+The prefix makes it explicit at the call site that a dataset may need to be
+downloaded and cached on first use. The bare names (e.g.
+``ski2.data.astronaut()``) still work, but are deprecated in favor of the
+``fetch_`` names, emit a :class:`DeprecationWarning`, and are absent from
+``skimage2.data.__all__`` and the API reference. Use the ``fetch_`` names in
+new code. For registry entries without a dedicated wrapper,
+``skimage2.data.fetch()`` takes a key such as ``'data/astronaut.png'`` and
+returns the local file path.
+
+On the ``skimage`` (v1) side, the bare names remain the primary API and emit a
+:class:`~skimage.util.PendingSkimage2Change` warning pointing at the
+``skimage2`` replacements. Both namespaces are maintained in parallel until
+``skimage`` (v1) support is dropped.
+
 Removal of ``skimage.future``
 -----------------------------
 

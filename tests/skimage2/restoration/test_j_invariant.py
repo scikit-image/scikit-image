@@ -7,7 +7,7 @@ import pytest
 from _skimage2._shared.testing import assert_
 from _skimage2._shared.utils import _supported_float_type
 from _skimage2.data import binary_blobs
-from _skimage2.data import camera, chelsea
+from _skimage2.data import fetch_camera, fetch_chelsea
 from _skimage2.metrics import mean_squared_error as mse
 from _skimage2.restoration import calibrate_denoiser, denoise_wavelet
 from _skimage2.restoration.j_invariant import denoise_invariant
@@ -22,8 +22,8 @@ xfail_without_pywt = pytest.mark.xfail(
 )
 
 
-test_img = img_as_float(camera())
-test_img_color = img_as_float(chelsea())
+test_img = img_as_float(fetch_camera())
+test_img_color = img_as_float(fetch_chelsea())
 # Reproduce skimage behavior.
 _blobs = binary_blobs((64, 64, 64), blob_size=0.1 * 64)
 test_img_3d = img_as_float(_blobs) / 2

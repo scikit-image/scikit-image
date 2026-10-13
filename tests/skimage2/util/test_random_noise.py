@@ -2,18 +2,18 @@ from _skimage2._shared import testing
 from _skimage2._shared.testing import assert_array_equal, assert_allclose
 
 import numpy as np
-from _skimage2.data import camera
+from _skimage2.data import fetch_camera
 from _skimage2.util import random_noise, img_as_float
 
 
 def test_set_seed():
-    cam = camera()
+    cam = fetch_camera()
     test = random_noise(cam, rng=42)
     assert_array_equal(test, random_noise(cam, rng=42))
 
 
 def test_salt():
-    cam = img_as_float(camera())
+    cam = img_as_float(fetch_camera())
     amount = 0.15
     cam_noisy = random_noise(cam, rng=42, mode='salt', amount=amount)
     saltmask = cam != cam_noisy
@@ -42,7 +42,7 @@ def test_singleton_dim():
 
 
 def test_pepper():
-    cam = img_as_float(camera())
+    cam = img_as_float(fetch_camera())
     data_signed = cam * 2.0 - 1.0  # Same image, on range [-1, 1]
 
     amount = 0.15
@@ -68,7 +68,7 @@ def test_pepper():
 
 
 def test_salt_and_pepper():
-    cam = img_as_float(camera())
+    cam = img_as_float(fetch_camera())
     amount = 0.15
     cam_noisy = random_noise(
         cam, rng=42, mode='s&p', amount=amount, salt_vs_pepper=0.25
@@ -173,7 +173,7 @@ def test_speckle():
 
 
 def test_poisson():
-    data = camera()  # 512x512 grayscale uint8
+    data = fetch_camera()  # 512x512 grayscale uint8
     seed = 460037662
     # random_noise uses default_rng internally
     rng = np.random.default_rng(seed)
@@ -187,7 +187,7 @@ def test_poisson():
 
 
 def test_clip_poisson():
-    data = camera()  # 512x512 grayscale uint8
+    data = fetch_camera()  # 512x512 grayscale uint8
     data_signed = img_as_float(data) * 2.0 - 1.0  # Same image, on range [-1, 1]
     seed = 4266430063
 
@@ -205,7 +205,7 @@ def test_clip_poisson():
 
 
 def test_clip_gaussian():
-    data = camera()  # 512x512 grayscale uint8
+    data = fetch_camera()  # 512x512 grayscale uint8
     data_signed = img_as_float(data) * 2.0 - 1.0  # Same image, on range [-1, 1]
     seed = 2169416880
 
@@ -223,7 +223,7 @@ def test_clip_gaussian():
 
 
 def test_clip_speckle():
-    data = camera()  # 512x512 grayscale uint8
+    data = fetch_camera()  # 512x512 grayscale uint8
     data_signed = img_as_float(data) * 2.0 - 1.0  # Same image, on range [-1, 1]
     seed = 3408637964
 

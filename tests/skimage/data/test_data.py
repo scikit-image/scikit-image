@@ -42,6 +42,14 @@ def test_astronaut():
     assert_equal(astronaut.shape, (512, 512, 3))
 
 
+def test_astronaut_migration_warning():
+    """The bare v1 name warns about the skimage2.fetch_astronaut replacement."""
+    from skimage.util import PendingSkimage2Change
+
+    with pytest.warns(PendingSkimage2Change, match='fetch_astronaut'):
+        data.astronaut()
+
+
 def test_camera():
     """Test that "camera" image can be loaded."""
     cameraman = data.camera()

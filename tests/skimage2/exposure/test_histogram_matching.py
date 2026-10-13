@@ -29,8 +29,8 @@ def test_match_array_values(array, template, expected_array):
 
 
 class TestMatchHistogram:
-    image_rgb = data.chelsea()
-    template_rgb = data.astronaut()
+    image_rgb = data.fetch_chelsea()
+    template_rgb = data.fetch_astronaut()
 
     @pytest.mark.parametrize(
         'image, reference, channel_axis',

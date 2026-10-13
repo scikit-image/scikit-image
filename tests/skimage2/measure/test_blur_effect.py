@@ -6,7 +6,7 @@ import _skimage2 as ski2
 
 def test_blur_effect():
     """Test that the blur metric increases with more blurring."""
-    image = ski2.data.astronaut()
+    image = ski2.data.fetch_astronaut()
     B0 = ski2.measure.blur_effect(image, channel_axis=-1)
     B1 = ski2.measure.blur_effect(
         ski2.filters.gaussian(image, sigma=1, channel_axis=-1), channel_axis=-1
@@ -22,7 +22,7 @@ def test_blur_effect_h_size():
     """Test that the blur metric decreases with increasing size of the
     re-blurring filter.
     """
-    image = ski2.data.astronaut()
+    image = ski2.data.fetch_astronaut()
     B0 = ski2.measure.blur_effect(image, h_size=3, channel_axis=-1)
     B1 = ski2.measure.blur_effect(image, channel_axis=-1)  # default h_size is 11
     B2 = ski2.measure.blur_effect(image, h_size=30, channel_axis=-1)
@@ -34,7 +34,7 @@ def test_blur_effect_channel_axis():
     """Test that passing an RGB image is equivalent to passing its grayscale
     version.
     """
-    image = ski2.data.astronaut()
+    image = ski2.data.fetch_astronaut()
     B0 = ski2.measure.blur_effect(image, channel_axis=-1)
     B1 = ski2.measure.blur_effect(ski2.color.rgb2gray(image))
     B0_arr = ski2.measure.blur_effect(image, channel_axis=-1, reduce_func=None)
@@ -46,7 +46,7 @@ def test_blur_effect_channel_axis():
 
 def test_blur_effect_3d():
     """Test that the blur metric works on a 3D image."""
-    image_3d = ski2.data.cells3d()[:, 1, :, :]  # grab just the nuclei
+    image_3d = ski2.data.fetch_cells3d()[:, 1, :, :]  # grab just the nuclei
     B0 = ski2.measure.blur_effect(image_3d)
     B1 = ski2.measure.blur_effect(ski2.filters.gaussian(image_3d, sigma=1))
     B2 = ski2.measure.blur_effect(ski2.filters.gaussian(image_3d, sigma=4))
