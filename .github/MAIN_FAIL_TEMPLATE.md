@@ -4,6 +4,17 @@ labels: "CI failure"
 ---
 
 Commit {{ sha }} by @{{ payload.sender.login }} did not pass CI.
+{% if env.DEPENDENCY_CHANGES %}
+
+> [!warning]
+> A dependency version changed between the baseline and the contender. This
+> can be the cause of a benchmark regression.
+
+```text
+{{ env.DEPENDENCY_CHANGES }}
+```
+
+{% endif %}
 
 > [!note]
 > This issue was created automatically as a notification.

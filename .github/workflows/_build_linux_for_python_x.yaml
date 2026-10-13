@@ -17,14 +17,6 @@ jobs:
     name: linux-cp${{ inputs.python-version }}
     runs-on: ubuntu-latest
 
-    env:
-      CCACHE_BASEDIR: "${{ github.workspace }}"
-      CCACHE_DIR: "${{ github.workspace }}/.ccache"
-      CCACHE_COMPRESS: true
-      CCACHE_COMPRESSLEVEL: 6
-      CCACHE_MAXSIZE: 400M
-      CCACHE_SLOPPINESS: "pch_defines,time_macros"
-
     steps:
       - name: Checkout scikit-image
         uses: actions/checkout@v5
@@ -45,22 +37,11 @@ jobs:
         run: |
           source .github/scripts/setup-build-env.sh
 
-      - name: Install and configure ccache
-        run: |
-          sudo apt-get install -y ccache
-          sudo /usr/sbin/update-ccache-symlinks
-          echo "/usr/lib/ccache" >> $GITHUB_PATH
-
-      - name: Restore/save ccache
-        uses: actions/cache@v4
+      - name: Setup ccache
+        uses: ./.github/actions/setup-ccache
         with:
-          path: ${{ github.workspace }}/.ccache
           key: ccache-${{ runner.os }}-py${{ inputs.python-version }}-${{ github.sha }}
-          restore-keys: |
-            ccache-${{ runner.os }}-py${{ inputs.python-version }}-
-
-      - name: Zero ccache stats
-        run: ccache --zero-stats
+          restore-keys: ccache-${{ runner.os }}-py${{ inputs.python-version }}-
 
       - name: Build wheel
         run: |
