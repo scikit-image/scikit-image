@@ -1288,7 +1288,7 @@ def regionprops(
     **image_filled** : (H, J) ndarray
         Binary region image with filled holes sliced by bounding box.
     **image_intensity** : (H, J) ndarray
-        Intensity image sliced by bounding box.
+        Intensity image sliced by the bounding box and masked to the region.
     **inertia_tensor** : ndarray
         Inertia tensor of the region for the rotation around its mass.
     **inertia_tensor_eigvals** : tuple
