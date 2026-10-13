@@ -12,8 +12,8 @@ def approximate_polygon(coords, tolerance):
 
     Parameters
     ----------
-    coords : (K, 2) array
-        Coordinate array.
+    coords : (K, 2) array-like
+        Coordinate array. A list of ``[r, c]`` vertices is accepted.
     tolerance : float
         Maximum distance from original points of polygon to approximated
         polygonal chain. If tolerance is 0, the original coordinate array
@@ -28,6 +28,13 @@ def approximate_polygon(coords, tolerance):
     ----------
     .. [1] https://en.wikipedia.org/wiki/Ramer-Douglas-Peucker_algorithm
     """
+    # Lists of vertices are a common call shape; without asarray, coords.shape
+    # raised AttributeError. An empty (0, 2) chain also IndexError'd on
+    # chain[-1] when marking endpoints.
+    coords = np.asarray(coords)
+    if coords.size == 0:
+        return np.empty((0, 2), dtype=float)
+
     if tolerance <= 0:
         return coords
 

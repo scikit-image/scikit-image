@@ -41,6 +41,19 @@ def test_approximate_polygon():
     assert_array_equal(out, square)
 
 
+def test_approximate_polygon_accepts_list_of_vertices():
+    """A list of [r, c] vertices used to AttributeError on coords.shape."""
+    coords = square.tolist()
+    out = approximate_polygon(coords, 2.2)
+    assert_array_equal(out, square[(0, 6, 12), :])
+
+
+def test_approximate_polygon_empty_coords():
+    """An empty (0, 2) chain used to IndexError when marking endpoints."""
+    out = approximate_polygon(np.zeros((0, 2)), 0.1)
+    assert out.shape == (0, 2)
+
+
 def test_subdivide_polygon():
     new_square1 = square
     new_square2 = square[:-1]
