@@ -5,6 +5,14 @@ on:
       python-version:
         required: true
         type: string
+      runner:
+        required: false
+        type: string
+        default: ubuntu-latest
+      test-modified:
+        required: false
+        type: boolean
+        default: true
       OPTIONS_NAME:
         required: true
         type: string
@@ -40,9 +48,13 @@ on:
 jobs:
   test-linux:
     name: linux-cp${{ inputs.python-version }}-${{ inputs.OPTIONS_NAME }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runner }}
 
     steps:
+      - name: Verify ARM64 runner
+        if: ${{ inputs.runner == 'ubuntu-24.04-arm' }}
+        run: test "$(uname -m)" = aarch64
+
       - name: Checkout scikit-image
         uses: actions/checkout@v5
         with:
@@ -59,7 +71,7 @@ jobs:
       - uses: actions/download-artifact@v4
         id: download
         with:
-          name: skimage-linux-${{ inputs.python-version }}
+          name: skimage-linux-${{ inputs.python-version }}-${{ runner.arch }}
           path: ./dist
 
       - name: Install wheel
@@ -95,6 +107,7 @@ jobs:
           pip install --dry-run --ignore-installed $(ls requirements/*.txt | sed 's/^/-r /')
 
       - name: Check for run-all-tests label
+        if: ${{ inputs.test-modified }}
         id: check-run-all-tests-label
         env:
           GH_TOKEN: ${{ github.token }}

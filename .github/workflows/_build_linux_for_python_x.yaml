@@ -7,6 +7,10 @@ on:
       python-version:
         required: true
         type: string
+      runner:
+        required: false
+        type: string
+        default: ubuntu-latest
       PIP_FLAGS:
         required: false
         type: string
@@ -15,7 +19,7 @@ on:
 jobs:
   build-skimage-spin:
     name: linux-cp${{ inputs.python-version }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runner }}
 
     env:
       CCACHE_BASEDIR: "${{ github.workspace }}"
@@ -26,6 +30,10 @@ jobs:
       CCACHE_SLOPPINESS: "pch_defines,time_macros"
 
     steps:
+      - name: Verify ARM64 runner
+        if: ${{ inputs.runner == 'ubuntu-24.04-arm' }}
+        run: test "$(uname -m)" = aarch64
+
       - name: Checkout scikit-image
         uses: actions/checkout@v5
         with:
@@ -55,9 +63,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/.ccache
-          key: ccache-${{ runner.os }}-py${{ inputs.python-version }}-${{ github.sha }}
+          key: ccache-${{ runner.os }}-${{ runner.arch }}-py${{ inputs.python-version }}-${{ github.sha }}
           restore-keys: |
-            ccache-${{ runner.os }}-py${{ inputs.python-version }}-
+            ccache-${{ runner.os }}-${{ runner.arch }}-py${{ inputs.python-version }}-
 
       - name: Zero ccache stats
         run: ccache --zero-stats
@@ -72,7 +80,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: skimage-linux-${{ inputs.python-version }}
+          name: skimage-linux-${{ inputs.python-version }}-${{ runner.arch }}
           path: |
             ./dist/*.whl
             ./dist/*.tar.gz
