@@ -9,10 +9,6 @@ on:
         required: false
         type: string
         default: ubuntu-latest
-      test-modified:
-        required: false
-        type: boolean
-        default: true
       OPTIONS_NAME:
         required: true
         type: string
@@ -107,7 +103,6 @@ jobs:
           pip install --dry-run --ignore-installed $(ls requirements/*.txt | sed 's/^/-r /')
 
       - name: Check for run-all-tests label
-        if: ${{ inputs.test-modified }}
         id: check-run-all-tests-label
         env:
           GH_TOKEN: ${{ github.token }}

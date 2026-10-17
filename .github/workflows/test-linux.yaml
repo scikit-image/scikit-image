@@ -104,7 +104,6 @@ jobs:
       python-version: 3.12
       runner: ubuntu-24.04-arm
       OPTIONS_NAME: "main"
-      test-modified: false
 
   test-linux-314:
     name: test-linux-cp3.14-main
