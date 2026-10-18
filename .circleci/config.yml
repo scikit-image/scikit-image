@@ -36,6 +36,22 @@ jobs:
             python3 -m pip install -r requirements/default.txt
             python3 -m pip install -r requirements/docs.txt
       - run:
+          name: Install Chrome for kaleido
+          # Installs via apt like test-docs.yaml (see there for why). This
+          # image preconfigures a google-chrome source without Signed-By,
+          # which conflicts with the signed one below, so remove it first.
+          command: |
+            for f in /etc/apt/sources.list /etc/apt/sources.list.d/*.list; do
+              [ -f "$f" ] && sudo sed -i '\#dl\.google\.com/linux/chrome/deb#d' "$f"
+            done
+            wget -q -O - https://dl.google.com/linux/linux_signing_key.pub \
+              | gpg --dearmor \
+              | sudo tee /usr/share/keyrings/google-chrome.gpg >/dev/null
+            echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" \
+              | sudo tee /etc/apt/sources.list.d/google-chrome.list
+            sudo apt-get update
+            sudo apt-get install -y google-chrome-stable
+      - run:
           name: Print ccache performance
           command: |
             ccache -s

@@ -48,6 +48,20 @@ jobs:
         run: |
           source .github/scripts/setup-docs-env.sh
 
+      - name: Install Chrome for kaleido
+        # plotly_get_chrome and browser-actions/setup-chrome fetch from Chrome
+        # for Testing, which has no Stable-channel linux-arm64 build (this
+        # runner is arm64). Google's apt repo does have arm64 Chrome, and
+        # choreographer checks /usr/bin/google-chrome-stable before downloading.
+        run: |
+          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub \
+            | gpg --dearmor \
+            | sudo tee /usr/share/keyrings/google-chrome.gpg >/dev/null
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" \
+            | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+
       - name: Build docs / run examples
         run: |
           SPHINXCACHE=${HOME}/.cache/sphinx SPHINXOPTS="-W -j auto" make -C doc html
