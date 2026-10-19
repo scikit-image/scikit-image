@@ -23,7 +23,7 @@ References
 
 """
 
-from ..._shared.utils import check_nD
+from _skimage2._shared.utils import check_nD
 from . import bilateral_cy
 from .generic import _preprocess_input
 

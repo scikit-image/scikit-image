@@ -9,7 +9,7 @@ import numpy as np
 import pytest
 from numpy.testing import assert_equal
 
-from skimage._shared.testing import fetch, assert_stacklevel
+from _skimage2._shared.testing import fetch, assert_stacklevel
 from skimage.morphology import footprints
 from skimage.morphology import footprint_rectangle, footprint_from_sequence
 
@@ -218,6 +218,9 @@ def test_ball_series_approximation_unavailable():
         footprints.ball(radius=10000, decomposition="sequence")
 
 
+# skimage.morphology.mirror_footprint --------------------------------------------------
+
+
 @pytest.mark.parametrize("as_sequence", [tuple, None])
 def test_mirror_footprint(as_sequence):
     footprint = np.array([[0, 0, 0], [0, 1, 1], [0, 1, 1]], np.uint8)
@@ -229,6 +232,9 @@ def test_mirror_footprint(as_sequence):
     actual_res = footprints.mirror_footprint(footprint)
     assert type(expected_res) is type(actual_res)
     assert_equal(expected_res, actual_res)
+
+
+# skimage.morphology.pad_footprint --------------------------------------------------
 
 
 @pytest.mark.parametrize("as_sequence", [tuple, None])

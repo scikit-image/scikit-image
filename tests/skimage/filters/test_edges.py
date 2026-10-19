@@ -3,7 +3,7 @@ import pytest
 from numpy.testing import assert_, assert_allclose, assert_array_almost_equal
 
 from skimage import data, filters
-from skimage._shared.utils import _supported_float_type
+from _skimage2._shared.utils import _supported_float_type
 from skimage.filters.edges import _mask_filter_result
 
 
@@ -79,8 +79,9 @@ def test_sobel_constant_cval():
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_sobel_mask(dtype):
     """Sobel on a masked array should be zero."""
+    rng = np.random.RandomState(1717786399)
     result = filters.sobel(
-        np.random.uniform(size=(10, 10)).astype(dtype), np.zeros((10, 10), dtype=bool)
+        rng.uniform(size=(10, 10)).astype(dtype), np.zeros((10, 10), dtype=bool)
     )
     assert result.dtype == _supported_float_type(dtype)
     assert np.all(result == 0)
@@ -113,9 +114,8 @@ def test_sobel_h_zeros():
 
 def test_sobel_h_mask():
     """Horizontal Sobel on a masked array should be zero."""
-    result = filters.sobel_h(
-        np.random.uniform(size=(10, 10)), np.zeros((10, 10), dtype=bool)
-    )
+    rng = np.random.RandomState(265215147)
+    result = filters.sobel_h(rng.uniform(size=(10, 10)), np.zeros((10, 10), dtype=bool))
     assert np.all(result == 0)
 
 
@@ -145,9 +145,8 @@ def test_sobel_v_zeros():
 
 def test_sobel_v_mask():
     """Vertical Sobel on a masked array should be zero."""
-    result = filters.sobel_v(
-        np.random.uniform(size=(10, 10)), np.zeros((10, 10), dtype=bool)
-    )
+    rng = np.random.RandomState(2053674326)
+    result = filters.sobel_v(rng.uniform(size=(10, 10)), np.zeros((10, 10), dtype=bool))
     assert_allclose(result, 0)
 
 
@@ -178,8 +177,9 @@ def test_scharr_zeros():
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_scharr_mask(dtype):
     """Scharr on a masked array should be zero."""
+    rng = np.random.RandomState(3940061267)
     result = filters.scharr(
-        np.random.uniform(size=(10, 10)).astype(dtype), np.zeros((10, 10), dtype=bool)
+        rng.uniform(size=(10, 10)).astype(dtype), np.zeros((10, 10), dtype=bool)
     )
     assert result.dtype == _supported_float_type(dtype)
     assert_allclose(result, 0)
@@ -212,8 +212,9 @@ def test_scharr_h_zeros():
 
 def test_scharr_h_mask():
     """Horizontal Scharr on a masked array should be zero."""
+    rng = np.random.RandomState(2158320590)
     result = filters.scharr_h(
-        np.random.uniform(size=(10, 10)), np.zeros((10, 10), dtype=bool)
+        rng.uniform(size=(10, 10)), np.zeros((10, 10), dtype=bool)
     )
     assert_allclose(result, 0)
 
@@ -244,8 +245,9 @@ def test_scharr_v_zeros():
 
 def test_scharr_v_mask():
     """Vertical Scharr on a masked array should be zero."""
+    rng = np.random.RandomState(3947430280)
     result = filters.scharr_v(
-        np.random.uniform(size=(10, 10)), np.zeros((10, 10), dtype=bool)
+        rng.uniform(size=(10, 10)), np.zeros((10, 10), dtype=bool)
     )
     assert_allclose(result, 0)
 
@@ -277,8 +279,9 @@ def test_prewitt_zeros():
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_prewitt_mask(dtype):
     """Prewitt on a masked array should be zero."""
+    rng = np.random.RandomState(3951122653)
     result = filters.prewitt(
-        np.random.uniform(size=(10, 10)).astype(dtype), np.zeros((10, 10), dtype=bool)
+        rng.uniform(size=(10, 10)).astype(dtype), np.zeros((10, 10), dtype=bool)
     )
     assert result.dtype == _supported_float_type(dtype)
     assert_allclose(np.abs(result), 0)
@@ -311,8 +314,9 @@ def test_prewitt_h_zeros():
 
 def test_prewitt_h_mask():
     """Horizontal prewitt on a masked array should be zero."""
+    rng = np.random.RandomState(4237765111)
     result = filters.prewitt_h(
-        np.random.uniform(size=(10, 10)), np.zeros((10, 10), dtype=bool)
+        rng.uniform(size=(10, 10)), np.zeros((10, 10), dtype=bool)
     )
     assert_allclose(result, 0)
 
@@ -343,8 +347,9 @@ def test_prewitt_v_zeros():
 
 def test_prewitt_v_mask():
     """Vertical prewitt on a masked array should be zero."""
+    rng = np.random.RandomState(3879799861)
     result = filters.prewitt_v(
-        np.random.uniform(size=(10, 10)), np.zeros((10, 10), dtype=bool)
+        rng.uniform(size=(10, 10)), np.zeros((10, 10), dtype=bool)
     )
     assert_allclose(result, 0)
 
@@ -410,8 +415,9 @@ def test_farid_zeros():
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_farid_mask(dtype):
     """Farid on a masked array should be zero."""
+    rng = np.random.RandomState(1987326585)
     result = filters.farid(
-        np.random.uniform(size=(10, 10)).astype(dtype),
+        rng.uniform(size=(10, 10)).astype(dtype),
         mask=np.zeros((10, 10), dtype=bool),
     )
     assert result.dtype == _supported_float_type(dtype)
@@ -445,8 +451,9 @@ def test_farid_h_zeros():
 
 def test_farid_h_mask():
     """Horizontal Farid on a masked array should be zero."""
+    rng = np.random.RandomState(3691212880)
     result = filters.farid_h(
-        np.random.uniform(size=(10, 10)), mask=np.zeros((10, 10), dtype=bool)
+        rng.uniform(size=(10, 10)), mask=np.zeros((10, 10), dtype=bool)
     )
     assert np.all(result == 0)
 
@@ -477,8 +484,9 @@ def test_farid_v_zeros():
 
 def test_farid_v_mask():
     """Vertical Farid on a masked array should be zero."""
+    rng = np.random.RandomState(1452038736)
     result = filters.farid_v(
-        np.random.uniform(size=(10, 10)), mask=np.zeros((10, 10), dtype=bool)
+        rng.uniform(size=(10, 10)), mask=np.zeros((10, 10), dtype=bool)
     )
     assert_allclose(result, 0)
 
@@ -673,7 +681,8 @@ def test_3d_edge_filters_single_axis(func, max_edge):
 )
 def test_range(detector):
     """Output of edge detection should be in [0, 1]"""
-    image = np.random.random((100, 100))
+    rng = np.random.RandomState(1000786091)
+    image = rng.random((100, 100))
     out = detector(image)
     assert_(out.min() >= 0, f'Minimum of `{detector.__name__}` is smaller than 0.')
 

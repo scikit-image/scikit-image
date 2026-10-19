@@ -1,19 +1,15 @@
-import sys
-from datetime import date
-
 import numpy as np
-import pytest
 
 from skimage.restoration import unwrap_phase
 
-from skimage._shared import testing
-from skimage._shared.testing import (
+from _skimage2._shared import testing
+from _skimage2._shared.testing import (
     assert_array_almost_equal_nulp,
     assert_almost_equal,
     assert_array_equal,
     assert_,
 )
-from skimage._shared._warnings import expected_warnings
+from _skimage2._shared._warnings import expected_warnings
 
 
 def assert_phase_almost_equal(a, b, *args, **kwargs):
@@ -57,8 +53,13 @@ def test_unwrap_1d():
     image = np.linspace(0, 10 * np.pi, 100)
     check_unwrap(image)
     # Masked arrays are not allowed in 1D
-    with testing.raises(ValueError):
+    with testing.raises(ValueError, match='1D masked images cannot'):
         check_unwrap(image, True)
+    # Arrays with NaN not allowed in 1D
+    nan_image = image.copy()
+    nan_image[50] = np.nan
+    with testing.raises(ValueError, match='1D images with NaNs cannot'):
+        check_unwrap(nan_image, None)
     # wrap_around is not allowed in 1D
     with testing.raises(ValueError):
         unwrap_phase(image, True, rng=0)
@@ -75,6 +76,19 @@ def test_unwrap_2d(check_with_mask):
     check_unwrap(image, mask)
 
 
+def test_unwrap_2d_nan():
+    x, y = np.ogrid[:8, :16]
+    image = 2 * np.pi * (x * 0.2 + y * 0.1)
+    image_wrapped = np.angle(np.exp(1j * image))
+    mask = np.zeros(image.shape, dtype=bool)
+    mask[4:6, 4:8] = True
+    image_wrapped_masked = np.ma.array(image_wrapped, mask=mask, fill_value=0.5)
+    mask_res = unwrap_phase(image_wrapped_masked, rng=0)
+    image_wrapped_nans = image_wrapped.copy()
+    image_wrapped_nans[mask] = np.nan
+    np.testing.assert_equal(mask_res, unwrap_phase(image_wrapped_nans, rng=0))
+
+
 @testing.parametrize("check_with_mask", (False, True))
 def test_unwrap_3d(check_with_mask):
     mask = None
@@ -84,6 +98,20 @@ def test_unwrap_3d(check_with_mask):
         mask = np.zeros(image.shape, dtype=bool)
         mask[4:6, 4:6, 1:3] = True
     check_unwrap(image, mask)
+
+
+def test_unwrap_3d_nan():
+    x, y, z = np.ogrid[:8, :12, :16]
+    image = 2 * np.pi * (x * 0.2 + y * 0.1 + z * 0.05)
+    image_wrapped = np.angle(np.exp(1j * image))
+    mask = np.zeros(image.shape, dtype=bool)
+    mask[4:6, 4:6, 1:3] = True
+    image_wrapped_masked = np.ma.array(image_wrapped, mask=mask, fill_value=0.5)
+    mask_res = unwrap_phase(image_wrapped_masked, rng=0)
+    image_wrapped_nans = image_wrapped.copy()
+    image_wrapped_nans[mask] = np.nan
+    masked_nan = unwrap_phase(image_wrapped_nans, rng=0)
+    np.testing.assert_equal(mask_res, masked_nan)
 
 
 def check_wrap_around(ndim, axis):
@@ -132,12 +160,6 @@ def check_wrap_around(ndim, axis):
 dim_axis = [(ndim, axis) for ndim in (2, 3) for axis in range(ndim)]
 
 
-@pytest.mark.xfail(
-    condition=sys.platform == "darwin" and date.today() < date(2026, 2, 1),
-    reason="Flakiness on macOS (gh-7964, xfail expires 2026-02-01)",
-    raises=AssertionError,
-    strict=False,
-)
 @testing.parametrize("ndim, axis", dim_axis)
 def test_wrap_around(ndim, axis):
     check_wrap_around(ndim, axis)
@@ -174,6 +196,40 @@ def test_mask():
             # remove phase shift
             image_unwrapped_3d -= image_unwrapped_3d[0, 0, 0]
         assert_array_almost_equal_nulp(image_unwrapped_3d[:, :, -1], image[i, -1])
+
+
+def _wrapped_ramp(n_pi, n):
+    ramp = np.linspace(0, n_pi * np.pi, n)
+    ramp[-1] = ramp[0]
+    return np.angle(np.exp(1j * ramp.reshape(n, 1)))
+
+
+def test_rng():
+    # Use a (100, 1) image with wrap_around: all pixel unreliabilities come
+    # from the random number generation (no interior pixels), so the result is
+    # sensitive to the seed.
+    image_wrapped = _wrapped_ramp(12, 100)
+
+    def unwrap(rng):
+        with expected_warnings(['length 1 dimension']):
+            return unwrap_phase(image_wrapped, wrap_around=[True, False], rng=rng)
+
+    # Assert that two identically seeded unwraps are about the same.
+    for seed in range(50):
+        assert_(np.allclose(unwrap(seed), unwrap(seed)))
+        assert_(
+            np.allclose(
+                unwrap(np.random.default_rng(seed)), unwrap(np.random.default_rng(seed))
+            )
+        )
+
+    # Check that `None` is also a valid seed value, and that, with a much
+    # larger image, it always differs.
+    big_wrap = _wrapped_ramp(1028, 10000)
+    with expected_warnings(['length 1 dimension']):
+        out0 = unwrap_phase(big_wrap, wrap_around=[True, False], rng=None)
+        out1 = unwrap_phase(big_wrap, wrap_around=[True, False], rng=None)
+    assert not np.allclose(out0, out1)
 
 
 def test_invalid_input():

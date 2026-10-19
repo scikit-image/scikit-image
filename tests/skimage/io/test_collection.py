@@ -7,8 +7,8 @@ from skimage import data_dir
 from skimage.io.collection import ImageCollection, MultiImage, alphanumeric_key
 from skimage.io import reset_plugins
 
-from skimage._shared import testing
-from skimage._shared.testing import assert_equal, assert_allclose, fetch
+from _skimage2._shared import testing
+from _skimage2._shared.testing import assert_equal, assert_allclose, fetch
 
 import pytest
 

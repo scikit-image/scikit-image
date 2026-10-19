@@ -12,7 +12,7 @@ Soille, P. (2003). Morphological Image Analysis: Principles and Applications
 
 import numpy as np
 
-from .._shared.utils import warn
+from _skimage2._shared.utils import warn
 from ..util import dtype_limits, invert, crop
 from . import grayreconstruct, _util
 from ._extrema_cy import _local_maxima

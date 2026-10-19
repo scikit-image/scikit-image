@@ -6,9 +6,12 @@ SKIP 4 — Transitioning to scikit-image 2.0
 
 :Author: Juan Nunez-Iglesias <juan.nunez-iglesias@monash.edu>
 :Author: Lars Grüter
+:Author: Stéfan van der Walt
+:Author: Matthew Brett
+:Author: Marianne Corvellec
 :Status: Draft
 :Type: Standards Track
-:Created: 2022-04-08
+:Created: 2025-08-16
 :Resolved: <null>
 :Resolution: <null>
 :Version effective: None
@@ -16,33 +19,34 @@ SKIP 4 — Transitioning to scikit-image 2.0
 Abstract
 --------
 
-scikit-image is preparing to release version 1.0. This :ref:`was seen
-<skip_3_transition_v1>` as an opportunity to clean up the API, including
-backwards incompatible changes. Some of these changes involve changing return
-values without changing function signatures, which can ordinarily only be done
-by adding an otherwise useless keyword argument (such as
-``new_return_style=True``) whose default value changes over several releases.
-The result is *still* a backwards incompatible change, but made over a longer
-time period.
+scikit-image is working towards a 2.0 release. This :ref:`is an opportunity
+<skip_3_transition_v1>` to clean up the API, and make long-outstanding
+backward incompatible changes. Some of these changes involve changing return
+values without changing function signatures, which cannot be done without adding
+an otherwise useless keyword argument (such as ``new_return_style=True``) whose
+default value would need to change over several releases. That procedure would
+still result in backward incompatible changes, but made over a longer time period.
 
 Despite being in beta and in a 0.x series of releases, scikit-image is used
 extremely broadly, and any backwards incompatible changes are likely to be
 disruptive. Given the rejection of :ref:`SKIP-3 <skip_3_transition_v1>`, this
-document proposes an alternative pathway to create a new API. The new pathway
-involves the following steps:
+document proposes an alternative pathway towards cleaning and modernizing our API.
+The new pathway involves the following steps:
 
-- Any pending deprecations that were scheduled for v0.20 and v0.21 are
-  finalised (the new API suggested by deprecation messages in v0.19 becomes
-  the only API).
-- This is released as 1.0.
-- At this point, the branch ``main`` changes the package and import names to
-  ``skimage2``, and the API is free to evolve.
+- Introduce a new namespace ``skimage2`` that will be included in the package
+  alongside the existing ``skimage`` namespace during a transition period.
+- The new API will be implemented in ``skimage2`` and will initially be marked as
+  unstable and experimental. The old API in ``skimage`` will continue working.
+- When the new API in ``skimage2`` is complete, the old namespace
+  ``skimage`` will be successively deprecated and eventually removed.
 
-Further motivation for the API changes is explained below, and largely
-duplicated from :ref:`SKIP-3 <skip_3_transition_v1>`.
+See the :ref:`skip4_implementation` section for a more detailed description of
+the changes and steps involved.
 
 Motivation and Scope
 --------------------
+
+.. note:: This is largely duplicated from :ref:`SKIP-3 <skip_3_transition_v1>`.
 
 scikit-image has grown organically over the past 12+ years, with functionality
 being added by a broad community of contributors from different backgrounds.
@@ -122,17 +126,19 @@ included below for illustrative purposes:
   specific task. It would also help the community grow around common APIs,
   where now scikit-image APIs are essentially unique for each function.
 
+More examples can be found in `"API changes for skimage2" on our Wiki <https://github.com/scikit-image/scikit-image/wiki/API-changes-for-skimage2>`_.
+
 To make this transition with a minimum amount of user disruption, this SKIP
-proposes releasing a new library, skimage2, that would replace the existing
-library, *but only if users explicitly opt-in*. Additionally, by releasing a
-new library, users could depend *both* on scikit-image (1.0) and on skimage2,
-allowing users to migrate their code progressively.
+proposes releasing a new namespace, ``skimage2``, that would provide the new
+API, *but only if users explicitly opt in*. Additionally, by releasing a new
+namespace, users could use *both* APIs at the same time, allowing users to
+migrate their code progressively.
 
 Related Work
 ------------
 
 ``pandas`` released 1.0.0 in January 2020, including many backwards-incompatible
-API changes [3]_. `scipy` released version 1.0 in 2017, but, given its stage of
+API changes [3]_. SciPy released version 1.0 in 2017, but, given its stage of
 maturity and position at the base of the scientific Python ecosystem, opted not
 to make major breaking changes [4]_. However, SciPy has adopted a policy of
 adding upper-bounds on dependencies [5]_, acknowledging that the ecosystem as a
@@ -143,29 +149,109 @@ namespace with a version number on it, such as OpenCV (imported as ``cv2``) and
 BeautifulSoup (imported as ``bs4``), Jinja (``jinja2``) and psycopg (currently
 imported as ``psycopg2``). Further afield, R's ggplot is used as ``ggplot2``.
 
+.. _skip4_implementation:
+
 Implementation
 --------------
 
-The details of the proposal are as follows:
+This section documents concrete implementation details, and will be updated as we progress with the v2 implementation.
 
-- scikit-image 0.19 will be followed by scikit-image 1.0. Every deprecation
-  message will be removed from 1.0, and the API will be considered the
-  scikit-image 1.0 API.
-- After 1.0, the main branch will be changed to (a) change the import name to
-  skimage2, (b) change the package name to skimage2, and (c) change the version
-  number to 2.0-dev.
-- There will be *no* "scikit-image" package on PyPI with version 2.0. Users who
-  ``pip install scikit-image`` will always get the 1.x version of the package.
-  To install scikit-image 2.0, users will need to ``pip install skimage2``,
-  ``conda install skimage2``, or similar.
-- After consensus has been reached on the new API, skimage2 will be released.
-- Following the release of skimage2, a release of scikit-image 1.1 is made. This
-  release is identical to 1.0 (including bugfixes) but will advise users to
-  either (a) upgrade to skimage2 or (b) pin the package to ``scikit-image<1.1``
-  to avoid the warning.
-- scikit-image 1.0.x and 1.1.x will receive critical bug fixes for an
-  unspecified period of time, depending on the severity of the bug and the
-  amount of effort involved.
+First phase: Building `skimage2`
+................................
+
+Two new namespaces and Python packages, ``src/_skimage2`` and ``src/skimage2``, will be created alongside ``src/skimage``.
+
+``_skimage2``
+  will be the temporary namespace, where we build up the new API.
+
+``skimage2``
+  is a lightweight wrapper around ``_skimage2``.
+  It exposes the API for early testing and warns the user on import that
+  ``skimage2`` is still unstable.
+
+With the new namespaces available, we will start building the new API while preserving the existing ``skimage`` namespace and functionality.
+This process orients itself around the following principles:
+
+One implementation
+  If possible, only one implementation should exist, and one API should be a *simple* wrapper around the other.
+
+.. _sk2-import-hierarchy:
+
+Import hierarchy
+  ``skimage`` and ``skimage2`` may only import from ``_skimage2``, and ``_skimage2`` should be self-contained.
+  Exceptions (for example, importing from ``skimage`` in ``_skimage2``) are temporary and should be realized using inlined imports.
+  By the end of this phase, implementations in ``_skimage2`` should no longer rely on code in ``skimage``.
+
+Test coverage of both APIs
+  The ``skimage`` test suite should be duplicated for ``_skimage2`` functions.
+  The tests should be adjusted to verify new behavior.
+  To counteract the slowdown due to test duplication, we will soon select tests
+  using dependency analysis (see `#7749 <https://github.com/scikit-image/scikit-image/pull/7749>`__).
+
+Minimize API difference
+  Minimize the differences between the old and new API to make the eventual transition easier for users.
+  Generally, new changes should be introduced in ``_skimage2`` only.
+  But we may opt for :ref:`conventional deprecations <deprecation-cycle>` within ``skimage``, if strong arguments can be made.
+
+Backwards compatible
+  It should be possible to achieve the old behavior of the ``skimage`` API by some call or set of calls with the ``skimage2`` API.
+  There may be some situations where we have to break this general rule, but an argument should be made for the relevant change that breaks this rule.
+  In those cases, we will try to provide helper functions instead.
+
+Migration guide
+  We will record the pathway for migrating from the old to the new API in detail in a migration guide.
+  Each API difference will be documented.
+
+.. _sk2-local-warning:
+
+Local deprecation warnings
+  Specific deprecation warnings will be added to the old API.
+  These warnings will be silent (subclass of `PendingDeprecationWarning`_) and not be shown to users by default.
+
+  For example, ``skimage.data.binary_blobs`` may emit a :class:`.PendingSkimage2Change` warning that advises users to use ``skimage2.data.binary_blobs`` instead and how to adapt to a new signature.
+
+During this phase, new (additional) features can still be introduced into the old ``skimage`` namespace, not only in the new one.
+
+.. _PendingDeprecationWarning: https://docs.python.org/3/library/exceptions.html#PendingDeprecationWarning
+
+
+Second phase: Transitioning to `skimage2`
+.........................................
+
+Once we consider the API in ``skimage2`` complete and stable, ``src/_skimage2`` will be merged into ``src/skimage2`` and the *experimental* warning will be removed.
+
+Instead, we will mark the API in ``skimage`` as deprecated with a single top-level warning that is raised on import.
+This warning will encourage users to transition to ``skimage2``.
+It should link to the migration guide and should explain how to enable :ref:`more specific warnings <sk2-local-warning>`.
+
+.. note::
+   At this stage ``skimage2`` should no longer need to import from ``skimage`` to avoid triggering this new warning.
+
+This state will be published in a full release as ``scikit-image==2.0.0``.
+
+From that point onward, importing ``skimage2`` is encouraged.
+Development of new features should only happen in ``skimage2``.
+Bugs in ``skimage`` may still be addressed and will be included in releases with version >= 2.0.0.
+
+As for conventional deprecations, we will provide users with a grace period of visible warnings for every change necessary for porting from ``skimage`` to ``skimage2``.
+This grace period should be at least 2 releases or 2 years long (whichever is longer) before user's code is broken.
+After this process is complete, we will remove the ``skimage`` namespace entirely.
+
+
+Code translation helper
+.......................
+
+While unclear that we will have time to do so, we would like to explore the viability of building a code translation tool, to help users automate the transition to ``skimage2``.
+This should alleviate the cost and work involved for switching – especially in cases that can be easily automated.
+
+Still, this tool might not support more ambiguous or complex updates of our API, or all the complex ways in which users might use our library.
+Supporting these cases might be impossible or might require prohibitive development effort.
+Therefore, users and downstream libraries must always have other means of completing the transition manually, e.g., with the help of conventional deprecation warnings.
+
+If this tool is successfully implemented, it will be included at the start of the second phase as an `entry point`_ alongside ``skimage2``.
+
+.. _entry point: https://packaging.python.org/en/latest/specifications/entry-points/
+
 
 Backward compatibility
 ----------------------
@@ -175,10 +261,37 @@ However, it does so in a new namespace, so that this proposal does not raise
 backward compatibility concerns for our users. That said, the authors will
 attempt to limit the number of backward incompatible changes to those likely to
 substantially improve the overall user experience. It is anticipated that
-porting `skimage` code to `skimage2` will be a straightforward process
+porting ``skimage`` code to ``skimage2`` will be a straightforward process
 and we will publish a user guide for making the transition by the time of
-the `skimage2` release. Users will be notified about these resources - among
+the ``skimage2`` release. Users will be notified about these resources - among
 other things - by a warning in scikit-image 1.1.
+
+
+Rationale
+---------
+
+Rationale for design decisions described in the previous section.
+See *Alternatives* for why certain solutions where rejected.
+
+Why so many namespaces?
+.......................
+
+Having additional namespaces significantly simplifies the gradual porting process during the first implementation phase.
+The new API v2 can be gradually fleshed out in its own independent namespace and made available for testing to the community.
+
+Separating ``_skimage2`` and ``skimage2`` simplifies the requirement that users are warned about the experimental status of the API v2.
+Ported implementations that live in ``_skimage2`` can be reused by wrappers in ``skimage`` without triggering the import warning in ``skimage2``.
+
+An alternative would have been to raise this warning not on import of ``skimage2`` but when any of its attributes are used, with a custom ``__getattr__``.
+However, we preferred to trigger this warning as early as possible.
+
+Why restrict imports between namespaces?
+........................................
+
+While we are gradually porting implementations and API from ``skimage`` to ``_skimage2``, code in one namespace may require functionality from the other one – and vice versa.
+This can easily lead to confusing circular import errors.
+To minimize the likelihood of these errors, we define an explicit :ref:`sk2-import-hierarchy`.
+Since we want ``skimage2`` to be independent of ``skimage`` by the end of the first phase, we only allow temporary inlined imports from ``skimage``.
 
 Alternatives
 ------------
@@ -209,16 +322,20 @@ the scikit-image developers and the developers of downstream libraries, for
 dubious benefit: ultimately, later versions of scikit-image will still be
 incompatible with prior versions, although over a longer time scale.
 
-A single package containing both versions
-.........................................
+A new package name
+..................
 
-Since the import name is changing, it would be possible to make a single
-package with both the ``skimage`` and ``skimage2`` namespaces shipping
-together, at least for some time. This option is attractive but it implies
-longer-term maintenance of the 1.0 namespace, for which we might lack
-maintainer time, or a long deprecation cycle for the 1.0 namespace, which would
-ultimately result in a lot of unhappy users getting deprecation messages from
-their scikit-image use.
+Since the import name is changing, it would be possible to also change the package name from ``scikit-image`` to ``skimage2`` for example.
+This was proposed in a previous version of this SKIP.
+It shares many of the same strengths as the current proposal – chiefly – the new ``skimage2`` namespace.
+This option also requires informing users about the new package.
+Similarly to the suggestion here, we could raise a warning when the old package is imported.
+It could advise users to install the new package.
+
+However, managing and releasing two packages from the same repository is problematic.
+At the same time, introducing a new repository would eventually leave behind issues and pull requests and would also make it prohibitively difficult to implement one API as a wrapper around the other.
+Therefore, this SKIP recommends keeping the ``scikit-image`` package name.
+
 
 Not making the proposed API changes
 ...................................
@@ -268,13 +385,19 @@ similar problems.
 Discussion
 ----------
 
-This SKIP is the result of discussion of :ref:`SKIP-3 <skip_3_transition_v1>`. See
-the "Resolution" section of that document for further background on the
-motivation for this SKIP.
+This SKIP is the result of many evolving discussions among the core team, with fellow projects, and with our user base:
+
+- :ref:`SKIP-3 <skip_3_transition_v1>` was an earlier iteration of this SKIP.
+  See the "Resolution" section of that document for further background on the motivation for this SKIP.
+- `A pragmatic pathway towards skimage2 <https://discuss.scientific-python.org/t/a-pragmatic-pathway-towards-skimage2/530>`_
+- Many discussions happened in `issues and pull requests tagged as "Path to skimage2" <https://github.com/scikit-image/scikit-image/pulls?q=label%3A%22%3Ahiking_boot%3A+Path+to+skimage2%22+>`_.
+- The `meeting notes from the Sprint in Vienna <https://github.com/scikit-image/skimage-archive/blob/05e98d46b5d12466dcde84487fb75d710adb08b7/sprints/2025-08_sprint_notes_Vienna.md>`_ captures part of the extensive discussion that informed this SKIP.
+
 
 Resolution
 ----------
 
+Pending.
 
 
 References and Footnotes

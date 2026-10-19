@@ -1,7 +1,7 @@
 """watershed.pyx - cython implementation of guts of watershed
 """
 from libc.math cimport sqrt
-from .._shared.fused_numerics cimport np_anyint
+from _skimage2._shared.fused_numerics cimport np_anyint
 
 cimport numpy as cnp
 cimport cython
