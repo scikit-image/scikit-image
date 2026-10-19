@@ -1,23 +1,17 @@
-## Description
-
 <!--
-- Reference relevant issues or related pull requests with their URL / #<number>.
-- Use `pre-commit` to check and format code.
+Please see the Contribution Guide:
+https://scikit-image.org/docs/dev/development/contribute.html
+For newcomers: this document has a checklist of what we expect in a PR.
+
+Also please note our AI policy:
+https://scikit-image.org/docs/dev/development/contribute.html#ai-policy
 -->
 
-## Checklist
+<!-- ... PR description goes here ... -->
 
-<!-- Before pull requests can be merged, they should provide: -->
+### Release note (optional)
 
-- A descriptive but concise pull request title
-- [Docstrings for all functions](https://github.com/numpy/numpydoc/blob/main/doc/example.py)
-- [Unit tests](https://scikit-image.org/docs/dev/development/contribute.html#testing)
-- A gallery example in `./doc/examples` for new features
-- [Contribution guide](https://scikit-image.org/docs/dev/development/contribute.html) is followed
-
-## Release note
-
-For maintainers and optionally contributors, please refer to the [instructions](https://scikit-image.org/docs/stable/development/contribute.html#documenting-changes) on how to document this PR for the release notes.
+<!-- See https://scikit-image.org/docs/stable/development/contribute.html#documenting-changes -->
 
 ```release-note
 ...

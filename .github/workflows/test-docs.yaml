@@ -1,10 +1,21 @@
 name: Test docs
 
-on: [push, pull_request, merge_group]
+on:
+  push:
+    branches:
+      - main
+      - pre-megamove-integration
+  pull_request:
+    branches:
+      - main
+      - pre-megamove-integration
+  merge_group:
+    branches:
+      - main
 
 concurrency:
   # Cancel previous workflows of the same PR, but only for PRs
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.base.ref || github.ref }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
 permissions:
@@ -36,6 +47,20 @@ jobs:
       - name: Install doc dependencies
         run: |
           source .github/scripts/setup-docs-env.sh
+
+      - name: Install Chrome for kaleido
+        # plotly_get_chrome and browser-actions/setup-chrome fetch from Chrome
+        # for Testing, which has no Stable-channel linux-arm64 build (this
+        # runner is arm64). Google's apt repo does have arm64 Chrome, and
+        # choreographer checks /usr/bin/google-chrome-stable before downloading.
+        run: |
+          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub \
+            | gpg --dearmor \
+            | sudo tee /usr/share/keyrings/google-chrome.gpg >/dev/null
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" \
+            | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
 
       - name: Build docs / run examples
         run: |

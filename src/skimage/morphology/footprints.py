@@ -1,13 +1,17 @@
 import os
 import warnings
-from collections.abc import Sequence
-from numbers import Integral
 
 import numpy as np
 
-from .. import draw
-from skimage import morphology
-from .._shared.utils import deprecate_func
+from _skimage2.morphology._footprints import (
+    _footprint_is_sequence,
+    mirror_footprint as sk2_mirror_footprint,
+    pad_footprint as sk2_pad_footprint,
+)
+from _skimage2._shared.utils import deprecate_func
+from skimage._migration import ski2_migration_decorator
+
+from .. import draw, morphology
 
 
 # Precomputed ball and disk decompositions were saved as 2D arrays where the
@@ -23,30 +27,6 @@ _nsphere_decompositions[2] = np.load(
 _nsphere_decompositions[3] = np.load(
     os.path.join(os.path.dirname(__file__), 'ball_decompositions.npy')
 )
-
-
-def _footprint_is_sequence(footprint):
-    if hasattr(footprint, '__array_interface__'):
-        return False
-
-    def _validate_sequence_element(t):
-        return (
-            isinstance(t, Sequence)
-            and len(t) == 2
-            and hasattr(t[0], '__array_interface__')
-            and isinstance(t[1], Integral)
-        )
-
-    if isinstance(footprint, Sequence):
-        if not all(_validate_sequence_element(t) for t in footprint):
-            raise ValueError(
-                "All elements of footprint sequence must be a 2-tuple where "
-                "the first element of the tuple is an ndarray and the second "
-                "is an integer indicating the number of iterations."
-            )
-    else:
-        raise ValueError("footprint must be either an ndarray or Sequence")
-    return True
 
 
 def _shape_from_sequence(footprints, require_odd_size=False):
@@ -110,7 +90,7 @@ def footprint_rectangle(shape, *, dtype=np.uint8, decomposition=None):
     shape : tuple[int, ...]
         The length of the footprint in each dimension. The length of the
         sequence determines the number of dimensions of the footprint.
-    dtype : data-type, optional
+    dtype : dtype-like, optional
         The data type of the footprint.
     decomposition : {None, 'separable', 'sequence'}, optional
         If None, a single array is returned. For 'sequence', a tuple of smaller
@@ -217,7 +197,7 @@ def square(width, dtype=np.uint8, *, decomposition=None):
 
     Other Parameters
     ----------------
-    dtype : data-type, optional
+    dtype : dtype-like, optional
         The data type of the footprint.
     decomposition : {None, 'separable', 'sequence'}, optional
         If None, a single array is returned. For 'sequence', a tuple of smaller
@@ -293,7 +273,7 @@ def rectangle(nrows, ncols, dtype=np.uint8, *, decomposition=None):
 
     Other Parameters
     ----------------
-    dtype : data-type, optional
+    dtype : dtype-like, optional
         The data type of the footprint.
     decomposition : {None, 'separable', 'sequence'}, optional
         If None, a single array is returned. For 'sequence', a tuple of smaller
@@ -353,7 +333,7 @@ def diamond(radius, dtype=np.uint8, *, decomposition=None):
 
     Other Parameters
     ----------------
-    dtype : data-type, optional
+    dtype : dtype-like, optional
         The data type of the footprint.
     decomposition : {None, 'sequence'}, optional
         If None, a single array is returned. For 'sequence', a tuple of smaller
@@ -445,8 +425,7 @@ def _nsphere_series_decomposition(radius, ndim, dtype=np.uint8):
     max_radius = precomputed_decompositions.shape[0]
     if radius > max_radius:
         raise ValueError(
-            f"precomputed {ndim}D decomposition unavailable for "
-            f"radius > {max_radius}"
+            f"precomputed {ndim}D decomposition unavailable for radius > {max_radius}"
         )
     num_t_series, num_diamond, num_square = precomputed_decompositions[radius]
 
@@ -519,7 +498,7 @@ def disk(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
 
     Other Parameters
     ----------------
-    dtype : data-type, optional
+    dtype : dtype-like, optional
         The data type of the footprint.
     strict_radius : bool, optional
         If False, extend the radius by 0.5. This allows the circle to expand
@@ -664,7 +643,7 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
 
     Other Parameters
     ----------------
-    dtype : data-type, optional
+    dtype : dtype-like, optional
         The data type of the footprint.
     decomposition : {None, 'crosses'}, optional
         If None, a single array is returned. For 'sequence', a tuple of smaller
@@ -738,7 +717,7 @@ def cube(width, dtype=np.uint8, *, decomposition=None):
 
     Other Parameters
     ----------------
-    dtype : data-type, optional
+    dtype : dtype-like, optional
         The data type of the footprint.
     decomposition : {None, 'separable', 'sequence'}, optional
         If None, a single array is returned. For 'sequence', a tuple of smaller
@@ -792,7 +771,7 @@ def octahedron(radius, dtype=np.uint8, *, decomposition=None):
 
     Other Parameters
     ----------------
-    dtype : data-type, optional
+    dtype : dtype-like, optional
         The data type of the footprint.
     decomposition : {None, 'sequence'}, optional
         If None, a single array is returned. For 'sequence', a tuple of smaller
@@ -852,7 +831,7 @@ def ball(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
 
     Other Parameters
     ----------------
-    dtype : data-type, optional
+    dtype : dtype-like, optional
         The data type of the footprint.
     strict_radius : bool, optional
         If False, extend the radius by 0.5. This allows the circle to expand
@@ -929,7 +908,7 @@ def octagon(m, n, dtype=np.uint8, *, decomposition=None):
 
     Other Parameters
     ----------------
-    dtype : data-type, optional
+    dtype : dtype-like, optional
         The data type of the footprint.
     decomposition : {None, 'sequence'}, optional
         If None, a single array is returned. For 'sequence', a tuple of smaller
@@ -1011,7 +990,7 @@ def star(a, dtype=np.uint8):
 
     Other Parameters
     ----------------
-    dtype : data-type, optional
+    dtype : dtype-like, optional
         The data type of the footprint.
 
     Returns
@@ -1044,6 +1023,15 @@ def star(a, dtype=np.uint8):
     return footprint.astype(dtype)
 
 
+@ski2_migration_decorator(
+    '''\
+<!--- cond-start: warning -->
+`%(qname_old)s` is deprecated in favor of `%(qname_new)s` with identical
+behavior.
+<!--- cond-end -->
+''',
+    qname_old='skimage.morphology.mirror_footprint',
+)
 def mirror_footprint(footprint):
     """Mirror each dimension in the footprint.
 
@@ -1068,12 +1056,17 @@ def mirror_footprint(footprint):
            [0, 0, 0]], dtype=uint8)
 
     """
-    if _footprint_is_sequence(footprint):
-        return tuple((mirror_footprint(fp), n) for fp, n in footprint)
-    footprint = np.asarray(footprint)
-    return footprint[(slice(None, None, -1),) * footprint.ndim]
+    return sk2_mirror_footprint(footprint)
 
 
+@ski2_migration_decorator(
+    '''\
+<!--- cond-start: warning -->
+`%(qname_old)s` is deprecated in favor of `%(qname_new)s` with identical behavior
+<!--- cond-end -->
+''',
+    qname_old='skimage.morphology.pad_footprint',
+)
 def pad_footprint(footprint, *, pad_end=True):
     """Pad the footprint to an odd size along each dimension.
 
@@ -1101,10 +1094,4 @@ def pad_footprint(footprint, *, pad_end=True):
            [1, 1, 0]], dtype=uint8)
 
     """
-    if _footprint_is_sequence(footprint):
-        return tuple((pad_footprint(fp, pad_end=pad_end), n) for fp, n in footprint)
-    footprint = np.asarray(footprint)
-    padding = []
-    for sz in footprint.shape:
-        padding.append(((0, 1) if pad_end else (1, 0)) if sz % 2 == 0 else (0, 0))
-    return np.pad(footprint, padding)
+    return sk2_pad_footprint(footprint, pad_end=pad_end)

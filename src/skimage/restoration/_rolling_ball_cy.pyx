@@ -4,7 +4,7 @@ cimport cython
 from libc.math cimport isnan, INFINITY
 from cython.parallel cimport prange
 
-from .._shared.fused_numerics cimport np_floats
+from _skimage2._shared.fused_numerics cimport np_floats
 
 ctypedef np_floats DTYPE_FLOAT
 
@@ -112,7 +112,7 @@ def apply_kernel_nan(DTYPE_FLOAT[::1] img not None,
     -------
     out_data : ndarray
         The array passed into ``out``, reshaped to
-        ``out_data.shape = img_shape`` (possibly a view) and filled with the
+        ``out_data.reshape(img_shape, copy=False)`` (possibly a view) and filled with the
         estimated background intensity.
 
     See Also
@@ -196,7 +196,7 @@ def apply_kernel(DTYPE_FLOAT[::1] img not None,
     -------
     out_data : ndarray
         The array passed into ``out``, reshaped to
-        ``out_data.shape = img_shape`` (possibly a view) and filled with the
+        ``out_data.reshape(img_shape, copy=False)`` (possibly a view) and filled with the
         estimated background intensity.
 
     See Also

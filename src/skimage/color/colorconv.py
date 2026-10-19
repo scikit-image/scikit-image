@@ -55,7 +55,7 @@ import numpy as np
 from scipy import linalg
 
 
-from .._shared.utils import (
+from _skimage2._shared.utils import (
     _supported_float_type,
     channel_as_last_axis,
     identity,

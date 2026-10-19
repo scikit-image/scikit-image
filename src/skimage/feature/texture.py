@@ -6,7 +6,7 @@ import warnings
 
 import numpy as np
 
-from .._shared.utils import check_nD
+from _skimage2._shared.utils import check_nD
 from ..color import gray2rgb
 from ..util import img_as_float
 from ._texture import _glcm_loop, _local_binary_pattern, _multiblock_lbp

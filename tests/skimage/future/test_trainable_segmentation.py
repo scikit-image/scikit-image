@@ -27,7 +27,8 @@ class DummyNNClassifier:
 def test_trainable_segmentation_singlechannel():
     img = np.zeros((20, 20))
     img[:10] = 1
-    img += 0.05 * np.random.randn(*img.shape)
+    rng = np.random.RandomState(739561322)
+    img += 0.05 * rng.randn(*img.shape)
     labels = np.zeros_like(img, dtype=np.uint8)
     labels[:2] = 1
     labels[-2:] = 2
@@ -49,7 +50,8 @@ def test_trainable_segmentation_singlechannel():
 def test_trainable_segmentation_multichannel():
     img = np.zeros((20, 20, 3))
     img[:10] = 1
-    img += 0.05 * np.random.randn(*img.shape)
+    rng = np.random.RandomState(2408776024)
+    img += 0.05 * rng.randn(*img.shape)
     labels = np.zeros_like(img[..., 0], dtype=np.uint8)
     labels[:2] = 1
     labels[-2:] = 2
@@ -71,7 +73,8 @@ def test_trainable_segmentation_multichannel():
 def test_trainable_segmentation_predict():
     img = np.zeros((20, 20))
     img[:10] = 1
-    img += 0.05 * np.random.randn(*img.shape)
+    rng = np.random.RandomState(430003013)
+    img += 0.05 * rng.randn(*img.shape)
     labels = np.zeros_like(img, dtype=np.uint8)
     labels[:2] = 1
     labels[-2:] = 2
@@ -86,7 +89,7 @@ def test_trainable_segmentation_predict():
     features = features_func(img)
     clf = fit_segmenter(labels, features, clf)
 
-    test_features = np.random.random((5, 20, 20))
+    test_features = rng.random((5, 20, 20))
     with pytest.raises(ValueError) as err:
         _ = predict_segmenter(test_features, clf)
         assert 'type of features' in str(err.value)
@@ -97,7 +100,8 @@ def test_trainable_segmentation_oo():
 
     img = np.zeros((20, 20))
     img[:10] = 1
-    img += 0.05 * np.random.randn(*img.shape)
+    rng = np.random.RandomState(1547222402)
+    img += 0.05 * rng.randn(*img.shape)
     labels = np.zeros_like(img, dtype=np.uint8)
     labels[:2] = 1
     labels[-2:] = 2

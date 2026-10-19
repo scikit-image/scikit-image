@@ -7,7 +7,7 @@ for use with data on a n-dimensional lattice.
 import cython
 import numpy as np
 from . import heap
-from .._shared.utils import warn, deprecate_parameter, DEPRECATED
+from _skimage2._shared.utils import warn, deprecate_parameter, DEPRECATED
 
 cimport numpy as cnp
 from . cimport heap
@@ -77,7 +77,7 @@ def _offset_edge_map(shape, offsets):
           [0, 0, 2, 1]], dtype=int8)
 
     """
-    indices = np.indices(shape)  # indices.shape = (n,)+shape
+    indices = np.indices(shape)  # indices.reshape((n,) + shape, copy=False)
 
     #get the distance from each index to the upper or lower edge in each dim
     pos_edges = (shape - indices.T).T

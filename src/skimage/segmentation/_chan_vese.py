@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.ndimage import distance_transform_edt as distance
 
-from .._shared.utils import _supported_float_type
+from _skimage2._shared.utils import _supported_float_type
 
 
 def _cv_calculate_variation(image, phi, mu, lambda1, lambda2, dt):

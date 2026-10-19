@@ -7,8 +7,8 @@ import numpy as np
 
 from libc.math cimport sin, cos
 
-from .._shared.interpolation cimport round
-from .._shared.fused_numerics cimport np_floats
+from _skimage2._shared.interpolation cimport round
+from _skimage2._shared.fused_numerics cimport np_floats
 
 from ._orb_descriptor_positions import POS, POS0, POS1
 

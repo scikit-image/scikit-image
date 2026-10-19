@@ -51,8 +51,9 @@ References
 import numpy as np
 from scipy import ndimage as ndi
 
-from ..._shared.utils import check_nD, warn
-from ...morphology.footprints import _footprint_is_sequence
+from _skimage2.morphology._footprints import _footprint_is_sequence
+from _skimage2._shared.utils import check_nD, warn
+
 from ...util import img_as_ubyte
 from . import generic_cy
 
@@ -100,8 +101,8 @@ def _preprocess_input(
     mask : ndarray of dtype (int or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    out_dtype : data-type, optional
-        Desired output data-type. Default is None, which means we cast output
+    out_dtype : dtype-like, optional
+        Desired output data type. Default is None, which means we cast output
         in input dtype.
     pixel_size : int, optional
         Dimension of each pixel. Default value is 1.
@@ -215,8 +216,8 @@ def _handle_input_3D(
     mask : ndarray of dtype (int or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    out_dtype : data-type, optional
-        Desired output data-type. Default is None, which means we cast output
+    out_dtype : dtype-like, optional
+        Desired output data type. Default is None, which means we cast output
         in input dtype.
     pixel_size : int, optional
         Dimension of each pixel. Default value is 1.
@@ -323,8 +324,8 @@ def _apply_scalar_per_pixel(
     shift_x, shift_y : int
         Offset added to the footprint center point. Shift is bounded to the
         footprint sizes (center must be inside the given footprint).
-    out_dtype : data-type, optional
-        Desired output data-type. Default is None, which means we cast output
+    out_dtype : dtype-like, optional
+        Desired output data type. Default is None, which means we cast output
         in input dtype.
 
     """
@@ -396,8 +397,8 @@ def _apply_vector_per_pixel(
     shift_x, shift_y : int
         Offset added to the footprint center point. Shift is bounded to the
         footprint sizes (center must be inside the given footprint).
-    out_dtype : data-type, optional
-        Desired output data-type. Default is None, which means we cast output
+    out_dtype : dtype-like, optional
+        Desired output data type. Default is None, which means we cast output
         in input dtype.
     pixel_size : int, optional
         Dimension of each pixel.

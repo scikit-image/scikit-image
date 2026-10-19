@@ -1,7 +1,7 @@
 import numpy as np
 
-from .._shared import utils
-from .._shared.utils import convert_to_float
+from _skimage2._shared import utils
+from _skimage2._shared.utils import convert_to_float
 from ._nl_means_denoising import (
     _nl_means_denoising_2d,
     _nl_means_denoising_3d,
