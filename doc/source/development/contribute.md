@@ -40,6 +40,11 @@ can be contributed to scikit-image.
      git clone --origin upstream git@github.com:scikit-image/scikit-image
      ```
 
+   :::{note}
+   We use `git@github.com` below; if you don't have SSH keys setup, use
+   `https://github.com` instead.
+   :::
+
    - Change into the root directory of the cloned repository:
 
      ```
