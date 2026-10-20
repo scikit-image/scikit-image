@@ -14,6 +14,8 @@ project(
   ],
 )
 
+min_numpy_version = '2.2.0'  # keep in sync with pyproject.toml
+
 cc = meson.get_compiler('c')
 cpp = meson.get_compiler('cpp')
 
