@@ -1,4 +1,4 @@
-# Installation
+# Development setup
 
 Your system needs a:
 
@@ -7,20 +7,8 @@ Your system needs a:
 - a version of Python supported by `scikit-image` (see
   [pyproject.toml](https://github.com/scikit-image/scikit-image/blob/main/pyproject.toml#L14)).
 
-First, [fork the scikit-image repository on GitHub](https://github.com/scikit-image/scikit-image/fork).
-Then clone your fork locally and set an `upstream` remote to point to the original scikit-image repository:
-
-:::{note}
-We use `git@github.com` below; if you don't have SSH keys setup, use
-`https://github.com` instead.
-:::
-
-```sh
-git clone git@github.com:YOURUSERNAME/scikit-image
-cd scikit-image
-git remote add upstream git@github.com:scikit-image/scikit-image
-```
-
+First, follow the [development process](contribute.md#development-process)
+to fork and clone the repository and configure its remotes.
 All commands below are run from within the cloned `scikit-image` directory.
 
 (build-env-setup)=
@@ -99,22 +87,10 @@ In that case, the library is not installed, but is accessible via
 etc.
 :::
 
-## Adding a feature branch
+## Rebuilding after changes
 
-When contributing a new feature, do so via a feature branch.
-
-First, fetch the latest source:
-
-```sh
-git switch main
-git pull upstream main
-```
-
-Create your feature branch:
-
-```sh
-git switch --create my-feature-name
-```
+Create a feature branch as described in the
+[development process](contribute.md#development-process) before making changes.
 
 Using an editable install, `scikit-image` will rebuild itself as
 necessary.

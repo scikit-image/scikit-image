@@ -23,7 +23,7 @@ chat:
 knowledge_base:
   code_guidelines:
     filePatterns:
-      - CONTRIBUTING.md
+      - doc/source/development/contribute.md
       - doc/source/development/guidelines.md
       - doc/source/development/testing.md
       - doc/source/development/building_docs.md
