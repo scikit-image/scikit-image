@@ -18,7 +18,7 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: scientific-python/attach-next-milestone-action@806bd518fa2d47c076046246efcbca38a829d53b
+      - uses: scientific-python/attach-next-milestone-action@796cfa44ba1e1a9a4bce7896241d4612a3f06327
         with:
           token: ${{ github.token }}
           force: true
