@@ -40,9 +40,10 @@ def gabor_kernel(
     theta : float, optional
         Orientation in radians. If 0, the harmonic is in the x-direction.
     bandwidth : float, optional
-        The bandwidth captured by the filter. For fixed bandwidth, ``sigma_x``
-        and ``sigma_y`` will decrease with increasing frequency. This value is
-        ignored if ``sigma_x`` and ``sigma_y`` are set by the user.
+        The bandwidth captured by the filter. Must be greater than 0. For fixed
+        bandwidth, ``sigma_x`` and ``sigma_y`` will decrease with increasing
+        frequency. This value is ignored if ``sigma_x`` and ``sigma_y`` are set
+        by the user.
     sigma_x, sigma_y : float, optional
         Standard deviation in x- and y-directions. These directions apply to
         the kernel *before* rotation. If `theta = pi/2`, then the kernel is
@@ -83,6 +84,8 @@ def gabor_kernel(
     >>> ax.imshow(gk.real)       # doctest: +SKIP
     >>> plt.show()               # doctest: +SKIP
     """
+    if (sigma_x is None or sigma_y is None) and bandwidth <= 0:
+        raise ValueError(f"`bandwidth` must be > 0, got {bandwidth}")
     if sigma_x is None:
         sigma_x = _sigma_prefactor(bandwidth) / frequency
     if sigma_y is None:
@@ -145,9 +148,10 @@ def gabor(
     theta : float, optional
         Orientation in radians. If 0, the harmonic is in the x-direction.
     bandwidth : float, optional
-        The bandwidth captured by the filter. For fixed bandwidth, `sigma_x`
-        and `sigma_y` will decrease with increasing frequency. This value is
-        ignored if `sigma_x` and `sigma_y` are set by the user.
+        The bandwidth captured by the filter. Must be greater than 0. For fixed
+        bandwidth, `sigma_x` and `sigma_y` will decrease with increasing
+        frequency. This value is ignored if `sigma_x` and `sigma_y` are set by
+        the user.
     sigma_x, sigma_y : float, optional
         Standard deviation in x- and y-directions. These directions apply to
         the kernel *before* rotation. If ``theta = pi/2``, then the kernel is
