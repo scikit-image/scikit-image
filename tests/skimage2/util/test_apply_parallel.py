@@ -87,6 +87,25 @@ def test_apply_parallel_lazy():
     assert_array_almost_equal(result2.compute(), expected1)
 
 
+def test_apply_parallel_dtype_avoids_meta_inference():
+    a = np.ones((32, 32), dtype=np.uint8)
+    called_shapes = []
+
+    def func(arr):
+        called_shapes.append(arr.shape)
+        return arr
+
+    result = apply_parallel(
+        func,
+        a,
+        chunks=(16, 16),
+        dtype=np.uint8,
+    )
+
+    assert_equal(result, a)
+    assert (0, 0) not in called_shapes
+
+
 def test_no_chunks():
     a = np.ones(1 * 4 * 8 * 9).reshape(1, 4, 8, 9)
 
