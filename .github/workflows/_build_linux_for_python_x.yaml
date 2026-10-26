@@ -35,7 +35,7 @@ jobs:
         run: test "$(uname -m)" = aarch64
 
       - name: Checkout scikit-image
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
 
@@ -60,7 +60,7 @@ jobs:
           echo "/usr/lib/ccache" >> $GITHUB_PATH
 
       - name: Restore/save ccache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ github.workspace }}/.ccache
           key: ccache-${{ runner.os }}-${{ runner.arch }}-py${{ inputs.python-version }}-${{ github.sha }}
@@ -78,7 +78,7 @@ jobs:
         if: always()
         run: ccache --show-stats
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: skimage-linux-${{ inputs.python-version }}-${{ runner.arch }}
           path: |
