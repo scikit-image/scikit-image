@@ -1,0 +1,6 @@
+option(
+  'exclude-v2',
+  type: 'boolean',
+  value: false,
+  description: 'Exclude skimage2 namespace in the built package'
+)
