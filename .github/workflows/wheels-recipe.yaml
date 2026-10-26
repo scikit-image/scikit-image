@@ -3,12 +3,18 @@ name: Wheels recipe
 
 on:
   workflow_call:
+    inputs:
+      exclude_v2:
+        description: Exclude the skimage2 namespace from the built wheels
+        type: boolean
+        default: false
 
 permissions:
   contents: read
 
 env:
   COLUMNS: 120
+  CIBW_CONFIG_SETTINGS: ${{ inputs.exclude_v2 && 'setup-args=-Dexclude-v2=true' || '' }}
 
 jobs:
   build_macos_wheel:
