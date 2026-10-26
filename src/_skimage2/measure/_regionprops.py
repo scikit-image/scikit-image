@@ -893,7 +893,7 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
     Examples
     --------
     >>> from _skimage2 import data, util, measure
-    >>> image = data.coins()
+    >>> image = data.fetch_coins()
     >>> label_image = measure.label(image > 110, connectivity=image.ndim)
     >>> proplist = measure.regionprops(label_image, image)
     >>> props = _props_to_dict(proplist, properties=['label', 'inertia_tensor',
@@ -1078,7 +1078,7 @@ def regionprops_table(
     Examples
     --------
     >>> from _skimage2 import data, util, measure
-    >>> image = data.coins()
+    >>> image = data.fetch_coins()
     >>> label_image = measure.label(image > 110, connectivity=image.ndim)
     >>> props = measure.regionprops_table(label_image, image,
     ...                           properties=['label', 'inertia_tensor',
@@ -1114,7 +1114,7 @@ def regionprops_table(
     >>> def quartiles(regionmask, intensity):
     ...     return np.percentile(intensity[regionmask], q=(25, 50, 75))
     >>>
-    >>> image = data.coins()
+    >>> image = data.fetch_coins()
     >>> label_image = measure.label(image > 110, connectivity=image.ndim)
     >>> props = measure.regionprops_table(label_image, intensity_image=image,
     ...                                   properties=('label',),
@@ -1394,7 +1394,7 @@ def regionprops(
     Examples
     --------
     >>> import _skimage2 as ski2
-    >>> img = ski2.util.img_as_ubyte(ski2.data.coins()) > 110
+    >>> img = ski2.util.img_as_ubyte(ski2.data.fetch_coins()) > 110
     >>> label_img = ski2.measure.label(img, connectivity=img.ndim)
     >>> props = ski2.measure.regionprops(label_img)
     >>> # centroid of first labeled region
@@ -1408,7 +1408,7 @@ def regionprops(
 
     >>> import numpy as np
     >>> import _skimage2 as ski2
-    >>> img = ski2.util.img_as_ubyte(ski2.data.coins()) > 110
+    >>> img = ski2.util.img_as_ubyte(ski2.data.fetch_coins()) > 110
     >>> label_img = ski2.measure.label(img, connectivity=img.ndim)
     >>> def pixelcount(regionmask):
     ...     return np.sum(regionmask)

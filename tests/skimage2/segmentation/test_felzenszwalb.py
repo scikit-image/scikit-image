@@ -32,14 +32,14 @@ def test_grey():
 
 def test_minsize():
     # single-channel:
-    img = data.coins()[20:168, 0:128]
+    img = data.fetch_coins()[20:168, 0:128]
     for min_size in np.arange(10, 100, 10):
         segments = felzenszwalb(img, min_size=min_size, sigma=3)
         counts = np.bincount(segments.ravel())
         # actually want to test greater or equal.
         assert_greater(counts.min() + 1, min_size)
     # multi-channel:
-    coffee = data.coffee()[::4, ::4]
+    coffee = data.fetch_coffee()[::4, ::4]
     for min_size in np.arange(10, 100, 10):
         segments = felzenszwalb(coffee, min_size=min_size, sigma=3)
         counts = np.bincount(segments.ravel())

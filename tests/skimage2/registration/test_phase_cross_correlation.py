@@ -11,7 +11,7 @@ from _skimage2 import img_as_float
 from _skimage2._shared._warnings import expected_warnings
 from _skimage2._shared.testing import assert_stacklevel
 from _skimage2._shared.utils import _supported_float_type
-from _skimage2.data import camera, binary_blobs, eagle
+from _skimage2.data import fetch_camera, binary_blobs, fetch_eagle
 from _skimage2.registration._phase_cross_correlation import (
     phase_cross_correlation,
     _upsampled_dft,
@@ -20,7 +20,7 @@ from _skimage2.registration._phase_cross_correlation import (
 
 @pytest.mark.parametrize('normalization', [None, 'phase'])
 def test_correlation(normalization):
-    reference_image = fft.fftn(camera())
+    reference_image = fft.fftn(fetch_camera())
     shift = (-7, 12)
     shifted_image = fourier_shift(reference_image, shift)
 
@@ -33,7 +33,7 @@ def test_correlation(normalization):
 
 @pytest.mark.parametrize('normalization', ['nonexisting'])
 def test_correlation_invalid_normalization(normalization):
-    reference_image = fft.fftn(camera())
+    reference_image = fft.fftn(fetch_camera())
     shift = (-7, 12)
     shifted_image = fourier_shift(reference_image, shift)
 
@@ -46,7 +46,7 @@ def test_correlation_invalid_normalization(normalization):
 
 @pytest.mark.parametrize('normalization', [None, 'phase'])
 def test_subpixel_precision(normalization):
-    reference_image = fft.fftn(camera())
+    reference_image = fft.fftn(fetch_camera())
     subpixel_shift = (-2.4, 1.32)
     shifted_image = fourier_shift(reference_image, subpixel_shift)
 
@@ -63,7 +63,7 @@ def test_subpixel_precision(normalization):
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_real_input(dtype):
-    reference_image = camera().astype(dtype, copy=False)
+    reference_image = fetch_camera().astype(dtype, copy=False)
     subpixel_shift = (-2.4, 1.32)
     shifted_image = fourier_shift(fft.fftn(reference_image), subpixel_shift)
     shifted_image = fft.ifftn(shifted_image).real.astype(dtype, copy=False)
@@ -78,7 +78,7 @@ def test_real_input(dtype):
 
 def test_size_one_dimension_input():
     # take a strip of the input image
-    reference_image = fft.fftn(camera()[:, 15]).reshape((-1, 1))
+    reference_image = fft.fftn(fetch_camera()[:, 15]).reshape((-1, 1))
     subpixel_shift = (-2.4, 4)
     shifted_image = fourier_shift(reference_image, subpixel_shift)
 
@@ -182,7 +182,7 @@ def test_mismatch_offsets_size():
     list(itertools.product((100, -100, 350, -350), (100, -100, 350, -350))),
 )
 def test_disambiguate_2d(shift0, shift1):
-    image = eagle()[500:, 900:]  # use a highly textured part of image
+    image = fetch_eagle()[500:, 900:]  # use a highly textured part of image
     shift = (shift0, shift1)
     origin0 = []
     for s in shift:
@@ -222,7 +222,7 @@ def test_disambiguate_zero_shift(disambiguate):
     cross-correlation. This test ensures that nothing bad happens in that
     scenario.
     """
-    image = camera()
+    image = fetch_camera()
     computed_shift, _, _ = phase_cross_correlation(
         image,
         image,
@@ -235,7 +235,7 @@ def test_disambiguate_zero_shift(disambiguate):
 @pytest.mark.parametrize('null_images', [(1, 0), (0, 1), (0, 0)])
 def test_disambiguate_empty_image(null_images):
     """When the image is empty, disambiguation becomes degenerate."""
-    image = camera()
+    image = fetch_camera()
     with pytest.warns(UserWarning) as records:
         shift, error, phasediff = phase_cross_correlation(
             image * null_images[0], image * null_images[1], disambiguate=True

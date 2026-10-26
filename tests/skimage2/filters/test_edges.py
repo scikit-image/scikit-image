@@ -38,7 +38,7 @@ def test_int_rescaling(function_name):
     two of the input range. For integer inputs, rescaling to floats in
     [0.0, 1.0] should occur, so just verify outputs are not > 2.0.
     """
-    img = data.coins()[:128, :128]
+    img = data.fetch_coins()[:128, :128]
     func = getattr(filters, function_name)
     filtered = func(img)
     assert filtered.max() <= 2.0

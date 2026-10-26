@@ -72,6 +72,40 @@ _skimage2.util.regular_grid
     )
 
 
+def test_adapt_strips_fetch_prefix_for_datasets():
+    doc = """\
+>>> from _skimage2 import data
+>>> data.fetch_astronaut()
+>>> data.fetch_stereo_motorcycle()
+"""
+    adapted = _adapt_doctest_doc(doc)
+    assert (
+        adapted
+        == """\
+>>> from skimage import data
+>>> data.astronaut()
+>>> data.stereo_motorcycle()
+"""
+    )
+
+
+def test_adapt_leaves_unrelated_fetch_identifiers():
+    doc = """\
+>>> from _skimage2 import data
+>>> client.fetch_20newsgroups()
+>>> fetch_data = something
+"""
+    adapted = _adapt_doctest_doc(doc)
+    assert (
+        adapted
+        == """\
+>>> from skimage import data
+>>> client.fetch_20newsgroups()
+>>> fetch_data = something
+"""
+    )
+
+
 @skip_if_pyopt2
 def test_prose_outside_doctests_unchanged():
     doc = """\
