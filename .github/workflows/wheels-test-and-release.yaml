@@ -24,6 +24,8 @@ jobs:
   call-workflow-build-wheels:
     name: Wheels recipe
     uses: ./.github/workflows/wheels-recipe.yaml
+    with:
+      exclude_v2: true
 
   build_sdist:
     name: Build source distribution
