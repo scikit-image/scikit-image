@@ -2664,12 +2664,12 @@ def estimate_transform(ttype, src, dst, *args, **kwargs):
 
 
 def matrix_transform(coords, matrix):
-    """Apply 2D matrix transform.
+    """Apply 2D matrix transform to coordinates.
 
     Parameters
     ----------
     coords : array_like of shape (N, 2)
-        x, y coordinates to transform
+        Coordinates to transform
     matrix : array_like of shape (3, 3)
         Homogeneous transformation matrix.
 
@@ -2677,6 +2677,5 @@ def matrix_transform(coords, matrix):
     -------
     coords : ndarray of shape (N, 2)
         Transformed coordinates.
-
     """
     return ProjectiveTransform(matrix)(coords)
