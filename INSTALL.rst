@@ -12,7 +12,7 @@ Installing scikit-image
 - Install ``scikit-image`` via `pip <#install-via-pip>`_ or `conda
   <#install-via-conda>`_, as appropriate.
 
-- Or, :doc:`build the package from source </development/contribute>`.
+- Or, :doc:`build the package from source </development/install>`.
   Do this if you'd like to contribute to development.
 
 Supported platforms
@@ -23,7 +23,7 @@ Supported platforms
 - Linux 64-bit on x86 and ARM processors
 
 While we do not officially support other platforms, you could still
-try :doc:`building from source </development/contribute>`.
+try :doc:`building from source </development/install>`.
 
 Version check
 ------------------------------------------------------------------------------
@@ -153,5 +153,7 @@ To suggest a change in these instructions,
 Installing scikit-image for contributors
 ========================================
 
-See the :doc:`contributing guide </development/contribute>` for instructions
-on setting up a development environment and contributing to scikit-image.
+See the :doc:`contributor installation guide </development/install>` for
+instructions on setting up a development environment, then the
+:doc:`contributing guide </development/contribute>` for how to contribute to
+scikit-image.

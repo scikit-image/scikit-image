@@ -6,11 +6,15 @@ from datetime import timedelta
 import os
 import sys
 import sysconfig
+from importlib.util import find_spec
 from pytest_pretty import CustomTerminalReporter
 
 from _pytest.terminal import TerminalReporter
 from _pytest.pathlib import bestrelpath
 
+
+# Builds made with `-Dexclude-v2=true` do not ship `skimage2`.
+collect_ignore_glob = [] if find_spec("skimage2") else ["skimage2/*"]
 
 FREE_THREADED_BUILD = bool(sysconfig.get_config_var("Py_GIL_DISABLED"))
 GIL_ENABLED_AT_START = getattr(sys, "_is_gil_enabled", lambda: True)()
