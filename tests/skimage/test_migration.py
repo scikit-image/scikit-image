@@ -1283,7 +1283,7 @@ SKIMAGE_API = {
     'nansafe=False, num_threads=<DEPRECATED>, workers=None)',
     'skimage.restoration:unsupervised_wiener(image, psf, reg=None, '
     'user_params=None, is_real=True, clip=True, *, rng=None)',
-    'skimage.restoration:unwrap_phase(image, wrap_around=False, rng=None)',
+    'skimage.restoration:unwrap_phase(image, wrap_around=False, rng=None, mask=None)',
     'skimage.restoration:wiener(image, psf, balance, reg=None, is_real=True, '
     'clip=True)',
     'skimage.segmentation:active_contour(image, snake, alpha=0.01, beta=0.1, '
