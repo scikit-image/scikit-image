@@ -68,8 +68,8 @@ can be contributed to scikit-image.
      checkers and formatters each time you do a `git commit`:
 
      ```
-     pip install pre-commit
-     pre-commit install
+     pip install prek
+     prek install
      ```
 
 2. Develop your contribution:
