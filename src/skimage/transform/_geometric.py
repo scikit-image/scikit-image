@@ -23,7 +23,7 @@ from _skimage2.transform._geometric import (  # noqa: F401
 )
 
 
-from skimage._doctest_adapters import adapt_doctests
+from skimage._doctest_adapters import adapt_doctests, _is_from_shim
 
 adapt_doctests(globals())
 
@@ -61,6 +61,9 @@ for _c in (
     EuclideanTransform,
     SimilarityTransform,
 ):
+    # Stop if we've picked up skimage2 class, rather than our own subclass.
+    assert _is_from_shim(_c, __name__)
+    # Patch __add__ to deal with subclass algorithm.
     _c.__add__ = _ptf__add__
 
 
