@@ -58,18 +58,18 @@ jobs:
         run: |
           echo -e "## docstub output\n\`\`\`" >> $GITHUB_STEP_SUMMARY
           (set -o pipefail && \
-           docstub run --verbose --group-errors --allow-errors=608 \
+           docstub run --verbose --group-errors --allow-errors=19 \
                        --workers -1 --out-dir ${MYPYPATH}/skimage src/skimage/ \
            2>&1 | tee -a $GITHUB_STEP_SUMMARY)
            echo -e "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
-      - name: Create skimage2-stubs with docstub
+      - name: Create _skimage2-stubs with docstub
         shell: bash
         run: |
           echo -e "## docstub output\n\`\`\`" >> $GITHUB_STEP_SUMMARY
           (set -o pipefail && \
-           docstub run --verbose --group-errors \
-                       --out-dir ${MYPYPATH}/skimage2 src/skimage2/ \
+           docstub run --verbose --group-errors --allow-errors=575 \
+                       --out-dir ${MYPYPATH}/_skimage2 src/_skimage2/ \
            2>&1 | tee -a $GITHUB_STEP_SUMMARY)
            echo -e "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
