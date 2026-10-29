@@ -172,9 +172,7 @@ from skimage.transform import iradon_sart
 
 reconstruction_sart = iradon_sart(sinogram, theta=theta)
 error = reconstruction_sart - image
-print(
-    f'SART (1 iteration) rms reconstruction error: ' f'{np.sqrt(np.mean(error**2)):.3g}'
-)
+print(f'SART (1 iteration) rms reconstruction error: {np.sqrt(np.mean(error**2)):.3g}')
 
 fig, axes = plt.subplots(2, 2, figsize=(8, 8.5), sharex=True, sharey=True)
 ax = axes.ravel()
@@ -189,10 +187,7 @@ ax[1].imshow(reconstruction_sart - image, cmap=plt.cm.Greys_r, **imkwargs)
 # from the first iteration as an initial estimate
 reconstruction_sart2 = iradon_sart(sinogram, theta=theta, image=reconstruction_sart)
 error = reconstruction_sart2 - image
-print(
-    f'SART (2 iterations) rms reconstruction error: '
-    f'{np.sqrt(np.mean(error**2)):.3g}'
-)
+print(f'SART (2 iterations) rms reconstruction error: {np.sqrt(np.mean(error**2)):.3g}')
 
 ax[2].set_title("Reconstruction\nSART, 2 iterations")
 ax[2].imshow(reconstruction_sart2, cmap=plt.cm.Greys_r)

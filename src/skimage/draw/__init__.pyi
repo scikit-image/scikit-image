@@ -21,6 +21,7 @@ __all__ = [
     'rectangle',
     'rectangle_perimeter',
     'polygon2mask',
+    '_bezier_segment',
 ]
 
 from .draw3d import ellipsoid, ellipsoid_stats

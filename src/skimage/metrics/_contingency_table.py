@@ -1,9 +1,32 @@
 import scipy.sparse as sparse
-import numpy as np
+
+import _skimage2 as ski2
+
+from .._migration import ski2_migration_decorator
 
 __all__ = ['contingency_table']
 
 
+@ski2_migration_decorator(
+    """\
+    ``%(qname_old)s`` is deprecated in favor of
+    ``%(qname_new)s`` with new behavior:
+
+    * Parameter `sparse_type` was removed
+    * Returned `cont` is always a `scipy.sparse.csr_array`
+
+    SciPy 2.0 deprecates the sparse matrix classes and will remove them no
+    earlier than SciPy 2.2. The two types define ``*`` differently: matrix
+    multiplication for `scipy.sparse.csr_matrix`, elementwise multiplication
+    for `scipy.sparse.csr_array`. ``@`` is matrix multiplication for both.
+
+    To keep the old (``skimage``, v1.x) behavior, convert the result::
+
+        cont = skimage2.metrics.contingency_table(im_true, im_test, ...)
+        cont = scipy.sparse.csr_matrix(cont)
+    """,
+    qname_old="skimage.metrics.contingency_table",
+)
 def contingency_table(
     im_true, im_test, *, ignore_labels=None, normalize=False, sparse_type="matrix"
 ):
@@ -32,20 +55,22 @@ def contingency_table(
         labeled `i` in `im_true` and `j` in `im_test`. Depending on `sparse_type`,
         this can be returned as a `scipy.sparse.csr_array`.
     """
-
-    if ignore_labels is None:
-        ignore_labels = []
-    im_test_r = im_test.reshape(-1)
-    im_true_r = im_true.reshape(-1)
-    data = np.isin(im_true_r, ignore_labels, invert=True).astype(float)
-    if normalize:
-        data /= np.count_nonzero(data)
-    cont = sparse.csr_array((data, (im_true_r, im_test_r)))
-
-    if sparse_type == "matrix":
-        cont = sparse.csr_matrix(cont)
-    elif sparse_type != "array":
+    if sparse_type not in ("array", "matrix"):
         msg = f"`sparse_type` must be 'array' or 'matrix', got {sparse_type}"
         raise ValueError(msg)
 
+    cont = ski2.metrics.contingency_table(
+        im_true,
+        im_test,
+        ignore_labels=ignore_labels,
+        normalize=normalize,
+    )
+    if sparse_type == "matrix":
+        cont = sparse.csr_matrix(cont)
+
     return cont
+
+
+from skimage._doctest_adapters import adapt_doctests  # noqa: E402
+
+adapt_doctests(globals())

@@ -1,71 +1,48 @@
-"""Generic utilities.
+"""Utility functions to work with images in general."""
 
-This module contains a number of utility functions to work with images in general.
-"""
+import lazy_loader as _lazy
 
-import functools
-import warnings
+_lazy_getattr, _, __all__ = _lazy.attach_stub(__name__, __file__)
 
-import numpy as np
-
-# keep .dtype imports first to avoid circular imports
-from .dtype import (
-    dtype_limits,
-    img_as_float,
-    img_as_float32,
-    img_as_float64,
-    img_as_bool,
-    img_as_int,
-    img_as_ubyte,
-    img_as_uint,
-)
-from ._slice_along_axes import slice_along_axes
-from ._invert import invert
-from ._label import label_points
-from ._montage import montage
-from ._map_array import map_array
-from ._regular_grid import regular_grid, regular_seeds
-from .apply_parallel import apply_parallel
-from .arraycrop import crop
-from .compare import compare_images
-from .noise import random_noise
-from .shape import view_as_blocks, view_as_windows
-from .unique import unique_rows
-from .lookfor import lookfor
-from _skimage2._shared.utils import FailedEstimationAccessError
+# lazy_loader ignores the manually defined `__all__` in the PYI file. Instead,
+# it populates `__all__` from what is imported. So patch in differences that we
+# actually want to have in `__all__` and `__dir__`. For example, we want to keep
+# deprecated functions available but not advertise them
+# (see https://github.com/scientific-python/lazy-loader/pull/133)
+to_strip = {
+    # Allow backwards-compatible submodule access but don't advertise
+    # or include in HTML docs
+    'arraycrop',
+    'compare',
+    'dtype',
+    'noise',
+    'shape',
+    'unique',
+}
+__all__ = list(set(__all__) - to_strip)
+__all__ += ["PendingSkimage2Change", "FailedEstimationAccessError"]
 
 
-__all__ = [
-    'img_as_float32',
-    'img_as_float64',
-    'img_as_float',
-    'img_as_int',
-    'img_as_uint',
-    'img_as_ubyte',
-    'img_as_bool',
-    'dtype_limits',
-    'view_as_blocks',
-    'view_as_windows',
-    'slice_along_axes',
-    'crop',
-    'compare_images',
-    'map_array',
-    'montage',
-    'random_noise',
-    'regular_grid',
-    'regular_seeds',
-    'apply_parallel',
-    'invert',
-    'unique_rows',
-    'label_points',
-    'lookfor',
-    'FailedEstimationAccessError',
-    'PendingSkimage2Change',
-]
+def __dir__():
+    return __all__.copy()
+
+
+def __getattr__(name):
+    obj = _lazy_getattr(name)
+
+    if name == "lookfor":
+        # Depending on how `lookfor` is first imported, lazy_loader may return
+        # the module or the function of the same name. Avoid that and always
+        # return the function.
+        import importlib
+
+        obj = importlib.import_module("skimage.util.lookfor").lookfor
+
+    return obj
 
 
 class PendingSkimage2Change(PendingDeprecationWarning):
-    """A warning about API usage that will silently change or break in skimage2.
+    """Warning about API usage that will change when switching to ``skimage2``.
 
     As a subclass of :class:`PendingDeprecationWarning`, this warning isn't
     shown by default. But it can be enabled with a warnings filter to prepare
@@ -74,8 +51,20 @@ class PendingSkimage2Change(PendingDeprecationWarning):
     .. code-block:: python
 
         import warnings
-        import skimage as ski
+        from skimage.util import PendingSkimage2Change
+
         warnings.filterwarnings(
-            action="default", category=ski.util.PendingSkimage2Change
+            action="default", category=PendingSkimage2Change
         )
     """
+
+
+from _skimage2._shared.utils import FailedEstimationAccessError  # noqa: F401
+
+
+# Bypass lazy_loader to maintain old behavior, that is, make the following pass:
+#   from skimage.util.lookfor import lookfor
+#   import skimage
+#   assert callable(skimage.util.lookfor)
+from .lookfor import lookfor  # noqa: F401
+from .apply_parallel import apply_parallel  # noqa: F401

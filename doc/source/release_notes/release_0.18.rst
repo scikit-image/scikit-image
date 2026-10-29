@@ -175,7 +175,7 @@ Documentation
   which are not installed with scikit-image (#4984). Similarly, the contributor
   guide has been updated to mention how to host new datasets in a gitlab
   repository (#4892).
-- The `benchmarking section of the developer documentation <https://scikit-image.org/docs/dev/development/contribute.html#benchmarks>`_
+- The `benchmarking section of the developer documentation <https://scikit-image.org/docs/dev/development/benchmarks.html>`_
   has been expanded (#4905).
 - Added links to the image.sc forum in example pages (#5094, #5096)
 - Added missing datasets to gallery examples (#5116, #5118)

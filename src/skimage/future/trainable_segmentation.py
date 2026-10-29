@@ -1,4 +1,6 @@
-from skimage.feature import multiscale_basic_features
+from ..feature import multiscale_basic_features
+from .._migration import ski2_migration_decorator
+from . import _PENDING_SKIMAGE2_NO_FUTURE
 
 try:
     from sklearn.exceptions import NotFittedError
@@ -12,6 +14,10 @@ except ImportError:
         pass
 
 
+@ski2_migration_decorator(
+    _PENDING_SKIMAGE2_NO_FUTURE,
+    qname_old='skimage.future.TrainableSegmenter',
+)
 class TrainableSegmenter:
     """Estimator for classifying pixels.
 
@@ -40,7 +46,7 @@ class TrainableSegmenter:
                 self.clf = RandomForestClassifier(n_estimators=100, n_jobs=-1)
             else:
                 raise ImportError(
-                    "Please install scikit-learn or pass a classifier instance"
+                    "Please install scikit-learn or pass a classifier instance "
                     "to TrainableSegmenter."
                 )
         else:
@@ -87,6 +93,10 @@ class TrainableSegmenter:
         return predict_segmenter(features, self.clf)
 
 
+@ski2_migration_decorator(
+    _PENDING_SKIMAGE2_NO_FUTURE,
+    qname_old='skimage.future.fit_segmenter',
+)
 def fit_segmenter(labels, features, clf):
     """Segmentation using labeled parts of the image and a classifier.
 
@@ -119,6 +129,10 @@ def fit_segmenter(labels, features, clf):
     return clf
 
 
+@ski2_migration_decorator(
+    _PENDING_SKIMAGE2_NO_FUTURE,
+    qname_old='skimage.future.predict_segmenter',
+)
 def predict_segmenter(features, clf):
     """Segmentation of images using a pretrained classifier.
 
@@ -148,7 +162,7 @@ def predict_segmenter(features, clf):
         predicted_labels = clf.predict(features)
     except NotFittedError:
         raise NotFittedError(
-            "You must train the classifier `clf` first"
+            "You must train the classifier `clf` first, "
             "for example with the `fit_segmenter` function."
         )
     except ValueError as err:

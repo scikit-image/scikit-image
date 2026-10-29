@@ -1,0 +1,77 @@
+import numpy as np
+import pytest
+from numpy.testing import assert_allclose
+from scipy import ndimage
+
+from _skimage2.filters import median, rank
+from _skimage2._shared.testing import assert_stacklevel
+
+
+@pytest.fixture
+def image():
+    return np.array(
+        [
+            [1, 2, 3, 2, 1],
+            [1, 1, 2, 2, 3],
+            [3, 2, 1, 2, 1],
+            [3, 2, 1, 1, 1],
+            [1, 2, 1, 2, 3],
+        ],
+        dtype=np.uint8,
+    )
+
+
+@pytest.mark.parametrize(
+    "mode, cval, behavior, warning_type",
+    [
+        ('nearest', 0.0, 'ndimage', None),
+        ('constant', 0.0, 'rank', UserWarning),
+        ('nearest', 0.0, 'rank', None),
+        ('nearest', 0.0, 'ndimage', None),
+    ],
+)
+def test_median_warning(image, mode, cval, behavior, warning_type):
+    if warning_type:
+        with pytest.warns(warning_type) as record:
+            median(image, mode=mode, behavior=behavior)
+        assert_stacklevel(record)
+    else:
+        median(image, mode=mode, behavior=behavior)
+
+
+@pytest.mark.parametrize(
+    "behavior, func, params",
+    [
+        ('ndimage', ndimage.median_filter, {'size': (3, 3)}),
+        ('rank', rank.median, {'footprint': np.ones((3, 3), dtype=np.uint8)}),
+    ],
+)
+def test_median_behavior(image, behavior, func, params):
+    assert_allclose(median(image, behavior=behavior), func(image, **params))
+
+
+@pytest.mark.parametrize("dtype", [np.uint8, np.uint16, np.float32, np.float64])
+def test_median_preserve_dtype(image, dtype):
+    median_image = median(image.astype(dtype), behavior='ndimage')
+    assert median_image.dtype == dtype
+
+
+def test_median_error_ndim():
+    rng = np.random.RandomState(4014147376)
+    img = rng.randint(0, 10, size=(5, 5, 5, 5), dtype=np.uint8)
+    with pytest.raises(ValueError):
+        median(img, behavior='rank')
+
+
+@pytest.mark.parametrize(
+    "size, behavior, seed",
+    [
+        ((3, 3), 'rank', 2461803925),
+        ((3, 3), 'ndimage', 1445049995),
+        ((3, 3, 3), 'ndimage', 1825616044),
+    ],
+)
+def test_median(size, behavior, seed):
+    rng = np.random.RandomState(seed)
+    img = rng.randint(0, 10, size=size, dtype=np.uint8)
+    median(img, behavior=behavior)

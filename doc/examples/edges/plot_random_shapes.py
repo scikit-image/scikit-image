@@ -40,7 +40,7 @@ image4, _ = random_shapes((128, 128), max_shapes=10, intensity_range=((0, 255),)
 
 for i, image in enumerate([image1, image2, image3, image4], 1):
     ax[i].imshow(image)
-    ax[i].set_title(f'Colored shapes, #{i-1}')
+    ax[i].set_title(f'Colored shapes, #{i - 1}')
 
 # These shapes are well suited to test segmentation algorithms. Often, we
 # want shapes to overlap to test the algorithm. This is also possible:

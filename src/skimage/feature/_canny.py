@@ -1,11 +1,7 @@
-"""
-canny.py - Canny Edge detector
-
-Reference: Canny, J., A Computational Approach To Edge Detection, IEEE Trans.
-    Pattern Analysis and Machine Intelligence, 8:679-714, 1986
-"""
-
 import _skimage2 as ski2
+
+from _skimage2.feature._canny import __doc__  # noqa: F401
+
 from skimage._migration import ski2_migration_decorator
 
 
@@ -132,3 +128,8 @@ def canny(
         mode=mode,
         cval=cval,
     )
+
+
+from skimage._doctest_adapters import adapt_doctests  # noqa: E402
+
+adapt_doctests(globals())

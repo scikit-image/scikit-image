@@ -1,14 +1,13 @@
-__all__ = ['imread', 'imsave']
+from _skimage2.io._plugins.imageio_plugin import (
+    imread as imread,
+    imsave as imsave,
+)  # noqa: F401
 
-from functools import wraps
-import numpy as np
+__all__ = [
+    'imread',
+    'imsave',
+]
 
-from imageio.v3 import imread as imageio_imread, imwrite as imsave
+from skimage._doctest_adapters import adapt_doctests
 
-
-@wraps(imageio_imread)
-def imread(*args, **kwargs):
-    out = np.asarray(imageio_imread(*args, **kwargs))
-    if not out.flags['WRITEABLE']:
-        out = out.copy()
-    return out
+adapt_doctests(globals())

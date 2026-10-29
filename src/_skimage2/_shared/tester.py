@@ -3,9 +3,9 @@ import sys
 
 
 def _show_skimage_info():
-    import skimage
+    import _skimage2
 
-    print(f"skimage version {skimage.__version__}")
+    print(f"skimage2 version {_skimage2.__version__}")
 
 
 class PytestTester:

@@ -15,6 +15,7 @@ classifiers = [
     'Programming Language :: Python :: 3.12',
     'Programming Language :: Python :: 3.13',
     'Programming Language :: Python :: 3.14',
+    'Programming Language :: Python :: 3.15',
     'Programming Language :: Python :: 3 :: Only',
     'Topic :: Software Development :: Libraries',
     'Topic :: Scientific/Engineering',
@@ -25,15 +26,15 @@ classifiers = [
 ]
 dynamic = ['version']
 dependencies = [
-    'numpy>=2.1',
+    'numpy>=2.2',
     'scipy>=1.15; sys_platform != "emscripten"',
     'scipy>=1.14; sys_platform == "emscripten"',
-    'networkx>=3.0',
+    'networkx>=3.4',
     'pillow>=10.1',
     'imageio>=2.33,!=2.35.0',
     'tifffile>=2025.1.10',
     'packaging>=24',
-    'lazy-loader>=0.5',
+    'lazy-loader>=0.6',
 ]
 
 [[project.maintainers]]
@@ -47,13 +48,13 @@ file = 'LICENSE.txt'
 build = [
     # Also update [build-system] -> requires
     'meson-python>=0.16',
-    'ninja>=1.11.1.1',
-    'Cython>=3.0.10,!=3.2.0b1',
+    'ninja>=1.11.1.3',
+    'Cython>=3.2',
     'pythran>=0.16',
-    'numpy>=2.0',
+    'numpy>=2.2',
     # Developer UI
-    'spin>=0.13',
-    'build>=1.2.1',
+    'spin>=0.14',
+    'build>=1.3',
 ]
 data = ['pooch>=1.6.0']
 developer = [
@@ -67,14 +68,14 @@ asv = [
 ]
 docs = [
     'sphinx>=8.0',
-    'sphinx-gallery[parallel]>=0.18',
+    'sphinx-gallery[parallel]>=0.20',
     'numpydoc>=1.7',
     'sphinx-copybutton',
     'sphinx-togglebutton',
     'matplotlib>=3.10',
     'dask[array]>=2025.1.0',
-    'pandas>=2.0',
-    'seaborn>=0.11',
+    'pandas>=2.3',
+    'seaborn>=0.13',
     'pooch>=1.6',
     'tifffile>=2025.1.10',
     'myst-parser',
@@ -85,7 +86,7 @@ docs = [
     'kaleido>=1.0',
     'scikit-learn>=1.6',
     'sphinx_design>=0.5',
-    'pydata-sphinx-theme>=0.16',
+    'pydata-sphinx-theme>=0.17',
     'PyWavelets>=1.7',
     'pytest-doctestplus>=1.6.0',
 ]
@@ -125,9 +126,9 @@ tracker = 'https://github.com/scikit-image/scikit-image/issues'
 build-backend = 'mesonpy'
 requires = [
     'meson-python>=0.16',
-    'Cython>=3.0.10,!=3.2.0b1',
+    'Cython>=3.2',
     'pythran>=0.16',
-    'lazy_loader>=0.5',
+    'lazy-loader>=0.6',
     'numpy>=2.0',
 ]
 
@@ -237,6 +238,9 @@ filterwarnings = [
     "ignore:.*(parseString|resetCache|enablePackrat|oneOf).*:DeprecationWarning:matplotlib",
     # tifffile (v2025.12.20) uses deprecated NumPy API
     "ignore:Setting the shape on a NumPy array:DeprecationWarning:tifffile",
+    # SimpleITK (< 3.0) uses deprecated NumPy API; fixed in SimpleITK 3.0
+    # TODO: remove once SimpleITK >= 3.0 is required
+    "ignore:Setting the shape on a NumPy array:DeprecationWarning:SimpleITK",
     # pytest warning when running under PYTHONOPTIMIZE=2 (assertions are stripped)
     "ignore:assertions not in test modules or plugins:pytest.PytestConfigWarning",
 ]
@@ -297,11 +301,23 @@ select = "*-musllinux*"
 test-extras = ["test", "optional_free_threaded"]
 # SimpleITK does not support musllinux yet
 
+[[tool.cibuildwheel.overrides]]
+select = "cp315*"
+# scikit-learn, matplotlib, PyWavelets, and astropy have no cp315 wheels yet,
+# so the `optional` and `optional_free_threaded` extras cannot be installed.
+# Drop this override once they publish for 3.15.
+test-extras = ["test"]
+
 [tool.cibuildwheel.linux]
 environment = {PIP_PREFER_BINARY=1, SKIMAGE_LINK_FLAGS="-Wl,--strip-debug"}
 
 [tool.cibuildwheel.windows]
 archs = ["auto"]
+# cibuildwheel 4.0 made delvewheel the default repair command on Windows. Five
+# of our extension modules import msvcp140.dll, so the default would start
+# bundling it; disabling repair keeps wheel contents as they have always been.
+# Revisit as its own change, not as a side effect of a cibuildwheel bump.
+repair-wheel-command = ""
 
 [tool.cibuildwheel.macos]
 test-command = "pytest"

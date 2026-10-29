@@ -5,6 +5,10 @@ on:
       python-version:
         required: true
         type: string
+      runner:
+        required: false
+        type: string
+        default: ubuntu-latest
       OPTIONS_NAME:
         required: true
         type: string
@@ -40,11 +44,15 @@ on:
 jobs:
   test-linux:
     name: linux-cp${{ inputs.python-version }}-${{ inputs.OPTIONS_NAME }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runner }}
 
     steps:
+      - name: Verify ARM64 runner
+        if: ${{ inputs.runner == 'ubuntu-24.04-arm' }}
+        run: test "$(uname -m)" = aarch64
+
       - name: Checkout scikit-image
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
 
@@ -56,10 +64,10 @@ jobs:
           cache: "pip"
           cache-dependency-path: "requirements/*.txt"
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         id: download
         with:
-          name: skimage-linux-${{ inputs.python-version }}
+          name: skimage-linux-${{ inputs.python-version }}-${{ runner.arch }}
           path: ./dist
 
       - name: Install wheel
@@ -102,7 +110,7 @@ jobs:
         run: bash .github/scripts/check-run-all-tests-label.sh
 
       - name: Run tests
-        if: ${{ inputs.python-version != '3.14t' }}
+        if: ${{ !endsWith(inputs.python-version, 't') }}
         env:
           TEST_MODIFIED: ${{ steps.check-run-all-tests-label.outputs.test_modified }}
           GITHUB_BASE_REF: ${{ github.base_ref }}
@@ -123,8 +131,8 @@ jobs:
         run: |
           python doc/tools/run_migration_doctests.py
 
-      - name: Run multithreaded tests (3.14t only)
-        if: ${{ inputs.python-version == '3.14t' }}
+      - name: Run multithreaded tests (free-threaded only)
+        if: ${{ endsWith(inputs.python-version, 't') }}
         env:
           # A lazy loader configuration parameter
           EAGER_IMPORT: ${{ inputs.EAGER_IMPORT }}
