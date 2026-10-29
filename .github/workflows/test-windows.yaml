@@ -1,21 +1,10 @@
 name: Test Windows
 
-on:
-  push:
-    branches:
-      - main
-      - pre-megamove-integration
-  pull_request:
-    branches:
-      - main
-      - pre-megamove-integration
-  merge_group:
-    branches:
-      - main
+on: [push, pull_request, merge_group]
 
 concurrency:
   # Cancel previous workflows of the same PR, but only for PRs
-  group: ${{ github.workflow }}-${{ github.event.pull_request.base.ref || github.ref }}-${{ github.event.pull_request.number || github.sha }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
 permissions:

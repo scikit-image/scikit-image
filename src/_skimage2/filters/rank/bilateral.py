@@ -162,8 +162,8 @@ def pop_bilateral(
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage.morphology import footprint_rectangle
-    >>> import skimage.filters.rank as rank
+    >>> from _skimage2.morphology import footprint_rectangle
+    >>> import _skimage2.filters.rank as rank
     >>> img = 255 * np.array([[0, 0, 0, 0, 0],
     ...                       [0, 1, 1, 1, 0],
     ...                       [0, 1, 1, 1, 0],
