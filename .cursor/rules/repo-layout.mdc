@@ -1,0 +1,17 @@
+---
+description: Where skimage implementation and tests live
+globs: src/**/*.py,tests/**/*.py
+alwaysApply: false
+---
+
+# Repo layout
+
+- Put algorithm changes in `src/_skimage2/` (Python + Cython/C/Pythran).
+- `src/skimage/` is the legacy public API; many modules only re-export from `_skimage2`.
+- `src/skimage2/` is the experimental v2 API; it is almost only shims to `_skimage2`.
+- Before editing `src/skimage/` or `src/skimage2/`, check whether the file is a re-export/shim.
+- Inside library code, use relative imports (`from .._shared import xyz`), not `from _skimage2._shared import xyz`.
+- Tests live only under top-level `tests/`, never next to source.
+- Use `tests/skimage/` for the legacy API; `tests/skimage2/` for `skimage2` and `_skimage2` internals.
+- After changing `.pyx` / extensions under `_skimage2`, rebuild (Meson/`spin`).
+
