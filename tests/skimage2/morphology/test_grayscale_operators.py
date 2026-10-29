@@ -34,6 +34,16 @@ gray_operators = (
 )
 
 
+def _ski1_legacy_disk(radius):
+    """Reproduce behavior of `disk` (ski1) with `footprint_ellipse` (ski2).
+
+    Necessary to reproduce the output of tests that compare runtime results
+    against ``gray_morph_output.npz`` which was computed with the legacy
+    `disk` function from skimage.
+    """
+    return ski2.morphology.footprint_ellipse(radius, adjust_edge=0.001)
+
+
 class TestMorphology:
     # TODO - ski2: gray_morph_output.npz is v1 regression data (mode='reflect').
     # v2 default is mode='ignore'; see test_gray_morphology_ignore_default_*.
@@ -45,7 +55,7 @@ class TestMorphology:
         [
             ("square", lambda n: footprint_rectangle((n, n))),
             ("diamond", ski2.morphology.diamond),
-            ("disk", ski2.morphology.disk),
+            ("disk", _ski1_legacy_disk),
             ("star", ski2.morphology.star),
         ],
     )
@@ -79,7 +89,7 @@ class TestMorphology:
         [
             ("square", lambda n: footprint_rectangle((n, n))),
             ("diamond", ski2.morphology.diamond),
-            ("disk", ski2.morphology.disk),
+            ("disk", _ski1_legacy_disk),
             ("star", ski2.morphology.star),
         ],
     )

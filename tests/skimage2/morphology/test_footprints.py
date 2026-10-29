@@ -5,8 +5,11 @@ import pytest
 from _skimage2._shared.testing import fetch, assert_stacklevel
 from _skimage2.morphology import (
     footprints,
+    cross_decompose_footprint,
     footprint_rectangle,
     footprint_rectangle_decomposed,
+    footprint_disk_decomposed,
+    footprint_ellipse,
     footprint_from_sequence,
     pad_footprint,
     mirror_footprint,
@@ -42,17 +45,20 @@ class TestFootprints:
             assert_equal(expected_mask, actual_mask[:, :, c])
             k = k + 1
 
-    def test_footprint_disk(self):
-        """Test disk footprints"""
-        self.strel_worker("data/disk-matlab-output.npz", footprints.disk)
-
     def test_footprint_diamond(self):
         """Test diamond footprints"""
         self.strel_worker("data/diamond-matlab-output.npz", footprints.diamond)
 
-    def test_footprint_ball(self):
-        """Test ball footprints"""
-        self.strel_worker_3d("data/disk-matlab-output.npz", footprints.ball)
+    def test_footprint_ellipse_compare_matlabs_disk(self):
+        """Compare behavior to Matlab's disk."""
+        file = "data/disk-matlab-output.npz"
+        matlab_masks = np.load(fetch(file))
+        for radius, name in enumerate(sorted(matlab_masks)):
+            expected = matlab_masks[name]
+            if expected.shape == (1,):
+                expected = expected[:, np.newaxis]
+            actual = footprint_ellipse(radius, adjust_edge=0.001)
+            assert_equal(expected, actual)
 
     def test_footprint_octahedron(self):
         """Test octahedron footprints"""
@@ -82,27 +88,43 @@ class TestFootprints:
         assert_equal(expected_mask1, actual_mask1)
         assert_equal(expected_mask2, actual_mask2)
 
-    def test_footprint_ellipse(self):
-        """Test ellipse footprints"""
-        expected_mask1 = np.array(
+    def test_footprint_ellipse_explicit_3_5(self):
+        expected = np.array(
             [
-                [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                [0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
+                [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
                 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
                 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
                 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                [0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
             ],
             dtype=np.uint8,
         )
-        actual_mask1 = footprints.ellipse(5, 3)
-        expected_mask2 = np.array([[1, 1, 1], [1, 1, 1], [1, 1, 1]], dtype=np.uint8)
-        actual_mask2 = footprints.ellipse(1, 1)
-        assert_equal(expected_mask1, actual_mask1)
-        assert_equal(expected_mask2, actual_mask2)
-        assert_equal(expected_mask1, footprints.ellipse(3, 5).T)
-        assert_equal(expected_mask2, footprints.ellipse(1, 1).T)
+        actual = footprint_ellipse((3, 5))
+        assert_equal(actual, expected)
+
+        # Switching dimensions makes no difference
+        actual = footprint_ellipse((5, 3))
+        assert_equal(actual.T, expected)
+
+    def test_footprint_ellipse_zero_radius(self):
+        # `radii` aren't exactly 0 because of default `adjust_edge`
+        actual = footprint_ellipse(0)
+        assert_equal(actual, [[1]])
+
+        actual = footprint_ellipse((0, 0))
+        assert_equal(actual, [[1]])
+
+        actual = footprint_ellipse((0, 1))
+        assert_equal(actual, [[1, 1, 1]])
+
+        # `radii` are exactly 0
+        actual = footprint_ellipse(0, adjust_edge=0)
+        assert_equal(actual, [[0]])
+
+        actual = footprint_ellipse((0, 1), adjust_edge=0)
+        assert_equal(actual, [[0, 0, 0]])
 
     def test_footprint_star(self):
         """Test star footprints"""
@@ -131,15 +153,38 @@ class TestFootprints:
         assert_equal(expected_mask2, actual_mask2)
 
 
+@pytest.mark.parametrize("func", [footprint_ellipse])
+@pytest.mark.parametrize(
+    "shape",
+    [(2, 2), (3, 3), (11, 11), (41, 32), (5, 5, 5), (21, 21, 10), (4, 5, 6, 7)],
+)
+def test_symmetric_convex_footprints(func, shape):
+    footprint = func(shape)
+    mirrored = footprints.mirror_footprint(footprint)
+    assert_equal(footprint, mirrored, err_msg="not symmetric")
+
+    # Since footprint is symmetric along each dimension,
+    # we only need to check if one quadrant is convex
+    sl = tuple(slice(s // 2, None) for s in footprint.shape)
+    last_quadrant = footprint[sl]
+    last_quadrant = last_quadrant.astype(int)
+
+    for axis in range(footprint.ndim):
+        # Sum all axes but current one
+        other_axes = tuple(set(range(footprint.ndim)) - {axis})
+        sum_other_axes = last_quadrant.sum(axis=other_axes).ravel()
+        # The sum must decline or stay the same from index `i` to its following
+        # neighbor `i + 1`, otherwise footprint is not convex
+        is_convex = np.all(np.diff(sum_other_axes) <= 0)
+        assert is_convex
+
+
 @pytest.mark.parametrize(
     'function, args, supports_sequence_decomposition',
     [
-        (footprints.disk, (3,), True),
-        (footprints.ball, (3,), True),
         (footprints.diamond, (3,), True),
         (footprints.octahedron, (3,), True),
         (footprint_rectangle, ((3, 5),), False),
-        (footprints.ellipse, (3, 4), False),
         (footprints.octagon, (3, 4), True),
         (footprints.star, (3,), False),
     ],
@@ -165,66 +210,91 @@ def test_decomposed_footprint_dtype(function, args, dtype):
     assert all([fp_tuple[0].dtype == dtype for fp_tuple in footprint])
 
 
-@pytest.mark.parametrize("function", ["disk", "ball"])
+@pytest.mark.parametrize("ndim", [2, 3])
 @pytest.mark.parametrize("radius", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20])
-def test_nsphere_series_approximation(function, radius):
-    fp_func = getattr(footprints, function)
-    expected = fp_func(radius, strict_radius=False, decomposition=None)
-    footprint_sequence = fp_func(radius, strict_radius=False, decomposition="sequence")
-    approximate = footprints.footprint_from_sequence(footprint_sequence)
+def test_nsphere_series_approximation(ndim, radius):
+    """Compare `footprint_ellipse` and `footprint_disk_decomposed`.
+
+    We need ``adjust_edge=0.5`` because `footprint_disk_decomposed` uses
+    precomputed values that were generated with legacy `skimage.morphology.disk`
+    with ``strict_radius=False`` (which added 0.5 to the radius internally).
+    """
+    expected = footprint_ellipse((radius,) * ndim, adjust_edge=0.5)
+    decomposed = footprint_disk_decomposed(radius, ndim=ndim)
+    approximate = footprints.footprint_from_sequence(decomposed)
     assert approximate.shape == expected.shape
 
     # verify that maximum error does not exceed some fraction of the size
-    error = np.sum(np.abs(expected.astype(int) - approximate.astype(int)))
-    if radius == 1:
-        assert error == 0
-    else:
-        max_error = 0.1 if function == "disk" else 0.15
-        assert error / expected.size <= max_error
+    mean_error = np.sum(np.abs(expected.astype(int) - approximate.astype(int)))
+    mean_error = mean_error / expected.size
+    assert mean_error < 0.12
 
 
 @pytest.mark.parametrize("radius", [1, 2, 3, 4, 5, 10, 20, 50, 75])
-@pytest.mark.parametrize("strict_radius", [False, True])
-def test_disk_crosses_approximation(radius, strict_radius):
-    fp_func = footprints.disk
-    expected = fp_func(radius, strict_radius=strict_radius, decomposition=None)
-    footprint_sequence = fp_func(
-        radius, strict_radius=strict_radius, decomposition="crosses"
-    )
-    approximate = footprints.footprint_from_sequence(footprint_sequence)
+@pytest.mark.parametrize("dtype", [bool, np.uint8, int, float])
+def test_ellipse_crosses_approximation_(radius, dtype):
+    expected = footprint_ellipse(radius, dtype=dtype)
+    decomposed = cross_decompose_footprint(expected)
+    approximate = footprint_from_sequence(decomposed)
     assert approximate.shape == expected.shape
+    assert approximate.dtype == dtype
 
     # verify that maximum error does not exceed some fraction of the size
     error = np.sum(np.abs(expected.astype(int) - approximate.astype(int)))
-    max_error = 0.05
+    max_error = 0.01
     assert error / expected.size <= max_error
 
 
 @pytest.mark.parametrize("width", [3, 8, 20, 50])
-@pytest.mark.parametrize("height", [3, 8, 20, 50])
+@pytest.mark.parametrize("height", [1, 2, 9, 21, 51])
 def test_ellipse_crosses_approximation(width, height):
-    fp_func = footprints.ellipse
-    expected = fp_func(width, height, decomposition=None)
-    footprint_sequence = fp_func(width, height, decomposition="crosses")
-    approximate = footprints.footprint_from_sequence(footprint_sequence)
+    shape = (width * 2 + 1, height * 2 + 1)
+    expected = footprint_ellipse(shape)
+    decomposed = cross_decompose_footprint(expected)
+    approximate = footprint_from_sequence(decomposed)
     assert approximate.shape == expected.shape
 
     # verify that maximum error does not exceed some fraction of the size
     error = np.sum(np.abs(expected.astype(int) - approximate.astype(int)))
-    max_error = 0.05
+    max_error = 0.01
     assert error / expected.size <= max_error
 
 
+def test_cross_decompose_footprint_asymmetric():
+    asymmetric = np.ones((3, 3), dtype=bool)
+    asymmetric[0, :] = 0  # Still concave
+    with pytest.raises(ValueError, match=r"footprint is not symmetric"):
+        cross_decompose_footprint(asymmetric)
+
+
+def test_cross_decompose_footprint_concave():
+    concave = np.ones((3, 3), dtype=bool)
+    concave[0, 1] = 0
+    concave[-1, 1] = 0  # Still symmetric
+    with pytest.raises(ValueError, match=r"footprint is not convex"):
+        cross_decompose_footprint(concave)
+
+
+def test_cross_decompose_footprint_even():
+    even = np.ones((4, 3), dtype=bool)
+    with pytest.raises(ValueError, match=r"footprint is not of uneven length"):
+        cross_decompose_footprint(even)
+
+
 def test_disk_series_approximation_unavailable():
+    footprint = footprints.footprint_disk_decomposed(radius=250)
+    assert len(footprint) == 6
     # ValueError if radius is too large (only precomputed up to radius=250)
     with pytest.raises(ValueError):
-        footprints.disk(radius=10000, decomposition="sequence")
+        footprints.footprint_disk_decomposed(radius=251)
 
 
 def test_ball_series_approximation_unavailable():
+    footprint = footprints.footprint_disk_decomposed(radius=100, ndim=3)
+    assert len(footprint) == 7
     # ValueError if radius is too large (only precomputed up to radius=100)
     with pytest.raises(ValueError):
-        footprints.ball(radius=10000, decomposition="sequence")
+        footprints.footprint_disk_decomposed(radius=101, ndim=3)
 
 
 # skimage.morphology.mirror_footprint --------------------------------------------------
