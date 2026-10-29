@@ -50,6 +50,7 @@ jobs:
     environment: release
     permissions:
       id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
+      contents: write # create/update GitHub release
     steps:
       - uses: actions/download-artifact@v8
         id: download
