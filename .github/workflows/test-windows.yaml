@@ -69,7 +69,17 @@ jobs:
 
       - name: Install ccache
         shell: bash
-        run: choco install ccache --no-progress
+        env:
+          CCACHE_VERSION: "4.14.2"
+          CCACHE_SHA256: "6993ce645e53192cec592ee23186200b574ac4c59097ecde8d9cfd681b47ae84"
+        run: |
+          set -euo pipefail
+          name="ccache-${CCACHE_VERSION}-windows-x86_64"
+          cd "$RUNNER_TEMP"
+          curl -fsSL -O "https://github.com/ccache/ccache/releases/download/v${CCACHE_VERSION}/${name}.zip"
+          echo "${CCACHE_SHA256}  ${name}.zip" | sha256sum -c -
+          unzip -q "${name}.zip"
+          echo "$RUNNER_TEMP\\${name}" >> "$GITHUB_PATH"
 
       - name: Cache ccache
         uses: actions/cache@v6
