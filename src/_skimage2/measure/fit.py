@@ -737,7 +737,7 @@ class EllipseModel(_BaseModel):
         Length of first axis and length of second axis.  Call these ``a`` and
         ``b``.
     theta : float
-        Angle of first axis.
+        Angle of first axis, in radians.
 
     Raises
     ------
@@ -795,7 +795,7 @@ class EllipseModel(_BaseModel):
             Length of first axis and length of second axis.  Call these ``a``
             and ``b``.
         theta : float
-            Angle of first axis.
+            Angle of first axis, in radians.
         """
         self.center, self.axis_lengths, self.theta = self._check_init_values(
             center, axis_lengths, theta

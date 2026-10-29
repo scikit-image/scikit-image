@@ -118,7 +118,8 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         The blur level of the seed image. If upsampling is enabled
         sigma_min is scaled by factor 1/upsampling
     sigma_in : float, optional
-        The assumed blur level of the input image.
+        The assumed blur level of the input image. Must not exceed
+        ``sigma_min / upsampling``.
     c_dog : float, optional
         Threshold to discard low contrast extrema in the DoG. It's final
         value is dependent on n_scales by the relation:
@@ -253,6 +254,8 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         self.n_octaves = n_octaves
         self.n_scales = n_scales
         self.sigma_min = sigma_min / upsampling
+        if sigma_in > self.sigma_min:
+            raise ValueError("sigma_in must not exceed sigma_min / upsampling")
         self.sigma_in = sigma_in
         self.c_dog = (2 ** (1 / n_scales) - 1) / (2 ** (1 / 3) - 1) * c_dog
         self.c_edge = c_edge
