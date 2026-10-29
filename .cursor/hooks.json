@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeShellExecution": [
+      {
+        "command": ".cursor/hooks/guard-push.sh",
+        "matcher": "git\\s+push",
+        "failClosed": true
+      }
+    ]
+  }
+}
