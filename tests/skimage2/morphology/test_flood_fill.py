@@ -358,3 +358,21 @@ def test_non_adjacent_footprint():
     )
 
     np.testing.assert_equal(output, expected)
+
+
+def test_flood_sequence_seed_point():
+    img = np.zeros((10, 10), dtype=np.uint8)
+    img[3:7, 3:7] = 1
+
+    expected = flood(img, (5, 5))
+
+    # Test list and array seed_point for flood
+    np.testing.assert_array_equal(flood(img, [5, 5]), expected)
+    np.testing.assert_array_equal(flood(img, np.array([5, 5])), expected)
+
+    # Test list and array seed_point for flood_fill
+    res_tuple = flood_fill(img.copy(), (5, 5), 5)
+    np.testing.assert_array_equal(flood_fill(img.copy(), [5, 5], 5), res_tuple)
+    np.testing.assert_array_equal(
+        flood_fill(img.copy(), np.array([5, 5]), 5), res_tuple
+    )
