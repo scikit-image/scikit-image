@@ -694,14 +694,20 @@ def laplace(image, ksize=3, mask=None):
 
     Returns
     -------
-    output : ndarray
-        The Laplace edge map.
+    output : array of float
+        The discrete Laplacian of `image`, with the same shape as `image`.
 
     Notes
     -----
     The Laplacian operator is generated using the function
     skimage.restoration.uft.laplacian().
 
+    Examples
+    --------
+    >>> from _skimage2 import data
+    >>> from _skimage2 import filters
+    >>> camera = data.camera()
+    >>> edges = filters.laplace(camera)
     """
     if image.dtype.kind == 'f':
         float_dtype = _supported_float_type(image.dtype)
