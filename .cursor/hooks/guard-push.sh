@@ -1,38 +1,41 @@
 #!/bin/sh
-# Deny risky git pushes before the shell runs them.
 cat | python3 -c '
-import json, shlex, sys
-cmd = json.load(sys.stdin).get("command") or ""
-try: args = shlex.split(cmd)
-except ValueError: args = cmd.split()
-def deny(user, agent):
-    json.dump({"permission": "deny", "user_message": user, "agent_message": agent}, sys.stdout)
+import json, re, shlex, sys
+
+def deny():
+    msg = (
+        "Only this form is allowed: git push [-u|--set-upstream|--dry-run] origin <branch>, "
+        "where <branch> is not main, master, or HEAD and uses only letters, digits, dot, "
+        "underscore, dash, and slash (no leading dash, +, :, or refs/)."
+    )
+    json.dump({"permission": "deny", "user_message": msg, "agent_message": msg}, sys.stdout)
     raise SystemExit
-stops = {"&&", "||", ";", "|"}
-i = 0
-while i < len(args) - 1:
-    tok = args[i]
-    if not ((tok == "git" or tok.endswith("/git")) and args[i + 1] == "push"):
-        i += 1
-        continue
-    rest, i = [], i + 2
-    while i < len(args) and args[i] not in stops:
-        if args[i] != "--": rest.append(args[i])
-        i += 1
-    flags = [a for a in rest if a.startswith("-")]
-    pos = [a for a in rest if not a.startswith("-")]
-    # (a) push to the remote named upstream
-    if pos[:1] == ["upstream"]:
-        deny("Push to the remote named upstream is blocked.", "Denied: this git push targets the remote upstream.")
-    # (b) force push: --force, -f, or --force-with-lease
-    for a in flags:
-        base = a.split("=", 1)[0]
-        if base in ("--force", "--force-with-lease") or (not base.startswith("--") and "f" in base[1:]):
-            deny("Force push is blocked (--force, -f, or --force-with-lease).", "Denied: this git push is a force push.")
-    # (c) push directly to main or master
-    for ref in pos[1:]:
-        dest = (ref[1:] if ref.startswith("+") else ref).split(":")[-1]
-        if (dest[11:] if dest.startswith("refs/heads/") else dest) in ("main", "master"):
-            deny("Direct push to main or master is blocked.", "Denied: this git push targets main or master.")
+
+try:
+    args = shlex.split(json.load(sys.stdin).get("command") or "")
+except (ValueError, json.JSONDecodeError):
+    deny()
+
+# (1) exactly git push, then at most one of -u, --set-upstream, or --dry-run
+if (
+    len(args) == 5
+    and args[:2] == ["git", "push"]
+    and args[2] in ("-u", "--set-upstream", "--dry-run")
+):
+    remote, branch = args[3], args[4]
+elif len(args) == 4 and args[:2] == ["git", "push"]:
+    remote, branch = args[2], args[3]
+else:
+    deny()
+# (2) remote is origin
+if remote != "origin":
+    deny()
+# (3) one branch: [A-Za-z0-9._/-] but not main, master, HEAD, a flag, or refs/
+if (
+    branch in ("main", "master", "HEAD")
+    or "refs/" in branch
+    or re.fullmatch(r"[A-Za-z0-9._/][A-Za-z0-9._/-]*", branch) is None
+):
+    deny()
 json.dump({"permission": "allow"}, sys.stdout)
 '

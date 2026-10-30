@@ -4,7 +4,7 @@
     "beforeShellExecution": [
       {
         "command": ".cursor/hooks/guard-push.sh",
-        "matcher": "git\\s+push",
+        "matcher": "\\bpush\\b",
         "failClosed": true
       }
     ]
