@@ -46,7 +46,7 @@ jobs:
           CIBW_SKIP: ${{ github.event_name == 'pull_request' && 'cp3??t-*' || '' }}
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: wheels-${{ matrix.os }}-${{ matrix.arch }}-${{ github.job }}-${{ strategy.job-index }}
+          name: wheels-${{ matrix.os }}-${{ matrix.python }}
           path: ./wheelhouse/*.whl
 
   build_windows_wheel:
@@ -83,7 +83,7 @@ jobs:
           CIBW_SKIP: ${{ github.event_name == 'pull_request' && '*-win32 cp3??t-*' || '*-win32' }}
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: wheels-${{ matrix.os }}-${{ matrix.arch }}-${{ github.job }}-${{ strategy.job-index }}
+          name: wheels-${{ matrix.os }}-${{ matrix.python }}
           path: ./wheelhouse/*.whl
 
   build_wheel_linux:
@@ -113,7 +113,7 @@ jobs:
           CIBW_SKIP: ${{ github.event_name == 'pull_request' && 'cp3??t-*' || '' }}
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: wheels-${{ matrix.os }}-${{ matrix.arch }}-${{ github.job }}-${{ strategy.job-index }}
+          name: wheels-${{ matrix.os }}-${{ matrix.libc }}-${{ matrix.python }}
           path: ./wheelhouse/*.whl
 
   build_pyodide_wheel:
