@@ -19,6 +19,8 @@ _submodules = [
 
 __all__ = _submodules + ['__version__', 'ExperimentalAPIWarning']  # noqa: F822
 
+from ._version import __version__
+
 from . import (
     color,
     data,

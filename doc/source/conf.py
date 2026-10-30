@@ -43,7 +43,7 @@ filterwarnings(
 project = "skimage"
 copyright = f"2013-{date.today().year}, the scikit-image team"
 
-with open("../../src/skimage/__init__.py") as f:
+with open("../../src/_skimage2/_version.py") as f:
     setup_lines = f.readlines()
 version = "vUndefined"
 for l in setup_lines:

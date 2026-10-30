@@ -12,7 +12,7 @@ import shutil
 from ..util.dtype import img_as_bool
 from ._registry import registry, registry_urls
 
-from .. import __version__
+from .._version import __version__
 
 import os.path as osp
 import os
