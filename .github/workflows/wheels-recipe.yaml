@@ -40,6 +40,7 @@ jobs:
           persist-credentials: false
       - uses: pypa/cibuildwheel@f9b966cfadf4109556cadc5bb39ddb72d0ce664e # v4.3.5
         env:
+          # Build all variants of this version, including free-threaded
           CIBW_BUILD: ${{ matrix.python }}*
           # Pull requests skip free-threaded wheels
           CIBW_SKIP: ${{ github.event_name == 'pull_request' && 'cp3??t-*' || '' }}
@@ -73,6 +74,7 @@ jobs:
       # on repair-wheel-command under [tool.cibuildwheel.windows].
       - uses: pypa/cibuildwheel@f9b966cfadf4109556cadc5bb39ddb72d0ce664e # v4.3.5
         env:
+          # Build all variants of this version, including free-threaded
           CIBW_BUILD: ${{ matrix.python }}*
           CC: clang-cl
           CXX: clang-cl
@@ -105,6 +107,7 @@ jobs:
           persist-credentials: false
       - uses: pypa/cibuildwheel@f9b966cfadf4109556cadc5bb39ddb72d0ce664e # v4.3.5
         env:
+          # Build all variants of this version, including free-threaded
           CIBW_BUILD: ${{ matrix.python }}*${{ matrix.libc }}*
           # Pull requests skip free-threaded wheels
           CIBW_SKIP: ${{ github.event_name == 'pull_request' && 'cp3??t-*' || '' }}
