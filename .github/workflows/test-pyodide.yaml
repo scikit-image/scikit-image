@@ -2,7 +2,10 @@
 
 name: Test Pyodide
 
-on: [push, pull_request, merge_group]
+on:
+  push:
+    branches:
+      - main
 
 permissions:
   contents: read # to fetch code (actions/checkout)
