@@ -26,12 +26,13 @@ manipulating arrays::
     spaced.
 
 .. note::
-    `NumPy masked arrays <https://numpy.org/doc/stable/reference/maskedarray.baseclass.html#numpy.ma.MaskedArray>`_
-    are not natively supported either. Please convert images to plain
-    ``numpy.ndarray``, and handle masks separately when calling scikit-image
-    functions. Some functions do accept mask arguments, but in many
-    cases you'll want to handle the masking yourself (for example, by
-    :ref:`using masks <numpy-images-masking>` to overwrite pixel values).
+    `We do not have native support for NumPy masked arrays
+    <https://numpy.org/doc/stable/reference/maskedarray.baseclass.html#numpy.ma.MaskedArray>`_.
+    Please convert images to plain ``numpy.ndarray``s, and handle masks by
+    using separate Numpy arrays. Some functions accept mask arguments, and
+    take Numpy arrays that define masks, but in many cases you'll want to
+    handle the masking yourself (for example, by :ref:`using masks
+    <numpy-images-masking>` to overwrite pixel values).
 
 Retrieving the geometry of the image and the number of pixels::
 
@@ -42,15 +43,35 @@ Retrieving the geometry of the image and the number of pixels::
 
 Retrieving statistical information about image intensity values::
 
-    >>> camera.min(), camera.max()
+    >>> import numpy as np
+    >>>
+    >>> np.min(camera), np.max(camera)
     (0, 255)
-    >>> camera.mean()
+    >>> np.mean(camera)
     118.31400299072266
 
 NumPy arrays representing images can be of different integer or float
 numerical types. See :ref:`data_types` for more information about these
 types and how ``scikit-image`` treats them.
 
+2D and 3D images
+----------------
+
+When we refer to a 2D image, we mean an image with two spatial dimensions,
+rows and columns, and that can be represented as a 2D visual image.
+
+In what immediately follows, we'll assume you have a simple one-color-channel
+(grayscale) 2D image.
+
+Later in the document we will generalize to other images.  For example, when
+we refer (later) to a 3D image, we mean an image that has three spatial
+dimensions that we could describe as rows, columns and planes.  We also cover
+2D and 3D images with an extra color dimension; in that case we implement 2D
+color (multichannel) images as arrays with three dimensions, and 3D color
+images as arrays with four dimensions.
+
+But for now, let us return to a simple grayscale (not color) 2D image,
+represented by a Numpy array with two dimensions.
 
 NumPy indexing
 --------------
@@ -64,12 +85,18 @@ modify them::
     >>> # Set to black the pixel at the 3rd row and 10th column
     >>> camera[3, 10] = 0
 
-Be careful! In NumPy indexing, the first dimension (``camera.shape[0]``)
-corresponds to rows, while the second (``camera.shape[1]``) corresponds
-to columns, with the origin (``camera[0, 0]``) at the top-left corner.
-This matches matrix/linear algebra notation, but is in contrast to
-Cartesian (x, y) coordinates. See `Coordinate conventions`_ below for
-more details.
+.. note::
+
+    Indexing above is Numpy indexing, where the first dimension
+    (``camera.shape[0]``) corresponds to the rows of the image (and rows of
+    the array), while the second (``camera.shape[1]``) corresponds to columns.
+    The origin (``camera[0, 0]``) is at the top-left corner. This matches
+    standard Numpy usage, and matrix/linear algebra notation. We emphasise
+    this here because Numpy / matrix convention is opposite to another
+    standard convention you will find in image analysis — Cartesian (x, y)
+    coordinates — where `x` specifies left to right (columns) and `y`
+    specifies top to bottom (rows). See :ref:`coordinates` for details of our
+    conventions, and discussion of coordinate systems.
 
 Beyond individual pixels, it is possible to access/modify values of
 whole sets of pixels using the different indexing capabilities of NumPy.
@@ -89,7 +116,6 @@ Masking (indexing with masks of booleans)::
 
 Fancy indexing (indexing with sets of indices)::
 
-    >>> import numpy as np
     >>> inds_r = np.arange(len(camera))
     >>> inds_c = 4 * inds_r % len(camera)
     >>> camera[inds_r, inds_c] = 0
@@ -121,8 +147,13 @@ Boolean operations from NumPy can be used to define even more complex masks::
 Color images
 ------------
 
-All of the above remains true for color images. A color image is a
-NumPy array with an additional trailing dimension for the channels::
+All of the above remains true for color images. A color image is a NumPy array
+with an additional dimension for the color channels.  Let's consider the
+typical case where you have a 2D color image represented by a Numpy array with
+three dimensions. By 2D, we mean an image with two spatial dimensions.  In the
+simplest case, the first two axes of the array correspond to the (spatial)
+rows and columns of the image (respectively), and the last corresponds to the
+three Red Green Blue (RGB) color channels::
 
     >>> cat = ski.data.chelsea()
     >>> type(cat)
@@ -130,8 +161,11 @@ NumPy array with an additional trailing dimension for the channels::
     >>> cat.shape
     (300, 451, 3)
 
-This shows that ``cat`` is a 300-by-451 pixel image with three channels
-(red, green, and blue). As before, we can get and set the pixel values::
+This is a 2D spatial image represented as an array with three dimensions.  We
+can also call this a 2D multichannel image, with the channel axis last.
+
+The output above shows that ``cat`` is a 300-by-451 pixel image with three
+color channels (RGB). As before, we can get and set the pixel values::
 
     >>> cat[10, 20]
     array([151, 129, 115], dtype=uint8)
@@ -152,57 +186,18 @@ the grayscale image above:
    cat[reddish] = [0, 255, 0]
    plt.imshow(cat)
 
-The example color images included in :mod:`skimage.data` have channels stored
-along the last axis, although other software may follow different conventions.
-The scikit-image library functions supporting color images have a
+The example color images here, and all those included in :mod:`skimage.data`,
+have channels stored along the last axis. Bear in mind that other software may
+follow different conventions as to the default position of the channel axis.
+The scikit-image library functions that support color images have a
 ``channel_axis`` argument that can be used to specify which axis of an array
-corresponds to channels.
+(if any) corresponds to channels.  See :ref:`coordinates` for more on
+specifying the channel axis.
 
-.. _numpy-images-coordinate-conventions:
-
-Coordinate conventions
+Working with 3D images
 ----------------------
 
-Because ``scikit-image`` represents images using NumPy arrays, the
-coordinate conventions must match. Two-dimensional (2D) grayscale images
-(such as ``camera`` above) are indexed by rows and columns (abbreviated to
-either ``(row, col)`` or ``(r, c)``), with the lowest element ``(0, 0)``
-at the top-left corner. In various parts of the library, you will
-also see ``rr`` and ``cc`` refer to lists of row and column
-coordinates. We distinguish this convention from ``(x, y)``, which commonly
-denote standard Cartesian coordinates, where ``x`` is the horizontal coordinate,
-``y`` - the vertical one, and the origin is at the bottom left
-(Matplotlib axes, for example, use this convention).
-
-In the case of multichannel images, any dimension (array axis) can be used for
-color channels, and is denoted by ``channel`` or ``ch``. Prior to scikit-image
-0.19, this channel dimension was always last, but in the current release the
-channel dimension can be specified by a ``channel_axis`` argument. Functions
-that require multichannel data default to ``channel_axis=-1``. Otherwise,
-functions default to ``channel_axis=None``, indicating that no axis is
-assumed to correspond to channels.
-
-Finally, for volumetric (3D) images, such as videos, magnetic resonance imaging
-(MRI) scans, confocal microscopy, etc., we refer to the leading dimension
-as ``plane``, abbreviated as ``pln`` or ``p``.
-
-These conventions are summarized below:
-
-.. table:: *Dimension name and order conventions in scikit-image*
-
-  =========================   =============================
-  Image type                  Coordinates
-  =========================   =============================
-  2D grayscale                (row, col)
-  2D multichannel (eg. RGB)   (row, col, ch)
-  3D grayscale                (pln, row, col)
-  3D multichannel             (pln, row, col, ch)
-  =========================   =============================
-
-Note that the position of ``ch`` is controlled by the ``channel_axis``
-argument.
-
-|
+By 3D images, we mean images with three spatial dimensions.
 
 Many functions in ``scikit-image`` can operate on 3D images directly::
 
@@ -214,15 +209,19 @@ Many functions in ``scikit-image`` can operate on 3D images directly::
     >>> seeds = sp.ndimage.label(im3d < 0.1)[0]
     >>> ws = ski.segmentation.watershed(im3d, seeds)
 
-In many cases, however, the third spatial dimension has lower resolution
-than the other two. Some ``scikit-image`` functions provide a ``spacing``
-keyword argument to help handle this kind of data::
+In many cases, however, the third spatial dimension has lower resolution than
+the other two, and this has consequences for the algorithm implemented by the
+function. Some ``scikit-image`` functions provide a ``spacing`` keyword
+argument to help handle this kind of data.  In the following call, we use
+`channel_axis=None` to tell the `slic` function that none of the `im3d` axes
+correspond to color channels, and `spacing` to tell `slic` that the elements
+along the first array dimension are spatially five times further apart than
+the elements on the second and third dimensions::
 
     >>> slics = ski.segmentation.slic(im3d, spacing=[5, 1, 1], channel_axis=None)
 
 Other times, the processing must be done plane-wise. When planes are stacked
-along the leading dimension (in agreement with our convention), the following
-syntax can be used::
+along the leading dimension, the following syntax can be used::
 
     >>> edges = np.empty_like(im3d)
     >>> for pln, image in enumerate(im3d):
@@ -230,16 +229,17 @@ syntax can be used::
     ...     edges[pln] = ski.filters.sobel(image)
 
 
-Notes on the order of array dimensions
---------------------------------------
+Notes on the memory order of array dimensions
+--------------------------------------------
 
 Although the labeling of the axes might seem arbitrary, it can have a
 significant effect on the speed of operations. This is because modern
-processors never retrieve just one item from memory, but rather a whole
-chunk of adjacent items (an operation called prefetching). Therefore,
-processing of elements that are next to each other in memory is faster
-than processing them when they are scattered, even if the number of operations
-is the same::
+processors implementing memory reads, do not retrieve just one item from
+memory, but rather they retrieve a whole chunk of items that are contiguous in
+memory (an operation called prefetching). Therefore, processing of elements
+that are next to each other in memory may be much faster than processing them
+when they are scattered in memory, even if the number of operations is the
+same::
 
     >>> def in_order_multiply(arr, scalar):
     ...     for plane in list(range(arr.shape[0])):
@@ -262,34 +262,11 @@ is the same::
     Speedup: 8.6x
 
 
-When the last/rightmost dimension becomes even larger the speedup is
-even more dramatic. It is worth thinking about *data locality* when
-developing algorithms. In particular, ``scikit-image`` uses C-contiguous
-arrays by default.
-When using nested loops, the last/rightmost dimension of the array
-should be in the innermost loop of the computation. In the example
-above, the ``*=`` numpy operator iterates over all remaining dimensions.
-
-
-A note on the time dimension
-----------------------------
-
-Although ``scikit-image`` does not currently provide functions to
-work specifically with time-varying 3D data, its compatibility with
-NumPy arrays allows us to work quite naturally with a 5D array of the
-shape (t, pln, row, col, ch)::
-
-    >>> for timepoint in image5d:  # doctest: +SKIP
-    ...     # Each timepoint is a 3D multichannel image
-    ...     do_something_with(timepoint)
-
-We can then supplement the above table as follows:
-
-.. table:: *Addendum to dimension names and orders in scikit-image*
-
-  ========================   =========================================
-  Image type                 coordinates
-  ========================   =========================================
-  2D color video             (t, row, col, ch)
-  3D color video             (t, pln, row, col, ch)
-  ========================   =========================================
+When the last/rightmost dimension becomes even larger the speedup is even more
+dramatic. It is worth thinking about this issue — known as *data locality* —
+when developing algorithms. In particular, ``scikit-image`` uses C-contiguous
+arrays by default. When using nested loops, the last/rightmost dimension of
+a C-contiguous array has elements that are contiguous in memory, and you might
+consider making sure they are in the innermost loop of the computation. In the
+example above, the ``*=`` numpy operator iterates over all remaining
+dimensions.

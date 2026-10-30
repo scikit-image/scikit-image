@@ -12,6 +12,7 @@ and more advanced topics.
    install
    getting_started
    numpy_images
+   coordinates
    data_types
    plugins
    video
