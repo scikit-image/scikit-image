@@ -1,15 +1,15 @@
 ---
-name: first-contribution
+name: small-change
 description: >-
-  Walk a small first change from task text after /first-contribution through a
-  fork branch ready for the human to open a PR. Use when invoked as
-  /first-contribution or when the user asks for the first-contribution skill.
+  Guide one small, low-risk change from a typed task to a pushed fork branch,
+  not only a first contribution. Use when invoked as /small-change or when
+  the user asks for the small-change skill.
 disable-model-invocation: true
 ---
 
-# First contribution
+# Small change
 
-Guide a small, low-risk first change from the task text after `/first-contribution` to a branch on the personal fork, ready for the human to open a PR.
+Guide one small, low-risk change from a typed task to a pushed fork branch, not only a first contribution.
 
 ## AI policy for this setup *(own suggestion — overrides upstream)*
 
@@ -30,15 +30,17 @@ Upstream (`CONTRIBUTING.md` AI policy) says: no AI for novel code or tests; PR t
 
 **Refuse** *(own suggestion + `doc/source/development/deprecations.md` + `doc/source/development/guidelines.md`)*: Cython/C/C++ or extension rebuilds; public API renames, moves, argument reorders, or default changes (deprecation cycle); broad refactors.
 
-**Task source** *(own suggestion)*: use whatever the engineer types after `/first-contribution`. Do not invent issues or scrape labels — that wording is not in `CONTRIBUTING.md`, and a fork has no maintained task list.
+**Over the limit** *(own suggestion)*: if the change would touch more than 3 files or roughly 100 changed lines, or needs a design decision, stop at step 1 and tell the human to use Plan mode or a cloud agent with a reviewer instead.
+
+**Task source** *(own suggestion)*: use whatever the engineer types after `/small-change`. Do not invent issues or scrape labels — that wording is not in `CONTRIBUTING.md`, and a fork has no maintained task list.
 
 ## Procedure
 
-1. **Parse the task** — Use the extra text after `/first-contribution`. If missing or out of scope (compiled code, public API), stop and ask the human. *(own suggestion)*
+1. **Parse the task** — Use the extra text after `/small-change`. If missing or out of scope (compiled code, public API), stop and ask the human. *(own suggestion)*
 
 2. **STOP — wait for human** — Confirm scope before any edits. *(own suggestion)*
 
-3. **Check working tree, then branch** — Before creating a branch, check the current branch and that there are no unrelated uncommitted changes. If there are, stop and ask. Then create a sensible feature branch (sync/`main` assumed already set up; one-time fork/env/pre-commit is out of scope). *(branching from `CONTRIBUTING.md`; working-tree check = own suggestion)*
+3. **Fetch origin, branch from `origin/main`, then check the tree** — Run `git fetch origin`. Create a sensible feature branch from `origin/main` with `--no-track` (`git switch -c <branch> --no-track origin/main`). Then check the working tree is clean. If there are unrelated uncommitted changes, stop and ask. One-time fork/env/pre-commit is out of scope. *(branching from `CONTRIBUTING.md`; fetch, `--no-track` from `origin/main`, and working-tree check = own suggestion)*
 
 4. **Implement the minimal change** — Draft code and tests under the AI override above. Follow the **repo-layout rule** (`.cursor/rules/repo-layout.mdc`) for where library code vs tests go; do not rediscover layout. Match `doc/source/development/guidelines.md` style. If the change implies an API break, refuse and stop (`doc/source/development/deprecations.md`).
 
