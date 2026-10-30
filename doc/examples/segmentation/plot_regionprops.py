@@ -9,6 +9,7 @@ interactively the properties of labelled objects.
 """
 
 import math
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -16,7 +17,6 @@ import pandas as pd
 from skimage.draw import ellipse
 from skimage.measure import label, regionprops, regionprops_table
 from skimage.transform import rotate
-
 
 image = np.zeros((600, 600))
 
@@ -83,10 +83,10 @@ pd.DataFrame(props)
 # objects by visualizing them in the hover information of the labels.
 # This example uses plotly in order to display properties when
 # hovering over the objects.
-
-import plotly
 import plotly.express as px
 import plotly.graph_objects as go
+import plotly.io as pio
+
 from skimage import data, filters, measure, morphology
 
 img = data.coins()
@@ -97,32 +97,46 @@ mask = morphology.remove_small_objects(mask, max_size=49)
 mask = morphology.remove_small_holes(mask, max_size=49)
 labels = measure.label(mask)
 
-fig = px.imshow(img, binary_string=True)
-fig.update_traces(hoverinfo='skip')  # hover is only for label info
+property_names = ["label", "area", "eccentricity", "perimeter", "intensity_mean"]
 
+# Get region properties
 props = measure.regionprops(labels, img)
-properties = ['area', 'eccentricity', 'perimeter', 'intensity_mean']
+
+# Filter out big regions
+filtered_props = [prop for prop in props if prop.area < 5000]
+
+fig = px.imshow(img, binary_string=True)
+fig.update_traces(hoverinfo="skip")  # hover is only for label info
+
+# Prepare data for scatter plot
+scatter_data = []
+for prop in filtered_props:
+    label_i = prop.label
+    contour = measure.find_contours(labels == label_i, 0.5)[0]
+    y, x = contour.T
+    hoverinfo = "<br>".join(
+        [
+            f'<b>{prop_name}: {getattr(prop, prop_name):.2f}</b>'
+            for prop_name in property_names
+        ]
+    )
+    scatter_data.append({"x": x, "y": y, "label": label_i, "hoverinfo": hoverinfo})
 
 # For each label, add a filled scatter trace for its contour,
 # and display the properties of the label in the hover of this trace.
-for index in range(1, labels.max()):
-    label_i = props[index].label
-    contour = measure.find_contours(labels == label_i, 0.5)[0]
-    y, x = contour.T
-    hoverinfo = ''
-    for prop_name in properties:
-        hoverinfo += f'<b>{prop_name}: {getattr(props[index], prop_name):.2f}</b><br>'
+for data_i in scatter_data:
     fig.add_trace(
         go.Scatter(
-            x=x,
-            y=y,
-            name=label_i,
-            mode='lines',
-            fill='toself',
+            x=data_i["x"],
+            y=data_i["y"],
+            name=str(data_i["label"]),
+            mode="lines",
+            fill="toself",
             showlegend=False,
-            hovertemplate=hoverinfo,
-            hoveron='points+fills',
+            hovertemplate=data_i["hoverinfo"],
+            hoveron="points+fills",
         )
     )
 
-plotly.io.show(fig)
+fig.update_layout(autosize=True)
+pio.show(fig)
