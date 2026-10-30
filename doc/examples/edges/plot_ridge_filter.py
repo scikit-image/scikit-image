@@ -4,7 +4,7 @@ Ridge operators
 ===============
 
 Ridge filters can be used to detect ridge-like structures, such as neurites
-[1]_, tubes [2]_, vessels [3]_, wrinkles [4]_ or rivers.
+[1]_, tubes [2]_, vessels [3]_ [4]_, wrinkles [5]_ or rivers.
 
 Different ridge filters may be suited for detecting different structures,
 e.g., depending on contrast or noise level.
@@ -34,16 +34,21 @@ References
        (pp. 130-137). Springer Berlin Heidelberg.
        :DOI:`10.1007/BFb0056195`
 
-.. [4] Ng, C. C., Yap, M. H., Costen, N., & Li, B. (2014, November). Automatic
+.. [4] Jerman, T., Pernuš, F., Likar, B., & Špiclin, Ž. (2016).
+       Enhancement of vascular structures in 3D and 2D angiographic
+       images. IEEE Transactions on Medical Imaging, 35(9), 2107-2118.
+       :DOI:`10.1109/TMI.2016.2550102`
+
+.. [5] Ng, C. C., Yap, M. H., Costen, N., & Li, B. (2014, November). Automatic
        wrinkle detection using hybrid Hessian filter. In Asian Conference on
        Computer Vision (pp. 609-622). Springer International Publishing.
        :DOI:`10.1007/978-3-319-16811-1_40`
 """
 
-from skimage import data
-from skimage import color
-from skimage.filters import meijering, sato, frangi, hessian
 import matplotlib.pyplot as plt
+
+from skimage import color, data
+from skimage.filters import frangi, hessian, jerman, meijering, sato
 
 
 def original(image, **kwargs):
@@ -55,7 +60,7 @@ image = color.rgb2gray(data.retina())[300:700, 700:900]
 cmap = plt.cm.gray
 
 plt.rcParams["axes.titlesize"] = "medium"
-axes = plt.figure(figsize=(10, 4)).subplots(2, 9)
+axes = plt.figure(figsize=(10, 4)).subplots(2, 11)
 for i, black_ridges in enumerate([True, False]):
     for j, (func, sigmas) in enumerate(
         [
@@ -64,6 +69,8 @@ for i, black_ridges in enumerate([True, False]):
             (meijering, range(1, 5)),
             (sato, [1]),
             (sato, range(1, 5)),
+            (jerman, [1]),
+            (jerman, range(1, 5)),
             (frangi, [1]),
             (frangi, range(1, 5)),
             (hessian, [1]),

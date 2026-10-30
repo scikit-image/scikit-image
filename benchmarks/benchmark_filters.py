@@ -2,7 +2,7 @@
 # https://asv.readthedocs.io/en/latest/writing_benchmarks.html
 import numpy as np
 
-from skimage import data, filters, color
+from skimage import color, data, filters
 from skimage.filters.thresholding import threshold_li
 
 
@@ -109,7 +109,13 @@ class RidgeFilters:
 
     def setup(self):
         # Ensure memory footprint of lazy import is included in reference
-        self._ = filters.meijering, filters.sato, filters.frangi, filters.hessian
+        self._ = (
+            filters.meijering,
+            filters.sato,
+            filters.jerman,
+            filters.frangi,
+            filters.hessian,
+        )
         self.image = color.rgb2gray(data.retina())
 
     def peakmem_setup(self):
@@ -137,6 +143,12 @@ class RidgeFilters:
 
     def peakmem_sato(self):
         filters.sato(self.image)
+
+    def time_jerman(self):
+        filters.jerman(self.image)
+
+    def peakmem_jerman(self):
+        filters.jerman(self.image)
 
     def time_frangi(self):
         filters.frangi(self.image)
