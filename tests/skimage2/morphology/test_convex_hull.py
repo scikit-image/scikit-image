@@ -367,3 +367,19 @@ def test_few_points():
     with pytest.warns(UserWarning, match=regex):
         chimage3d = convex_hull_image(image3d)
         assert_array_equal(chimage3d, np.zeros(image3d.shape, dtype=bool))
+
+
+def test_object_3d():
+    image = np.zeros((9, 9, 9), dtype=bool)
+    image[1:4, 1:4, 1:4] = True
+    image[2, 2, 2] = False
+    image[5:8, 5:8, 5:8] = True
+    image[6, 6, 6] = False
+
+    expected = np.zeros_like(image)
+    expected[1:4, 1:4, 1:4] = True
+    expected[5:8, 5:8, 5:8] = True
+
+    for connectivity in (1, 2, 3):
+        result = convex_hull_object(image, connectivity=connectivity)
+        assert_array_equal(result, expected)
