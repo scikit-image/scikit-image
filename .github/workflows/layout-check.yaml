@@ -1,0 +1,17 @@
+name: Layout check
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  layout:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7
+
+      - name: Reject test files under src/
+        run: python3 .github/scripts/check_layout.py
