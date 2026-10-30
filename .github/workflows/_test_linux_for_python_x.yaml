@@ -134,13 +134,21 @@ jobs:
       - name: Run multithreaded tests (free-threaded only)
         if: ${{ endsWith(inputs.python-version, 't') }}
         env:
+          TEST_MODIFIED: ${{ steps.check-run-all-tests-label.outputs.test_modified }}
+          GITHUB_BASE_REF: ${{ github.base_ref }}
           # A lazy loader configuration parameter
           EAGER_IMPORT: ${{ inputs.EAGER_IMPORT }}
           MINIMUM_REQUIREMENTS: ${{ inputs.MINIMUM_REQUIREMENTS }}
           PYTHONOPTIMIZE: ${{ inputs.PYTHONOPTIMIZE }}
         run: |
+          if [[ "$TEST_MODIFIED" == "true" ]]; then
+            MODIFIED_FLAG="--test-modified"
+            git fetch origin "$GITHUB_BASE_REF"
+          else
+            MODIFIED_FLAG=""
+          fi
           pip install pytest-run-parallel
-          spin test --doctest -- --parallel-threads=4
+          spin test --doctest $MODIFIED_FLAG -- --parallel-threads=4
 
       - name: Check benchmarks
         run: |
