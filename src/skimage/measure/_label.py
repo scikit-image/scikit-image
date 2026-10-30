@@ -46,6 +46,10 @@ def label(label_image, background=None, return_num=False, connectivity=None):
             |               /  |  \             hop 1
            [ ]           [ ]  [ ]  [ ]
 
+    .. note::
+        This function is available as :func:`skimage.measure.label` and
+        :func:`skimage.morphology.label`. Both are identical.
+
     Parameters
     ----------
     label_image : ndarray of dtype int
