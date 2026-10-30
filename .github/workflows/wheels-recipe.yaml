@@ -108,6 +108,33 @@ jobs:
           name: wheels-${{ matrix.os }}-${{ matrix.arch }}-${{ github.job }}-${{ strategy.job-index }}
           path: ./wheelhouse/*.whl
 
+  build_wheel_linux_riscv64:
+    name: Build ${{ matrix.build }} on ubuntu-24.04-riscv
+    runs-on: ubuntu-24.04-riscv
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        # Pull requests build a single configuration to save runner time
+        build: ${{ fromJSON(github.event_name == 'pull_request'
+          && '["cp314-manylinux_riscv64"]'
+          || '["cp313-manylinux_riscv64", "cp314-manylinux_riscv64", "cp314t-manylinux_riscv64"]') }}
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: pypa/cibuildwheel@adba99c781d3746d38b3a09b1cf797965bcb7fe6 # v4.3.0
+        env:
+          CIBW_BUILD: ${{ matrix.build }}
+          # PyPI has no riscv64 wheels for numpy, scipy or pillow
+          PIP_EXTRA_INDEX_URL: https://pypi.riseproject.dev/simple/
+      - uses: actions/upload-artifact@v7
+        with:
+          name: wheels-ubuntu-24.04-riscv-${{ github.job }}-${{ strategy.job-index }}
+          path: ./wheelhouse/*.whl
+
   build_pyodide_wheel:
     name: Build pyodide on ubuntu-latest
     runs-on: ubuntu-latest
