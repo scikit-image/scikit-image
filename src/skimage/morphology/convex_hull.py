@@ -2,6 +2,7 @@
 
 from itertools import product
 import numpy as np
+import scipy.ndimage as ndi
 from scipy.spatial import ConvexHull, QhullError
 from ..measure.pnpoly import grid_points_in_poly
 from ._convex_hull import possible_hull
@@ -104,35 +105,33 @@ def convex_hull_image(
     .. [1] https://blogs.mathworks.com/steve/2011/10/04/binary-image-convex-hull-algorithm-notes/
 
     """
-    ndim = image.ndim
     if np.count_nonzero(image) == 0:
         warn(
-            "Input image is entirely zero, no valid convex hull. "
-            "Returning empty image",
+            "Input image is entirely zero, no valid convex hull. Returning empty image",
             UserWarning,
         )
         return np.zeros(image.shape, dtype=bool)
+
+    # singleton sizes can cause numeric problems in QHull, so squeeze out
+    # these dimensions first (and restore original shape at the end)
+    original_shape = image.shape
+    image = np.squeeze(image)
+    ndim = image.ndim
+    if ndim < 2:
+        return image.reshape(original_shape)
+
     # In 2D, we do an optimisation by choosing only pixels that are
     # the starting or ending pixel of a row or column.  This vastly
     # limits the number of coordinates to examine for the virtual hull.
     if ndim == 2:
         coords = possible_hull(np.ascontiguousarray(image, dtype=np.uint8))
     else:
-        coords = np.transpose(np.nonzero(image))
-        if offset_coordinates:
-            # when offsetting, we multiply number of vertices by 2 * ndim.
-            # therefore, we reduce the number of coordinates by using a
-            # convex hull on the original set, before offsetting.
-            try:
-                hull0 = ConvexHull(coords)
-            except QhullError as err:
-                warn(
-                    f"Failed to get convex hull image. "
-                    f"Returning empty image, see error message below:\n"
-                    f"{err}"
-                )
-                return np.zeros(image.shape, dtype=bool)
-            coords = hull0.points[hull0.vertices]
+        # xor with eroded version to keep only edge pixels of the binary image
+        footprint = ndi.generate_binary_structure(ndim, connectivity=1)
+        image = np.ascontiguousarray(image, dtype=bool)
+        image_eroded = ndi.binary_erosion(image, footprint)
+        image_boundary = np.bitwise_xor(image, image_eroded)
+        coords = np.stack(np.nonzero(image_boundary), axis=-1)
 
     # Add a vertex for the middle of each pixel edge
     if offset_coordinates:
@@ -153,10 +152,10 @@ def convex_hull_image(
             f"{err}"
         )
         return np.zeros(image.shape, dtype=bool)
-    vertices = hull.points[hull.vertices]
 
     # If 2D, use fast Cython function to locate convex hull pixels
     if ndim == 2:
+        vertices = hull.points[hull.vertices]
         labels = grid_points_in_poly(image.shape, vertices, binarize=False)
         # If include_borders is True, we include vertices (2) and edge
         # points (3) in the mask, otherwise only the inside of the hull (1)
@@ -167,7 +166,7 @@ def convex_hull_image(
         coords_in_hull = _check_coords_in_hull(gridcoords, hull.equations, tolerance)
         mask = np.reshape(coords_in_hull, image.shape)
 
-    return mask
+    return mask.reshape(original_shape)
 
 
 def convex_hull_object(image, *, connectivity=2):
