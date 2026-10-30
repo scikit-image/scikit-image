@@ -1,13 +1,13 @@
 # Platform kit
 
-Cursor kit on this fork: the layout rule, three typed skills, Bugbot review rules, a push guard, and a layout check on every pull request.
+Cursor kit on this fork: the layout rule, four typed skills, Bugbot review rules, a push guard, and a layout check on every pull request.
 
 ## Audiences
 
 | Audience | Uses |
 | --- | --- |
 | New engineer | `/small-change` |
-| PM | `/release-check` and the Notion board |
+| PM | `/release-check`, `/plan-from-requirement`, and the Notion board |
 | QA | `/qa-plan` |
 | DevOps | `/release-check` and the pull-request checks |
 | Platform team | This guide. `.github/CODEOWNERS` assigns `/.cursor/`, `/.github/scripts/`, and `/.github/workflows/layout-check.yaml` to `@vikasramnani`. |
@@ -23,6 +23,7 @@ Cursor kit on this fork: the layout rule, three typed skills, Bugbot review rule
 | `.cursor/skills/small-change/SKILL.md` | The agent, only when someone types `/small-change`. |
 | `.cursor/skills/qa-plan/SKILL.md` | The agent, only when someone types `/qa-plan`. |
 | `.cursor/skills/release-check/SKILL.md` | The agent, only when someone types `/release-check`. |
+| `.cursor/skills/plan-from-requirement/SKILL.md` | The agent, only when someone types `/plan-from-requirement`. |
 | `.cursor/hooks/guard-push.sh` (wired from `.cursor/hooks.json`) | Cursor, before a shell command that matches `push`. `failClosed` is true. |
 | `.github/scripts/check_layout.py` and `.github/workflows/layout-check.yaml` | GitHub Actions on `pull_request`. The workflow runs the script. |
 | Ruleset on `main` | `/release-check` reads it with `gh api repos/<fork>/rules/branches/main`. |
@@ -58,3 +59,4 @@ The script prints how many test files are under `src/` and exits 1 when that cou
 - The guard over-blocks and assumes `origin`. It allows only `git push` with at most one of `-u`, `--set-upstream`, or `--dry-run`, remote `origin`, and one branch that is not `main`, `master`, or `HEAD`.
 - Skills are instructions, not locks. Typing one runs it. The hook denies a matching shell command.
 - The improver agent is designed, not built.
+- The guard hook sees only the agent's shell commands that contain the word push. The editor's git buttons and a plain terminal bypass it; the ruleset on main covers every client.
