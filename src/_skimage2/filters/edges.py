@@ -558,6 +558,12 @@ def prewitt_v(image, mask=None):
       1/3   0  -1/3
       1/3   0  -1/3
 
+    Examples
+    --------
+    >>> from _skimage2 import data
+    >>> from _skimage2 import filters
+    >>> camera = data.camera()
+    >>> edges = filters.prewitt_v(camera)
     """
     check_nD(image, 2)
     return prewitt(image, mask=mask, axis=1)
