@@ -11,6 +11,7 @@ from warnings import filterwarnings
 
 import importlib
 import pkgutil
+from pathlib import Path
 
 import plotly.io as pio
 import skimage
@@ -43,8 +44,8 @@ filterwarnings(
 project = "skimage"
 copyright = f"2013-{date.today().year}, the scikit-image team"
 
-curpath = os.path.dirname(__file__)
-sys.path.append(os.path.join(curpath, "..", "..", "src", "_skimage2", "_build_utils"))
+curpath = Path(__file__).resolve().parent
+sys.path.append(str(curpath.parents[1] / "src/_skimage2/_build_utils"))
 
 from version import version as _source_version  # noqa: E402
 
@@ -54,7 +55,7 @@ release = version
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-sys.path.append(os.path.join(curpath, "..", "ext"))
+sys.path.append(str(curpath.parent / "ext"))
 
 extensions = [
     "sphinx.ext.autodoc",
