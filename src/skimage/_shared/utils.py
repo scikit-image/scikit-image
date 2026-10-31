@@ -32,4 +32,5 @@ __all__ = [
 
 from skimage._doctest_adapters import adapt_doctests  # noqa: E402
 
-adapt_doctests(globals())
+# Do not subclass-wrap DEPRECATED - it is a singleton sentinel class.
+adapt_doctests(globals(), skip_names=('DEPRECATED',))
