@@ -96,6 +96,18 @@ def test_radon_center_rectangular(shape, circle, dtype, preserve_range):
     check_radon_center(shape, circle, dtype, preserve_range)
 
 
+@pytest.mark.parametrize("shape", [(1, 10), (10, 1), (1, 1)])
+def test_radon_circle_singleton(shape):
+    image = np.zeros(shape)
+    image[shape[0] // 2, shape[1] // 2] = 1.0
+    sinogram = radon(image, circle=True)
+    sinogram_t = radon(image.T, circle=True)
+    assert sinogram.shape == (1, 180)
+    assert sinogram_t.shape == (1, 180)
+
+    np.testing.assert_array_equal(sinogram, np.roll(sinogram_t, 90, axis=1))
+
+
 def check_iradon_center(size, theta, circle):
     debug = False
     # Create a test sinogram corresponding to a single projection
