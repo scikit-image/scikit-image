@@ -11,9 +11,10 @@ manipulating arrays::
     >>> import skimage as ski
     >>> camera = ski.data.camera()
     >>> type(camera)
-    <type 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
 
 .. note::
+
     Labeled array-like data types, such as
     `pandas.DataFrame <https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html>`_
     or `xarray.DataArray <https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html>`_,
@@ -26,6 +27,7 @@ manipulating arrays::
     spaced.
 
 .. note::
+
     `We do not have native support for NumPy masked arrays
     <https://numpy.org/doc/stable/reference/maskedarray.baseclass.html#numpy.ma.MaskedArray>`_.
     Please convert images to plain ``numpy.ndarray``s, and handle masks by
@@ -46,9 +48,9 @@ Retrieving statistical information about image intensity values::
     >>> import numpy as np
     >>>
     >>> np.min(camera), np.max(camera)
-    (0, 255)
+    (np.uint8(0), np.uint8(255))
     >>> np.mean(camera)
-    118.31400299072266
+    np.float64(129.0607...)
 
 NumPy arrays representing images can be of different integer or float
 numerical types. See :ref:`data_types` for more information about these
@@ -81,7 +83,7 @@ modify them::
 
     >>> # Get the value of the pixel at the 10th row and 20th column
     >>> camera[10, 20]
-    153
+    np.uint8(200)
     >>> # Set to black the pixel at the 3rd row and 10th column
     >>> camera[3, 10] = 0
 
@@ -140,7 +142,7 @@ Boolean operations from NumPy can be used to define even more complex masks::
 
     >>> lower_half = row > cnt_row
     >>> lower_half_disk = np.logical_and(lower_half, outer_disk_mask)
-    >>> camera = data.camera()
+    >>> camera = ski.data.camera()
     >>> camera[lower_half_disk] = 0
 
 
@@ -157,7 +159,7 @@ three Red Green Blue (RGB) color channels::
 
     >>> cat = ski.data.chelsea()
     >>> type(cat)
-    <type 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
     >>> cat.shape
     (300, 451, 3)
 
@@ -199,32 +201,45 @@ Working with 3D images
 
 By 3D images, we mean images with three spatial dimensions.
 
-Many functions in ``scikit-image`` can operate on 3D images directly::
+Many functions in ``scikit-image`` can operate on 3D images directly.  Here we
+segment the nuclei in a stack of confocal microscopy images.  ``cells3d``
+returns an array of shape ``(plane, channel, row, column)``; channel 1 holds
+the nuclei::
 
     >>> import numpy as np
     >>> import scipy as sp
     >>> import skimage as ski
-    >>> rng = np.random.default_rng()
-    >>> im3d = rng.random((100, 1000, 1000))
-    >>> seeds = sp.ndimage.label(im3d < 0.1)[0]
-    >>> ws = ski.segmentation.watershed(im3d, seeds)
+    >>> nuclei = ski.data.cells3d()[:, 1]
+    >>> nuclei.shape
+    (60, 256, 256)
 
-In many cases, however, the third spatial dimension has lower resolution than
-the other two, and this has consequences for the algorithm implemented by the
-function. Some ``scikit-image`` functions provide a ``spacing`` keyword
-argument to help handle this kind of data.  In the following call, we use
-`channel_axis=None` to tell the `slic` function that none of the `im3d` axes
-correspond to color channels, and `spacing` to tell `slic` that the elements
-along the first array dimension are spatially five times further apart than
-the elements on the second and third dimensions::
+We next smooth the image to emphasize the spatially distributed nuclei
+compared to the voxel-to-voxel noise::
 
-    >>> slics = ski.segmentation.slic(im3d, spacing=[5, 1, 1], channel_axis=None)
+    >>> smoothed = ski.filters.gaussian(nuclei, sigma=2)
+    >>> seeds = sp.ndimage.label(smoothed > ski.filters.threshold_otsu(smoothed))[0]
+    >>> ws = ski.segmentation.watershed(nuclei, seeds)
+    >>> int(ws.max())  # One region per nucleus.
+    23
+
+In many cases, the third spatial dimension has lower resolution than the other
+two, and this has consequences for the algorithm implemented by the function.
+Some ``scikit-image`` functions provide a ``spacing`` keyword argument to help
+handle this kind of data.  The microscope that recorded ``cells3d`` reports a
+voxel size of 0.29 micrometers between planes, against 0.26 micrometers within
+a plane.  In the following call, we use `spacing` to pass that geometry to
+`slic`, and `channel_axis=None` to tell `slic` that none of the `nuclei` axes
+correspond to color channels::
+
+    >>> slics = ski.segmentation.slic(nuclei, n_segments=100,
+    ...                               spacing=[0.29, 0.26, 0.26],
+    ...                               channel_axis=None)
 
 Other times, the processing must be done plane-wise. When planes are stacked
 along the leading dimension, the following syntax can be used::
 
-    >>> edges = np.empty_like(im3d)
-    >>> for pln, image in enumerate(im3d):
+    >>> edges = np.empty(nuclei.shape, dtype=float)
+    >>> for pln, image in enumerate(nuclei):
     ...     # Iterate over the leading dimension
     ...     edges[pln] = ski.filters.sobel(image)
 
