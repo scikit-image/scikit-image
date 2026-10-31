@@ -2,12 +2,12 @@
 """Script to auto-generate our API docs."""
 
 import sys
+from pathlib import Path
 
 from packaging import version as _version
 
 # local imports
 from apigen import ApiDocWriter
-from doc_version import get_version
 
 
 # *****************************************************************************
@@ -40,7 +40,12 @@ if __name__ == '__main__':
     # exclude any appended git hash and date
     installed_version = _version.parse(module.__version__.split('+git')[0])
 
-    source_version = _version.parse(get_version())
+    sys.path.append(
+        str(Path(__file__).resolve().parents[2] / 'src/_skimage2/_build_utils')
+    )
+    from version import version as _source_version
+
+    source_version = _version.parse(_source_version(local=False))
 
     if source_version != installed_version:
         abort("Installed version does not match source version")

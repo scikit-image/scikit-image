@@ -9,8 +9,10 @@ import importlib.util
 from pathlib import Path
 
 
-def version():
+def version(local=True):
     """Load the version from ``_skimage2/_version.py``.
+
+    If `local` is False, drop the local segment (``+git...``).
 
     The module is loaded by path, since ``_skimage2`` is not yet built.
     """
@@ -23,7 +25,7 @@ def version():
         raise RuntimeError(f'Cannot load version file: {path}')
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    return module.__version__
+    return module.__version__ if local else module.__version__.split('+')[0]
 
 
 if __name__ == "__main__":

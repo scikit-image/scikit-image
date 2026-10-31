@@ -44,11 +44,11 @@ project = "skimage"
 copyright = f"2013-{date.today().year}, the scikit-image team"
 
 curpath = os.path.dirname(__file__)
-sys.path.append(os.path.join(curpath, "..", "tools"))
+sys.path.append(os.path.join(curpath, "..", "..", "src", "_skimage2", "_build_utils"))
 
-from doc_version import get_version  # noqa: E402
+from version import version as _source_version  # noqa: E402
 
-version = get_version()
+version = _source_version(local=False)
 release = version
 
 # -- General configuration ---------------------------------------------------
