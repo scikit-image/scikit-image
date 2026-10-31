@@ -1,10 +1,12 @@
 """Package version.
 
-Keep this module standalone: import only from the standard library.
-The build loads it by path, before ``_skimage2`` is importable.
+Ensure that this module remains standalone: i.e, no imports, or import *only* from the standard library.
+
+Meson loads it as part of the build before ``_skimage2`` becomes importable.
 """
 
-# Doc tooling parses the unindented ``__version__ = `` line.
+# The canonical library version is defined here.
+# It is used by the meson build, {skimage,skimage2}.__version__, and docs
 __version__ = '0.27.0rc2.dev0'
 
 
