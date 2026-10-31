@@ -18,6 +18,7 @@ __all__ = [
     "gabor_kernel",
     "gaussian",
     "hessian",
+    "high_boost_filter",
     "laplace",
     "median",
     "meijering",
@@ -57,6 +58,7 @@ from . import rank
 from ._fft_based import butterworth
 from ._gabor import gabor, gabor_kernel
 from ._gaussian import difference_of_gaussians, gaussian
+from ._high_boost import high_boost_filter
 from ._median import median
 from ._rank_order import rank_order
 from ._sparse import correlate_sparse

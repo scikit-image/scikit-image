@@ -11,6 +11,7 @@ from _skimage2._shared.utils import (
     slice_at_axis as slice_at_axis,
     deprecate_parameter as deprecate_parameter,
     DEPRECATED as DEPRECATED,
+    _supported_float_type as _supported_float_type,
 )  # noqa: F401
 
 __all__ = [
@@ -26,6 +27,7 @@ __all__ = [
     'slice_at_axis',
     'deprecate_parameter',
     'DEPRECATED',
+    '_supported_float_type',
 ]
 
 from skimage._doctest_adapters import adapt_doctests  # noqa: E402
