@@ -15,10 +15,12 @@ def version():
     The module is loaded by path, since ``_skimage2`` is not yet built.
     """
     path = Path(__file__).parent / '../../_skimage2/_version.py'
-    assert path.is_file()
+    if not path.is_file():
+        raise RuntimeError(f'Version file not found: {path}')
 
     spec = importlib.util.spec_from_file_location('_skimage2_version', path)
-    assert spec is not None and spec.loader is not None
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f'Cannot load version file: {path}')
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module.__version__

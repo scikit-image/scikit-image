@@ -43,20 +43,17 @@ filterwarnings(
 project = "skimage"
 copyright = f"2013-{date.today().year}, the scikit-image team"
 
-with open("../../src/_skimage2/_version.py") as f:
-    setup_lines = f.readlines()
-version = "vUndefined"
-for l in setup_lines:
-    if l.startswith("__version__ ="):
-        version = l.split("'")[1]
-        break
+curpath = os.path.dirname(__file__)
+sys.path.append(os.path.join(curpath, "..", "tools"))
 
+from doc_version import get_version  # noqa: E402
+
+version = get_version()
 release = version
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-curpath = os.path.dirname(__file__)
 sys.path.append(os.path.join(curpath, "..", "ext"))
 
 extensions = [

@@ -1,3 +1,10 @@
+"""Package version.
+
+Keep this module standalone: import only from the standard library.
+The build loads it by path, before ``_skimage2`` is importable.
+"""
+
+# Doc tooling parses the unindented ``__version__ = `` line.
 __version__ = '0.27.0rc2.dev0'
 
 
@@ -8,7 +15,7 @@ def _try_append_commit_info(version):
 
     try:
         output = subprocess.check_output(
-            ['git', 'log', '-1', '--format="%h %aI"'],
+            ['git', 'log', '-1', '--format="%H %aI"'],
             cwd=Path(__file__).parent,
             text=True,
         )
@@ -19,7 +26,7 @@ def _try_append_commit_info(version):
             version = '+'.join(
                 [tag for tag in version.split('+') if not tag.startswith('git')]
             )
-            version += f'+git{git_date}.{git_hash}'
+            version += f'+git{git_date}.{git_hash[:7]}'
 
     except (FileNotFoundError, subprocess.CalledProcessError):
         pass
