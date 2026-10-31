@@ -37,6 +37,10 @@ jobs:
         run: |
           source .github/scripts/setup-docs-env.sh
 
+      - name: Test doctests in user guide pages
+        run: |
+          make -C doc doctest-pages
+
       - name: Install Chrome for kaleido
         # plotly_get_chrome and browser-actions/setup-chrome fetch from Chrome
         # for Testing, which has no Stable-channel linux-arm64 build (this

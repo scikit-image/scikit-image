@@ -15,7 +15,12 @@ DEST            = build
 
 MIGRATION_TPL = source/user_guide/skimage2_migration.rst.tpl
 
-.PHONY: all help clean api migration-doc migration-test html api dirhtml pickle json htmlhelp qthelp devhelp latex latexpdf changes linkcheck doctest gitwash
+# User guide pages checked by `make doctest-pages`.
+DOCTEST_PAGES = source/user_guide/coordinates.rst \
+                source/user_guide/geometrical_transform.rst \
+                source/user_guide/numpy_images.rst
+
+.PHONY: all help clean api migration-doc migration-test html api dirhtml pickle json htmlhelp qthelp devhelp latex latexpdf changes linkcheck doctest doctest-pages gitwash
 
 all: html
 
@@ -33,6 +38,7 @@ help:
 	@echo "  changes        to make an overview of all changed/added/deprecated items"
 	@echo "  linkcheck      to check all external links for integrity"
 	@echo "  doctest        to run all doctests embedded in the documentation (if enabled)"
+	@echo "  doctest-pages  to run the doctests in the pages listed in DOCTEST_PAGES"
 	@echo "  gitwash        to update the gitwash documentation"
 	@echo "  api            to build the API docs"
 	@echo "  migration-doc  to build the skimage2 migration doc"
@@ -131,6 +137,9 @@ doctest:
 	$(SPHINXBUILD) -b doctest $(ALLSPHINXOPTS) $(DEST)/doctest
 	@echo "Testing of doctests in the sources finished, look at the " \
 	      "results in build/doctest/output.txt."
+
+doctest-pages:
+	$(PYTHON) -m pytest --doctest-plus --doctest-glob='*.rst' $(DOCTEST_PAGES)
 
 gitwash:
 	$(PYTHON) tools/gitwash/gitwash_dumper.py source scikit-image \

@@ -64,6 +64,17 @@ Arguments specified after the `--` are forwarded as
 [options to pytest](https://docs.pytest.org/en/stable/reference/reference.html#command-line-flags).
 :::
 
+Some code in the user guide pages under `doc/source/user_guide/` is not run by
+`spin test`. The pages listed in `DOCTEST_PAGES` in `doc/Makefile` are checked
+with:
+
+```shell
+make -C doc doctest-pages
+```
+
+The snippets in those pages must run on their own, because readers run them on
+their own. Add a page to the list only once it passes.
+
 Testing requirements are listed in `requirements/test.txt`.
 
 :::{note}
