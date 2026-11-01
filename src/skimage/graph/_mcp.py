@@ -38,3 +38,8 @@ __all__ = [
     'make_offsets',
     'warn',
 ]
+
+from skimage._doctest_adapters import adapt_doctests
+
+# Do not subclass-wrap DEPRECATED - it is a singleton sentinel class.
+adapt_doctests(globals(), skip_names=('DEPRECATED',))

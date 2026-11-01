@@ -11,3 +11,7 @@ __all__ = [
     'optical_flow_ilk',
     'optical_flow_tvl1',
 ]
+
+from skimage._doctest_adapters import adapt_doctests
+
+adapt_doctests(globals())

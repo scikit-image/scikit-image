@@ -17,12 +17,12 @@ jobs:
     runs-on: ubuntu-24.04-arm
     steps:
       - name: Checkout scikit-image
-        uses: actions/checkout@v5
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
       - name: Setup Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.13"
           allow-prereleases: true
@@ -36,6 +36,20 @@ jobs:
       - name: Install doc dependencies
         run: |
           source .github/scripts/setup-docs-env.sh
+
+      - name: Install Chrome for kaleido
+        # plotly_get_chrome and browser-actions/setup-chrome fetch from Chrome
+        # for Testing, which has no Stable-channel linux-arm64 build (this
+        # runner is arm64). Google's apt repo does have arm64 Chrome, and
+        # choreographer checks /usr/bin/google-chrome-stable before downloading.
+        run: |
+          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub \
+            | gpg --dearmor \
+            | sudo tee /usr/share/keyrings/google-chrome.gpg >/dev/null
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" \
+            | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
 
       - name: Build docs / run examples
         run: |

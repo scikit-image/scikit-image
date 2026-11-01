@@ -1,71 +1,8 @@
-from .generic import (
-    autolevel,
-    equalize,
-    gradient,
-    majority,
-    maximum,
-    mean,
-    geometric_mean,
-    subtract_mean,
-    median,
-    minimum,
-    modal,
-    enhance_contrast,
-    pop,
-    threshold,
-    noise_filter,
-    entropy,
-    otsu,
-    sum,
-    windowed_histogram,
-)
-from ._percentile import (
-    autolevel_percentile,
-    gradient_percentile,
-    mean_percentile,
-    subtract_mean_percentile,
-    enhance_contrast_percentile,
-    percentile,
-    pop_percentile,
-    sum_percentile,
-    threshold_percentile,
-)
-from .bilateral import mean_bilateral, pop_bilateral, sum_bilateral
+"""Rank filters, e.g. median, entropy, local Otsu, etc."""
 
+import lazy_loader as _lazy
 
-__all__ = [
-    'autolevel',
-    'autolevel_percentile',
-    'gradient',
-    'equalize',
-    'gradient_percentile',
-    'majority',
-    'maximum',
-    'mean',
-    'geometric_mean',
-    'mean_percentile',
-    'mean_bilateral',
-    'subtract_mean',
-    'subtract_mean_percentile',
-    'median',
-    'minimum',
-    'modal',
-    'enhance_contrast',
-    'enhance_contrast_percentile',
-    'pop',
-    'pop_percentile',
-    'pop_bilateral',
-    'sum',
-    'sum_bilateral',
-    'sum_percentile',
-    'threshold',
-    'threshold_percentile',
-    'noise_filter',
-    'entropy',
-    'otsu',
-    'percentile',
-    'windowed_histogram',
-]
+__getattr__, __dir__, __all__ = _lazy.attach_stub(__name__, __file__)
 
 __3Dfilters = [
     'autolevel',

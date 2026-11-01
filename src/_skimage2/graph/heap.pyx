@@ -238,8 +238,8 @@ cdef class BinaryHeap:
 
         # track tree
         cdef INDEX_T ii
-        cdef LEVELS_T level
-        for level in range(self.levels, 1, -1):
+        cdef LEVELS_T _level
+        for _level in range(self.levels, 1, -1):
             ii = (i-1) // 2  # CalcPrevAbs
 
             # test
@@ -321,11 +321,11 @@ cdef class BinaryHeap:
         cdef VALUE_T *values = self._values
 
         # init index. start at 1 because we start in level 1
-        cdef LEVELS_T level
+        cdef LEVELS_T _level
         cdef INDEX_T i = 1
         cdef LEVELS_T levels = self.levels
         # search tree (using absolute indices)
-        for level in range(1, levels):
+        for _level in range(1, levels):
             if values[i] <= values[i+1]:
                 i = i * 2 + 1  # CalcNextAbs
             else:

@@ -945,6 +945,11 @@ def test_union():
     assert_almost_equal(tform.params, tform3.params)
     assert tform.__class__ == ProjectiveTransform
 
+    # Test the other way round.
+    tform = tform2 + tform1
+    assert_almost_equal(tform.params, tform3.params)
+    assert isinstance(tform, ProjectiveTransform)
+
     tform = AffineTransform(scale=(0.1, 0.1), rotation=0.3)
     assert_almost_equal((tform + tform.inverse).params, np.eye(3))
 
@@ -1291,8 +1296,16 @@ def test_fundamental_3d_not_implemented():
 def test_array_protocol():
     mat = np.eye(4)
     tf = ProjectiveTransform(mat)
-    assert_equal(np.array(tf), mat)
+    copied = np.array(tf, copy=True)
+    assert_equal(copied, mat)
+    assert not np.shares_memory(copied, tf.params)
+
+    params = np.array(tf, copy=False)
+    assert params is tf.params
+
     assert_equal(np.array(tf, dtype=int), mat.astype(int))
+    with pytest.raises(ValueError, match=r"Unable to avoid copy"):
+        np.array(tf, dtype=int, copy=False)
 
 
 def test_affine_transform_from_linearized_parameters():

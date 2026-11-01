@@ -130,7 +130,7 @@ def _coarse_to_fine(
         raise ValueError("Input images should have the same shape")
 
     if np.dtype(dtype).char not in 'efdg':
-        raise ValueError("Only floating point data type are valid" " for optical flow")
+        raise ValueError("Only floating point data type are valid for optical flow")
 
     pyramid = list(
         zip(

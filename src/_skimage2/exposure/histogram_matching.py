@@ -65,15 +65,12 @@ def match_histograms(image, reference, *, channel_axis=None):
 
     """
     if image.ndim != reference.ndim:
-        raise ValueError(
-            'Image and reference must have the same number ' 'of channels.'
-        )
+        raise ValueError('Image and reference must have the same number of channels.')
 
     if channel_axis is not None:
         if image.shape[-1] != reference.shape[-1]:
             raise ValueError(
-                'Number of channels in the input image and '
-                'reference image must match!'
+                'Number of channels in the input image and reference image must match!'
             )
 
         matched = np.empty(image.shape, dtype=image.dtype)

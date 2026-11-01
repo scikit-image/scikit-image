@@ -17,3 +17,7 @@ __all__ = [
     'remove_small_objects',
     'skimage2ndimage',
 ]
+
+from skimage._doctest_adapters import adapt_doctests
+
+adapt_doctests(globals())

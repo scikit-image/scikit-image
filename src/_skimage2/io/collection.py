@@ -181,10 +181,11 @@ class ImageCollection:
     >>> from pathlib import Path
     >>> import imageio.v3 as iio3
     >>> import _skimage2.io as io
-    >>> from _skimage2 import data
 
-    # Where your images are located
-    >>> data_dir = Path(data.__file__).parent
+    Where your images are located:
+
+    >>> from _skimage2 import data
+    >>> data_dir = Path(data.legacy_data_dir)
 
     >>> coll = io.ImageCollection(str(data_dir / 'chess*.png'))
     >>> len(coll)
@@ -473,9 +474,12 @@ class MultiImage(ImageCollection):
     Examples
     --------
     >>> from pathlib import Path
-    >>> from _skimage2 import data
     >>> from _skimage2.io import ImageCollection
-    >>> data_dir = Path(data.__file__).parent
+
+    Get directory containing data files.
+
+    >>> from _skimage2 import data
+    >>> data_dir = Path(data.legacy_data_dir)
 
     >>> multipage_tiff = str(data_dir / 'multipage.tif')
     >>> multi_img = MultiImage(multipage_tiff)

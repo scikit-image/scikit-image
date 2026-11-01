@@ -119,7 +119,7 @@ def _get_outer_edges(image, hist_range):
             raise ValueError("max must be larger than min in hist_range parameter.")
         if not (np.isfinite(first_edge) and np.isfinite(last_edge)):
             raise ValueError(
-                f'supplied hist_range of [{first_edge}, {last_edge}] is ' f'not finite'
+                f'supplied hist_range of [{first_edge}, {last_edge}] is not finite'
             )
     elif image.size == 0:
         # handle empty arrays. Can't determine hist_range, so use 0-1.
@@ -128,8 +128,7 @@ def _get_outer_edges(image, hist_range):
         first_edge, last_edge = image.min(), image.max()
         if not (np.isfinite(first_edge) and np.isfinite(last_edge)):
             raise ValueError(
-                f'autodetected hist_range of [{first_edge}, {last_edge}] is '
-                f'not finite'
+                f'autodetected hist_range of [{first_edge}, {last_edge}] is not finite'
             )
 
     # expand empty hist_range to avoid divide by zero

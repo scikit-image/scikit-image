@@ -11,3 +11,7 @@ __all__ = [
     'NP_COPY_IF_NEEDED',
     'SCIPY_CG_TOL_PARAM_NAME',
 ]
+
+from skimage._doctest_adapters import adapt_doctests
+
+adapt_doctests(globals())

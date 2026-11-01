@@ -1,5 +1,6 @@
 python_sources = [
   '__init__.py',
+  '__init__.pyi',
   '_image_stack.py',
   '_io.py',
   'collection.py',

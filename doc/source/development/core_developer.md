@@ -92,7 +92,7 @@ When reviewing, focus on the following:
    new contributions should be consistent with {doc}`our mission <../about/values>`.
 
 [wiki_functional]: https://en.wikipedia.org/wiki/Functional_programming
-[dep_pol]: https://scikit-image.org/docs/dev/development/contribute.html#deprecation-cycle
+[dep_pol]: https://scikit-image.org/docs/dev/development/deprecations.html#deprecation-cycle
 [mit_license]: https://spdx.org/licenses/MIT.html
 [apache_2-2]: https://spdx.org/licenses/Apache-2.0.html
 
@@ -151,10 +151,10 @@ a long time ago and many changes have taken place in the meantime.
 
 When squashing commits GitHub concatenates all commit messages.
 Please edit the resulting message so that it gives a concise, tidy
-overview of changes. For example, you may want to grab the
-description from the PR itself, and delete lines such as "pep8 fix",
-"apply review comments", etc. Please retain all Co-authored-by
-entries.
+overview of changes. For example, you may want to grab the description
+from the PR itself, and delete lines such as "pep8 fix", "apply review
+comments", etc. Please retain all `Co-authored-by` and `Assisted-by`
+tags.
 
 ## Closing issues and pull requests
 

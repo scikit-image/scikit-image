@@ -11,3 +11,7 @@ __all__ = [
     'haar_like_feature',
     'haar_like_feature_coord',
 ]
+
+from skimage._doctest_adapters import adapt_doctests
+
+adapt_doctests(globals())

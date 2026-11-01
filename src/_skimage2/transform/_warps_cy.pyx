@@ -78,7 +78,7 @@ def _warp_fast(np_floats[:, :] image, np_floats[:, :] H, output_shape=None,
     For each pixel, given its homogeneous coordinate :math:`\mathbf{x}
     = [x, y, 1]^T`, its target position is calculated by multiplying
     with the given matrix, :math:`H`, to give :math:`H \mathbf{x}`.
-    E.g., to rotate by theta degrees clockwise, the matrix should be::
+    E.g., to rotate by theta radians clockwise, the matrix should be::
 
       [[cos(theta) -sin(theta) 0]
        [sin(theta)  cos(theta) 0]

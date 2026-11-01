@@ -208,7 +208,7 @@ def haar_like_feature(
     else:
         if feature_coord.shape[0] != feature_type.shape[0]:
             raise ValueError(
-                "Inconsistent size between feature coordinates" "and feature types."
+                "Inconsistent size between feature coordinates and feature types."
             )
 
         mask_feature = [feature_type == feat_t for feat_t in FEATURE_TYPE]

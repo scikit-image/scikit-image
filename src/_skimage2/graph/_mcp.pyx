@@ -261,7 +261,7 @@ cdef class MCP:
 
         # Check sampling
         if sampling is None:
-            sampling = np.array([1.0 for s in costs.shape], FLOAT_D)
+            sampling = np.array([1.0 for _s in costs.shape], FLOAT_D)
         elif isinstance(sampling, (list, tuple)):
             sampling = np.array(sampling, FLOAT_D)
             if sampling.ndim != 1 or len(sampling) != costs.ndim:
@@ -498,7 +498,7 @@ cdef class MCP:
         cdef FLOAT_T cost, new_cost, cumcost, new_cumcost, offset_length
         cdef INDEX_T index, new_index
         cdef BOOL_T is_at_edge, use_offset
-        cdef INDEX_T d, i, iter
+        cdef INDEX_T d, i, _iter
         cdef OFFSET_T offset
         cdef EDGE_T pos_edge_val, neg_edge_val
         cdef int num_ends_found = 0
@@ -507,7 +507,7 @@ cdef class MCP:
 
         cdef INDEX_T maxiter = int(max_coverage * flat_costs.size)
 
-        for iter in range(maxiter):
+        for _iter in range(maxiter):
 
             # This is rather like a while loop, except we are guaranteed to
             # exit, which is nice during developing to prevent eternal loops.

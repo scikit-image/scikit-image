@@ -9,6 +9,7 @@ from _skimage2.morphology import (
     binary,
     footprints,
     footprint_rectangle,
+    footprint_rectangle_decomposed,
     erosion,
     dilation,
     closing,
@@ -104,14 +105,14 @@ def _get_decomp_test_data(function, ndim=2):
 )
 @pytest.mark.parametrize("nrows", (3, 7, 11))
 @pytest.mark.parametrize("ncols", (3, 7, 11))
-@pytest.mark.parametrize("decomposition", ['separable', 'sequence'])
-def test_rectangle_decomposition(function, nrows, ncols, decomposition):
+@pytest.mark.parametrize("method", ['separable', 'sequence'])
+def test_rectangle_decomposition(function, nrows, ncols, method):
     """Validate footprint decomposition for various shapes.
 
     comparison is made to the case without decomposition.
     """
-    footprint_ndarray = footprint_rectangle((nrows, ncols), decomposition=None)
-    footprint = footprint_rectangle((nrows, ncols), decomposition=decomposition)
+    footprint_ndarray = footprint_rectangle((nrows, ncols))
+    footprint = footprint_rectangle_decomposed((nrows, ncols), method=method)
     img = _get_decomp_test_data(function)
     func = getattr(binary, function)
     expected = func(img, footprint=footprint_ndarray)
@@ -126,9 +127,7 @@ def test_rectangle_decomposition(function, nrows, ncols, decomposition):
 @pytest.mark.parametrize("m", (0, 1, 2, 3, 4, 5))
 @pytest.mark.parametrize("n", (0, 1, 2, 3, 4, 5))
 @pytest.mark.parametrize("decomposition", ['sequence'])
-@pytest.mark.filterwarnings(
-    "ignore:.*falling back to decomposition='separable':UserWarning"
-)
+@pytest.mark.filterwarnings("ignore:.*falling back to method='separable':UserWarning")
 def test_octagon_decomposition(function, m, n, decomposition):
     """Validate footprint decomposition for various shapes.
 
@@ -172,17 +171,15 @@ def test_diamond_decomposition(function, radius, decomposition):
     ["binary_erosion", "binary_dilation", "binary_closing", "binary_opening"],
 )
 @pytest.mark.parametrize("shape", [(3, 3, 3), (3, 4, 5)])
-@pytest.mark.parametrize("decomposition", ['separable', 'sequence'])
-@pytest.mark.filterwarnings(
-    "ignore:.*falling back to decomposition='separable':UserWarning"
-)
-def test_cube_decomposition(function, shape, decomposition):
+@pytest.mark.parametrize("method", ['separable', 'sequence'])
+@pytest.mark.filterwarnings("ignore:.*falling back to method='separable':UserWarning")
+def test_cube_decomposition(function, shape, method):
     """Validate footprint decomposition for various shapes.
 
     comparison is made to the case without decomposition.
     """
-    footprint_ndarray = footprint_rectangle(shape, decomposition=None)
-    footprint = footprint_rectangle(shape, decomposition=decomposition)
+    footprint_ndarray = footprint_rectangle(shape)
+    footprint = footprint_rectangle_decomposed(shape, method=method)
     img = _get_decomp_test_data(function, ndim=3)
     func = getattr(binary, function)
     expected = func(img, footprint=footprint_ndarray)

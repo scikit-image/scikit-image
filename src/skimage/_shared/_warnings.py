@@ -13,3 +13,7 @@ __all__ = [
     'warn_external',
     'ExperimentalAPIWarning',
 ]
+
+from skimage._doctest_adapters import adapt_doctests
+
+adapt_doctests(globals())

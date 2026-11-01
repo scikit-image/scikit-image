@@ -142,3 +142,8 @@ def corner_peaks(
         num_peaks_per_label=num_peaks_per_label,
         p_norm=p_norm,
     )
+
+
+from skimage._doctest_adapters import adapt_doctests  # noqa: E402
+
+adapt_doctests(globals())

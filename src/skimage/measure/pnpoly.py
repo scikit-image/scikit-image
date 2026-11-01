@@ -7,3 +7,7 @@ __all__ = [
     'grid_points_in_poly',
     'points_in_poly',
 ]
+
+from skimage._doctest_adapters import adapt_doctests
+
+adapt_doctests(globals())

@@ -13,3 +13,7 @@ __all__ = [
     'marching_cubes',
     'mesh_surface_area',
 ]
+
+from skimage._doctest_adapters import adapt_doctests
+
+adapt_doctests(globals())

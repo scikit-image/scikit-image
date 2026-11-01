@@ -17,3 +17,7 @@ __all__ = [
     'binary_erosion',
     'binary_opening',
 ]
+
+from skimage._doctest_adapters import adapt_doctests
+
+adapt_doctests(globals())

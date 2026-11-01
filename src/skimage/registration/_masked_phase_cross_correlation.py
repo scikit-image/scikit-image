@@ -20,3 +20,7 @@ __all__ = ['cross_correlate_masked']
 from _skimage2.registration._masked_phase_cross_correlation import (  # noqa: F401
     _masked_phase_cross_correlation,
 )
+
+from skimage._doctest_adapters import adapt_doctests
+
+adapt_doctests(globals())

@@ -15,8 +15,7 @@ from _skimage2._shared.testing import (
 )
 
 
-@pytest.mark.parametrize("sparse_type", ["matrix", "array"])
-def test_contingency_table(sparse_type):
+def test_contingency_table():
     im_true = np.array([1, 2, 3, 4])
     im_test = np.array([1, 1, 8, 8])
 
@@ -30,28 +29,17 @@ def test_contingency_table(sparse_type):
         ]
     )
 
-    sparse_table2 = contingency_table(
-        im_true, im_test, normalize=True, sparse_type=sparse_type
-    )
+    sparse_table2 = contingency_table(im_true, im_test, normalize=True)
     table2 = sparse_table2.toarray()
     assert_array_equal(table1, table2)
 
 
-def test_contingency_table_sparse_type():
+def test_contingency_table_return_type():
     im_true = np.array([1, 2, 3, 4])
     im_test = np.array([1, 1, 8, 8])
 
     result = contingency_table(im_true, im_test)
-    assert isinstance(result, sp.sparse.csr_matrix)
-
-    result = contingency_table(im_true, im_test, sparse_type="matrix")
-    assert isinstance(result, sp.sparse.csr_matrix)
-
-    result = contingency_table(im_true, im_test, sparse_type="array")
     assert isinstance(result, sp.sparse.csr_array)
-
-    with pytest.raises(ValueError, match="`sparse_type` must be 'array' or 'matrix'"):
-        contingency_table(im_true, im_test, sparse_type="unknown")
 
 
 def test_vi():

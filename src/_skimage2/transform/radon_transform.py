@@ -72,8 +72,7 @@ def radon(image, theta=None, circle=True, *, preserve_range=False):
         outside_reconstruction_circle = dist > radius**2
         if np.any(image[outside_reconstruction_circle]):
             warn(
-                'Radon transform: image must be zero outside the '
-                'reconstruction circle'
+                'Radon transform: image must be zero outside the reconstruction circle'
             )
         # Crop image to make it square
         slices = tuple(
@@ -479,7 +478,7 @@ def iradon_sart(
             dtype = np.dtype(float)
     elif np.dtype(dtype).char not in 'fd':
         raise ValueError(
-            "Only floating point data type are valid for inverse " "radon transform."
+            "Only floating point data type are valid for inverse radon transform."
         )
 
     dtype = np.dtype(dtype)
@@ -505,7 +504,7 @@ def iradon_sart(
             f'of radon_image ({reconstructed_shape})'
         )
     elif image.dtype != dtype:
-        warn(f'image dtype does not match output dtype: ' f'image is cast to {dtype}')
+        warn(f'image dtype does not match output dtype: image is cast to {dtype}')
 
     image = np.asarray(image, dtype=dtype)
 

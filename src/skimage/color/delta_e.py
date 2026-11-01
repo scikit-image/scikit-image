@@ -35,3 +35,7 @@ __all__ = [
     'deltaE_cmc',
     'get_dH2',
 ]
+
+from skimage._doctest_adapters import adapt_doctests
+
+adapt_doctests(globals())

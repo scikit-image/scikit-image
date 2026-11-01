@@ -103,3 +103,8 @@ def binary_blobs(
         rng=rng,
         boundary_mode=boundary_mode,
     )
+
+
+from skimage._doctest_adapters import adapt_doctests  # noqa: E402
+
+adapt_doctests(globals())

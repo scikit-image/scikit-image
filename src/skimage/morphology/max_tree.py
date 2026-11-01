@@ -62,3 +62,7 @@ __all__ = [
     'signed_int_types',
     'unsigned_int_types',
 ]
+
+from skimage._doctest_adapters import adapt_doctests
+
+adapt_doctests(globals())

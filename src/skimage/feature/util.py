@@ -14,3 +14,7 @@ from _skimage2.feature.util import (  # noqa: F401
     _mask_border_keypoints,
     _prepare_grayscale_input_2D,
 )
+
+from skimage._doctest_adapters import adapt_doctests
+
+adapt_doctests(globals())
