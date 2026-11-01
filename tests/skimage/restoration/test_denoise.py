@@ -970,6 +970,37 @@ def test_estimate_sigma_masked_image():
 
 
 @xfail_without_pywt
+def test_sigma_est_dwt_uses_mad():
+    """_sigma_est_dwt must use median absolute deviation, not median of abs.
+
+    Regression test for gh-8086: the formula was np.median(np.abs(d)) / 0.6745
+    instead of the correct MAD formula np.median(np.abs(d - np.median(d))) / 0.6745.
+
+    The two are equivalent only when median(d) ≈ 0.  This test uses coefficients
+    with a nonzero median to expose the difference.
+    """
+    from skimage.restoration._denoise import _sigma_est_dwt
+
+    rng = np.random.default_rng(0)
+    # Shift coefficients so their median is far from zero — exposing the bug.
+    detail_coeffs = rng.standard_normal(1000) + 5.0
+    sigma_est = _sigma_est_dwt(detail_coeffs, distribution='Gaussian')
+
+    # Ground-truth: standard deviation of the zero-mean component is 1.0;
+    # with the +5 offset the old formula would severely over-estimate sigma.
+    denom = 0.6745  # scipy.stats.norm.ppf(0.75)
+    sigma_correct = np.median(np.abs(detail_coeffs - np.median(detail_coeffs))) / denom
+    sigma_wrong = np.median(np.abs(detail_coeffs)) / denom
+
+    assert abs(sigma_est - sigma_correct) < abs(sigma_est - sigma_wrong), (
+        "sigma estimate should match MAD formula, not median-of-absolute formula"
+    )
+    assert abs(sigma_est - 1.0) < 0.1, (
+        f"estimated sigma {sigma_est:.3f} is too far from true sigma 1.0"
+    )
+
+
+@xfail_without_pywt
 @pytest.mark.parametrize('channel_axis', [0, 1, 2, -1])
 def test_estimate_sigma_color(channel_axis):
     rstate = np.random.RandomState(1591076970)
