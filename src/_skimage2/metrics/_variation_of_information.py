@@ -87,16 +87,17 @@ def _vi_tables(im_true, im_test, table=None, ignore_labels=()):
         Per-segment conditional entropies of ``im_true`` given ``im_test`` and
         vice-versa.
     """
-    check_shape_equality(im_true, im_test)
-
     if table is None:
+        check_shape_equality(im_true, im_test)
         # normalize, since it is an identity op if already done
         pxy = contingency_table(
             im_true, im_test, ignore_labels=ignore_labels, normalize=True
         )
 
     else:
-        pxy = table
+        if im_true is not None and im_test is not None:
+            check_shape_equality(im_true, im_test)
+        pxy = sparse.csr_array(table) if sparse.isspmatrix(table) else table
 
     # compute marginal probabilities, converting to 1D array
     px = np.ravel(pxy.sum(axis=1))
