@@ -15,7 +15,7 @@ from ._skeletonize_various_cy import (
 )
 
 
-def skeletonize(image, *, method=None):
+def skeletonize(image, *, method=None, mode='constant'):
     """Compute the skeleton of the input image via thinning.
 
     Parameters
@@ -30,6 +30,15 @@ def skeletonize(image, *, method=None):
         Which algorithm to use. Zhang's algorithm [Zha84]_ only works for
         2D images, and is the default for 2D. Lee's algorithm [Lee94]_
         works for 2D or 3D images and is the default for 3D.
+    mode : str, optional
+        The mode parameter determines how the image borders are handled during
+        padding before skeletonization. This is passed to ``numpy.pad``. The
+        default is 'constant', which pads with zeros. Other options include
+        'edge', 'reflect', 'symmetric', 'wrap', etc. See ``numpy.pad`` for
+        more details. This parameter only affects the Lee algorithm
+        (used for 3D images or when explicitly specified).
+
+        .. versionadded:: 0.26
 
     Returns
     -------
@@ -88,7 +97,7 @@ def skeletonize(image, *, method=None):
     elif image.ndim == 3 and method == 'zhang':
         raise ValueError('skeletonize method "zhang" only works for 2D ' 'images.')
     elif image.ndim == 3 or (image.ndim == 2 and method == 'lee'):
-        skeleton = _skeletonize_lee(image)
+        skeleton = _skeletonize_lee(image, mode=mode)
     else:
         raise ValueError(
             f'skeletonize requires a 2D or 3D image as input, ' f'got {image.ndim}D.'
@@ -588,7 +597,7 @@ def _table_lookup(image, table):
     return image
 
 
-def _skeletonize_lee(image):
+def _skeletonize_lee(image, *, mode='constant'):
     """Compute the skeleton of a binary image.
 
     Thinning is used to reduce each connected component in a binary image
@@ -599,6 +608,9 @@ def _skeletonize_lee(image):
     image : ndarray, 2D or 3D
         An image containing the objects to be skeletonized. Zeros or ``False``
         represent background, nonzero values or ``True`` are foreground.
+    mode : str, optional
+        The mode parameter determines how the image borders are handled during
+        padding. This is passed to ``numpy.pad``. The default is 'constant'.
 
     Returns
     -------
@@ -642,7 +654,7 @@ def _skeletonize_lee(image):
     # NB: careful here to not clobber the original *and* minimize copying
     if image.ndim == 2:
         image_o = image_o[np.newaxis, ...]
-    image_o = np.pad(image_o, pad_width=1, mode='constant')  # copies
+    image_o = np.pad(image_o, pad_width=1, mode=mode)  # copies
 
     # do the computation
     image_o = _compute_thin_image(image_o)
