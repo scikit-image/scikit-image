@@ -178,6 +178,13 @@ def _marching_cubes_lewiner(
         level = float(level)
         if level < volume.min() or level > volume.max():
             raise ValueError("Surface level must be within volume data range.")
+    # Nudge level by one float32 ULP when it exactly matches voxel values.
+    # The Cython core uses strict `v > 0` after subtracting the level, so a
+    # corner with value == level produces 0.0 which is classified as "inside".
+    # This inconsistency across shared cube edges causes holes in the mesh.
+    level_f32 = np.float32(level)
+    if np.any(volume == level_f32):
+        level = float(np.nextafter(level_f32, np.float32(np.inf)))
     # spacing
     if len(spacing) != 3:
         raise ValueError("`spacing` must consist of three floats.")
