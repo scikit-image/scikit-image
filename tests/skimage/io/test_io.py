@@ -1,9 +1,9 @@
 import os
 import pathlib
 import tempfile
-import warnings
 
 import numpy as np
+from numpy.testing import assert_allclose
 import pytest
 
 from skimage import io
@@ -38,6 +38,9 @@ def test_stack_basic():
 def test_stack_non_array():
     with pytest.raises(ValueError):
         io.push([[1, 2, 3]])
+
+
+# skimage.io.imread ------------------------------------------------------------
 
 
 def test_imread_file_url():
@@ -116,6 +119,8 @@ def test_failed_temporary_file(monkeypatch, error_class):
     data_path = data_path.replace(os.path.sep, '/')
     image_url = f'file:///{data_path}/camera.png'
     with monkeypatch.context():
+        # Patch `tempfile.NamedTemporaryFile` to raise an error. This attribute
+        # is implicitly called by `imread` for URLs via `.io.file_or_url_context`.
         monkeypatch.setattr(
             tempfile, 'NamedTemporaryFile', _named_tempfile_func(error_class)
         )
@@ -123,52 +128,159 @@ def test_failed_temporary_file(monkeypatch, error_class):
             io.imread(image_url)
 
 
-@pytest.mark.parametrize(
-    # Test `**plugin_args` with `mode`
-    "kwarg",
-    [{"plugin": None}, {"plugin": "imageio"}, {"mode": "r"}],
-)
-def test_plugin_deprecation_on_imread(kwarg):
-    path = fetch("data/multipage.tif")
-    regex = ".*use `imageio` or other I/O packages directly.*"
-    # tifffile raises "DeprecationWarning: Setting the shape on a NumPy array
-    # has been deprecated in NumPy 2.5" on NumPy >= 2.5 — suppress until fixed
-    # upstream. TODO: remove once tifffile > 2026.4.11 is released.
-    with pytest.warns(FutureWarning, match=regex) as record:
-        # tifffile raises "DeprecationWarning: Setting the shape on a NumPy array
-        # has been deprecated in NumPy 2.5" — suppress until fixed upstream.
-        # TODO: remove once tifffile > 2026.4.11 is released.
-        with warnings.catch_warnings():
-            warnings.filterwarnings(
-                "ignore",
-                message="Setting the shape on a NumPy array",
-                category=DeprecationWarning,
-            )
-            io.imread(path, **kwarg)
-    assert len(record) == 1
-    assert_stacklevel(record, offset=-2)
+def test_imread_color_as_gray():
+    img = io.imread(fetch('data/color.png'), as_gray=True)
+    assert img.ndim == 2
+    assert img.dtype == np.float64
+    assert type(img) is np.ndarray
+
+
+def test_imread_camera_as_gray():
+    img = io.imread(fetch('data/camera.png'), as_gray=True)
+    # check that conversion does not happen for a gray image
+    assert np.dtype(img.dtype).char in np.typecodes['AllInteger']
+    assert type(img) is np.ndarray
+
+
+def test_imread_uint16():
+    expected = np.load(fetch('data/chessboard_GRAY_U8.npy'))
+    img = io.imread(fetch('data/chessboard_GRAY_U16.tif'))
+    assert np.issubdtype(img.dtype, np.uint16)
+    assert_allclose(img, expected)
+
+
+def test_imread_uint16_big_endian():
+    expected = np.load(fetch('data/chessboard_GRAY_U8.npy'))
+    img = io.imread(fetch('data/chessboard_GRAY_U16B.tif'))
+    assert img.dtype.type == np.uint16
+    assert_allclose(img, expected)
+
+
+def test_imread_multipage_rgb_tif():
+    img = io.imread(fetch('data/multipage_rgb.tif'))
+    assert img.shape == (2, 10, 10, 3), img.shape
+
+
+def test_imread_handle():
+    expected = np.load(fetch('data/chessboard_GRAY_U8.npy'))
+    with open(fetch('data/chessboard_GRAY_U16.tif'), 'rb') as fh:
+        img = io.imread(fh)
+    assert img.dtype == np.uint16
+    assert_allclose(img, expected)
+
+
+def test_imread_palette():
+    img = io.imread(fetch('data/palette_color.png'))
+    assert img.ndim == 3
+
+
+def test_extreme_palette():
+    img = io.imread(fetch('data/green_palette.png'))
+    assert img.shape == (240, 320, 3)
+
+
+def test_imread_truncated_jpg():
+    # imageio>2.0 uses Pillow / PIL to try and load the file.
+    # Oddly, PIL explicitly raises a OSError when the file read fails.
+    with pytest.raises(OSError, match=r"Truncated File Read"):
+        io.imread(fetch('data/truncated.jpg'))
+
+
+def test_imread_bilevel():
+    expected = np.zeros((10, 10), bool)
+    expected[::2] = 1
+    img = io.imread(fetch('data/checker_bilevel.png'))
+    assert_array_equal(img.astype(bool), expected)
+
+
+def test_imread_separate_channels(tmp_path):
+    # Test that imread returns RGB(A) values contiguously even when they are
+    # stored in separate planes.
+    img = np.random.RandomState(819070535).rand(3, 16, 8)
+
+    img_path = tmp_path / "image.tif"
+    io.imsave(img_path, img)
+    img = io.imread(img_path)
+    os.remove(img_path)
+    assert img.shape == (16, 8, 3), img.shape
+
+
+# skimage.io.imsave ------------------------------------------------------------
 
 
 @pytest.mark.parametrize(
-    # Test `**plugin_args` with `mode`
-    "kwarg",
-    [{"plugin": None}, {"plugin": "imageio"}, {"append": False}],
+    "shape,dtype",
+    [
+        # float32, float64 can't be saved as PNG and raise
+        # uint32 is not roundtripping properly
+        ((10, 10), np.uint8),
+        ((10, 10), np.uint16),
+        ((10, 10, 2), np.uint8),
+        ((10, 10, 3), np.uint8),
+        ((10, 10, 4), np.uint8),
+    ],
 )
-def test_plugin_deprecation_on_imsave(kwarg, tmp_path):
-    path = tmp_path / "test.tif"
-    array = np.array([0, 1], dtype=float)
-    regex = ".*use `imageio` or other I/O packages directly.*"
-    with pytest.warns(FutureWarning, match=regex) as record:
-        io.imsave(path, array, **kwarg)
-    assert len(record) == 1
-    assert_stacklevel(record, offset=-2)
+def test_imsave_roundtrip(shape, dtype, tmp_path):
+    if np.issubdtype(dtype, np.floating):
+        min_ = 0
+        max_ = 1
+    else:
+        min_ = 0
+        max_ = np.iinfo(dtype).max
+    expected = np.linspace(min_, max_, endpoint=True, num=np.prod(shape), dtype=dtype)
+    expected = expected.reshape(shape)
+    file_path = tmp_path / "roundtrip.png"
+    io.imsave(file_path, expected)
+    actual = io.imread(file_path)
+    np.testing.assert_array_almost_equal(actual, expected)
 
 
-@pytest.mark.parametrize("kwarg", [{"plugin": None}, {"plugin": "imageio"}])
-def test_plugin_deprecation_on_imread_collection(kwarg):
-    pattern = data_dir + "*.png"
-    regex = ".*use `imageio` or other I/O packages directly.*"
-    with pytest.warns(FutureWarning, match=regex) as record:
-        io.imread_collection(pattern, **kwarg)
-    assert len(record) == 1
-    assert_stacklevel(record, offset=-2)
+@pytest.mark.parametrize("shape", [(10, 10), (10, 10, 3), (10, 10, 4)])
+def test_imsave_roundtrip_uint8(shape, tmp_path):
+    rng = np.random.RandomState(3174584926)
+    img = np.ones(shape, dtype=np.uint8) * rng.rand(*shape)
+    img = (img * 255).astype(np.uint8)
+    expected = img.astype(np.int32)
+
+    img_path = tmp_path / "image.png"
+
+    io.imsave(img_path, img)
+    actual = io.imread(img_path)
+    assert_allclose(expected, actual)
+
+
+@pytest.mark.parametrize(
+    "shape,seed",
+    [
+        ((10, 10), 2500279270),
+        ((10, 10, 3), 2439842967),
+        ((10, 10, 4), 337224809),
+    ],
+)
+@pytest.mark.parametrize(
+    "dtype", [np.uint8, np.uint16, np.float32, np.int16, np.float64]
+)
+@pytest.mark.parametrize("use_pathlib", [False, True])
+def test_imsave_roundtrip_tiff(shape, seed, dtype, use_pathlib, tmp_path):
+    rng = np.random.RandomState(seed)
+    img = rng.rand(*shape)
+    if not np.issubdtype(dtype, np.floating):
+        img = img * np.iinfo(dtype).max
+    img = img.astype(dtype)
+
+    img_path = tmp_path / "image.tif"
+    if not use_pathlib:
+        img_path = str(img_path)
+
+    io.imsave(img_path, img, check_contrast=False)
+    actual = io.imread(img_path)
+    assert_array_equal(img, actual)
+
+
+def test_imsave_bool_array(tmp_path):
+    a = np.zeros((5, 5), bool)
+    a[2, 2] = True
+    img_path = tmp_path / "image.png"
+    with pytest.warns(UserWarning, match=r'.* is a boolean image') as record:
+        io.imsave(img_path, a)
+    assert_stacklevel(record)

@@ -2,7 +2,6 @@
 Testing utilities.
 """
 
-import os
 import platform  # noqa: F401
 import re
 import struct
@@ -10,10 +9,8 @@ import sys  # noqa: F401
 import functools
 import inspect
 import threading
-from tempfile import NamedTemporaryFile
 
 import numpy as np  # noqa: F401
-from numpy import testing
 from numpy.testing import (  # noqa: F401
     TestCase,
     assert_,
@@ -107,97 +104,6 @@ def doctest_skip_parser(func):
         new_lines.append(code)
     func.__doc__ = "\n".join(new_lines)
     return func
-
-
-def roundtrip(image, plugin, suffix):
-    """Save and read an image using a specified plugin"""
-    # TODO Undo inlined imports once available in _skimage2 namespace
-    from skimage import io
-
-    if '.' not in suffix:
-        suffix = '.' + suffix
-    with NamedTemporaryFile(suffix=suffix, delete=False) as temp_file:
-        fname = temp_file.name
-    io.imsave(fname, image, plugin=plugin)
-    new = io.imread(fname, plugin=plugin)
-    try:
-        os.remove(fname)
-    except Exception:
-        pass
-    return new
-
-
-def color_check(plugin, fmt='png'):
-    """Check roundtrip behavior for color images.
-
-    All major input types should be handled as ubytes and read
-    back correctly.
-    """
-    # TODO Undo inlined imports once available in _skimage2 namespace
-    from skimage import data
-    from skimage.util import img_as_ubyte, img_as_float, img_as_int, img_as_uint
-
-    img = img_as_ubyte(data.chelsea())
-    r1 = roundtrip(img, plugin, fmt)
-    testing.assert_allclose(img, r1)
-
-    img2 = img > 128
-    r2 = roundtrip(img2, plugin, fmt)
-    testing.assert_allclose(img2, r2.astype(bool))
-
-    img3 = img_as_float(img)
-    r3 = roundtrip(img3, plugin, fmt)
-    testing.assert_allclose(r3, img)
-
-    img4 = img_as_int(img)
-    if fmt.lower() in (('tif', 'tiff')):
-        img4 -= 100
-        r4 = roundtrip(img4, plugin, fmt)
-        testing.assert_allclose(r4, img4)
-    else:
-        r4 = roundtrip(img4, plugin, fmt)
-        testing.assert_allclose(r4, img_as_ubyte(img4))
-
-    img5 = img_as_uint(img)
-    r5 = roundtrip(img5, plugin, fmt)
-    testing.assert_allclose(r5, img)
-
-
-def mono_check(plugin, fmt='png'):
-    """Check the roundtrip behavior for images that support most types.
-
-    All major input types should be handled.
-    """
-    from skimage import data
-    from skimage.util import img_as_ubyte, img_as_float, img_as_int, img_as_uint
-
-    img = img_as_ubyte(data.moon())
-    r1 = roundtrip(img, plugin, fmt)
-    testing.assert_allclose(img, r1)
-
-    img2 = img > 128
-    r2 = roundtrip(img2, plugin, fmt)
-    testing.assert_allclose(img2, r2.astype(bool))
-
-    img3 = img_as_float(img)
-    r3 = roundtrip(img3, plugin, fmt)
-    if r3.dtype.kind == 'f':
-        testing.assert_allclose(img3, r3)
-    else:
-        testing.assert_allclose(r3, img_as_uint(img))
-
-    img4 = img_as_int(img)
-    if fmt.lower() in (('tif', 'tiff')):
-        img4 -= 100
-        r4 = roundtrip(img4, plugin, fmt)
-        testing.assert_allclose(r4, img4)
-    else:
-        r4 = roundtrip(img4, plugin, fmt)
-        testing.assert_allclose(r4, img_as_uint(img4))
-
-    img5 = img_as_uint(img)
-    r5 = roundtrip(img5, plugin, fmt)
-    testing.assert_allclose(r5, img5)
 
 
 def fetch(data_filename, prefix=None):

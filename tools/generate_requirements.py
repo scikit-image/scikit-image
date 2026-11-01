@@ -31,7 +31,6 @@ def generate_environment_yml(req_sections: dict[str, list[str]]) -> None:
         'build': 'python-build',
         'kaleido': 'python-kaleido',
         'sphinx_design': 'sphinx-design',
-        'astropy': 'astropy-base',
         'matplotlib': 'matplotlib-base',
     }
     pip_only = ['docstub']
