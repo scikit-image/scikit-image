@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 from skimage.morphology import diameter_closing
 from skimage import data
 from skimage.morphology import closing
-from skimage.morphology import square
+from skimage.morphology import footprint_rectangle
 
 datasets = {
     'retina': {
@@ -79,7 +79,7 @@ for dataset in datasets.values():
 
     # A morphological closing removes all dark structures that cannot
     # contain a structuring element of a certain size.
-    closed = closing(image, square(diameter))
+    closed = closing(image, footprint_rectangle((diameter, diameter)))
 
     # Again we calculate the difference to the original image.
     tophat = closed - image

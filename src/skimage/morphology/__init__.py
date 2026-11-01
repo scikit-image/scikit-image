@@ -10,7 +10,6 @@ from .isotropic import (
 )
 from .footprints import (
     ball,
-    cube,
     diamond,
     disk,
     ellipse,
@@ -20,8 +19,6 @@ from .footprints import (
     octagon,
     octahedron,
     pad_footprint,
-    rectangle,
-    square,
     star,
 )
 from ..measure._label import label
