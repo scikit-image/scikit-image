@@ -43,9 +43,9 @@ def join_segmentations(s1, s2, return_mapping: bool = False):
     >>> m1
     ArrayMap(array([0, 1, 2, 3, 4, 5]), array([0, 0, 1, 1, 2, 2]))
     >>> np.all(m1[j] == s1)
-    True
+    np.True_
     >>> np.all(m2[j] == s2)
-    True
+    np.True_
     """
     if s1.shape != s2.shape:
         raise ValueError(
@@ -137,9 +137,9 @@ def relabel_sequential(label_field, offset=1):
     >>> np.array(inv)
     array([ 0,  1,  5,  8, 42, 99])
     >>> (fw[label_field] == relab).all()
-    True
+    np.True_
     >>> (inv[relab] == label_field).all()
-    True
+    np.True_
     >>> relab, fw, inv = relabel_sequential(label_field, offset=5)
     >>> relab
     array([5, 5, 6, 6, 7, 9, 8])

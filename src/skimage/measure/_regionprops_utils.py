@@ -359,9 +359,9 @@ def euler_number(image, connectivity=None):
     ...                    [0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1],
     ...                    [0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1]])
     >>> ski.measure.euler_number(SAMPLE)
-    0
+    np.int64(0)
     >>> ski.measure.euler_number(SAMPLE, connectivity=1)
-    2
+    np.int64(2)
     """
 
     # as image can be a label image, transform it to binary
@@ -444,9 +444,9 @@ def perimeter(image, neighborhood=4):
     >>> img_coins = ski.data.coins() > 110
     >>> # total perimeter of all objects in the image
     >>> ski.measure.perimeter(img_coins, neighborhood=4)  # doctest: +ELLIPSIS
-    7796.867...
+    np.float64(7796.867...)
     >>> ski.measure.perimeter(img_coins, neighborhood=8)  # doctest: +ELLIPSIS
-    8806.268...
+    np.float64(8806.268...)
 
     """
     if image.ndim != 2:
@@ -526,9 +526,9 @@ def perimeter_crofton(image, directions=4):
     >>> img_coins = ski.data.coins() > 110
     >>> # total perimeter of all objects in the image
     >>> ski.measure.perimeter_crofton(img_coins, directions=2)  # doctest: +ELLIPSIS
-    8144.578...
+    np.float64(8144.578...)
     >>> ski.measure.perimeter_crofton(img_coins, directions=4)  # doctest: +ELLIPSIS
-    7837.077...
+    np.float64(7837.077...)
     """
     if image.ndim != 2:
         raise NotImplementedError('`perimeter_crofton` supports 2D images only')

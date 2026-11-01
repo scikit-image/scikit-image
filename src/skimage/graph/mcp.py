@@ -85,4 +85,4 @@ def route_through_array(array, start, end, fully_connected=True, geometric=True)
         mcp_class = MCP
     m = mcp_class(array, fully_connected=fully_connected)
     costs, traceback_array = m.find_costs([start], [end])
-    return m.traceback(end), costs[end]
+    return m.traceback(end), float(costs[end])

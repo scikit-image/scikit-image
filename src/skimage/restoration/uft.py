@@ -328,9 +328,9 @@ def image_quad_norm(inarray):
     --------
     >>> input = np.ones((5, 5))
     >>> image_quad_norm(ufft2(input)) == np.sum(np.abs(input)**2)
-    True
+    np.True_
     >>> image_quad_norm(ufft2(input)) == image_quad_norm(urfft2(input))
-    True
+    np.True_
     """
     # If there is a Hermitian symmetry
     if inarray.shape[-1] != inarray.shape[-2]:
@@ -375,7 +375,7 @@ def ir2tf(imp_resp, shape, dim=None, is_real=True):
     Examples
     --------
     >>> np.all(np.array([[4, 0], [0, 0]]) == ir2tf(np.ones((2, 2)), (2, 2)))
-    True
+    np.True_
     >>> ir2tf(np.ones((2, 2)), (512, 512)).shape == (512, 257)
     True
     >>> ir2tf(np.ones((2, 2)), (512, 512), is_real=False).shape == (512, 512)
@@ -435,9 +435,9 @@ def laplacian(ndim, shape, is_real=True):
     --------
     >>> tf, ir = laplacian(2, (32, 32))
     >>> np.all(ir == np.array([[0, -1, 0], [-1, 4, -1], [0, -1, 0]]))
-    True
+    np.True_
     >>> np.all(tf == ir2tf(ir, (32, 32)))
-    True
+    np.True_
     """
     impr = np.zeros([3] * ndim)
     for dim in range(ndim):
