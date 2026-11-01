@@ -72,7 +72,7 @@ def normalized_root_mse(image_true, image_test, *, normalization='euclidean'):
 
               NRMSE = RMSE * sqrt(N) / || im_true ||
 
-          where || . || denotes the Frobenius norm and ``N = im_true.size``.
+          where ``|| . ||`` denotes the Frobenius norm and ``N = im_true.size``.
           This result is equivalent to::
 
               NRMSE = || im_true - im_test || / || im_true ||.
