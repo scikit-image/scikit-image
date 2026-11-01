@@ -1342,12 +1342,20 @@ def ransac(
     seeded number generator with the ``rng`` argument to ``ransac``.
 
     >>> ransac_model, inliers = ransac(data, EllipseModel, 20, 3, max_trials=50)
-    >>> np.abs(np.round(ransac_model.center))  # doctest: +SKIP
-    array([20., 30.])
-    >>> np.abs(np.round(ransac_model.axis_lengths))  # doctest: +SKIP
-    array([10., 6.])
-    >>> np.abs(np.round(ransac_model.theta))    # doctest: +SKIP
-    2.0
+
+    >>> clean_model = EllipseModel.from_estimate(data[4:])
+
+    >>> np.allclose(
+    ...     ransac_model.center,
+    ...     clean_model.center
+    ... )
+    True
+
+    >>> np.allclose(
+    ...     ransac_model.axis_lengths,
+    ...     clean_model.axis_lengths
+    ... )
+    True
     >>> inliers  # doctest: +SKIP
     array([False, False, False, False,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
