@@ -124,6 +124,7 @@ def _local_binary_pattern(cnp.float64_t[:, ::1] image,
 
     # pre-allocate arrays for computation
     cdef cnp.float64_t[::1] texture = np.zeros(P, dtype=np.float64)
+    cdef cnp.float64_t epsilon = 1e-12
     cdef signed char[::1] signed_texture = np.zeros(P, dtype=np.int8)
     cdef int[::1] rotation_chain = np.zeros(P, dtype=np.int32)
 
@@ -150,7 +151,7 @@ def _local_binary_pattern(cnp.float64_t[:, ::1] image,
                             b'C', 0, &texture[i])
                 # signed / thresholded texture
                 for i in range(P):
-                    if texture[i] - image[r, c] >= 0:
+                    if texture[i] - image[r, c] >= -epsilon:
                         signed_texture[i] = 1
                     else:
                         signed_texture[i] = 0
