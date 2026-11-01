@@ -1,5 +1,6 @@
 extensions = [
   '_hough_transform',
+  '_hough_transform_ridge',
   '_radon_transform',
   '_warps_cy'
 ]
