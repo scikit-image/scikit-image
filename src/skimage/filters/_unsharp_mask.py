@@ -132,8 +132,9 @@ def unsharp_mask(
             vrange = [0.0, 1.0]
 
     if channel_axis is not None:
+        channel_axis = channel_axis % fimg.ndim
         result = np.empty_like(fimg, dtype=float_dtype)
-        for channel in range(image.shape[channel_axis]):
+        for channel in range(fimg.shape[channel_axis]):
             sl = utils.slice_at_axis(channel, channel_axis)
             result[sl] = _unsharp_mask_single_channel(fimg[sl], radius, amount, vrange)
         return result
