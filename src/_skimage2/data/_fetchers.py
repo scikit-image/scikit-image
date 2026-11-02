@@ -773,11 +773,10 @@ def lily():
     """Lily of the valley plant stem.
 
     This plant stem on a pre-prepared slide was imaged with confocal
-    fluorescence microscopy (Nikon C1 inverted microscope).
-    Image shape is (922, 922, 4), with 922x922 pixels in X-Y. The four
-    channels comprise three fluorescence channels and one diascopic
-    differential interference contrast (DIC) channel.
-    Real-space voxel size is 1.24 microns in X-Y.
+    fluorescence microscopy (Nikon C1 inverted microscope).  The image
+    shape is (922, 922, 4). The four channels comprise three
+    fluorescence channels and one diascopic differential interference
+    contrast (DIC) channel.  Real-space voxel size is 1.24 microns.
     The 12-bit image data are stored as unsigned 16-bit integers.
 
     Notes
@@ -790,6 +789,7 @@ def lily():
     -------
     lily : ndarray of shape (922, 922, 4) and dtype uint16
         Lily 2D multichannel image.
+
     """
     return _load("data/lily.tif")
 
