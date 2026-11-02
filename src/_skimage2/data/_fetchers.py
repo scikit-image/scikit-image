@@ -774,10 +774,11 @@ def lily():
 
     This plant stem on a pre-prepared slide was imaged with confocal
     fluorescence microscopy (Nikon C1 inverted microscope).
-    Image shape is (922, 922, 4). That is 922x922 pixels in X-Y,
-    with 4 color channels.
+    Image shape is (922, 922, 4), with 922x922 pixels in X-Y. The four
+    channels comprise three fluorescence channels and one diascopic
+    differential interference contrast (DIC) channel.
     Real-space voxel size is 1.24 microns in X-Y.
-    Data type is unsigned 16-bit integers.
+    The 12-bit image data are stored as unsigned 16-bit integers.
 
     Notes
     -----
