@@ -19,7 +19,13 @@ from ._regionprops_utils import (
     perimeter_crofton,
 )
 
-__all__ = ['regionprops', 'euler_number', 'perimeter', 'perimeter_crofton']
+__all__ = [
+    'RegionProperties',
+    'regionprops',
+    'euler_number',
+    'perimeter',
+    'perimeter_crofton',
+]
 
 
 # All values in this PROPS dict correspond to current scikit-image property

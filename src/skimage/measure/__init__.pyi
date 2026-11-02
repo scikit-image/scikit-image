@@ -6,6 +6,7 @@ __all__ = [
     'find_contours',
     'regionprops',
     'regionprops_table',
+    'RegionProperties',
     'perimeter',
     'perimeter_crofton',
     'euler_number',
@@ -48,6 +49,7 @@ from ._regionprops import (
     perimeter_crofton,
     euler_number,
     regionprops_table,
+    RegionProperties,
 )
 from ._polygon import approximate_polygon, subdivide_polygon
 from .pnpoly import points_in_poly, grid_points_in_poly
