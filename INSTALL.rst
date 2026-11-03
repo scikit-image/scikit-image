@@ -153,7 +153,7 @@ To suggest a change in these instructions,
 Installing scikit-image for contributors
 ========================================
 
-See the :doc:`contributor installation guide </development/install>` for
+See the :doc:`development setup guide </development/install>` for
 instructions on setting up a development environment, then the
 :doc:`contributing guide </development/contribute>` for how to contribute to
 scikit-image.
