@@ -31,6 +31,7 @@ _ski2_imread_collection_wrapper = imread_collection_wrapper
 def imread_collection_wrapper(imread):
     ski2_imread_collection = _ski2_imread_collection_wrapper(imread)
 
+    # Reuse the implementation wrapper's docstring and signature.
     @functools.wraps(ski2_imread_collection)
     def imread_collection(load_pattern, conserve_memory=True):
         return ImageCollection(

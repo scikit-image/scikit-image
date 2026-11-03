@@ -23,11 +23,12 @@ __all__ = [
 
 from skimage._doctest_adapters import adapt_doctests
 
+# Keep these as the implementation objects: `_Ski2ImageCollection` and
+# `DEPRECATED` are identity-checked; `deprecate_parameter` needs no shim.
 adapt_doctests(
     globals(),
     skip_names=(
         '_Ski2ImageCollection',
-        'ImageCollection',
         'DEPRECATED',
         'deprecate_parameter',
     ),

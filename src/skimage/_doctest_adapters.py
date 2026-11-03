@@ -6,10 +6,11 @@ _skimage2 import data``. `skimage` shims call :func:`adapt_doctests` so
 
 :func:`adapt_doctests` never modifies implementation objects from
 ``_skimage2``.  It returns copies of functions when their doctests need
-rewriting.  For classes, it always returns a subclass with the shim
-``__module__``, so shim modules can safely patch the class without mutating the
-implementation.  We rewrite docstrings on the subclass when they contain
-``_skimage2`` / ``skimage2`` doctest references.
+rewriting.  For classes not already owned by a ``skimage`` shim, it returns a
+subclass with the shim ``__module__``, so shim modules can safely patch the
+class without mutating the implementation.  Objects already owned by another
+``skimage`` shim pass through unchanged.  We rewrite docstrings on subclasses
+when they contain ``_skimage2`` / ``skimage2`` doctest references.
 
 :func:`adapt_doctests` also copies ``__doctest_requires__`` and
 ``__doctest_skip__`` from ``_skimage2`` implementation modules onto the shim
@@ -132,8 +133,14 @@ def _make_inheritor(old_class, doc, mod_name):
 
 
 def _is_from_shim(obj, shim_module: str):
-    """True if `obj` owned by `shim_module`"""
+    """True if `obj` is owned by `shim_module`."""
     return getattr(obj, '__module__', None) == shim_module
+
+
+def _is_from_skimage_shim(obj):
+    """True if `obj` is owned by a `skimage` shim module."""
+    module = getattr(obj, '__module__', None)
+    return isinstance(module, str) and module.startswith('skimage.')
 
 
 def _adapt_obj_doctest(obj, shim_module: str):
@@ -142,18 +149,17 @@ def _adapt_obj_doctest(obj, shim_module: str):
     If a function needs a modified docstring, we return a copy of that
     function, with the modified docstring.
 
-    If `obj` is a class defined outside `shim_module` (and therefore imported
-    into the module), we always return a subclass so any later shim-only
-    patches do not mutate the implementation. Class and method docstrings are
-    rewritten when they contain ``_skimage2`` / ``skimage2`` doctest
-    references.
+    If `obj` is a class not already owned by a ``skimage`` shim, we always return
+    a subclass so later shim-only patches do not mutate the implementation.
+    Class and method docstrings are rewritten when they contain ``_skimage2`` /
+    ``skimage2`` doctest references. Objects already owned by a ``skimage`` shim
+    pass through unchanged.
 
     If no docstring modifications are necessary for a function, or `obj` is
-    neither a function nor a class, we return the original object.  We do not
-    change classes already owned by `shim_module`.
+    neither a function nor a class, we return the original object.
     """
-    # Do not adapt anything that is defined in this module.
-    if _is_from_shim(obj, shim_module):
+    # Do not adapt objects already owned by a ``skimage`` shim.
+    if _is_from_skimage_shim(obj):
         return obj
     original_doc = getattr(obj, '__doc__', None)
     adapted_doc = _adapt_doctest_doc(original_doc)
@@ -171,8 +177,8 @@ def adapt_doctests(
 ) -> None:
     """Adapt docstrings for callables and classes exported from a shim module
 
-    Classes imported into `ns` are always replaced with a subclass owned by
-    the shim module.  That protects the underlying implementation from any
+    Classes not already owned by a ``skimage`` shim are replaced with a subclass
+    owned by the shim module. That protects the underlying implementation from
     later patches in the shim, because changes are on the subclass.
 
     ns : Mapping

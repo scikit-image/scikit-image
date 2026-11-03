@@ -1,5 +1,6 @@
 import functools
 
+# `_Ski2RAG` keeps the implementation class for the identity check in `_as_v1_rag`.
 from _skimage2.graph._rag import (
     RAG as _Ski2RAG,
     RAG as RAG,
@@ -28,13 +29,13 @@ adapt_doctests(
 )
 
 
-def _as_v1_rag(graph):
-    """Return `graph` as an instance of the `skimage` RAG subclass."""
+def _as_v1_rag(rag):
+    """Return `rag` as an instance of the `skimage` RAG subclass."""
     # The implementation constructs the `_skimage2` RAG class; the shim
     # subclass adds no attributes, so we can swap the class in place.
-    if type(graph) is _Ski2RAG:
-        graph.__class__ = RAG
-    return graph
+    if type(rag) is _Ski2RAG:
+        rag.__class__ = RAG
+    return rag
 
 
 @functools.wraps(rag_mean_color)

@@ -64,13 +64,13 @@ for _c in (
     EuclideanTransform,
     SimilarityTransform,
 ):
-    # Stop if we've picked up skimage2 class, rather than our own subclass.
+    # The patches must apply to shim classes, not implementation classes.
     assert _is_from_shim(_c, __name__)
     # Patch __add__ to deal with subclass algorithm.
     _c.__add__ = _ptf__add__
 
 
-# Refill transforms from our own (shimmed) transform definitions.
+# Repopulate transforms from our own (shimmed) transform definitions.
 TRANSFORMS = {k: globals()[v.__name__] for k, v in _SKI2_TRANSFORMS.items()}
 
 # `PiecewiseAffineTransform` builds its `affines` with this class.

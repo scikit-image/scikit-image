@@ -387,6 +387,15 @@ def test_adapt_obj_doctest_leaves_shim_local_class_unchanged():
     assert out is AlreadyShimmed
 
 
+def test_adapt_obj_doctest_leaves_other_skimage_shim_class_unchanged():
+    class AlreadyShimmed:
+        pass
+
+    AlreadyShimmed.__module__ = 'skimage.tests.first_shim'
+    out = _adapt_obj_doctest(AlreadyShimmed, shim_module='skimage.tests.second_shim')
+    assert out is AlreadyShimmed
+
+
 def test_adapt_doctests_wraps_class_without_mutating_impl_add():
     """Shim-only __add__ patch must not land on the implementation class."""
 

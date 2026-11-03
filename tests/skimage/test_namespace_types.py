@@ -42,8 +42,8 @@ def _camera_path(ns):
     return os.path.join(ns.data.data_dir, 'camera.png')
 
 
-# Every v1 function and method that returns an object of a class that v1
-# subclasses.  The v1 API does not grow, so this list stays complete.
+# Factory paths that return objects whose classes have v1 shims. Keep this list
+# aligned with the v1 factories as they are added.
 # (case name, subpackage, class name, factory taking the namespace module)
 CASES = [
     (
