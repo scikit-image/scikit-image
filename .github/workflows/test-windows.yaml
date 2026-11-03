@@ -9,45 +9,29 @@ concurrency:
 
 permissions:
   contents: read
-  issues: write
 
 env:
-  CC: ccache clang
-  CXX: ccache clang
-  CCACHE_DIR: C:\ccache
   # Hosted Windows runners intermittently ship an unreadable Tcl install, so
   # matplotlib's default TkAgg backend fails; see gh-8194.
   MPLBACKEND: Agg
 
 jobs:
-  test_skimage_windows:
-    name: windows-cp${{ matrix.python-version }}-${{ matrix.OPTIONS_NAME }}
+  build_skimage_windows:
+    name: build-windows-cp${{ matrix.python-version }}
     runs-on: windows-latest
+    permissions:
+      contents: read
+      issues: write
 
     strategy:
-      # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        include:
-          - python-version: "3.12"
-            MINIMUM_REQUIREMENTS: 0
-            OPTIONAL_DEPS: 0
-            OPTIONS_NAME: "default"
-          - python-version: "3.12"
-            MINIMUM_REQUIREMENTS: 0
-            OPTIONAL_DEPS: 1
-            OPTIONS_NAME: "optional-deps"
-          - python-version: "3.13"
-            PIP_FLAGS: "--pre"
-            OPTIONS_NAME: "pre"
-          - python-version: "3.14"
-            MINIMUM_REQUIREMENTS: 0
-            OPTIONAL_DEPS: 0
-            OPTIONS_NAME: "default"
-          - python-version: "3.15"
-            MINIMUM_REQUIREMENTS: 0
-            OPTIONAL_DEPS: 0
-            OPTIONS_NAME: "default"
+        python-version: ["3.12", "3.14", "3.15"]
+
+    env:
+      CC: ccache clang
+      CXX: ccache clang
+      CCACHE_DIR: C:\ccache
 
     steps:
       - name: Checkout scikit-image
@@ -64,8 +48,6 @@ jobs:
           cache: "pip"
 
       - name: Install build dependencies
-        env:
-          PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
         shell: bash
         run: |
           source .github/scripts/setup-build-env.sh
@@ -88,31 +70,93 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: ccache-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.OPTIONS_NAME }}-${{ github.sha }}
+          key: ccache-${{ runner.os }}-${{ matrix.python-version }}-${{ github.sha }}
           restore-keys: |
-            ccache-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.OPTIONS_NAME }}-
+            ccache-${{ runner.os }}-${{ matrix.python-version }}-
             ccache-${{ runner.os }}-
 
       - name: Zero ccache stats
         shell: bash
         run: ccache --zero-stats
 
-      - name: Build skimage
+      - name: Build wheel
         shell: bash
         run: |
-          spin build
+          python -m build --wheel --no-isolation --skip-dependency-check
 
       - name: Show ccache stats
         if: always()
         shell: bash
         run: ccache --show-stats
 
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: skimage-windows-${{ matrix.python-version }}
+          path: ./dist/*.whl
+          if-no-files-found: error
+
+      - name: "Job has failed: reporting"
+        if: ${{ failure() && github.ref == 'refs/heads/main' }}
+        uses: JasonEtco/create-an-issue@1b14a70e4d8dc185e5cc76d3bec9eab20257b2c5 # v2.9.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BUILD_TYPE: "windows tests"
+        with:
+          filename: .github/MAIN_FAIL_TEMPLATE.md
+          update_existing: true
+
+  test_skimage_windows:
+    name: windows-cp${{ matrix.python-version }}-${{ matrix.OPTIONS_NAME }}
+    needs: [build_skimage_windows]
+    runs-on: windows-latest
+    permissions:
+      contents: read
+      issues: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - python-version: "3.12"
+            OPTIONAL_DEPS: 0
+            OPTIONS_NAME: "default"
+          - python-version: "3.12"
+            OPTIONAL_DEPS: 1
+            OPTIONS_NAME: "optional-deps"
+          - python-version: "3.14"
+            OPTIONAL_DEPS: 0
+            OPTIONS_NAME: "default"
+          - python-version: "3.15"
+            OPTIONAL_DEPS: 0
+            OPTIONS_NAME: "default"
+
+    steps:
+      - name: Checkout scikit-image
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: ${{ matrix.python-version}}
+          allow-prereleases: true
+          cache-dependency-path: "requirements/*.txt"
+          cache: "pip"
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: skimage-windows-${{ matrix.python-version }}
+          path: ./dist
+
+      - name: Install wheel and spin
+        shell: bash
+        run: |
+          pip install dist/*.whl spin
+
       - name: Install test dependencies
         env:
-          MINIMUM_REQUIREMENTS: ${{ matrix.MINIMUM_REQUIREMENTS }}
           OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
-          WITHOUT_POOCH: ${{ matrix.WITHOUT_POOCH }}
-          PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
         shell: bash
         run: |
           source .github/scripts/setup-test-env.sh
@@ -140,7 +184,7 @@ jobs:
 
       - name: Doctest skimage2 migration
         run: |
-          spin run -- python doc/tools/run_migration_doctests.py
+          python doc/tools/run_migration_doctests.py
 
       - name: "Job has failed: reporting"
         if: ${{ failure() && github.ref == 'refs/heads/main' }}
