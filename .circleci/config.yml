@@ -84,4 +84,8 @@ workflows:
   version: 2
   build-doc:
     jobs:
-      - doc
+      # build-docs.yaml builds the docs on main
+      - doc:
+          filters:
+            branches:
+              ignore: main
