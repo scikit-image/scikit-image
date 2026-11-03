@@ -87,11 +87,11 @@ Example `version number`
 
       git add src/skimage/data/_fetchers.py doc/source/_static/docversions.js doc/source/_static/version_switcher.json
 
-- Update ``__version__`` in ``src/skimage/__init__.py``.
+- Update ``__version__`` in ``src/_skimage2/_version.py``.
 
 - Commit changes:
 
-      git add src/skimage/__init__.py ${NOTES}
+      git add src/_skimage2/_version.py ${NOTES}
       git commit -m "Designate ${VERSION} release"
 
 - Tag the release in git:
@@ -120,11 +120,11 @@ Example `version number`
       - close old milestone
       - ensure new milestone exists (perhaps setting due date)
 
-- Update ``__version__`` in ``src/skimage/__init__.py``.
+- Update ``__version__`` in ``src/_skimage2/_version.py``.
 
 - Commit changes:
 
-      git add src/skimage/__init__.py
+      git add src/_skimage2/_version.py
       git commit -m 'Bump version'
       git push origin main
 
