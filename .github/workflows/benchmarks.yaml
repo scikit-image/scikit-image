@@ -28,12 +28,12 @@ jobs:
     steps:
       # We need the full repo to avoid this issue
       # https://github.com/actions/checkout/issues/23
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
 
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         name: Install Python
         with:
           python-version: "3.12"
@@ -59,7 +59,7 @@ jobs:
           ccache -z
 
       - name: "Restore ccache"
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .ccache
           key: ccache-${{ secrets.CACHE_VERSION }}-${{ steps.prepare-ccache.outputs.key }}-${{ steps.prepare-ccache.outputs.timestamp }}
@@ -110,7 +110,7 @@ jobs:
         if: always()
         run: cp benchmarks/README_CI.md benchmarks.log .asv/results/
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: asv-benchmark-results-${{ runner.os }}
