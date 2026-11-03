@@ -307,6 +307,11 @@ select = "cp315*"
 # Drop this override once they publish for 3.15.
 test-extras = ["test"]
 
+[[tool.cibuildwheel.overrides]]
+select = "*-manylinux_riscv64"
+# Most optional dependencies have no riscv64 wheels on PyPI
+test-extras = ["test"]
+
 [tool.cibuildwheel.linux]
 environment = {PIP_PREFER_BINARY=1, SKIMAGE_LINK_FLAGS="-Wl,--strip-debug"}
 
