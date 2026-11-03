@@ -19,7 +19,13 @@ from ._regionprops_utils import (
     perimeter_crofton,
 )
 
-__all__ = ['regionprops', 'euler_number', 'perimeter', 'perimeter_crofton']
+__all__ = [
+    'RegionProperties',
+    'regionprops',
+    'euler_number',
+    'perimeter',
+    'perimeter_crofton',
+]
 
 
 # All values in this PROPS dict correspond to current scikit-image property
@@ -1484,7 +1490,35 @@ def _parse_docs():
     matches = re.finditer(arg_regex, doc, flags=re.DOTALL)
     prop_doc = {m.group(1): textwrap.dedent(m.group(2)) for m in matches}
 
+    # Each property docstring must define the references it cites.
+    refs = _parse_references(doc)
+    for name, text in prop_doc.items():
+        cited = dict.fromkeys(re.findall(r'\[(\w+)\]_', text))
+        if entries := [refs[label] for label in cited if label in refs]:
+            prop_doc[name] = (
+                text.rstrip() + '\n\nReferences\n----------\n' + '\n'.join(entries)
+            )
+
     return prop_doc
+
+
+def _parse_references(doc):
+    """Return the entries of the References section in `doc`, by label."""
+    import re
+    import textwrap
+
+    match = re.search(
+        r'References\n\s*-+\n(.*?)(?=\n\s*\n\s*\S+\n\s*-+\n|\Z)', doc, flags=re.DOTALL
+    )
+    if match is None:
+        return {}
+    section = textwrap.dedent(match.group(1))
+    entries = re.split(r'^(?=\.\. \[)', section, flags=re.MULTILINE)
+    return {
+        re.match(r'\.\. \[(\w+)\]', e).group(1): e.rstrip()
+        for e in entries
+        if e.startswith('.. [')
+    }
 
 
 def _install_properties_docs():
