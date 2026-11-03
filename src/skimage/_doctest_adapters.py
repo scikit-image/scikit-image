@@ -9,7 +9,9 @@ _skimage2 import data``. `skimage` shims call :func:`adapt_doctests` so
 rewriting.  For classes, it always returns a subclass with the shim
 ``__module__``, so shim modules can safely patch the class without mutating the
 implementation.  We rewrite docstrings on the subclass when they contain
-``_skimage2`` / ``skimage2`` doctest references.
+``_skimage2`` / ``skimage2`` doctest references.  Each subclass also inherits
+from the shim subclasses of its implementation parents, so that the shim
+classes have the same hierarchy as the implementation classes.
 
 :func:`adapt_doctests` also copies ``__doctest_requires__`` and
 ``__doctest_skip__`` from ``_skimage2`` implementation modules onto the shim
@@ -23,6 +25,7 @@ import functools
 import inspect
 import re
 import types
+import typing
 from collections.abc import Mapping
 
 # For namespace injection
@@ -103,8 +106,29 @@ def _proc_line(line):
     return line
 
 
+# Shim subclasses, by implementation class.
+_SHIM_CLASSES: dict[type, type] = {}
+
+
+def _shim_parents(old_class):
+    """Return shim subclasses of the nearest shimmed ancestors of `old_class`"""
+    parents = []
+    for base in old_class.__bases__:
+        shimmed = next((c for c in base.__mro__ if c in _SHIM_CLASSES), None)
+        if shimmed is not None and _SHIM_CLASSES[shimmed] not in parents:
+            parents.append(_SHIM_CLASSES[shimmed])
+    # Keep only the most derived parents, so that the MRO is consistent.
+    return tuple(
+        p for p in parents if not any(q is not p and issubclass(q, p) for q in parents)
+    )
+
+
 def _make_inheritor(old_class, doc, mod_name):
     """Return new class that inherits from `old_class`
+
+    The new class also inherits from the shim subclasses of the nearest
+    shimmed ancestors of `old_class`.  If `old_class` is a protocol, the new
+    class is a protocol too.
 
     Parameters
     ----------
@@ -120,14 +144,16 @@ def _make_inheritor(old_class, doc, mod_name):
     new_class: type
         A class that inherits from `old_class`
     """
-    new_class = types.new_class(
-        old_class.__name__,
-        (old_class,),  # Inherits from original.
-        {},
-    )
+    bases = (old_class,) + _shim_parents(old_class)  # Inherits from original.
+    if getattr(old_class, '_is_protocol', False):
+        bases += (typing.Protocol,)
+    new_class = types.new_class(old_class.__name__, bases, {})
     new_class.__doc__ = doc
     new_class.__module__ = mod_name
     new_class.__qualname__ = old_class.__qualname__
+    if getattr(old_class, '_is_runtime_protocol', False):
+        new_class = typing.runtime_checkable(new_class)
+    _SHIM_CLASSES[old_class] = new_class
     return new_class
 
 
@@ -142,15 +168,15 @@ def _adapt_obj_doctest(obj, shim_module: str):
     If a function needs a modified docstring, we return a copy of that
     function, with the modified docstring.
 
-    If `obj` is a class defined outside `shim_module` (and therefore imported
+    If `obj` is a class defined outside `skimage` (and therefore imported
     into the module), we always return a subclass so any later shim-only
     patches do not mutate the implementation. Class and method docstrings are
     rewritten when they contain ``_skimage2`` / ``skimage2`` doctest
-    references.
+    references.  All shim modules share one subclass for each class.
 
     If no docstring modifications are necessary for a function, or `obj` is
     neither a function nor a class, we return the original object.  We do not
-    change classes already owned by `shim_module`.
+    change classes defined in `skimage`.
     """
     # Do not adapt anything that is defined in this module.
     if _is_from_shim(obj, shim_module):
@@ -160,6 +186,10 @@ def _adapt_obj_doctest(obj, shim_module: str):
     if inspect.isroutine(obj) and original_doc != adapted_doc:
         return _copy_callable(obj, adapted_doc, shim_module)
     if inspect.isclass(obj):
+        if obj in _SHIM_CLASSES:  # One shim subclass for each class.
+            return _SHIM_CLASSES[obj]
+        if obj.__module__.split('.')[0] == 'skimage':  # Already a shim class.
+            return obj
         return _adapt_class(obj, adapted_doc, shim_module)
     return obj
 
@@ -193,7 +223,11 @@ def adapt_doctests(
     # Collect implementing modules for functions / classes in namespace.
     # Adapt doctests for functions / classes.
     impl_modules: set[types.ModuleType] = set()
-    for name, obj in list(ns.items()):
+    # Classes with shorter MROs first, so that parents are shimmed first.
+    items = sorted(
+        ns.items(), key=lambda kv: len(kv[1].__mro__) if inspect.isclass(kv[1]) else 0
+    )
+    for name, obj in items:
         if name.startswith('__') or name in skip or inspect.ismodule(obj):
             continue
         if not (inspect.isroutine(obj) or inspect.isclass(obj)):

@@ -1672,6 +1672,9 @@ class PiecewiseAffineTransform(_GeometricTransform):
     FailedEstimationAccessError: No attribute "params" for failed estimation ...
     """
 
+    # Class of the transforms in `affines` and `inverse_affines`.
+    _affine_class = AffineTransform
+
     def __init__(self):
         self._tesselation = None
         self._inverse_tesselation = None
@@ -1723,10 +1726,10 @@ class PiecewiseAffineTransform(_GeometricTransform):
         self.affines = []
         messages = []
         for i, tri in enumerate(self._tesselation.simplices):
-            affine = AffineTransform.from_estimate(src[tri, :], dst[tri, :])
+            affine = self._affine_class.from_estimate(src[tri, :], dst[tri, :])
             if not affine:
                 messages.append(f'Failure at forward simplex {i}: {affine}')
-                affine = AffineTransform(fail_matrix.copy())
+                affine = self._affine_class(fail_matrix.copy())
             self.affines.append(affine)
 
         # inverse piecewise affine
@@ -1735,10 +1738,10 @@ class PiecewiseAffineTransform(_GeometricTransform):
         # find affine mapping from source positions to destination
         self.inverse_affines = []
         for i, tri in enumerate(self._inverse_tesselation.simplices):
-            affine = AffineTransform.from_estimate(dst[tri, :], src[tri, :])
+            affine = self._affine_class.from_estimate(dst[tri, :], src[tri, :])
             if not affine:
                 messages.append(f'Failure at inverse simplex {i}: {affine}')
-                affine = AffineTransform(fail_matrix.copy())
+                affine = self._affine_class(fail_matrix.copy())
             self.inverse_affines.append(affine)
 
         return '; '.join(messages) if messages else None
@@ -2727,11 +2730,16 @@ def estimate_transform(ttype, src, dst, *args, **kwargs):
     FailedEstimationAccessError: No attribute "params" for failed estimation ...
 
     """
+    return _estimate_transform(TRANSFORMS, ttype, src, dst, *args, **kwargs)
+
+
+def _estimate_transform(transforms, ttype, src, dst, *args, **kwargs):
+    """Implement `estimate_transform` with transform classes `transforms`."""
     ttype = ttype.lower()
-    if ttype not in TRANSFORMS:
+    if ttype not in transforms:
         raise ValueError(f'the transformation type \'{ttype}\' is not implemented')
 
-    return TRANSFORMS[ttype].from_estimate(src, dst, *args, **kwargs)
+    return transforms[ttype].from_estimate(src, dst, *args, **kwargs)
 
 
 def matrix_transform(coords, matrix):
