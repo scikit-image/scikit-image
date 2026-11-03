@@ -18,7 +18,7 @@ from _skimage2.morphology import (
 from _skimage2._shared.testing import assert_stacklevel
 
 
-img = color.rgb2gray(data.astronaut())
+img = color.rgb2gray(data.fetch_astronaut())
 bw_img = img > 100 / 255.0
 
 

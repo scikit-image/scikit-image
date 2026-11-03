@@ -20,7 +20,7 @@ def test_color_image_unsupported_error():
 @pytest.mark.parametrize('dtype', ['float32', 'float64', 'uint8', 'int'])
 def test_normal_mode(dtype):
     """Verify the computed BRIEF descriptors with expected for normal mode."""
-    img = data.coins().astype(dtype)
+    img = data.fetch_coins().astype(dtype)
 
     keypoints = corner_peaks(
         corner_harris(img), min_distance=5, threshold_abs=0, threshold_rel=0.1
@@ -50,7 +50,7 @@ def test_normal_mode(dtype):
 @pytest.mark.parametrize('dtype', ['float32', 'float64', 'uint8', 'int'])
 def test_uniform_mode(dtype):
     """Verify the computed BRIEF descriptors with expected for uniform mode."""
-    img = data.coins().astype(dtype)
+    img = data.fetch_coins().astype(dtype)
 
     keypoints = corner_peaks(
         corner_harris(img), min_distance=5, threshold_abs=0, threshold_rel=0.1

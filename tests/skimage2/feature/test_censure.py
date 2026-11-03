@@ -1,13 +1,13 @@
 import numpy as np
 from _skimage2._shared.testing import assert_array_equal
-from _skimage2.data import moon
+from _skimage2.data import fetch_moon
 from _skimage2.feature import CENSURE
 from _skimage2._shared.testing import run_in_parallel
 from _skimage2._shared import testing
 from _skimage2.transform import rescale
 
 
-img = moon()
+img = fetch_moon()
 
 
 def test_censure_on_rectangular_images():

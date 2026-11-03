@@ -26,7 +26,7 @@ def slice_along_axes(image, slices, axes=None, copy=False):
     Examples
     --------
     >>> from _skimage2 import data
-    >>> img = data.camera()
+    >>> img = data.fetch_camera()
     >>> img.shape
     (512, 512)
     >>> cropped_img = slice_along_axes(img, [(0, 100)])
