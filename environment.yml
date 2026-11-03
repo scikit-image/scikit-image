@@ -22,7 +22,7 @@ dependencies:
   # data
   - pooch>=1.6.0
   # developer
-  - pre-commit
+  - prek
   - ipython
   # asv
   - asv
