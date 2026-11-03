@@ -35,6 +35,7 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+      # Find cibuildwheel releases at https://github.com/pypa/cibuildwheel/releases
       - uses: pypa/cibuildwheel@adba99c781d3746d38b3a09b1cf797965bcb7fe6 # v4.3.0
         env:
           CIBW_BUILD: ${{ matrix.build }}
