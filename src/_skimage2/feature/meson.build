@@ -31,8 +31,7 @@ _brief_pythran = custom_target('_brief_pythran',
 py3.extension_module('brief_cy',
   [_brief_pythran],
   cpp_args: cpp_args_pythran,
-  include_directories: [incdir_pythran],
-  dependencies: [py3_dep, np_dep],
+  dependencies: [py3_dep, np_dep, pythran_dep],
   install: true,
   subdir: '_skimage2/feature'
 )
@@ -46,8 +45,7 @@ _hessian_det_appx_pythran = custom_target('_hessian_det_appx_pythran',
 py3.extension_module('_hessian_det_appx',
   [_hessian_det_appx_pythran],
   cpp_args: cpp_args_pythran,
-  include_directories: [incdir_pythran],
-  dependencies: [py3_dep, np_dep],
+  dependencies: [py3_dep, np_dep, pythran_dep],
   install: true,
   subdir: '_skimage2/feature'
 )
