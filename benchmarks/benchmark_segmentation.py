@@ -5,6 +5,7 @@ See "Writing benchmarks" in the asv docs for more information.
 
 import numpy as np
 from numpy.lib import NumpyVersion as Version
+from scipy import ndimage as ndi
 
 import skimage
 from skimage import data, filters, segmentation
@@ -150,3 +151,36 @@ class Watershed:
 
     def peakmem_watershed(self, seed_count, connectivity, compactness):
         watershed(self.image, seed_count, connectivity, compactness=compactness)
+
+
+class WatershedLine:
+    """Watershed with and without watershed lines on a smooth image.
+
+    On smooth images, ``watershed_line=True`` once re-expanded pixels that
+    were already part of a line, so the queue grew far beyond the image size.
+    """
+
+    param_names = ["watershed_line"]
+    params = [False, True]
+
+    def setup(self, *args):
+        rng = np.random.default_rng(1)
+        self.image = ndi.gaussian_filter(rng.random((128, 128)), 4)
+        self.markers, _ = ndi.label(self.image < np.percentile(self.image, 2))
+
+    def time_watershed(self, watershed_line):
+        watershed(
+            self.image, self.markers, connectivity=2, watershed_line=watershed_line
+        )
+
+    def peakmem_reference(self, *args):
+        """Provide reference for memory measurement with empty benchmark.
+
+        See `Watershed.peakmem_reference`.
+        """
+        pass
+
+    def peakmem_watershed(self, watershed_line):
+        watershed(
+            self.image, self.markers, connectivity=2, watershed_line=watershed_line
+        )
