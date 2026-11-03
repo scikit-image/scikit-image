@@ -87,15 +87,21 @@ pd.DataFrame(props)
 import plotly
 import plotly.express as px
 import plotly.graph_objects as go
-from skimage import data, filters, measure, morphology
+from skimage import data, filters, measure, segmentation
 
 img = data.coins()
-# Binary image, post-process the binary mask and compute labels
-threshold = filters.threshold_otsu(img)
-mask = img > threshold
-mask = morphology.remove_small_objects(mask, max_size=49)
-mask = morphology.remove_small_holes(mask, max_size=49)
-labels = measure.label(mask)
+# Sobel edge detection
+edges = filters.sobel(img)
+
+# Create markers from intensity thresholds
+markers = np.zeros_like(img)
+foreground, background = 1, 2
+markers[img < 30.0] = background  # dark = background seed
+markers[img > 150.0] = foreground  # bright = foreground seed
+
+# Watershed segmentation
+ws = segmentation.watershed(edges, markers)
+labels = measure.label(ws == foreground)
 
 fig = px.imshow(img, binary_string=True)
 fig.update_traces(hoverinfo='skip')  # hover is only for label info
@@ -105,13 +111,13 @@ properties = ['area', 'eccentricity', 'perimeter', 'intensity_mean']
 
 # For each label, add a filled scatter trace for its contour,
 # and display the properties of the label in the hover of this trace.
-for index in range(1, labels.max()):
-    label_i = props[index].label
+for prop in props:
+    label_i = prop.label
     contour = measure.find_contours(labels == label_i, 0.5)[0]
     y, x = contour.T
     hoverinfo = ''
     for prop_name in properties:
-        hoverinfo += f'<b>{prop_name}: {getattr(props[index], prop_name):.2f}</b><br>'
+        hoverinfo += f'<b>{prop_name}: {getattr(prop, prop_name):.2f}</b><br>'
     fig.add_trace(
         go.Scatter(
             x=x,
