@@ -18,10 +18,12 @@ jobs:
     with:
       python-version: 3.12
 
+  # Covers installation from the sdist; see ISOLATED_BUILD
   build-linux-313:
     uses: ./.github/workflows/_build_linux_for_python_x.yaml
     with:
       python-version: 3.13
+      ISOLATED_BUILD: 1
 
   build-linux-arm64-312:
     uses: ./.github/workflows/_build_linux_for_python_x.yaml
@@ -66,8 +68,6 @@ jobs:
           - PYTHONOPTIMIZE: 2
             WITHOUT_POOCH: 1
             OPTIONS_NAME: "optimize-and-no-pooch"
-          - INSTALL_FROM_SDIST: 1
-            OPTIONS_NAME: "install-from-sdist"
           - MINIMUM_REQUIREMENTS: 1
             OPTIONAL_DEPS: 0
             EAGER_IMPORT: 1
@@ -86,7 +86,6 @@ jobs:
       WITHOUT_POOCH: ${{ matrix.WITHOUT_POOCH }}
       PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
       PYTHONOPTIMIZE: ${{ matrix.PYTHONOPTIMIZE }}
-      INSTALL_FROM_SDIST: ${{ matrix.INSTALL_FROM_SDIST }}
 
   test-linux-313:
     name: test-linux-cp3.13-main

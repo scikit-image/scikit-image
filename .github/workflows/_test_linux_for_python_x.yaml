@@ -36,10 +36,6 @@ on:
         required: false
         type: string
         default: 0
-      INSTALL_FROM_SDIST:
-        required: false
-        type: string
-        default: 0
 
 jobs:
   test-linux:
@@ -71,18 +67,10 @@ jobs:
           path: ./dist
 
       - name: Install wheel
-        if: ${{ inputs.INSTALL_FROM_SDIST != 1 }}
         env:
           PIP_FLAGS: ${{ inputs.PIP_FLAGS }}
         run: |
           pip install $PIP_FLAGS dist/*.whl
-
-      - name: Install sdist
-        if: ${{ inputs.INSTALL_FROM_SDIST == 1 }}
-        env:
-          PIP_FLAGS: ${{ inputs.PIP_FLAGS }}
-        run: |
-          pip install dist/*.tar.gz
 
       - name: Install spin
         run: pip install spin
