@@ -312,18 +312,16 @@ def rgb2hsv(rgb, *, channel_axis=-1):
     out_s[delta == 0.0] = 0.0
 
     # -- H channel
-    # red is max
-    idx = arr[..., 0] == out_v
-    out[idx, 0] = (arr[idx, 1] - arr[idx, 2]) / delta[idx]
-
-    # green is max
-    idx = arr[..., 1] == out_v
-    out[idx, 0] = 2.0 + (arr[idx, 2] - arr[idx, 0]) / delta[idx]
-
-    # blue is max
-    idx = arr[..., 2] == out_v
-    out[idx, 0] = 4.0 + (arr[idx, 0] - arr[idx, 1]) / delta[idx]
-    out_h = (out[..., 0] / 6.0) % 1.0
+    # Compute hue with a single nested ``np.where`` instead of three boolean
+    # masks plus gather/scatter passes. Testing blue, then green, then red
+    # preserves the original red < green < blue tie-break (last write wins).
+    r, g, b = arr[..., 0], arr[..., 1], arr[..., 2]
+    out_h = np.where(
+        b == out_v,
+        4.0 + (r - g) / delta,
+        np.where(g == out_v, 2.0 + (b - r) / delta, (g - b) / delta),
+    )
+    out_h = (out_h / 6.0) % 1.0
     out_h[delta == 0.0] = 0.0
 
     np.seterr(**old_settings)
@@ -394,19 +392,21 @@ def hsv2rgb(hsv, *, channel_axis=-1):
     t = arr[..., 2] * (1 - (1 - f) * arr[..., 1])
     v = arr[..., 2]
 
-    hi = np.stack([hi, hi, hi], axis=-1).astype(np.uint8) % 6
-    out = np.choose(
-        hi,
-        np.stack(
-            [
-                np.stack((v, t, p), axis=-1),
-                np.stack((q, v, p), axis=-1),
-                np.stack((p, v, t), axis=-1),
-                np.stack((p, q, v), axis=-1),
-                np.stack((t, p, v), axis=-1),
-                np.stack((v, p, q), axis=-1),
-            ]
-        ),
+    # Select each sector's channel values with ``take_along_axis`` instead of
+    # building six full-size RGB arrays and running ``np.choose``. Each per-
+    # channel table is indexed by the sector, giving identical output with
+    # less memory traffic.
+    sector = (hi.astype(np.uint8) % 6)[..., np.newaxis]
+    red = np.stack([v, q, p, p, t, v], axis=-1)
+    green = np.stack([t, v, v, q, p, p], axis=-1)
+    blue = np.stack([p, p, t, v, v, q], axis=-1)
+    out = np.stack(
+        [
+            np.take_along_axis(red, sector, axis=-1)[..., 0],
+            np.take_along_axis(green, sector, axis=-1)[..., 0],
+            np.take_along_axis(blue, sector, axis=-1)[..., 0],
+        ],
+        axis=-1,
     )
 
     return out
