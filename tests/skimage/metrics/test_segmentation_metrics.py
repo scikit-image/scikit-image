@@ -93,3 +93,25 @@ def test_are():
         adapted_rand_error(im_true, im_test, alpha=1.01)
     with pytest.raises(ValueError):
         adapted_rand_error(im_true, im_test, alpha=-0.01)
+
+
+@pytest.mark.parametrize("sparse_type", sparse_types)
+def test_are_precomputed_table(sparse_type):
+    im_true = np.array([[2, 1], [1, 2]])
+    im_test = np.array([[1, 2], [3, 1]])
+    table = contingency_table(
+        im_true, im_test, ignore_labels=[0], sparse_type=sparse_type
+    )
+    result = adapted_rand_error(table=table)
+    expected = adapted_rand_error(im_true, im_test)
+    assert_almost_equal(result, expected)
+
+
+@pytest.mark.parametrize("sparse_type", sparse_types)
+def test_vi_precomputed_table(sparse_type):
+    im_true = np.array([[2, 1], [1, 2]])
+    im_test = np.array([[1, 2], [3, 1]])
+    table = contingency_table(im_true, im_test, normalize=True, sparse_type=sparse_type)
+    result = variation_of_information(table=table)
+    expected = variation_of_information(im_true, im_test)
+    assert_almost_equal(result, expected)
