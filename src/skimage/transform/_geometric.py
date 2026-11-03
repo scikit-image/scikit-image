@@ -1,3 +1,5 @@
+import functools
+
 from _skimage2.transform._geometric import (
     AffineTransform as AffineTransform,
     EssentialMatrixTransform as EssentialMatrixTransform,
@@ -19,6 +21,7 @@ from _skimage2.transform._geometric import (  # noqa: F401
     _apply_homogeneous,
     _calc_center_normalize,
     _center_and_normalize_points,
+    _estimate_transform,
     _euler_rotation_matrix,
 )
 
@@ -69,6 +72,15 @@ for _c in (
 
 # Refill transforms from our own (shimmed) transform definitions.
 TRANSFORMS = {k: globals()[v.__name__] for k, v in _SKI2_TRANSFORMS.items()}
+
+# `PiecewiseAffineTransform` builds its `affines` with this class.
+PiecewiseAffineTransform._affine_class = AffineTransform
+
+
+@functools.wraps(estimate_transform)
+def estimate_transform(ttype, src, dst, *args, **kwargs):
+    return _estimate_transform(TRANSFORMS, ttype, src, dst, *args, **kwargs)
+
 
 __all__ = [
     'AffineTransform',

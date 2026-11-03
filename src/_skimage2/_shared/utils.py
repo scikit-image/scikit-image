@@ -774,7 +774,7 @@ def _update_from_estimate_docstring(cls):
     inherited_cmeth = getattr(cls, 'from_estimate')
 
     def from_estimate(cls, *args, **kwargs):
-        return inherited_cmeth(*args, **kwargs)
+        return inherited_cmeth.__func__(cls, *args, **kwargs)
 
     inherited_class_name = inherited_cmeth.__qualname__.split('.')[-2]
 
