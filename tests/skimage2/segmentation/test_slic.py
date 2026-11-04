@@ -615,6 +615,74 @@ def test_start_label_fix():
     assert superp.min() == start_label
 
 
+def test_enforce_connectivity_isolated_small_3d_component_keeps_own_label():
+    """An undersized 3D region with no processed neighbor must not share its
+    label with a later, disconnected component (gh-8295).
+    """
+    from _skimage2.segmentation._slic import _enforce_label_connectivity_cython
+
+    # Scan order hits the 2-voxel blob first. Masked voxels stay at 0.
+    labels = np.zeros((5, 5, 5), dtype=np.intp)
+    labels[0, 0, 0] = 2
+    labels[0, 0, 1] = 2
+    labels[2:5, 2:5, 2:5] = 3
+
+    connected = _enforce_label_connectivity_cython(
+        labels, min_size=5, max_size=100, start_label=1
+    )
+
+    small = connected[0, 0, :2]
+    large = connected[2:5, 2:5, 2:5]
+    assert np.all(small == small[0])
+    assert np.all(large == large.flat[0])
+    assert small[0] != 0
+    assert large.flat[0] != 0
+    assert small[0] != large.flat[0]
+
+
+def test_slic_3d_mask_enforce_connectivity_no_duplicate_labels():
+    """Each non-mask label from 3D SLIC must be a single connected component.
+
+    Regression for gh-8295, where an undersized supervoxel could reuse the
+    label of a disconnected region when ``mask`` and
+    ``enforce_connectivity`` were used together.
+    """
+    from scipy import ndimage as ndi
+
+    from _skimage2.measure import label as connected_label
+
+    shape = (24, 24, 24)
+    rng = np.random.default_rng(27)
+    volume = rng.integers(0, 255, size=shape + (3,)).astype(np.float64)
+    volume = ndi.uniform_filter(volume, size=(3, 3, 3, 1))
+
+    mask_rng = np.random.default_rng(27 + 1000)
+    mask = np.ones(shape, dtype=bool)
+    for _ in range(6):
+        z, y, x = (mask_rng.integers(0, shape[i] - 2) for i in range(3))
+        mask[z : z + 2, y : y + 2, x : x + 2] = False
+
+    start_label = 1
+    segments = slic(
+        volume,
+        mask=mask,
+        n_segments=80,
+        compactness=5,
+        enforce_connectivity=True,
+        min_size_factor=0.3,
+        max_size_factor=3,
+        start_label=start_label,
+        channel_axis=-1,
+    )
+
+    bg_label = start_label - 1
+    for lbl in np.unique(segments):
+        if lbl == bg_label:
+            continue
+        _, n_pieces = connected_label(segments == lbl, connectivity=1, return_num=True)
+        assert n_pieces == 1, f"label {lbl} has {n_pieces} disconnected components"
+
+
 def test_raises_ValueError_if_input_has_NaN():
     img = np.zeros((4, 5), dtype=float)
     img[2, 3] = np.nan
