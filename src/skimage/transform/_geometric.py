@@ -1,3 +1,5 @@
+import functools
+
 from _skimage2.transform._geometric import (
     AffineTransform as AffineTransform,
     EssentialMatrixTransform as EssentialMatrixTransform,
@@ -19,20 +21,14 @@ from _skimage2.transform._geometric import (  # noqa: F401
     _apply_homogeneous,
     _calc_center_normalize,
     _center_and_normalize_points,
+    _estimate_transform,
     _euler_rotation_matrix,
 )
 
 
-from skimage._doctest_adapters import adapt_doctests, _is_from_shim
+from skimage._doctest_adapters import adapt_doctests
 
 adapt_doctests(globals())
-
-# Use the fact that geometric classes inherit from ABC, and therefore implement
-# 'register', to fix inheritance checks after subclassing in adapt_doctests.
-ProjectiveTransform.register(AffineTransform)
-ProjectiveTransform.register(EuclideanTransform)
-EuclideanTransform.register(SimilarityTransform)
-FundamentalMatrixTransform.register(EssentialMatrixTransform)
 
 
 # ProjectiveTransform and child instance __add__ results will fail without
@@ -51,24 +47,21 @@ def _ptf__add__(self, other):
     return tform_class(other.params @ self.params)
 
 
-# We need to define __add__ for each projective transform, as the shims inherit
-# from their original classes, so e.g.shim AffineTransform no longer inherits
-# directly from shim ProjectiveTransform, and therefore, doesn't pick up
-# `__add__` defined on ProjectiveTransform.
-for _c in (
-    ProjectiveTransform,
-    AffineTransform,
-    EuclideanTransform,
-    SimilarityTransform,
-):
-    # Stop if we've picked up skimage2 class, rather than our own subclass.
-    assert _is_from_shim(_c, __name__)
-    # Patch __add__ to deal with subclass algorithm.
-    _c.__add__ = _ptf__add__
+# The other projective transforms inherit `__add__` from the shim
+# ProjectiveTransform.
+ProjectiveTransform.__add__ = _ptf__add__
 
 
 # Refill transforms from our own (shimmed) transform definitions.
 TRANSFORMS = {k: globals()[v.__name__] for k, v in _SKI2_TRANSFORMS.items()}
+
+PiecewiseAffineTransform._affine_class = AffineTransform
+
+
+@functools.wraps(estimate_transform)
+def estimate_transform(ttype, src, dst, *args, **kwargs):
+    return _estimate_transform(TRANSFORMS, ttype, src, dst, *args, **kwargs)
+
 
 __all__ = [
     'AffineTransform',

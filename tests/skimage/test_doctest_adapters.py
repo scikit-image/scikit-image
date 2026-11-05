@@ -1,5 +1,6 @@
 import sys
 import types
+import typing
 
 import numpy as np
 
@@ -429,3 +430,68 @@ def test_geometric_shim_does_not_patch_skimage2_affine_add():
     tform2 = Ski2Similarity(scale=0.1, rotation=0.9)
     combined = tform1 + tform2
     assert isinstance(combined, Ski2Projective)
+
+
+def test_adapt_doctests_matches_class_hierarchy():
+    class Base:
+        pass
+
+    class Child(Base):
+        pass
+
+    class GrandChild(Child):
+        pass
+
+    # Parents in another shim module, and listed after their children.
+    ns_base = {'Base': Base, '__name__': 'skimage.tests.example_base'}
+    ns = {
+        'GrandChild': GrandChild,
+        'Child': Child,
+        '__name__': 'skimage.tests.example_shim',
+    }
+    adapt_doctests(ns_base)
+    adapt_doctests(ns)
+    ShimBase, ShimChild, ShimGrandChild = ns_base['Base'], ns['Child'], ns['GrandChild']
+    assert issubclass(ShimChild, ShimBase)
+    assert issubclass(ShimGrandChild, ShimChild)
+    assert issubclass(ShimGrandChild, GrandChild)
+    assert not issubclass(ShimBase, ShimChild)
+
+
+def test_adapt_doctests_shares_shim_class_between_modules():
+    class Impl:
+        pass
+
+    ns1 = {'Impl': Impl, '__name__': 'skimage.tests.example_one'}
+    ns2 = {'Impl': Impl, '__name__': 'skimage.tests.example_two'}
+    adapt_doctests(ns1)
+    adapt_doctests(ns2)
+    assert ns1['Impl'] is not Impl
+    assert ns2['Impl'] is ns1['Impl']
+
+
+def test_adapt_doctests_leaves_skimage_classes_unchanged():
+    class Native:
+        pass
+
+    Native.__module__ = 'skimage.tests.example_other'
+    ns = {'Native': Native, '__name__': 'skimage.tests.example_shim'}
+    adapt_doctests(ns)
+    assert ns['Native'] is Native
+
+
+def test_adapt_doctests_keeps_runtime_protocol():
+    @typing.runtime_checkable
+    class Proto(typing.Protocol):
+        def run(self): ...
+
+    class Impl:
+        def run(self):
+            pass
+
+    ns = {'Proto': Proto, '__name__': 'skimage.tests.example_shim'}
+    adapt_doctests(ns)
+    assert ns['Proto'] is not Proto
+    assert isinstance(Impl(), ns['Proto'])
+    assert issubclass(Impl, ns['Proto'])
+    assert not isinstance(object(), ns['Proto'])
