@@ -93,15 +93,25 @@ labels = ski.segmentation.watershed(-distance, markers, mask=mask)
 print(f'Objects after watershed: {labels.max()}')
 
 #####################################################################
-# The two segmentations below make the difference visible: nuclei that end
-# up with a single label after thresholding receive distinct labels after
-# the watershed, so the number of objects increases.
+# The two images below show the labels of a zoomed-in region, because the
+# whole field of view is too crowded to see where nuclei touch. A nucleus
+# that is merged with its neighbour shares their color after thresholding,
+# and gets its own color after the watershed, so the clumps that were split
+# stand out.
+
+rows, cols = slice(380, 495), slice(20, 135)
 
 fig, axes = plt.subplots(1, 2, figsize=(8, 4))
-axes[0].imshow(ski.color.label2rgb(labeled_mask, bg_label=0))
-axes[0].set_title(f'Connected components ({labeled_mask.max()})')
-axes[1].imshow(ski.color.label2rgb(labels, bg_label=0))
-axes[1].set_title(f'Watershed ({labels.max()})')
+axes[0].imshow(
+    ski.color.label2rgb(
+        labeled_mask[rows, cols], image=image[rows, cols] / 255.0, bg_label=0
+    )
+)
+axes[0].set_title('Connected components (touching nuclei merged)')
+axes[1].imshow(
+    ski.color.label2rgb(labels[rows, cols], image=image[rows, cols] / 255.0, bg_label=0)
+)
+axes[1].set_title('Watershed (touching nuclei split)')
 for ax in axes:
     ax.set_axis_off()
 fig.tight_layout()
