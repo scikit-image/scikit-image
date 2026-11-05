@@ -385,21 +385,36 @@ def test_denoise_nl_means_2d(fast_mode):
     sigma = 0.3
     img += sigma * np.random.RandomState(2657472497).standard_normal(img.shape)
     img_f32 = img.astype('float32')
+    h_array = np.full(img.shape, 0.2)
     for s in [sigma, 0]:
-        denoised = restoration.denoise_nl_means(
+        denoised_scaler = restoration.denoise_nl_means(
             img, 7, 5, 0.2, fast_mode=fast_mode, channel_axis=None, sigma=s
         )
         # make sure noise is reduced
-        assert img.std() > denoised.std()
+        assert img.std() > denoised_scaler.std()
 
-        denoised_f32 = restoration.denoise_nl_means(
+        denoised_f32_scaler = restoration.denoise_nl_means(
             img_f32, 7, 5, 0.2, fast_mode=fast_mode, channel_axis=None, sigma=s
         )
         # make sure noise is reduced
-        assert img.std() > denoised_f32.std()
+        assert img.std() > denoised_f32_scaler.std()
+
+        if fast_mode != True:
+            denoised_array = restoration.denoise_nl_means(
+                img, 7, 5, h_array, fast_mode=fast_mode, channel_axis=None, sigma=s
+            )
+            # make sure noise is reduced
+            assert denoised_scaler.std() == denoised_array.std()
+
+            denoised_f32_array = restoration.denoise_nl_means(
+                img_f32, 7, 5, h_array, fast_mode=fast_mode, channel_axis=None, sigma=s
+            )
+            # make sure noise is reduced
+            assert denoised_f32_array.std() == denoised_f32_scaler.std()
+            assert np.allclose(denoised_f32_array, denoised_array, atol=1e-2)
 
         # Check single precision result
-        assert np.allclose(denoised_f32, denoised, atol=1e-2)
+        assert np.allclose(denoised_f32_scaler, denoised_scaler, atol=1e-2)
 
 
 @pytest.mark.parametrize('fast_mode', [False, True])
@@ -412,6 +427,7 @@ def test_denoise_nl_means_2d_multichannel(fast_mode, n_channels, dtype):
         (img,) * 2,
     )  # 6 channels
     img = img.astype(dtype)
+    h_array = np.full(img.shape[:2], 0.75)
 
     # add some random noise
     sigma = 0.1
@@ -436,8 +452,92 @@ def test_denoise_nl_means_2d_multichannel(fast_mode, n_channels, dtype):
             denoised[..., :n_channels], img[..., :n_channels]
         )
 
+    if fast_mode != True:
+        for s in [sigma, 0]:
+            psnr_noisy_array = peak_signal_noise_ratio(
+                img[..., :n_channels], imgn[..., :n_channels]
+            )
+            denoised_array = restoration.denoise_nl_means(
+                imgn[..., :n_channels],
+                3,
+                5,
+                h=h_array * sigma,
+                fast_mode=fast_mode,
+                channel_axis=-1,
+                sigma=s,
+            )
+            psnr_denoised_array = peak_signal_noise_ratio(
+                denoised_array[..., :n_channels], img[..., :n_channels]
+            )
+            assert psnr_denoised_array > psnr_noisy_array
+
         # make sure noise is reduced
         assert psnr_denoised > psnr_noisy
+
+
+def test_denoise_nl_means_2d_spatially_varying_h():
+    img = np.zeros((40, 40))
+    img[10:-10, 10:-10] = 1.0
+    sigma = 0.3
+    img += sigma * np.random.RandomState(2657472497).standard_normal(img.shape)
+
+    h_array = np.empty(img.shape)
+    mid = img.shape[1] // 2
+    h_array[:, :mid] = 0.1
+    h_array[:, mid:] = 0.4
+
+    denoised = restoration.denoise_nl_means(
+        img,
+        7,
+        5,
+        h=h_array,
+        fast_mode=False,
+        channel_axis=None,
+        sigma=sigma,
+    )
+
+    left_std = denoised[:, :mid].std()
+    right_std = denoised[:, mid:].std()
+    assert left_std > right_std
+
+    assert img[:, :mid].std() > left_std
+    assert img[:, mid:].std() > right_std
+
+
+@pytest.mark.parametrize('n_channels', [2, 3, 6])
+@pytest.mark.parametrize('dtype', ['float64', 'float32'])
+def test_denoise_nl_means_2d_multichannel_spatially_varying_h(n_channels, dtype):
+    img = np.copy(astro[:50, :50])
+    img = np.concatenate((img,) * 2)
+    img = img.astype(dtype)
+
+    h_array = np.empty(img.shape[:2])
+    mid = img.shape[1] // 2
+    h_array[:, :mid] = 0.05
+    h_array[:, mid:] = 0.2
+
+    sigma = 0.1
+    imgn = img + sigma * np.random.RandomState(1129635084).standard_normal(img.shape)
+    imgn = np.clip(imgn, 0, 1)
+    imgn = imgn.astype(dtype)
+
+    denoised = restoration.denoise_nl_means(
+        imgn[..., :n_channels],
+        3,
+        5,
+        h=h_array,
+        fast_mode=False,
+        channel_axis=-1,
+        sigma=sigma,
+    )
+
+    left_std = denoised[:, :mid, :].std()
+    right_std = denoised[:, mid:, :].std()
+
+    assert left_std > right_std
+
+    assert imgn[:, :mid, :n_channels].std() > left_std
+    assert imgn[:, mid:, :n_channels].std() > right_std
 
 
 @pytest.mark.parametrize('fast_mode', [False, True])
@@ -449,12 +549,26 @@ def test_denoise_nl_means_3d(fast_mode, dtype):
     imgn = img + sigma * np.random.RandomState(4003450789).standard_normal(img.shape)
     imgn = imgn.astype(dtype)
     psnr_noisy = peak_signal_noise_ratio(img, imgn)
+    h_array = np.full(img.shape, 0.75)
     for s in [sigma, 0]:
         denoised = restoration.denoise_nl_means(
             imgn, 3, 4, h=0.75 * sigma, fast_mode=fast_mode, channel_axis=None, sigma=s
         )
         # make sure noise is reduced
         assert peak_signal_noise_ratio(img, denoised) > psnr_noisy
+
+    if fast_mode != True:
+        for s in [sigma, 0]:
+            denoised_array = restoration.denoise_nl_means(
+                imgn,
+                3,
+                4,
+                h=h_array * sigma,
+                fast_mode=fast_mode,
+                channel_axis=None,
+                sigma=s,
+            )
+        assert peak_signal_noise_ratio(img, denoised_array) > psnr_noisy
 
 
 @pytest.mark.parametrize('fast_mode', [False, True])
