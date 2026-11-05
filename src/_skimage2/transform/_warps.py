@@ -935,7 +935,8 @@ def warp(
 
     order = _validate_interpolation_order(image.dtype, order)
 
-    if order > 0:
+    image_dtype = image.dtype
+    if order >= 0:
         image = convert_to_float(image, preserve_range)
         if image.dtype == np.float16:
             image = image.astype(np.float32)
@@ -962,7 +963,7 @@ def warp(
             "to use bi-linear or bi-cubic interpolation instead."
         )
 
-    if order in (1, 3) and not map_args:
+    if order in (0, 1, 3) and not map_args:
         # use fast Cython version for specific interpolation orders and input
 
         matrix = None
@@ -1053,6 +1054,9 @@ def warp(
         )
 
     _clip_warp_output(image, warped, mode, cval, clip)
+
+    if order == 0:
+        warped = warped.astype(image_dtype)
 
     return warped
 
