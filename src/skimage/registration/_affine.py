@@ -11,7 +11,7 @@ import numpy as np
 from scipy import ndimage as ndi
 from scipy.optimize import minimize
 
-from skimage.metrics import normalized_mutual_information
+from ..metrics import normalized_mutual_information
 import skimage as ski
 
 from enum import StrEnum
