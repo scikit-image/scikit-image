@@ -1,0 +1,21 @@
+---
+description: Upstream scikit-image architecture, compatibility wrappers, imports, and docs
+globs: src/**/*.py
+alwaysApply: false
+---
+
+# Source conventions (upstream)
+
+This rule restates **upstream conventions**. Acme ticket scope lives in the always-applied Acme rule, not here.
+
+## Dual API and wrappers
+
+From `doc/source/skips/4-transition-to-v2.rst`: prefer **one implementation** in `_skimage2`, with `skimage` / `skimage2` as simple wrappers. `skimage` and `skimage2` may import `_skimage2`; `_skimage2` should be self-contained (temporary inlined imports from `skimage` only). Trace the public wrapper to the shared implementation before editing. Function-object identity is not proof of a shared code object.
+
+## Imports, docs, compatibility
+
+From `doc/source/development/guidelines.md`: relative imports (`from .._shared import xyz`, not `from _skimage2._shared import xyz`); `import numpy as np`, `import skimage as ski`; NumPy dtypes; numpydoc; array dims as (plane), row, column.
+
+From `doc/source/development/deprecations.md`: no deprecation cycle for fixing incorrect behavior; cycles apply to signature/name/default changes. Keep signatures and defaults unless the current ticket says otherwise.
+
+From `CONTRIBUTING.md` AI policy: AI may explore the codebase, iterate on hand-written code, and fix trivial bugs. Do not use AI to create novel algorithmic code. Disclose AI use. Changes must stay easy to review.

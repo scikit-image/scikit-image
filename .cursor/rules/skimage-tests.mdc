@@ -1,0 +1,27 @@
+---
+description: Upstream scikit-image testing conventions and meaningful regression evidence
+globs: tests/**/*.py
+alwaysApply: false
+---
+
+# Test conventions (upstream)
+
+This rule restates **upstream testing conventions**. **Acme:** the human engineer owns test scenarios and expected results. A new test file is not by itself regression evidence.
+
+## Coverage of both APIs
+
+From `doc/source/skips/4-transition-to-v2.rst` and `doc/source/development/testing.md`: tests live under `tests/`. Duplicate coverage for `skimage` and `_skimage2` / `skimage2`, adjusting for intended behavior. Inspect neighboring tests in the matching API directories before adding cases.
+
+## How to test
+
+From `doc/source/development/testing.md`: use `spin test` (pytest). Prefer local `np.random.RandomState` with a hardcoded seed. Warnings are errors unless `SKIMAGE_TEST_STRICT_WARNINGS=0`. Match existing assertion style (`np.testing`, `pytest.raises`). Prefer `tmp_path` over manual temp paths. CI on PRs often runs `spin test --test-modified`.
+
+From `doc/source/development/guidelines.md`: all code should have tests; 100% statement coverage is the ideal.
+
+## AI policy (upstream)
+
+From `CONTRIBUTING.md`: do **not** use AI to write tests as novel code. AI may help with scaffolding after the human has specified scenarios and expected results.
+
+## Regression evidence (synthesized Acme)
+
+Demonstrate that assertions fail on the baseline and pass after the fix. Report actual commands and outcomes; do not imply CI or review from local runs.

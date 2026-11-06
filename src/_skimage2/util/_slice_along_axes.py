@@ -42,7 +42,7 @@ def slice_along_axes(image, slices, axes=None, copy=False):
 
     # empty length of bounding box detected on None
     if not slices:
-        return image
+        return image.copy() if copy else image
 
     if axes is None:
         axes = list(range(image.ndim))

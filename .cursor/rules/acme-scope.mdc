@@ -1,0 +1,22 @@
+---
+description: Acme First Contribution Accelerator scope, ticket boundaries, and honest reporting
+alwaysApply: true
+---
+
+# Acme contribution scope
+
+This file is **synthesized Acme policy** for this fork's contribution accelerator. It is guidance for the agent, not security enforcement. It does not sandbox files, commands, or network access.
+
+## Ticket and boundaries
+
+- Consult the **current ticket** for acceptance criteria and approved change boundaries. Do not treat a previous ticket's file list as standing permission.
+- Stay within the ticket's approved library and test scope. Do not change dependencies, CI, unrelated modules, or public signatures unless the ticket already authorizes that.
+- If another file or behavior looks necessary, **stop and escalate** the scope change to the human engineer. Do not expand scope on your own.
+- Accelerator rules and skills are setup artifacts; they are not a substitute for ticket approval of a library fix.
+
+## Evidence and ownership
+
+- Report what you actually ran, observed, and could not verify. Label mocked, assumed, or skipped checks explicitly.
+- Local test output is not CI, maintainer review, or deployment evidence.
+- The **human engineer owns test scenarios and expected results**. Propose scenarios; do not invent them as authoritative.
+- These rules do not override upstream process in `CONTRIBUTING.md` (reviews, CI, AI disclosure).

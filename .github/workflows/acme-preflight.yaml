@@ -1,0 +1,72 @@
+# Acme accelerator preflight. Not tamperproof: pull_request workflows
+# run from the PR and can be edited in the same PR. Policy blobs are
+# taken from the PR base SHA; that only helps if this workflow still
+# extracts and runs them.
+name: Acme preflight
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Identify revisions and extract trusted policy
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          echo "PR base (trusted policy): ${BASE_SHA}"
+          echo "PR head: ${PR_HEAD}"
+          echo "Checked out revision: $(git rev-parse HEAD)"
+          git rev-parse --verify "${BASE_SHA}^{commit}"
+          git cat-file -e "${BASE_SHA}:tools/acme_preflight.py"
+          git cat-file -e "${BASE_SHA}:acme/task-allowlist.txt"
+          POLICY_DIR="${RUNNER_TEMP}/acme-policy"
+          mkdir -p "${POLICY_DIR}"
+          git cat-file -p "${BASE_SHA}:tools/acme_preflight.py" \
+            > "${POLICY_DIR}/acme_preflight.py"
+          echo "POLICY_DIR=${POLICY_DIR}" >> "${GITHUB_ENV}"
+          echo "BASE_SHA=${BASE_SHA}" >> "${GITHUB_ENV}"
+
+      - name: Scope validation
+        run: |
+          set -euo pipefail
+          python3 "${POLICY_DIR}/acme_preflight.py" \
+            --base "${BASE_SHA}" \
+            --skip-tests
+
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+
+      - name: Install contribution test environment
+        run: |
+          set -euo pipefail
+          python -m pip install -r requirements/build.txt -r requirements/default.txt -r requirements/test.txt
+          python -m pip install --no-build-isolation -e .
+
+      - name: Guardrail tests
+        run: |
+          set -euo pipefail
+          python -m pytest tests/acme/test_preflight.py
+
+      - name: Focused contribution tests
+        run: |
+          set -euo pipefail
+          python3 "${POLICY_DIR}/acme_preflight.py" --base "${BASE_SHA}"

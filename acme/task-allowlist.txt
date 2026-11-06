@@ -1,0 +1,5 @@
+# ACME-001 approved contribution paths (exact match).
+# This file is setup policy. Contributions must not edit it.
+src/_skimage2/util/_slice_along_axes.py
+tests/skimage/util/test_slice_along_axes.py
+tests/skimage2/util/test_slice_along_axes.py
