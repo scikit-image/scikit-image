@@ -90,12 +90,12 @@ def resize(
     image : ndarray
         Input image.
     output_shape : iterable
-        Size of the generated output image `(rows, cols[, ...][, dim])`.
-        `output_shape` may be one element shorter than `image.ndim`; the
-        trailing `dim` is then taken from `image`, so that the size of the
-        last axis (e.g. the number of channels) is preserved. `resize` does
-        not treat any axis as a dedicated channel axis: if `dim` is given and
-        differs from the size of the last axis of `image`, that axis is
+        Size of the generated output image ``(rows, cols[, ...][, dim])``.
+        `output_shape` may be one element shorter than ``image.ndim``; the
+        trailing ``dim`` is then taken from `image`, so that the size of the
+        last axis (e.g. the number of channels) is preserved. ``resize`` does
+        not treat any axis as a dedicated channel axis: if ``dim`` is given
+        and differs from the size of the last axis of `image`, that axis is
         interpolated over just like the preceding ones.
 
     Returns
