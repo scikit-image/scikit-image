@@ -77,7 +77,7 @@ def autolevel_percentile(
 
     Parameters
     ----------
-    image : ndarray of shape (M, N) and dtype (uint8 or uint16)
+    image : ndarray of shape (M, N) and dtype in {uint8, uint16}
         Input image.
     footprint : ndarray of shape (m, n)
         The neighborhood expressed as a 2-D array of 1's and 0's.
@@ -122,7 +122,7 @@ def gradient_percentile(
 
     Parameters
     ----------
-    image : ndarray of shape (M, N) and dtype (uint8 or uint16)
+    image : ndarray of shape (M, N) and dtype in {uint8, uint16}
         Input image.
     footprint : ndarray of shape (m, n)
         The neighborhood expressed as a 2-D array of 1's and 0's.
@@ -167,7 +167,7 @@ def mean_percentile(
 
     Parameters
     ----------
-    image : ndarray of shape (M, N) and dtype (uint8 or uint16)
+    image : ndarray of shape (M, N) and dtype in {uint8, uint16}
         Input image.
     footprint : ndarray of shape (m, n)
         The neighborhood expressed as a 2-D array of 1's and 0's.
@@ -212,7 +212,7 @@ def subtract_mean_percentile(
 
     Parameters
     ----------
-    image : ndarray of shape (M, N) and dtype (uint8 or uint16)
+    image : ndarray of shape (M, N) and dtype in {uint8, uint16}
         Input image.
     footprint : ndarray of shape (m, n)
         The neighborhood expressed as a 2-D array of 1's and 0's.
@@ -261,7 +261,7 @@ def enhance_contrast_percentile(
 
     Parameters
     ----------
-    image : ndarray of shape (M, N) and dtype (uint8 or uint16)
+    image : ndarray of shape (M, N) and dtype in {uint8, uint16}
         Input image.
     footprint : ndarray of shape (m, n)
         The neighborhood expressed as a 2-D array of 1's and 0's.
@@ -307,7 +307,7 @@ def percentile(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, p0=0
 
     Parameters
     ----------
-    image : ndarray of shape (M, N) and dtype (uint8 or uint16)
+    image : ndarray of shape (M, N) and dtype in {uint8, uint16}
         Input image.
     footprint : ndarray of shape (m, n)
         The neighborhood expressed as a 2-D array of 1's and 0's.
@@ -354,7 +354,7 @@ def pop_percentile(
 
     Parameters
     ----------
-    image : ndarray of shape (M, N) and dtype (uint8 or uint16)
+    image : ndarray of shape (M, N) and dtype in {uint8, uint16}
         Input image.
     footprint : ndarray of shape (m, n)
         The neighborhood expressed as a 2-D array of 1's and 0's.
@@ -402,7 +402,7 @@ def sum_percentile(
 
     Parameters
     ----------
-    image : ndarray of shape (M, N) and dtype (uint8 or uint16)
+    image : ndarray of shape (M, N) and dtype in {uint8, uint16}
         Input image.
     footprint : ndarray of shape (m, n)
         The neighborhood expressed as a 2-D array of 1's and 0's.
@@ -450,7 +450,7 @@ def threshold_percentile(
 
     Parameters
     ----------
-    image : ndarray of shape (M, N) and dtype (uint8 or uint16)
+    image : ndarray of shape (M, N) and dtype in {uint8, uint16}
         Input image.
     footprint : ndarray of shape (m, n)
         The neighborhood expressed as a 2-D array of 1's and 0's.

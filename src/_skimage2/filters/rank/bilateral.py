@@ -76,7 +76,7 @@ def mean_bilateral(
 
     Parameters
     ----------
-    image : ndarray of shape (M, N) and dtype (uint8 or uint16)
+    image : ndarray of shape (M, N) and dtype in {uint8, uint16}
         Input image.
     footprint : ndarray of shape (m, n)
         The neighborhood expressed as a 2-D array of 1's and 0's.
@@ -138,7 +138,7 @@ def pop_bilateral(
 
     Parameters
     ----------
-    image : ndarray of shape (M, N) and dtype (uint8 or uint16)
+    image : ndarray of shape (M, N) and dtype in {uint8, uint16}
         Input image.
     footprint : ndarray of shape (m, n)
         The neighborhood expressed as a 2-D array of 1's and 0's.
@@ -213,7 +213,7 @@ def sum_bilateral(
 
     Parameters
     ----------
-    image : ndarray of shape (M, N) and dtype (uint8 or uint16)
+    image : ndarray of shape (M, N) and dtype in {uint8, uint16}
         Input image.
     footprint : ndarray of shape (m, n)
         The neighborhood expressed as a 2-D array of 1's and 0's.
