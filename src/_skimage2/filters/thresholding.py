@@ -765,11 +765,10 @@ def threshold_li(image, *, tolerance=None, initial_guess=None, iter_callback=Non
 
             mean_fore = np.average(bin_centers[foreground], weights=hist[foreground])
             mean_back = np.average(bin_centers[background], weights=hist[background])
-            
+
             diff = mean_back - mean_fore
             if diff == -mean_fore:
                 break
-
             t_next = diff / np.log1p(diff / mean_fore)
 
             if iter_callback is not None:
