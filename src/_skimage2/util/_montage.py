@@ -120,6 +120,7 @@ def montage(
         # loads submodules: util._montage -> exposure -> color -> util.dtype_limits.
         from ..exposure import rescale_intensity
 
+        arr_in = arr_in.copy()  # don't modify the caller's array , therefore creating a copy of the array 
         for i in range(n_images):
             arr_in[i] = rescale_intensity(arr_in[i])
 
