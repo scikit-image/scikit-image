@@ -781,10 +781,10 @@ def threshold_li(image, *, tolerance=None, initial_guess=None, iter_callback=Non
             mean_fore = np.mean(image[foreground])
             mean_back = np.mean(image[~foreground])
 
-            if mean_back == 0.0:
+            diff = mean_back - mean_fore
+            if diff == -mean_fore:
                 break
-
-            t_next = (mean_back - mean_fore) / (np.log(mean_back) - np.log(mean_fore))
+            t_next = diff / np.log1p(diff / mean_fore)
 
             if iter_callback is not None:
                 iter_callback(t_next + image_min)
