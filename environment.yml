@@ -71,4 +71,4 @@ dependencies:
   # pypa-only packages
   - pip
   - pip:
-      - docstub==0.7.0rc1
+      - docstub==0.7.0
