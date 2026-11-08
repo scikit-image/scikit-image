@@ -30,6 +30,15 @@ def test_montage_simple_gray():
     assert_array_equal(arr_out, arr_ref)
 
 
+def test_montage_rescale_intensity_does_not_modify_input():
+    rng = np.random.default_rng(0)
+    for shape, kwargs in [((3, 4, 4), {}), ((3, 4, 4, 3), {'channel_axis': -1})]:
+        arr = rng.random(shape) * 5 + 10
+        expected = arr.copy()
+        montage(arr, rescale_intensity=True, **kwargs)
+        assert_array_equal(arr, expected)
+
+
 def test_montage_simple_rgb():
     n_images, n_rows, n_cols, n_channels = 2, 2, 2, 2
     arr_in = np.arange(
