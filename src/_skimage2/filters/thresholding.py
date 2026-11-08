@@ -756,8 +756,8 @@ def threshold_li(image, *, tolerance=None, initial_guess=None, iter_callback=Non
     # since log(0) is not defined.
 
     if image.dtype.kind in 'iu':
-        hist, bin_centers = histogram(image.reshape(-1), source_range='image')
-        hist = hist.astype('float32', copy=False)
+        hist, bin_centers = histogram(image.reshape(-1), source_range='image', normalize=True)
+        hist = hist.astype('float64', copy=False)
         while abs(t_next - t_curr) > tolerance:
             t_curr = t_next
             foreground = bin_centers > t_curr
@@ -766,10 +766,10 @@ def threshold_li(image, *, tolerance=None, initial_guess=None, iter_callback=Non
             mean_fore = np.average(bin_centers[foreground], weights=hist[foreground])
             mean_back = np.average(bin_centers[background], weights=hist[background])
 
-            if mean_back == 0:
+            diff = mean_back - mean_fore
+            if diff == 0:
                 break
-
-            t_next = (mean_back - mean_fore) / (np.log(mean_back) - np.log(mean_fore))
+            t_next = diff / np.log1p(diff / mean_fore)
 
             if iter_callback is not None:
                 iter_callback(t_next + image_min)
