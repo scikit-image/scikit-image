@@ -60,7 +60,7 @@ data = ['pooch>=1.6.0']
 developer = [
     'pre-commit',
     'ipython',
-    'docstub==0.7.0rc0',
+    'docstub==0.7.0',
     'scikit-image[asv]',
 ]
 asv = [
@@ -258,6 +258,7 @@ ignore_files = [
     "io/_plugins",
     "io/manage_plugins.py",
 ]
+plugin_paths = ["tools/docstub_plugin.py"]
 
 [tool.docstub.type_prefixes]
 warnings = "warnings"
