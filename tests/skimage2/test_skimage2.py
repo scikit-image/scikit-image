@@ -1,6 +1,7 @@
 import os
 import sys
 import subprocess
+import inspect
 
 import pytest
 
@@ -15,10 +16,9 @@ def test_import_skimage2_warning():
         capture_output=True,
         text=True,
     )
-    assert result.stderr.startswith(
-        "<string>:1: "
+    assert (
         "ExperimentalAPIWarning: "
-        "Importing from the `skimage2` namespace is experimental"
+        "Importing from the `skimage2` namespace is experimental" in result.stderr
     )
     assert result.stdout == ""
     assert result.returncode == 0
@@ -59,3 +59,24 @@ def test_no_eager_skimage_import(namespace):
         top_module, *_ = module.partition(".")
         assert top_module != "skimage"
         assert "skimage" in top_module
+
+
+@pytest.mark.thread_unsafe(
+    reason="pytest.warns (subclass of warnings.catch_warnings) is not thread safe"
+)
+def test_skimage2_modules_match():
+    """Ensure _skimage2 and skimage2 package structures are aligned."""
+
+    def generate_submodule_tree(module):
+        tree = {}
+        for attr_name, attr in inspect.getmembers(module):
+            if inspect.ismodule(attr):
+                tree[attr_name] = generate_submodule_tree(attr)
+        return tree
+
+    import _skimage2
+
+    with pytest.warns(_skimage2.ExperimentalAPIWarning):
+        import skimage2
+
+    assert generate_submodule_tree(skimage2) == generate_submodule_tree(_skimage2)

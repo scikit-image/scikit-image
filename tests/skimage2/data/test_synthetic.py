@@ -69,6 +69,27 @@ class Test_binary_blobs:
         else:
             np.testing.assert_equal(result, 1)
 
+    @pytest.mark.parametrize("blob_size", [81, 300])
+    @pytest.mark.parametrize("volume_fraction", [0.9, 0.1])
+    def test_large_blob_size(self, blob_size, volume_fraction):
+        shape = (80, 100)
+        # No warning, blob size warns when longer than shape
+        result = binary_blobs(
+            shape, blob_size=min(shape), volume_fraction=volume_fraction, rng=SEED
+        )
+        assert result.shape == shape
+
+        regex = r"`blob_size=.* is larger than a dimension"
+        with pytest.warns(RuntimeWarning, match=regex) as record:
+            result = binary_blobs(
+                shape, blob_size=blob_size, volume_fraction=volume_fraction, rng=SEED
+            )
+        assert_stacklevel(record, offset=-3)
+
+        # Volume fraction is still forced correctly
+        actual_fraction = result.sum() / result.size
+        np.testing.assert_allclose(actual_fraction, volume_fraction, rtol=0.01)
+
     @pytest.mark.filterwarnings("ignore:Requested `blob_size` .* is smaller than 1")
     def test_blob_size_clamping(self):
         # A very small `blob_size` will allocate excessive memory.

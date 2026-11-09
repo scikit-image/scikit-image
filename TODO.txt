@@ -45,7 +45,8 @@ Other
   `skimage/graph/_graph_cut.py::_ncut_relabel` and the `xfail` mark in
   `tests/skimage/graph/test_rag.py::test_reproducibility`.
 * Once SciPy 1.18 is minimal required version, remove minkowski
-  distance branching from `src/skimage/measure/fit.py`.
+  distance branching from `src/skimage/measure/fit.py`.  Also remove "dok_matrix"
+  workaround in "test_random" in `tests/skimage2/morphology/test_misc.py`.
 
 Post Python 3.12
 ----------------

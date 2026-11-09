@@ -139,4 +139,8 @@ cython_cpp_args = cython_c_args
 # call `subdir` after defining the cython constants
 subdir('skimage')
 subdir('_skimage2')
-subdir('skimage2')
+
+exclude_v2 = get_option('exclude-v2')
+if not exclude_v2
+  subdir('skimage2')
+endif

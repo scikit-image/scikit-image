@@ -17,6 +17,13 @@ and how the dispatching mechanism in scikit-image works.
     Consider the dispatching API to be very unstable; we might change behavior
     suddenly between releases without a deprecation period.
 
+We currently implement dispatching for the public ``skimage`` API, but not the
+upcoming `skimage2` API. Implementations in the upcoming public `skimage2`
+namespace, and the current private ``_skimage2`` namespace, are not
+dispatchable and cannot be overridden by backends. Backend function names must
+use ``skimage`` module paths, for example
+``skimage.metrics:mean_squared_error``.
+
 
 Creating a scikit-image backend
 -------------------------------

@@ -2,6 +2,7 @@ import functools
 from importlib.metadata import entry_points
 from functools import cache
 import os
+import re
 import warnings
 
 
@@ -21,11 +22,10 @@ def public_api_module(func):
     be found.
     """
     full_name = func.__module__
-    # This relies on the fact that scikit-image does not use
-    # sub-submodules in its public API, except in one case.
-    # This means that public name can be atmost `skimage.foobar`
-    # for everything else
 
+    # This relies on the fact that scikit-image does not use sub-submodules in
+    # its public API, except in the case of `skimage.filters.rank`. This means
+    # that the public name can be at most `skimage.foobar` for everything else
     sub_submodules = ["skimage.filters.rank"]
     candidates = [name for name in sub_submodules if full_name.startswith(name)]
     if len(candidates) == 0:
@@ -51,6 +51,20 @@ def public_api_module(func):
     return public_name
 
 
+def _check_supported_funcs(supported_functions, backend_name):
+    """Reject backend registrations other than `skimage`."""
+    invalid = [n for n in supported_functions if not re.search('skimage[:.]', n)]
+    if invalid:
+        names = ", ".join(sorted(invalid))
+        msg = (
+            f"Backend {backend_name!r} cannot override functions outside "
+            "the `skimage` namespace.  Invalid functions are: "
+            f"functions ({names}). Register `skimage` public API names "
+            "instead, for example `skimage.metrics:mean_squared_error`."
+        )
+        raise ValueError(msg)
+
+
 @cache
 def all_backends():
     """List all installed backends and information about them."""
@@ -63,7 +77,9 @@ def all_backends():
         try:
             info = backend_infos[backend.name]
             # Double () to load and then call the backend information function
-            backends[backend.name]["info"] = info.load()()
+            info = info.load()()
+            _check_supported_funcs(info.supported_functions, backend.name)
+            backends[backend.name]["info"] = info
         except KeyError:
             pass
 
@@ -78,16 +94,13 @@ def dispatchable(func):
     then the scikit-image implementation is used.
     """
     func_name = func.__name__
-    func_module = public_api_module(func)
-
-    # If no backends are installed at all or dispatching is disabled,
-    # return the original function. This way people who don't care about it
-    # don't see anything related to dispatching
-    if dispatching_disabled() or not all_backends():
-        return func
 
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
+        if dispatching_disabled() or not all_backends():
+            return func(*args, **kwargs)
+
+        func_module = public_api_module(func)
         # Backends are tried in alphabetical order, this makes things
         # predictable and stable across runs. Might need a better solution
         # when it becomes common that users have more than one backend
@@ -129,6 +142,21 @@ def dispatchable(func):
     return wrapper
 
 
+def dispatchable_shim(impl_func, module):
+    """Replace apparent `impl_func` ``__module__`` with `module`
+
+    This allows functions that are implemented in some namespace from which we
+    cannot dispatch, to be sourced in a module from which we can dispatch.
+    """
+
+    @functools.wraps(impl_func)
+    def wrapper(*args, **kwargs):
+        return impl_func(*args, **kwargs)
+
+    wrapper.__module__ = module
+    return dispatchable(wrapper)
+
+
 class BackendInformation:
     """Information about a backend
 
@@ -137,6 +165,7 @@ class BackendInformation:
     """
 
     def __init__(self, supported_functions):
+        _check_supported_funcs(supported_functions, backend_name="unknown")
         self.supported_functions = supported_functions
 
 

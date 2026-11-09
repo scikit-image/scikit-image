@@ -163,7 +163,7 @@ def erosion(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     --------
     >>> # Erosion shrinks bright regions
     >>> import numpy as np
-    >>> from skimage.morphology import footprint_rectangle
+    >>> from _skimage2.morphology import footprint_rectangle
     >>> bright_square = np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
@@ -264,7 +264,7 @@ def dilation(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     --------
     >>> # Dilation enlarges bright regions
     >>> import numpy as np
-    >>> from skimage.morphology import footprint_rectangle
+    >>> from _skimage2.morphology import footprint_rectangle
     >>> bright_pixel = np.array([[0, 0, 0, 0, 0],
     ...                          [0, 0, 0, 0, 0],
     ...                          [0, 0, 1, 0, 0],
@@ -363,7 +363,7 @@ def opening(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     --------
     >>> # Open up gap between two bright regions (but also shrink regions)
     >>> import numpy as np
-    >>> from skimage.morphology import footprint_rectangle
+    >>> from _skimage2.morphology import footprint_rectangle
     >>> bad_connection = np.array([[1, 0, 0, 0, 1],
     ...                            [1, 1, 0, 1, 1],
     ...                            [1, 1, 1, 1, 1],
@@ -442,7 +442,7 @@ def closing(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     --------
     >>> # Close a gap between two bright lines
     >>> import numpy as np
-    >>> from skimage.morphology import footprint_rectangle
+    >>> from _skimage2.morphology import footprint_rectangle
     >>> broken_line = np.array([[0, 0, 0, 0, 0],
     ...                         [0, 0, 0, 0, 0],
     ...                         [1, 1, 0, 1, 1],
@@ -525,7 +525,7 @@ def white_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     --------
     >>> # Subtract gray background from bright peak
     >>> import numpy as np
-    >>> from skimage.morphology import footprint_rectangle
+    >>> from _skimage2.morphology import footprint_rectangle
     >>> bright_on_gray = np.array([[2, 3, 3, 3, 2],
     ...                            [3, 4, 5, 4, 3],
     ...                            [3, 5, 9, 5, 3],
@@ -620,7 +620,7 @@ def black_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     --------
     >>> # Change dark peak to bright peak and subtract background
     >>> import numpy as np
-    >>> from skimage.morphology import footprint_rectangle
+    >>> from _skimage2.morphology import footprint_rectangle
     >>> dark_on_gray = np.array([[7, 6, 6, 6, 7],
     ...                          [6, 5, 4, 5, 6],
     ...                          [6, 4, 0, 4, 6],

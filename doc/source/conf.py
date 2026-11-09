@@ -11,6 +11,7 @@ from warnings import filterwarnings
 
 import importlib
 import pkgutil
+from pathlib import Path
 
 import plotly.io as pio
 import skimage
@@ -43,21 +44,18 @@ filterwarnings(
 project = "skimage"
 copyright = f"2013-{date.today().year}, the scikit-image team"
 
-with open("../../src/skimage/__init__.py") as f:
-    setup_lines = f.readlines()
-version = "vUndefined"
-for l in setup_lines:
-    if l.startswith("__version__ ="):
-        version = l.split("'")[1]
-        break
+curpath = Path(__file__).resolve().parent
+sys.path.append(str(curpath.parents[1] / "src/_skimage2/_build_utils"))
 
+from version import version as _source_version  # noqa: E402
+
+version = _source_version(local=False)
 release = version
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-curpath = os.path.dirname(__file__)
-sys.path.append(os.path.join(curpath, "..", "ext"))
+sys.path.append(str(curpath.parent / "ext"))
 
 extensions = [
     "sphinx.ext.autodoc",
@@ -87,6 +85,8 @@ suppress_warnings = [
     # Ignore new warning in Sphinx 7.3.0 while pickling environment:
     #   WARNING: cannot cache unpickable configuration value: 'sphinx_gallery_conf'
     "config.cache",
+    # TODO: remove once skimage2 API docs have Examples sections
+    "skimage2",
 ]
 
 # -- Options for HTML output -------------------------------------------------
@@ -383,3 +383,5 @@ myst_enable_extensions = [
     # Enable fencing directives with `:::`
     "colon_fence",
 ]
+# Auto-generate heading anchors up to depth
+myst_heading_anchors = 3

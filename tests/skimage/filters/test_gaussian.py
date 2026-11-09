@@ -128,7 +128,6 @@ def test_output_error():
         gaussian(image, sigma=1, out=out, preserve_range=True)
 
 
-@pytest.mark.filterwarnings("default::skimage.util.PendingSkimage2Change")
 def test_gaussian_pending_skimage2_warn():
     regex = (
         r"`skimage.filters.gaussian` is deprecated in favor of\n"

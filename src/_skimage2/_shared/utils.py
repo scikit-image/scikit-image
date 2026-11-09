@@ -995,7 +995,7 @@ def convert_to_float(image, preserve_range):
             image = image.astype(float)
     else:
         # Avoid circular import
-        from skimage.util.dtype import img_as_float
+        from _skimage2.util.dtype import img_as_float
 
         image = img_as_float(image)
     return image

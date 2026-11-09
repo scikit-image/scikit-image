@@ -1,54 +1,26 @@
-extensions = [
-  '_denoise_cy',
-  '_inpaint',
-  '_nl_means_denoising',
-  '_rolling_ball_cy'
-]
-
-foreach ext: extensions
-  py3.extension_module(ext,
-    cython_gen.process(ext + '.pyx'),
-    c_args: cython_c_args,
-    include_directories: ['../../_skimage2/_shared'],
-    dependencies: [np_dep],
-    install: true,
-    subdir: 'skimage/restoration'
-  )
-endforeach
-
-wrap_extensions = [
-  ['_unwrap_1d', []],
-  ['_unwrap_2d', ['unwrap_2d_ljmu.c', 'unwrap_2d_ljmu.h', 'unwrap_common.h']],
-  ['_unwrap_3d', ['unwrap_3d_ljmu.c', 'unwrap_3d_ljmu.h', 'unwrap_common.h']],
-]
-
-foreach ext: wrap_extensions
-  py3.extension_module(ext[0],
-    [cython_gen.process(ext[0] + '.pyx')] + ext[1],
-    c_args: cython_c_args,
-    include_directories: ['../../_skimage2/_shared'],
-    dependencies: [np_dep],
-    install: true,
-    subdir: 'skimage/restoration'
-  )
-endforeach
-
 python_sources = [
-  '__init__.py',
-  '__init__.pyi',
-  '_cycle_spin.py',
-  '_denoise.py',
-  'deconvolution.py',
-  'inpaint.py',
-  'j_invariant.py',
-  'non_local_means.py',
-  '_rolling_ball.py',
-  'uft.py',
-  'unwrap.py'
+    '_inpaint.py',
+    'inpaint.py',
+    'non_local_means.py',
+    '_cycle_spin.py',
+    '__init__.pyi',
+    'j_invariant.py',
+    'deconvolution.py',
+    '__init__.py',
+    'unwrap.py',
+    '_unwrap_1d.py',
+    '_unwrap_3d.py',
+    '_unwrap_2d.py',
+    'uft.py',
+    '_rolling_ball.py',
+    '_denoise_cy.py',
+    '_nl_means_denoising.py',
+    '_denoise.py',
+    '_rolling_ball_cy.py',
 ]
 
 py3.install_sources(
   python_sources,
-  pure: false,             # Will be installed next to binaries
+  pure: false,          # Will be installed next to binaries
   subdir: 'skimage/restoration'  # Folder relative to site-packages to install to
 )

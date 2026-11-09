@@ -3,12 +3,13 @@
 import warnings
 
 from .manage_plugins import *
-from .manage_plugins import _hide_plugin_deprecation_warnings
+from .manage_plugins import _available_plugins, _hide_plugin_deprecation_warnings
 from .sift import *
 from .collection import *
 
 from ._io import *
 from ._image_stack import *
+from . import util
 
 
 with _hide_plugin_deprecation_warnings():
