@@ -22,6 +22,6 @@ See the git page for the most recent information.
 Have a look at the github install help pages available from `github help`_
 
 There are good instructions here:
-https://book.git-scm.com/book/en/v2/Getting-Started-Installing-Git
+https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
 
 .. include:: links.inc
