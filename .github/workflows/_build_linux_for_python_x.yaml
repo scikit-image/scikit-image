@@ -15,10 +15,17 @@ on:
         required: false
         type: string
         default: ""
+      # Build the sdist, then the wheel from it, in an isolated environment
+      # with the build requirements from pyproject.toml, as `pip install`
+      # from an sdist does. This is the only CI check of that path.
+      ISOLATED_BUILD:
+        required: false
+        type: string
+        default: 0
 
 jobs:
   build-skimage-spin:
-    name: linux-cp${{ inputs.python-version }}
+    name: linux-cp${{ inputs.python-version }}${{ inputs.ISOLATED_BUILD == 1 && '-isolated-sdist' || '' }}
     runs-on: ${{ inputs.runner }}
 
     env:
@@ -71,8 +78,14 @@ jobs:
         run: ccache --zero-stats
 
       - name: Build wheel
+        if: ${{ inputs.ISOLATED_BUILD != 1 }}
         run: |
           python -m build --no-isolation --skip-dependency-check -Csetup-args="-Doptimization=2"
+
+      - name: Build wheel from sdist in isolated environment
+        if: ${{ inputs.ISOLATED_BUILD == 1 }}
+        run: |
+          python -m build -Csetup-args="-Doptimization=2"
 
       - name: ccache statistics
         if: always()
