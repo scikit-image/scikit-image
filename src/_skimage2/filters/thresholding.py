@@ -706,8 +706,11 @@ def threshold_li(image, *, tolerance=None, initial_guess=None, iter_callback=Non
     if image.size == 0:
         return 0.0
 
-    # Li's algorithm requires positive image (because of log(mean))
-    image_min = np.min(image)
+    # Li's algorithm requires positive image (because of log(mean)).
+    # But the the constraint on which the algorithm is based depends on
+    # actual means of the thresholded image.
+    # Hense, keep original intensities when possible.
+    image_min = min(0, np.min(image))
     image -= image_min
     if image.dtype.kind in 'iu':
         tolerance = tolerance or 0.5
@@ -721,12 +724,13 @@ def threshold_li(image, *, tolerance=None, initial_guess=None, iter_callback=Non
         t_next = initial_guess(image)
     elif np.isscalar(initial_guess):  # convert to new, positive image range
         t_next = initial_guess - float(image_min)
-        image_max = np.max(image) + image_min
-        if not 0 < t_next < np.max(image):
+        actual_min = np.min(image) + image_min
+        actual_max = np.max(image) + image_min
+        if not np.min(image) < t_next < np.max(image):
             msg = (
                 f'The initial guess for threshold_li must be within the '
                 f'range of the image. Got {initial_guess} for image min '
-                f'{image_min} and max {image_max}.'
+                f'{actual_min} and max {actual_max}.'
             )
             raise ValueError(msg)
         t_next = image.dtype.type(t_next)
@@ -753,7 +757,7 @@ def threshold_li(image, *, tolerance=None, initial_guess=None, iter_callback=Non
 
     if image.dtype.kind in 'iu':
         hist, bin_centers = histogram(image.reshape(-1), source_range='image')
-        hist = hist.astype('float32', copy=False)
+        hist = hist.astype('float64', copy=False)
         while abs(t_next - t_curr) > tolerance:
             t_curr = t_next
             foreground = bin_centers > t_curr
@@ -761,11 +765,14 @@ def threshold_li(image, *, tolerance=None, initial_guess=None, iter_callback=Non
 
             mean_fore = np.average(bin_centers[foreground], weights=hist[foreground])
             mean_back = np.average(bin_centers[background], weights=hist[background])
-
             if mean_back == 0:
                 break
 
-            t_next = (mean_back - mean_fore) / (np.log(mean_back) - np.log(mean_fore))
+            diff = mean_back - mean_fore
+            if abs(diff) < mean_fore / 2:
+                t_next = diff / np.log1p(diff / mean_fore)
+            else:
+                t_next = diff / (np.log(mean_back) - np.log(mean_fore))
 
             if iter_callback is not None:
                 iter_callback(t_next + image_min)
@@ -776,11 +783,14 @@ def threshold_li(image, *, tolerance=None, initial_guess=None, iter_callback=Non
             foreground = image > t_curr
             mean_fore = np.mean(image[foreground])
             mean_back = np.mean(image[~foreground])
-
-            if mean_back == 0.0:
+            if mean_back == 0:
                 break
 
-            t_next = (mean_back - mean_fore) / (np.log(mean_back) - np.log(mean_fore))
+            diff = mean_back - mean_fore
+            if abs(diff) < mean_fore / 2:
+                t_next = diff / np.log1p(diff / mean_fore)
+            else:
+                t_next = diff / (np.log(mean_back) - np.log(mean_fore))
 
             if iter_callback is not None:
                 iter_callback(t_next + image_min)
