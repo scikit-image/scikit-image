@@ -1,3 +1,5 @@
+import numpy as np
+
 from _skimage2._shared.utils import check_shape_equality
 from ._contingency_table import contingency_table
 
@@ -65,10 +67,8 @@ def adapted_rand_error(
            for connectomics. Front. Neuroanat. 9:142.
            :DOI:`10.3389/fnana.2015.00142`
     """
-    if image_test is not None and image_true is not None:
-        check_shape_equality(image_true, image_test)
-
     if table is None:
+        check_shape_equality(image_true, image_test)
         p_ij = contingency_table(
             image_true,
             image_test,
@@ -84,8 +84,8 @@ def adapted_rand_error(
     # Sum of the joint distribution squared
     sum_p_ij2 = p_ij.data @ p_ij.data - p_ij.sum()
 
-    a_i = p_ij.sum(axis=1).ravel()
-    b_i = p_ij.sum(axis=0).ravel()
+    a_i = np.asarray(p_ij.sum(axis=1)).ravel()
+    b_i = np.asarray(p_ij.sum(axis=0)).ravel()
 
     # Sum of squares of the test segment sizes (this is 2x the number of pairs
     # of pixels with the same label in im_test)
