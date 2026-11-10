@@ -1,6 +1,7 @@
 """test_watershed.py - tests the watershed function"""
 
 import math
+import timeit
 import unittest
 
 import numpy as np
@@ -1034,3 +1035,74 @@ def test_connectivity():
 
     for lab, area in zip(range(5), [61824, 3653, 20466, 12386, 11291]):
         assert np.sum(labels_c2 == lab) == area
+
+
+def test_watershed_line_does_not_requeue_line_pixels():
+    """Pixels marked as watershed lines must not be expanded again.
+
+    Since gh-7071, a pixel that becomes part of a watershed line stays
+    unlabeled. Its other entries on the queue then passed the "already
+    visited" check, and each one pushed the pixel's neighbors again. On
+    smooth 2D and 3D images with ``connectivity=2`` the queue could grow
+    without bound, until the call ran out of memory.
+
+    The bug does not change the labels where the call finishes; it only
+    multiplies the work. On this small image the call still finishes, but
+    took about 1000 times longer than the same call without watershed lines
+    (about 70 ms against 0.07 ms). With the fix, both take about the same
+    time.
+    """
+    # fmt: off
+    image = np.array(
+        [[[16, 17, 12,  7,  5,  6],
+          [12, 13, 12,  5,  1,  1],
+          [ 8, 11, 13,  5,  0,  0]],
+         [[26, 25, 23, 19, 11,  6],
+          [26, 25, 23, 21, 17, 13],
+          [29, 25, 21, 20, 18, 14]],
+         [[29, 27, 25, 20, 10,  4],
+          [27, 24, 22, 21, 16, 11],
+          [30, 23, 19, 20, 17, 10]]],
+        dtype=float,
+    )
+    expected = np.array(
+        [[[1, 0, 2, 2, 2, 2],
+          [1, 0, 0, 2, 2, 2],
+          [1, 1, 0, 2, 2, 2]],
+         [[1, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0]],
+         [[0, 0, 0, 3, 3, 3],
+          [0, 4, 0, 0, 0, 0],
+          [4, 4, 4, 0, 5, 5]]]
+    )
+    # fmt: on
+    # The markers are the regional minima of `image`
+    markers = np.zeros(image.shape, dtype=int)
+    markers[0, 2, 0] = 1
+    markers[0, 2, 4:] = 2
+    markers[2, 0, 5] = 3
+    markers[2, 2, 2] = 4
+    markers[2, 2, 5] = 5
+
+    result = watershed(image, markers, connectivity=2, watershed_line=True)
+    np.testing.assert_array_equal(result, expected)
+
+    # Compare against the same flood without watershed lines, timed in the
+    # same process, so that machine load affects both alike. The ratio is
+    # below 2 with the fix and about 1000 without it.
+    t_line = min(
+        timeit.repeat(
+            lambda: watershed(image, markers, connectivity=2, watershed_line=True),
+            number=1,
+            repeat=5,
+        )
+    )
+    t_ref = min(
+        timeit.repeat(
+            lambda: watershed(image, markers, connectivity=2),
+            number=1,
+            repeat=5,
+        )
+    )
+    assert t_line < 30 * t_ref

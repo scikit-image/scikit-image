@@ -143,6 +143,11 @@ def watershed_raveled(cnp.float64_t[::1] image,
                     # non-marker, already visited from another neighbor
                     continue
 
+                if wsl and not mask[elem.index]:
+                    # already made a watershed line by an earlier entry; line
+                    # pixels stay unlabeled, so the check above misses them
+                    continue
+
                 # when `wsl` is `True`, label is only set for pixels without a neighbor of different label
                 # NOTE: `_diff_neighbors` sets `mask[elem.index]` to `False` if
                 #        neighbor has different label
