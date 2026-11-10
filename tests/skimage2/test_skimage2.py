@@ -2,6 +2,7 @@ import os
 import sys
 import subprocess
 import inspect
+import importlib
 
 import pytest
 
@@ -76,7 +77,9 @@ def test_skimage2_modules_match():
 
     import _skimage2
 
+    # `skimage2` may already be imported (e.g. by an earlier test), so the
+    # import-time warning would not re-fire. Reload to emit it reliably.
     with pytest.warns(_skimage2.ExperimentalAPIWarning):
-        import skimage2
+        skimage2 = importlib.reload(importlib.import_module("skimage2"))
 
     assert generate_submodule_tree(skimage2) == generate_submodule_tree(_skimage2)

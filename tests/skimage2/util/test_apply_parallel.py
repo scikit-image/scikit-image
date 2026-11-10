@@ -127,7 +127,7 @@ def test_apply_parallel_nearest():
 @pytest.mark.parametrize('chunks', (None, (128, 128, 3)))
 @pytest.mark.parametrize('depth', (0, 8, (8, 8, 0)))
 def test_apply_parallel_rgb(depth, chunks, dtype):
-    cat = data.chelsea().astype(dtype) / 255.0
+    cat = data.fetch_chelsea().astype(dtype) / 255.0
 
     func = color.rgb2ycbcr
     cat_ycbcr_expected = func(cat)
@@ -153,7 +153,7 @@ def test_apply_parallel_rgb_channel_axis(depth, chunks, channel_axis):
     2.) tuple of length ``image.ndim - 1`` corresponding to spatial axes
     3.) tuple of length ``image.ndim`` corresponding to all axes
     """
-    cat = img_as_float(data.chelsea())
+    cat = img_as_float(data.fetch_chelsea())
 
     func = color.rgb2ycbcr
     cat_ycbcr_expected = func(cat, channel_axis=-1)

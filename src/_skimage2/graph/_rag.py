@@ -355,7 +355,7 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance', sigma=255.0):
     Examples
     --------
     >>> from _skimage2 import data, segmentation, graph
-    >>> img = data.astronaut()
+    >>> img = data.fetch_astronaut()
     >>> labels = segmentation.slic(img)
     >>> rag = graph.rag_mean_color(img, labels)
 
@@ -423,7 +423,7 @@ def rag_boundary(labels, edge_map, connectivity=2):
     Examples
     --------
     >>> from _skimage2 import data, segmentation, filters, color, graph
-    >>> img = data.chelsea()
+    >>> img = data.fetch_chelsea()
     >>> labels = segmentation.slic(img)
     >>> edge_map = filters.sobel(color.rgb2gray(img))
     >>> rag = graph.rag_boundary(labels, edge_map)
@@ -513,7 +513,7 @@ def show_rag(
     >>> from _skimage2 import data, segmentation, graph
     >>> import matplotlib.pyplot as plt
     >>>
-    >>> img = data.coffee()
+    >>> img = data.fetch_coffee()
     >>> labels = segmentation.slic(img)
     >>> g =  graph.rag_mean_color(img, labels)
     >>> lc = graph.show_rag(labels, g, img)
