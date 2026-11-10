@@ -1109,6 +1109,7 @@ SKIMAGE_API = {
     'skimage.measure:EllipseModel',
     'skimage.measure:LineModelND',
     'skimage.measure:RansacModelProtocol',
+    'skimage.measure:RegionProperties',
     'skimage.measure:approximate_polygon(coords, tolerance)',
     'skimage.measure:block_reduce(image, block_size=2, func=<function sum at '
     '0x...>, cval=0, func_kwargs=None)',

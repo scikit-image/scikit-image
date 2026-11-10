@@ -22,8 +22,9 @@ from _skimage2.measure._regionprops import (  # noqa: F401
     _props_to_dict,
     _require_intensity_image,
     regionprops_table,
+    RegionProperties,
 )
 
 from skimage._doctest_adapters import adapt_doctests
 
-adapt_doctests(globals())
+adapt_doctests(globals(), skip_names=('RegionProperties',))
