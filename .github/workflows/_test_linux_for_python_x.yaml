@@ -36,10 +36,6 @@ on:
         required: false
         type: string
         default: 0
-      INSTALL_FROM_SDIST:
-        required: false
-        type: string
-        default: 0
 
 jobs:
   test-linux:
@@ -71,18 +67,10 @@ jobs:
           path: ./dist
 
       - name: Install wheel
-        if: ${{ inputs.INSTALL_FROM_SDIST != 1 }}
         env:
           PIP_FLAGS: ${{ inputs.PIP_FLAGS }}
         run: |
           pip install $PIP_FLAGS dist/*.whl
-
-      - name: Install sdist
-        if: ${{ inputs.INSTALL_FROM_SDIST == 1 }}
-        env:
-          PIP_FLAGS: ${{ inputs.PIP_FLAGS }}
-        run: |
-          pip install dist/*.tar.gz
 
       - name: Install spin
         run: pip install spin
@@ -134,13 +122,21 @@ jobs:
       - name: Run multithreaded tests (free-threaded only)
         if: ${{ endsWith(inputs.python-version, 't') }}
         env:
+          TEST_MODIFIED: ${{ steps.check-run-all-tests-label.outputs.test_modified }}
+          GITHUB_BASE_REF: ${{ github.base_ref }}
           # A lazy loader configuration parameter
           EAGER_IMPORT: ${{ inputs.EAGER_IMPORT }}
           MINIMUM_REQUIREMENTS: ${{ inputs.MINIMUM_REQUIREMENTS }}
           PYTHONOPTIMIZE: ${{ inputs.PYTHONOPTIMIZE }}
         run: |
+          if [[ "$TEST_MODIFIED" == "true" ]]; then
+            MODIFIED_FLAG="--test-modified"
+            git fetch origin "$GITHUB_BASE_REF"
+          else
+            MODIFIED_FLAG=""
+          fi
           pip install pytest-run-parallel
-          spin test --doctest -- --parallel-threads=4
+          spin test --doctest $MODIFIED_FLAG -- --parallel-threads=4
 
       - name: Check benchmarks
         run: |
