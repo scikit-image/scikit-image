@@ -1,0 +1,6 @@
+# https://jupytext.readthedocs.io/en/latest/config.html
+# Pair ipynb notebooks to Myst Markdown text notebooks. This allows us to use
+# the Jupyter notebook to edit and review notebooks while we are writing docs.
+# To use this configuration, you will also want to install jupytext in your
+# environment.
+formats = "ipynb,md:myst"

@@ -1,10 +1,11 @@
 (coordinates)=
 
-# Specifying coordinates
+# Specifying image coordinates
 
 A coordinate identifies a pixel. A coordinate consists of a sequence of
-numbers, one for each axis, specifying the pixel location on each axis of the
-image. For example, for a 2D image, the coordinate is a length 2 sequence, giving a number identifying the locations on the first and second image axis.
+numbers, one for each image axis, specifying the pixel location on the matching
+image axis. For example, for a 2D image, the coordinate is a length 2 sequence,
+giving a number identifying the locations on the first and second image axes.
 
 This page sets out the coordinate systems that we use in scikit-image, the
 names we give to image axes, and the rules the library follows when a function
@@ -34,9 +35,9 @@ use curly brackets for Cartesian indexing to remind ourselves that this is
 notation, not code.
 :::
 
-Cartesian indexing is common to the point of being universal in description of
-image processing algorithms in papers, books and web pages. It is also the
-way that Matplotlib thinks of positions on a plot.
+Cartesian indexing is very common in descriptions of image processing
+algorithms in papers, books and web pages. It is also the way that Matplotlib
+thinks of positions on a plot.
 
 In what follows, we'll set out the scikit-image approach, of using Numpy /
 matrix indexing for images, and contrast with Cartesian indexing.
@@ -49,31 +50,26 @@ axes in images, and justify our choices.
 Here we recap and extend the exposition in {ref}`numpy_images`. Let us start
 with an array that defines an image:
 
-```{eval-rst}
-.. plot::
-   :context:
-   :nofigs:
-   :include-source:
+```{code-cell} ipython3
+import numpy as np
+import matplotlib.pyplot as plt
 
-   >>> import numpy as np
-   >>> import matplotlib.pyplot as plt
-   >>> img_2d = np.array([[ 0,  0,  0,  0,  0,  0,  0,  0],
-   ...                    [ 0,  0,  0,  9, 99, 99, 94,  0],
-   ...                    [ 0,  0,  0, 25, 99, 99, 79,  0],
-   ...                    [ 0,  0,  0,  0,  0,  0,  0,  0],
-   ...                    [ 0,  0,  0, 56, 99, 99, 49,  0],
-   ...                    [ 0,  0,  0, 73, 99, 99, 31,  0],
-   ...                    [ 0,  0,  0, 91, 99, 99, 13,  0],
-   ...                    [ 0,  0,  9, 99, 99, 94,  0,  0],
-   ...                    [ 0,  0, 27, 99, 99, 77,  0,  0],
-   ...                    [ 0,  0, 45, 99, 99, 59,  0,  0],
-   ...                    [ 0,  0, 63, 99, 99, 42,  0,  0],
-   ...                    [ 0,  0, 80, 99, 99, 24,  0,  0],
-   ...                    [ 0,  1, 96, 99, 99,  6,  0,  0],
-   ...                    [ 0, 16, 99, 99, 88,  0,  0,  0],
-   ...                    [ 0,  0,  0,  0,  0,  0,  0,  0]])
-   >>> img_2d.shape
-   (15, 8)
+img_2d = np.array([[ 0,  0,  0,  0,  0,  0,  0,  0],
+                   [ 0,  0,  0,  9, 99, 99, 94,  0],
+                   [ 0,  0,  0, 25, 99, 99, 79,  0],
+                   [ 0,  0,  0,  0,  0,  0,  0,  0],
+                   [ 0,  0,  0, 56, 99, 99, 49,  0],
+                   [ 0,  0,  0, 73, 99, 99, 31,  0],
+                   [ 0,  0,  0, 91, 99, 99, 13,  0],
+                   [ 0,  0,  9, 99, 99, 94,  0,  0],
+                   [ 0,  0, 27, 99, 99, 77,  0,  0],
+                   [ 0,  0, 45, 99, 99, 59,  0,  0],
+                   [ 0,  0, 63, 99, 99, 42,  0,  0],
+                   [ 0,  0, 80, 99, 99, 24,  0,  0],
+                   [ 0,  1, 96, 99, 99,  6,  0,  0],
+                   [ 0, 16, 99, 99, 88,  0,  0,  0],
+                   [ 0,  0,  0,  0,  0,  0,  0,  0]])
+img_2d.shape
 ```
 
 :::{note} Terminology
@@ -84,25 +80,19 @@ the shape of a 2D grayscale image in general, as shape `(I, J)`. Here
 `I` is 15 and `J` is 8.
 :::
 
-You can probably see from the values in the array above that this
-two-dimensional array represents a grayscale image of an italic lower-case
-"i". Here is the array displayed as an image:
+You can probably see by squinting at the values in the array above that this
+two-dimensional array represents a grayscale image of an italic lower-case "i".
+Here is the array displayed as an image:
 
-```{eval-rst}
-.. plot::
-   :context:
-   :include-source:
-   :caption: ``img_2d`` displayed with the first axis running top to bottom.
-
-   >>> _ = plt.imshow(img_2d, cmap="gray")
+```{code-cell} ipython3
+plt.imshow(img_2d, cmap="gray");
 ```
 
 Numpy indexing into these image arrays is as for any other Numpy array. To
 get the pixel in the second (position 1) row, and fourth (position 3) column:
 
-```python
->>> img_2d[1, 3]
-np.int64(9)
+```{code-cell} ipython3
+img_2d[1, 3]
 ```
 
 :::{note} Terminology
@@ -114,20 +104,20 @@ position `j` in an image / array `image`: `image[i, j]`.
 :::{admonition} 0-based indexing and matrix indexing
 
 Because this is Numpy array indexing, and Numpy indexing is 0-based (not
-1-based), the top-left pixel value is `img_2d[0, 0]`. This is a
-convention choice by Python, and Numpy. In this sense, it differs from
-standard matrix / linear algebra notation, that typically prefers 1-based
-indexing.
+1-based), the top-left pixel value is `img_2d[0, 0]`. This is a convention
+choice by Python, and Numpy. In this sense, it differs from standard matrix
+/ linear algebra notation, that typically prefers 1-based indexing.
 :::
 
 Because indexing is nothing other than Numpy indexing, we can use the usual
 indexing expressions:
 
-```python
->>> img_2d[2]  # Values in third row of the image.
-array([ 0,  0,  0, 25, 99, 99, 79,  0])
->>> img_2d[:, 3]  # Values in fourth column of the image.
-array([ 0,  9, 25,  0, 56, 73, 91, 99, 99, 99, 99, 99, 99, 99,  0])
+```{code-cell} ipython3
+img_2d[2]  # Values in third row of the image.
+```
+
+```{code-cell} ipython3
+img_2d[:, 3]  # Values in fourth column of the image.
 ```
 
 and so on.
@@ -139,12 +129,12 @@ To summarize, for Numpy indexing:
 - The second coordinate (`j`) specifies positions from left to right in the
   image (the image column).
 
-## Cartesian indexing
+## Matplotlib / Cartesian indexing
 
 Above, we have used a coordinate pair `i, j` to index into an image. For
-example, to get the value in the second row and fourth column, `i=1, j=3`
-and `img_2d[i, j]`. The first coordinate in the pair specifies the row
-position and the second specifies the column position.
+example, to get the value in the second row and fourth column, `i=1, j=3` and
+`img_2d[i, j]`. The first coordinate in the pair specifies the row position and
+the second specifies the column position.
 
 Cartesian indexing is an alternative convention for defining what the first
 and second coordinate values mean, in an indexing expression. In Cartesian
@@ -163,104 +153,54 @@ indexing:
 - The second coordinate (`y`) specifies positions from top to bottom in the
   image (the image row).
 
-As for that page, we start by considering a 2D grayscale image, represented by
-a Numpy array with two dimensions.
+Cartesian indexing matches the indexing we use for on graph axes, where we
+think of the x-axis (the first axis) as being left-to-right. Then consider the
+way we typically display images in e.g. Matplotlib. Consider the display of the image of the italic "i" above, repeated below. Notice the image axes for this Matplotlib default image display, that have their origin at 0, 0 at the top-left of the image.
 
-In what follows, we discuss arrays and axes in general, so we begin by giving
-the terminology we use for specifying axes, and length of axes.
+We've also placed a red dot at position `{2, 5}` _in Matplotlib (image axis)
+coordinates_.
 
-## Terminology
-
-An upper-case letter gives the length of an axis. The matching lower-case
-letter gives an index into that axis. An array of shape `(I, J)` has
-indices `i` from 0 to `I - 1`, and `j` from 0 to `J - 1`. We name an
-axis by its lower-case letter, so we write "the `i` axis".
-
-In the simple case of a 2D grayscale (no color) image, we represent that image
-with a Numpy array of shape `(I, J)`.
-
-## Two coordinate systems
-
-The same pair of numbers names two different pixels, depending on the
-coordinate system.
-
-% Draft note. Source: coordinate_review.md "Background" (L23-53).
-% State the problem with one coordinate, (5, 10), before splitting into the
-% two subsections below.
-
-### The array coordinate system
-
-The array, or `IJ`, coordinate system gives the position along the first
-array axis, then the position along the second. It is the system NumPy
-indexing uses:
-
-```python
->>> import skimage as ski
->>> img = ski.data.camera()
->>> img[5, 10]
-np.uint8(198)
+```{code-cell} ipython3
+plt.imshow(img_2d, cmap="gray");
+plt.plot(5, 2, color='red', marker='o')
 ```
 
-The names `i` and `j` carry no meaning about display. They name array
-axes only.
+Notice that Matplotlib considers the first axis to be left-to-right (hence
+column 5 on this plot), and the second axis to be top-to-bottom (hence row 2 on
+this plot). This is Cartesian indexing. Because it is natural to think in
+this convention when discussing displayed images, it is a very common
+convention in papers and textbooks describing image algorithms.
 
-% Draft note. Source: coordinate_review.md "The array coordinate system"
-% (L71-106). Needs the displayed image, with the first axis running top to
-% bottom and the second left to right. Use `.. plot::` rather than
-% `plt.imshow`, because this page is built by Sphinx, not executed as a
-% notebook.
+## Coordinate conventions in scikit-image
 
-### The imaging coordinate system
+Versions of sckit-image before version 2 used both Numpy and Matplotlib
+(Cartesian) conventions, because Cartesian conventions are so common in
+descriptions of algorithms.
 
-The imaging, or `XY`, coordinate system reverses the order. The first
-number gives the position along the _second_ array axis, and the second
-number the position along the _first_:
-
-```python
->>> img[10, 5]
-np.uint8(201)
-```
-
-`x` runs left to right in the displayed image. `y` runs top to bottom.
-Both names refer to the display, not to the array.
-
-% Draft note. Source: coordinate_review.md "The imaging coordinate system"
-% (L107-144). Explain why the system is common: it matches graph axes,
-% except that y runs downwards for images. Matplotlib axes use (x, y) with
-% the origin at the bottom left.
-
-So `(5, 10)` means `img[5, 10]` in array coordinates and `img[10, 5]`
-in imaging coordinates. You cannot read a coordinate without knowing its
-system.
-
-## Rows and columns
-
-A row runs left to right in the displayed image. A column runs top to
-bottom:
-
-```python
->>> row_5 = img[5, :]
->>> col_10 = img[:, 10]
-```
-
-For a 2D grayscale image, row-column (`RC`) coordinates and `IJ`
-coordinates are the same.
-
-% Draft note. Source: coordinate_review.md "Row and columns" (L145-195).
-% Give `skimage.draw.line` as the worked example: it takes (r0, c0, r1, c1)
-% and returns (rr, cc) for direct indexing.
+Version 2 onwards standardize to using Numpy conventions.
 
 ## Rows and columns beyond 2D
 
-"Row" and "column" describe a _displayed_ 2D image. Once an array has three
-spatial axes, the row axis is no longer the first axis, and which axis holds
-the rows depends on how you choose to display the volume:
+"Row" and "column" describe a _displayed_ _2D image_. Once an image has three
+axes, or more, the relationship between axes and rows, columns becomes more
+ambiguous.
 
-```python
->>> img_4d = ski.data.cells3d()
->>> img_4d.shape
-(60, 2, 256, 256)
+For example, consider the following array that contains a 3D image of cells.
+
+Look at the docstring for `ski.data.cell3d` for more details on this array.
+
+```{code-cell} ipython3
+import skimage as ski
+
+# This array is shape planes, channels, rows, columns.
+# We index out the channels axis to concentrate on the planes, rows, columns
+# problem.
+img_4d = ski.data.cells3d()
+imd_3d = img_4d[:, 1]  # Channel 1 contains imaging of nuclei.
+img_3d.shape
 ```
+
+The a
 
 % Draft note. Source: coordinate_review.md "Rows and columns in 3D"
 % (L196-266). Show both readings of the same volume: `img_3d[middle, :, :]`
@@ -268,7 +208,7 @@ the rows depends on how you choose to display the volume:
 % 0 and 1 the rows and columns. The point is that "row" is a statement about
 % display, so it is ambiguous for a volume.
 
-## Semantic and positional labels
+## Color channels, semantic and positional labels
 
 `row`, `column` and `plane` are _semantic_ labels. Each says what an
 axis means for display. `i`, `j` and `k` are _positional_ labels. Each
