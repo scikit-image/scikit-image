@@ -80,7 +80,10 @@ extensions = [
 
 autosummary_generate = True
 templates_path = ["_templates"]
-source_suffix = {".rst": "restructuredtext"}
+source_suffix = {
+    ".rst": "restructuredtext",
+    ".md": "markdown",
+}
 
 show_warning_types = True
 suppress_warnings = [
