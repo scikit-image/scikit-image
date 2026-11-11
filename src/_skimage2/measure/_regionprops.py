@@ -1421,28 +1421,6 @@ def regionprops(
     42
 
     """
-    return _regionprops(
-        RegionProperties,
-        label_image,
-        intensity_image,
-        cache,
-        extra_properties=extra_properties,
-        spacing=spacing,
-        offset=offset,
-    )
-
-
-def _regionprops(
-    region_class,
-    label_image,
-    intensity_image,
-    cache,
-    *,
-    extra_properties,
-    spacing,
-    offset,
-):
-    """Implement `regionprops`, building regions of class `region_class`."""
 
     if label_image.ndim not in (2, 3):
         raise TypeError('Only 2-D and 3-D images supported.')
@@ -1479,7 +1457,7 @@ def _regionprops(
 
         label = i + 1
 
-        props = region_class(
+        props = RegionProperties(
             sl,
             label,
             label_image,

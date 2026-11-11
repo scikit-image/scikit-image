@@ -10,6 +10,7 @@ import pytest
 import _skimage2
 import skimage
 from _skimage2.transform._geometric import TRANSFORMS
+from skimage._doctest_adapters import _IMPL_TO_SHIM
 
 
 SRC = np.array(
@@ -192,24 +193,78 @@ def _impl_class(cls):
 
 
 def test_v1_classes_are_v1():
-    # Exceptions stay shared, so that v1 code can catch them from v2 code.
-    v2 = [
-        name
-        for name, cls in _v1_classes().items()
-        if cls.__module__.split('.')[0] != 'skimage'
-        and not issubclass(cls, BaseException)
-    ]
+    v2 = []  # Classes in v1 that are actually v2.
+    for name, cls in _v1_classes().items():
+        if cls.__module__.split('.')[0] == 'skimage':
+            continue  # cls already v1
+        # Exceptions stay shared, so that v1 code can catch them from v2 code.
+        if not issubclass(cls, BaseException):
+            v2.append(name)
     assert v2 == []
 
 
 def test_v1_classes_keep_v2_hierarchy():
     classes = _v1_classes()
-    lost = [
-        f'{a} -> {b}'
-        for a, cls_a in classes.items()
-        for b, cls_b in classes.items()
-        if cls_a is not cls_b
-        and issubclass(_impl_class(cls_a), _impl_class(cls_b))
-        and not issubclass(cls_a, cls_b)
-    ]
+    lost = []  # Classes that are subclasses in v2, but not v1.
+    for a, cls_a in classes.items():
+        for b, cls_b in classes.items():
+            if cls_a is cls_b:
+                continue
+            if not issubclass(_impl_class(cls_a), _impl_class(cls_b)):
+                continue  # Not subclass in v2 namespace.
+            if not issubclass(cls_a, cls_b):
+                # Subclass in v2 namespace, but not in v1 namespace.
+                lost.append(f'{a} -> {b}')
+    assert lost == []
+
+
+# Subclass relationships among public v1 classes.  The v1 API is frozen, so
+# these must not change, whatever the `_skimage2` class hierarchy.
+V1_SUBCLASSES = {
+    ('graph.MCP_Connect', 'graph.MCP'),
+    ('graph.MCP_Flexible', 'graph.MCP'),
+    ('graph.MCP_Geometric', 'graph.MCP'),
+    ('io.MultiImage', 'io.ImageCollection'),
+    ('transform.AffineTransform', 'transform.ProjectiveTransform'),
+    ('transform.EssentialMatrixTransform', 'transform.FundamentalMatrixTransform'),
+    ('transform.EuclideanTransform', 'transform.ProjectiveTransform'),
+    ('transform.SimilarityTransform', 'transform.EuclideanTransform'),
+    ('transform.SimilarityTransform', 'transform.ProjectiveTransform'),
+    # Structural: classes with the methods of the runtime-checkable protocol.
+    ('measure.CircleModel', 'measure.RansacModelProtocol'),
+    ('measure.EllipseModel', 'measure.RansacModelProtocol'),
+    ('measure.LineModelND', 'measure.RansacModelProtocol'),
+    ('transform.AffineTransform', 'measure.RansacModelProtocol'),
+    ('transform.EssentialMatrixTransform', 'measure.RansacModelProtocol'),
+    ('transform.EuclideanTransform', 'measure.RansacModelProtocol'),
+    ('transform.FundamentalMatrixTransform', 'measure.RansacModelProtocol'),
+    ('transform.PiecewiseAffineTransform', 'measure.RansacModelProtocol'),
+    ('transform.PolynomialTransform', 'measure.RansacModelProtocol'),
+    ('transform.ProjectiveTransform', 'measure.RansacModelProtocol'),
+    ('transform.SimilarityTransform', 'measure.RansacModelProtocol'),
+}
+
+
+def test_v1_class_hierarchy_frozen():
+    classes = _v1_classes()
+    found = set()
+    for a, cls_a in classes.items():
+        for b, cls_b in classes.items():
+            if cls_a is not cls_b and issubclass(cls_a, cls_b):
+                found.add((a, b))
+    assert found == V1_SUBCLASSES
+
+
+def test_v1_shim_classes_findable():
+    # Every public shim class is at its module and name, for pickle and doctests.
+    _v1_classes()  # Import all v1 shim modules.
+    lost = []
+    for shim_class in _IMPL_TO_SHIM.values():
+        if shim_class.__module__.startswith('skimage.tests'):
+            continue  # Made by tests of the shim machinery.
+        if shim_class.__qualname__.startswith('_'):
+            continue  # Private classes need not be importable.
+        module = importlib.import_module(shim_class.__module__)
+        if getattr(module, shim_class.__qualname__, None) is not shim_class:
+            lost.append(f'{shim_class.__module__}.{shim_class.__qualname__}')
     assert lost == []

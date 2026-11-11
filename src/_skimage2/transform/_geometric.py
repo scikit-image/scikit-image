@@ -2730,16 +2730,11 @@ def estimate_transform(ttype, src, dst, *args, **kwargs):
     FailedEstimationAccessError: No attribute "params" for failed estimation ...
 
     """
-    return _estimate_transform(TRANSFORMS, ttype, src, dst, *args, **kwargs)
-
-
-def _estimate_transform(transforms, ttype, src, dst, *args, **kwargs):
-    """Implement `estimate_transform` with transform classes `transforms`."""
     ttype = ttype.lower()
-    if ttype not in transforms:
+    if ttype not in TRANSFORMS:
         raise ValueError(f'the transformation type \'{ttype}\' is not implemented')
 
-    return transforms[ttype].from_estimate(src, dst, *args, **kwargs)
+    return TRANSFORMS[ttype].from_estimate(src, dst, *args, **kwargs)
 
 
 def matrix_transform(coords, matrix):

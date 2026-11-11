@@ -365,12 +365,7 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance', sigma=255.0):
            "Regions Adjacency Graph Applied To Color Image Segmentation"
            :DOI:`10.1109/83.841950`
     """
-    return _rag_mean_color(RAG, image, labels, connectivity, mode, sigma)
-
-
-def _rag_mean_color(rag_class, image, labels, connectivity, mode, sigma):
-    """Implement `rag_mean_color`, building a graph of class `rag_class`."""
-    graph = rag_class(labels, connectivity=connectivity)
+    graph = RAG(labels, connectivity=connectivity)
 
     for n in graph:
         graph.nodes[n].update(
@@ -434,11 +429,6 @@ def rag_boundary(labels, edge_map, connectivity=2):
     >>> rag = graph.rag_boundary(labels, edge_map)
 
     """
-    return _rag_boundary(RAG, labels, edge_map, connectivity)
-
-
-def _rag_boundary(rag_class, labels, edge_map, connectivity):
-    """Implement `rag_boundary`, building a graph of class `rag_class`."""
 
     conn = ndi.generate_binary_structure(labels.ndim, connectivity)
     eroded = ndi.grey_erosion(labels, footprint=conn)
@@ -459,7 +449,7 @@ def _rag_boundary(rag_class, labels, edge_map, connectivity):
     graph_matrix = sparse.csr_array((data, (labels_small, labels_large)))
     graph_matrix.data /= count_matrix.data
 
-    rag = rag_class()
+    rag = RAG()
     rag.add_weighted_edges_from(_edge_generator_from_csr(graph_matrix), weight='weight')
     rag.add_weighted_edges_from(_edge_generator_from_csr(count_matrix), weight='count')
 

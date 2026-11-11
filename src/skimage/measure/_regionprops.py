@@ -1,5 +1,3 @@
-import functools
-
 from _skimage2.measure._regionprops import (
     regionprops as regionprops,
     euler_number as euler_number,
@@ -22,33 +20,13 @@ from _skimage2.measure._regionprops import (  # noqa: F401
     _inertia_eigvals_to_axes_lengths_3D,
     _parse_docs,
     _props_to_dict,
-    _regionprops,
     _require_intensity_image,
     regionprops_table,
     RegionProperties,
 )
 
-from skimage._doctest_adapters import adapt_doctests
+from skimage._doctest_adapters import adapt_doctests, returns_shim
 
 adapt_doctests(globals())
 
-
-@functools.wraps(regionprops)
-def regionprops(
-    label_image,
-    intensity_image=None,
-    cache=True,
-    *,
-    extra_properties=None,
-    spacing=None,
-    offset=None,
-):
-    return _regionprops(
-        RegionProperties,
-        label_image,
-        intensity_image,
-        cache,
-        extra_properties=extra_properties,
-        spacing=spacing,
-        offset=offset,
-    )
+regionprops = returns_shim(regionprops)

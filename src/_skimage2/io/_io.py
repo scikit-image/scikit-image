@@ -3,7 +3,8 @@ import warnings
 
 import numpy as np
 
-from _skimage2._shared.utils import warn, deprecate_parameter, DEPRECATED
+from _skimage2._shared.utils import deprecate_parameter, DEPRECATED
+from _skimage2._shared._warnings import warn_external
 from ..exposure import is_low_contrast
 from ..color.colorconv import rgb2gray, rgba2rgb
 from ..io.manage_plugins import call_plugin, _hide_plugin_deprecation_warnings
@@ -17,7 +18,7 @@ __all__ = [
 
 
 _remove_plugin_param_template = (
-    "The plugin infrastructure in `_skimage2.io` and the parameter "
+    "The I/O plugin infrastructure and the parameter "
     "`{deprecated_name}` are deprecated since version {deprecated_version} and "
     "will be removed in {changed_version} (or later). To avoid this warning, "
     "please do not use the parameter `{deprecated_name}`. Instead, use `imageio` "
@@ -59,11 +60,11 @@ def imread(fname, as_gray=False, plugin=DEPRECATED, **plugin_args):
         plugin = None
     if plugin_args:
         msg = (
-            "The plugin infrastructure in `_skimage2.io` is deprecated since "
+            "The I/O plugin infrastructure is deprecated since "
             "version 0.25 and will be removed in 0.27 (or later). To avoid "
             "this warning, please do not pass additional keyword arguments "
             "for plugins (`**plugin_args`). Instead, use `imageio` or other "
-            "I/O packages directly. See also `_skimage2.io.imread`."
+            "I/O packages directly. See also `imread`."
         )
         warnings.warn(msg, category=FutureWarning, stacklevel=3)
 
@@ -130,11 +131,11 @@ def imread_collection(
         plugin = None
     if plugin_args:
         msg = (
-            "The plugin infrastructure in `_skimage2.io` is deprecated since "
+            "The I/O plugin infrastructure is deprecated since "
             "version 0.25 and will be removed in 0.27 (or later). To avoid "
             "this warning, please do not pass additional keyword arguments "
             "for plugins (`**plugin_args`). Instead, use `imageio` or other "
-            "I/O packages directly. See also `_skimage2.io.imread_collection`."
+            "I/O packages directly. See also `imread_collection`."
         )
         warnings.warn(msg, category=FutureWarning, stacklevel=3)
     with _hide_plugin_deprecation_warnings():
@@ -174,11 +175,11 @@ def imsave(fname, arr, plugin=DEPRECATED, *, check_contrast=True, **plugin_args)
         plugin = None
     if plugin_args:
         msg = (
-            "The plugin infrastructure in `_skimage2.io` is deprecated since "
+            "The I/O plugin infrastructure is deprecated since "
             "version 0.25 and will be removed in 0.27 (or later). To avoid "
             "this warning, please do not pass additional keyword arguments "
             "for plugins (`**plugin_args`). Instead, use `imageio` or other "
-            "I/O packages directly. See also `_skimage2.io.imsave`."
+            "I/O packages directly. See also `imsave`."
         )
         warnings.warn(msg, category=FutureWarning, stacklevel=3)
 
@@ -188,15 +189,14 @@ def imsave(fname, arr, plugin=DEPRECATED, *, check_contrast=True, **plugin_args)
         if fname.lower().endswith(('.tiff', '.tif')):
             plugin = 'tifffile'
     if arr.dtype == bool:
-        warn(
+        warn_external(
             f'{fname} is a boolean image: setting True to 255 and False to 0. '
             'To silence this warning, please convert the image using '
-            'img_as_ubyte.',
-            stacklevel=3,
+            'img_as_ubyte.'
         )
         arr = arr.astype('uint8') * 255
     if check_contrast and is_low_contrast(arr):
-        warn(f'{fname} is a low contrast image')
+        warn_external(f'{fname} is a low contrast image')
 
     with _hide_plugin_deprecation_warnings():
         return call_plugin('imsave', fname, arr, plugin=plugin, **plugin_args)
