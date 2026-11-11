@@ -1,0 +1,28 @@
+[workspace]
+name = "scikit-image"
+description = "Image processing in Python"
+authors = ["scikit-image developers <skimage-core@discuss.scientific-python.org>"]
+channels = ["https://prefix.dev/conda-forge"]
+platforms = ["linux-64", "osx-arm64", "win-64", "linux-aarch64"]
+preview = ["pixi-build"]
+requires-pixi = ">=0.71.0"
+
+
+### scikit-image Package Definition ###
+
+[package]
+version = "999" # fake a static version for now
+
+[package.build.backend]
+name = "pixi-build-python"
+version = "*"
+
+[package.build.config]
+compilers = ["c"]
+# map build-system.requires and project.dependencies from pyproject.toml
+ignore-pypi-mapping = false
+
+# matches the wheel builds (pythran needs clang-cl on Windows)
+[workspace.target.win.build-variants]
+c_compiler = ["clang-cl"]
+cxx_compiler = ["clang-cl"]
