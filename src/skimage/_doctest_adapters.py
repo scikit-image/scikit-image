@@ -57,6 +57,42 @@ _SEARCH_REP_PAIRS = (
 )
 
 
+_RST_ROLE_SKIMAGE2_REF = re.compile(
+    r'''
+    :(?P<role>\w+):
+    `skimage2
+    (?P<suffix>\.[\w.]*)`  # Exclude roles with <target>
+    ''',
+    flags=re.VERBOSE,
+)
+
+
+def _adapt_skimage2_rst_roles(doc):
+    """Replace ``skimage2`` with ``skimage`` in rST roles.
+
+    Parameters
+    ----------
+    doc : str | None
+        A docstring.
+
+    Returns
+    -------
+    new_doc : str | None
+        New docstrings where rST-roles that reference ``_skimage2`` or
+        `skimage2`` are replaced with ``skimage2``
+
+    Examples
+    --------
+    >>> docstring = "With reference to :func:`skimage2.exposure.histogram`."
+    >>> _adapt_skimage2_rst_roles(docstring)
+    'With reference to :func:`skimage.exposure.histogram`.'
+    """
+    if not doc:
+        return doc
+    new_doc = _RST_ROLE_SKIMAGE2_REF.sub(r':\g<role>:`skimage\g<suffix>`', doc)
+    return new_doc
+
+
 def _adapt_doctest_doc(doc: str | None) -> str | None:
     """Rewrite ``_skimage2`` / ``skimage2`` inside doctest blocks only.
 
@@ -157,6 +193,7 @@ def _adapt_obj_doctest(obj, shim_module: str):
         return obj
     original_doc = getattr(obj, '__doc__', None)
     adapted_doc = _adapt_doctest_doc(original_doc)
+    adapted_doc = _adapt_skimage2_rst_roles(adapted_doc)
     if inspect.isroutine(obj) and original_doc != adapted_doc:
         return _copy_callable(obj, adapted_doc, shim_module)
     if inspect.isclass(obj):
@@ -209,6 +246,7 @@ def adapt_doctests(
 
     module_doc = ns.get('__doc__')
     adapted_module_doc = _adapt_doctest_doc(module_doc)
+    adapted_module_doc = _adapt_skimage2_rst_roles(adapted_module_doc)
     if adapted_module_doc != module_doc:
         ns['__doc__'] = adapted_module_doc
 
@@ -300,6 +338,7 @@ def _adapt_class(old_class, class_doc, mod_name):
             continue
 
         adapted_doc = _adapt_doctest_doc(original_doc)
+        adapted_doc = _adapt_skimage2_rst_roles(adapted_doc)
         if adapted_doc == original_doc:
             continue
 

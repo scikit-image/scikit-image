@@ -1275,7 +1275,7 @@ def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None):
     classes desired.
 
     If no `hist` is given, this function will make use of
-    :func:`~.exposure.histogram`, which behaves differently than
+    :func:`skimage2.exposure.histogram`, which behaves differently than
     :func:`numpy.histogram`. While both are allowed, use the former for consistent
     behavior.
 
