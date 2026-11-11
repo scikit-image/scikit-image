@@ -71,7 +71,7 @@ extensions = [
     "numpydoc",
     "sphinx_design",
     "matplotlib.sphinxext.plot_directive",
-    "myst_parser",
+    "myst_nb",
     "pytest_doctestplus.sphinx.doctestplus",
     "skimage_extensions",
     # Add “toggle button” elements to sections
@@ -82,7 +82,6 @@ autosummary_generate = True
 templates_path = ["_templates"]
 source_suffix = {
     ".rst": "restructuredtext",
-    ".md": "markdown",
 }
 
 show_warning_types = True
@@ -390,3 +389,13 @@ myst_enable_extensions = [
 ]
 # Auto-generate heading anchors up to depth
 myst_heading_anchors = 3
+
+
+def _drop_notebook_sources(app, config):
+    """Keep sphinx-gallery's .ipynb files out of the document set."""
+    config.source_suffix.pop(".ipynb", None)
+
+
+def setup(app):
+    # Priority 900 runs this after Sphinx's own merge_source_suffix (800).
+    app.connect("config-inited", _drop_notebook_sources, priority=900)

@@ -1,6 +1,45 @@
+---
+jupytext:
+  text_representation:
+    extension: .md
+    format_name: myst
+kernelspec:
+  display_name: Python 3
+  language: python
+  name: python3
+---
+
 (coordinates)=
 
 # Specifying image coordinates
+
+## Summary
+
+The following applies to a grayscale images — that is, the image array has no color channel axis.
+
+If we have a 2D grayscale image `img` then we refer to the pixel at row
+position `i` and column position `j` as being at coordinate `(i, j)`. We say
+that the image, in general, has shape `(I, J)`.
+
+Scikit-image represents a grayscale 2D image as a 2D array. Thus the pixel
+value at `i, j` is the result of Numpy indexing into the array with `img[i,
+j]`.
+
+For a 3D grayscale image `img3d`, then we name the coordinates of three axes
+`i, j, k`, and the image array has shape `(I, J, K)`. It will depend on the
+particular image whether the first axis is best thought of as "rows" or
+"columns" or "planes".
+
+A multichannel (color) image has an extra axis containing the color channel
+information. Such an axis will typically be last, but routines that consider
+color channels have a `channel_axis` keyword argument to specify the axis in
+the array that holds the color information. Thus, in the typical case, a 2D
+image with color channels will be shape `(I, J, C)`, where `C` is the number
+of channels, and `C` is typically (e.g. for RGB) equal to 3. However, if
+your image array has `channel_axis=0`, then the image array would be shape
+`(C, I, J)`.
+
+## Background
 
 A coordinate identifies a pixel. A coordinate consists of a sequence of
 numbers, one for each image axis, specifying the pixel location on the matching
@@ -50,7 +89,7 @@ axes in images, and justify our choices.
 Here we recap and extend the exposition in {ref}`numpy_images`. Let us start
 with an array that defines an image:
 
-```{code-cell} ipython3
+```{code-cell} python
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -84,14 +123,14 @@ You can probably see by squinting at the values in the array above that this
 two-dimensional array represents a grayscale image of an italic lower-case "i".
 Here is the array displayed as an image:
 
-```{code-cell} ipython3
+```{code-cell} python
 plt.imshow(img_2d, cmap="gray");
 ```
 
 Numpy indexing into these image arrays is as for any other Numpy array. To
 get the pixel in the second (position 1) row, and fourth (position 3) column:
 
-```{code-cell} ipython3
+```{code-cell} python
 img_2d[1, 3]
 ```
 
@@ -112,11 +151,11 @@ choice by Python, and Numpy. In this sense, it differs from standard matrix
 Because indexing is nothing other than Numpy indexing, we can use the usual
 indexing expressions:
 
-```{code-cell} ipython3
+```{code-cell} python
 img_2d[2]  # Values in third row of the image.
 ```
 
-```{code-cell} ipython3
+```{code-cell} python
 img_2d[:, 3]  # Values in fourth column of the image.
 ```
 
@@ -160,7 +199,7 @@ way we typically display images in e.g. Matplotlib. Consider the display of the 
 We've also placed a red dot at position `{2, 5}` _in Matplotlib (image axis)
 coordinates_.
 
-```{code-cell} ipython3
+```{code-cell} python
 plt.imshow(img_2d, cmap="gray");
 plt.plot(5, 2, color='red', marker='o')
 ```
@@ -187,28 +226,55 @@ ambiguous.
 
 For example, consider the following array that contains a 3D image of cells.
 
-Look at the docstring for `ski.data.cell3d` for more details on this array.
+See the docstring for `ski.data.cell3d` for more details on this array.
 
-```{code-cell} ipython3
+```{code-cell} python
 import skimage as ski
 
-# This array is shape planes, channels, rows, columns.
-# We index out the channels axis to concentrate on the planes, rows, columns
-# problem.
+# The full data has shape (n_planes, n_channels, n_rows, n_columns).
 img_4d = ski.data.cells3d()
-imd_3d = img_4d[:, 1]  # Channel 1 contains imaging of nuclei.
+# Slice the 4D array to get a 3D array (and a 3D image).
+# Channel 1 contains imaging of nuclei.
+img_3d = img_4d[:, 1]
 img_3d.shape
 ```
 
-The a
+In fact, in this case, the first axis contains the _planes_ of the image
+— that is, the microscope took planar (2D) images, and the array we have is
+the result of taking these 2D images, and stacking them over the first
+dimension. For example, this was the first planar 2D image from the whole sequence:
 
-% Draft note. Source: coordinate_review.md "Rows and columns in 3D"
-% (L196-266). Show both readings of the same volume: `img_3d[middle, :, :]`
-% makes axes 1 and 2 the rows and columns; `img_3d[:, :, middle]` makes axes
-% 0 and 1 the rows and columns. The point is that "row" is a statement about
-% display, so it is ambiguous for a volume.
+```{code-cell} python
+first_plane = img_3d[0, :, :]
+
+plt.imshow(first_plane, cmap='gray')
+```
+
+We bring this up, because it may now be obvious that, for a 3D image, it is no
+longer true that the first axis is always "rows" in the image, and the second
+"columns". And, in fact, in this case, the first axis could be thought of as
+containing "planes", the second "rows" and the third "columns".
+
+For this reason, scikit-image, in docstrings and documentation, refers to
+coordinates in grayscale 3D images as `(i, j, k)` — meaning `i` is the
+coordinate on the first axis (whatever that represents), and so on. Similarly
+we write the shape of a 3D (grayscale) image, in general, as `(I, J, K)`.
+
+Put another way, the term "row" is a statement about our intended
+two-dimensional display of the image, so it is ambiguous for a volume. So we
+avoid the terms "row" and "column" for 3D (volume) image.
 
 ## Color channels, semantic and positional labels
+
+You will notice that, so far, we have avoided using labels for axes that
+attempt to give some meaning to the axes. Labels that contain meaning or
+interpretation of the axis are — semantic labels. For example, "row" is
+a semantic label, because it tells us that the labeled axis will be displayed
+as rows in a 2D display. But `i` and `j` and `k` are not semantic; they just mean the first, second and third axes in a 3D (grayscale) image.
+
+However, color images have an extra axis that contains the color information. For example, consider the `cat` image:
+
+pcc
 
 `row`, `column` and `plane` are _semantic_ labels. Each says what an
 axis means for display. `i`, `j` and `k` are _positional_ labels. Each
@@ -265,7 +331,8 @@ These conventions are summarized below:
 | 2D multichannel (eg. RGB) | (row, col, ch)      |
 | 3D grayscale              | (pln, row, col)     |
 | 3D multichannel           | (pln, row, col, ch) |
-| :::                       |
+
+:::
 
 Note that the position of `ch` is controlled by the `channel_axis`
 argument.
@@ -278,7 +345,8 @@ We can supplement the above table for time-varying data:
 | -------------- | ---------------------- |
 | 2D color video | (t, row, col, ch)      |
 | 3D color video | (t, pln, row, col, ch) |
-| :::            |
+
+:::
 
 ## Color channels and `channel_axis`
 
@@ -314,4 +382,5 @@ Angles are in radians.
 
 - {ref}`numpy_images` — Images as NumPy arrays, and the cost of axis order.
 - {ref}`geometrical_transform` — Transformations that map one set of coordinates to another.
-  :::
+
+:::

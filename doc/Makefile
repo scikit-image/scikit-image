@@ -16,8 +16,7 @@ DEST            = build
 MIGRATION_TPL = source/user_guide/skimage2_migration.rst.tpl
 
 # User guide pages checked by `make doctest-pages`.
-DOCTEST_PAGES = source/user_guide/coordinates.rst \
-                source/user_guide/geometrical_transform.rst \
+DOCTEST_PAGES = source/user_guide/geometrical_transform.rst \
                 source/user_guide/numpy_images.rst
 
 .PHONY: all help clean api migration-doc migration-test html api dirhtml pickle json htmlhelp qthelp devhelp latex latexpdf changes linkcheck doctest doctest-pages gitwash
@@ -139,7 +138,7 @@ doctest:
 	      "results in build/doctest/output.txt."
 
 doctest-pages:
-	$(PYTHON) -m pytest --doctest-plus --doctest-glob='*.rst' $(DOCTEST_PAGES)
+	$(PYTHON) -m pytest --doctest-plus --doctest-glob='*.rst' --doctest-glob='*.md' $(DOCTEST_PAGES)
 
 gitwash:
 	$(PYTHON) tools/gitwash/gitwash_dumper.py source scikit-image \
