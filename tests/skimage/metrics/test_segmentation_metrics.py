@@ -96,26 +96,18 @@ def test_are():
 
 
 @pytest.mark.parametrize("sparse_type", sparse_types)
-def test_are_table(sparse_type):
-    im_true = np.array([[2, 1], [1, 2]])
-    im_test = np.array([[1, 2], [3, 1]])
-    expected = adapted_rand_error(im_true, im_test)
-
-    table = contingency_table(
-        im_true, im_test, ignore_labels=(0,), sparse_type=sparse_type
-    )
-    result = adapted_rand_error(table=table)
-    assert_almost_equal(result, expected)
+def test_vi_table(sparse_type):
+    im1 = np.array([[1, 0], [2, 3]], dtype='uint8')
+    im2 = np.array([[1, 1], [1, 0]], dtype='uint8')
+    table = contingency_table(im1, im2, ignore_labels=[0], sparse_type=sparse_type)
+    assert_almost_equal(variation_of_information(table=table), (0, 2 / 3))
 
 
 @pytest.mark.parametrize("sparse_type", sparse_types)
-def test_vi_table(sparse_type):
-    im_true = np.array([[1, 0], [2, 3]], dtype='uint8')
-    im_test = np.array([[1, 1], [1, 0]], dtype='uint8')
-    expected = variation_of_information(im_true, im_test, ignore_labels=[0])
-
+def test_are_table(sparse_type):
+    im_true = np.array([[2, 1], [1, 2]])
+    im_test = np.array([[1, 2], [3, 1]])
     table = contingency_table(
-        im_true, im_test, ignore_labels=[0], normalize=True, sparse_type=sparse_type
+        im_true, im_test, ignore_labels=[0], sparse_type=sparse_type
     )
-    result = variation_of_information(table=table)
-    assert_almost_equal(result, expected)
+    assert_almost_equal(adapted_rand_error(table=table), (0.3333333, 0.5, 1.0))

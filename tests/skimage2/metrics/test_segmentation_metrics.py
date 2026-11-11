@@ -69,21 +69,26 @@ def test_are():
         adapted_rand_error(im_true, im_test, alpha=-0.01)
 
 
+@pytest.mark.parametrize("normalize", [True, False])
+def test_vi_table(normalize):
+    im1 = np.array([[1, 0], [2, 3]], dtype='uint8')
+    im2 = np.array([[1, 1], [1, 0]], dtype='uint8')
+    table = contingency_table(im1, im2, ignore_labels=[0], normalize=normalize)
+    assert_almost_equal(variation_of_information(table=table), (0, 2 / 3))
+
+
 def test_are_table():
     im_true = np.array([[2, 1], [1, 2]])
     im_test = np.array([[1, 2], [3, 1]])
-    expected = adapted_rand_error(im_true, im_test)
-
-    table = contingency_table(im_true, im_test, ignore_labels=(0,))
-    result = adapted_rand_error(table=table)
-    assert_almost_equal(result, expected)
+    table = contingency_table(im_true, im_test, ignore_labels=[0])
+    assert_almost_equal(adapted_rand_error(table=table), (0.3333333, 0.5, 1.0))
+    assert_almost_equal(adapted_rand_error(table=table, alpha=0), (0, 0.5, 1.0))
 
 
-def test_vi_table():
-    im_true = np.array([[1, 0], [2, 3]], dtype='uint8')
-    im_test = np.array([[1, 1], [1, 0]], dtype='uint8')
-    expected = variation_of_information(im_true, im_test, ignore_labels=[0])
-
-    table = contingency_table(im_true, im_test, ignore_labels=[0], normalize=True)
-    result = variation_of_information(table=table)
-    assert_almost_equal(result, expected)
+@pytest.mark.parametrize("func", [variation_of_information, adapted_rand_error])
+@pytest.mark.parametrize(
+    "images", [(), (np.ones((2, 2), dtype=int),), (None, np.ones((2, 2), dtype=int))]
+)
+def test_missing_inputs(func, images):
+    with pytest.raises(ValueError, match="Provide both images"):
+        func(*images)
