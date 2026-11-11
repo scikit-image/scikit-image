@@ -1,5 +1,7 @@
+import inspect
 import sys
 import types
+import typing
 
 import numpy as np
 
@@ -7,6 +9,9 @@ from skimage._doctest_adapters import (
     _adapt_doctest_doc,
     _adapt_obj_doctest,
     adapt_doctests,
+    as_shim,
+    returns_shim,
+    shim_wraps,
 )
 
 import pytest
@@ -17,6 +22,12 @@ def skip_if_pyopt2(func):
         sys.flags.optimize >= 2,
         reason='PYTHONOPTIMIZE=2 strips docstrings',
     )(func)
+
+
+def _as_impl(cls):
+    """Give test class `cls` the module of a ``_skimage2`` implementation class."""
+    cls.__module__ = '_skimage2.tests.example'
+    return cls
 
 
 def test_adapt_import_lines():
@@ -102,13 +113,14 @@ def test_adapt_obj_doctest_sets_doc():
 
 @skip_if_pyopt2
 def test_adapt_obj_doctest_class_uses_proxy_without_mutating_impl():
+    @_as_impl
     class Impl:
         """Example
 
         >>> from _skimage2 import data
         """
 
-    assert Impl.__module__ == __name__
+    assert Impl.__module__ == '_skimage2.tests.example'
     in_doc = Impl.__doc__
     assert '_skimage2' in in_doc
     bound = _adapt_obj_doctest(Impl, shim_module='skimage.tests.example')
@@ -211,6 +223,7 @@ def test_adapt_preserves_output_block():
 
 @skip_if_pyopt2
 def test_adapt_obj_doctest_adapts_method_docstrings():
+    @_as_impl
     class Impl:
         """Example class.
 
@@ -247,11 +260,12 @@ def test_adapt_obj_doctest_adapts_method_docstrings():
     # Original class and methods are unmodified
     assert '_skimage2' in Impl.__doc__
     assert '_skimage2' in Impl.process.__doc__
-    assert Impl.__module__ == __name__
+    assert Impl.__module__ == '_skimage2.tests.example'
 
 
 @skip_if_pyopt2
 def test_adapt_obj_doctest_adapts_classmethod_docstrings():
+    @_as_impl
     class Impl:
         @classmethod
         def create(cls):
@@ -275,6 +289,7 @@ def test_adapt_obj_doctest_adapts_classmethod_docstrings():
 
 @skip_if_pyopt2
 def test_adapt_obj_doctest_adapts_staticmethod_docstrings():
+    @_as_impl
     class Impl:
         @staticmethod
         def helper(x):
@@ -300,6 +315,7 @@ def test_adapt_obj_doctest_adapts_staticmethod_docstrings():
 def test_adapt_obj_doctest_class_method_without_skimage_ref_not_copied():
     """Methods without _skimage2 references stay inherited, not overridden."""
 
+    @_as_impl
     class Impl:
         """Example class.
 
@@ -319,6 +335,7 @@ def test_adapt_obj_doctest_class_method_without_skimage_ref_not_copied():
 
 @skip_if_pyopt2
 def test_adapt_obj_doctest_adapts_init_docstring():
+    @_as_impl
     class Impl:
         """Example class.
 
@@ -348,6 +365,7 @@ def test_adapt_obj_doctest_adapts_init_docstring():
 def test_adapt_obj_doctest_always_wraps_class_without_doc_rewrite():
     """Classes are always wrapped so shim patches cannot mutate implementation"""
 
+    @_as_impl
     class Impl:
         """Plain class with no skimage2 doctest imports."""
 
@@ -366,6 +384,7 @@ def test_adapt_obj_doctest_always_wraps_class_without_doc_rewrite():
 
 
 def test_adapt_obj_doctest_always_wraps_class_with_none_doc():
+    @_as_impl
     class Impl:
         pass
 
@@ -387,6 +406,115 @@ def test_adapt_obj_doctest_leaves_shim_local_class_unchanged():
     assert out is AlreadyShimmed
 
 
+def test_shim_wraps():
+    """shim_wraps copies wrapper metadata but keeps the enclosing __module__."""
+
+    def impl(a, b=1):
+        """Implementation docstring."""
+        return a + b
+
+    impl.__module__ = '_skimage2.tests.example'
+
+    @shim_wraps(impl)
+    def wrapper(*args, **kwargs):
+        return impl(*args, **kwargs)
+
+    assert wrapper.__module__ == __name__
+    assert wrapper.__name__ == impl.__name__
+    assert wrapper.__qualname__ == impl.__qualname__
+    assert wrapper.__doc__ == impl.__doc__
+    assert wrapper.__annotations__ == impl.__annotations__
+    assert wrapper.__wrapped__ is impl
+    assert wrapper(1, b=2) == 3
+    assert str(inspect.signature(wrapper)) == str(inspect.signature(impl))
+
+
+def test_shim_wraps_keeps_module_for_closures():
+    """A wrapper defined inside a function still keeps the module __name__."""
+
+    def impl():
+        """Implementation docstring."""
+        return 1
+
+    impl.__module__ = '_skimage2.tests.example'
+
+    def make():
+        @shim_wraps(impl)
+        def wrapper():
+            return impl()
+
+        return wrapper
+
+    assert make().__module__ == __name__
+
+
+def test_as_shim():
+    @_as_impl
+    class Impl:
+        pass
+
+    ns = {'Impl': Impl, '__name__': 'skimage.tests.example_as_shim'}
+    adapt_doctests(ns)
+    obj = Impl()
+    assert as_shim(obj) is obj
+    assert type(obj) is ns['Impl']
+    items = as_shim([Impl(), Impl()])
+    assert [type(item) for item in items] == [ns['Impl']] * 2
+    other = object()
+    assert as_shim(other) is other
+
+
+def test_as_shim_refuses_shim_init():
+    @_as_impl
+    class Impl:
+        pass
+
+    ns = {'Impl': Impl, '__name__': 'skimage.tests.example_shim_init'}
+    adapt_doctests(ns)
+
+    def __init__(self):
+        self.extra = 1
+
+    ns['Impl'].__init__ = __init__
+    with pytest.raises(TypeError, match='must not define __init__'):
+        as_shim(Impl())
+
+
+def test_as_shim_allows_doctest_copy_of_init():
+    @_as_impl
+    class Impl:
+        def __init__(self):
+            """Example.
+
+            >>> import _skimage2 as ski2
+            """
+            self.value = 1
+
+    ns = {'Impl': Impl, '__name__': 'skimage.tests.example_init_copy'}
+    adapt_doctests(ns)
+    assert '__init__' in vars(ns['Impl'])  # Copy with adapted docstring.
+    assert type(as_shim(Impl())) is ns['Impl']
+
+
+def test_returns_shim():
+    @_as_impl
+    class Impl:
+        pass
+
+    def make():
+        """Implementation docstring."""
+        return Impl()
+
+    make.__module__ = '_skimage2.tests.example'
+    ns = {'Impl': Impl, '__name__': 'skimage.tests.example_returns_shim'}
+    adapt_doctests(ns)
+    wrapper = returns_shim(make)
+    assert type(wrapper()) is ns['Impl']
+    assert wrapper.__module__ == __name__
+    assert wrapper.__doc__ == make.__doc__
+    assert wrapper.__wrapped__ is make
+
+
 def test_adapt_doctests_wraps_class_without_mutating_impl_add():
     """Shim-only __add__ patch must not land on the implementation class."""
 
@@ -394,7 +522,7 @@ def test_adapt_doctests_wraps_class_without_mutating_impl_add():
         def __add__(self, other):
             return 'impl'
 
-    Impl.__module__ = 'impl.module'
+    Impl.__module__ = '_skimage2.tests.example'
     impl_add = Impl.__add__
 
     ns = {
@@ -429,3 +557,100 @@ def test_geometric_shim_does_not_patch_skimage2_affine_add():
     tform2 = Ski2Similarity(scale=0.1, rotation=0.9)
     combined = tform1 + tform2
     assert isinstance(combined, Ski2Projective)
+
+
+def test_adapt_doctests_matches_class_hierarchy():
+    class Base:
+        pass
+
+    class Child(Base):
+        pass
+
+    class GrandChild(Child):
+        pass
+
+    for cls in (Base, Child, GrandChild):
+        cls.__module__ = '_skimage2.tests.example'
+    # Parents in another shim module, and listed after their children.
+    ns_base = {'Base': Base, '__name__': 'skimage.tests.example_base'}
+    ns = {
+        'GrandChild': GrandChild,
+        'Child': Child,
+        '__name__': 'skimage.tests.example_shim',
+    }
+    adapt_doctests(ns_base)
+    adapt_doctests(ns)
+    ShimBase, ShimChild, ShimGrandChild = ns_base['Base'], ns['Child'], ns['GrandChild']
+    assert issubclass(ShimChild, ShimBase)
+    assert issubclass(ShimGrandChild, ShimChild)
+    assert issubclass(ShimGrandChild, GrandChild)
+    assert not issubclass(ShimBase, ShimChild)
+
+
+def test_adapt_doctests_refuses_missing_parent_shim():
+    class Base:
+        pass
+
+    class Child(Base):
+        pass
+
+    for cls in (Base, Child):
+        cls.__module__ = '_skimage2.tests.example'
+    # The child's module first: `Base` has no shim class yet.
+    ns_child = {'Child': Child, '__name__': 'skimage.tests.example_child'}
+    with pytest.raises(TypeError, match='No shim class for'):
+        adapt_doctests(ns_child)
+
+
+def test_adapt_doctests_does_not_shim_other_bases():
+    class Other:
+        pass
+
+    class Impl(Other):
+        pass
+
+    Impl.__module__ = '_skimage2.tests.example'
+    ns = {'Impl': Impl, '__name__': 'skimage.tests.example_other_base'}
+    adapt_doctests(ns)
+    assert ns['Impl'].__bases__ == (Impl,)
+
+
+def test_adapt_doctests_shares_shim_class_between_modules():
+    @_as_impl
+    class Impl:
+        pass
+
+    ns1 = {'Impl': Impl, '__name__': 'skimage.tests.example_one'}
+    ns2 = {'Impl': Impl, '__name__': 'skimage.tests.example_two'}
+    adapt_doctests(ns1)
+    adapt_doctests(ns2)
+    assert ns1['Impl'] is not Impl
+    assert ns2['Impl'] is ns1['Impl']
+
+
+def test_adapt_doctests_leaves_skimage_classes_unchanged():
+    class Native:
+        pass
+
+    Native.__module__ = 'skimage.tests.example_other'
+    ns = {'Native': Native, '__name__': 'skimage.tests.example_shim'}
+    adapt_doctests(ns)
+    assert ns['Native'] is Native
+
+
+def test_adapt_doctests_keeps_runtime_protocol():
+    @_as_impl
+    @typing.runtime_checkable
+    class Proto(typing.Protocol):
+        def run(self): ...
+
+    class Impl:
+        def run(self):
+            pass
+
+    ns = {'Proto': Proto, '__name__': 'skimage.tests.example_shim'}
+    adapt_doctests(ns)
+    assert ns['Proto'] is not Proto
+    assert isinstance(Impl(), ns['Proto'])
+    assert issubclass(Impl, ns['Proto'])
+    assert not isinstance(object(), ns['Proto'])

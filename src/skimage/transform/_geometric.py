@@ -14,6 +14,7 @@ from _skimage2.transform._geometric import (
 
 from _skimage2.transform._geometric import (  # noqa: F401
     _GeometricTransform,
+    _HMatrixTransform,
     _affine_matrix_from_vector,
     _append_homogeneous_dim,
     _apply_homogeneous,
@@ -23,52 +24,33 @@ from _skimage2.transform._geometric import (  # noqa: F401
 )
 
 
-from skimage._doctest_adapters import adapt_doctests, _is_from_shim
+from skimage._doctest_adapters import adapt_doctests, as_shim, returns_shim
 
 adapt_doctests(globals())
 
-# Use the fact that geometric classes inherit from ABC, and therefore implement
-# 'register', to fix inheritance checks after subclassing in adapt_doctests.
-ProjectiveTransform.register(AffineTransform)
-ProjectiveTransform.register(EuclideanTransform)
-EuclideanTransform.register(SimilarityTransform)
-FundamentalMatrixTransform.register(EssentialMatrixTransform)
+
+# The `_skimage2` `__add__` returns the `_skimage2` ProjectiveTransform when
+# the two transform types differ.
+_ski2_ptf__add__ = ProjectiveTransform.__add__
 
 
-# ProjectiveTransform and child instance __add__ results will fail without
-# intervention, as they depend on the definition of the ProjectiveTransform
-# class as the default output, and this is the `_skimage2` version in the
-# `_skimage2` tree.  Redefine __add__ (with exact same code as `_skimage2` at
-# time of writing), so it picks up our ProjectiveTransform.
 def _ptf__add__(self, other):
     """Combine this transformation with another."""
-    # Is the other a projective instance?
-    if not isinstance(other, ProjectiveTransform):
-        raise TypeError("Cannot combine transformations of non-projective types.")
-    # Combination of the same types result in a transformation of this
-    # type again, otherwise the generic projective transform.
-    tform_class = type(self) if type(self) == type(other) else ProjectiveTransform
-    return tform_class(other.params @ self.params)
+    return as_shim(_ski2_ptf__add__(self, other))
 
 
-# We need to define __add__ for each projective transform, as the shims inherit
-# from their original classes, so e.g.shim AffineTransform no longer inherits
-# directly from shim ProjectiveTransform, and therefore, doesn't pick up
-# `__add__` defined on ProjectiveTransform.
-for _c in (
-    ProjectiveTransform,
-    AffineTransform,
-    EuclideanTransform,
-    SimilarityTransform,
-):
-    # Stop if we've picked up skimage2 class, rather than our own subclass.
-    assert _is_from_shim(_c, __name__)
-    # Patch __add__ to deal with subclass algorithm.
-    _c.__add__ = _ptf__add__
+# The other projective transforms inherit `__add__` from the shim
+# ProjectiveTransform.
+ProjectiveTransform.__add__ = _ptf__add__
 
 
 # Refill transforms from our own (shimmed) transform definitions.
 TRANSFORMS = {k: globals()[v.__name__] for k, v in _SKI2_TRANSFORMS.items()}
+
+PiecewiseAffineTransform._affine_class = AffineTransform
+
+estimate_transform = returns_shim(estimate_transform)
+
 
 __all__ = [
     'AffineTransform',

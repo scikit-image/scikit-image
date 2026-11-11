@@ -109,7 +109,7 @@ def _set_plugin(plugin_type, plugin_list):
 @deprecate_func(
     deprecated_version="0.25",
     removed_version="0.27",
-    hint="The plugin infrastructure of `_skimage2.io` is deprecated. "
+    hint="The I/O plugin infrastructure is deprecated. "
     "Instead, use `imageio` or other I/O packages directly.",
 )
 def reset_plugins():
@@ -172,7 +172,7 @@ with _hide_plugin_deprecation_warnings():
 @deprecate_func(
     deprecated_version="0.25",
     removed_version="0.27",
-    hint="The plugin infrastructure of `_skimage2.io` is deprecated. "
+    hint="The I/O plugin infrastructure is deprecated. "
     "Instead, use `imageio` or other I/O packages directly.",
 )
 def find_available_plugins(loaded=False):
@@ -211,7 +211,7 @@ with _hide_plugin_deprecation_warnings():
 @deprecate_func(
     deprecated_version="0.25",
     removed_version="0.27",
-    hint="The plugin infrastructure of `_skimage2.io` is deprecated. "
+    hint="The I/O plugin infrastructure is deprecated. "
     "Instead, use `imageio` or other I/O packages directly.",
 )
 def call_plugin(kind, *args, **kwargs):
@@ -235,9 +235,9 @@ def call_plugin(kind, *args, **kwargs):
     if len(plugin_funcs) == 0:
         msg = (
             f"No suitable plugin registered for {kind}.\n\n"
-            "You may load I/O plugins with the `_skimage2.io.use_plugin` "
-            "command.  A list of all available plugins are shown in the "
-            "`_skimage2.io` docstring."
+            "You may load I/O plugins with the `use_plugin` command.  A "
+            "list of all available plugins are shown in the I/O module "
+            "docstring."
         )
         raise RuntimeError(msg)
 
@@ -257,7 +257,7 @@ def call_plugin(kind, *args, **kwargs):
 @deprecate_func(
     deprecated_version="0.25",
     removed_version="0.27",
-    hint="The plugin infrastructure of `_skimage2.io` is deprecated. "
+    hint="The I/O plugin infrastructure is deprecated. "
     "Instead, use `imageio` or other I/O packages directly.",
 )
 def use_plugin(name, kind=None):
@@ -362,7 +362,7 @@ def _load(plugin):
 @deprecate_func(
     deprecated_version="0.25",
     removed_version="0.27",
-    hint="The plugin infrastructure of `_skimage2.io` is deprecated. "
+    hint="The I/O plugin infrastructure is deprecated. "
     "Instead, use `imageio` or other I/O packages directly.",
 )
 def plugin_info(plugin):
@@ -388,7 +388,7 @@ def plugin_info(plugin):
 @deprecate_func(
     deprecated_version="0.25",
     removed_version="0.27",
-    hint="The plugin infrastructure of `_skimage2.io` is deprecated. "
+    hint="The I/O plugin infrastructure is deprecated. "
     "Instead, use `imageio` or other I/O packages directly.",
 )
 def plugin_order():

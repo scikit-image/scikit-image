@@ -14,6 +14,9 @@ __all__ = [
     'show_rag',
 ]
 
-from skimage._doctest_adapters import adapt_doctests
+from skimage._doctest_adapters import adapt_doctests, returns_shim
 
 adapt_doctests(globals())
+
+rag_mean_color = returns_shim(rag_mean_color)
+rag_boundary = returns_shim(rag_boundary)
