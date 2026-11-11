@@ -43,3 +43,7 @@ skimage/morphology/_skeletonize_lee_cy.pyx
 stubs/
 # pyenv virtualenv environment marker.
 .python-version
+# Working with notebooks
+.ipynb_checkpoints/
+# Prefex textey source to built ipynb JSON
+*.ipynb
