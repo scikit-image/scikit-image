@@ -1,3 +1,5 @@
+import scipy.sparse as sparse
+
 from _skimage2._shared.utils import check_shape_equality
 from ._contingency_table import contingency_table
 
@@ -15,9 +17,11 @@ def adapted_rand_error(
         Ground-truth label image, same shape as im_test.
     image_test : ndarray of int
         Test image.
-    table : scipy.sparse array in crs format, optional
-        A contingency table built with skimage.evaluate.contingency_table.
-        If None, it will be computed on the fly.
+    table : scipy.sparse.csr_array or scipy.sparse.csr_matrix, optional
+        A contingency table of pixel counts, built with
+        :func:`~skimage2.metrics.contingency_table` and ``normalize=False``.
+        If given, the error is computed from this table, and `image_true`,
+        `image_test`, and `ignore_labels` are ignored.
     ignore_labels : sequence of int, optional
         Labels to ignore. Any part of the true image labeled with any of these
         values will not be counted in the score.
@@ -65,27 +69,21 @@ def adapted_rand_error(
            for connectomics. Front. Neuroanat. 9:142.
            :DOI:`10.3389/fnana.2015.00142`
     """
-    if image_test is not None and image_true is not None:
-        check_shape_equality(image_true, image_test)
-
-    if table is None:
-        p_ij = contingency_table(
-            image_true,
-            image_test,
-            ignore_labels=ignore_labels,
-            normalize=False,
-        )
-    else:
-        p_ij = table
-
     if alpha < 0.0 or alpha > 1.0:
         raise ValueError('alpha must be between 0 and 1')
+
+    if table is None:
+        if image_true is None or image_test is None:
+            raise ValueError("Provide both images, or a contingency table.")
+        check_shape_equality(image_true, image_test)
+        table = contingency_table(image_true, image_test, ignore_labels=ignore_labels)
+    p_ij = sparse.csr_array(table)
 
     # Sum of the joint distribution squared
     sum_p_ij2 = p_ij.data @ p_ij.data - p_ij.sum()
 
-    a_i = p_ij.sum(axis=1).ravel()
-    b_i = p_ij.sum(axis=0).ravel()
+    a_i = p_ij.sum(axis=1)
+    b_i = p_ij.sum(axis=0)
 
     # Sum of squares of the test segment sizes (this is 2x the number of pairs
     # of pixels with the same label in im_test)
