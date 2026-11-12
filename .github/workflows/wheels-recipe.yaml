@@ -45,8 +45,8 @@ jobs:
         env:
           # Build all variants of this version, including free-threaded
           CIBW_BUILD: ${{ matrix.python }}*
-          # Free-threaded builds opt out of the stable ABI (see pyproject.toml)
-          CIBW_CONFIG_SETTINGS: ${{ inputs.exclude_v2 && 'setup-args=-Dexclude-v2=true' || '' }}${{ endsWith(matrix.python, 't') && ' setup-args=-Dpython.allow_limited_api=false' || '' }}
+          # GIL builds opt in to the stable ABI (see the root meson.build)
+          CIBW_CONFIG_SETTINGS: ${{ inputs.exclude_v2 && 'setup-args=-Dexclude-v2=true' || '' }}${{ !endsWith(matrix.python, 't') && ' setup-args=-Dpython.allow_limited_api=true' || '' }}
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: wheels-${{ matrix.os }}-${{ matrix.python }}
@@ -82,8 +82,8 @@ jobs:
         env:
           # Build all variants of this version, including free-threaded
           CIBW_BUILD: ${{ matrix.python }}*
-          # Free-threaded builds opt out of the stable ABI (see pyproject.toml)
-          CIBW_CONFIG_SETTINGS: ${{ inputs.exclude_v2 && 'setup-args=-Dexclude-v2=true' || '' }}${{ endsWith(matrix.python, 't') && ' setup-args=-Dpython.allow_limited_api=false' || '' }}
+          # GIL builds opt in to the stable ABI (see the root meson.build)
+          CIBW_CONFIG_SETTINGS: ${{ inputs.exclude_v2 && 'setup-args=-Dexclude-v2=true' || '' }}${{ !endsWith(matrix.python, 't') && ' setup-args=-Dpython.allow_limited_api=true' || '' }}
           CC: clang-cl
           CXX: clang-cl
           LDFLAGS: "-Wl,-S"
@@ -120,8 +120,8 @@ jobs:
         env:
           # Build all variants of this version, including free-threaded
           CIBW_BUILD: ${{ matrix.python }}*${{ matrix.libc }}*
-          # Free-threaded builds opt out of the stable ABI (see pyproject.toml)
-          CIBW_CONFIG_SETTINGS: ${{ inputs.exclude_v2 && 'setup-args=-Dexclude-v2=true' || '' }}${{ endsWith(matrix.python, 't') && ' setup-args=-Dpython.allow_limited_api=false' || '' }}
+          # GIL builds opt in to the stable ABI (see the root meson.build)
+          CIBW_CONFIG_SETTINGS: ${{ inputs.exclude_v2 && 'setup-args=-Dexclude-v2=true' || '' }}${{ !endsWith(matrix.python, 't') && ' setup-args=-Dpython.allow_limited_api=true' || '' }}
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: wheels-${{ matrix.os }}-${{ matrix.libc }}-${{ matrix.python }}

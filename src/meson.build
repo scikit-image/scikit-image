@@ -103,25 +103,13 @@ cpp_args_pythran = [
   '-DPYTHRAN_BLAS_NONE'
 ]
 
-# Free-threaded CPython builds (cp3??t) do not support the stable ABI: the
-# headers refuse to compile with Py_LIMITED_API on 3.14 and earlier, and abi3t
-# is only available from 3.15 (and still requires toolchain support). Detect a
-# free-threaded build interpreter and, in that case, skip `limited_api` so the
-# extensions are built as regular version-specific wheels.
-free_threaded = run_command(
-  py3,
-  [
-    '-c',
-    'import sysconfig; print(1 if sysconfig.get_config_var("Py_GIL_DISABLED") else 0)'
-  ],
-  check: true
-).stdout().strip() == '1'
-
-if free_threaded
-  limited_api_ver = ''
-else
-  limited_api_ver = '3.12'
-endif
+# Every _skimage2 extension targets the CPython limited API (3.12). Whether that
+# is honoured is controlled by the opt-in `python.allow_limited_api` option,
+# which is disabled by default in the root meson.build: the abi3 wheel builds
+# pass `-Dpython.allow_limited_api=true`, while ordinary source builds and
+# free-threaded CPython (which does not support the limited API before 3.15)
+# build version-specific extensions.
+limited_api_ver = '3.12'
 
 # Deal with M_PI & friends; add `use_math_defines` to c_args
 # Cython doesn't always get this correctly itself

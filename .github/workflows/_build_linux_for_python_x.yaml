@@ -82,18 +82,23 @@ jobs:
         if: ${{ inputs.ISOLATED_BUILD != 1 }}
         run: |
           setup_args=("-Csetup-args=-Doptimization=2")
-          # Free-threaded builds cannot target the stable ABI (abi3) that the
-          # project builds by default, so disable the limited API to let them
-          # build as version-specific wheels.
-          if [[ "$PYTHON_VERSION" == *"t" ]]; then
-            setup_args+=("-Csetup-args=-Dpython.allow_limited_api=false")
+          # The limited API is opt-in (see the root meson.build). GIL builds
+          # request it to produce the single cp312-abi3 wheel that installs on
+          # 3.12-3.15; free-threaded builds keep the default (off), since the
+          # limited API is unsupported on free-threaded CPython before 3.15.
+          if [[ "$PYTHON_VERSION" != *"t" ]]; then
+            setup_args+=("-Csetup-args=-Dpython.allow_limited_api=true")
           fi
           python -m build --no-isolation --skip-dependency-check "${setup_args[@]}"
 
       - name: Build wheel from sdist in isolated environment
         if: ${{ inputs.ISOLATED_BUILD == 1 }}
         run: |
-          python -m build -Csetup-args="-Doptimization=2"
+          setup_args=("-Csetup-args=-Doptimization=2")
+          if [[ "$PYTHON_VERSION" != *"t" ]]; then
+            setup_args+=("-Csetup-args=-Dpython.allow_limited_api=true")
+          fi
+          python -m build "${setup_args[@]}"
 
       - name: ccache statistics
         if: always()

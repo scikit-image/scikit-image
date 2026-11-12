@@ -9,6 +9,12 @@ project(
     'buildtype=debugoptimized',
     'c_std=c17',
     'cpp_std=c++17',
+    # The limited API / stable ABI (abi3) is opt-in: ordinary source builds use
+    # the version-specific API by default, which also keeps free-threaded
+    # CPython working (the limited API is unsupported before 3.15). The abi3
+    # wheel builds opt in with `-Dpython.allow_limited_api=true`. See
+    # https://meson-python.readthedocs.io/en/latest/how-to-guides/limited-api.html
+    'python.allow_limited_api=false',
   ],
 )
 

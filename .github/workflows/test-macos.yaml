@@ -89,7 +89,9 @@ jobs:
 
       - name: Build skimage
         run: |
-          spin build
+          # Compile against the opt-in limited API so the abi3 code path is
+          # exercised; the macOS matrix is GIL-only.
+          spin build -- -Dpython.allow_limited_api=true
 
       - name: ccache statistics
         if: always()

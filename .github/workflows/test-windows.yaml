@@ -85,7 +85,9 @@ jobs:
       - name: Build wheel
         shell: bash
         run: |
-          python -m build --wheel --no-isolation --skip-dependency-check
+          # Build the stable-ABI (abi3) wheel; the limited API is opt-in.
+          python -m build --wheel --no-isolation --skip-dependency-check \
+            -Csetup-args="-Dpython.allow_limited_api=true"
 
       - name: Show ccache stats
         if: always()

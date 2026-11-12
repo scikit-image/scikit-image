@@ -290,11 +290,10 @@ build-verbosity = 0
 select = "cp3??t-*"
 test-environment = {PYTHON_GIL=0}
 test-extras = ["test", "optional_free_threaded"]
-# Free-threaded builds cannot target the stable ABI that `limited-api` requests,
-# so meson-python must be told to skip it. `config-settings` cannot be set here:
-# the `CIBW_CONFIG_SETTINGS` environment variable set in the workflow replaces
-# the `setup-args` key, so the `-Dpython.allow_limited_api=false` argument is
-# appended there for free-threaded matrix entries instead.
+# Free-threaded builds cannot target the stable ABI, so they rely on the
+# default `python.allow_limited_api=false` (see the root meson.build) and build
+# version-specific wheels; only the GIL builds pass
+# `-Dpython.allow_limited_api=true` via `CIBW_CONFIG_SETTINGS` in the workflow.
 
 [[tool.cibuildwheel.overrides]]
 select = "*-m*linux_aarch64"
