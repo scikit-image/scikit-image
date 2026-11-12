@@ -26,9 +26,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # The wheel is built once as a stable-ABI (abi3) wheel on cp312 and
-        # installs on CPython 3.12-3.15, so it is reused by the 3.14/3.15 tests
-        # instead of building a version-specific wheel per interpreter.
+        # Build the abi3 wheel once on cp312; the 3.14/3.15 tests reuse it.
         python-version: ["3.12"]
 
     env:
@@ -85,7 +83,7 @@ jobs:
       - name: Build wheel
         shell: bash
         run: |
-          # Build the stable-ABI (abi3) wheel; the limited API is opt-in.
+          # Build the abi3 wheel (the limited API is opt-in).
           python -m build --wheel --no-isolation --skip-dependency-check \
             -Csetup-args="-Dpython.allow_limited_api=true"
 

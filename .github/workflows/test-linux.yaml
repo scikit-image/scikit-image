@@ -18,8 +18,8 @@ jobs:
     with:
       python-version: 3.12
 
-  # Covers installation from the sdist; see ISOLATED_BUILD. Built on 3.12 so
-  # the resulting wheel is cp312-abi3, like every other GIL wheel here.
+  # Covers installation from the sdist (see ISOLATED_BUILD); built on 3.12 to
+  # produce a cp312-abi3 wheel.
   build-linux-sdist:
     uses: ./.github/workflows/_build_linux_for_python_x.yaml
     with:

@@ -290,10 +290,8 @@ build-verbosity = 0
 select = "cp3??t-*"
 test-environment = {PYTHON_GIL=0}
 test-extras = ["test", "optional_free_threaded"]
-# Free-threaded builds cannot target the stable ABI, so they rely on the
-# default `python.allow_limited_api=false` (see the root meson.build) and build
-# version-specific wheels; only the GIL builds pass
-# `-Dpython.allow_limited_api=true` via `CIBW_CONFIG_SETTINGS` in the workflow.
+# Free-threaded builds keep the default `python.allow_limited_api=false` and
+# build version-specific wheels; only the GIL builds opt in to abi3.
 
 [[tool.cibuildwheel.overrides]]
 select = "*-m*linux_aarch64"

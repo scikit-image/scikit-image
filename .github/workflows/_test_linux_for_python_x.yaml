@@ -135,10 +135,8 @@ jobs:
           EAGER_IMPORT: ${{ inputs.EAGER_IMPORT }}
           MINIMUM_REQUIREMENTS: ${{ inputs.MINIMUM_REQUIREMENTS }}
           PYTHONOPTIMIZE: ${{ inputs.PYTHONOPTIMIZE }}
-          # gh-8212: OpenBLAS's internal thread pool is not thread-safe when the
-          # same data is used concurrently, which makes this parallel run flaky.
-          # Let the test threads provide the parallelism instead. OMP_NUM_THREADS
-          # is deliberately not pinned, so skimage's own OpenMP paths stay covered.
+          # gh-8212: pin BLAS to one thread so this parallel run isn't flaky;
+          # OMP_NUM_THREADS is left alone to keep OpenMP paths covered.
           OPENBLAS_NUM_THREADS: 1
           MKL_NUM_THREADS: 1
         run: |

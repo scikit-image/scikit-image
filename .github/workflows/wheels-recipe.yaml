@@ -28,10 +28,8 @@ jobs:
             macos-15-intel,
             macos-latest, # ARM-version of MacOS
           ]
-        # The GIL wheel is built once as a stable-ABI (abi3) wheel on cp312
-        # and installs on CPython 3.12-3.15; free-threaded wheels cannot use
-        # the stable ABI and are built per interpreter. Pull requests build
-        # only the abi3 wheel.
+        # One cp312-abi3 wheel covers CPython 3.12-3.15; free-threaded wheels
+        # are built per interpreter. Pull requests build only the abi3 wheel.
         python: ${{ fromJSON(github.event_name == 'pull_request'
           && '["cp312"]'
           || '["cp312", "cp314t", "cp315t"]') }}
@@ -45,7 +43,7 @@ jobs:
         env:
           # Build all variants of this version, including free-threaded
           CIBW_BUILD: ${{ matrix.python }}*
-          # GIL builds opt in to the stable ABI (see the root meson.build)
+          # GIL builds opt in to the stable ABI (abi3)
           CIBW_CONFIG_SETTINGS: ${{ inputs.exclude_v2 && 'setup-args=-Dexclude-v2=true' || '' }}${{ !endsWith(matrix.python, 't') && ' setup-args=-Dpython.allow_limited_api=true' || '' }}
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -60,10 +58,8 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest, windows-11-arm]
-        # The GIL wheel is built once as a stable-ABI (abi3) wheel on cp312
-        # and installs on CPython 3.12-3.15; free-threaded wheels cannot use
-        # the stable ABI and are built per interpreter. Pull requests build
-        # only the abi3 wheel.
+        # One cp312-abi3 wheel covers CPython 3.12-3.15; free-threaded wheels
+        # are built per interpreter. Pull requests build only the abi3 wheel.
         python: ${{ fromJSON(github.event_name == 'pull_request'
           && '["cp312"]'
           || '["cp312", "cp314t", "cp315t"]') }}
@@ -82,7 +78,7 @@ jobs:
         env:
           # Build all variants of this version, including free-threaded
           CIBW_BUILD: ${{ matrix.python }}*
-          # GIL builds opt in to the stable ABI (see the root meson.build)
+          # GIL builds opt in to the stable ABI (abi3)
           CIBW_CONFIG_SETTINGS: ${{ inputs.exclude_v2 && 'setup-args=-Dexclude-v2=true' || '' }}${{ !endsWith(matrix.python, 't') && ' setup-args=-Dpython.allow_limited_api=true' || '' }}
           CC: clang-cl
           CXX: clang-cl
@@ -103,10 +99,8 @@ jobs:
       matrix:
         os: [ubuntu-latest, ubuntu-22.04-arm]
         libc: [manylinux, musllinux]
-        # The GIL wheel is built once as a stable-ABI (abi3) wheel on cp312
-        # and installs on CPython 3.12-3.15; free-threaded wheels cannot use
-        # the stable ABI and are built per interpreter. Pull requests build
-        # only the abi3 wheel.
+        # One cp312-abi3 wheel covers CPython 3.12-3.15; free-threaded wheels
+        # are built per interpreter. Pull requests build only the abi3 wheel.
         python: ${{ fromJSON(github.event_name == 'pull_request'
           && '["cp312"]'
           || '["cp312", "cp314t", "cp315t"]') }}
@@ -120,7 +114,7 @@ jobs:
         env:
           # Build all variants of this version, including free-threaded
           CIBW_BUILD: ${{ matrix.python }}*${{ matrix.libc }}*
-          # GIL builds opt in to the stable ABI (see the root meson.build)
+          # GIL builds opt in to the stable ABI (abi3)
           CIBW_CONFIG_SETTINGS: ${{ inputs.exclude_v2 && 'setup-args=-Dexclude-v2=true' || '' }}${{ !endsWith(matrix.python, 't') && ' setup-args=-Dpython.allow_limited_api=true' || '' }}
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:

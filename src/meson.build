@@ -103,12 +103,8 @@ cpp_args_pythran = [
   '-DPYTHRAN_BLAS_NONE'
 ]
 
-# Every _skimage2 extension targets the CPython limited API (3.12). Whether that
-# is honoured is controlled by the opt-in `python.allow_limited_api` option,
-# which is disabled by default in the root meson.build: the abi3 wheel builds
-# pass `-Dpython.allow_limited_api=true`, while ordinary source builds and
-# free-threaded CPython (which does not support the limited API before 3.15)
-# build version-specific extensions.
+# Target the CPython limited API (3.12); honoured only when the opt-in
+# `python.allow_limited_api` option is enabled (see the root meson.build).
 limited_api_ver = '3.12'
 
 # Deal with M_PI & friends; add `use_math_defines` to c_args
