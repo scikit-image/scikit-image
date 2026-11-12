@@ -28,9 +28,10 @@ jobs:
             macos-15-intel,
             macos-latest, # ARM-version of MacOS
           ]
-        # The GIL wheel is built once as a stable-ABI (abi3) wheel on cp312,
-        # which installs on CPython 3.12-3.15.
-        python: ["cp312"]
+        # The GIL wheel is built once as a stable-ABI (abi3) wheel on cp312
+        # and installs on CPython 3.12-3.15; free-threaded wheels cannot use
+        # the stable ABI and are built per interpreter.
+        python: ["cp312", "cp314t", "cp315t"]
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -39,8 +40,10 @@ jobs:
           persist-credentials: false
       - uses: pypa/cibuildwheel@f9b966cfadf4109556cadc5bb39ddb72d0ce664e # v4.3.5
         env:
-          # Build the stable-ABI (abi3) wheel on cp312
+          # Build all variants of this version, including free-threaded
           CIBW_BUILD: ${{ matrix.python }}*
+          # Free-threaded builds opt out of the stable ABI (see pyproject.toml)
+          CIBW_CONFIG_SETTINGS: ${{ inputs.exclude_v2 && 'setup-args=-Dexclude-v2=true' || '' }}${{ endsWith(matrix.python, 't') && ' setup-args=-Dpython.allow_limited_api=false' || '' }}
           # Pull requests skip free-threaded wheels
           CIBW_SKIP: ${{ github.event_name == 'pull_request' && 'cp3??t-*' || '' }}
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -56,9 +59,10 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest, windows-11-arm]
-        # The GIL wheel is built once as a stable-ABI (abi3) wheel on cp312,
-        # which installs on CPython 3.12-3.15.
-        python: ["cp312"]
+        # The GIL wheel is built once as a stable-ABI (abi3) wheel on cp312
+        # and installs on CPython 3.12-3.15; free-threaded wheels cannot use
+        # the stable ABI and are built per interpreter.
+        python: ["cp312", "cp314t", "cp315t"]
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -72,8 +76,10 @@ jobs:
       # on repair-wheel-command under [tool.cibuildwheel.windows].
       - uses: pypa/cibuildwheel@f9b966cfadf4109556cadc5bb39ddb72d0ce664e # v4.3.5
         env:
-          # Build the stable-ABI (abi3) wheel on cp312
+          # Build all variants of this version, including free-threaded
           CIBW_BUILD: ${{ matrix.python }}*
+          # Free-threaded builds opt out of the stable ABI (see pyproject.toml)
+          CIBW_CONFIG_SETTINGS: ${{ inputs.exclude_v2 && 'setup-args=-Dexclude-v2=true' || '' }}${{ endsWith(matrix.python, 't') && ' setup-args=-Dpython.allow_limited_api=false' || '' }}
           CC: clang-cl
           CXX: clang-cl
           LDFLAGS: "-Wl,-S"
@@ -93,9 +99,10 @@ jobs:
       matrix:
         os: [ubuntu-latest, ubuntu-22.04-arm]
         libc: [manylinux, musllinux]
-        # The GIL wheel is built once as a stable-ABI (abi3) wheel on cp312,
-        # which installs on CPython 3.12-3.15.
-        python: ["cp312"]
+        # The GIL wheel is built once as a stable-ABI (abi3) wheel on cp312
+        # and installs on CPython 3.12-3.15; free-threaded wheels cannot use
+        # the stable ABI and are built per interpreter.
+        python: ["cp312", "cp314t", "cp315t"]
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -104,8 +111,10 @@ jobs:
           persist-credentials: false
       - uses: pypa/cibuildwheel@f9b966cfadf4109556cadc5bb39ddb72d0ce664e # v4.3.5
         env:
-          # Build the stable-ABI (abi3) wheel on cp312
+          # Build all variants of this version, including free-threaded
           CIBW_BUILD: ${{ matrix.python }}*${{ matrix.libc }}*
+          # Free-threaded builds opt out of the stable ABI (see pyproject.toml)
+          CIBW_CONFIG_SETTINGS: ${{ inputs.exclude_v2 && 'setup-args=-Dexclude-v2=true' || '' }}${{ endsWith(matrix.python, 't') && ' setup-args=-Dpython.allow_limited_api=false' || '' }}
           # Pull requests skip free-threaded wheels
           CIBW_SKIP: ${{ github.event_name == 'pull_request' && 'cp3??t-*' || '' }}
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

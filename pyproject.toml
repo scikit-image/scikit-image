@@ -287,6 +287,16 @@ build-verbosity = 0
 # Could be overwritten using CIBW_CONFIG_SETTINGS environment variable
 
 [[tool.cibuildwheel.overrides]]
+select = "cp3??t-*"
+test-environment = {PYTHON_GIL=0}
+test-extras = ["test", "optional_free_threaded"]
+# Free-threaded builds cannot target the stable ABI that `limited-api` requests,
+# so meson-python must be told to skip it. `config-settings` cannot be set here:
+# the `CIBW_CONFIG_SETTINGS` environment variable set in the workflow replaces
+# the `setup-args` key, so the `-Dpython.allow_limited_api=false` argument is
+# appended there for free-threaded matrix entries instead.
+
+[[tool.cibuildwheel.overrides]]
 select = "*-m*linux_aarch64"
 test-extras = ["test", "optional_free_threaded"]
 
@@ -298,6 +308,13 @@ test-extras = ["test", "optional_free_threaded"]
 select = "*-musllinux*"
 test-extras = ["test", "optional_free_threaded"]
 # SimpleITK does not support musllinux yet
+
+[[tool.cibuildwheel.overrides]]
+select = "cp315*"
+# scikit-learn, matplotlib, PyWavelets, and astropy have no cp315 wheels yet,
+# so the `optional` and `optional_free_threaded` extras cannot be installed.
+# Drop this override once they publish for 3.15.
+test-extras = ["test"]
 
 [tool.cibuildwheel.linux]
 environment = {PIP_PREFER_BINARY=1, SKIMAGE_LINK_FLAGS="-Wl,--strip-debug"}
