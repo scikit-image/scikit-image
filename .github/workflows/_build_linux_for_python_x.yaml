@@ -101,7 +101,7 @@ jobs:
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: skimage-linux-${{ inputs.python-version }}-${{ runner.arch }}
+          name: skimage-linux-${{ inputs.python-version }}${{ inputs.ISOLATED_BUILD == 1 && '-sdist' || '' }}-${{ runner.arch }}
           path: |
             ./dist/*.whl
             ./dist/*.tar.gz

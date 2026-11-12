@@ -18,11 +18,12 @@ jobs:
     with:
       python-version: 3.12
 
-  # Covers installation from the sdist; see ISOLATED_BUILD
-  build-linux-313:
+  # Covers installation from the sdist; see ISOLATED_BUILD. Built on 3.12 so
+  # the resulting wheel is cp312-abi3, like every other GIL wheel here.
+  build-linux-sdist:
     uses: ./.github/workflows/_build_linux_for_python_x.yaml
     with:
-      python-version: 3.13
+      python-version: 3.12
       ISOLATED_BUILD: 1
 
   build-linux-arm64-312:
@@ -82,11 +83,12 @@ jobs:
 
   test-linux-313:
     name: test-linux-cp3.13-main
-    needs: [build-linux-313]
+    needs: [build-linux-sdist]
     uses: ./.github/workflows/_test_linux_for_python_x.yaml
     with:
       python-version: 3.13
       OPTIONS_NAME: "main"
+      DIST_ARTIFACT_NAME: "skimage-linux-3.12-sdist-X64"
 
   test-linux-arm64-312:
     name: test-linux-arm64-cp3.12-main
@@ -136,7 +138,7 @@ jobs:
     needs:
       [
         build-linux-312,
-        build-linux-313,
+        build-linux-sdist,
         build-linux-arm64-312,
         build-linux-314t,
         build-linux-315t,

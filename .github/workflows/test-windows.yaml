@@ -26,7 +26,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.12", "3.14", "3.15"]
+        # The wheel is built once as a stable-ABI (abi3) wheel on cp312 and
+        # installs on CPython 3.12-3.15, so it is reused by the 3.14/3.15 tests
+        # instead of building a version-specific wheel per interpreter.
+        python-version: ["3.12"]
 
     env:
       CC: ccache clang
@@ -91,7 +94,7 @@ jobs:
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: skimage-windows-${{ matrix.python-version }}
+          name: skimage-windows-abi3
           path: ./dist/*.whl
           if-no-files-found: error
 
@@ -146,7 +149,7 @@ jobs:
 
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
-          name: skimage-windows-${{ matrix.python-version }}
+          name: skimage-windows-abi3
           path: ./dist
 
       - name: Install wheel and spin
