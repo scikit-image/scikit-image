@@ -42,4 +42,5 @@ __all__ = [
 
 from skimage._doctest_adapters import adapt_doctests
 
-adapt_doctests(globals())
+# Do not wrap: pytest.raises must match the original types raised by _skimage2.
+adapt_doctests(globals(), skip_names=('DescriptorException', 'FisherVectorException'))

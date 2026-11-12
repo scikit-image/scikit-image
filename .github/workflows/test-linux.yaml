@@ -18,6 +18,19 @@ jobs:
     with:
       python-version: 3.12
 
+  # Covers installation from the sdist; see ISOLATED_BUILD
+  build-linux-313:
+    uses: ./.github/workflows/_build_linux_for_python_x.yaml
+    with:
+      python-version: 3.13
+      ISOLATED_BUILD: 1
+
+  build-linux-arm64-312:
+    uses: ./.github/workflows/_build_linux_for_python_x.yaml
+    with:
+      python-version: 3.12
+      runner: ubuntu-24.04-arm
+
   # The GIL build is produced once as a stable-ABI (abi3) wheel on CPython
   # 3.12, which then installs on 3.12-3.15. Free-threaded builds cannot use
   # the stable ABI, so they are still built per interpreter.
@@ -48,8 +61,6 @@ jobs:
           - PYTHONOPTIMIZE: 2
             WITHOUT_POOCH: 1
             OPTIONS_NAME: "optimize-and-no-pooch"
-          - INSTALL_FROM_SDIST: 1
-            OPTIONS_NAME: "install-from-sdist"
           - MINIMUM_REQUIREMENTS: 1
             OPTIONAL_DEPS: 0
             EAGER_IMPORT: 1
@@ -68,16 +79,23 @@ jobs:
       WITHOUT_POOCH: ${{ matrix.WITHOUT_POOCH }}
       PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
       PYTHONOPTIMIZE: ${{ matrix.PYTHONOPTIMIZE }}
-      INSTALL_FROM_SDIST: ${{ matrix.INSTALL_FROM_SDIST }}
 
   test-linux-313:
     name: test-linux-cp3.13-main
-    needs: [build-linux-312]
+    needs: [build-linux-313]
     uses: ./.github/workflows/_test_linux_for_python_x.yaml
     with:
       python-version: 3.13
       OPTIONS_NAME: "main"
-      DIST_ARTIFACT_NAME: "skimage-linux-3.12"
+
+  test-linux-arm64-312:
+    name: test-linux-arm64-cp3.12-main
+    needs: [build-linux-arm64-312]
+    uses: ./.github/workflows/_test_linux_for_python_x.yaml
+    with:
+      python-version: 3.12
+      runner: ubuntu-24.04-arm
+      OPTIONS_NAME: "main"
 
   test-linux-314:
     name: test-linux-cp3.14-main
@@ -86,7 +104,7 @@ jobs:
     with:
       python-version: 3.14
       OPTIONS_NAME: "main"
-      DIST_ARTIFACT_NAME: "skimage-linux-3.12"
+      DIST_ARTIFACT_NAME: "skimage-linux-3.12-X64"
 
   test-linux-314t:
     name: test-linux-cp3.14t-main
@@ -103,7 +121,7 @@ jobs:
     with:
       python-version: 3.15
       OPTIONS_NAME: "main"
-      DIST_ARTIFACT_NAME: "skimage-linux-3.12"
+      DIST_ARTIFACT_NAME: "skimage-linux-3.12-X64"
 
   test-linux-315t:
     name: test-linux-cp3.15t-main
@@ -118,10 +136,13 @@ jobs:
     needs:
       [
         build-linux-312,
+        build-linux-313,
+        build-linux-arm64-312,
         build-linux-314t,
         build-linux-315t,
         test-linux-312,
         test-linux-313,
+        test-linux-arm64-312,
         test-linux-314,
         test-linux-314t,
         test-linux-315,
@@ -129,8 +150,12 @@ jobs:
       ]
     if: ${{ always() && github.ref == 'refs/heads/main' && contains(needs.*.result, 'failure') }}
     permissions:
+      contents: read
       issues: write
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: "Job has failed: reporting"
         uses: JasonEtco/create-an-issue@1b14a70e4d8dc185e5cc76d3bec9eab20257b2c5 # v2.9.2
         env:

@@ -65,7 +65,7 @@ To find out more about the history of this document, please read the following:
 
 [functional]: https://en.wikipedia.org/wiki/Functional_programming
 [blog]: https://ilovesymposia.com/2018/07/13/the-road-to-scikit-image-1-0/
-[numpydoc]: https://docs.scipy.org/doc/numpy/docs/howto_document.html
+[numpydoc]: https://numpydoc.readthedocs.io/en/latest/format.html
 [defaults]: https://forum.image.sc/t/request-for-comment-road-to-scikit-image-1-0/20099/4
 [zen]: https://www.python.org/dev/peps/pep-0020/
 [issue]: https://github.com/scikit-image/scikit-image/issues/3263

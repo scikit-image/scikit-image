@@ -31,13 +31,14 @@ def meijering(
 
     Parameters
     ----------
-    image : (M, N[, ...]) ndarray
+    image : ndarray of shape (M, N[, ...])
         Array with input image data.
     sigmas : iterable of floats, optional
         Sigmas used as scales of filter
     alpha : float, optional
-        Shaping filter constant, that selects maximally flat elongated
-        features.  The default, None, selects the optimal value -1/(ndim+1).
+        Shaping filter constant, that tunes shape selection to flat elongated
+        features, rather than blob-like features.  The default, None, selects
+        an optimal value (-1/(ndim+1)).  See discussion in appendix of [1]_.
     black_ridges : bool, optional
         When True (the default), the filter detects black ridges; when
         False, it detects white ridges.
@@ -49,7 +50,7 @@ def meijering(
 
     Returns
     -------
-    out : (M, N[, ...]) ndarray
+    out : ndarray of shape (M, N[, ...])
         Filtered image (maximum of pixels across all scales).
 
     See also
@@ -74,7 +75,7 @@ def meijering(
         image = -image
 
     if alpha is None:
-        alpha = 1 / (image.ndim + 1)
+        alpha = -1 / (image.ndim + 1)
     mtx = linalg.circulant([1, *[alpha] * (image.ndim - 1)]).astype(image.dtype)
 
     # Generate empty array for storing maximum value

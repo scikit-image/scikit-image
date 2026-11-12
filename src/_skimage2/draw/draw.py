@@ -66,8 +66,9 @@ def ellipse(r, c, r_radius, c_radius, shape=None, rotation=0.0):
         By default the full extent of the ellipse are used. Must be at least
         length 2. Only the first two values are used to determine the extent.
     rotation : float, optional (default 0.)
-        Set the ellipse rotation (rotation) in range (-PI, PI)
-        in contra clock wise direction, so PI/2 degree means swap ellipse axis
+        Set the ellipse rotation counter-clockwise, in radians.  An ellipse
+        is symmetric under a half turn, so a rotation of PI/2 swaps the
+        ellipse axes.
 
     Returns
     -------
@@ -121,7 +122,8 @@ def ellipse(r, c, r_radius, c_radius, shape=None, rotation=0.0):
 
     center = np.array([r, c])
     radii = np.array([r_radius, c_radius])
-    # allow just rotation with in range +/- 180 degree
+    # An ellipse is symmetric under a half turn, so fold the rotation, in
+    # radians, into [0, PI).
     rotation %= np.pi
 
     # compute rotated radii by given rotation
