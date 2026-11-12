@@ -250,6 +250,12 @@ def _fetch(data_filename, prefix=None):
         )
     # Download the data with pooch which caches it automatically
     _ensure_cache_dir(target_dir=cache_dir)
+    # Pooch creates the destination directory with `os.makedirs()` guarded only
+    # by an `exists()` check. That check-then-create races when several threads
+    # fetch files in the same subdirectory at once (e.g. under
+    # pytest-run-parallel), raising FileExistsError. Pre-create the directory so
+    # pooch's check passes and it skips `os.makedirs()`.
+    os.makedirs(osp.dirname(cached_file_path), exist_ok=True)
     try:
         cached_file_path = _image_fetcher.fetch(data_filename)
         return cached_file_path
