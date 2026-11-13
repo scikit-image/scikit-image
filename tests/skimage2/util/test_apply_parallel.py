@@ -1,9 +1,9 @@
 import numpy as np
 import platform
 
-from _skimage2._shared.testing import assert_array_almost_equal, assert_equal
-from _skimage2 import color, data, img_as_float
-from _skimage2.filters import threshold_local, gaussian
+from numpy.testing import assert_array_almost_equal, assert_equal
+from skimage import color, data, img_as_float
+from skimage.filters import threshold_local, gaussian
 from _skimage2.util.apply_parallel import apply_parallel
 
 import pytest
@@ -16,6 +16,22 @@ IS_MACOS_ARM = platform.system() == 'Darwin' and platform.machine() == 'arm64'
 IMG_COMPARE_PRECISION = 4 if IS_MACOS_ARM else 6
 # on macOS arm64 the result is slightly different from other platforms,
 # so we need to lower the decimal precision
+
+# test data
+x = np.zeros((4, 4))
+x[0, 0] = 6
+x[0, 1] = 3
+x[1, 0] = 3
+
+
+# test function
+def func(arr):
+    return arr + arr.mean()
+
+
+# ground truth in this case
+gt = x + x.mean()
+chunks = (2, 2)
 
 
 def test_apply_parallel():
@@ -79,11 +95,9 @@ def test_apply_parallel_lazy():
     )
 
     assert isinstance(result1, da.Array)
-
     assert_array_almost_equal(result1.compute(), expected1)
 
     assert isinstance(result2, da.Array)
-
     assert_array_almost_equal(result2.compute(), expected1)
 
 
@@ -99,15 +113,31 @@ def test_no_chunks():
     assert_array_almost_equal(result, expected)
 
 
-def test_apply_parallel_wrap():
+@pytest.mark.parametrize('mode', ('wrap', 'periodic'))
+def test_apply_parallel_wrap(mode):
     def wrapped(arr):
         return gaussian(arr, sigma=1, mode='wrap')
 
     a = np.arange(144).reshape(12, 12).astype(float)
     expected = gaussian(a, sigma=1, mode='wrap')
-    result = apply_parallel(wrapped, a, chunks=(6, 6), depth=5, mode='wrap')
-
+    result = apply_parallel(wrapped, a, chunks=(6, 6), depth=5, mode=mode)
     assert_array_almost_equal(result, expected)
+
+    # overlap of size 1 (with wrap padding each chunk)
+    res = apply_parallel(func, x, chunks=chunks, depth=1, mode=mode)
+    assert_array_almost_equal(res, gt)
+
+    # overlap of size 2 (with wrap padding each chunk)
+    res = apply_parallel(func, x, chunks=chunks, depth=2, mode=mode)
+    expected = np.array(
+        [
+            [6.33333333, 3.33333333, 0.66666667, 0.66666667],
+            [3.33333333, 0.33333333, 0.66666667, 0.66666667],
+            [0.66666667, 0.66666667, 1.33333333, 1.33333333],
+            [0.66666667, 0.66666667, 1.33333333, 1.33333333],
+        ]
+    )
+    assert_array_almost_equal(res, expected)
 
 
 def test_apply_parallel_nearest():
@@ -119,7 +149,6 @@ def test_apply_parallel_nearest():
     result = apply_parallel(
         wrapped, a, chunks=(6, 6), depth={0: 5, 1: 5}, mode='nearest'
     )
-
     assert_array_almost_equal(result, expected)
 
 
@@ -138,7 +167,7 @@ def test_apply_parallel_rgb(depth, chunks, dtype):
     assert_equal(cat_ycbcr.dtype, cat.dtype)
 
     assert_array_almost_equal(
-        cat_ycbcr_expected, cat_ycbcr, decimal=IMG_COMPARE_PRECISION
+        cat_ycbcr, cat_ycbcr_expected, decimal=IMG_COMPARE_PRECISION
     )
 
 
@@ -180,4 +209,169 @@ def test_apply_parallel_rgb_channel_axis(depth, chunks, channel_axis):
     # move channels of output back to the last dimension
     cat_ycbcr = np.moveaxis(cat_ycbcr, channel_axis, -1)
 
-    assert_array_almost_equal(cat_ycbcr_expected, cat_ycbcr)
+    assert_array_almost_equal(cat_ycbcr, cat_ycbcr_expected)
+
+
+def test_apply_parallel_default_mode():
+    """Test that apply_parallel does not add boundary padding by default."""
+
+    depth = 2
+    defa = apply_parallel(func, x, chunks=chunks, depth=depth)
+    # under the hood, runs:
+    # d = da.from_array(x, chunks=chunks)
+    # d.map_overlap(func, depth=depth).compute()
+    assert_array_almost_equal(defa, gt)
+    none_c = apply_parallel(func, x, chunks=chunks, depth=depth, mode=None)
+    assert_array_almost_equal(none_c, gt)
+
+
+def test_depth_parameter_no_padding():
+    """Test the depth parameter (overlap size) in case of no padding."""
+
+    # no overlap between chunks
+    # Note: `depth=0` overwrites any boundary mode; de facto there is no
+    # padding if `depth=0`.
+    res = apply_parallel(func, x, chunks=chunks, depth=0)
+    expected = np.array(
+        [
+            [9.0, 6.0, 0.0, 0.0],
+            [6.0, 3.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 0.0],
+        ]
+    )
+    assert_array_almost_equal(res, expected)
+
+    # overlap of size 1
+    res = apply_parallel(func, x, chunks=chunks, depth=1)
+    expected = np.array(
+        [
+            [7.33333333, 4.33333333, 0.33333333, 0.33333333],
+            [4.33333333, 1.33333333, 0.33333333, 0.33333333],
+            [0.33333333, 0.33333333, 0.0, 0.0],
+            [0.33333333, 0.33333333, 0.0, 0.0],
+        ]
+    )
+    assert_array_almost_equal(res, expected)
+
+    # overlap of size 0 (resp. 1) along the first (resp. second) axis
+    res = apply_parallel(func, x, chunks=chunks, depth=(0, 1))
+    expected = np.array(
+        [
+            [8.0, 5.0, 0.5, 0.5],
+            [5.0, 2.0, 0.5, 0.5],
+            [0.0, 0.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 0.0],
+        ]
+    )
+    assert_array_almost_equal(res, expected)
+
+    # overlap of size 2
+    # (minimum depth giving the same result as the function applied 'plainly')
+    res = apply_parallel(func, x, chunks=chunks, depth=2)
+    assert_array_almost_equal(res, gt)
+
+
+def test_depth_parameter_constant_padding():
+    """Test the depth parameter (overlap size) with constant (zero) padding."""
+
+    # no overlap between chunks
+    # Note: `depth=0` overwrites any boundary mode; de facto there is no
+    # padding if `depth=0`.
+    res = apply_parallel(func, x, chunks=chunks, depth=0, mode=0)
+    expected = np.array(
+        [
+            [9.0, 6.0, 0.0, 0.0],
+            [6.0, 3.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 0.0],
+        ]
+    )
+    assert_array_almost_equal(res, expected)
+
+    # overlap of size 1 (with zeroes padding each chunk)
+    res = apply_parallel(func, x, chunks=chunks, depth=1, mode=0)
+    expected = np.array(
+        [
+            [6.75, 3.75, 0.1875, 0.1875],
+            [3.75, 0.75, 0.1875, 0.1875],
+            [0.1875, 0.1875, 0.0, 0.0],
+            [0.1875, 0.1875, 0.0, 0.0],
+        ]
+    )
+    assert_array_almost_equal(res, expected)
+
+    # overlap of size 0 (resp. 1) along the first (resp. second) axis
+    res = apply_parallel(func, x, chunks=chunks, depth=(0, 1), mode=0)
+    expected = np.array(
+        [
+            [7.5, 4.5, 0.375, 0.375],
+            [4.5, 1.5, 0.375, 0.375],
+            [0.0, 0.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 0.0],
+        ]
+    )
+    assert_array_almost_equal(res, expected)
+
+    # overlap of size 2
+    res = apply_parallel(func, x, chunks=chunks, depth=2, mode=0)
+    expected = np.array(
+        [
+            [6.33333333, 3.33333333, 0.33333333, 0.33333333],
+            [3.33333333, 0.33333333, 0.33333333, 0.33333333],
+            [0.33333333, 0.33333333, 0.33333333, 0.33333333],
+            [0.33333333, 0.33333333, 0.33333333, 0.33333333],
+        ]
+    )
+    assert_array_almost_equal(res, expected)
+
+
+def test_apply_parallel_edge():
+    """Test 'nearest' boundary mode."""
+
+    mode = 'nearest'
+
+    # overlap of size 1 (with edge values padding each chunk)
+    res = apply_parallel(func, x, chunks=chunks, depth=1, mode=mode)
+    expected = np.array(
+        [
+            [8.25, 5.25, 0.375, 0.375],
+            [5.25, 2.25, 0.375, 0.375],
+            [0.375, 0.375, 0.0, 0.0],
+            [0.375, 0.375, 0.0, 0.0],
+        ]
+    )
+    assert_array_almost_equal(res, expected)
+
+    # overlap of size 2 (with edge values padding each chunk)
+    res = apply_parallel(func, x, chunks=chunks, depth=2, mode=mode)
+    expected = np.array(
+        [
+            [8.0, 5.0, 0.83333333, 0.83333333],
+            [5.0, 2.0, 0.83333333, 0.83333333],
+            [0.83333333, 0.83333333, 0.33333333, 0.33333333],
+            [0.83333333, 0.83333333, 0.33333333, 0.33333333],
+        ]
+    )
+    assert_array_almost_equal(res, expected)
+
+
+def test_apply_parallel_symmetric():
+    """Test 'reflect' boundary mode."""
+
+    mode = 'reflect'
+
+    # Equivalent to `mode='nearest'` for an overlap of size 1, since the edge
+    # value is repeating.
+
+    # overlap of size 2 (with reflection of the vector padding each chunk)
+    res = apply_parallel(func, x, chunks=chunks, depth=2, mode=mode)
+    expected = np.array(
+        [
+            [7.33333333, 4.33333333, 0.66666667, 0.66666667],
+            [4.33333333, 1.33333333, 0.66666667, 0.66666667],
+            [0.66666667, 0.66666667, 0.33333333, 0.33333333],
+            [0.66666667, 0.66666667, 0.33333333, 0.33333333],
+        ]
+    )
+    assert_array_almost_equal(res, expected)
