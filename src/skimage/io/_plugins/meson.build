@@ -10,8 +10,19 @@ python_sources = [
     'imread_plugin.py',
 ]
 
+ini_files = [
+  'fits_plugin.ini',
+  'gdal_plugin.ini',
+  'imageio_plugin.ini',
+  'imread_plugin.ini',
+  'matplotlib_plugin.ini',
+  'pil_plugin.ini',
+  'simpleitk_plugin.ini',
+  'tifffile_plugin.ini'
+]
+
 py3.install_sources(
-  python_sources,
+  python_sources + ini_files,
   pure: false,          # Will be installed next to binaries
   subdir: 'skimage/io/_plugins'  # Folder relative to site-packages to install to
 )
