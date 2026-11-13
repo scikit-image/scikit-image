@@ -15,7 +15,7 @@ def clear_border(labels, buffer_size=0, bgval=0, mask=None, *, out=None):
         that touch the outside of the image are removed.
     bgval : float or int, optional
         Cleared objects are set to this value.
-    mask : ndarray of bool, same shape as `image`, optional.
+    mask : ndarray of bool, same shape as `labels`, optional.
         Image data mask. Objects in labels image overlapping with
         False pixels of mask will be removed. If defined, the
         argument buffer_size will be ignored.
@@ -68,12 +68,11 @@ def clear_border(labels, buffer_size=0, bgval=0, mask=None, *, out=None):
         out = labels.copy()
 
     if mask is not None:
-        err_msg = (
-            f'labels and mask should have the same shape but '
-            f'are {out.shape} and {mask.shape}'
-        )
         if out.shape != mask.shape:
-            raise (ValueError, err_msg)
+            raise ValueError(
+                f'labels and mask should have the same shape but '
+                f'are {out.shape} and {mask.shape}'
+            )
         if mask.dtype != bool:
             raise TypeError("mask should be of type bool.")
         borders = ~mask
