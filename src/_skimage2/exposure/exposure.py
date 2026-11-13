@@ -606,22 +606,20 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
         # the array path when those unused values could expose underflow or
         # an unrepresentable floating-point endpoint of a 64-bit integer cast.
         if (
-            image.dtype == np.uint8 and image.size > 256
+            image.dtype == np.uint8
+            and image.size > 256
             and np.geterr()['under'] == 'ignore'
             and not (output.kind in 'iu' and output.itemsize >= 8)
-            and np.all(np.isfinite(
-                [imin, imax, omin, omax, imax - imin, omax - omin]))
+            and np.all(np.isfinite([imin, imax, omin, omax, imax - imin, omax - omin]))
         ):
             # There are only 256 possible input values. Rescale those once,
             # then index the final output dtype directly without allocating a
             # full-image floating point buffer. This uses the same operation
             # order and truncating cast as the general calculation.
             values = np.arange(256, dtype=np.uint8)
-            table = _rescale_intensity_numpy(values, imin, imax, omin, omax,
-                                             out_dtype)
+            table = _rescale_intensity_numpy(values, imin, imax, omin, omax, out_dtype)
             return table[image]
-        return _rescale_intensity_numpy(image, imin, imax, omin, omax,
-                                        out_dtype)
+        return _rescale_intensity_numpy(image, imin, imax, omin, omax, out_dtype)
 
     image = np.clip(image, imin, imax)
 
