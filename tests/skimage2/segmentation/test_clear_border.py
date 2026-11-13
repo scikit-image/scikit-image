@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from _skimage2.segmentation import clear_border
 
 from _skimage2._shared.testing import assert_array_equal, assert_
@@ -178,3 +179,23 @@ def test_clear_border_non_binary_out_3d():
 
     assert_array_equal(result, expected)
     assert_array_equal(out, result)
+
+
+def test_clear_border_invalid():
+    image = np.zeros((5, 5), dtype=int)
+
+    with pytest.raises(
+        ValueError, match="buffer size may not be greater than labels size"
+    ):
+        clear_border(image, buffer_size=5)
+
+    mask_wrong_shape = np.ones((4, 4), dtype=bool)
+    with pytest.raises(
+        ValueError,
+        match=r"labels and mask should have the same shape but are \(5, 5\) and \(4, 4\)",
+    ):
+        clear_border(image, mask=mask_wrong_shape)
+
+    mask_wrong_type = np.ones((5, 5), dtype=int)
+    with pytest.raises(TypeError, match="mask should be of type bool."):
+        clear_border(image, mask=mask_wrong_type)
