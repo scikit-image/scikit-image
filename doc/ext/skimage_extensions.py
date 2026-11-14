@@ -8,6 +8,7 @@ from pathlib import Path
 
 from sphinx.util import logging
 from sphinx.directives.other import TocTree
+from sphinx.domains.python import PythonDomain
 
 
 logger = logging.getLogger(__name__)
@@ -149,7 +150,28 @@ def check_examples_section(app, what, name, obj, options, lines):
         )
 
 
+class SkimagePythonDomain(PythonDomain):
+    """Python domain that resolves ambiguous references within the current package.
+
+    The API docs contain both ``skimage`` and ``skimage2``, which share
+    docstrings. A relative reference such as ``:func:`~.exposure.histogram```
+    matches an object in each package. Prefer the match in the top-level
+    package of the module that contains the reference.
+    """
+
+    def find_obj(self, env, modname, classname, name, type, searchmode=0):
+        matches = super().find_obj(env, modname, classname, name, type, searchmode)
+        if len(matches) > 1 and modname:
+            # The trailing dot keeps "skimage." from matching "skimage2.".
+            package = modname.split(".")[0] + "."
+            local = [match for match in matches if match[0].startswith(package)]
+            if local:
+                matches = local
+        return matches
+
+
 def setup(app):
+    app.add_domain(SkimagePythonDomain, override=True)
     app.add_directive('naturalsortedtoctree', NaturalSortedTocTree)
     app.connect('autodoc-process-docstring', check_examples_section)
     app.connect('build-finished', write_random_js)
