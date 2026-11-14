@@ -92,7 +92,7 @@ When reviewing, focus on the following:
    new contributions should be consistent with {doc}`our mission <../about/values>`.
 
 [wiki_functional]: https://en.wikipedia.org/wiki/Functional_programming
-[dep_pol]: https://scikit-image.org/docs/dev/development/contribute.html#deprecation-cycle
+[dep_pol]: https://scikit-image.org/docs/dev/development/deprecations.html#deprecation-cycle
 [mit_license]: https://spdx.org/licenses/MIT.html
 [apache_2-2]: https://spdx.org/licenses/Apache-2.0.html
 
@@ -215,7 +215,7 @@ resources such as:
 - Our [developer forum][ml]
 - Our [chat room](https://skimage.zulipchat.com/)
 
-[numpydoc]: https://docs.scipy.org/doc/numpy/docs/howto_document.html
+[numpydoc]: https://numpydoc.readthedocs.io/en/latest/format.html
 [so_tag]: https://stackoverflow.com/questions/tagged/scikit-image
 [ml]: https://discuss.scientific-python.org/c/contributor/skimage
 
