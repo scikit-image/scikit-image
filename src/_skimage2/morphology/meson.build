@@ -22,6 +22,7 @@ foreach ext: extensions
     c_args: cython_c_args,
     include_directories: ['../../_skimage2/_shared'],
     dependencies: [np_dep],
+    limited_api: limited_api_ver,
     install: true,
     subdir: '_skimage2/morphology'
   )
@@ -32,6 +33,7 @@ py3.extension_module('_skeletonize_lee_cy',
   cpp_args: cython_cpp_args,
   include_directories: ['../../_skimage2/_shared'],
   dependencies: [np_dep],
+  limited_api: limited_api_ver,
   install: true,
   subdir: '_skimage2/morphology'
 )

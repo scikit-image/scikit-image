@@ -250,6 +250,9 @@ def _fetch(data_filename, prefix=None):
         )
     # Download the data with pooch which caches it automatically
     _ensure_cache_dir(target_dir=cache_dir)
+    # Pooch's exists()-then-makedirs() of the destination directory races when
+    # threads fetch into the same subdirectory concurrently; pre-create it.
+    os.makedirs(osp.dirname(cached_file_path), exist_ok=True)
     try:
         cached_file_path = _image_fetcher.fetch(data_filename)
         return cached_file_path

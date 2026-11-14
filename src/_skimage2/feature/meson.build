@@ -17,6 +17,7 @@ foreach pyx_file: pyx_files
     cpp_args: cython_cpp_args,
     include_directories: ['../../_skimage2/_shared'],
     dependencies: [np_dep],
+    limited_api: limited_api_ver,
     install: true,
     subdir: '_skimage2/feature'
   )
@@ -33,6 +34,7 @@ py3.extension_module('brief_cy',
   cpp_args: cpp_args_pythran,
   include_directories: [incdir_pythran],
   dependencies: [py3_dep, np_dep],
+  limited_api: limited_api_ver,
   install: true,
   subdir: '_skimage2/feature'
 )
@@ -48,6 +50,7 @@ py3.extension_module('_hessian_det_appx',
   cpp_args: cpp_args_pythran,
   include_directories: [incdir_pythran],
   dependencies: [py3_dep, np_dep],
+  limited_api: limited_api_ver,
   install: true,
   subdir: '_skimage2/feature'
 )

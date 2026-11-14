@@ -9,6 +9,10 @@ project(
     'buildtype=debugoptimized',
     'c_std=c17',
     'cpp_std=c++17',
+    # The limited API (abi3) is opt-in; abi3 wheel builds pass
+    # `-Dpython.allow_limited_api=true`. See the meson-python limited-API guide:
+    # https://meson-python.readthedocs.io/en/latest/how-to-guides/limited-api.html
+    'python.allow_limited_api=false',
   ],
 )
 

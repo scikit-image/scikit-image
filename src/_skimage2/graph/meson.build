@@ -11,6 +11,7 @@ foreach ext: extensions
     c_args: cython_c_args,
     include_directories: ['../../_skimage2/_shared'],
     dependencies: [np_dep],
+    limited_api: limited_api_ver,
     install: true,
     subdir: '_skimage2/graph'
   )
