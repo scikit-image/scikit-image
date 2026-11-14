@@ -1,7 +1,17 @@
-from _skimage2.io._plugins.gdal_plugin import imread as imread  # noqa: F401
-
 __all__ = ['imread']
 
-from skimage._doctest_adapters import adapt_doctests
+try:
+    import osgeo.gdal as gdal
+except ImportError:
+    raise ImportError(
+        "The GDAL Library could not be found. "
+        "Please refer to http://www.gdal.org/ "
+        "for further instructions."
+    )
 
-adapt_doctests(globals())
+
+def imread(fname):
+    """Load an image from file."""
+    ds = gdal.Open(fname)
+
+    return ds.ReadAsArray()
