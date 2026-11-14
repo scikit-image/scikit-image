@@ -1,7 +1,11 @@
 import numpy as np
 import platform
 
-from _skimage2._shared.testing import assert_array_almost_equal, assert_equal
+from _skimage2._shared.testing import (
+    assert_array_almost_equal,
+    assert_array_equal,
+    assert_equal,
+)
 from _skimage2 import color, data, img_as_float
 from _skimage2.filters import threshold_local, gaussian
 from _skimage2.util.apply_parallel import apply_parallel
@@ -102,7 +106,7 @@ def test_apply_parallel_dtype_avoids_meta_inference():
         dtype=np.uint8,
     )
 
-    assert_equal(result, a)
+    assert_array_equal(result, a)
     assert (0, 0) not in called_shapes
 
 
