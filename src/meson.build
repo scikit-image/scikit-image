@@ -51,32 +51,13 @@ endif
 #
 #     https://mesonbuild.com/Cross-compilation.html
 
-# NumPy include directory
-incdir_numpy = meson.get_external_property('numpy-include-dir', 'not-given')
-if incdir_numpy == 'not-given'
-  # If not specified, try to query NumPy from the build python
-  incdir_numpy = run_command(py3,
-    [
-      '-c',
-      'import os; os.chdir(".."); import numpy; print(numpy.get_include())'
-    ],
-    check: true
-  ).stdout().strip()
-endif
-
-# Don't use the deprecated NumPy C API. Define this to a fixed version instead of
-# NPY_API_VERSION in order not to break compilation for released SciPy versions
-# when NumPy introduces a new deprecation. Use in a meson.build file::
-#
-#   py3.extension_module('_name',
-#     'source_fname',
-#     numpy_nodepr_api)
-#
-numpy_nodepr_api = '-DNPY_NO_DEPRECATED_API=NPY_1_24_API_VERSION'
-
+# Uses the `numpy-config` executable (or a user's numpy.pc pkg-config file).
 np_dep = declare_dependency(
-  include_directories: incdir_numpy,
-  compile_args: numpy_nodepr_api
+  dependencies: dependency('numpy', version: '>=' + min_numpy_version),
+  # Don't use the deprecated NumPy C API. Define this to a fixed version instead
+  # of NPY_API_VERSION in order not to break compilation for released scikit-image
+  # versions when NumPy introduces a new deprecation.
+  compile_args: ['-DNPY_NO_DEPRECATED_API=NPY_1_24_API_VERSION'],
 )
 
 cc = meson.get_compiler('c')
@@ -94,7 +75,9 @@ if incdir_pythran == 'not-given'
   ).stdout().strip()
 endif
 
-inc_pythran = include_directories(incdir_pythran)
+pythran_dep = declare_dependency(
+  include_directories: incdir_pythran,
+)
 
 # Pythran build flags
 cpp_args_pythran = [
