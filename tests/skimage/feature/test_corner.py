@@ -1,6 +1,11 @@
 import numpy as np
 import pytest
-from numpy.testing import assert_almost_equal, assert_array_equal, assert_equal
+from numpy.testing import (
+    assert_allclose,
+    assert_almost_equal,
+    assert_array_equal,
+    assert_equal,
+)
 
 from skimage import data, draw, img_as_float, measure
 from _skimage2._shared.testing import run_in_parallel
@@ -289,6 +294,105 @@ def test_hessian_matrix_3d_xy(use_gaussian_derivatives):
             order='nonexistant',
             use_gaussian_derivatives=use_gaussian_derivatives,
         )
+
+
+# ``np.pad`` spells two of the five boundary rules differently from
+# ``scipy.ndimage``. Matching them by name builds a different outside.
+_NUMPY_PAD_MODE = {
+    'nearest': 'edge',
+    'reflect': 'symmetric',
+    'mirror': 'reflect',
+    'constant': 'constant',
+    'wrap': 'wrap',
+}
+
+
+def _quadratic(size, ndim, curvatures):
+    """An image that is exactly a quadratic, and the Hessian it must report."""
+    coords = [c - size // 2 for c in np.indices((size,) * ndim, dtype=float)]
+    pairs = []
+    for i in range(ndim):
+        for j in range(i, ndim):
+            pairs.append((i, j))
+    image = np.zeros((size,) * ndim, dtype=float)
+    for (i, j), value in zip(pairs, curvatures):
+        image = image + (value / 2 if i == j else value) * coords[i] * coords[j]
+    return image
+
+
+def _interior(ndim, sigma, truncate=8):
+    """Pixels no kernel tap reached over the border."""
+    reach = int(truncate * np.max(sigma) + 0.5) + 1
+    return (slice(reach, -reach),) * ndim
+
+
+@pytest.mark.parametrize('mode', ['nearest', 'reflect', 'mirror', 'constant', 'wrap'])
+def test_hessian_gaussian_applies_the_boundary_rule_once(mode):
+    """One pass extends each axis once, so padding first does not change it."""
+    image = np.random.default_rng(0).random((48, 48))
+    pad = 24
+    kwargs = dict(sigma=2, mode=mode, use_gaussian_derivatives=True)
+    direct = hessian_matrix(image, **kwargs)
+    bigger = np.pad(image, pad, mode=_NUMPY_PAD_MODE[mode])
+    padded = hessian_matrix(bigger, **kwargs)
+    for got, expected in zip(direct, padded):
+        assert_array_equal(got, expected[pad:-pad, pad:-pad])
+
+
+@pytest.mark.parametrize(
+    'sigma, ndim, size', [(0.1, 2, 81), (0.4, 2, 81), ((1, 3), 2, 81), (1, 3, 41)]
+)
+def test_hessian_gaussian_is_exact_on_a_quadratic(sigma, ndim, size):
+    curvatures = [0.7, -0.4, 0.2, 1.3, 0.5, -0.9][: ndim * (ndim + 1) // 2]
+    image = _quadratic(size, ndim, curvatures)
+    inner = _interior(ndim, sigma)
+    tol = 1e-12 * max(np.abs(image).max(), 1)
+    for got, expected in zip(
+        hessian_matrix(image, sigma=sigma, use_gaussian_derivatives=True), curvatures
+    ):
+        assert_allclose(got[inner], expected, atol=tol, rtol=0)
+
+
+@pytest.mark.parametrize('sigma', [0.1, 0.4, 1, 3])
+def test_hessian_gaussian_has_no_response_to_a_constant(sigma):
+    # cval differs from the image, so the constant short-circuit does not
+    # apply and the kernel itself has to refuse the constant.
+    flat = np.full((48, 48), 0.4)
+    inner = _interior(2, sigma)
+    for element in hessian_matrix(
+        flat, sigma=sigma, mode='constant', cval=0, use_gaussian_derivatives=True
+    ):
+        assert_allclose(element[inner], 0, atol=1e-12)
+
+
+@pytest.mark.parametrize('sigma', [1, 2, 4])
+def test_hessian_gaussian_matches_a_gaussian_blob(sigma):
+    width, size = 6.0, 161
+    r, c = [x - size // 2 for x in np.indices((size, size), dtype=float)]
+    blob = np.exp(-(r**2 + c**2) / (2 * width**2))
+    spread = np.sqrt(width**2 + sigma**2)
+    smoothed = (width**2 / spread**2) * np.exp(-(r**2 + c**2) / (2 * spread**2))
+    truth = [
+        smoothed * (r**2 - spread**2) / spread**4,
+        smoothed * (r * c) / spread**4,
+        smoothed * (c**2 - spread**2) / spread**4,
+    ]
+    inner = _interior(2, sigma)
+    tol = 1e-5 * max(np.abs(t).max() for t in truth)
+    for got, expected in zip(
+        hessian_matrix(blob, sigma=sigma, use_gaussian_derivatives=True), truth
+    ):
+        assert_allclose(got[inner], expected[inner], atol=tol, rtol=0)
+
+
+@pytest.mark.parametrize('sigma', [0.5, 1, 2])
+def test_hessian_gaussian_order_is_a_reversal(sigma):
+    """``order='xy'`` is the reversed ``rc`` list, including at the border."""
+    image = np.random.default_rng(0).random((48, 48))
+    rc = hessian_matrix(image, sigma=sigma, use_gaussian_derivatives=True, order='rc')
+    xy = hessian_matrix(image, sigma=sigma, use_gaussian_derivatives=True, order='xy')
+    for got, expected in zip(xy, rc[::-1]):
+        assert_array_equal(got, expected)
 
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])

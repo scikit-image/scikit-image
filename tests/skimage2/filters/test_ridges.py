@@ -253,17 +253,24 @@ def test_3d_cropped_camera_image():
     np.zeros(a_black.shape)
     ones = np.ones(a_black.shape)
 
+    # The two images differ by a sign. Near a tie the filters select or clip
+    # on that sign, so a rounding difference in the Hessian becomes ~1e-7 here.
     assert_allclose(
-        meijering(a_black, black_ridges=True), meijering(a_white, black_ridges=False)
+        meijering(a_black, black_ridges=True),
+        meijering(a_white, black_ridges=False),
+        atol=1e-6,
     )
 
     assert_allclose(
         sato(a_black, black_ridges=True, mode='reflect'),
         sato(a_white, black_ridges=False, mode='reflect'),
+        atol=1e-6,
     )
 
     assert_allclose(
-        frangi(a_black, black_ridges=True), frangi(a_white, black_ridges=False)
+        frangi(a_black, black_ridges=True),
+        frangi(a_white, black_ridges=False),
+        atol=1e-6,
     )
 
     assert_allclose(

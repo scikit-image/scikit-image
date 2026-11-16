@@ -1,5 +1,3 @@
-import functools
-import math
 from itertools import combinations_with_replacement
 
 import numpy as np
@@ -130,95 +128,90 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0, order='rc'):
     return A_elems
 
 
+def _gaussian_derivative_kernel(sigma, order, truncate=8):
+    """Sampled 1-D Gaussian derivative, with its discrete moments restored.
+
+    Sampling a Gaussian derivative and using the taps as they fall leaves an
+    operator that responds to a constant image and under-reports curvature.
+    Both faults are at zero frequency, so both are repaired by imposing the
+    moments the continuous operator has: ``sum(k) == 1`` for order 0,
+    ``sum(k * x) == 1`` for order 1, and ``sum(k) == 0`` together with
+    ``sum(k * x**2) == 2`` for order 2.
+    """
+    radius = int(truncate * sigma + 0.5)
+    x = np.arange(-radius, radius + 1, dtype=float)
+    smoothing = np.exp(-(x**2) / (2 * sigma**2))
+    smoothing /= smoothing.sum()
+    if order == 0:
+        return smoothing
+    if order == 1:
+        kernel = smoothing * (x / sigma**2)
+        return kernel / (kernel * x).sum()
+    kernel = smoothing * ((x**2 - sigma**2) / sigma**4)
+    kernel = kernel - kernel.sum() * smoothing
+    # Below sigma of about 0.2 the line above cancels catastrophically: the
+    # centre tap is the difference of two numbers of order sigma**-2, and the
+    # result it should leave is of order exp(-1 / (2 sigma**2)). Put what is
+    # left back into the centre tap, which is where it belongs.
+    center = len(kernel) // 2
+    kernel[center] = -(kernel[:center].sum() + kernel[center + 1 :].sum())
+    kernel /= (kernel * x**2).sum() / 2
+    kernel[center] = -(kernel[:center].sum() + kernel[center + 1 :].sum())
+    return kernel
+
+
 def _hessian_matrix_with_gaussian(image, sigma=1, mode='reflect', cval=0, order='rc'):
-    """Compute the Hessian via convolutions with Gaussian derivatives.
+    """Hessian elements from one separable pass of moment-corrected kernels.
 
-    In 2D, the Hessian matrix is defined as:
-        H = [Hrr Hrc]
-            [Hrc Hcc]
-
-    which is computed by convolving the image with the second derivatives
-    of the Gaussian kernel in the respective r- and c-directions.
-
-    The implementation here also supports n-dimensional data.
-
-    Parameters
-    ----------
-    image : ndarray
-        Input image.
-    sigma : float or sequence of float, optional
-        Standard deviation used for the Gaussian kernel, which sets the
-        amount of smoothing in terms of pixel-distances. It is
-        advised to not choose a sigma much less than 1.0, otherwise
-        aliasing artifacts may occur.
-    mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
-        How to handle values outside the image borders.
-    cval : float, optional
-        Used in conjunction with mode 'constant', the value outside
-        the image boundaries.
-    order : {'rc', 'xy'}, optional
-        This parameter allows for the use of reverse or forward order of
-        the image axes in gradient computation. 'rc' indicates the use of
-        the first axis initially (Hrr, Hrc, Hcc), whilst 'xy' indicates the
-        usage of the last axis initially (Hxx, Hxy, Hyy)
-
-    Returns
-    -------
-    H_elems : list of ndarray
-        Upper-diagonal elements of the hessian matrix for each pixel in the
-        input image. In 2D, this will be a three element list containing [Hrr,
-        Hrc, Hcc]. In nD, the list will contain ``(n**2 + n) / 2`` arrays.
-
+    ``order='xy'`` reverses the element list. Each element is computed in one
+    frame, so the reversal is a relabelling and not a second differentiation.
     """
     image = img_as_float(image)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
-    if image.ndim > 2 and order == "xy":
+    if image.ndim > 2 and order == 'xy':
         raise ValueError("order='xy' is only supported for 2D images.")
-    if order not in ["rc", "xy"]:
-        raise ValueError(f"unrecognized order: {order}")
+    if order not in ('rc', 'xy'):
+        raise ValueError(f'unrecognized order: {order}')
+
+    ndim = image.ndim
+    # A constant continued by the same constant has no curvature. Returning
+    # that as an exact zero keeps a later division by the peak from turning a
+    # rounding residue into a response.
+    if (
+        image.size
+        and np.ptp(image) == 0
+        and (mode != 'constant' or cval == image.flat[0])
+    ):
+        n_elements = ndim * (ndim + 1) // 2
+        return [np.zeros_like(image) for _ in range(n_elements)]
 
     if np.isscalar(sigma):
-        sigma = (sigma,) * image.ndim
+        sigma = (float(sigma),) * ndim
 
-    # This function uses `scipy.ndimage.gaussian_filter` with the order
-    # argument to compute convolutions. For example, specifying
-    # ``order=[1, 0]`` would apply convolution with a first-order derivative of
-    # the Gaussian along the first axis and simple Gaussian smoothing along the
-    # second.
-
-    # For small sigma, the SciPy Gaussian filter suffers from aliasing and edge
-    # artifacts, given that the filter will approximate a sinc or sinc
-    # derivative which only goes to 0 very slowly (order 1/n**2). Thus, we use
-    # a much larger truncate value to reduce any edge artifacts.
-    truncate = 8 if all(s > 1 for s in sigma) else 100
-    sq1_2 = 1 / math.sqrt(2)
-    sigma_scaled = tuple(sq1_2 * s for s in sigma)
-    common_kwargs = dict(sigma=sigma_scaled, mode=mode, cval=cval, truncate=truncate)
-    gaussian_ = functools.partial(ndi.gaussian_filter, **common_kwargs)
-
-    # Apply two successive first order Gaussian derivative operations, as
-    # detailed in:
-    # https://dsp.stackexchange.com/questions/78280/are-scipy-second-order-gaussian-derivatives-correct
-
-    # 1.) First order along one axis while smoothing (order=0) along the other
-    ndim = image.ndim
-
-    # orders in 2D = ([1, 0], [0, 1])
-    #        in 3D = ([1, 0, 0], [0, 1, 0], [0, 0, 1])
-    #        etc.
-    orders = tuple([0] * d + [1] + [0] * (ndim - d - 1) for d in range(ndim))
-    gradients = [gaussian_(image, order=orders[d]) for d in range(ndim)]
-
-    # 2.) apply the derivative along another axis as well
-    axes = range(ndim)
-    if order == 'xy':
-        axes = reversed(axes)
-    H_elems = [
-        gaussian_(gradients[ax0], order=orders[ax1])
-        for ax0, ax1 in combinations_with_replacement(axes, 2)
-    ]
-    return H_elems
+    kernels = {
+        (axis, derivative_order): _gaussian_derivative_kernel(
+            sigma[axis], derivative_order
+        ).astype(float_dtype, copy=False)
+        for axis in range(ndim)
+        for derivative_order in (0, 1, 2)
+    }
+    H_elems = []
+    for ax0, ax1 in combinations_with_replacement(range(ndim), 2):
+        orders = [0] * ndim
+        orders[ax0] += 1
+        orders[ax1] += 1
+        element = image
+        for axis, derivative_order in enumerate(orders):
+            element = ndi.correlate1d(
+                element,
+                kernels[(axis, derivative_order)],
+                axis=axis,
+                mode=mode,
+                cval=cval,
+            )
+        H_elems.append(element)
+    return H_elems[::-1] if order == 'xy' else H_elems
 
 
 def hessian_matrix(
@@ -277,11 +270,18 @@ def hessian_matrix(
         \frac{\partial }{\partial x_i}(I * G) =
         I * \left( \frac{\partial }{\partial x_i} G \right)
 
-    When ``use_gaussian_derivatives`` is ``True``, this property is used to
-    compute the second order derivatives that make up the Hessian matrix.
+    When ``use_gaussian_derivatives`` is ``True``, each element is one separable
+    convolution with a sampled Gaussian derivative whose discrete moments have
+    been restored, so every axis is extended over the border exactly once.
 
     When ``use_gaussian_derivatives`` is ``False``, simple finite differences
     on a Gaussian-smoothed image are used instead.
+
+    .. versionchanged:: 0.27
+        With ``use_gaussian_derivatives=True``, each element is computed in one
+        pass. The previous scheme differentiated twice, so the border rule was
+        applied twice and, below ``sigma`` of about 1, most of the curvature
+        was lost. ``order='xy'`` is the reversed element list.
 
     Examples
     --------
