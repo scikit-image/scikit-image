@@ -383,3 +383,22 @@ def test_object_3d():
     for connectivity in (1, 2, 3):
         result = convex_hull_object(image, connectivity=connectivity)
         assert_array_equal(result, expected)
+
+
+def test_object_3d_flat():
+    image = np.zeros((9, 9, 9), dtype=bool)
+
+    # Single voxel
+    image[1, 1, 1] = True
+
+    # Straight line along the third axis
+    image[1, 4, 1:4] = True
+
+    # Flat square in the third dimension
+    image[5, 5:8, 5:8] = True
+
+    expected = image.copy()
+
+    for connectivity in (1, 2, 3):
+        result = convex_hull_object(image, connectivity=connectivity)
+        assert_array_equal(result, expected)

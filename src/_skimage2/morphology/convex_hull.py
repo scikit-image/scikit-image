@@ -1,5 +1,6 @@
 """Convex Hull."""
 
+import warnings
 from itertools import product
 import numpy as np
 from scipy.spatial import ConvexHull, QhullError
@@ -214,7 +215,16 @@ def convex_hull_object(image, *, connectivity=2):
     convex_img = np.zeros(image.shape, dtype=bool)
 
     for i in range(1, labeled_im.max() + 1):
-        convex_obj = convex_hull_image(labeled_im == i)
+        obj = labeled_im == i
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                'ignore', message='Failed to get convex hull image'
+            )
+            convex_obj = convex_hull_image(obj)
+        # The hull can fail for flat objects (e.g. a single voxel or a
+        # planar slice in 3D). Keep the original object in that case.
+        if not convex_obj.any():
+            convex_obj = obj
         convex_img = np.logical_or(convex_img, convex_obj)
 
     return convex_img
