@@ -1,4 +1,4 @@
-version: 2
+version: 2.1
 
 jobs:
   doc:
@@ -81,7 +81,6 @@ jobs:
           path: doc/build/html
 
 workflows:
-  version: 2
   build-doc:
     jobs:
       # build-docs.yaml builds the docs on main
