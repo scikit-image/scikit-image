@@ -7,19 +7,19 @@ from _skimage2._shared.utils import _supported_float_type
 
 from _skimage2 import data
 
-np.random.seed(5)
+# test results depend on this seed
+MODULE_RNG = np.random.RandomState(5)
 cam = data.camera()
 sigma = 20.0
-cam_noisy = np.clip(cam + sigma * np.random.randn(*cam.shape), 0, 255)
+cam_noisy = np.clip(cam + sigma * MODULE_RNG.randn(*cam.shape), 0, 255)
 cam_noisy = cam_noisy.astype(cam.dtype)
-
-np.random.seed(1234)
 
 
 def test_structural_similarity_patch_range():
     N = 51
-    X = (np.random.rand(N, N) * 255).astype(np.uint8)
-    Y = (np.random.rand(N, N) * 255).astype(np.uint8)
+    rng = np.random.RandomState(1974147632)
+    X = (rng.rand(N, N) * 255).astype(np.uint8)
+    Y = (rng.rand(N, N) * 255).astype(np.uint8)
 
     assert structural_similarity(X, Y, data_range=255, win_size=N) < 0.1
     assert_equal(structural_similarity(X, X, data_range=255, win_size=N), 1)
@@ -27,8 +27,9 @@ def test_structural_similarity_patch_range():
 
 def test_structural_similarity_image():
     N = 100
-    X = (np.random.rand(N, N) * 255).astype(np.uint8)
-    Y = (np.random.rand(N, N) * 255).astype(np.uint8)
+    rng = np.random.RandomState(3782407563)
+    X = (rng.rand(N, N) * 255).astype(np.uint8)
+    Y = (rng.rand(N, N) * 255).astype(np.uint8)
 
     S0 = structural_similarity(X, X, data_range=255, win_size=3)
     assert_equal(S0, 1)
@@ -85,9 +86,9 @@ def test_structural_similarity_grad(seed, dtype):
 )
 def test_structural_similarity_dtype(dtype):
     N = 30
-    rng = np.random.default_rng(1234)
-    X = rng.random((N, N))
-    Y = rng.random((N, N))
+    rng = np.random.RandomState(2249242827)
+    X = rng.rand(N, N)
+    Y = rng.rand(N, N)
     if np.dtype(dtype).kind in 'iub':
         data_range = 255.0
         X = (X * 255).astype(dtype)
@@ -106,8 +107,9 @@ def test_structural_similarity_dtype(dtype):
 @pytest.mark.parametrize('channel_axis', [0, 1, 2, -1])
 def test_structural_similarity_multichannel(channel_axis):
     N = 100
-    X = (np.random.rand(N, N) * 255).astype(np.uint8)
-    Y = (np.random.rand(N, N) * 255).astype(np.uint8)
+    rng = np.random.RandomState(3501932312)
+    X = (rng.rand(N, N) * 255).astype(np.uint8)
+    Y = (rng.rand(N, N) * 255).astype(np.uint8)
     data_range = np.iinfo(np.uint8).max
 
     S1 = structural_similarity(X, Y, data_range=data_range, win_size=3)
@@ -173,7 +175,8 @@ def test_structural_similarity_multichannel_chelsea():
     # color image example
     Xc = data.chelsea()
     sigma = 15.0
-    Yc = np.clip(Xc + sigma * np.random.randn(*Xc.shape), 0, 255)
+    rng = np.random.RandomState(2064892105)
+    Yc = np.clip(Xc + sigma * rng.randn(*Xc.shape), 0, 255)
     Yc = Yc.astype(Xc.dtype)
 
     # multichannel result should be mean of the individual channel results
@@ -295,8 +298,9 @@ def test_structural_similarity_errors_without_data_range():
 def test_gaussian_weights_win_size_error():
     """win_size with gaussian_weights=True should raise ValueError (#7231)."""
     N = 100
-    X = (np.random.rand(N, N) * 255).astype(np.uint8)
-    Y = (np.random.rand(N, N) * 255).astype(np.uint8)
+    rng = np.random.RandomState(2945864201)
+    X = (rng.rand(N, N) * 255).astype(np.uint8)
+    Y = (rng.rand(N, N) * 255).astype(np.uint8)
 
     with pytest.raises(
         ValueError, match="win_size cannot be specified when gaussian_weights"
