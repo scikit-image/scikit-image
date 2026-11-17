@@ -30,7 +30,7 @@ manipulating arrays::
 
     `We do not have native support for NumPy masked arrays
     <https://numpy.org/doc/stable/reference/maskedarray.baseclass.html#numpy.ma.MaskedArray>`_.
-    Please convert images to plain ``numpy.ndarray``s, and handle masks by
+    Please convert images to plain ``numpy.ndarray`` objects, and handle masks by
     using separate Numpy arrays. Some functions accept mask arguments, and
     take Numpy arrays that define masks, but in many cases you'll want to
     handle the masking yourself (for example, by :ref:`using masks
@@ -245,7 +245,7 @@ along the leading dimension, the following syntax can be used::
 
 
 Notes on the memory order of array dimensions
---------------------------------------------
+---------------------------------------------
 
 Although the labeling of the axes might seem arbitrary, it can have a
 significant effect on the speed of operations. This is because modern
