@@ -411,7 +411,7 @@ license [1]_, as in `Copyright`, below, with attribution encouraged with CC0+BY
    https://creativecommons.org/publicdomain/zero/1.0/
 .. [2] https://dancohen.org/2013/11/26/cc0-by/
 .. [3] https://pandas.pydata.org/pandas-docs/stable/whatsnew/v1.0.0.html#backwards-incompatible-api-changes
-.. [4] https://docs.scipy.org/doc/scipy/reference/release.1.0.0.html
+.. [4] https://docs.scipy.org/doc/scipy-1.0.0/reference/release.1.0.0.html
 .. [5] https://github.com/scipy/scipy/pull/12862
 .. [6] https://semver.org/
 .. [7] https://github.com/scikit-image/scikit-image/issues/5439

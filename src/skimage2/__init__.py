@@ -4,8 +4,8 @@ import warnings
 
 import lazy_loader as _lazy
 
-from _skimage2 import __version__
 from _skimage2._shared._warnings import ExperimentalAPIWarning
+from _skimage2._version import __version__
 
 
 # Each submodule is a shim package that forwards to its `_skimage2` counterpart.

@@ -161,7 +161,7 @@ References
 
 .. [1] https://ilovesymposia.com/2018/07/13/the-road-to-scikit-image-1-0/
 .. [2] https://en.wikipedia.org/wiki/Functional_programming
-.. [3] https://docs.scipy.org/doc/numpy/docs/howto_document.html
+.. [3] https://numpydoc.readthedocs.io/en/latest/format.html
 .. [4] https://forum.image.sc/t/request-for-comment-road-to-scikit-image-1-0/20099/4
 .. [5] https://www.python.org/dev/peps/pep-0020/
 .. [6] https://github.com/scikit-image/scikit-image/issues/3263

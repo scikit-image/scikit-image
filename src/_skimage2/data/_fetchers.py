@@ -12,7 +12,7 @@ import shutil
 from ..util.dtype import img_as_bool
 from ._registry import registry, registry_urls
 
-from .. import __version__
+from .._version import __version__
 
 import os.path as osp
 import os
@@ -773,11 +773,11 @@ def lily():
     """Lily of the valley plant stem.
 
     This plant stem on a pre-prepared slide was imaged with confocal
-    fluorescence microscopy (Nikon C1 inverted microscope).
-    Image shape is (922, 922, 4). That is 922x922 pixels in X-Y,
-    with 4 color channels.
-    Real-space voxel size is 1.24 microns in X-Y.
-    Data type is unsigned 16-bit integers.
+    fluorescence microscopy (Nikon C1 inverted microscope).  The image
+    shape is (922, 922, 4). The four channels comprise three
+    fluorescence channels and one diascopic differential interference
+    contrast (DIC) channel.  Real-space voxel size is 1.24 microns.
+    The 12-bit image data are stored as unsigned 16-bit integers.
 
     Notes
     -----
@@ -789,6 +789,7 @@ def lily():
     -------
     lily : ndarray of shape (922, 922, 4) and dtype uint16
         Lily 2D multichannel image.
+
     """
     return _load("data/lily.tif")
 

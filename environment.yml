@@ -27,7 +27,7 @@ dependencies:
   # asv
   - asv
   # docs
-  - sphinx>=8.0
+  - sphinx>=8.1
   - sphinx-gallery>=0.20
   - numpydoc>=1.7
   - sphinx-copybutton
@@ -72,4 +72,4 @@ dependencies:
   # pypa-only packages
   - pip
   - pip:
-      - docstub==0.7.0rc0
+      - docstub==0.7.0

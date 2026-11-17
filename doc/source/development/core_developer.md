@@ -215,7 +215,7 @@ resources such as:
 - Our [developer forum][ml]
 - Our [chat room](https://skimage.zulipchat.com/)
 
-[numpydoc]: https://docs.scipy.org/doc/numpy/docs/howto_document.html
+[numpydoc]: https://numpydoc.readthedocs.io/en/latest/format.html
 [so_tag]: https://stackoverflow.com/questions/tagged/scikit-image
 [ml]: https://discuss.scientific-python.org/c/contributor/skimage
 

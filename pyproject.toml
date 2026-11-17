@@ -60,14 +60,14 @@ data = ['pooch>=1.6.0']
 developer = [
     'pre-commit',
     'ipython',
-    'docstub==0.7.0rc0',
+    'docstub==0.7.0',
     'scikit-image[asv]',
 ]
 asv = [
     'asv; sys_platform != "emscripten"',
 ]
 docs = [
-    'sphinx>=8.0',
+    'sphinx>=8.1',
     'sphinx-gallery[parallel]>=0.20',
     'numpydoc>=1.7',
     'sphinx-copybutton',
@@ -168,8 +168,7 @@ ignore = [
     'E501',
     'E741',
     'E712',
-    'E721',
-    'UP038',  # non-pep604-isinstance -- https://github.com/astral-sh/ruff/issues/7871
+    'E721'
 ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -260,6 +259,7 @@ ignore_files = [
     "io/_plugins",
     "io/manage_plugins.py",
 ]
+plugin_paths = ["tools/docstub_plugin.py"]
 
 [tool.docstub.type_prefixes]
 warnings = "warnings"

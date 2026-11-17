@@ -1,4 +1,4 @@
-version: 2
+version: 2.1
 
 jobs:
   doc:
@@ -22,10 +22,14 @@ jobs:
           name: Restore cached pip dependencies
           keys:
             - packages-v1-{{ checksum "requirements/all_requirements" }}
+            - packages-v1-
       - restore_cache:
           name: Restore cached build files (ccache)
+          # Cache keys are immutable; fall back to the newest cache of this
+          # branch, then of any branch
           keys:
-            - ccache-v2-{{ .Branch }}
+            - ccache-v3-{{ .Branch }}-
+            - ccache-v3-
       - run:
           name: Install dependencies and build package
           command: |
@@ -37,9 +41,9 @@ jobs:
             python3 -m pip install -r requirements/docs.txt
       - run:
           name: Install Chrome for kaleido
-          # Installs via apt like test-docs.yaml (see there for why). This
-          # image preconfigures a google-chrome source without Signed-By,
-          # which conflicts with the signed one below, so remove it first.
+          # This image preconfigures a google-chrome source without
+          # Signed-By, which conflicts with the signed one below, so remove
+          # it first.
           command: |
             for f in /etc/apt/sources.list /etc/apt/sources.list.d/*.list; do
               [ -f "$f" ] && sudo sed -i '\#dl\.google\.com/linux/chrome/deb#d' "$f"
@@ -62,16 +66,21 @@ jobs:
             - ~/.cache/pip
       - save_cache:
           name: Cache build files (ccache)
-          key: ccache-v2-{{ .Branch }}
+          key: ccache-v3-{{ .Branch }}-{{ .Revision }}
           paths:
             - ~/.cache/ccache
+      - run:
+          name: Test doctests in user guide pages
+          command: |
+            cd doc
+            PYTHON=python3 make doctest-pages
       - run:
           name: Build doc
           no_output_timeout: 50m
           command: |
             cd doc
             PYTHON=python3 make clean
-            PYTHON=python3 SPHINXOPTS="-j 1" make html
+            PYTHON=python3 SPHINXOPTS="-W -j auto" make html
       - save_cache:
           name: Cache data files
           key: data-v1-{{ checksum "src/skimage/data/_registry.py" }}
@@ -81,7 +90,10 @@ jobs:
           path: doc/build/html
 
 workflows:
-  version: 2
   build-doc:
     jobs:
-      - doc
+      # build-docs.yaml builds the docs on main
+      - doc:
+          filters:
+            branches:
+              ignore: main

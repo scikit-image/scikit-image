@@ -25,13 +25,13 @@ jobs:
 
     steps:
       - name: Clone scikit-image
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: 3.13
           cache: "pip"
@@ -47,18 +47,18 @@ jobs:
         run: |
           echo -e "## docstub output\n\`\`\`" >> $GITHUB_STEP_SUMMARY
           (set -o pipefail && \
-           docstub run --verbose --group-errors --allow-errors=622 \
+           docstub run --verbose --group-errors --allow-errors=19 \
                        --workers -1 --out-dir ${MYPYPATH}/skimage src/skimage/ \
            2>&1 | tee -a $GITHUB_STEP_SUMMARY)
            echo -e "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
-      - name: Create skimage2-stubs with docstub
+      - name: Create _skimage2-stubs with docstub
         shell: bash
         run: |
           echo -e "## docstub output\n\`\`\`" >> $GITHUB_STEP_SUMMARY
           (set -o pipefail && \
-           docstub run --verbose --group-errors \
-                       --out-dir ${MYPYPATH}/skimage2 src/skimage2/ \
+           docstub run --verbose --group-errors --allow-errors=596 \
+                       --out-dir ${MYPYPATH}/_skimage2 src/_skimage2/ \
            2>&1 | tee -a $GITHUB_STEP_SUMMARY)
            echo -e "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
@@ -75,7 +75,7 @@ jobs:
       #        run: |
       #          pip install -v --no-build-isolation .
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: skimage-stubs
           path: ${MYPYPATH}
