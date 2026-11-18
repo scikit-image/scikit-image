@@ -185,7 +185,7 @@ def ufft2(inarray):
 
     Returns
     -------
-    outarray : ndarray (same shape as inarray)
+    outarray : ndarray, same shape as `inarray`
         The unitary 2-D Fourier transform of ``inarray``.
 
     See Also
@@ -217,7 +217,7 @@ def uifft2(inarray):
 
     Returns
     -------
-    outarray : ndarray (same shape as inarray)
+    outarray : ndarray, same shape as `inarray`
         The unitary 2-D inverse Fourier transform of ``inarray``.
 
     See Also

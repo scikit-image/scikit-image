@@ -413,9 +413,10 @@ def line_aa(r0, c0, r1, c1):
 
     Returns
     -------
-    rr, cc, val : (N,) ndarray (int, int, float)
-        Indices of pixels (`rr`, `cc`) and intensity values (`val`).
-        ``img[rr, cc] = val``.
+    rr, cc : ndarray of shape (N,) and dtype int
+        Indices of pixels (`rr`, `cc`) where ``img[rr, cc] = val``.
+    val : ndarray of shape (N,) and dtype float
+        Intensity values (`val`) where ``img[rr, cc] = val``.
 
     References
     ----------
@@ -602,9 +603,10 @@ def circle_perimeter_aa(r, c, radius, shape=None):
 
     Returns
     -------
-    rr, cc, val : (N,) ndarray (int, int, float)
-        Indices of pixels (`rr`, `cc`) and intensity values (`val`).
-        ``img[rr, cc] = val``.
+    rr, cc : ndarray of shape (N,) and dtype int
+        Indices of pixels (`rr`, `cc`) where ``img[rr, cc] = val``.
+    val : ndarray of shape (N,) and dtype float
+        Intensity values (`val`) where ``img[rr, cc] = val``.
 
     Notes
     -----

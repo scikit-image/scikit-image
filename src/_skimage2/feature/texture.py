@@ -323,7 +323,7 @@ def local_binary_pattern(image, P, R, method='default'):
 
     Parameters
     ----------
-    image : (M, N) array
+    image : ndarray of shape (M, N)
         2D grayscale image.
     P : int
         Number of circularly symmetric neighbor set points (quantization of
@@ -352,7 +352,7 @@ def local_binary_pattern(image, P, R, method='default'):
 
     Returns
     -------
-    output : (M, N) array
+    output : ndarray of shape (M, N)
         LBP image.
 
     References

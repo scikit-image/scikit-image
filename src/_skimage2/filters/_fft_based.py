@@ -70,7 +70,7 @@ def butterworth(
 
     Parameters
     ----------
-    image : (M[, N[, ..., P]][, C]) ndarray
+    image : ndarray of shape (M[, N[, ..., P]][, C])
         Input image.
     cutoff_frequency_ratio : float, optional
         Determines the position of the cut-off relative to the shape of the

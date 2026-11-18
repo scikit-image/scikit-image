@@ -955,7 +955,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
     ----------
     image : ndarray of shape (M, N)
         Input image.
-    corners : (K, 2) ndarray
+    corners : ndarray of shape (K, 2)
         Corner coordinates `(row, col)`.
     window_size : int, optional
         Search window size for subpixel estimation.
@@ -964,7 +964,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
 
     Returns
     -------
-    positions : (K, 2) ndarray
+    positions : ndarray of shape (K, 2)
         Subpixel corner positions. NaN for "not classified" corners.
 
     References

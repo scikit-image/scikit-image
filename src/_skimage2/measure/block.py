@@ -9,7 +9,7 @@ def block_reduce(image, block_size=2, func=np.sum, cval=0, func_kwargs=None):
 
     Parameters
     ----------
-    image : (M[, ...]) ndarray
+    image : ndarray of shape (M[, ...])
         N-dimensional input image.
     block_size : array_like or int
         Array containing down-sampling integer factor along each axis.

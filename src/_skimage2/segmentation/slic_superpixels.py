@@ -26,7 +26,7 @@ def _get_mask_centroids(mask, n_centroids, multichannel):
 
     Returns
     -------
-    centroids : 2D ndarray
+    centroids : ndarray of shape (M, N)
         The coordinates of the centroids with shape (n_centroids, 3).
     steps : 1D ndarray
         The approximate distance between two seeds in all dimensions.
@@ -81,7 +81,7 @@ def _get_grid_centroids(image, n_centroids):
 
     Returns
     -------
-    centroids : 2D ndarray
+    centroids : ndarray of shape (M, N)
         The coordinates of the centroids with shape (~n_centroids, 3).
     steps : 1D ndarray
         The approximate distance between two seeds in all dimensions.

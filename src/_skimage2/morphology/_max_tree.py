@@ -75,10 +75,10 @@ def max_tree(image, connectivity=1):
 
     Returns
     -------
-    parent : ndarray, int64
+    parent : ndarray of dtype int64
         Array of same shape as image. The value of each pixel is the index of
         its parent in the ravelled array.
-    tree_traverser : 1D array, int64
+    tree_traverser : ndarray of shape (N,) and dtype int64
         The ordered pixel indices (referring to the ravelled array). The pixels
         are ordered such that every pixel is preceded by its parent (except for
         the root which has no parent).
@@ -181,10 +181,10 @@ def area_opening(
         The neighborhood connectivity. The integer represents the maximum
         number of orthogonal steps to reach a neighbor. In 2D, it is 1 for
         a 4-neighborhood and 2 for a 8-neighborhood. Default value is 1.
-    parent : ndarray, int64, optional
+    parent : ndarray of dtype int64, optional
         Parent image representing the max tree of the image. The
         value of each pixel is the index of its parent in the ravelled array.
-    tree_traverser : 1D array, int64, optional
+    tree_traverser : ndarray of shape (N,) and dtype int64, optional
         The ordered pixel indices (referring to the ravelled array). The pixels
         are ordered such that every pixel is preceded by its parent (except for
         the root which has no parent).
@@ -289,10 +289,10 @@ def diameter_opening(
         The neighborhood connectivity. The integer represents the maximum
         number of orthogonal steps to reach a neighbor. In 2D, it is 1 for
         a 4-neighborhood and 2 for a 8-neighborhood. Default value is 1.
-    parent : ndarray, int64, optional
+    parent : ndarray of dtype int64, optional
         Parent image representing the max tree of the image. The
         value of each pixel is the index of its parent in the ravelled array.
-    tree_traverser : 1D array, int64, optional
+    tree_traverser : ndarray of shape (N,) and dtype int64, optional
         The ordered pixel indices (referring to the ravelled array). The pixels
         are ordered such that every pixel is preceded by its parent (except for
         the root which has no parent).
@@ -397,11 +397,11 @@ def area_closing(
         The neighborhood connectivity. The integer represents the maximum
         number of orthogonal steps to reach a neighbor. In 2D, it is 1 for
         a 4-neighborhood and 2 for a 8-neighborhood. Default value is 1.
-    parent : ndarray, int64, optional
+    parent : ndarray of dtype int64, optional
         Parent image representing the max tree of the inverted image. The
         value of each pixel is the index of its parent in the ravelled array.
         See Note for further details.
-    tree_traverser : 1D array, int64, optional
+    tree_traverser : ndarray of shape (N,) and dtype int64, optional
         The ordered pixel indices (referring to the ravelled array). The pixels
         are ordered such that every pixel is preceded by its parent (except for
         the root which has no parent).
@@ -523,11 +523,11 @@ def diameter_closing(
         The neighborhood connectivity. The integer represents the maximum
         number of orthogonal steps to reach a neighbor. In 2D, it is 1 for
         a 4-neighborhood and 2 for a 8-neighborhood. Default value is 1.
-    parent : ndarray, int64, optional
+    parent : ndarray of dtype int64, optional
         Precomputed parent image representing the max tree of the inverted
         image. This function is fast, if precomputed parent and tree_traverser
         are provided. See Note for further details.
-    tree_traverser : 1D array, int64, optional
+    tree_traverser : ndarray of shape (N,) and dtype int64, optional
         Precomputed traverser, where the pixels are ordered such that every
         pixel is preceded by its parent (except for the root which has no
         parent). This function is fast, if precomputed parent and
@@ -633,10 +633,10 @@ def max_tree_local_maxima(image, connectivity=1, parent=None, tree_traverser=Non
         The neighborhood connectivity. The integer represents the maximum
         number of orthogonal steps to reach a neighbor. In 2D, it is 1 for
         a 4-neighborhood and 2 for a 8-neighborhood. Default value is 1.
-    parent : ndarray, int64, optional
+    parent : ndarray of dtype int64, optional
         The value of each pixel is the index of its parent in the ravelled
         array.
-    tree_traverser : 1D array, int64, optional
+    tree_traverser : ndarray of shape (N,) and dtype int64, optional
         The ordered pixel indices (referring to the ravelled array). The pixels
         are ordered such that every pixel is preceded by its parent (except for
         the root which has no parent).

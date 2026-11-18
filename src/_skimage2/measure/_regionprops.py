@@ -1257,9 +1257,9 @@ def regionprops(
     **centroid_weighted_local** : array
         Centroid coordinate tuple ``(row, col)``, relative to region bounding
         box, weighted with intensity image.
-    **coords_scaled** : (K, 2) ndarray
+    **coords_scaled** : ndarray of shape (K, 2)
         Coordinate list ``(row, col)`` of the region scaled by `spacing`.
-    **coords** : (K, 2) ndarray
+    **coords** : ndarray of shape (K, 2)
         Coordinate list ``(row, col)`` of the region.
     **eccentricity** : float
         Eccentricity of the ellipse that has the same second moments as the
