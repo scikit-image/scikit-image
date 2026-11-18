@@ -999,7 +999,7 @@ def regionprops_table(
 
     Parameters
     ----------
-    label_image : (M, N[, P]) ndarray
+    label_image : ndarray of shape (M, N[, P])
         Label image. Labels with value 0 are ignored.
     intensity_image : (M, N[, P][, C]) ndarray, optional
         Intensity (input) image of same shape as label image, plus
@@ -1178,7 +1178,7 @@ def regionprops(
 
     Parameters
     ----------
-    label_image : (M, N[, P]) ndarray
+    label_image : ndarray of shape (M, N[, P])
         Label image. Labels with value 0 are ignored.
 
         .. versionchanged:: 0.14.1

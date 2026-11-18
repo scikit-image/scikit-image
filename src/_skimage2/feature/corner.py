@@ -1314,17 +1314,17 @@ def corner_orientations(image, corners, mask):
 
     Parameters
     ----------
-    image : (M, N) array
+    image : ndarray of shape (M, N)
         Input grayscale image.
-    corners : (K, 2) array
+    corners : ndarray of shape (K, 2)
         Corner coordinates as ``(row, col)``.
-    mask : 2D array
+    mask : ndarray of shape (M, N)
         Mask defining the local neighborhood of the corner used for the
         calculation of the central moment.
 
     Returns
     -------
-    orientations : (K, 1) array
+    orientations : ndarray of shape (K, 1)
         Orientations of corners in the range [-pi, pi].
 
     References

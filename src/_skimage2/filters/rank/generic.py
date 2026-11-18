@@ -92,11 +92,11 @@ def _preprocess_input(
 
     Parameters
     ----------
-    image : 2-D array (integer or float)
+    image : ndarray of shape (M, N) and dtype in {int, float}
         Input image.
-    footprint : 2-D array (integer or float), optional
+    footprint : ndarray of shape (M, N) and dtype in {int, float}, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer or float), optional
+    out : ndarray of shape (M, N) and dtype in {int, float}, optional
         If None, a new array is allocated.
     mask : ndarray of dtype in {int, float}, optional
         Mask array that defines (>0) area of the image included in the local
@@ -312,11 +312,11 @@ def _apply_scalar_per_pixel(
     ----------
     func : function
         Cython function to apply.
-    image : 2-D array (integer or float)
+    image : ndarray of shape (M, N) and dtype in {int, float}
         Input image.
-    footprint : 2-D array (integer or float)
+    footprint : ndarray of shape (M, N) and dtype in {int, float}
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer or float)
+    out : ndarray of shape (M, N) and dtype in {int, float}
         If None, a new array is allocated.
     mask : ndarray (integer or float)
         Mask array that defines (>0) area of the image included in the local
@@ -385,11 +385,11 @@ def _apply_vector_per_pixel(
     ----------
     func : function
         Cython function to apply.
-    image : 2-D array (integer or float)
+    image : ndarray of shape (M, N) and dtype in {int, float}
         Input image.
-    footprint : 2-D array (integer or float)
+    footprint : ndarray of shape (M, N) and dtype in {int, float}
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer or float)
+    out : ndarray of shape (M, N) and dtype in {int, float}
         If None, a new array is allocated.
     mask : ndarray (integer or float)
         Mask array that defines (>0) area of the image included in the local
@@ -525,7 +525,7 @@ def equalize(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_
 
     Returns
     -------
-    out : ([P,] M, N) ndarray, same dtype as `image`
+    out : ndarray of shape ([P,] M, N), same dtype as `image`
         Output image.
 
     Examples
@@ -587,7 +587,7 @@ def gradient(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_
 
     Returns
     -------
-    out : ([P,] M, N) ndarray, same dtype as `image`
+    out : ndarray of shape ([P,] M, N), same dtype as `image`
         Output image.
 
     Examples
@@ -649,7 +649,7 @@ def maximum(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z
 
     Returns
     -------
-    out : ([P,] M, N) ndarray, same dtype as `image`
+    out : ndarray of shape ([P,] M, N), same dtype as `image`
         Output image.
 
     See also
@@ -720,7 +720,7 @@ def mean(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0)
 
     Returns
     -------
-    out : ([P,] M, N) ndarray, same dtype as `image`
+    out : ndarray of shape ([P,] M, N), same dtype as `image`
         Output image.
 
     Examples
@@ -784,7 +784,7 @@ def geometric_mean(
 
     Returns
     -------
-    out : ([P,] M, N) ndarray, same dtype as `image`
+    out : ndarray of shape ([P,] M, N), same dtype as `image`
         Output image.
 
     Examples
@@ -853,7 +853,7 @@ def subtract_mean(
 
     Returns
     -------
-    out : ([P,] M, N) ndarray, same dtype as `image`
+    out : ndarray of shape ([P,] M, N), same dtype as `image`
         Output image.
 
     Notes
@@ -932,7 +932,7 @@ def median(
 
     Returns
     -------
-    out : ([P,] M, N) ndarray, same dtype as `image`
+    out : ndarray of shape ([P,] M, N), same dtype as `image`
         Output image.
 
     See also
@@ -1074,7 +1074,7 @@ def modal(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0
 
     Returns
     -------
-    out : ([P,] M, N) ndarray, same dtype as `image`
+    out : ndarray of shape ([P,] M, N), same dtype as `image`
         Output image.
 
     Examples
@@ -1142,7 +1142,7 @@ def enhance_contrast(
 
     Returns
     -------
-    out : ([P,] M, N) ndarray, same dtype as `image`
+    out : ndarray of shape ([P,] M, N), same dtype as `image`
         Output image
 
     Examples
@@ -1697,7 +1697,7 @@ def majority(
     ----------
     image : ndarray of dtype (int or float)
         Image array.
-    footprint : 2-D array (integer or float)
+    footprint : array of shape (M, N) and dtype in {int, float}
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray of dtype int, optional
         If None, a new array will be allocated.

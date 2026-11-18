@@ -371,7 +371,7 @@ def line(r0, c0, r1, c1):
 
     Returns
     -------
-    rr, cc : (N,) ndarray of int
+    rr, cc : ndarray of shape (N,) and dtype int
         Indices of pixels that belong to the line.
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
@@ -542,7 +542,7 @@ def circle_perimeter(r, c, radius, method='bresenham', shape=None):
 
     Returns
     -------
-    rr, cc : (N,) ndarray of int
+    rr, cc : ndarray of shape (N,) and dtype int
         Bresenham and Andres' method:
         Indices of pixels that belong to the circle perimeter.
         May be used to directly index into an array, e.g.
@@ -665,7 +665,7 @@ def ellipse_perimeter(r, c, r_radius, c_radius, orientation=0, shape=None):
 
     Returns
     -------
-    rr, cc : (N,) ndarray of int
+    rr, cc : ndarray of shape (N,) and dtype int
         Indices of pixels that belong to the ellipse perimeter.
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
@@ -736,7 +736,7 @@ def bezier_curve(r0, c0, r1, c1, r2, c2, weight, shape=None):
 
     Returns
     -------
-    rr, cc : (N,) ndarray of int
+    rr, cc : ndarray of shape (N,) and dtype int
         Indices of pixels that belong to the Bezier curve.
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
