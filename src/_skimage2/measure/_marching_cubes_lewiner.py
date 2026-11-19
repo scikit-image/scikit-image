@@ -54,7 +54,8 @@ def marching_cubes(
         Whether the method of Lewiner et al. or Lorensen et al. will be used.
     mask : (M, N, P) array, optional
         Boolean array. The marching cube algorithm will be computed only on
-        True elements. This will save computational time when interfaces
+        True elements. A cube is processed only if all eight of its corner
+        voxels are True. This will save computational time when interfaces
         are located within certain region of the volume M, N, P-e.g. the top
         half of the cube-and also allow to compute finite surfaces-i.e. open
         surfaces that do not end at the border of the cube.
