@@ -39,6 +39,11 @@ jobs:
         with:
           persist-credentials: false
 
+      # windows-latest (VS 2026) ships MSVC STL that rejects Clang < 22 (STL1000),
+      # while the image still provides LLVM 20. Install a matching toolchain.
+      - name: Install LLVM
+        uses: ./.github/windows_llvm_steps
+
       - name: Setup Python
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
@@ -70,10 +75,11 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: ccache-${{ runner.os }}-${{ matrix.python-version }}-${{ github.sha }}
+          # Include llvm major so objects built with Clang 20 are not reused.
+          key: ccache-${{ runner.os }}-llvm22-${{ matrix.python-version }}-${{ github.sha }}
           restore-keys: |
-            ccache-${{ runner.os }}-${{ matrix.python-version }}-
-            ccache-${{ runner.os }}-
+            ccache-${{ runner.os }}-llvm22-${{ matrix.python-version }}-
+            ccache-${{ runner.os }}-llvm22-
 
       - name: Zero ccache stats
         shell: bash

@@ -67,9 +67,9 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - name: Set up LLVM toolchain for Windows ARM64
-        if: matrix.os == 'windows-11-arm'
-        uses: ./.github/windows_arm64_steps
+      # VS 2026 MSVC STL needs Clang 22+; runner images still ship LLVM 20.
+      - name: Install LLVM
+        uses: ./.github/windows_llvm_steps
       # Wheel repair is disabled for Windows in pyproject.toml; see the comment
       # on repair-wheel-command under [tool.cibuildwheel.windows].
       - uses: pypa/cibuildwheel@f9b966cfadf4109556cadc5bb39ddb72d0ce664e # v4.3.5
