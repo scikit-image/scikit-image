@@ -40,6 +40,7 @@ jobs:
           persist-credentials: false
 
       - name: Install LLVM
+        id: llvm
         uses: ./.github/win_install_llvm
 
       - name: Setup Python
@@ -73,11 +74,10 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ env.CCACHE_DIR }}
-          # Include llvm major so objects built with Clang 20 are not reused.
-          key: ccache-${{ runner.os }}-llvm22-${{ matrix.python-version }}-${{ github.sha }}
+          key: ccache-${{ runner.os }}-llvm${{ steps.llvm.outputs.major }}-${{ matrix.python-version }}-${{ github.sha }}
           restore-keys: |
-            ccache-${{ runner.os }}-llvm22-${{ matrix.python-version }}-
-            ccache-${{ runner.os }}-llvm22-
+            ccache-${{ runner.os }}-llvm${{ steps.llvm.outputs.major }}-${{ matrix.python-version }}-
+            ccache-${{ runner.os }}-llvm${{ steps.llvm.outputs.major }}-
 
       - name: Zero ccache stats
         shell: bash
