@@ -386,11 +386,11 @@ def frangi(
     The per-sigma derivatives used in [1]_ are Lindeberg's
     :math:`\gamma`-normalised derivatives, as in eq. (2), with :math:`\sigma`
     the paper's scale :math:`s`.  The Hessian is a second derivative, so it
-    carries a factor :math:`\sigma^{2\gamma}`.  [1]_ sets :math:`\gamma` to 1
-    when "no scale is preferred", so the factor is :math:`\sigma^2`.  This
-    Lindeberg :math:`\gamma` is unrelated to the `gamma` parameter.  The
-    normalisation is what lets the maximum over scales in eq. (14) of [1]_
-    select a structure's width; ``sato`` uses the same convention.
+    is scaled by :math:`\sigma^{2\gamma}`.  [1]_ sets :math:`\gamma` to 1 when
+    "no scale is preferred", so the factor is :math:`\sigma^2`.  This Lindeberg
+    :math:`\gamma` is unrelated to the `gamma` parameter.  The normalisation is
+    what lets the maximum over scales in eq. (14) of [1]_ select a structure's
+    width; ``sato`` uses the same convention.
 
     Earlier versions of this filter were implemented by Marc Schrijver,
     (November 2001), D. J. Kroon, University of Twente (May 2009) [2]_, and
