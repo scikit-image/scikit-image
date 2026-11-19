@@ -463,34 +463,24 @@ def test_frangi_agrees_with_sato_about_scale(frangi_bars):
         assert np.argmax(sato_scales) == np.argmax(frangi_scales)
 
 
-@pytest.mark.parametrize('width', FRANGI_WIDTHS)
-def test_frangi_rejects_the_wrong_polarity(width):
-    """`black_ridges=True` must say nothing about a bright ridge.
-
-    `frangi` negates the image for `black_ridges=False`, so internally it
-    always looks for dark ridges.  Across a dark ridge, the curvature is
-    positive.  After sorting the Hessian eigenvalues by magnitude, `lambda1`
-    is the small value along the ridge, and `lambda2` is the larger value
-    across the ridge.  Eq. (15) of Frangi et al. (1998) gives zero vesselness
-    unless `lambda2 > 0`.
-
-    In 2D, the blobness ratio R_B is ``|lambda1| / lambda2``.  It is high for
-    a blob, where the two eigenvalues are similar, and low for a ridge.  The
-    blobness factor ``exp(-R_B ** 2 / (2 * beta ** 2))`` is near 1 for a ridge
-    and falls towards 0 for a blob.
-    """
-    # An ideal bright ridge.
+def test_frangi_rejects_the_wrong_polarity():
+    """`black_ridges` selects the dark or the bright line, not both."""
     size = 128
-    columns = np.indices((size, size), dtype=float)[1]
-    bright = np.exp(-((columns - size // 2) ** 2) / (2 * width**2))
-    centre = (size // 2, size // 2)
+    mid = size // 2
+    dark_c, bright_c = size // 3, 2 * size // 3
+    image = np.zeros((size, size))
+    image[:, dark_c] = -1
+    image[:, bright_c] = 1
+    dark_at = (mid, dark_c)
+    bright_at = (mid, bright_c)
 
-    # Default is black_ridges=True; it should not detect the ideal bright
-    # ridge.
-    assert frangi(bright, sigmas=[3])[centre] == 0
-    # But it should detect the same ridge when looking for bright ridges, so
-    # the zero above is not just a filter that returns zero everywhere.
-    assert frangi(bright, sigmas=[3], black_ridges=False)[centre] > 0
+    dark_mode = frangi(image, sigmas=[2])
+    assert dark_mode[dark_at] > 0
+    assert dark_mode[bright_at] == 0
+
+    bright_mode = frangi(image, sigmas=[2], black_ridges=False)
+    assert bright_mode[bright_at] > 0
+    assert bright_mode[dark_at] == 0
 
 
 @pytest.mark.parametrize('factor', [1e-6, 1e-4, 1e2])
