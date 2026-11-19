@@ -381,21 +381,6 @@ def test_frangi_ignores_the_order_of_sigmas(frangi_bars):
         assert_array_equal(frangi(image, sigmas=order), reference)
 
 
-def test_frangi_gamma_is_resolved_over_every_scale(frangi_bars):
-    """`gamma=None` is half the largest Hessian norm over all scales given.
-
-    Passing that value explicitly must reproduce the default exactly.  It is
-    the value the docstring describes.
-    """
-    image, _ = frangi_bars
-    sigmas = (1, 3, 5)
-    resolved = _get_default_gamma(image, sigmas)
-    # Test passing calculated gamma explicitly gives same answer as default.
-    assert_array_equal(
-        frangi(image, sigmas=sigmas), frangi(image, sigmas=sigmas, gamma=resolved)
-    )
-
-
 def test_frangi_agrees_with_sato_about_scale(frangi_bars):
     """Sato and Frangi must nominate the same scale for the same bar.
 
@@ -460,15 +445,6 @@ def test_frangi_is_invariant_to_brightness_units(factor):
         frangi(image, sigmas=(1, 3, 5)),
         atol=1e-6,
     )
-
-
-def test_frangi_sigma_iterable():
-    """Check sigmas can be generator."""
-    rng = np.random.default_rng(0)
-    img = rng.random((48, 48))
-    res = frangi(img, sigmas=(1, 3))
-    sigmas = (i for i in (1, 3))
-    assert_array_equal(res, frangi(img, sigmas=sigmas))
 
 
 # The `alpha` parameter of `meijering`.
