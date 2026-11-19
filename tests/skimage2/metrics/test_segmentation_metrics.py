@@ -67,3 +67,21 @@ def test_are():
         adapted_rand_error(im_true, im_test, alpha=1.01)
     with pytest.raises(ValueError):
         adapted_rand_error(im_true, im_test, alpha=-0.01)
+
+
+def test_are_precomputed_table():
+    im_true = np.array([[2, 1], [1, 2]])
+    im_test = np.array([[1, 2], [3, 1]])
+    table = contingency_table(im_true, im_test, ignore_labels=[0])
+    result = adapted_rand_error(table=table)
+    expected = adapted_rand_error(im_true, im_test)
+    assert_almost_equal(result, expected)
+
+
+def test_vi_precomputed_table():
+    im_true = np.array([[2, 1], [1, 2]])
+    im_test = np.array([[1, 2], [3, 1]])
+    table = contingency_table(im_true, im_test, normalize=True)
+    result = variation_of_information(table=table)
+    expected = variation_of_information(im_true, im_test)
+    assert_almost_equal(result, expected)

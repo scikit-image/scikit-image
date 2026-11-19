@@ -1,3 +1,6 @@
+import numpy as np
+import scipy.sparse as sparse
+
 from _skimage2._shared.utils import check_shape_equality
 from ._contingency_table import contingency_table
 
@@ -76,7 +79,7 @@ def adapted_rand_error(
             normalize=False,
         )
     else:
-        p_ij = table
+        p_ij = sparse.csr_array(table) if sparse.isspmatrix(table) else table
 
     if alpha < 0.0 or alpha > 1.0:
         raise ValueError('alpha must be between 0 and 1')
@@ -84,8 +87,8 @@ def adapted_rand_error(
     # Sum of the joint distribution squared
     sum_p_ij2 = p_ij.data @ p_ij.data - p_ij.sum()
 
-    a_i = p_ij.sum(axis=1).ravel()
-    b_i = p_ij.sum(axis=0).ravel()
+    a_i = np.asarray(p_ij.sum(axis=1)).ravel()
+    b_i = np.asarray(p_ij.sum(axis=0)).ravel()
 
     # Sum of squares of the test segment sizes (this is 2x the number of pairs
     # of pixels with the same label in im_test)
