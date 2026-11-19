@@ -443,27 +443,6 @@ def test_frangi_rejects_the_wrong_polarity(width):
     a blob, where the two eigenvalues are similar, and low for a ridge.  The
     blobness factor ``exp(-R_B ** 2 / (2 * beta ** 2))`` is near 1 for a ridge
     and falls towards 0 for a blob.
-
-    In previous code, we did this::
-
-        lambda2 = np.maximum(eigvals[1], 1e-10)
-        r_b = abs(lambda1) / lambda2
-        vals *= np.exp(-r_b**2 / (2 * beta**2))   # blobness
-
-    The code did not check the sign of `lambda2` directly.  Instead it relied
-    on clipping: a wrong-signed `lambda2` becomes 1e-10, so `r_b` becomes very
-    large, and ``np.exp(-r_b**2 / (2 * beta**2))`` underflows to 0.  This
-    works when `lambda1` is not very close to zero (roughly, above 1e-9 with
-    the default ``beta=0.5``), as will usually be the case in a real image.
-
-    Now consider a positive (bright) ridge when `black_ridges=True` (the
-    default), so the image has not been negated.  The ideal bright ridge has
-    ``lambda1 = 0`` and ``lambda2 < 0``.  In the code above, ``r_b = 0 / 1e-10
-    = 0``, so the blobness factor is 1, rather than 0.  The structuredness
-    factor uses the unclipped eigenvalues, so it is also large, and the bright
-    ridge gets a high score.  The current code tests the sign of `lambda2`
-    explicitly, and gives 0 wherever the sign does not match the `black_ridges`
-    parameter.
     """
     # An ideal bright ridge.
     size = 128
