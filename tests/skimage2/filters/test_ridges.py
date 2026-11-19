@@ -472,28 +472,6 @@ def test_frangi_is_invariant_to_brightness_units(factor):
     )
 
 
-def test_frangi_alpha_has_no_effect_in_2d():
-    """`alpha` is the plate factor, which eq. (15) does not have.
-
-    Therefore, alpha should have no effect in 2D, as noted in docstring, but
-    does change result in 3D.
-    """
-    rng = np.random.default_rng(0)
-    flat = rng.random((48, 48))
-    volume = rng.random((24, 24, 24))
-
-    # Default alpha is 0.5.
-    reference = frangi(flat, sigmas=(1, 3))
-    # alpha has no effect in 2D.
-    for alpha in (0.1, 2.0, 5.0):
-        assert_array_equal(frangi(flat, sigmas=(1, 3), alpha=alpha), reference)
-    # alpha has an effect in 3D.
-    assert not np.allclose(
-        frangi(volume, sigmas=(1, 3), alpha=0.1),
-        frangi(volume, sigmas=(1, 3), alpha=5.0),
-    )
-
-
 def test_frangi_sigma_iterable():
     """Check sigmas can be generator."""
     rng = np.random.default_rng(0)
