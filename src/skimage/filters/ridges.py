@@ -82,12 +82,12 @@ def frangi(
 
     Parameters
     ----------
-    image : (M, N[, P]) ndarray
+    image : ndarray of shape (M, N[, P])
         Array with input image data.
-    sigmas : iterable of floats, optional
+    sigmas : list of float, optional
         Sigmas used as scales of filter, i.e.,
         np.arange(scale_range[0], scale_range[1], scale_step)
-    scale_range : 2-tuple of floats, optional
+    scale_range : tuple of float, optional
         The range of sigmas used.  Ignored unless `scale_step` is also given.
         Use `sigmas` instead; removed in ``skimage2``.
     scale_step : float, optional
@@ -114,10 +114,6 @@ def frangi(
         whole-image statistic, it makes the result at any pixel depend on every
         other pixel: one bright speck anywhere changes the output everywhere.
         Pass an explicit `gamma` where that matters.
-
-        .. versionchanged:: 0.20
-            The default, None, uses half of the maximum Hessian norm.
-
     black_ridges : bool, optional
         When True (the default), the filter detects black ridges; when
         False, it detects white ridges.
@@ -129,8 +125,26 @@ def frangi(
 
     Returns
     -------
-    out : (M, N[, P]) ndarray
+    out : ndarray of shape (M, N[, P])
         Filtered image (maximum of pixels across all scales).
+
+    Notes
+    -----
+    The per-sigma derivatives used in [1]_ are Lindeberg's
+    :math:`\gamma`-normalised derivatives, as in eq. (2), with :math:`\sigma`
+    the paper's scale :math:`s`.  The Hessian is a second derivative, so it
+    is scaled by :math:`\sigma^{2\gamma}`.  [1]_ sets :math:`\gamma` to 1 when
+    "no scale is preferred", so the factor is :math:`\sigma^2`.  This Lindeberg
+    :math:`\gamma` is unrelated to the `gamma` parameter.  The normalisation is
+    what lets the maximum over scales in eq. (14) of [1]_ select a structure's
+    width; ``sato`` uses the same convention.
+
+    Earlier versions of this filter were implemented by Marc Schrijver,
+    (November 2001), D. J. Kroon, University of Twente (May 2009) [2]_, and
+    D. G. Ellis (January 2017) [3]_.
+
+    .. versionchanged:: 0.20
+        The default for `gamma`, None, uses half of the maximum Hessian norm.
 
     .. versionchanged:: 0.20
         The implementation got rewritten and gives different output values wrt
@@ -149,21 +163,6 @@ def frangi(
         ``gamma=None`` is resolved from every scale rather than from
         ``sigmas[0]``, so the result no longer depends on the order of
         ``sigmas``.
-
-    Notes
-    -----
-    The per-sigma derivatives used in [1]_ are Lindeberg's
-    :math:`\gamma`-normalised derivatives, as in eq. (2), with :math:`\sigma`
-    the paper's scale :math:`s`.  The Hessian is a second derivative, so it
-    is scaled by :math:`\sigma^{2\gamma}`.  [1]_ sets :math:`\gamma` to 1 when
-    "no scale is preferred", so the factor is :math:`\sigma^2`.  This Lindeberg
-    :math:`\gamma` is unrelated to the `gamma` parameter.  The normalisation is
-    what lets the maximum over scales in eq. (14) of [1]_ select a structure's
-    width; ``sato`` uses the same convention.
-
-    Earlier versions of this filter were implemented by Marc Schrijver,
-    (November 2001), D. J. Kroon, University of Twente (May 2009) [2]_, and
-    D. G. Ellis (January 2017) [3]_.
 
     See also
     --------
@@ -221,12 +220,12 @@ def hessian(
 
     Parameters
     ----------
-    image : (M, N[, P]) ndarray
+    image : ndarray of shape (M, N[, P])
         Array with input image data.
-    sigmas : iterable of floats, optional
+    sigmas : list of float, optional
         Sigmas used as scales of filter, i.e.,
         np.arange(scale_range[0], scale_range[1], scale_step)
-    scale_range : 2-tuple of floats, optional
+    scale_range : tuple of float, optional
         The range of sigmas used.  Ignored unless `scale_step` is also given.
         Use `sigmas` instead; removed in ``skimage2``.
     scale_step : float, optional
@@ -252,7 +251,7 @@ def hessian(
 
     Returns
     -------
-    out : (M, N[, P]) ndarray
+    out : ndarray of shape (M, N[, P])
         Filtered image (maximum of pixels across all scales).
 
     Notes
