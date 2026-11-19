@@ -208,7 +208,8 @@ def _scaled_hessian_frob(H_elems, sigma):
     S : ndarray
         ``sigma ** 2`` times the Frobenius norm of the Hessian at each pixel.
     """
-    rows, cols = np.triu_indices(H_elems[0].ndim)
+    D = H_elems[0].ndim
+    rows, cols = np.triu_indices(D)
     weight = 1 + (rows != cols)  # Off-diagonal elements count twice.
     norm_sq = np.zeros_like(H_elems[0])
     for H_elem, w in zip(H_elems, weight):
