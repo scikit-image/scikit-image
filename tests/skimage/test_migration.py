@@ -263,14 +263,14 @@ def test_skimage2migration_no_warning_is_identity_decorator():
 
 
 def test_skimage2_becomes_skimage():
-    # At least for now, skimage.filters.frangi is defined in _skimage2, but it
-    # should be detected as being in skimage, due to public skimage API.
-    from skimage.filters import frangi
+    # At least for now, skimage.filters.meijering is defined in _skimage2, but
+    # it should be detected as being in skimage, due to public skimage API.
+    from skimage.filters import meijering
 
-    assert "_skimage2" in frangi.__module__
-    assert _public_skimage_api_names(frangi) == [
-        'skimage.filters.frangi',
-        'skimage.filters.ridges.frangi',
+    assert "_skimage2" in meijering.__module__
+    assert _public_skimage_api_names(meijering) == [
+        'skimage.filters.meijering',
+        'skimage.filters.ridges.meijering',
     ]
 
 

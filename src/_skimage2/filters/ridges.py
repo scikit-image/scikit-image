@@ -8,8 +8,6 @@ image intensities to detect tube-like structures where the intensity changes
 perpendicular but not along the structure.
 """
 
-from warnings import warn
-
 import numpy as np
 from scipy import linalg
 
@@ -293,8 +291,6 @@ def _frangi_shape_norm(image, sigma, alpha, beta, mode, cval):
 def frangi(
     image,
     sigmas=range(1, 10, 2),
-    scale_range=None,
-    scale_step=None,
     alpha=0.5,
     beta=0.5,
     gamma=None,
@@ -318,12 +314,7 @@ def frangi(
     image : (M, N[, P]) ndarray
         Array with input image data.
     sigmas : iterable of floats, optional
-        Sigmas used as scales of filter, i.e.,
-        np.arange(scale_range[0], scale_range[1], scale_step)
-    scale_range : 2-tuple of floats, optional
-        The range of sigmas used.
-    scale_step : float, optional
-        Step size between sigmas.
+        Sigmas used as scales of filter.
     alpha : float, optional
         Frangi correction constant that adjusts the filter's sensitivity to
         deviation from a plate-like structure.  It has no effect on 2-D images:
@@ -372,7 +363,7 @@ def frangi(
     .. versionchanged:: 0.28
         The Hessian is again normalised by ``sigma ** 2``, as it was before
         version 0.20 and as ``sato`` has been throughout.  Without it the
-        response of a ridge falls with ``sigma``, so the smallest scale always
+        response of a ridge is lower with higher ``sigma``, so the smallest scale always
         won and wide structures scored far below narrow ones.  Output values
         change on every image.
 
@@ -412,15 +403,7 @@ def frangi(
     .. [2] Kroon, D. J.: Hessian based Frangi vesselness filter.
     .. [3] Ellis, D. G.: https://github.com/ellisdg/frangi3d/tree/master/frangi
     """
-    if scale_range is not None and scale_step is not None:
-        warn(
-            'Use keyword parameter `sigmas` instead of `scale_range` and '
-            '`scale_range` which will be removed in version 0.17.',
-            stacklevel=2,
-        )
-        sigmas = np.arange(scale_range[0], scale_range[1], scale_step)
-    else:  # Pull values from potential iterator.
-        sigmas = list(sigmas)
+    sigmas = list(sigmas)  # Pull values from potential iterator.
 
     check_nD(image, [2, 3])  # Check image dimensions.
     image = image.astype(_supported_float_type(image.dtype), copy=False)
@@ -452,8 +435,6 @@ def frangi(
 def hessian(
     image,
     sigmas=range(1, 10, 2),
-    scale_range=None,
-    scale_step=None,
     alpha=0.5,
     beta=0.5,
     gamma=15,
@@ -476,12 +457,10 @@ def hessian(
     image : (M, N[, P]) ndarray
         Array with input image data.
     sigmas : iterable of floats, optional
-        Sigmas used as scales of filter, i.e.,
-        np.arange(scale_range[0], scale_range[1], scale_step)
-    scale_range : 2-tuple of floats, optional
-        The range of sigmas used.
-    scale_step : float, optional
-        Step size between sigmas.
+        Sigmas used as scales of filter.
+    alpha : float, optional
+        Frangi correction constant that adjusts the filter's sensitivity to
+        deviation from a plate-like structure.
     beta : float, optional
         Frangi correction constant that adjusts the filter's
         sensitivity to deviation from a blob-like structure.
@@ -524,8 +503,6 @@ def hessian(
     filtered = frangi(
         image,
         sigmas=sigmas,
-        scale_range=scale_range,
-        scale_step=scale_step,
         alpha=alpha,
         beta=beta,
         gamma=gamma,

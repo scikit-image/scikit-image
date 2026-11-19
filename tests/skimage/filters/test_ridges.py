@@ -38,6 +38,41 @@ def test_2d_null_matrix():
     assert_equal(hessian(a_white, black_ridges=True, mode='reflect'), ones)
 
 
+def test_scale_range_matches_sigmas():
+    """skimage1 keeps scale_range/scale_step; they match explicit sigmas."""
+    image = img_as_float(crop(camera(), ((200, 200), (200, 200))))
+    scale_range = (1.0, 5.0)
+    scale_step = 2.0
+    sigmas = np.arange(scale_range[0], scale_range[1], scale_step)
+    other_sigmas = [2.0, 4.0]
+
+    for func in frangi, hessian:
+        sigma_result = func(image, sigmas=sigmas)
+        assert_allclose(
+            func(image, scale_range=scale_range, scale_step=scale_step), sigma_result
+        )
+        # Both scale_range, scale_step override sigmas.
+        assert_allclose(
+            func(
+                image,
+                sigmas=other_sigmas,
+                scale_range=scale_range,
+                scale_step=scale_step,
+            ),
+            sigma_result,
+        )
+        # If either unset, prefer sigmas.
+        other_result = func(image, sigmas=other_sigmas)
+        assert_allclose(
+            func(image, sigmas=other_sigmas, scale_range=None, scale_step=scale_step),
+            other_result,
+        )
+        assert_allclose(
+            func(image, sigmas=other_sigmas, scale_range=scale_range, scale_step=None),
+            other_result,
+        )
+
+
 def test_3d_null_matrix():
     # Note: last axis intentionally not size 3 to avoid 2D+RGB autodetection
     #       warning from an internal call to `skimage.filters.gaussian`.
