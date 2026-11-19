@@ -67,9 +67,8 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      # VS 2026 MSVC STL needs Clang 22+; runner images still ship LLVM 20.
       - name: Install LLVM
-        uses: ./.github/windows_llvm_steps
+        uses: ./.github/win_install_llvm
       # Wheel repair is disabled for Windows in pyproject.toml; see the comment
       # on repair-wheel-command under [tool.cibuildwheel.windows].
       - uses: pypa/cibuildwheel@f9b966cfadf4109556cadc5bb39ddb72d0ce664e # v4.3.5
