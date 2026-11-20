@@ -80,7 +80,7 @@ cdef inline DTYPE_INT64_t find_root(DTYPE_INT64_t[::1] parent,
     return parent[index]
 
 
-cdef void canonize(np_real_numeric[::1] image, DTYPE_INT64_t[::1] parent,
+cdef void canonize(const np_real_numeric[::1] image, DTYPE_INT64_t[::1] parent,
                    DTYPE_INT64_t[::1] sorted_indices) noexcept:
     """Generate a max-tree for which every node's parent is a canonical node.
 
@@ -109,9 +109,9 @@ cdef void canonize(np_real_numeric[::1] image, DTYPE_INT64_t[::1] parent,
 
 
 cdef np.ndarray[DTYPE_INT32_t, ndim = 2] unravel_offsets(
-        DTYPE_INT32_t[::1] offsets,
-        DTYPE_INT32_t[::1] center_point,
-        DTYPE_INT32_t[::1] shape):
+        const DTYPE_INT32_t[::1] offsets,
+        const DTYPE_INT32_t[::1] center_point,
+        const DTYPE_INT32_t[::1] shape):
     """Unravel a list of offset indices.
 
     These offsets can be negative. The function generates an array of shape
@@ -142,8 +142,8 @@ cdef np.ndarray[DTYPE_INT32_t, ndim = 2] unravel_offsets(
 
 
 cdef DTYPE_UINT8_t _is_valid_neighbor(DTYPE_INT64_t index,
-                                      DTYPE_INT32_t[::1] coordinates,
-                                      DTYPE_INT32_t[::1] shape):
+                                      const DTYPE_INT32_t[::1] coordinates,
+                                      const DTYPE_INT32_t[::1] shape):
     """Check whether a neighbor of a given pixel is inside the image.
 
     Parameters
@@ -180,7 +180,7 @@ cdef DTYPE_UINT8_t _is_valid_neighbor(DTYPE_INT64_t index,
     return 1
 
 
-cpdef np.ndarray[DTYPE_FLOAT64_t, ndim = 1] _compute_area(np_real_numeric[::1] image,
+cpdef np.ndarray[DTYPE_FLOAT64_t, ndim = 1] _compute_area(const np_real_numeric[::1] image,
             DTYPE_INT64_t[::1] parent,
             DTYPE_INT64_t[::1] sorted_indices):
     """Compute the area of all max-tree components.
@@ -203,8 +203,8 @@ cpdef np.ndarray[DTYPE_FLOAT64_t, ndim = 1] _compute_area(np_real_numeric[::1] i
 
 
 cpdef np.ndarray[DTYPE_FLOAT64_t, ndim = 1] _compute_extension(
-            np_real_numeric[::1] image,
-            DTYPE_INT32_t[::1] shape,
+            const np_real_numeric[::1] image,
+            const DTYPE_INT32_t[::1] shape,
             DTYPE_INT64_t[::1] parent,
             DTYPE_INT64_t[::1] sorted_indices):
     """Compute the bounding box extension of all max-tree components.
@@ -239,7 +239,7 @@ cpdef np.ndarray[DTYPE_FLOAT64_t, ndim = 1] _compute_extension(
 # representation this is interesting if the max-tree representation has
 # already been calculated for other reasons. Otherwise, it is not the most
 # efficient method. If the parameter label is True, the minima are labeled.
-cpdef void _max_tree_local_maxima(np_real_numeric[::1] image,
+cpdef void _max_tree_local_maxima(const np_real_numeric[::1] image,
                                   DTYPE_UINT64_t[::1] output,
                                   DTYPE_INT64_t[::1] parent,
                                   DTYPE_INT64_t[::1] sorted_indices
@@ -302,7 +302,7 @@ cpdef void _max_tree_local_maxima(np_real_numeric[::1] image,
 
 
 # direct filter (criteria based filter)
-cpdef void _direct_filter(np_real_numeric[::1] image,
+cpdef void _direct_filter(const np_real_numeric[::1] image,
                           np_real_numeric[::1] output,
                           DTYPE_INT64_t[::1] parent,
                           DTYPE_INT64_t[::1] sorted_indices,
@@ -378,11 +378,11 @@ cpdef void _direct_filter(np_real_numeric[::1] image,
 
 # _max_tree is the main function. It allows to construct a max
 # tree representation of the image.
-cpdef void _max_tree(np_real_numeric[::1] image,
-                     DTYPE_BOOL_t[::1] mask,
-                     DTYPE_INT32_t[::1] structure,
-                     DTYPE_INT32_t[::1] offset,
-                     DTYPE_INT32_t[::1] shape,
+cpdef void _max_tree(const np_real_numeric[::1] image,
+                     const DTYPE_BOOL_t[::1] mask,
+                     const DTYPE_INT32_t[::1] structure,
+                     const DTYPE_INT32_t[::1] offset,
+                     const DTYPE_INT32_t[::1] shape,
                      DTYPE_INT64_t[::1] parent,
                      DTYPE_INT64_t[::1] sorted_indices
                      ):

@@ -12,17 +12,17 @@ from numpy.random cimport bitgen_t
 
 cdef extern from "unwrap_3d_ljmu.h":
     int unwrap3D(
-        cnp.float64_t *wrapped_volume,
+        const cnp.float64_t *wrapped_volume,
         cnp.float64_t *unwrapped_volume,
-        unsigned char *input_mask,
+        const unsigned char *input_mask,
         intptr_t n_k, intptr_t n_j, intptr_t n_i,
         int wrap_around_k, int wrap_around_j, int wrap_around_i,
         bitgen_t* bitgen_state
     ) noexcept nogil
 
 
-def unwrap_3d(cnp.float64_t[:, :, ::1] image,
-              unsigned char[:, :, ::1] mask,
+def unwrap_3d(const cnp.float64_t[:, :, ::1] image,
+              const unsigned char[:, :, ::1] mask,
               cnp.float64_t[:, :, ::1] unwrapped_image,
               wrap_around,
               rng):

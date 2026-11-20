@@ -1,5 +1,7 @@
 import cython
 
+cimport numpy as cnp
+
 from _skimage2._shared.fused_numerics cimport np_floats
 
 
@@ -14,9 +16,9 @@ cpdef Py_ssize_t _build_matrix_inner(
     # input arrays
     const Py_ssize_t[::1] center_i,
     const Py_ssize_t[::1] raveled_offsets,
-    np_floats[::1] coef_vals,
-    char[::1] mask_flat,
-    np_floats[:, ::1] out_flat,
+    const np_floats[::1] coef_vals,
+    const cnp.npy_bool[::1] mask_flat,
+    const np_floats[:, ::1] out_flat,
     # output arrays
     Py_ssize_t[::1] row_idx_known,
     np_floats[:, ::1] data_known,

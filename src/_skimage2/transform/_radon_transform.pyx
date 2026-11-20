@@ -11,7 +11,7 @@ from _skimage2._shared.fused_numerics cimport np_floats
 
 cnp.import_array()
 
-cdef bilinear_ray_sum(np_floats[:, :] image, np_floats theta,
+cdef bilinear_ray_sum(const np_floats[:, :] image, np_floats theta,
                       np_floats ray_position):
     """
     Compute the projection of an image along a ray.
@@ -89,7 +89,7 @@ cdef bilinear_ray_sum(np_floats[:, :] image, np_floats theta,
     return ray_sum, weight_norm
 
 
-cdef bilinear_ray_update(np_floats[:, :] image,
+cdef bilinear_ray_update(const np_floats[:, :] image,
                          np_floats[:, :] image_update,
                          np_floats theta, np_floats ray_position,
                          np_floats projected_value):
@@ -173,9 +173,9 @@ cdef bilinear_ray_update(np_floats[:, :] image,
 
 
 @cython.boundscheck(True)
-def sart_projection_update(np_floats[:, :] image not None,
+def sart_projection_update(const np_floats[:, :] image not None,
                            np_floats theta,
-                           np_floats[:] projection not None,
+                           const np_floats[:] projection not None,
                            np_floats projection_shift=0.):
     """ Compute update to a reconstruction estimate from a single projection.
 

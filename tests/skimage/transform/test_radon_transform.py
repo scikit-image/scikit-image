@@ -533,3 +533,18 @@ def test_iradon_rampfilter_bias_circular_phantom():
     tol = 5e-5
     roi_err = np.abs(np.mean(error))
     assert roi_err < tol
+
+
+def test_iradon_sart_read_only():
+    """Read-only sinogram must be accepted and match the writable result.
+
+    Regression test for gh-8423.
+    """
+    image = PHANTOM
+    theta = np.linspace(0.0, 180.0, image.shape[0], endpoint=False)
+    sinogram = radon(image, theta, circle=True)
+    expected = iradon_sart(sinogram, theta)
+    sinogram_ro = sinogram.copy()
+    sinogram_ro.setflags(write=False)
+    result = iradon_sart(sinogram_ro, theta)
+    np.testing.assert_allclose(result, expected, rtol=1e-12, atol=1e-12)
