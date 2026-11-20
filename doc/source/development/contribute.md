@@ -41,8 +41,17 @@ can be contributed to scikit-image.
      ```
 
    :::{note}
-   We use `git@github.com` below; if you don't have SSH keys setup, use
-   `https://github.com` instead.
+   We use `git@github.com` (SSH) in the examples below. If you don't have SSH keys set up or your network blocks SSH, use HTTPS instead:
+
+   ```sh
+   git clone --origin upstream https://github.com/scikit-image/scikit-image.git
+   ```
+
+   And when adding your fork remote:
+
+   ```sh
+   git remote add codemonkey https://github.com/codemonkey/scikit-image.git
+   ```
    :::
 
    - Change into the root directory of the cloned repository:

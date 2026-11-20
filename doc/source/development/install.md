@@ -8,7 +8,7 @@ Your system needs a:
   [pyproject.toml](https://github.com/scikit-image/scikit-image/blob/main/pyproject.toml#L14)).
 
 First, follow the [development process](contribute.md#development-process)
-to fork and clone the repository and configure its remotes.
+to fork and clone the repository and configure its remotes (via SSH or HTTPS).
 All commands below are run from within the cloned `scikit-image` directory.
 
 (build-env-setup)=
