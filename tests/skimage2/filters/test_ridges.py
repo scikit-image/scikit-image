@@ -13,8 +13,8 @@ from _skimage2._shared.utils import _supported_float_type
 from _skimage2.color import rgb2gray
 from _skimage2.data import camera, retina
 from _skimage2.feature import hessian_matrix, hessian_matrix_eigvals
-from _skimage2.filters import frangi, frangi_hessian_norm, hessian, meijering, sato
-from _skimage2.filters.ridges import _frangi_norm, _scaled_hessian_frob
+from _skimage2.filters import frangi, frangi_hessian_norms, hessian, meijering, sato
+from _skimage2.filters.ridges import _scaled_hessian_frob
 from _skimage2.util import crop, invert
 
 
@@ -336,7 +336,8 @@ def test_scaled_hessian_frob_matches_eigenvalue_form(shape, sigma):
 
 def _get_default_gamma(image, sigmas, mode='reflect', cval=0):
     """Half largest Hessian norm over `sigmas`: the value `gamma=None` gives."""
-    peaks = frangi_hessian_norm(image, sigmas, mode=mode, cval=cval)
+    norms = frangi_hessian_norms(image, sigmas, mode=mode, cval=cval)
+    peaks = [np.max(norm) for norm in norms]
     gamma = max(peaks) / 2 if peaks else 1.0
     return 1.0 if gamma == 0 else gamma
 
@@ -346,51 +347,24 @@ FRANGI_CENTRES = (28, 75, 122, 172)
 FRANGI_SIGMAS = (1, 2, 3, 4, 6, 8, 10, 12)
 
 
-def test_frangi_hessian_norm_default_is_per_sigma_max():
-    """Default summary matches the per-sigma max."""
-    image = img_as_float(camera())[::8, ::8]
-    sigmas = (1, 2, 3)
-    expected = [_frangi_norm(image, sigma, 'reflect', 0).max() for sigma in sigmas]
-    assert_allclose(frangi_hessian_norm(image, sigmas, 'reflect', 0), expected)
-
-
-def test_frangi_hessian_norm_summary_none_returns_images():
-    image = img_as_float(camera())[::8, ::8]
-    sigmas = (1.5, 2.5)
-    maps = frangi_hessian_norm(image, sigmas, 'reflect', 0, summary_func=None)
-    assert len(maps) == len(sigmas)
-    for sigma, S in zip(sigmas, maps):
-        assert S.shape == image.shape
-        assert_allclose(S, _frangi_norm(image, sigma, 'reflect', 0))
-
-
-def test_frangi_hessian_norm_custom_summary_func():
-    image = img_as_float(camera())[::8, ::8]
-    sigmas = (1, 3)
-    expected = [np.median(_frangi_norm(image, sigma, 'reflect', 0)) for sigma in sigmas]
-    assert_allclose(
-        frangi_hessian_norm(image, sigmas, 'reflect', 0, summary_func=np.median),
-        expected,
-    )
-
-
 def test_frangi_hessian_norm_empty_sigmas():
     image = np.zeros((8, 8))
-    assert frangi_hessian_norm(image, [], 'reflect', 0) == []
+    assert frangi_hessian_norms(image, [], 'reflect', 0) == []
 
 
 def test_frangi_hessian_norm_rejects_wrong_ndim():
     with pytest.raises(ValueError):
-        frangi_hessian_norm(np.zeros(8), [1], 'reflect', 0)
+        frangi_hessian_norms(np.zeros(8), [1], 'reflect', 0)
     with pytest.raises(ValueError):
-        frangi_hessian_norm(np.zeros((4, 4, 4, 4)), [1], 'reflect', 0)
+        frangi_hessian_norms(np.zeros((4, 4, 4, 4)), [1], 'reflect', 0)
 
 
 def test_frangi_default_gamma_matches_hessian_norm():
     image = img_as_float(camera())[::8, ::8]
     sigmas = (1, 3, 5)
     gamma = _get_default_gamma(image, sigmas)
-    peaks = frangi_hessian_norm(image, sigmas, 'reflect', 0)
+    norms = frangi_hessian_norms(image, sigmas, 'reflect', 0)
+    peaks = [np.max(norm) for norm in norms]
     assert_allclose(gamma, max(peaks) / 2, rtol=1e-12)
     assert_allclose(
         frangi(image, sigmas=sigmas, gamma=None),
@@ -401,8 +375,9 @@ def test_frangi_default_gamma_matches_hessian_norm():
 def test_frangi_flat_image_default_gamma():
     """All-zero input must not divide by zero when resolving ``gamma=None``."""
     image = np.zeros((16, 16))
-    peaks = frangi_hessian_norm(image, (1, 3), 'reflect', 0)
-    assert peaks == [0.0, 0.0]
+    norms = frangi_hessian_norms(image, (1, 3), 'reflect', 0)
+    assert len(norms) == 2
+    assert np.sum(norms) == 0
     assert _get_default_gamma(image, (1, 3)) == 1.0
     out = frangi(image, (1, 3), gamma=None)
     assert_array_equal(out, np.zeros_like(image))
@@ -416,13 +391,13 @@ def test_frangi_empty_sigmas_default_gamma():
     assert_array_equal(frangi(image, sigmas=[], gamma=None), np.zeros_like(image))
 
 
-def test_frangi_hessian_norm_forwards_mode_cval():
+def test_frangi_hessian_norms_forwards_mode_cval():
     """Border mode and cval must reach the Hessian, changing edge structure."""
     image = np.zeros((32, 32))
     image[8:24, 8:24] = 1.0
     sigmas = (3,)
-    reflect = frangi_hessian_norm(image, sigmas, 'reflect', 0, summary_func=None)[0]
-    constant = frangi_hessian_norm(image, sigmas, 'constant', 1, summary_func=None)[0]
+    reflect = frangi_hessian_norms(image, sigmas, 'reflect', 0)[0]
+    constant = frangi_hessian_norms(image, sigmas, 'constant', 1)[0]
     assert not np.allclose(reflect, constant)
 
 

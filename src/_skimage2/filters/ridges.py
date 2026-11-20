@@ -215,25 +215,6 @@ def _scaled_hessian_frob(H_elems, sigma):
     return float(sigma) ** 2 * np.sqrt(norm_sq)
 
 
-def _frangi_norm(image, sigma, mode, cval):
-    """Sigma-scaled Frobenius norm `S` of eq. (12) in Frangi et al. (1998).
-
-    This calculates `S` (the "second order structureness") for one scale
-    `sigma` of the image `image`.
-
-    Unlike ``_frangi_shape_norm``, this needs no eigenvalue decomposition, so
-    it is somewhat quicker as a method to calculate `S` during a first pass
-    through sigmas in order to calculate default gamma.
-    """
-    # Avoid circular import.
-    from ..feature.corner import hessian_matrix
-
-    H_elems = hessian_matrix(
-        image, sigma, mode=mode, cval=cval, use_gaussian_derivatives=True
-    )
-    return _scaled_hessian_frob(H_elems, sigma)
-
-
 def _frangi_shape_norm(image, sigma, alpha, beta, mode, cval):
     """One scale of Frangi's vesselness, less the structureness factor.
 
@@ -281,33 +262,31 @@ def _frangi_shape_norm(image, sigma, alpha, beta, mode, cval):
         shape[wanted] = plateness * blobness
     # S (below) can also be calculated - as in the paper, eq. (12) - with the
     # root summed squared eigenvalues.  We choose to calculate on the Hessian
-    # directly for compatibility with _frangi_norm above, used to calculate
-    # default gamma.  Notice _scaled_hessian_frob scales by sigma ** 2,
-    # giving matched weights for features at different sigma levels.
+    # directly for compatibility with frangi_hessian_norms below, used to
+    # calculate default gamma.  Notice _scaled_hessian_frob scales by sigma **
+    # 2, giving matched weights for features at different sigma levels.
     S = _scaled_hessian_frob(H_elems, sigma)
     return shape, S
 
 
-def frangi_hessian_norm(
+def frangi_hessian_norms(
     image,
     sigmas,
     mode,
     cval,
-    summary_func=np.max,
 ):
     """Sigma-scaled Hessian Frobenius norms for `image` at each of `sigmas`.
 
     Returns Frangi's "second order structureness" :math:`S` of eq. (12) in
-    Frangi et al. (1998): the Frobenius norm of the Hessian, scaled by
-    ``sigma ** 2``, for each scale in `sigmas`.
+    Frangi et al. (1998): the Frobenius norm of the Hessian, scaled by ``sigma
+    ** 2``, for each scale in `sigmas`.
 
-    Use this to estimate a suitable ``gamma`` for :func:`frangi`.  The default
-    ``gamma`` for :func:`frangi` is half the largest value among the results of
-    this function with matching `image`, `sigmas`, `mode` and `cval` and
-    ``summary_func=np.max`` (the default), with empty `sigmas` or an all-zero
-    :math:`S` resolved to ``1``.  Experiment with other summary functions, or
-    pass ``summary_func=None`` to get the per-scale norm images for more
-    detailed calculations.
+    You can use this to estimate a suitable ``gamma`` for :func:`frangi`.  The
+    default ``gamma`` for :func:`frangi` is given by::
+
+        norms = frangi_hessian_norms(image, sigmas, mode, cval)
+        peaks = [np.max(norm) for norm in norms]
+        gamma = np.max(peaks) / 2
 
     When estimating ``gamma`` for :func:`frangi` with ``black_ridges=False``,
     pass the negated image (``-image``), as :func:`frangi` does before
@@ -324,25 +303,25 @@ def frangi_hessian_norm(
     cval : float
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
-    summary_func : callable or None, optional
-        Applied to each per-sigma norm image.  The default, ``np.max``,
-        matches the statistic used when :func:`frangi` resolves ``gamma=None``.
-        Pass ``None`` to return the images themselves.
 
     Returns
     -------
     s_vals : list
-        A list with one result for each value in `sigmas`.  The elements are
-        either (``summary_func=None``) the norm images of shape
-        ``image.shape``, or (``summary_func is not None``) the result of
-        `summary_func` as applied to those images.
+        A list with one element for each value in `sigmas`.  The elements are
+        the norm images, with shape ``image.shape``.
     """
+    # Avoid circular import.
+    from ..feature.corner import hessian_matrix
+
     check_nD(image, [2, 3])
     # Calculate norms without eigenvalue decomposition.
-    s_vals = [_frangi_norm(image, sigma, mode, cval) for sigma in sigmas]
-    if summary_func is None:
-        return s_vals
-    return [summary_func(S) for S in s_vals]
+    s_vals = []
+    for sigma in sigmas:
+        H_elems = hessian_matrix(
+            image, sigma, mode=mode, cval=cval, use_gaussian_derivatives=True
+        )
+        s_vals.append(_scaled_hessian_frob(H_elems, sigma))
+    return s_vals
 
 
 def frangi(
@@ -393,8 +372,8 @@ def frangi(
         whole-image statistic, it makes the result at any pixel depend on every
         other pixel: one bright speck anywhere changes the output everywhere.
         Pass an explicit `gamma` where that matters.  See
-        :func:`frangi_hessian_norm` for a function to estimate your own
-        value for `gamma`.
+        :func:`frangi_hessian_norms` for a function to estimate your own value
+        for `gamma`.
 
         .. versionchanged:: 0.20
             The default, None, uses half of the maximum Hessian norm.
@@ -476,7 +455,8 @@ def frangi(
     # `S` is the sigma-scaled Frobenius norm, with one value per pixel / voxel.
     if gamma is None:
         # Calculate norms without eigenvalue decomposition.
-        peaks = frangi_hessian_norm(image, sigmas, mode=mode, cval=cval)
+        norms = frangi_hessian_norms(image, sigmas, mode=mode, cval=cval)
+        peaks = [np.max(norm) for norm in norms]
         # Half the largest Hessian norm, over every scale given.
         gamma = max(peaks) / 2 if peaks else 1.0
         # If S == 0 everywhere, gamma doesn't matter.
