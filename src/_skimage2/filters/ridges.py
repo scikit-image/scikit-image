@@ -288,25 +288,30 @@ def _frangi_shape_norm(image, sigma, alpha, beta, mode, cval):
     return shape, S
 
 
-def frangi_structureness(
+def frangi_hessian_norm(
     image,
     sigmas,
     mode,
     cval,
     summary_func=np.max,
 ):
-    """Calculate Frangi structureness metric for `image` at `sigmas`.
+    """Sigma-scaled Hessian Frobenius norms for `image` at each of `sigmas`.
 
-    The Frangi structureness metric is the sigma-scaled Frobenius norm of the
-    Hessian at the given sigma.
+    Returns Frangi's "second order structureness" :math:`S` of eq. (12) in
+    Frangi et al. (1998): the Frobenius norm of the Hessian, scaled by
+    ``sigma ** 2``, for each scale in `sigmas`.
 
-    You can use this function to estimate a suitable value for the ``gamma``
-    parameter of :func:`frangi`.  The default ``gamma`` for :func:`frangi` is
-    the result of calling this function with matching `image`, `sigmas`,
-    `mode` and `cval`, ``summary_func=np.max`` (the default), and returning
-    ``np.max(s_vals) / 2``.  Experiment with different summary functions to
-    find a suitable `gamma`, or return the structureness images themselves
-    using ``summary_func=None``, for more detailed calculations.
+    Use this to estimate a suitable ``gamma`` for :func:`frangi`.  The default
+    ``gamma`` for :func:`frangi` is half the largest value among the results of
+    this function with matching `image`, `sigmas`, `mode` and `cval` and
+    ``summary_func=np.max`` (the default), with empty `sigmas` or an all-zero
+    :math:`S` resolved to ``1``.  Experiment with other summary functions, or
+    pass ``summary_func=None`` to get the per-scale norm images for more
+    detailed calculations.
+
+    When estimating ``gamma`` for :func:`frangi` with ``black_ridges=False``,
+    pass the negated image (``-image``), as :func:`frangi` does before
+    resolving ``gamma=None``.
 
     Parameters
     ----------
@@ -320,7 +325,7 @@ def frangi_structureness(
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
     summary_func : callable or None, optional
-        Applied to each per-sigma structureness image.  The default, ``np.max``,
+        Applied to each per-sigma norm image.  The default, ``np.max``,
         matches the statistic used when :func:`frangi` resolves ``gamma=None``.
         Pass ``None`` to return the images themselves.
 
@@ -328,10 +333,11 @@ def frangi_structureness(
     -------
     s_vals : list
         A list with one result for each value in `sigmas`.  The elements are
-        either (``summary_func=None``) the structureness images of shape
+        either (``summary_func=None``) the norm images of shape
         ``image.shape``, or (``summary_func is not None``) the result of
         `summary_func` as applied to those images.
     """
+    check_nD(image, [2, 3])
     # Calculate norms without eigenvalue decomposition.
     s_vals = [_frangi_norm(image, sigma, mode, cval) for sigma in sigmas]
     if summary_func is None:
@@ -387,7 +393,7 @@ def frangi(
         whole-image statistic, it makes the result at any pixel depend on every
         other pixel: one bright speck anywhere changes the output everywhere.
         Pass an explicit `gamma` where that matters.  See
-        :func:`frangi_structureness` for a function to estimate your own
+        :func:`frangi_hessian_norm` for a function to estimate your own
         value for `gamma`.
 
         .. versionchanged:: 0.20
@@ -442,6 +448,7 @@ def frangi(
 
     See also
     --------
+    frangi_hessian_norm
     meijering
     sato
     hessian
@@ -469,7 +476,7 @@ def frangi(
     # `S` is the sigma-scaled Frobenius norm, with one value per pixel / voxel.
     if gamma is None:
         # Calculate norms without eigenvalue decomposition.
-        peaks = frangi_structureness(image, sigmas, mode=mode, cval=cval)
+        peaks = frangi_hessian_norm(image, sigmas, mode=mode, cval=cval)
         # Half the largest Hessian norm, over every scale given.
         gamma = max(peaks) / 2 if peaks else 1.0
         # If S == 0 everywhere, gamma doesn't matter.
