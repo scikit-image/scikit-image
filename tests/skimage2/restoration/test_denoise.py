@@ -1221,3 +1221,38 @@ def test_cycle_spinner_deprecate_num_workers(num_workers):
             num_workers=num_workers,
         )
     assert_stacklevel(record, offset=-8)
+
+
+def test_denoise_tv_bregman_read_only():
+    """Read-only input must be accepted and match the writable result.
+
+    Regression test for gh-8423.
+    """
+    rng = np.random.RandomState(0)
+    img = rng.rand(32, 32)
+    img_ro = img.copy()
+    img_ro.setflags(write=False)
+    assert_array_equal(
+        restoration.denoise_tv_bregman(img, weight=10),
+        restoration.denoise_tv_bregman(img_ro, weight=10),
+    )
+
+
+def test_denoise_bilateral_read_only():
+    """Read-only input must be accepted and match the writable result.
+
+    Regression test for gh-8423. The default ``sigma_color=None`` path is
+    included since it computes the image standard deviation in Cython.
+    """
+    rng = np.random.RandomState(0)
+    img = rng.rand(32, 32)
+    img_ro = img.copy()
+    img_ro.setflags(write=False)
+    assert_array_equal(
+        restoration.denoise_bilateral(img, sigma_spatial=3),
+        restoration.denoise_bilateral(img_ro, sigma_spatial=3),
+    )
+    assert_array_equal(
+        restoration.denoise_bilateral(img, sigma_color=0.1, sigma_spatial=3),
+        restoration.denoise_bilateral(img_ro, sigma_color=0.1, sigma_spatial=3),
+    )

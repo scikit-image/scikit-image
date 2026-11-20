@@ -128,6 +128,9 @@ def unwrap_phase(image, wrap_around=False, rng=None):
 
     image_not_masked = np.asarray(np.ma.getdata(image), dtype=np.float64, order='C')
     if any_nans:
+        # `np.asarray` may return the caller's (read-only) array unchanged;
+        # copy before zeroing the NaN entries so read-only input is accepted.
+        image_not_masked = image_not_masked.copy()
         image_not_masked[nan_mask] = 0
     image_unwrapped = np.empty_like(image, dtype=np.float64, order='C', subok=False)
 

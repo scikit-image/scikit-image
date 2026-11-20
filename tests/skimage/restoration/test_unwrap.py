@@ -295,3 +295,32 @@ def test_unwrap_3d_all_masked():
     assert_(np.ma.isMaskedArray(unwrap))
     assert_(np.sum(unwrap.mask) == 999)  # all but one masked
     assert_(unwrap[0, 0, 0] == 0)
+
+
+def test_unwrap_phase_read_only():
+    """Read-only input must be accepted and match the writable result.
+
+    Regression test for gh-8423.
+    """
+    rng = np.random.default_rng(0)
+    for ndim, shape in ((1, (64,)), (2, (16, 24)), (3, (8, 12, 16))):
+        image = rng.uniform(-np.pi, np.pi, size=shape)
+        image_ro = image.copy()
+        image_ro.setflags(write=False)
+        expected = unwrap_phase(image, rng=0)
+        result = unwrap_phase(image_ro, rng=0)
+        np.testing.assert_array_equal(result, expected)
+
+
+def test_unwrap_phase_read_only_nan():
+    """Read-only input with NaNs must be accepted (gh-8423)."""
+    x, y = np.ogrid[:8, :16]
+    image = 2 * np.pi * (x * 0.2 + y * 0.1)
+    image_wrapped = np.angle(np.exp(1j * image))
+    image_wrapped_nans = image_wrapped.copy()
+    image_wrapped_nans[4:6, 4:8] = np.nan
+    image_ro = image_wrapped_nans.copy()
+    image_ro.setflags(write=False)
+    expected = unwrap_phase(image_wrapped_nans, rng=0)
+    result = unwrap_phase(image_ro, rng=0)
+    np.testing.assert_equal(result, expected)

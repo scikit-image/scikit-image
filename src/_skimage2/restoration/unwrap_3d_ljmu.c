@@ -38,13 +38,13 @@ typedef struct {
 // initialize voxels. See the explanation of the voxel class in header above.
 // Initially every voxel is assumed to belong to a group consisting of only
 // itself.
-void initialiseVOXELs(double *WrappedVolume, unsigned char *input_mask,
+void initialiseVOXELs(const double *WrappedVolume, const unsigned char *input_mask,
                       unsigned char *extended_mask, VOXELM *voxel,
                       intptr_t n_k, intptr_t n_j, intptr_t n_i,
                       bitgen_t* bitgen_state) {
   VOXELM *voxel_pointer = voxel;
-  double *wrapped_volume_pointer = WrappedVolume;
-  unsigned char *input_mask_pointer = input_mask;
+  const double *wrapped_volume_pointer = WrappedVolume;
+  const unsigned char *input_mask_pointer = input_mask;
   unsigned char *extended_mask_pointer = extended_mask;
   intptr_t n, i, j;
 
@@ -74,7 +74,7 @@ void initialiseVOXELs(double *WrappedVolume, unsigned char *input_mask,
 }
 //-------------------end initialize voxels -----------
 
-void extend_mask(unsigned char *input_mask, unsigned char *extended_mask,
+void extend_mask(const unsigned char *input_mask, unsigned char *extended_mask,
                  intptr_t n_k, intptr_t n_j, intptr_t n_i,
                  params_t *params) {
   intptr_t n, i, j;
@@ -83,7 +83,7 @@ void extend_mask(unsigned char *input_mask, unsigned char *extended_mask,
   intptr_t frame_size = n_k * n_j;
   intptr_t volume_size = n_k * n_j * n_i;  // volume size
   intptr_t vs = volume_size;
-  unsigned char *IMP =
+  const unsigned char *IMP =
       input_mask + frame_size + n_k + 1;  // input mask pointer
   unsigned char *EMP =
       extended_mask + frame_size + n_k + 1;  // extended mask pointer
@@ -308,14 +308,14 @@ void extend_mask(unsigned char *input_mask, unsigned char *extended_mask,
   }
 }
 
-void calculate_unreliability(double *wrappedVolume, VOXELM *voxel,
+void calculate_unreliability(const double *wrappedVolume, VOXELM *voxel,
                            intptr_t n_k, intptr_t n_j,
                            intptr_t n_i, params_t *params) {
   intptr_t frame_size = n_k * n_j;
   intptr_t volume_size = n_k * n_j * n_i;
   VOXELM *voxel_pointer;
   double H, V, N, D1, D2, D3, D4, D5, D6, D7, D8, D9, D10;
-  double *WVP;
+  const double *WVP;
   intptr_t n, i, j;
 
   WVP = wrappedVolume + frame_size + n_k + 1;
@@ -904,10 +904,10 @@ void unwrapVolume(VOXELM *voxel, intptr_t n_k, intptr_t n_j,
 }
 
 // set the masked voxels (mask = 0) to the minimum of the unwrapper phase
-void maskVolume(VOXELM *voxel, unsigned char *input_mask, intptr_t n_k,
+void maskVolume(VOXELM *voxel, const unsigned char *input_mask, intptr_t n_k,
                 intptr_t n_j, intptr_t n_i) {
   VOXELM *pointer_voxel = voxel;
-  unsigned char *IMP = input_mask;  // input mask pointer
+  const unsigned char *IMP = input_mask;  // input mask pointer
   double min = DBL_MAX;
   intptr_t i;
   intptr_t volume_size = n_k * n_j * n_i;
@@ -953,8 +953,8 @@ void returnVolume(VOXELM *voxel, double *unwrappedVolume, intptr_t n_k,
 }
 
 // the main function of the unwrapper
-int unwrap3D(double *wrapped_volume, double *unwrapped_volume,
-        unsigned char *input_mask, intptr_t n_k, intptr_t n_j,
+int unwrap3D(const double *wrapped_volume, double *unwrapped_volume,
+        const unsigned char *input_mask, intptr_t n_k, intptr_t n_j,
         intptr_t n_i, int wrap_around_k, int wrap_around_j,
         int wrap_around_i, bitgen_t* bitgen_state) {
   params_t params = {TWOPI, wrap_around_k, wrap_around_j, wrap_around_i, 0};
