@@ -288,6 +288,57 @@ def _frangi_shape_norm(image, sigma, alpha, beta, mode, cval):
     return shape, S
 
 
+def frangi_structureness(
+    image,
+    sigmas,
+    mode,
+    cval,
+    summary_func=np.max,
+):
+    """Calculate Frangi structureness metric for `image` at `sigmas`.
+
+    The Frangi structureness metric is the sigma-scaled Frobenius norm of the
+    Hessian at the given sigma.
+
+    You can use this function to estimate a suitable value for the ``gamma``
+    parameter of :func:`frangi`.  The default ``gamma`` for :func:`frangi` is
+    the result of calling this function with matching `image`, `sigmas`,
+    `mode` and `cval`, ``summary_func=np.max`` (the default), and returning
+    ``np.max(s_vals) / 2``.  Experiment with different summary functions to
+    find a suitable `gamma`, or return the structureness images themselves
+    using ``summary_func=None``, for more detailed calculations.
+
+    Parameters
+    ----------
+    image : (M, N[, P]) ndarray
+        Array with input image data.
+    sigmas : iterable of floats
+        Sigmas used as scales of filter.
+    mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}
+        How to handle values outside the image borders.
+    cval : float
+        Used in conjunction with mode 'constant', the value outside
+        the image boundaries.
+    summary_func : callable or None, optional
+        Applied to each per-sigma structureness image.  The default, ``np.max``,
+        matches the statistic used when :func:`frangi` resolves ``gamma=None``.
+        Pass ``None`` to return the images themselves.
+
+    Returns
+    -------
+    s_vals : list
+        A list with one result for each value in `sigmas`.  The elements are
+        either (``summary_func=None``) the structureness images of shape
+        ``image.shape``, or (``summary_func is not None``) the result of
+        `summary_func` as applied to those images.
+    """
+    # Calculate norms without eigenvalue decomposition.
+    s_vals = [_frangi_norm(image, sigma, mode, cval) for sigma in sigmas]
+    if summary_func is None:
+        return s_vals
+    return [summary_func(S) for S in s_vals]
+
+
 def frangi(
     image,
     sigmas=range(1, 10, 2),
@@ -335,7 +386,9 @@ def frangi(
         [1]_ suggests, taken over the whole image and every scale.  Being a
         whole-image statistic, it makes the result at any pixel depend on every
         other pixel: one bright speck anywhere changes the output everywhere.
-        Pass an explicit `gamma` where that matters.
+        Pass an explicit `gamma` where that matters.  See
+        :func:`frangi_structureness` for a function to estimate your own
+        value for `gamma`.
 
         .. versionchanged:: 0.20
             The default, None, uses half of the maximum Hessian norm.
@@ -416,11 +469,11 @@ def frangi(
     # `S` is the sigma-scaled Frobenius norm, with one value per pixel / voxel.
     if gamma is None:
         # Calculate norms without eigenvalue decomposition.
-        peaks = [_frangi_norm(image, sigma, mode, cval).max() for sigma in sigmas]
+        peaks = frangi_structureness(image, sigmas, mode=mode, cval=cval)
         # Half the largest Hessian norm, over every scale given.
         gamma = max(peaks) / 2 if peaks else 1.0
-        if gamma == 0:
-            gamma = 1  # If S == 0 everywhere, gamma doesn't matter.
+        # If S == 0 everywhere, gamma doesn't matter.
+        gamma = 1 if gamma == 0 else gamma
 
     # Filtered image, eqs. (13) and (15), then the maximum over scales.  With
     # `gamma` known, each scale is fused and discarded as it is computed.

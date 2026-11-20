@@ -14,6 +14,7 @@ __all__ = [
     "filter_inverse",
     "filter_forward",
     "frangi",
+    "frangi_structureness",
     "gabor",
     "gabor_kernel",
     "gaussian",
@@ -88,6 +89,7 @@ from .lpi_filter import (
 )
 from .ridges import (
     frangi,
+    frangi_structureness,
     hessian,
     meijering,
     sato,
