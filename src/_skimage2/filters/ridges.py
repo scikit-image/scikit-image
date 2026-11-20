@@ -282,7 +282,7 @@ def frangi_hessian_norms(
     ** 2``, for each scale in `sigmas`.
 
     You can use this to estimate a suitable ``gamma`` for :func:`frangi`.  The
-    default ``gamma`` for :func:`frangi` is given by::
+    underlying recipe for default ``gamma`` in :func:`frangi` is given by::
 
         norms = frangi_hessian_norms(image, sigmas, mode, cval)
         peaks = [np.max(norm) for norm in norms]
@@ -306,7 +306,7 @@ def frangi_hessian_norms(
 
     Returns
     -------
-    s_vals : list
+    norms : list
         A list with one element for each value in `sigmas`.  The elements are
         the norm images, with shape ``image.shape``.
     """
@@ -315,13 +315,13 @@ def frangi_hessian_norms(
 
     check_nD(image, [2, 3])
     # Calculate norms without eigenvalue decomposition.
-    s_vals = []
+    norms = []
     for sigma in sigmas:
         H_elems = hessian_matrix(
             image, sigma, mode=mode, cval=cval, use_gaussian_derivatives=True
         )
-        s_vals.append(_scaled_hessian_frob(H_elems, sigma))
-    return s_vals
+        norms.append(_scaled_hessian_frob(H_elems, sigma))
+    return norms
 
 
 def frangi(
@@ -427,7 +427,7 @@ def frangi(
 
     See also
     --------
-    frangi_hessian_norm
+    frangi_hessian_norms
     meijering
     sato
     hessian

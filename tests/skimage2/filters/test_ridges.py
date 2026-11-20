@@ -347,19 +347,19 @@ FRANGI_CENTRES = (28, 75, 122, 172)
 FRANGI_SIGMAS = (1, 2, 3, 4, 6, 8, 10, 12)
 
 
-def test_frangi_hessian_norm_empty_sigmas():
+def test_frangi_hessian_norms_empty_sigmas():
     image = np.zeros((8, 8))
     assert frangi_hessian_norms(image, [], 'reflect', 0) == []
 
 
-def test_frangi_hessian_norm_rejects_wrong_ndim():
+def test_frangi_hessian_norms_rejects_wrong_ndim():
     with pytest.raises(ValueError):
         frangi_hessian_norms(np.zeros(8), [1], 'reflect', 0)
     with pytest.raises(ValueError):
         frangi_hessian_norms(np.zeros((4, 4, 4, 4)), [1], 'reflect', 0)
 
 
-def test_frangi_default_gamma_matches_hessian_norm():
+def test_frangi_default_gamma_matches_hessian_norms():
     image = img_as_float(camera())[::8, ::8]
     sigmas = (1, 3, 5)
     gamma = _get_default_gamma(image, sigmas)
@@ -377,7 +377,7 @@ def test_frangi_flat_image_default_gamma():
     image = np.zeros((16, 16))
     norms = frangi_hessian_norms(image, (1, 3), 'reflect', 0)
     assert len(norms) == 2
-    assert np.sum(norms) == 0
+    assert all(np.all(n == 0) for n in norms)
     assert _get_default_gamma(image, (1, 3)) == 1.0
     out = frangi(image, (1, 3), gamma=None)
     assert_array_equal(out, np.zeros_like(image))

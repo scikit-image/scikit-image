@@ -10,7 +10,7 @@ from numpy.testing import (
 
 from skimage import img_as_float
 from _skimage2._shared.utils import _supported_float_type
-from _skimage2.filters.ridges import _frangi_norm, _scaled_hessian_frob
+from _skimage2.filters.ridges import _scaled_hessian_frob, frangi_hessian_norms
 from skimage.color import rgb2gray
 from skimage.data import camera, retina
 from skimage.feature import hessian_matrix, hessian_matrix_eigvals
@@ -371,10 +371,10 @@ def test_scaled_hessian_frob_matches_eigenvalue_form(shape, sigma):
 
 def _get_default_gamma(image, sigmas, mode='reflect', cval=0):
     """Half largest Hessian norm over `sigmas`: the value `gamma=None` gives."""
-    maxes = []
-    for sigma in sigmas:
-        maxes.append(_frangi_norm(image, sigma, mode, cval).max())
-    return max(maxes) / 2
+    norms = frangi_hessian_norms(image, sigmas, mode=mode, cval=cval)
+    peaks = [np.max(norm) for norm in norms]
+    gamma = max(peaks) / 2 if peaks else 1.0
+    return 1.0 if gamma == 0 else gamma
 
 
 FRANGI_WIDTHS = (1.0, 2.0, 4.0, 8.0)
