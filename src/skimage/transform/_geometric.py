@@ -3,6 +3,7 @@ from _skimage2.transform._geometric import (
     EssentialMatrixTransform as EssentialMatrixTransform,
     EuclideanTransform as EuclideanTransform,
     FundamentalMatrixTransform as FundamentalMatrixTransform,
+    GeometricTransform as GeometricTransform,
     PiecewiseAffineTransform as PiecewiseAffineTransform,
     PolynomialTransform as PolynomialTransform,
     ProjectiveTransform as ProjectiveTransform,
@@ -25,7 +26,8 @@ from _skimage2.transform._geometric import (  # noqa: F401
 
 from skimage._doctest_adapters import adapt_doctests, _is_from_shim
 
-adapt_doctests(globals())
+# Don't wrap the base class: the public transforms subclass the original.
+adapt_doctests(globals(), skip_names=('GeometricTransform', '_GeometricTransform'))
 
 # Use the fact that geometric classes inherit from ABC, and therefore implement
 # 'register', to fix inheritance checks after subclassing in adapt_doctests.
@@ -75,6 +77,7 @@ __all__ = [
     'EssentialMatrixTransform',
     'EuclideanTransform',
     'FundamentalMatrixTransform',
+    'GeometricTransform',
     'PiecewiseAffineTransform',
     'PolynomialTransform',
     'ProjectiveTransform',

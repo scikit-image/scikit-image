@@ -20,7 +20,7 @@ to_strip = {
     'unique',
 }
 __all__ = list(set(__all__) - to_strip)
-__all__ += ["PendingSkimage2Change", "FailedEstimationAccessError"]
+__all__ += ["PendingSkimage2Change", "FailedEstimation", "FailedEstimationAccessError"]
 
 
 def __dir__():
@@ -59,7 +59,10 @@ class PendingSkimage2Change(PendingDeprecationWarning):
     """
 
 
-from _skimage2._shared.utils import FailedEstimationAccessError  # noqa: F401
+from _skimage2._shared.utils import (  # noqa: F401
+    FailedEstimation,
+    FailedEstimationAccessError,
+)
 
 
 # Bypass lazy_loader to maintain old behavior, that is, make the following pass:
