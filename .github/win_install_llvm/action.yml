@@ -1,0 +1,49 @@
+name: Install LLVM for Windows CI
+description: >-
+  Install a Clang/LLVM toolchain new enough for the MSVC STL shipped on
+  windows-latest.
+outputs:
+  version:
+    description: Full LLVM version installed (e.g. 22.1.3)
+    value: ${{ steps.install.outputs.version }}
+  major:
+    description: LLVM major version (e.g. 22)
+    value: ${{ steps.install.outputs.major }}
+runs:
+  using: "composite"
+  steps:
+    - name: Install LLVM
+      id: install
+      shell: pwsh
+      run: | # zizmor: ignore[github-env]
+        # VS 2026's MSVC STL asserts __clang_major__ >= 22 (error STL1000).
+        # (see https://github.com/microsoft/STL/blob/main/stl/inc/yvals_core.h#L905)
+        # The runner image (as of 2026-11-19) still ships LLVM 20, so install a
+        # matching toolchain and put it first on PATH. Keep win64 and win-arm64
+        # hashes in lockstep when bumping the version.
+        $version = "22.1.3"
+        if ($env:PROCESSOR_ARCHITECTURE -eq "ARM64") {
+          $file = "LLVM-$version-woa64.exe"
+          $expectedHash = "C18D02A43BA31595CA99590FAF3AC74C89577F3F49E903537C5BDEC5100ED4D2"
+        } else {
+          $file = "LLVM-$version-win64.exe"
+          $expectedHash = "72CA54C3B7940615776D8994C0B918A1D8C4981BDCF13B439EAA86A1BD477001"
+        }
+        $url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-$version/$file"
+        Invoke-WebRequest $url -UseBasicParsing -OutFile $file
+        $fileHash = (Get-FileHash -Path $file -Algorithm SHA256).Hash
+        if ($fileHash -ne $expectedHash) {
+            Write-Error "Checksum verification failed for $file (got $fileHash)."
+            exit 1
+        }
+        Start-Process -FilePath ".\$file" -ArgumentList "/S" -Wait
+
+        # When reviewing a PR touching the line below, ensure that a
+        # static, known path only is being added to GITHUB_PATH.
+        "C:\Program Files\LLVM\bin" | Out-File -FilePath "$env:GITHUB_PATH" -Encoding utf8 -Append
+
+        & "C:\Program Files\LLVM\bin\clang.exe" --version
+
+        $major = $version.Split('.')[0]
+        Add-Content -Path $env:GITHUB_OUTPUT -Value "version=$version"
+        Add-Content -Path $env:GITHUB_OUTPUT -Value "major=$major"
