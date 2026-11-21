@@ -174,7 +174,7 @@ class ORB(FeatureDetector, DescriptorExtractor):
 
         Parameters
         ----------
-        image : 2D array
+        image : ndarray of shape (M, N)
             Input image.
 
         """
@@ -295,7 +295,7 @@ class ORB(FeatureDetector, DescriptorExtractor):
 
         Parameters
         ----------
-        image : 2D array
+        image : ndarray of shape (M, N)
             Input image.
 
         """

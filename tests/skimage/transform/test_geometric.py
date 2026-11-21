@@ -537,9 +537,9 @@ def _calc_distances(src, dst, F, metric='distance'):
 
     Parameters
     ----------
-    src : (N, D) array
+    src : ndarray of shape (N, D)
         Points in first image.
-    dst : (N, D) array
+    dst : ndarray of shape (N, D)
         Matching points in second image.
     F : (3, 3) array
         Fundamental matrix mapping `src` to epipolar lines passing through `dst`.

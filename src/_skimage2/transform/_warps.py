@@ -480,7 +480,7 @@ def downscale_local_mean(image, factors, cval=0, clip=True):
 
     Parameters
     ----------
-    image : (M[, ...]) ndarray
+    image : ndarray of shape (M[, ...])
         Input image.
     factors : array_like
         Array containing down-sampling integer factor along each axis.
@@ -1062,7 +1062,7 @@ def _linear_polar_mapping(output_coords, k_angle, k_radius, center):
 
     Parameters
     ----------
-    output_coords : (M, 2) ndarray
+    output_coords : ndarray of shape (M, 2)
         Array of `(col, row)` coordinates in the output image.
     k_angle : float
         Scaling factor that relates the intended number of rows in the output
@@ -1077,7 +1077,7 @@ def _linear_polar_mapping(output_coords, k_angle, k_radius, center):
 
     Returns
     -------
-    coords : (M, 2) ndarray
+    coords : ndarray of shape (M, 2)
         Array of `(col, row)` coordinates in the input image that
         correspond to the `output_coords` given as input.
     """
@@ -1093,7 +1093,7 @@ def _log_polar_mapping(output_coords, k_angle, k_radius, center):
 
     Parameters
     ----------
-    output_coords : (M, 2) ndarray
+    output_coords : ndarray of shape (M, 2)
         Array of `(col, row)` coordinates in the output image.
     k_angle : float
         Scaling factor that relates the intended number of rows in the output

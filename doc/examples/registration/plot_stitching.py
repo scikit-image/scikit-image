@@ -22,11 +22,11 @@ def match_locations(img0, img1, coords0, coords1, radius=5, sigma=3):
 
     Parameters
     ----------
-    img0, img1 : 2D array
+    img0, img1 : ndarray of shape (M, N)
         Input images.
-    coords0 : (2, m) array_like
+    coords0 : array-like of shape (2, m)
         Centers of the reference patches in `img0`.
-    coords1 : (2, n) array_like
+    coords1 : array-like of shape (2, n)
         Centers of the candidate patches in `img1`.
     radius : int
         Radius of the considered patches.
@@ -35,7 +35,7 @@ def match_locations(img0, img1, coords0, coords1, radius=5, sigma=3):
 
     Returns
     -------
-    match_coords: (2, m) array
+    match_coords: ndarray of shape (2, m)
         The points in `coords1` that are the closest corresponding matches to
         those in `coords0` as determined by the (Gaussian weighted) sum of
         squared differences between patches surrounding each point.

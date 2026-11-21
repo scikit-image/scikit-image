@@ -198,17 +198,17 @@ def _corner_orientations(const np_floats[:, ::1] image, const Py_ssize_t[:, :] c
 
     Parameters
     ----------
-    image : 2D array
+    image : ndarray of shape (M, N) and dtype float
         Input grayscale image.
-    corners : (N, 2) array
+    corners : ndarray of shape (K, 2) and dtype int
         Corner coordinates as ``(row, col)``.
-    mask : 2D array
+    mask : ndarray of shape (M, N)
         Mask defining the local neighborhood of the corner used for the
         calculation of the central moment.
 
     Returns
     -------
-    orientations : (N, 1) array
+    orientations : ndarray of shape (K, 1)
         Orientations of corners in the range [-pi, pi].
 
     References

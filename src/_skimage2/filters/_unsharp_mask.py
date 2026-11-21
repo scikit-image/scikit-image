@@ -27,7 +27,7 @@ def unsharp_mask(
 
     Parameters
     ----------
-    image : (M[, ...][, C]) ndarray
+    image : ndarray of shape (M[, ..., C])
         Input image.
     radius : scalar or sequence of scalars, optional
         If a scalar is given, then its value is used for all dimensions.

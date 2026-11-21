@@ -20,7 +20,7 @@ def skeletonize(image, *, method=None):
 
     Parameters
     ----------
-    image : (M, N[, P]) ndarray of bool or int
+    image : ndarray of shape (M, N[, P]) and dtype in {bool, int}
         The image containing the objects to be skeletonized. Each connected component
         in the image is reduced to a single-pixel wide skeleton. The image is binarized
         prior to thinning; thus, adjacent objects of different intensities are
@@ -33,7 +33,7 @@ def skeletonize(image, *, method=None):
 
     Returns
     -------
-    skeleton : (M, N[, P]) ndarray of bool
+    skeleton : ndarray of shape (M, N[, P]) and dtype bool
         The thinned image.
 
     See Also

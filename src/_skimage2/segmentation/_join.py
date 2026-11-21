@@ -12,14 +12,14 @@ def join_segmentations(s1, s2, return_mapping: bool = False):
 
     Parameters
     ----------
-    s1, s2 : numpy arrays
+    s1, s2 : ndarray
         s1 and s2 are label fields of the same shape.
     return_mapping : bool, optional
         If true, return mappings for joined segmentation labels to the original labels.
 
     Returns
     -------
-    j : numpy array
+    j : ndarray
         The join segmentation of s1 and s2.
     map_j_to_s1 : ArrayMap, optional
         Mapping from labels of the joined segmentation j to labels of s1.
@@ -82,7 +82,7 @@ def relabel_sequential(label_field, offset=1):
 
     Parameters
     ----------
-    label_field : numpy array of int, arbitrary shape
+    label_field : ndarray of dtype int, arbitrary shape
         An array of labels, which must be non-negative integers.
     offset : int, optional
         The return labels will start at `offset`, which should be

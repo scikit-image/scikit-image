@@ -66,7 +66,7 @@ def active_contour(
 
     Returns
     -------
-    snake : (K, 2) ndarray
+    snake : ndarray of shape (K, 2)
         Optimised snake, same shape as input parameter.
 
     References
