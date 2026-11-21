@@ -64,8 +64,10 @@ def ipython(*, parent_callback, **kwargs):
     env['PYTHONWARNINGS'] = env.get('PYTHONWARNINGS', 'all')
 
     pre_import = (
-        r"import skimage as ski; "
-        r"print(f'\nPreimported scikit-image {ski.__version__} as ski')"
+        r"import skimage as ski; import skimage2 as ski2;"
+        r"print(f'\nPreimported scikit-image {ski.__version__}\n"
+        r"import skimage as ski\n"
+        r"import skimage2 as ski2')"
     )
     parent_callback(pre_import=pre_import, **kwargs)
 
