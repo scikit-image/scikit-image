@@ -1,7 +1,11 @@
 import numpy as np
 import platform
 
-from _skimage2._shared.testing import assert_array_almost_equal, assert_equal
+from _skimage2._shared.testing import (
+    assert_array_almost_equal,
+    assert_array_equal,
+    assert_equal,
+)
 from _skimage2 import color, data, img_as_float
 from _skimage2.filters import threshold_local, gaussian
 from _skimage2.util.apply_parallel import apply_parallel
@@ -85,6 +89,25 @@ def test_apply_parallel_lazy():
     assert isinstance(result2, da.Array)
 
     assert_array_almost_equal(result2.compute(), expected1)
+
+
+def test_apply_parallel_dtype_avoids_meta_inference():
+    a = np.ones((32, 32), dtype=np.uint8)
+    called_shapes = []
+
+    def func(arr):
+        called_shapes.append(arr.shape)
+        return arr
+
+    result = apply_parallel(
+        func,
+        a,
+        chunks=(16, 16),
+        dtype=np.uint8,
+    )
+
+    assert_array_equal(result, a)
+    assert (0, 0) not in called_shapes
 
 
 def test_no_chunks():
