@@ -51,5 +51,5 @@ ax[3].set_title("Downscaled image (no aliasing)")
 
 ax[0].set_xlim(0, 512)
 ax[0].set_ylim(512, 0)
-plt.tight_layout()
+fig.tight_layout()
 plt.show()

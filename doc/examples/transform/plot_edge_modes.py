@@ -38,5 +38,5 @@ for a in ax:
     a.set_axis_off()
     a.set_aspect('equal')
 
-plt.tight_layout()
+fig.tight_layout()
 plt.show()

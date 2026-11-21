@@ -75,7 +75,7 @@ ax3.set_title('Unwrapped without wrap_around')
 fig.colorbar(ax4.imshow(image_unwrapped_wrap_around, cmap='rainbow'), ax=ax4)
 ax4.set_title('Unwrapped with wrap_around')
 
-plt.tight_layout()
+fig.tight_layout()
 plt.show()
 
 

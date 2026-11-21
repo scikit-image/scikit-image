@@ -56,7 +56,7 @@ for ax, img, feat_t in zip(np.ravel(axs), images, feature_types):
     ax.set_yticks([])
 
 fig.suptitle('The different Haar-like feature descriptors')
-plt.axis('off')
+fig.set_axis_off()
 plt.show()
 
 ###############################################################################

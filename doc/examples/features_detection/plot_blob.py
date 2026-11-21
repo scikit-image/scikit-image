@@ -74,5 +74,5 @@ for idx, (blobs, color, title) in enumerate(sequence):
         ax[idx].add_patch(c)
     ax[idx].set_axis_off()
 
-plt.tight_layout()
+fig.tight_layout()
 plt.show()

@@ -39,7 +39,7 @@ ax2.set_title('Reference')
 ax3.imshow(matched)
 ax3.set_title('Matched')
 
-plt.tight_layout()
+fig.tight_layout()
 plt.show()
 
 
@@ -64,5 +64,5 @@ axes[0, 0].set_title('Source')
 axes[0, 1].set_title('Reference')
 axes[0, 2].set_title('Matched')
 
-plt.tight_layout()
+fig.tight_layout()
 plt.show()

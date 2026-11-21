@@ -57,6 +57,6 @@ ax[2].imshow(regions, cmap='jet')
 ax[2].set_title('Multi-Otsu result')
 ax[2].axis('off')
 
-plt.subplots_adjust()
+fig.subplots_adjust()
 
 plt.show()
