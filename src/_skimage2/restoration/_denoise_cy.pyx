@@ -19,7 +19,7 @@ cdef inline Py_ssize_t Py_ssize_t_min(Py_ssize_t value1, Py_ssize_t value2) noex
         return value2
 
 
-def _denoise_bilateral(np_floats[:, :, ::1] image, cnp.float64_t max_value,
+def _denoise_bilateral(const np_floats[:, :, ::1] image, cnp.float64_t max_value,
                        Py_ssize_t win_size, cnp.float64_t sigma_color,
                        cnp.float64_t sigma_spatial, Py_ssize_t bins, mode,
                        cnp.float64_t cval, np_floats[::1] color_lut,
@@ -96,7 +96,7 @@ def _denoise_bilateral(np_floats[:, :, ::1] image, cnp.float64_t max_value,
     return np.squeeze(np.asarray(out))
 
 
-def _denoise_tv_bregman(np_floats[:, :, ::1] image, np_floats weight,
+def _denoise_tv_bregman(const np_floats[:, :, ::1] image, np_floats weight,
                         int max_num_iter, cnp.float64_t eps,
                         char isotropic, np_floats[:, :, ::1] out):
     cdef:

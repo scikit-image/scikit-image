@@ -17,6 +17,7 @@ python_sources = [
   '__init__.py',
   '__init__.pyi',
   '_value_rescaling.py',
+  '_estimation.py',
   '_invert.py',
   '_label.py',
   '_map_array.py',

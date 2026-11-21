@@ -25,6 +25,7 @@ from .lookfor import lookfor
 from . import arraycrop, compare, dtype, noise, shape, unique
 
 class PendingSkimage2Change(PendingDeprecationWarning): ...
+class FailedEstimation: ...
 class FailedEstimationAccessError(AttributeError): ...
 
 __all__ = [
@@ -51,6 +52,7 @@ __all__ = [
     'unique_rows',
     'label_points',
     'lookfor',
+    'FailedEstimation',
     'FailedEstimationAccessError',
     'PendingSkimage2Change',
 ]

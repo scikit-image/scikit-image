@@ -175,7 +175,7 @@ cdef bilinear_ray_update(np_floats[:, :] image,
 @cython.boundscheck(True)
 def sart_projection_update(np_floats[:, :] image not None,
                            np_floats theta,
-                           np_floats[:] projection not None,
+                           const np_floats[:] projection not None,
                            np_floats projection_shift=0.):
     """ Compute update to a reconstruction estimate from a single projection.
 

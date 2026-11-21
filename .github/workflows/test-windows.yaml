@@ -39,6 +39,10 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Install LLVM
+        id: llvm
+        uses: ./.github/win_install_llvm
+
       - name: Setup Python
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
@@ -70,10 +74,10 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: ccache-${{ runner.os }}-${{ matrix.python-version }}-${{ github.sha }}
+          key: ccache-${{ runner.os }}-llvm${{ steps.llvm.outputs.major }}-${{ matrix.python-version }}-${{ github.sha }}
           restore-keys: |
-            ccache-${{ runner.os }}-${{ matrix.python-version }}-
-            ccache-${{ runner.os }}-
+            ccache-${{ runner.os }}-llvm${{ steps.llvm.outputs.major }}-${{ matrix.python-version }}-
+            ccache-${{ runner.os }}-llvm${{ steps.llvm.outputs.major }}-
 
       - name: Zero ccache stats
         shell: bash
