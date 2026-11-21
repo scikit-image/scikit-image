@@ -597,6 +597,30 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
             stacklevel=2,
         )
 
+    # NumPy images can reuse the private clipping result. Keep the expression
+    # based path below for array implementations that dispatch NumPy functions
+    # (including lazy arrays), and for ndarray subclasses with custom behavior.
+    if type(image) in (np.ndarray, np.memmap) and image.ndim > 0:
+        output = np.dtype(out_dtype)
+        # A lookup table also evaluates values absent from the image. Keep
+        # the array path when those unused values could expose underflow or
+        # an unrepresentable floating-point endpoint of a 64-bit integer cast.
+        if (
+            image.dtype == np.uint8
+            and image.size > 256
+            and np.geterr()['under'] == 'ignore'
+            and not (output.kind in 'iu' and output.itemsize >= 8)
+            and np.all(np.isfinite([imin, imax, omin, omax, imax - imin, omax - omin]))
+        ):
+            # There are only 256 possible input values. Rescale those once,
+            # then index the final output dtype directly without allocating a
+            # full-image floating point buffer. This uses the same operation
+            # order and truncating cast as the general calculation.
+            values = np.arange(256, dtype=np.uint8)
+            table = _rescale_intensity_numpy(values, imin, imax, omin, omax, out_dtype)
+            return table[image]
+        return _rescale_intensity_numpy(image, imin, imax, omin, omax, out_dtype)
+
     image = np.clip(image, imin, imax)
 
     if imin != imax:
@@ -604,6 +628,22 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
         return (image * (omax - omin) + omin).astype(out_dtype)
     else:
         return np.clip(image, omin, omax).astype(out_dtype)
+
+
+def _rescale_intensity_numpy(image, imin, imax, omin, omax, out_dtype):
+    """Apply the intensity map with one private floating point buffer."""
+    # The float bounds promote integer input, while floating point input
+    # retains its precision. np.clip allocates here, so even read-only inputs
+    # and memory mapped images remain untouched by the in-place operations.
+    values = np.clip(image, imin, imax)
+    if imin != imax:
+        values -= imin
+        values /= imax - imin
+        values *= omax - omin
+        values += omin
+    else:
+        np.clip(values, omin, omax, out=values)
+    return values.astype(out_dtype, copy=False)
 
 
 def _assert_non_negative(image):
