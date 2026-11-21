@@ -103,6 +103,10 @@ cpp_args_pythran = [
   '-DPYTHRAN_BLAS_NONE'
 ]
 
+# Target the CPython limited API (3.12); honoured only when the opt-in
+# `python.allow_limited_api` option is enabled (see the root meson.build).
+limited_api_ver = '3.12'
+
 # Deal with M_PI & friends; add `use_math_defines` to c_args
 # Cython doesn't always get this correctly itself
 # explicitly add the define as a compiler flag for Cython-generated code.

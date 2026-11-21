@@ -35,6 +35,7 @@ jobs:
       CCACHE_COMPRESSLEVEL: 6
       CCACHE_MAXSIZE: 400M
       CCACHE_SLOPPINESS: "pch_defines,time_macros"
+      PYTHON_VERSION: "${{ inputs.python-version }}"
 
     steps:
       - name: Verify ARM64 runner
@@ -80,12 +81,22 @@ jobs:
       - name: Build wheel
         if: ${{ inputs.ISOLATED_BUILD != 1 }}
         run: |
-          python -m build --no-isolation --skip-dependency-check -Csetup-args="-Doptimization=2"
+          setup_args=("-Csetup-args=-Doptimization=2")
+          # Opt in to the limited API (abi3) for GIL builds; free-threaded
+          # builds keep the default (off). See the root meson.build.
+          if [[ "$PYTHON_VERSION" != *"t" ]]; then
+            setup_args+=("-Csetup-args=-Dpython.allow_limited_api=true")
+          fi
+          python -m build --no-isolation --skip-dependency-check "${setup_args[@]}"
 
       - name: Build wheel from sdist in isolated environment
         if: ${{ inputs.ISOLATED_BUILD == 1 }}
         run: |
-          python -m build -Csetup-args="-Doptimization=2"
+          setup_args=("-Csetup-args=-Doptimization=2")
+          if [[ "$PYTHON_VERSION" != *"t" ]]; then
+            setup_args+=("-Csetup-args=-Dpython.allow_limited_api=true")
+          fi
+          python -m build "${setup_args[@]}"
 
       - name: ccache statistics
         if: always()
@@ -93,7 +104,7 @@ jobs:
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: skimage-linux-${{ inputs.python-version }}-${{ runner.arch }}
+          name: skimage-linux-${{ inputs.python-version }}${{ inputs.ISOLATED_BUILD == 1 && '-sdist' || '' }}-${{ runner.arch }}
           path: |
             ./dist/*.whl
             ./dist/*.tar.gz

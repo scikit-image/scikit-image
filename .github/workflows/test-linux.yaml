@@ -18,11 +18,12 @@ jobs:
     with:
       python-version: 3.12
 
-  # Covers installation from the sdist; see ISOLATED_BUILD
-  build-linux-313:
+  # Covers installation from the sdist (see ISOLATED_BUILD); built on 3.12 to
+  # produce a cp312-abi3 wheel.
+  build-linux-sdist:
     uses: ./.github/workflows/_build_linux_for_python_x.yaml
     with:
-      python-version: 3.13
+      python-version: 3.12
       ISOLATED_BUILD: 1
 
   build-linux-arm64-312:
@@ -31,20 +32,13 @@ jobs:
       python-version: 3.12
       runner: ubuntu-24.04-arm
 
-  build-linux-314:
-    uses: ./.github/workflows/_build_linux_for_python_x.yaml
-    with:
-      python-version: 3.14
-
+  # The GIL build is produced once as a stable-ABI (abi3) wheel on CPython
+  # 3.12, which then installs on 3.12-3.15. Free-threaded builds cannot use
+  # the stable ABI, so they are still built per interpreter.
   build-linux-314t:
     uses: ./.github/workflows/_build_linux_for_python_x.yaml
     with:
       python-version: 3.14t
-
-  build-linux-315:
-    uses: ./.github/workflows/_build_linux_for_python_x.yaml
-    with:
-      python-version: 3.15
 
   build-linux-315t:
     uses: ./.github/workflows/_build_linux_for_python_x.yaml
@@ -89,11 +83,12 @@ jobs:
 
   test-linux-313:
     name: test-linux-cp3.13-main
-    needs: [build-linux-313]
+    needs: [build-linux-sdist]
     uses: ./.github/workflows/_test_linux_for_python_x.yaml
     with:
       python-version: 3.13
       OPTIONS_NAME: "main"
+      DIST_ARTIFACT_NAME: "skimage-linux-3.12-sdist-X64"
 
   test-linux-arm64-312:
     name: test-linux-arm64-cp3.12-main
@@ -106,11 +101,12 @@ jobs:
 
   test-linux-314:
     name: test-linux-cp3.14-main
-    needs: [build-linux-314]
+    needs: [build-linux-312]
     uses: ./.github/workflows/_test_linux_for_python_x.yaml
     with:
       python-version: 3.14
       OPTIONS_NAME: "main"
+      DIST_ARTIFACT_NAME: "skimage-linux-3.12-X64"
 
   test-linux-314t:
     name: test-linux-cp3.14t-main
@@ -122,11 +118,12 @@ jobs:
 
   test-linux-315:
     name: test-linux-cp3.15-main
-    needs: [build-linux-315]
+    needs: [build-linux-312]
     uses: ./.github/workflows/_test_linux_for_python_x.yaml
     with:
       python-version: 3.15
       OPTIONS_NAME: "main"
+      DIST_ARTIFACT_NAME: "skimage-linux-3.12-X64"
 
   test-linux-315t:
     name: test-linux-cp3.15t-main
@@ -141,11 +138,9 @@ jobs:
     needs:
       [
         build-linux-312,
-        build-linux-313,
+        build-linux-sdist,
         build-linux-arm64-312,
-        build-linux-314,
         build-linux-314t,
-        build-linux-315,
         build-linux-315t,
         test-linux-312,
         test-linux-313,

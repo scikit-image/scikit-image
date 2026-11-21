@@ -3,7 +3,7 @@
 meson-python>=0.16
 ninja>=1.11.1.3
 Cython>=3.2
-pythran>=0.16
+pythran>=0.19
 numpy>=2.2
 spin>=0.14
 build>=1.3
