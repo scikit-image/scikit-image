@@ -137,27 +137,48 @@ def _gaussian_derivative_kernel(sigma, order, truncate=8):
     moments the continuous operator has: ``sum(k) == 1`` for order 0,
     ``sum(k * x) == 1`` for order 1, and ``sum(k) == 0`` together with
     ``sum(k * x**2) == 2`` for order 2.
+
+    From Lindeberg, Journal of Mathematical Imaging and Vision, 2024
+    (convolution form):
+
+        g(x;σ)=1/σ√(2π)e^(-x²/(2σ²)),  (the Gaussian).
+        g_x=-x/σ²g,  (first derivative).
+        g_xx=(x²-σ²)/σ⁴g  (second derivative).
+
+    Kernels are applied with ``ndi.correlate1d``, so the order-1 taps use the
+    correlation sign ``+x/σ² g`` (the reverse of the convolution ``g_x``
+    above), then scale so ``sum(k * x) == 1``.
+
+    The order-2 centre-rebuild route, its fine-sigma behaviour, and the
+    comparison to DIPlib mean subtract and to Lindeberg's discrete analogue
+    are worked in
+    https://scikit-image.org/skimage-workbooks/on-taps.
     """
     radius = int(truncate * sigma + 0.5)
     x = np.arange(-radius, radius + 1, dtype=float)
-    smoothing = np.exp(-(x**2) / (2 * sigma**2))
-    smoothing /= smoothing.sum()
+    # Discrete sum sets sum(g) == 1 (below); the continuous 1/(sigma sqrt(2
+    # pi)) factor (above) cancels under that normalisation.
+    g = np.exp(-(x**2) / (2 * sigma**2))
+    g /= g.sum()
     if order == 0:
-        return smoothing
+        return g
     if order == 1:
-        kernel = smoothing * (x / sigma**2)
-        return kernel / (kernel * x).sum()
-    kernel = smoothing * ((x**2 - sigma**2) / sigma**4)
-    kernel = kernel - kernel.sum() * smoothing
-    # Below sigma of about 0.2 the line above cancels catastrophically: the
-    # centre tap is the difference of two numbers of order sigma**-2, and the
-    # result it should leave is of order exp(-1 / (2 sigma**2)). Put what is
-    # left back into the centre tap, which is where it belongs.
-    center = len(kernel) // 2
-    kernel[center] = -(kernel[:center].sum() + kernel[center + 1 :].sum())
-    kernel /= (kernel * x**2).sum() / 2
-    kernel[center] = -(kernel[:center].sum() + kernel[center + 1 :].sum())
-    return kernel
+        # Correlation form = convolution g_x reversed in x; that flip is a
+        # no-op for even (k_{-i} = k_i) g / g_xx.  g_x is odd (k_{-i} = -k_i),
+        # so it satisfies sum(k) == 0 by construction.  See docstring.
+        g_x = (x / sigma**2) * g
+        return g_x / (g_x * x).sum()  # sum(k * x) == 1 constraint.
+    g_xx = ((x**2 - sigma**2) / sigma**4) * g
+    g_xx = g_xx - g_xx.sum() * g  # sum(k) == 0 constraint.
+    g_xx /= (g_xx * x**2).sum() / 2  # sum(k * x**2) == 2 constraint.
+    # Below sigma of about 0.2, g is almost a delta: the centre tap is ~1 and
+    # the wings are tiny.  The `g_xx - g_xx.sum() * g` step then zeros the
+    # centre of g_xx while the wings stay tiny and positive.  After the
+    # second-moment scale the wings are ~1 and the centre is still 0, so
+    # sum(g_xx) != 0; rebuild the centre from the wings so sum(g_xx) == 0.
+    center = len(g_xx) // 2
+    g_xx[center] = -(g_xx[:center].sum() + g_xx[center + 1 :].sum())
+    return g_xx
 
 
 def _hessian_matrix_with_gaussian(image, sigma=1, mode='reflect', cval=0, order='rc'):
