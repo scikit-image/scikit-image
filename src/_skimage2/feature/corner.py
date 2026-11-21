@@ -129,30 +129,33 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0, order='rc'):
 
 
 def _gaussian_derivative_kernel(sigma, order, truncate=8):
-    """Sampled 1-D Gaussian derivative, with its discrete moments restored.
+    """Sampled 1-D Gaussian derivative with discrete moments restored.
 
     Sampling a Gaussian derivative and using the taps as they fall leaves an
-    operator that responds to a constant image and under-reports curvature.
-    Both faults are at zero frequency, so both are repaired by imposing the
-    moments the continuous operator has: ``sum(k) == 1`` for order 0,
-    ``sum(k * x) == 1`` for order 1, and ``sum(k) == 0`` together with
-    ``sum(k * x**2) == 2`` for order 2.
+    operator that responds to a constant image and can give wrong curvature.
+    Both faults show on the simplest images: the kernel gives a non-zero second
+    derivative for a constant image, and the wrong value (it should be 1) for
+    the parabola $x^2/2$. In contrast, the continuous operator is exact on 1,
+    $x$ and $x^2/2$. Therefore we repair both sampled kernels by imposing the
+    same results on the taps: ``sum(k) == 1`` for order 0, ``sum(k * x) == 1``
+    for order 1, and ``sum(k) == 0`` together with ``sum(k * x**2) == 2`` for
+    order 2.
 
     From Lindeberg, Journal of Mathematical Imaging and Vision, 2024
     (convolution form):
 
-        g(x;σ)=1/σ√(2π)e^(-x²/(2σ²)),  (the Gaussian).
-        g_x=-x/σ²g,  (first derivative).
-        g_xx=(x²-σ²)/σ⁴g  (second derivative).
+        g(x; σ) = 1/(σ √(2π)) exp(-x²/(2σ²)),  (the Gaussian).
+        g_x = -(x/σ²) g,  (first derivative).
+        g_xx = ((x² − σ²)/σ⁴) g  (second derivative).
 
     Kernels are applied with ``ndi.correlate1d``, so the order-1 taps use the
-    correlation sign ``+x/σ² g`` (the reverse of the convolution ``g_x``
+    correlation sign ``+(x/σ²) g`` (the reverse of the convolution ``g_x``
     above), then scale so ``sum(k * x) == 1``.
 
-    The order-2 centre-rebuild route, its fine-sigma behaviour, and the
-    comparison to DIPlib mean subtract and to Lindeberg's discrete analogue
-    are worked in
-    https://scikit-image.org/skimage-workbooks/on-taps.
+    The `on-taps <https://scikit-image.org/skimage-workbooks/on-taps>`_
+    workbook discusses the order-2 centre-rebuild route, its fine-sigma
+    behaviour, and the comparison to DIPlib mean subtract and to Lindeberg's
+    discrete analogue.
     """
     radius = int(truncate * sigma + 0.5)
     x = np.arange(-radius, radius + 1, dtype=float)
@@ -164,8 +167,9 @@ def _gaussian_derivative_kernel(sigma, order, truncate=8):
         return g
     if order == 1:
         # Correlation form = convolution g_x reversed in x; that flip is a
-        # no-op for even (k_{-i} = k_i) g / g_xx.  g_x is odd (k_{-i} = -k_i),
-        # so it satisfies sum(k) == 0 by construction.  See docstring.
+        # no-op for even kernels (g, g_xx), where k_{-i} = k_i.  g_x is odd
+        # (k_{-i} = -k_i), so it satisfies sum(k) == 0 by construction.  See
+        # docstring.
         g_x = (x / sigma**2) * g
         return g_x / (g_x * x).sum()  # sum(k * x) == 1 constraint.
     g_xx = ((x**2 - sigma**2) / sigma**4) * g
@@ -181,58 +185,56 @@ def _gaussian_derivative_kernel(sigma, order, truncate=8):
     return g_xx
 
 
-def _hessian_matrix_with_gaussian(image, sigma=1, mode='reflect', cval=0, order='rc'):
-    """Hessian elements from one separable pass of moment-corrected kernels.
+def _hessian_matrix_with_gaussian(image, sigma=1, mode='reflect', cval=0):
+    """Hessian elements from one pass of moment-corrected kernels.
 
-    ``order='xy'`` reverses the element list. Each element is computed in one
-    frame, so the reversal is a relabelling and not a second differentiation.
+    ``image`` must already be in a supported float dtype; `hessian_matrix`
+    converts and checks it.
     """
-    image = img_as_float(image)
-    float_dtype = _supported_float_type(image.dtype)
-    image = image.astype(float_dtype, copy=False)
-    if image.ndim > 2 and order == 'xy':
-        raise ValueError("order='xy' is only supported for 2D images.")
-    if order not in ('rc', 'xy'):
-        raise ValueError(f'unrecognized order: {order}')
-
     ndim = image.ndim
-    # A constant continued by the same constant has no curvature. Returning
-    # that as an exact zero keeps a later division by the peak from turning a
-    # rounding residue into a response.
-    if (
-        image.size
-        and np.ptp(image) == 0
-        and (mode != 'constant' or cval == image.flat[0])
+    value = image.flat[0]
+    # The cast rounds a NumPy float64 `cval`, so float32 0.1 matches np.float64(0.1).
+    if np.all(image == value) and (
+        mode != 'constant' or image.dtype.type(cval) == value
     ):
+        # A finite constant has no curvature; for inf, inf - inf is undefined.
+        out = 0 if np.isfinite(value) else np.nan
         n_elements = ndim * (ndim + 1) // 2
-        return [np.zeros_like(image) for _ in range(n_elements)]
+        return [np.full_like(image, out) for _ in range(n_elements)]
 
     if np.isscalar(sigma):
         sigma = (float(sigma),) * ndim
 
-    kernels = {
-        (axis, derivative_order): _gaussian_derivative_kernel(
-            sigma[axis], derivative_order
-        ).astype(float_dtype, copy=False)
-        for axis in range(ndim)
-        for derivative_order in (0, 1, 2)
-    }
+    # Kept in float64: `correlate1d` applies weights in float64, and rounding
+    # them would break the moments the kernels impose.
+    kernels = {}
+    for axis in range(ndim):
+        for derivative_order in (0, 1, 2):
+            kernels[(axis, derivative_order)] = _gaussian_derivative_kernel(
+                sigma[axis], derivative_order
+            )
     H_elems = []
-    for ax0, ax1 in combinations_with_replacement(range(ndim), 2):
-        orders = [0] * ndim
-        orders[ax0] += 1
-        orders[ax1] += 1
+    # Upper triangle of the Hessian, row by row.
+    for ax0, ax1 in zip(*np.triu_indices(ndim)):
+        # Each axis is differentiated once for each time it is in the pair.
+        orders = np.bincount([ax0, ax1], minlength=ndim)
         element = image
+        # mode='constant' puts the image in a plane of `cval`. Outside the
+        # image, a pass gives its kernel's sum times the outside value: an
+        # order-0 kernel (sum 1) keeps `cval`; order 1 or 2 (sum 0) gives 0.
+        pass_cval = cval
         for axis, derivative_order in enumerate(orders):
             element = ndi.correlate1d(
                 element,
                 kernels[(axis, derivative_order)],
                 axis=axis,
                 mode=mode,
-                cval=cval,
+                cval=pass_cval,
             )
+            if derivative_order:  # Orders 1 and 2 return 0 for constant.
+                pass_cval = 0 * pass_cval  # 0, or nan for a non-finite cval.
         H_elems.append(element)
-    return H_elems[::-1] if order == 'xy' else H_elems
+    return H_elems
 
 
 def hessian_matrix(
@@ -278,7 +280,6 @@ def hessian_matrix(
         Upper-diagonal elements of the hessian matrix for each pixel in the
         input image. In 2D, this will be a three element list containing [Hrr,
         Hrc, Hcc]. In nD, the list will contain ``(n**2 + n) / 2`` arrays.
-
 
     Notes
     -----
@@ -327,6 +328,11 @@ def hessian_matrix(
         raise ValueError("order='xy' is only supported for 2D images.")
     if order not in ["rc", "xy"]:
         raise ValueError(f"unrecognized order: {order}")
+    if image.ndim == 0 or any(length < 2 for length in image.shape):
+        raise ValueError(
+            "image must have at least one axis, and at least 2 elements along "
+            "every axis"
+        )
 
     if use_gaussian_derivatives is None:
         use_gaussian_derivatives = False
@@ -339,23 +345,18 @@ def hessian_matrix(
         )
 
     if use_gaussian_derivatives:
-        return _hessian_matrix_with_gaussian(
-            image, sigma=sigma, mode=mode, cval=cval, order=order
+        H_elems = _hessian_matrix_with_gaussian(
+            image, sigma=sigma, mode=mode, cval=cval
         )
-
-    gaussian_filtered = gaussian(image, sigma=sigma, mode=mode, cval=cval)
-
-    gradients = np.gradient(gaussian_filtered)
-    axes = range(image.ndim)
-
-    if order == 'xy':
-        axes = reversed(axes)
-
-    H_elems = [
-        np.gradient(gradients[ax0], axis=ax1)
-        for ax0, ax1 in combinations_with_replacement(axes, 2)
-    ]
-    return H_elems
+    else:
+        # Finite differences: smooth, then np.gradient twice.
+        gradients = np.gradient(gaussian(image, sigma=sigma, mode=mode, cval=cval))
+        H_elems = [
+            np.gradient(gradients[ax0], axis=ax1)
+            for ax0, ax1 in zip(*np.triu_indices(image.ndim))
+        ]
+    # Each element is computed in rc order, so 'xy' is a relabelling.
+    return H_elems[::-1] if order == 'xy' else H_elems
 
 
 def hessian_matrix_det(image, sigma=1, approximate=True):

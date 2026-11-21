@@ -365,6 +365,71 @@ def test_hessian_gaussian_has_no_response_to_a_constant(sigma):
         assert_allclose(element[inner], 0, atol=1e-12)
 
 
+@pytest.mark.parametrize('cval', [0.7, np.inf, -np.inf, np.nan])
+@pytest.mark.parametrize('sigma', [0.7, 2])
+@pytest.mark.parametrize('shape', [(24, 24), (12, 14, 10)])
+def test_hessian_gaussian_constant_mode_matches_padding_once(shape, sigma, cval):
+    # The outside is `cval` once, so derivatives see 0 there (nan for a
+    # non-finite `cval`), not `cval`.
+    image = np.random.default_rng(0).random(shape)
+    pad = int(8 * sigma + 0.5) + 1
+    kwargs = dict(
+        sigma=sigma, mode='constant', cval=cval, use_gaussian_derivatives=True
+    )
+    padded = np.pad(image, pad, constant_values=cval)
+    inner = (slice(pad, -pad),) * image.ndim
+    with np.errstate(invalid='ignore'):
+        H_elems = hessian_matrix(image, **kwargs)
+        H_padded = hessian_matrix(padded, **kwargs)
+    for got, expected in zip(H_elems, H_padded):
+        # Also requires nan and inf at the same pixels.
+        assert_allclose(got, expected[inner], atol=1e-12, rtol=0)
+
+
+@pytest.mark.parametrize('cval', [0.1, np.float64(0.1)])
+@pytest.mark.parametrize('dtype', [np.float32, np.float64])
+def test_hessian_gaussian_constant_matching_cval_is_exactly_zero(dtype, cval):
+    # float32(0.1) != float64(0.1), so `cval` must be compared in the image dtype.
+    flat = np.full((16, 16), 0.1, dtype=dtype)
+    H_elems = hessian_matrix(
+        flat, sigma=1, mode='constant', cval=cval, use_gaussian_derivatives=True
+    )
+    for element in H_elems:
+        assert element.dtype == dtype
+        assert_array_equal(element, 0)
+
+
+@pytest.mark.parametrize('use_gaussian_derivatives', [False, True])
+@pytest.mark.parametrize('value', [np.inf, -np.inf, np.nan])
+def test_hessian_matrix_of_a_non_finite_constant_is_nan(
+    value, use_gaussian_derivatives
+):
+    # inf - inf is undefined, so a constant of inf has no defined curvature.
+    flat = np.full((12, 12), value)
+    with np.errstate(invalid='ignore'):
+        H_elems = hessian_matrix(
+            flat,
+            sigma=1,
+            mode='reflect',
+            use_gaussian_derivatives=use_gaussian_derivatives,
+        )
+    for element in H_elems:
+        assert np.all(np.isnan(element))
+
+
+@pytest.mark.parametrize('use_gaussian_derivatives', [False, True])
+@pytest.mark.parametrize(
+    'shape', [(), (0,), (1,), (0, 4), (1, 5), (5, 1), (3, 0, 3), (4, 4, 1)]
+)
+def test_hessian_matrix_rejects_a_missing_or_short_axis(
+    shape, use_gaussian_derivatives
+):
+    with pytest.raises(ValueError, match='at least one axis'):
+        hessian_matrix(
+            np.empty(shape), use_gaussian_derivatives=use_gaussian_derivatives
+        )
+
+
 @pytest.mark.parametrize('sigma', [1, 2, 4])
 def test_hessian_gaussian_matches_a_gaussian_blob(sigma):
     width, size = 6.0, 161
@@ -385,12 +450,14 @@ def test_hessian_gaussian_matches_a_gaussian_blob(sigma):
         assert_allclose(got[inner], expected[inner], atol=tol, rtol=0)
 
 
+@pytest.mark.parametrize('use_gaussian_derivatives', [False, True])
 @pytest.mark.parametrize('sigma', [0.5, 1, 2])
-def test_hessian_gaussian_order_is_a_reversal(sigma):
+def test_hessian_matrix_order_is_a_reversal(sigma, use_gaussian_derivatives):
     """``order='xy'`` is the reversed ``rc`` list, including at the border."""
     image = np.random.default_rng(0).random((48, 48))
-    rc = hessian_matrix(image, sigma=sigma, use_gaussian_derivatives=True, order='rc')
-    xy = hessian_matrix(image, sigma=sigma, use_gaussian_derivatives=True, order='xy')
+    kwargs = dict(sigma=sigma, use_gaussian_derivatives=use_gaussian_derivatives)
+    rc = hessian_matrix(image, order='rc', **kwargs)
+    xy = hessian_matrix(image, order='xy', **kwargs)
     for got, expected in zip(xy, rc[::-1]):
         assert_array_equal(got, expected)
 
