@@ -125,6 +125,8 @@ def unwrap_phase(image, wrap_around=False, rng=None):
         mask = nan_mask | np.require(np.ma.getmaskarray(image), np.uint8, ['C'])
     else:
         mask = nan_mask
+    # The Cython kernels need C-contiguous arrays, also for transposed input.
+    mask = np.ascontiguousarray(mask)
 
     image_not_masked = np.asarray(np.ma.getdata(image), dtype=np.float64, order='C')
     if any_nans:
