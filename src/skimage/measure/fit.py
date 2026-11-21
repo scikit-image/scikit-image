@@ -20,6 +20,7 @@ __all__ = [
 ]
 
 from _skimage2.measure.fit import (  # noqa: F401
+    _BaseModel,
     _dynamic_max_trials,
 )
 

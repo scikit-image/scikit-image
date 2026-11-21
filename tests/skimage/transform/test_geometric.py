@@ -1022,6 +1022,14 @@ def test_identity(tform_class):
         assert np.allclose(t(src), out)
 
 
+@pytest.mark.parametrize('tform_class', TRANSFORMS.values())
+def test_from_estimate_subclass(tform_class):
+    class Subclass(tform_class):
+        pass
+
+    assert type(Subclass.from_estimate(SRC, DST)) is Subclass
+
+
 def test_geometric_tform():
     with pytest.raises(TypeError, match="Can't instantiate abstract class"):
         _GeometricTransform()
