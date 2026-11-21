@@ -22,6 +22,7 @@ __all__ = [
     'warp_polar',
     'estimate_transform',
     'matrix_transform',
+    'GeometricTransform',
     'EuclideanTransform',
     'SimilarityTransform',
     'AffineTransform',
@@ -57,6 +58,7 @@ from .integral import integral_image, integrate
 from ._geometric import (
     estimate_transform,
     matrix_transform,
+    GeometricTransform,
     EuclideanTransform,
     SimilarityTransform,
     AffineTransform,
