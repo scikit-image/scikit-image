@@ -150,3 +150,35 @@ def test_morphsnakes_3d():
     # Check that the contour is shrinking at every iteration
     for v1, v2 in zip(evolution[:-1], evolution[1:]):
         assert v1 >= v2
+
+
+@pytest.mark.parametrize(
+    "snake", [morphological_chan_vese, morphological_geodesic_active_contour]
+)
+def test_morphsnakes_independent_of_previous_calls(snake):
+    img = gaussian_blob()
+
+    if snake is morphological_chan_vese:
+        num_iter = 3
+        init_level_set = "disk"
+        previous_num_iter = 1
+    else:
+        num_iter = 5
+        init_level_set = "checkerboard"
+        previous_num_iter = 3
+
+    result = snake(img, num_iter=num_iter, smoothing=1, init_level_set=init_level_set)
+    repeated = snake(img, num_iter=num_iter, smoothing=1, init_level_set=init_level_set)
+
+    snake(
+        img,
+        num_iter=previous_num_iter,
+        smoothing=1,
+        init_level_set=init_level_set,
+    )
+    after_previous_call = snake(
+        img, num_iter=num_iter, smoothing=1, init_level_set=init_level_set
+    )
+
+    assert_array_equal(result, repeated)
+    assert_array_equal(result, after_previous_call)
