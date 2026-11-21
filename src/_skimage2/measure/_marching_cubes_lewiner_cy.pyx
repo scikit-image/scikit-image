@@ -425,15 +425,24 @@ cdef class Cell:
         self.z = z
         self.step = step
 
-        # Set values
+        # Set values. Only exact ties are perturbed; nonzero residuals must
+        # retain their sign so the result is invariant to intensity scale.
         self.v0 = v0 - isovalue
+        if self.v0 == 0.0: self.v0 = FLT_EPSILON
         self.v1 = v1 - isovalue
+        if self.v1 == 0.0: self.v1 = FLT_EPSILON
         self.v2 = v2 - isovalue
+        if self.v2 == 0.0: self.v2 = FLT_EPSILON
         self.v3 = v3 - isovalue
+        if self.v3 == 0.0: self.v3 = FLT_EPSILON
         self.v4 = v4 - isovalue
+        if self.v4 == 0.0: self.v4 = FLT_EPSILON
         self.v5 = v5 - isovalue
+        if self.v5 == 0.0: self.v5 = FLT_EPSILON
         self.v6 = v6 - isovalue
+        if self.v6 == 0.0: self.v6 = FLT_EPSILON
         self.v7 = v7 - isovalue
+        if self.v7 == 0.0: self.v7 = FLT_EPSILON
 
         # Calculate index
         cdef int index = 0
