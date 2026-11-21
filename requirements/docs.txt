@@ -12,6 +12,7 @@ seaborn>=0.13
 pooch>=1.6
 tifffile>=2025.1.10
 myst-parser
+myst-nb
 intersphinx-registry>=0.2411.14
 ipywidgets
 ipykernel
