@@ -1,5 +1,4 @@
 from itertools import cycle
-import threading
 
 import numpy as np
 from scipy import ndimage as ndi
@@ -79,7 +78,18 @@ def inf_sup(u):
     return np.stack(dilations, axis=0).min(0)
 
 
-_curvop = threading.local()
+def _curvature_operator():
+    """Return the smoothing operator, alternating SIoIS and ISoSI on each call.
+
+    A new operator is created for every evolution, so that the result does
+    not depend on how many smoothing steps earlier calls performed.
+    """
+    return _fcycle(
+        [
+            lambda u: sup_inf(inf_sup(u)),  # SIoIS
+            lambda u: inf_sup(sup_inf(u)),  # ISoSI
+        ]
+    )
 
 
 def _check_input(image, init_level_set):
@@ -287,13 +297,7 @@ def morphological_chan_vese(
            2014, :DOI:`10.1109/TPAMI.2013.106`
     """
 
-    if not hasattr(_curvop, 'c'):
-        _curvop.c = _fcycle(
-            [
-                lambda u: sup_inf(inf_sup(u)),  # SIoIS
-                lambda u: inf_sup(sup_inf(u)),
-            ]
-        )  # ISoSI
+    curvop = _curvature_operator()
 
     init_level_set = _init_level_set(init_level_set, image.shape)
 
@@ -319,7 +323,7 @@ def morphological_chan_vese(
 
         # Smoothing
         for _ in range(smoothing):
-            u = _curvop.c(u)
+            u = curvop(u)
 
         iter_callback(u)
 
@@ -411,13 +415,7 @@ def morphological_geodesic_active_contour(
            Transactions on Pattern Analysis and Machine Intelligence (PAMI),
            2014, :DOI:`10.1109/TPAMI.2013.106`
     """
-    if not hasattr(_curvop, 'c'):
-        _curvop.c = _fcycle(
-            [
-                lambda u: sup_inf(inf_sup(u)),  # SIoIS
-                lambda u: inf_sup(sup_inf(u)),
-            ]
-        )  # ISoSI
+    curvop = _curvature_operator()
 
     image = gimage
     init_level_set = _init_level_set(init_level_set, image.shape)
@@ -456,7 +454,7 @@ def morphological_geodesic_active_contour(
 
         # Smoothing
         for _ in range(smoothing):
-            u = _curvop.c(u)
+            u = curvop(u)
 
         iter_callback(u)
 
