@@ -190,5 +190,5 @@ str(bad_tform)
 #
 # Of course, there may be times, where you did not check the *truthiness* of
 # the estimation, and you nevertheless try to use the returned estimate.  In
-# this case, you'll get a :class:`~.FailedEstimationAccessError`---a custom
+# this case, you'll get a :class:`~skimage.util.FailedEstimationAccessError`---a custom
 # subclass of a :class:`AttributeError`.
