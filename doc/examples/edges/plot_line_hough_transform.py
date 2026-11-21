@@ -115,7 +115,7 @@ for _, angle, dist in zip(*hough_line_peaks(h, theta, d)):
     (x0, y0) = dist * np.array([np.cos(angle), np.sin(angle)])
     ax[2].axline((x0, y0), slope=np.tan(angle + np.pi / 2))
 
-plt.tight_layout()
+fig.tight_layout()
 plt.show()
 
 
@@ -151,5 +151,5 @@ ax[2].set_title('Probabilistic Hough')
 for a in ax:
     a.set_axis_off()
 
-plt.tight_layout()
+fig.tight_layout()
 plt.show()

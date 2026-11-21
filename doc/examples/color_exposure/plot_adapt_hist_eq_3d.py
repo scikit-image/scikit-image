@@ -208,7 +208,7 @@ for iax, ax in enumerate(axs[:]):
     ax.grid(False)
     ax.elev = 30
 
-plt.subplots_adjust(
+fig.subplots_adjust(
     left=0.05, bottom=-0.1, right=1.01, top=1.1, wspace=-0.1, hspace=-0.45
 )
 

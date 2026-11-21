@@ -53,5 +53,5 @@ ax.set_xlim(0, 24)  # a = 6 (times two for 2nd ellipsoid)
 ax.set_ylim(0, 20)  # b = 10
 ax.set_zlim(0, 32)  # c = 16
 
-plt.tight_layout()
+fig.tight_layout()
 plt.show()

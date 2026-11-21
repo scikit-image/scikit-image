@@ -33,7 +33,7 @@ ax[1].set_title('Transformed picture')
 ax[1].imshow(chull, cmap=plt.cm.gray)
 ax[1].set_axis_off()
 
-plt.tight_layout()
+fig.tight_layout()
 plt.show()
 
 ######################################################################

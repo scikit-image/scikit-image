@@ -30,5 +30,5 @@ fig.colorbar(lc, fraction=0.03, ax=ax[1])
 for a in ax:
     a.axis('off')
 
-plt.tight_layout()
+fig.tight_layout()
 plt.show()

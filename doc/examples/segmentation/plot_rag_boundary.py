@@ -32,5 +32,5 @@ lc = graph.show_rag(
 )
 
 
-plt.colorbar(lc, fraction=0.03)
+fig.colorbar(lc, ax=ax, fraction=0.03)
 plt.show()

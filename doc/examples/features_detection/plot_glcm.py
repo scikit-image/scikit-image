@@ -104,5 +104,5 @@ for i, patch in enumerate(sky_patches):
 
 # display the patches and plot
 fig.suptitle('Grey level co-occurrence matrix features', fontsize=14, y=1.05)
-plt.tight_layout()
+fig.tight_layout()
 plt.show()

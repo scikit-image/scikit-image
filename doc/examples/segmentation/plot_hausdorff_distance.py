@@ -30,7 +30,7 @@ plt_y = [1, 0, -1, 0]
 
 set_ax = [(x_diamond + r * x) for x in plt_x]
 set_ay = [(y_diamond + r * y) for y in plt_y]
-plt.plot(set_ax, set_ay, 'or')
+ax.plot(set_ax, set_ay, 'or')
 
 # Create a kite-like shape where the four corners form the 2nd set of points
 x_kite = 30
@@ -40,7 +40,7 @@ y_r = 20
 
 set_bx = [(x_kite + x_r * x) for x in plt_x]
 set_by = [(y_kite + y_r * y) for y in plt_y]
-plt.plot(set_bx, set_by, 'og')
+ax.plot(set_bx, set_by, 'og')
 
 # Set up the data to compute the Hausdorff distance
 coords_a = np.zeros(shape, dtype=bool)
@@ -58,11 +58,11 @@ hausdorff_point_a, hausdorff_point_b = metrics.hausdorff_pair(coords_a, coords_b
 # Plot the lines that shows the length of the Hausdorff distance
 x_line = [30, 30]
 y_line = [20, 10]
-plt.plot(x_line, y_line, 'y')
+ax.plot(x_line, y_line, 'y')
 
 x_line = [30, 30]
 y_line = [40, 50]
-plt.plot(x_line, y_line, 'y')
+ax.plot(x_line, y_line, 'y')
 
 # Plot circles to show that at this distance, the Hausdorff distance can
 # travel to its nearest neighbor (in this case, from the kite to diamond)

@@ -120,5 +120,5 @@ ax[1, 1].set_title('Compact watershed')
 for a in ax.ravel():
     a.set_axis_off()
 
-plt.tight_layout()
+fig.tight_layout()
 plt.show()

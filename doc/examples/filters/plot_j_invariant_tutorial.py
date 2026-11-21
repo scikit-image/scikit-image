@@ -312,11 +312,11 @@ print(f'Wavelet  (Calibrated): {psnr_calibrated_wavelet:.1f}')
 print(f'TV norm  (Default)   : {psnr_default_tv:.1f}')
 print(f'TV norm  (Calibrated): {psnr_calibrated_tv:.1f}')
 
-plt.subplots(figsize=(10, 12))
-plt.imshow(noisy, cmap='Greys_r')
-plt.xticks([])
-plt.yticks([])
-plt.title('Noisy Image')
+fig, ax = plt.subplots(figsize=(10, 12))
+ax.imshow(noisy, cmap='Greys_r')
+ax.set_xticks([])
+ax.set_yticks([])
+ax.set_title('Noisy Image')
 
 
 def get_inset(x):
