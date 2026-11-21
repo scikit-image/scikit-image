@@ -1,5 +1,6 @@
 """Convex Hull."""
 
+import warnings
 from itertools import product
 import numpy as np
 from scipy.spatial import ConvexHull, QhullError
@@ -177,9 +178,9 @@ def convex_hull_object(image, *, connectivity=2):
 
     Parameters
     ----------
-    image : ndarray of shape (M, N)
+    image : ndarray
         Binary input image.
-    connectivity : {1, 2}, int, optional
+    connectivity : int, optional
         Determines the neighbors of each pixel. Adjacent elements
         within a squared distance of ``connectivity`` from pixel center
         are considered neighbors.::
@@ -204,18 +205,26 @@ def convex_hull_object(image, *, connectivity=2):
     objects may overlap in the result. If this is suspected, consider using
     convex_hull_image separately on each object or adjust ``connectivity``.
     """
-    if image.ndim > 2:
-        raise ValueError("Input must be a 2D image")
-
-    if connectivity not in (1, 2):
-        raise ValueError('`connectivity` must be either 1 or 2.')
+    if connectivity not in range(1, image.ndim + 1):
+        raise ValueError(
+            f'`connectivity` must be an integer between 1 and {image.ndim}.'
+        )
 
     labeled_im = label(image, connectivity=connectivity, background=0)
     convex_obj = np.zeros(image.shape, dtype=bool)
     convex_img = np.zeros(image.shape, dtype=bool)
 
     for i in range(1, labeled_im.max() + 1):
-        convex_obj = convex_hull_image(labeled_im == i)
+        obj = labeled_im == i
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                'ignore', message='Failed to get convex hull image'
+            )
+            convex_obj = convex_hull_image(obj)
+        # The hull can fail for flat objects (e.g. a single voxel or a
+        # planar slice in 3D). Keep the original object in that case.
+        if not convex_obj.any():
+            convex_obj = obj
         convex_img = np.logical_or(convex_img, convex_obj)
 
     return convex_img
