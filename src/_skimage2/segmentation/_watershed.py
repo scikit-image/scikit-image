@@ -46,7 +46,7 @@ def _validate_inputs(image, markers, mask, connectivity):
     markers : ndarray of dtype int32
         The validated `markers`.
     mask : ndarray of dtype int8
-        The validated `mask`. If ``None`` was given it is a volume of all 1s.
+        The validated `mask`. If ``None``, it is a volume of all 1s.
 
     Raises
     ------
