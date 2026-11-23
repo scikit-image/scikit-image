@@ -11,6 +11,7 @@ from skimage.transform import (
     EssentialMatrixTransform,
     EuclideanTransform,
     FundamentalMatrixTransform,
+    GeometricTransform,
     PiecewiseAffineTransform,
     PolynomialTransform,
     ProjectiveTransform,
@@ -537,9 +538,9 @@ def _calc_distances(src, dst, F, metric='distance'):
 
     Parameters
     ----------
-    src : (N, D) array
+    src : ndarray of shape (N, D)
         Points in first image.
-    dst : (N, D) array
+    dst : ndarray of shape (N, D)
         Matching points in second image.
     F : (3, 3) array
         Fundamental matrix mapping `src` to epipolar lines passing through `dst`.
@@ -1048,6 +1049,12 @@ def test_geometric_tform():
         dst = tform(src)  # Obtain the dst coords
         # Ensure dst coords are finite numeric values
         assert np.isfinite(dst).all()
+
+
+@pytest.mark.parametrize('tform_class', TRANSFORMS.values())
+def test_public_transforms_subclass_geometric_transform(tform_class):
+    # Fails if `adapt_doctests` wraps the base class in the shim module.
+    assert issubclass(tform_class, GeometricTransform)
 
 
 @pytest.mark.parametrize(

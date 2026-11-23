@@ -114,7 +114,7 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True, mode='reflect', cval=
 
     Parameters
     ----------
-    image : (M, N[, P]) ndarray
+    image : ndarray of shape (M, N[, P])
         Array with input image data.
     sigmas : iterable of floats, optional
         Sigmas used as scales of filter.
@@ -129,7 +129,7 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True, mode='reflect', cval=
 
     Returns
     -------
-    out : (M, N[, P]) ndarray
+    out : ndarray of shape (M, N[, P])
         Filtered image (maximum of pixels across all scales).
 
     See also
@@ -347,7 +347,7 @@ def frangi(
 
     Parameters
     ----------
-    image : (M, N[, P]) ndarray
+    image : ndarray of shape (M, N[, P])
         Array with input image data.
     sigmas : iterable of floats, optional
         Sigmas used as scales of filter.
@@ -389,7 +389,7 @@ def frangi(
 
     Returns
     -------
-    out : (M, N[, P]) ndarray
+    out : ndarray of shape (M, N[, P])
         Filtered image (maximum of pixels across all scales).
 
     .. versionchanged:: 0.20
@@ -494,7 +494,7 @@ def hessian(
 
     Parameters
     ----------
-    image : (M, N[, P]) ndarray
+    image : ndarray of shape (M, N[, P])
         Array with input image data.
     sigmas : iterable of floats, optional
         Sigmas used as scales of filter.
@@ -518,7 +518,7 @@ def hessian(
 
     Returns
     -------
-    out : (M, N[, P]) ndarray
+    out : ndarray of shape (M, N[, P])
         Filtered image (maximum of pixels across all scales).
 
     Notes

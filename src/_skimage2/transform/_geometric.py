@@ -60,7 +60,7 @@ def _calc_center_normalize(points, scaling='rms'):
 
     Parameters
     ----------
-    points : (N, D) array
+    points : ndarray of shape (N, D)
         The coordinates of the image points.
     scaling : {'rms', 'mrs', 'raw'}, optional
         Scaling algorithm adjusting for magnitude of `points` after applying
@@ -127,12 +127,12 @@ def _apply_homogeneous(matrix, points):
         object with an `__array__` method [1]_ that returns a matrix with the
         correct dimensions can be used as input here. This includes all
         subclasses of :class:`ProjectiveTransform`, for example.
-    points : (N, D) array
+    points : ndarray of shape (N, D)
         The coordinates of the image points.
 
     Returns
     -------
-    new_points : (N, D) array
+    new_points : ndarray of shape (N, D)
         The transformed image points.
 
     References
@@ -176,9 +176,9 @@ def _umeyama(src, dst, estimate_scale):
 
     Parameters
     ----------
-    src : (M, N) array_like
+    src : array-like of shape (M, N)
         Source coordinates.
-    dst : (M, N) array_like
+    dst : array-like of shape (M, N)
         Destination coordinates.
     estimate_scale : bool
         Whether to estimate scaling factor.
@@ -251,7 +251,7 @@ def _umeyama(src, dst, estimate_scale):
     return T
 
 
-class _GeometricTransform(ABC):
+class GeometricTransform(ABC):
     """Abstract base class for geometric transformations."""
 
     @abstractmethod
@@ -360,7 +360,11 @@ def _from_estimate(cls, src, dst, *args, **kwargs):
     return tf if msg is None else FailedEstimation(f'{cls.__name__}: {msg}')
 
 
-class _HMatrixTransform(_GeometricTransform):
+# Backwards-compatible alias for the former private name.
+_GeometricTransform = GeometricTransform
+
+
+class _HMatrixTransform(GeometricTransform):
     """Transform accepting homogeneous matrix as input."""
 
     def __init__(self, matrix=None, *, dimensionality=None):
@@ -1091,12 +1095,12 @@ class ProjectiveTransform(_HMatrixTransform):
 
         Parameters
         ----------
-        coords : (N, D) array_like
+        coords : array-like of shape (N, D)
             Source coordinates.
 
         Returns
         -------
-        coords_out : (N, D) array
+        coords_out : ndarray of shape (N, D)
             Destination coordinates.
 
         """
@@ -1597,7 +1601,7 @@ class AffineTransform(ProjectiveTransform):
         return self.params[0 : self.dimensionality, self.dimensionality]
 
 
-class PiecewiseAffineTransform(_GeometricTransform):
+class PiecewiseAffineTransform(GeometricTransform):
     """Piecewise affine transformation.
 
     Control points are used to define the mapping. The transform is based on
@@ -1686,9 +1690,9 @@ class PiecewiseAffineTransform(_GeometricTransform):
 
         Parameters
         ----------
-        src : (N, D) array_like
+        src : array-like of shape (N, D)
             Source coordinates.
-        dst : (N, D) array_like
+        dst : array-like of shape (N, D)
             Destination coordinates.
 
         Returns
@@ -2308,7 +2312,7 @@ class SimilarityTransform(EuclideanTransform):
             raise NotImplementedError('Scale is only implemented for 2D and 3D.')
 
 
-class PolynomialTransform(_GeometricTransform):
+class PolynomialTransform(GeometricTransform):
     """2D polynomial transformation.
 
     In what follows, ``x`` refers to coordinates from the first coordinate
@@ -2661,7 +2665,7 @@ def estimate_transform(ttype, src, dst, *args, **kwargs):
 
     Returns
     -------
-    tf : :class:`_GeometricTransform` or :class:`FailedEstimation`
+    tf : :class:`GeometricTransform` or :class:`FailedEstimation`
         An instance of the requested transformation if the estimation
         Otherwise, we return a special ``FailedEstimation`` object to signal a
         failed estimation. Testing the truth value of the failed estimation

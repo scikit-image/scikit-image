@@ -325,7 +325,7 @@ def blob_dog(
 
     Returns
     -------
-    A : (n, image.ndim + sigma) ndarray
+    A : ndarray of shape (n, dim), where dim = image.ndim + len(sigma)
         A 2d array with each row representing 2 coordinate values for a 2D
         image, or 3 coordinate values for a 3D image, plus the sigma(s) used.
         When a single sigma is passed, outputs are:
@@ -556,7 +556,7 @@ def blob_log(
 
     Returns
     -------
-    A : (n, image.ndim + sigma) ndarray
+    A : ndarray of shape (n, dim), where dim = image.ndim + len(sigma)
         A 2d array with each row representing 2 coordinate values for a 2D
         image, or 3 coordinate values for a 3D image, plus the sigma(s) used.
         When a single sigma is passed, outputs are:
@@ -687,7 +687,7 @@ def blob_doh(
 
     Parameters
     ----------
-    image : 2D ndarray
+    image : ndarray of shape (M, N)
         Input grayscale image. Blobs can either be light on dark or vice versa.
     min_sigma : float, optional
         The minimum standard deviation for Gaussian Kernel used to compute
@@ -752,9 +752,9 @@ def blob_doh(
 
     Returns
     -------
-    A : ndarray of shape (n, 3)
-        A 2d array with each row representing 3 values, ``(y,x,sigma)``
-        where ``(y,x)`` are coordinates of the blob and ``sigma`` is the
+    A : ndarray of shape (K, 3)
+        A 2d array with each row representing 3 values, ``(m, n, sigma)``
+        where ``(m, n)`` are coordinates of the blob and ``sigma`` is the
         standard deviation of the Gaussian kernel of the Hessian Matrix whose
         determinant detected the blob.
 

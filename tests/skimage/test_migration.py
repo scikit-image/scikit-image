@@ -1332,6 +1332,7 @@ SKIMAGE_API = {
     'skimage.transform:EssentialMatrixTransform',
     'skimage.transform:EuclideanTransform',
     'skimage.transform:FundamentalMatrixTransform',
+    'skimage.transform:GeometricTransform',
     'skimage.transform:PiecewiseAffineTransform',
     'skimage.transform:PolynomialTransform',
     'skimage.transform:ProjectiveTransform',
@@ -1390,6 +1391,7 @@ SKIMAGE_API = {
     'skimage.transform:warp_coords(coord_map, shape, dtype=<class \'numpy.float64\'>)',
     'skimage.transform:warp_polar(image, center=None, *, radius=None, '
     "output_shape=None, scaling='linear', channel_axis=None, **kwargs)",
+    'skimage.util:FailedEstimation',
     'skimage.util:FailedEstimationAccessError',
     'skimage.util:PendingSkimage2Change',
     'skimage.util:apply_parallel(function, array, chunks=None, depth=0, '

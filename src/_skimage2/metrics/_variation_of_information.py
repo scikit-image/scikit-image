@@ -19,11 +19,11 @@ def variation_of_information(image0=None, image1=None, *, table=None, ignore_lab
     ----------
     image0, image1 : ndarray of int
         Label images / segmentations, must have same shape.
-    table : scipy.sparse array in csr format, optional
-        A contingency table built with skimage.evaluate.contingency_table.
-        If None, it will be computed with skimage.evaluate.contingency_table.
-        If given, the entropies will be computed from this table and any images
-        will be ignored.
+    table : scipy.sparse.csr_array or scipy.sparse.csr_matrix, optional
+        A contingency table built with
+        :func:`~skimage2.metrics.contingency_table`, normalized or not.
+        If given, the entropies are computed from this table, and `image0`,
+        `image1`, and `ignore_labels` are ignored.
     ignore_labels : sequence of int, optional
         Labels to ignore. Any part of the true image labeled with any of these
         values will not be counted in the score.
@@ -51,19 +51,16 @@ def _xlogx(x):
 
     Parameters
     ----------
-    x : ndarray or scipy.sparse.csc_array or scipy.sparse.csr_array
+    x : scipy.sparse.csr_array
         The input array.
 
     Returns
     -------
-    y : same type as x
+    y : scipy.sparse.csr_array
         Result of x * log_2(x).
     """
     y = x.copy()
-    if sparse.issparse(y) and y.format in ('csc', 'csr'):
-        z = y.data
-    else:
-        z = np.asarray(y)  # ensure np.matrix converted to np.array
+    z = y.data
     nz = z.nonzero()
     z[nz] *= np.log2(z[nz])
     return y
@@ -76,8 +73,8 @@ def _vi_tables(im_true, im_test, table=None, ignore_labels=()):
     ----------
     im_true, im_test : ndarray of int
         Input label images, any dimensionality.
-    table : csr_array, optional
-        Pre-computed contingency table.
+    table : scipy.sparse.csr_array or scipy.sparse.csr_matrix, optional
+        Pre-computed contingency table, normalized or not.
     ignore_labels : sequence of int, optional
         Labels to ignore when computing scores.
 
@@ -87,31 +84,26 @@ def _vi_tables(im_true, im_test, table=None, ignore_labels=()):
         Per-segment conditional entropies of ``im_true`` given ``im_test`` and
         vice-versa.
     """
-    check_shape_equality(im_true, im_test)
-
     if table is None:
-        # normalize, since it is an identity op if already done
-        pxy = contingency_table(
-            im_true, im_test, ignore_labels=ignore_labels, normalize=True
-        )
+        if im_true is None or im_test is None:
+            raise ValueError("Provide both images, or a contingency table.")
+        check_shape_equality(im_true, im_test)
+        table = contingency_table(im_true, im_test, ignore_labels=ignore_labels)
 
-    else:
-        pxy = table
+    pxy = sparse.csr_array(table)
+    pxy = pxy / pxy.sum()
 
-    # compute marginal probabilities, converting to 1D array
-    px = np.ravel(pxy.sum(axis=1))
-    py = np.ravel(pxy.sum(axis=0))
+    # marginal probabilities
+    px = pxy.sum(axis=1)
+    py = pxy.sum(axis=0)
 
-    # use sparse matrix linear algebra to compute VI
-    # first, compute the inverse diagonal matrices
-    px_inv = sparse.dia_array((_invert_nonzero(px), 0), shape=(px.size, px.size))
-    py_inv = sparse.dia_array((_invert_nonzero(py), 0), shape=(py.size, py.size))
+    px_inv = sparse.diags_array(_invert_nonzero(px))
+    py_inv = sparse.diags_array(_invert_nonzero(py))
 
-    # then, compute the entropies
     hygx = -px @ _xlogx(px_inv @ pxy).sum(axis=1)
     hxgy = -_xlogx(pxy @ py_inv).sum(axis=0) @ py
 
-    return list(map(np.asarray, [hxgy, hygx]))
+    return hxgy, hygx
 
 
 def _invert_nonzero(arr):

@@ -26,17 +26,17 @@ def _slic_cython(np_floats[:, :, :, ::1] image_zyx,
 
     Parameters
     ----------
-    image_zyx : 4D array of np_floats, shape (Z, Y, X, C)
+    image_zyx : ndarray of shape (Z, Y, X, C) and dtype float
         The input image.
-    mask : 3D array of bool, shape (Z, Y, X), optional
+    mask : ndarray of shape (Z, Y, X) and dtype bool
         The input mask.
-    segments : 2D array of np_floats, shape (N, 3 + C)
+    segments : ndarray of shape (N, Cp) and dtype float, with Cp = C + 3
         The initial centroids obtained by SLIC as [Z, Y, X, C...].
     step : np_floats
         The size of the step between two seeds in voxels.
     max_num_iter : int
         The maximum number of k-means iterations.
-    spacing : 1D array of np_floats, shape (3,)
+    spacing : ndarray of shape (3,) and dtype float
         The voxel spacing along each image dimension. This parameter
         controls the weights of the distances along z, y, and x during
         k-means clustering.
@@ -50,7 +50,7 @@ def _slic_cython(np_floats[:, :, :, ::1] image_zyx,
 
     Returns
     -------
-    nearest_segments : 3D array of int, shape (Z, Y, X)
+    nearest_segments : ndarray of shape (Z, Y, X) and dtype int
         The label field/superpixels found by SLIC.
 
     Notes

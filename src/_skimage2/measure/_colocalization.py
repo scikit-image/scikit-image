@@ -22,7 +22,7 @@ def pearson_corr_coeff(image0, image1, mask=None):
     image1 : ndarray of shape (M, N)
         Image of channel 2 to be correlated with channel B.
         Must have same dimensions as `image0`.
-    mask : (M, N) ndarray of dtype bool, optional
+    mask : ndarray of shape (M, N) and dtype bool, optional
         Only `image0` and `image1` pixels within this region of interest mask
         are included in the calculation. Must have same dimensions as `image0`.
 
@@ -104,10 +104,10 @@ def manders_coloc_coeff(image0, image1_mask, mask=None):
     ----------
     image0 : ndarray of shape (M, N)
         Input image (first channel). All pixel values should be non-negative.
-    image1_mask : (M, N) ndarray of dtype bool
+    image1_mask : ndarray of shape (M, N) and dtype bool
         Binary image giving the regions of interest in the second channel.
         Must have same shape as `image0`.
-    mask : (M, N) ndarray of dtype bool, optional
+    mask : ndarray of shape (M, N) and dtype bool, optional
         Only `image0` pixel values within `mask` are included in the calculation.
         Must have same shape as `image0`.
 
@@ -269,12 +269,12 @@ def intersection_coeff(image0_mask, image1_mask, mask=None):
 
     Parameters
     ----------
-    image0_mask : (M, N) ndarray of dtype bool
+    image0_mask : ndarray of shape (M, N) and dtype bool
         Image mask of channel A.
-    image1_mask : (M, N) ndarray of dtype bool
+    image1_mask : ndarray of shape (M, N) and dtype bool
         Image mask of channel B.
         Must have same dimensions as `image0_mask`.
-    mask : (M, N) ndarray of dtype bool, optional
+    mask : ndarray of shape (M, N) and dtype bool, optional
         Only `image0_mask` and `image1_mask` pixels within this region of
         interest
         mask are included in the calculation.

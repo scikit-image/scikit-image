@@ -24,7 +24,7 @@ from .unique import unique_rows
 from ._lookfor import lookfor
 from ._value_rescaling import rescale_minmax, rescale_legacy, _prescale_value_range
 
-class FailedEstimationAccessError(AttributeError): ...
+from ._estimation import FailedEstimation, FailedEstimationAccessError
 
 __all__ = [
     'img_as_float32',
@@ -50,6 +50,7 @@ __all__ = [
     'unique_rows',
     'label_points',
     'lookfor',
+    'FailedEstimation',
     'FailedEstimationAccessError',
     'rescale_minmax',
     'rescale_legacy',

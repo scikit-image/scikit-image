@@ -30,7 +30,7 @@ def equalize_adapthist(image, kernel_size=None, clip_limit=0.01, nbins=256):
 
     Parameters
     ----------
-    image : (M[, ...][, C]) ndarray
+    image : ndarray of shape (M[, ..., C])
         Input image.
     kernel_size : int or array_like, optional
         Defines the shape of contextual regions used in the algorithm. If
@@ -46,7 +46,7 @@ def equalize_adapthist(image, kernel_size=None, clip_limit=0.01, nbins=256):
 
     Returns
     -------
-    out : (M[, ...][, C]) ndarray
+    out : ndarray of shape (M[, ..., C])
         Equalized image with float64 dtype.
 
     See Also
@@ -96,7 +96,7 @@ def _clahe(image, kernel_size, clip_limit, nbins):
 
     Parameters
     ----------
-    image : (M[, ...]) ndarray
+    image : ndarray of shape (M[, ...])
         Input image.
     kernel_size : int or N-tuple of int
         Defines the shape of contextual regions used in the algorithm.
@@ -108,7 +108,7 @@ def _clahe(image, kernel_size, clip_limit, nbins):
 
     Returns
     -------
-    out : (M[, ...]) ndarray
+    out : ndarray of shape (M[, ...])
         Equalized image.
 
     The number of "effective" graylevels in the output image is set by `nbins`;

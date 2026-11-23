@@ -251,7 +251,7 @@ class LineModelND(_BaseModel):
 
         Parameters
         ----------
-        data : (N, dim) array
+        data : ndarray of shape (N, dim)
             N points in a space of dimensionality dim >= 2.
 
         Returns
@@ -301,7 +301,7 @@ class LineModelND(_BaseModel):
 
         Parameters
         ----------
-        data : (N, dim) array
+        data : ndarray of shape (N, dim)
             N points in a space of dimension dim.
 
         Returns
@@ -443,7 +443,7 @@ class LineModelND(_BaseModel):
 
         Parameters
         ----------
-        data : (N, dim) array
+        data : ndarray of shape (N, dim)
             N points in a space of dimensionality ``dim >= 2``.
 
         Returns

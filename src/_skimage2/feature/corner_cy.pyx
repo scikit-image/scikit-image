@@ -12,7 +12,7 @@ from _skimage2._shared.fused_numerics cimport np_floats
 cnp.import_array()
 
 
-def _corner_moravec(np_floats[:, ::1] cimage, Py_ssize_t window_size=1):
+def _corner_moravec(const np_floats[:, ::1] cimage, Py_ssize_t window_size=1):
     """Compute Moravec corner measure response image.
 
     This is one of the simplest corner detectors and is comparatively fast but
@@ -110,7 +110,7 @@ cdef inline np_floats _corner_fast_response(np_floats curr_pixel,
     return 0
 
 
-def _corner_fast(np_floats[:, ::1] image, signed char n, np_floats threshold):
+def _corner_fast(const np_floats[:, ::1] image, signed char n, np_floats threshold):
 
     if np_floats is cnp.float32_t:
         dtype = np.float32
@@ -186,7 +186,7 @@ def _corner_fast(np_floats[:, ::1] image, signed char n, np_floats threshold):
     return np.asarray(corner_response)
 
 
-def _corner_orientations(np_floats[:, ::1] image, Py_ssize_t[:, :] corners,
+def _corner_orientations(const np_floats[:, ::1] image, const Py_ssize_t[:, :] corners,
                          mask):
     """Compute the orientation of corners.
 
@@ -198,17 +198,17 @@ def _corner_orientations(np_floats[:, ::1] image, Py_ssize_t[:, :] corners,
 
     Parameters
     ----------
-    image : 2D array
+    image : ndarray of shape (M, N) and dtype float
         Input grayscale image.
-    corners : (N, 2) array
+    corners : ndarray of shape (K, 2) and dtype int
         Corner coordinates as ``(row, col)``.
-    mask : 2D array
+    mask : ndarray of shape (M, N)
         Mask defining the local neighborhood of the corner used for the
         calculation of the central moment.
 
     Returns
     -------
-    orientations : (N, 1) array
+    orientations : ndarray of shape (K, 1)
         Orientations of corners in the range [-pi, pi].
 
     References

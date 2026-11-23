@@ -41,10 +41,12 @@ def _validate_inputs(image, markers, mask, connectivity):
 
     Returns
     -------
-    image, markers, mask : arrays
-        The validated and formatted arrays. Image will have dtype float64,
-        markers int32, and mask int8. If ``None`` was given for the mask,
-        it is a volume of all 1s.
+    image : ndarray of dtype float64
+        The validated `image`.
+    markers : ndarray of dtype int32
+        The validated `markers`.
+    mask : ndarray of dtype int8
+        The validated `mask`. If ``None``, it is a volume of all 1s.
 
     Raises
     ------
