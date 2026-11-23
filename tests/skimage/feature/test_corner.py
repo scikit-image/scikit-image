@@ -289,16 +289,20 @@ _NUMPY_PAD_MODE = {
 
 
 def _quadratic(size, ndim, curvatures):
-    """An image that is exactly a quadratic, and the Hessian it must report."""
-    coords = [c - size // 2 for c in np.indices((size,) * ndim, dtype=float)]
-    pairs = []
-    for i in range(ndim):
-        for j in range(i, ndim):
-            pairs.append((i, j))
-    image = np.zeros((size,) * ndim, dtype=float)
-    for (i, j), value in zip(pairs, curvatures):
-        image = image + (value / 2 if i == j else value) * coords[i] * coords[j]
-    return image
+    """An image whose Hessian is ``curvatures``, in upper-triangle order.
+
+    At a coordinate ``x`` measured from the centre, the value is
+    ``(1/2) x^T H x``. The half makes a pure second derivative equal the
+    diagonal of ``H``.
+    """
+    coords = np.indices((size,) * ndim, dtype=float).reshape(ndim, -1)
+    coords -= size // 2
+    rows, cols = np.triu_indices(ndim)
+    hessian = np.zeros((ndim, ndim))
+    hessian[rows, cols] = curvatures
+    hessian[cols, rows] = curvatures
+    values = np.sum(coords * (hessian @ coords), axis=0) / 2
+    return values.reshape((size,) * ndim)
 
 
 def _interior(ndim, sigma, truncate=8):
