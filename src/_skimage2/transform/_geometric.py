@@ -60,7 +60,7 @@ def _calc_center_normalize(points, scaling='rms'):
 
     Parameters
     ----------
-    points : (N, D) array
+    points : ndarray of shape (N, D)
         The coordinates of the image points.
     scaling : {'rms', 'mrs', 'raw'}, optional
         Scaling algorithm adjusting for magnitude of `points` after applying
@@ -127,12 +127,12 @@ def _apply_homogeneous(matrix, points):
         object with an `__array__` method [1]_ that returns a matrix with the
         correct dimensions can be used as input here. This includes all
         subclasses of :class:`ProjectiveTransform`, for example.
-    points : (N, D) array
+    points : ndarray of shape (N, D)
         The coordinates of the image points.
 
     Returns
     -------
-    new_points : (N, D) array
+    new_points : ndarray of shape (N, D)
         The transformed image points.
 
     References
@@ -176,9 +176,9 @@ def _umeyama(src, dst, estimate_scale):
 
     Parameters
     ----------
-    src : (M, N) array_like
+    src : array-like of shape (M, N)
         Source coordinates.
-    dst : (M, N) array_like
+    dst : array-like of shape (M, N)
         Destination coordinates.
     estimate_scale : bool
         Whether to estimate scaling factor.
@@ -1095,12 +1095,12 @@ class ProjectiveTransform(_HMatrixTransform):
 
         Parameters
         ----------
-        coords : (N, D) array_like
+        coords : array-like of shape (N, D)
             Source coordinates.
 
         Returns
         -------
-        coords_out : (N, D) array
+        coords_out : ndarray of shape (N, D)
             Destination coordinates.
 
         """
@@ -1690,9 +1690,9 @@ class PiecewiseAffineTransform(GeometricTransform):
 
         Parameters
         ----------
-        src : (N, D) array_like
+        src : array-like of shape (N, D)
             Source coordinates.
-        dst : (N, D) array_like
+        dst : array-like of shape (N, D)
             Destination coordinates.
 
         Returns

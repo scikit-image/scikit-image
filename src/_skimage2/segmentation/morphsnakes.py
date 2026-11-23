@@ -191,7 +191,7 @@ def inverse_gaussian_gradient(image, alpha=100.0, sigma=5.0):
 
     Parameters
     ----------
-    image : (M, N) or (L, M, N) array
+    image : ndarray of shape ([L,] M, N)
         Grayscale image or volume.
     alpha : float, optional
         Controls the steepness of the inversion. A larger value will make the
@@ -202,7 +202,7 @@ def inverse_gaussian_gradient(image, alpha=100.0, sigma=5.0):
 
     Returns
     -------
-    gimage : (M, N) or (L, M, N) array
+    gimage : ndarray of shape ([L,] M, N)
         Preprocessed image (or volume) suitable for
         `morphological_geodesic_active_contour`.
     """
@@ -229,7 +229,7 @@ def morphological_chan_vese(
 
     Parameters
     ----------
-    image : (M, N) or (L, M, N) array
+    image : ndarray of shape ([L,] M, N)
         Grayscale image or volume to be segmented.
     num_iter : uint
         Number of num_iter to run
@@ -259,7 +259,7 @@ def morphological_chan_vese(
 
     Returns
     -------
-    out : (M, N) or (L, M, N) array
+    out : ndarray of shape ([L,] M, N)
         Final segmentation (i.e., the final level set)
 
     See Also
@@ -343,7 +343,7 @@ def morphological_geodesic_active_contour(
 
     Parameters
     ----------
-    gimage : (M, N) or (L, M, N) array
+    gimage : ndarray of shape ([L,] M, N)
         Preprocessed image or volume to be segmented. This is very rarely the
         original image. Instead, this is usually a preprocessed version of the
         original image that enhances and highlights the borders (or other
@@ -384,7 +384,7 @@ def morphological_geodesic_active_contour(
 
     Returns
     -------
-    out : (M, N) or (L, M, N) array
+    out : ndarray of shape ([L,] M, N)
         Final segmentation (i.e., the final level set)
 
     See Also

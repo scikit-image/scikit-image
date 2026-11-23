@@ -41,7 +41,7 @@ def daisy(
 
     Parameters
     ----------
-    image : (M, N) array
+    image : ndarray of shape (M, N)
         Input image (grayscale).
     step : int, optional
         Distance between descriptor sampling points.

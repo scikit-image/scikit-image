@@ -148,9 +148,9 @@ def _disambiguate_shift(reference_image, moving_image, shift):
 
     Parameters
     ----------
-    reference_image : numpy array
+    reference_image : ndarray
         The reference (non-moving) image.
-    moving_image : numpy array
+    moving_image : ndarray
         The moving image: applying the shift to this image overlays it on the
         reference image. Must be the same shape as the reference image.
     shift : ndarray

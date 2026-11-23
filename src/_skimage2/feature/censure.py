@@ -263,7 +263,7 @@ class CENSURE(FeatureDetector):
 
         Parameters
         ----------
-        image : 2D ndarray
+        image : ndarray of shape (M, N)
             Input image.
 
         """

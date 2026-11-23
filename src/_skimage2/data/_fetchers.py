@@ -432,7 +432,7 @@ def brick():
 
     Returns
     -------
-    brick : (512, 512) uint8 image
+    brick : ndarray of shape (512, 512) and dtype uint8
         A small section of a brick wall.
 
     Notes
@@ -498,7 +498,7 @@ def grass():
 
     Returns
     -------
-    grass : (512, 512) uint8 image
+    grass : ndarray of shape (512, 512) and dtype uint8
         Some grass.
 
     Notes
@@ -546,7 +546,7 @@ def gravel():
 
     Returns
     -------
-    gravel : (512, 512) uint8 image
+    gravel : ndarray of shape (512, 512) and dtype uint8
         Grayscale gravel sample.
 
     Notes

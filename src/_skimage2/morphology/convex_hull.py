@@ -96,7 +96,7 @@ def convex_hull_image(
 
     Returns
     -------
-    hull : (M, N) array of bool
+    hull : ndarray of shape (M, N) and dtype bool
         Binary image with pixels in convex hull set to True.
 
     References

@@ -17,7 +17,7 @@ def _coords_inside_image(rr, cc, shape, val=None):
 
     Parameters
     ----------
-    rr, cc : (N,) ndarray of int
+    rr, cc : ndarray of shape (N,) and dtype int
         Indices of pixels.
     shape : tuple
         Image shape which is used to determine the maximum extent of output
@@ -52,7 +52,7 @@ def _line(Py_ssize_t r0, Py_ssize_t c0, Py_ssize_t r1, Py_ssize_t c1):
 
     Returns
     -------
-    rr, cc : (N,) ndarray of int
+    rr, cc : ndarray of shape (N,) and dtype int
         Indices of pixels that belong to the line.
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
@@ -269,7 +269,7 @@ def _circle_perimeter(Py_ssize_t r_o, Py_ssize_t c_o, Py_ssize_t radius,
 
     Returns
     -------
-    rr, cc : (N,) ndarray of int
+    rr, cc : ndarray of shape (N,) and dtype int
         Bresenham and Andres' method:
         Indices of pixels that belong to the circle perimeter.
         May be used to directly index into an array, e.g.
@@ -425,7 +425,7 @@ def _ellipse_perimeter(Py_ssize_t r_o, Py_ssize_t c_o, Py_ssize_t r_radius,
 
     Returns
     -------
-    rr, cc : (N,) ndarray of int
+    rr, cc : ndarray of shape (N,) and dtype int
         Indices of pixels that belong to the ellipse perimeter.
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
@@ -549,7 +549,7 @@ def _bezier_segment(Py_ssize_t r0, Py_ssize_t c0,
 
     Returns
     -------
-    rr, cc : (N,) ndarray of int
+    rr, cc : ndarray of shape (N,) and dtype int
         Indices of pixels that belong to the Bezier curve.
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
@@ -681,7 +681,7 @@ def _bezier_curve(Py_ssize_t r0, Py_ssize_t c0,
 
     Returns
     -------
-    rr, cc : (N,) ndarray of int
+    rr, cc : ndarray of shape (N,) and dtype int
         Indices of pixels that belong to the Bezier curve.
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
