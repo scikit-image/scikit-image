@@ -147,6 +147,7 @@ def test_plugin_deprecation_on_imread(kwarg):
             io.imread(path, **kwarg)
     assert len(record) == 1
     assert_stacklevel(record, offset=-2)
+    assert "_skimage2" not in str(record[0].message)
 
 
 @pytest.mark.parametrize(
@@ -162,6 +163,7 @@ def test_plugin_deprecation_on_imsave(kwarg, tmp_path):
         io.imsave(path, array, **kwarg)
     assert len(record) == 1
     assert_stacklevel(record, offset=-2)
+    assert "_skimage2" not in str(record[0].message)
 
 
 @pytest.mark.parametrize("kwarg", [{"plugin": None}, {"plugin": "imageio"}])
@@ -172,3 +174,4 @@ def test_plugin_deprecation_on_imread_collection(kwarg):
         io.imread_collection(pattern, **kwarg)
     assert len(record) == 1
     assert_stacklevel(record, offset=-2)
+    assert "_skimage2" not in str(record[0].message)

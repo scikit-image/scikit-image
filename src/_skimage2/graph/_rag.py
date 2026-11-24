@@ -284,7 +284,7 @@ class RAG(nx.Graph):
             the correct type---ready to fill with nodes and edges.
 
         """
-        return RAG()
+        return type(self)()
 
     def next_id(self):
         """Returns the `id` for the new node to be inserted.

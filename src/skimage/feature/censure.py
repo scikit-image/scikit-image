@@ -14,6 +14,8 @@ __all__ = [
     'STAR_SHAPE',
 ]
 
+# Make the shim classes for the base classes first.
+from . import util  # noqa: F401
 from skimage._doctest_adapters import adapt_doctests
 
 adapt_doctests(globals())

@@ -80,6 +80,11 @@ class TestSave:
             imsave(fname, a)
         assert_stacklevel(record)
 
+    def test_low_contrast_save(self, tmp_path):
+        with pytest.warns(UserWarning, match=r'.* is a low contrast image') as record:
+            imsave(tmp_path / 'low_contrast.png', np.zeros((5, 5), np.uint8))
+        assert_stacklevel(record)
+
 
 def test_return_class():
     testing.assert_equal(type(imread(fetch('data/color.png'))), np.ndarray)
