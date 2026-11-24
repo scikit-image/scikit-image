@@ -935,7 +935,7 @@ def rgbcie2rgb(rgbcie, *, channel_axis=-1):
 
 @channel_as_last_axis(multichannel_output=False)
 def rgb2gray(rgb, *, channel_axis=-1):
-    """Compute luminance of an RGB image.
+    """Compute luma (Y′) of an RGB image.
 
     Parameters
     ----------
@@ -946,7 +946,7 @@ def rgb2gray(rgb, *, channel_axis=-1):
     Returns
     -------
     out : ndarray
-        The luminance image - an array which is the same size as the input
+        The luma image - an array which is the same size as the input
         array, but with the channel dimension removed.
 
     Raises
@@ -965,7 +965,7 @@ def rgb2gray(rgb, *, channel_axis=-1):
 
     References
     ----------
-    .. [1] http://poynton.ca/PDFs/ColorFAQ.pdf
+    .. [1] https://web.archive.org/web/20240109183817/https://poynton.ca/PDFs/ColorFAQ.pdf
 
     Examples
     --------
