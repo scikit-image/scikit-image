@@ -67,8 +67,8 @@ def radon(image, theta=None, circle=True, *, preserve_range=False):
         shape_min = min(image.shape)
         radius = shape_min // 2
         img_shape = np.array(image.shape)
-        coords = np.array(np.ogrid[: image.shape[0], : image.shape[1]], dtype=object)
-        dist = ((coords - img_shape // 2) ** 2).sum(0)
+        coords = np.ogrid[: image.shape[0], : image.shape[1]]
+        dist = sum((c - s // 2) ** 2 for c, s in zip(coords, image.shape))
         outside_reconstruction_circle = dist > radius**2
         if np.any(image[outside_reconstruction_circle]):
             warn(
