@@ -333,17 +333,18 @@ def test_hessian_gaussian_exact_on_quadratic(sigma, ndim, size):
         assert_allclose(got[i][inner], expected, atol=tol, rtol=0)
 
 
-@pytest.mark.parametrize(
-    'mode, cval',
-    (
-        ('nearest', 0),
-        ('reflect', 0),
-        ('mirror', 0),
-        ('constant', 0),
-        ('constant', 99),
-        ('wrap', 0),
-    ),
+# bounary mode, cval pairs at which to test.
+BOUNDARY_PARAMS = (
+    ('nearest', 0),
+    ('reflect', 0),
+    ('mirror', 0),
+    ('constant', 0),
+    ('constant', 99),
+    ('wrap', 0),
 )
+
+
+@pytest.mark.parametrize('mode, cval', BOUNDARY_PARAMS)
 def test_hessian_gaussian_applies_the_boundary_rule_once(mode, cval):
     """We extend each axis once with boundary conditions.
 
@@ -388,17 +389,7 @@ def test_hessian_gaussian_near_0_to_constant(sigma):
         assert_allclose(element[inner], 0, atol=1e-15)
 
 
-@pytest.mark.parametrize(
-    'mode, cval',
-    (
-        ('nearest', 0),
-        ('reflect', 0),
-        ('mirror', 0),
-        ('constant', 0),
-        ('constant', 99),
-        ('wrap', 0),
-    ),
-)
+@pytest.mark.parametrize('mode, cval', BOUNDARY_PARAMS)
 def test_hessian_gaussian_matches_one_2d_convolution(mode, cval):
     """Each element matches one correlation with outer product of its kernels.
 
@@ -423,17 +414,7 @@ def test_hessian_gaussian_matches_one_2d_convolution(mode, cval):
         assert_allclose(element, expected, atol=tol, rtol=0)
 
 
-@pytest.mark.parametrize(
-    'mode, cval',
-    (
-        ('nearest', 0),
-        ('reflect', 0),
-        ('mirror', 0),
-        ('constant', 0),
-        ('constant', 99),
-        ('wrap', 0),
-    ),
-)
+@pytest.mark.parametrize('mode, cval', BOUNDARY_PARAMS)
 def test_hessian_gaussian_matches_one_3d_convolution(mode, cval):
     """Each element matches one correlation with outer product of its kernels.
 
