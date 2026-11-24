@@ -31,12 +31,12 @@ images = (
 for name in images:
     caller = getattr(ski.data, name)
     image = caller()
-    plt.figure()
-    plt.title(name)
+    fig, ax = plt.subplots()
+    ax.set_title(name)
     if image.ndim == 2:
-        plt.imshow(image, cmap=plt.cm.gray)
+        ax.imshow(image, cmap=plt.cm.gray)
     else:
-        plt.imshow(image)
+        ax.imshow(image)
 
 plt.show()
 
@@ -61,4 +61,4 @@ further_img = np.full((300, 300), 255)
 for xpos in [100, 150, 200]:
     further_img[150 - 10 : 150 + 10, xpos - 10 : xpos + 10] = 0
 axs[2, 2].imshow(further_img, cmap=plt.cm.gray)
-plt.subplots_adjust(wspace=-0.3, hspace=0.1)
+fig.subplots_adjust(wspace=-0.3, hspace=0.1)

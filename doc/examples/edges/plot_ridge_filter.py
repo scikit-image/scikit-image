@@ -55,7 +55,8 @@ image = color.rgb2gray(data.retina())[300:700, 700:900]
 cmap = plt.cm.gray
 
 plt.rcParams["axes.titlesize"] = "medium"
-axes = plt.figure(figsize=(10, 4)).subplots(2, 9)
+fig = plt.figure(figsize=(10, 4))
+axes = fig.subplots(2, 9)
 for i, black_ridges in enumerate([True, False]):
     for j, (func, sigmas) in enumerate(
         [
@@ -82,5 +83,5 @@ for i, black_ridges in enumerate([True, False]):
         axes[i, j].set_xticks([])
         axes[i, j].set_yticks([])
 
-plt.tight_layout()
+fig.tight_layout()
 plt.show()

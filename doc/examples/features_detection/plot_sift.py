@@ -114,5 +114,5 @@ ax[1, 1].set_title(
     "Original Image vs. Transformed Image\n(subset of matches for visibility)"
 )
 
-plt.tight_layout()
+fig.tight_layout()
 plt.show()

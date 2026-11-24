@@ -72,5 +72,5 @@ for index, obj in enumerate([square, disk]):
 
 ax[0].set_title('Square')
 ax[1].set_title('Disk')
-plt.tight_layout()
+fig.tight_layout()
 plt.show()

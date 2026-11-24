@@ -79,7 +79,7 @@ ax[5].plot(max_shifts, all_psnr, 'k.-')
 ax[5].set_ylabel('PSNR (dB)')
 ax[5].set_xlabel('max cycle shift along each axis')
 ax[5].grid(True)
-plt.subplots_adjust(wspace=0.35, hspace=0.35)
+fig.subplots_adjust(wspace=0.35, hspace=0.35)
 
 # Annotate with a cyan arrow on the 6x6 case vs. no cycle shift case to
 # illustrate a region with reduced block-like artifact with cycle shifting

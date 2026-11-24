@@ -97,7 +97,7 @@ def plot_filtered(lowpass_filtered, highpass_filtered, cutoffs):
     for ax in axes.ravel():
         ax.set_xticks([])
         ax.set_yticks([])
-    plt.tight_layout()
+    fig.tight_layout()
     return fig, axes
 
 

@@ -35,4 +35,4 @@ ax[1].imshow(out2)
 for a in ax:
     a.axis('off')
 
-plt.tight_layout()
+fig.tight_layout()

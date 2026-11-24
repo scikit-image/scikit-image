@@ -131,5 +131,5 @@ axes[1, 1].imshow(rotated_similarity, cmap='hot', alpha=0.5)
 axes[1, 1].set_title('Rotated image with overlaid similarity')
 axes[1, 1].axis('off')
 
-plt.tight_layout()
+fig.tight_layout()
 plt.show()

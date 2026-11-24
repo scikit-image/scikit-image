@@ -31,7 +31,7 @@ axes[1].set_title('Sobel Edge Detection')
 for ax in axes:
     ax.axis('off')
 
-plt.tight_layout()
+fig.tight_layout()
 plt.show()
 
 ######################################################################
@@ -86,7 +86,7 @@ axes[3].set_title('Scharr - Sobel')
 for ax in axes:
     ax.axis('off')
 
-plt.tight_layout()
+fig.tight_layout()
 plt.show()
 
 ######################################################################

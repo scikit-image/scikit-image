@@ -80,5 +80,5 @@ out = segmentation.mark_boundaries(out, labels2, (0, 0, 0))
 
 fig, ax = plt.subplots()
 ax.imshow(out)
-plt.tight_layout()
+fig.tight_layout()
 plt.show()

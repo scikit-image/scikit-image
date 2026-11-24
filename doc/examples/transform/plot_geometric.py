@@ -72,7 +72,7 @@ ax[2].imshow(back_rotated, cmap=plt.cm.gray)
 for a in ax:
     a.axis('off')
 
-plt.tight_layout()
+fig.tight_layout()
 
 ######################################################################
 # Parameter estimation
@@ -128,7 +128,7 @@ ax[1].imshow(warped, cmap=plt.cm.gray)
 for a in ax:
     a.axis('off')
 
-plt.tight_layout()
+fig.tight_layout()
 plt.show()
 
 ######################################################################

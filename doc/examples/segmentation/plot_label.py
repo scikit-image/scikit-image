@@ -57,5 +57,5 @@ for region in regionprops(label_image):
         ax.add_patch(rect)
 
 ax.set_axis_off()
-plt.tight_layout()
+fig.tight_layout()
 plt.show()

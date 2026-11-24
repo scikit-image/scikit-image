@@ -53,5 +53,5 @@ ax[1].set_title('Transformed Image')
 for a in ax:
     a.axis('off')
 
-plt.tight_layout()
+fig.tight_layout()
 plt.show()

@@ -71,5 +71,5 @@ ax4.set_title('maskSLIC')
 for ax in ax_arr.ravel():
     ax.set_axis_off()
 
-plt.tight_layout()
+fig.tight_layout()
 plt.show()

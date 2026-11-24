@@ -42,5 +42,5 @@ for n in range(0, len(imgs)):
     ax[n].set_title(titles[n])
     ax[n].axis('off')
 
-plt.tight_layout()
+fig.tight_layout()
 plt.show()

@@ -44,6 +44,6 @@ ax[1, 1].set_title('Hysteresis threshold')
 for a in ax.ravel():
     a.axis('off')
 
-plt.tight_layout()
+fig.tight_layout()
 
 plt.show()
