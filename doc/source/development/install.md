@@ -195,7 +195,7 @@ More rarely, you may also need:
   :literal:
 ```
 
-## Help with contributor installation
+## Help with development setup
 
 See {ref}`additional-help`.
 

@@ -40,19 +40,11 @@ can be contributed to scikit-image.
      git clone --origin upstream git@github.com:scikit-image/scikit-image
      ```
 
-   :::{note}
-   We use `git@github.com` (SSH) in the examples below. If you don't have SSH keys set up or your network blocks SSH, use HTTPS instead:
+     If you don't have SSH keys set up or your network blocks SSH, use HTTPS instead:
 
-   ```sh
-   git clone --origin upstream https://github.com/scikit-image/scikit-image.git
-   ```
-
-   And when adding your fork remote:
-
-   ```sh
-   git remote add codemonkey https://github.com/codemonkey/scikit-image.git
-   ```
-   :::
+     ```
+     git clone --origin upstream https://github.com/scikit-image/scikit-image.git
+     ```
 
    - Change into the root directory of the cloned repository:
 
@@ -68,6 +60,13 @@ can be contributed to scikit-image.
 
      ```
      git remote add codemonkey git@github.com:codemonkey/scikit-image
+     git fetch codemonkey
+     ```
+
+     Or using HTTPS:
+
+     ```
+     git remote add codemonkey https://github.com/codemonkey/scikit-image.git
      git fetch codemonkey
      ```
 
