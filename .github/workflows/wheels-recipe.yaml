@@ -43,7 +43,8 @@ jobs:
         env:
           # Build all variants of this version, including free-threaded
           CIBW_BUILD: ${{ matrix.python }}*
-          # GIL builds opt in to the stable ABI (abi3)
+          # GIL builds opt in to the stable ABI (abi3); exclude_v2 (independent)
+          # drops the skimage2 namespace.
           CIBW_CONFIG_SETTINGS: ${{ inputs.exclude_v2 && 'setup-args=-Dexclude-v2=true' || '' }}${{ !endsWith(matrix.python, 't') && ' setup-args=-Dpython.allow_limited_api=true' || '' }}
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -78,7 +79,8 @@ jobs:
         env:
           # Build all variants of this version, including free-threaded
           CIBW_BUILD: ${{ matrix.python }}*
-          # GIL builds opt in to the stable ABI (abi3)
+          # GIL builds opt in to the stable ABI (abi3); exclude_v2 (independent)
+          # drops the skimage2 namespace.
           CIBW_CONFIG_SETTINGS: ${{ inputs.exclude_v2 && 'setup-args=-Dexclude-v2=true' || '' }}${{ !endsWith(matrix.python, 't') && ' setup-args=-Dpython.allow_limited_api=true' || '' }}
           CC: clang-cl
           CXX: clang-cl
@@ -114,7 +116,8 @@ jobs:
         env:
           # Build all variants of this version, including free-threaded
           CIBW_BUILD: ${{ matrix.python }}*${{ matrix.libc }}*
-          # GIL builds opt in to the stable ABI (abi3)
+          # GIL builds opt in to the stable ABI (abi3); exclude_v2 (independent)
+          # drops the skimage2 namespace.
           CIBW_CONFIG_SETTINGS: ${{ inputs.exclude_v2 && 'setup-args=-Dexclude-v2=true' || '' }}${{ !endsWith(matrix.python, 't') && ' setup-args=-Dpython.allow_limited_api=true' || '' }}
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
