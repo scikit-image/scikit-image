@@ -2,6 +2,7 @@ py3.extension_module('transform',
   cython_gen.process('transform.pyx'),
   c_args: cython_c_args,
   dependencies: [np_dep],
+  limited_api: limited_api_ver,
   install: true,
   subdir: '_skimage2/_shared'
 )
@@ -10,6 +11,7 @@ py3.extension_module('fast_exp',
   cython_gen.process('fast_exp.pyx'),
   c_args: cython_c_args,
   dependencies: [np_dep],
+  limited_api: limited_api_ver,
   install: true,
   subdir: '_skimage2/_shared'
 )
@@ -18,6 +20,7 @@ py3.extension_module('geometry',
   cython_gen.process('geometry.pyx'),
   c_args: cython_c_args,
   dependencies: [np_dep],
+  limited_api: limited_api_ver,
   install: true,
   subdir: '_skimage2/_shared'
 )
@@ -26,6 +29,7 @@ py3.extension_module('interpolation',
   cython_gen.process('interpolation.pyx'),
   c_args: cython_c_args,
   dependencies: [np_dep],
+  limited_api: limited_api_ver,
   install: true,
   subdir: '_skimage2/_shared'
 )

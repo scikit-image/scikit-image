@@ -8,6 +8,7 @@ foreach ext: cpp_extensions
     cpp_args: cython_cpp_args,
     include_directories: ['../../_skimage2/_shared'],
     dependencies: [np_dep],
+    limited_api: limited_api_ver,
     install: true,
     subdir: '_skimage2/util'
   )
