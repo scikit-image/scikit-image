@@ -33,13 +33,13 @@ typedef struct {
 // Initialize pixels. See the explanation of the pixel class in header above.
 // Initially every pixel is assumed to belong to a group consisting of only
 // itself.
-void initialisePIXELs(double *wrapped_image, unsigned char *input_mask,
+void initialisePIXELs(const double *wrapped_image, const unsigned char *input_mask,
                       unsigned char *extended_mask, PIXELM *pixel,
                       intptr_t n_j, intptr_t n_i,
                       bitgen_t* bitgen_state) {
   PIXELM *pixel_pointer = pixel;
-  double *wrapped_image_pointer = wrapped_image;
-  unsigned char *input_mask_pointer = input_mask;
+  const double *wrapped_image_pointer = wrapped_image;
+  const unsigned char *input_mask_pointer = input_mask;
   unsigned char *extended_mask_pointer = extended_mask;
   intptr_t i, j;
 
@@ -68,12 +68,12 @@ void initialisePIXELs(double *wrapped_image, unsigned char *input_mask,
 //-------------------end initialize pixels -----------
 
 
-void extend_mask(unsigned char *input_mask, unsigned char *extended_mask,
+void extend_mask(const unsigned char *input_mask, unsigned char *extended_mask,
                  intptr_t n_j, intptr_t n_i, params_t *params) {
   intptr_t i, j;
   intptr_t n_j_plus_one = n_j + 1;
   intptr_t n_j_minus_one = n_j - 1;
-  unsigned char *IMP = input_mask + n_j + 1;  // input mask pointer
+  const unsigned char *IMP = input_mask + n_j + 1;  // input mask pointer
   unsigned char *EMP = extended_mask + n_j + 1;  // extended mask
                                                          // pointer
 
@@ -169,12 +169,12 @@ void extend_mask(unsigned char *input_mask, unsigned char *extended_mask,
   }
 }
 
-void calculate_unreliability(double *wrappedImage, PIXELM *pixel, intptr_t n_j,
+void calculate_unreliability(const double *wrappedImage, PIXELM *pixel, intptr_t n_j,
                            intptr_t n_i, params_t *params) {
   intptr_t n_j_plus_one = n_j + 1;
   intptr_t n_j_minus_one = n_j - 1;
   PIXELM *pixel_pointer = pixel + n_j_plus_one;
-  double *WIP =
+  const double *WIP =
       wrappedImage + n_j_plus_one;  // WIP is the wrapped image pointer
   double H, V, D1, D2;
   intptr_t i, j;
@@ -201,7 +201,7 @@ void calculate_unreliability(double *wrappedImage, PIXELM *pixel, intptr_t n_j,
   if (params->x_connectivity == 1) {
     // calculating the unreliability for the left border of the image
     PIXELM *pixel_pointer = pixel + n_j;
-    double *WIP = wrappedImage + n_j;
+    const double *WIP = wrappedImage + n_j;
 
     for (i = 1; i < n_i - 1; ++i) {
       if (pixel_pointer->extended_mask == NOMASK) {
@@ -242,7 +242,7 @@ void calculate_unreliability(double *wrappedImage, PIXELM *pixel, intptr_t n_j,
   if (params->y_connectivity == 1) {
     // calculating the unreliability for the top border of the image
     PIXELM *pixel_pointer = pixel + 1;
-    double *WIP = wrappedImage + 1;
+    const double *WIP = wrappedImage + 1;
 
     for (i = 1; i < n_j - 1; ++i) {
       if (pixel_pointer->extended_mask == NOMASK) {
@@ -492,10 +492,10 @@ void unwrapImage(PIXELM *pixel, intptr_t n_j, intptr_t n_i) {
 }
 
 // set the masked pixels (mask = 0) to the minimum of the unwrapper phase
-void maskImage(PIXELM *pixel, unsigned char *input_mask, intptr_t n_j,
+void maskImage(PIXELM *pixel, const unsigned char *input_mask, intptr_t n_j,
                intptr_t n_i) {
   PIXELM *pointer_pixel = pixel;
-  unsigned char *IMP = input_mask;  // input mask pointer
+  const unsigned char *IMP = input_mask;  // input mask pointer
   double min = DBL_MAX;
   intptr_t i;
   intptr_t image_size = n_j * n_i;
@@ -541,8 +541,8 @@ void returnImage(PIXELM *pixel, double *unwrapped_image, intptr_t n_j,
 }
 
 // the main function of the unwrapper
-int unwrap2D(double *wrapped_image, double *UnwrappedImage,
-        unsigned char *input_mask, intptr_t n_j, intptr_t n_i,
+int unwrap2D(const double *wrapped_image, double *UnwrappedImage,
+        const unsigned char *input_mask, intptr_t n_j, intptr_t n_i,
         int wrap_around_j, int wrap_around_i,
         bitgen_t* bitgen_state) {
   params_t params = {TWOPI, wrap_around_j, wrap_around_i, 0};
