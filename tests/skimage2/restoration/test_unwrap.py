@@ -295,3 +295,19 @@ def test_unwrap_3d_all_masked():
     assert_(np.ma.isMaskedArray(unwrap))
     assert_(np.sum(unwrap.mask) == 999)  # all but one masked
     assert_(unwrap[0, 0, 0] == 0)
+
+
+@testing.parametrize("ndim", [2, 3])
+def test_unwrap_non_c_contiguous(ndim):
+    shape = (16,) * ndim
+    phase = 0.8 * np.indices(shape).sum(axis=0)
+    image = np.angle(np.exp(1j * phase))
+
+    image = image.transpose(tuple(reversed(range(ndim))))
+
+    assert not image.flags.c_contiguous
+
+    result = unwrap_phase(image, rng=0)
+    expected = unwrap_phase(np.ascontiguousarray(image), rng=0)
+
+    assert_array_equal(result, expected)
