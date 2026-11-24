@@ -140,7 +140,7 @@ package = 'skimage'
 
 [tool.spin.commands]
 Build = [
-    'spin.cmds.meson.build',
+    '.spin/cmds.py:build',
     'spin.cmds.pip.install',
     '.spin/cmds.py:test',
     '.spin/cmds.py:sdist',

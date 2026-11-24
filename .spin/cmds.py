@@ -10,6 +10,24 @@ _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 @click.option(
+    "--abi3/--no-abi3",
+    default=False,
+    help="Build against the Python limited API (stable ABI).",
+)
+@spin.util.extend_command(spin.cmds.meson.build)
+def build(*, parent_callback, abi3, **kwargs):
+    """Pass ``--abi3`` to build against the Python limited API (see the
+    ``python.allow_limited_api`` option in ``meson.build``), which produces a
+    stable-ABI (abi3) wheel.
+    """
+    if abi3:
+        kwargs["meson_args"] = tuple(kwargs.get("meson_args", ())) + (
+            "-Dpython.allow_limited_api=true",
+        )
+    parent_callback(**kwargs)
+
+
+@click.option(
     "--install-deps/--no-install-deps",
     default=False,
     help="Install dependencies before building",
