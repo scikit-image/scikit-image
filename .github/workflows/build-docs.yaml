@@ -40,6 +40,9 @@ jobs:
       - name: Run Skimage2 migration doctests
         run: |
           python doc/tools/run_migration_doctests.py
+      - name: Test doctests in user guide pages
+        run: |
+          make -C doc doctest-pages
       - name: Push docs
         run: |
           eval "$(ssh-agent -s)"

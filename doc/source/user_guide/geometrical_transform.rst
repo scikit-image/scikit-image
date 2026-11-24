@@ -1,3 +1,5 @@
+.. _geometrical_transform:
+
 ============================================
 Geometrical transformations of images
 ============================================

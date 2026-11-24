@@ -70,6 +70,11 @@ jobs:
           paths:
             - ~/.cache/ccache
       - run:
+          name: Test doctests in user guide pages
+          command: |
+            cd doc
+            PYTHON=python3 make doctest-pages
+      - run:
           name: Build doc
           no_output_timeout: 50m
           command: |
