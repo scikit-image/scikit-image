@@ -262,8 +262,10 @@ def hessian_matrix(
     -------
     H_elems : list of ndarray
         Upper-diagonal elements of the hessian matrix for each pixel in the
-        input image. In 2D, this will be a three element list containing [Hrr,
-        Hrc, Hcc]. In nD, the list will contain ``(n**2 + n) / 2`` arrays.
+        input image. In 2D, this will be a three element list containing arrays
+        [Hrr, Hrc, Hcc], each of the same shape as `image`, where ``Hrr`` is
+        the row/row element of the Hessian. In nD, the list will contain
+        ``(n**2 + n) / 2`` arrays.
 
 
     Notes

@@ -12,7 +12,9 @@ from _skimage2 import img_as_float
 from _skimage2._shared.utils import _supported_float_type
 from _skimage2.color import rgb2gray
 from _skimage2.data import camera, retina
-from _skimage2.filters import frangi, hessian, meijering, sato
+from _skimage2.feature import hessian_matrix, hessian_matrix_eigvals
+from _skimage2.filters import frangi, frangi_hessian_norms, hessian, meijering, sato
+from _skimage2.filters.ridges import _scaled_hessian_frob
 from _skimage2.util import crop, invert
 
 
@@ -296,6 +298,207 @@ def test_border_management(func, tol):
     assert abs(full_mean - inside_mean) < tol
     assert abs(full_mean - border_mean) < tol
     assert abs(inside_mean - border_mean) < tol
+
+
+# `frangi` and scales
+#
+# When correct, Frangi should normalize vesselness scores across smoothing
+# levels, so wide vessels are not penalized by the smoothing.  Otherwise, the
+# responses of a ridge fall monotonically with greater smoothing, so the
+# smallest scale always wins.  gh-7711 reported that `frangi` lost this
+# normalization in version 0.20.0.  The tests below assert we do now find
+# vessel-like features across scales.
+#
+# Every constant below is measured in the workbooks notebook
+# https://scikit-image.org/skimage-workbooks/frangi-testing, which shows what
+# each test catches and which of these an unrepaired `frangi` fails.
+
+
+@pytest.mark.parametrize('shape', [(15, 17), (9, 10, 11)])
+@pytest.mark.parametrize('sigma', [1.0, 2.5])
+def test_scaled_hessian_frob_matches_eigenvalue_form(shape, sigma):
+    """`_scaled_hessian_frob` gives `S` as eq. (12) of Frangi et al. (1998).
+
+    Eq. (12) takes the root of the summed squared Hessian eigenvalues.  The
+    helper instead sums the squared elements of the upper triangle that
+    `hessian_matrix` returns, counting off-diagonal elements twice.  The two
+    agree on a symmetric matrix only if that weighting is right.
+    """
+    rng = np.random.default_rng(1998)
+    image = rng.random(shape)
+    H_elems = hessian_matrix(image, sigma, use_gaussian_derivatives=True)
+    eigvals = hessian_matrix_eigvals(H_elems)
+    expected = sigma**2 * np.sqrt(np.sum(eigvals**2, axis=0))
+    assert_allclose(
+        _scaled_hessian_frob(H_elems, sigma), expected, rtol=1e-10, atol=1e-12
+    )
+
+
+def _get_default_gamma(image, sigmas, mode='reflect', cval=0):
+    """Half largest Hessian norm over `sigmas`: the value `gamma=None` gives."""
+    norms = frangi_hessian_norms(image, sigmas, mode=mode, cval=cval)
+    peaks = [np.max(norm) for norm in norms]
+    gamma = max(peaks) / 2 if peaks else 1.0
+    return 1.0 if gamma == 0 else gamma
+
+
+FRANGI_WIDTHS = (1.0, 2.0, 4.0, 8.0)
+FRANGI_CENTRES = (28, 75, 122, 172)
+FRANGI_SIGMAS = (1, 2, 3, 4, 6, 8, 10, 12)
+
+
+def test_frangi_hessian_norms_empty_sigmas():
+    image = np.zeros((8, 8))
+    assert frangi_hessian_norms(image, [], 'reflect', 0) == []
+
+
+def test_frangi_hessian_norms_rejects_wrong_ndim():
+    with pytest.raises(ValueError):
+        frangi_hessian_norms(np.zeros(8), [1], 'reflect', 0)
+    with pytest.raises(ValueError):
+        frangi_hessian_norms(np.zeros((4, 4, 4, 4)), [1], 'reflect', 0)
+
+
+def test_frangi_default_gamma_matches_hessian_norms():
+    image = img_as_float(camera())[::8, ::8]
+    sigmas = (1, 3, 5)
+    gamma = _get_default_gamma(image, sigmas)
+    norms = frangi_hessian_norms(image, sigmas, 'reflect', 0)
+    peaks = [np.max(norm) for norm in norms]
+    assert_allclose(gamma, max(peaks) / 2, rtol=1e-12)
+    assert_allclose(
+        frangi(image, sigmas=sigmas, gamma=None),
+        frangi(image, sigmas=sigmas, gamma=gamma),
+    )
+
+
+def test_frangi_flat_image_default_gamma():
+    """All-zero input must not divide by zero when resolving ``gamma=None``."""
+    image = np.zeros((16, 16))
+    norms = frangi_hessian_norms(image, (1, 3), 'reflect', 0)
+    assert len(norms) == 2
+    assert all(np.all(n == 0) for n in norms)
+    assert _get_default_gamma(image, (1, 3)) == 1.0
+    out = frangi(image, (1, 3), gamma=None)
+    assert_array_equal(out, np.zeros_like(image))
+    assert np.isfinite(out).all()
+
+
+def test_frangi_empty_sigmas_default_gamma():
+    """Empty ``sigmas`` resolves ``gamma=None`` to 1 and returns zeros."""
+    image = img_as_float(camera())[::8, ::8]
+    assert _get_default_gamma(image, []) == 1.0
+    assert_array_equal(frangi(image, sigmas=[], gamma=None), np.zeros_like(image))
+
+
+def test_frangi_hessian_norms_forwards_mode_cval():
+    """Border mode and cval must reach the Hessian, changing edge structure."""
+    image = np.zeros((32, 32))
+    image[8:24, 8:24] = 1.0
+    sigmas = (3,)
+    reflect = frangi_hessian_norms(image, sigmas, 'reflect', 0)[0]
+    constant = frangi_hessian_norms(image, sigmas, 'constant', 1)[0]
+    assert not np.allclose(reflect, constant)
+
+
+@pytest.fixture
+def frangi_bars():
+    """Dark bars of four widths on a light ground, and their centre probes.
+
+    A scale-normalised ridge filter must score these different widths alike,
+    and must find each with a filter of matching size.
+    """
+    size = 200
+    columns = np.indices((size, size), dtype=float)[1]
+    image = np.ones((size, size))
+    # Add the bars to the image.
+    probes = []  # Example coordinate for bar in image.
+    for width, centre in zip(FRANGI_WIDTHS, FRANGI_CENTRES):
+        image -= np.exp(-((columns - centre) ** 2) / (2 * width**2))
+        probes.append((size // 2, centre))
+    return image, probes
+
+
+def test_frangi_score_does_not_depend_on_bar_width(frangi_bars):
+    """Four bars of the same contrast but different widths must score alike."""
+    image, probes = frangi_bars
+    scores = [frangi(image, sigmas=FRANGI_SIGMAS)[probe] for probe in probes]
+    # Without the sigma ** 2 correction scores span a factor of 220.
+    assert min(scores) / max(scores) > 0.9
+
+
+def test_frangi_ignores_the_order_of_sigmas(frangi_bars):
+    """`sigmas` is a set of scales, so its order must not matter."""
+    image, _ = frangi_bars
+    reference = frangi(image, sigmas=(1, 3, 5))
+    for order in ((1, 5, 3), (3, 1, 5), (3, 5, 1), (5, 1, 3), (5, 3, 1)):
+        assert_array_equal(frangi(image, sigmas=order), reference)
+
+
+def test_frangi_agrees_with_sato_about_scale(frangi_bars):
+    """Sato and Frangi must nominate the same scale for the same bar.
+
+    We can only compare results of passing single sigmas with `gamma` held
+    fixed. Otherwise, with `gamma=None`, gamma resolves to half the largest
+    Hessian norm *of the scales it was given*, so a call carrying one sigma
+    takes `gamma` from that sigma alone. For a single sigma, default `gamma` is
+    `S.max() / 2`, so `S.max() / gamma` is 2 by construction, and the
+    structuredness term `1 - exp(-S ** 2 / 2 gamma ** 2)` is `1 - exp(-2)` at
+    the strongest pixel of every scale.  As a result, results from different
+    single sigmas are not comparable unless `gamma` is supplied explicitly.
+
+    Not every fixed value of `gamma` is useful.  A `gamma` far below the
+    Hessian norms saturates the structuredness term to 1 at every scale, and
+    the scan across sigmas then picks a scale from blobness alone.  We use the
+    value that `gamma=None` gives when using the `FRANGI_SIGMAS` values.
+    """
+    image, probes = frangi_bars
+    # Fix Frangi gamma for repeat calls across sigmas.
+    gamma = _get_default_gamma(image, FRANGI_SIGMAS)
+    for probe in probes:
+        sato_scales = []
+        frangi_scales = []
+        for s in FRANGI_SIGMAS:
+            sato_scales.append(sato(image, sigmas=[s], mode='reflect')[probe])
+            frangi_scales.append(
+                frangi(image, sigmas=[s], gamma=gamma, mode='reflect')[probe]
+            )
+        # They identify the same scale.
+        assert np.argmax(sato_scales) == np.argmax(frangi_scales)
+
+
+def test_frangi_rejects_the_wrong_polarity():
+    """`black_ridges` selects the dark or the bright line, not both."""
+    size = 128
+    mid = size // 2
+    dark_c, bright_c = size // 3, 2 * size // 3
+    image = np.zeros((size, size))
+    image[:, dark_c] = -1
+    image[:, bright_c] = 1
+    dark_at = (mid, dark_c)
+    bright_at = (mid, bright_c)
+
+    dark_mode = frangi(image, sigmas=[2])
+    assert dark_mode[dark_at] > 0
+    assert dark_mode[bright_at] == 0
+
+    bright_mode = frangi(image, sigmas=[2], black_ridges=False)
+    assert bright_mode[bright_at] > 0
+    assert bright_mode[dark_at] == 0
+
+
+@pytest.mark.parametrize('factor', [1e-6, 1e-4, 1e2])
+def test_frangi_is_invariant_to_brightness_units(factor):
+    """With `gamma=None` every term is a ratio, so scaling must change nothing.
+
+    The paper calls the geometric ratios "grey-level invariant".
+    """
+    image = img_as_float(camera())[::4, ::4]
+    assert_allclose(
+        frangi(image * factor, sigmas=(1, 3, 5)),
+        frangi(image, sigmas=(1, 3, 5)),
+        atol=1e-6,
+    )
 
 
 # The `alpha` parameter of `meijering`.
