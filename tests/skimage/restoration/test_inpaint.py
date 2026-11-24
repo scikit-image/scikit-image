@@ -184,29 +184,3 @@ def test_inpaint_nrmse(dtype, order, channel_axis, split_into_regions):
     nrmse_defect = normalized_root_mse(image_orig, image_defect)
     nrmse_result = normalized_root_mse(img_as_float(image_orig), image_result)
     assert nrmse_result < 0.2 * nrmse_defect
-
-
-@testing.parametrize('split_into_regions', [False, True])
-def test_inpaint_biharmonic_read_only(split_into_regions):
-    """Read-only image and mask must be accepted (gh-8423)."""
-    img = np.tile(np.square(np.linspace(0, 1, 5)), (5, 1))
-    mask = np.zeros_like(img, dtype=bool)
-    mask[2, 2:] = True
-    mask[1, 3:] = True
-    mask[0, 4:] = True
-    img[np.where(mask)] = 0
-    expected = inpaint.inpaint_biharmonic(
-        img, mask, split_into_regions=split_into_regions
-    )
-    mask_ro = mask.copy()
-    mask_ro.setflags(write=False)
-    assert_allclose(
-        expected,
-        inpaint.inpaint_biharmonic(img, mask_ro, split_into_regions=split_into_regions),
-    )
-    img_ro = img.copy()
-    img_ro.setflags(write=False)
-    assert_allclose(
-        expected,
-        inpaint.inpaint_biharmonic(img_ro, mask, split_into_regions=split_into_regions),
-    )

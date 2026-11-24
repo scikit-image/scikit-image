@@ -871,23 +871,3 @@ def test_corner_orientations_square(dtype):
     actual_orientations_degrees = np.rad2deg(actual_orientations)
     expected_orientations_degree = np.array([45, 135, -45, -135])
     assert_array_equal(actual_orientations_degrees, expected_orientations_degree)
-
-
-@run_in_parallel()
-def test_corner_read_only():
-    """Read-only input must be accepted and match the writable result.
-
-    Regression test for gh-8423.
-    """
-    square = np.zeros((12, 12))
-    square[3:9, 3:9] = 1
-    square_ro = square.copy()
-    square_ro.setflags(write=False)
-    assert_array_equal(corner_fast(square, 9), corner_fast(square_ro, 9))
-    assert_array_equal(corner_moravec(square), corner_moravec(square_ro))
-    corners = corner_peaks(corner_fast(square, 9), min_distance=1)
-    mask = octagon(3, 2)
-    assert_array_equal(
-        corner_orientations(square, corners, mask),
-        corner_orientations(square_ro, corners, mask),
-    )

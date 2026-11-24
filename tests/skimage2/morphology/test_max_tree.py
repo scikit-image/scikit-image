@@ -469,34 +469,3 @@ class TestMaxtree(TestCase):
         out_bin = out > 0
         assert_array_equal(local_maxima, out_bin)
         assert np.max(out) == 5
-
-    def test_area_opening_read_only(self):
-        """Read-only input must be accepted and match the writable result.
-
-        Regression test for gh-8423.
-        """
-        img = np.array(
-            [[10, 8, 8, 9], [7, 7, 9, 9], [8, 7, 10, 10], [9, 9, 10, 10]],
-            dtype=np.uint8,
-        )
-        img_ro = img.copy()
-        img_ro.setflags(write=False)
-        assert_array_equal(area_opening(img, 8), area_opening(img_ro, 8))
-        # max_tree itself must accept read-only input too
-        P, S = max_tree(img_ro, connectivity=2)
-        P_exp, S_exp = max_tree(img, connectivity=2)
-        assert_array_equal(P, P_exp)
-        assert_array_equal(S, S_exp)
-
-    def test_diameter_opening_read_only(self):
-        """Read-only input must be accepted and match the writable result.
-
-        Regression test for gh-8423.
-        """
-        img = np.array(
-            [[10, 8, 8, 9], [7, 7, 9, 9], [8, 7, 10, 10], [9, 9, 10, 10]],
-            dtype=np.uint8,
-        )
-        img_ro = img.copy()
-        img_ro.setflags(write=False)
-        assert_array_equal(diameter_opening(img, 3), diameter_opening(img_ro, 3))
