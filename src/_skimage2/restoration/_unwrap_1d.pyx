@@ -7,7 +7,7 @@ cimport numpy as cnp
 from libc.math cimport M_PI
 
 
-def unwrap_1d(cnp.float64_t[::1] image, cnp.float64_t[::1] unwrapped_image):
+def unwrap_1d(const cnp.float64_t[::1] image, cnp.float64_t[::1] unwrapped_image):
     '''Phase unwrapping using the naive approach.'''
     cdef:
         Py_ssize_t i

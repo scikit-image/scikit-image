@@ -109,9 +109,9 @@ cdef void canonize(const np_real_numeric[::1] image, DTYPE_INT64_t[::1] parent,
 
 
 cdef np.ndarray[DTYPE_INT32_t, ndim = 2] unravel_offsets(
-        DTYPE_INT32_t[::1] offsets,
-        DTYPE_INT32_t[::1] center_point,
-        DTYPE_INT32_t[::1] shape):
+        const DTYPE_INT32_t[::1] offsets,
+        const DTYPE_INT32_t[::1] center_point,
+        const DTYPE_INT32_t[::1] shape):
     """Unravel a list of offset indices.
 
     These offsets can be negative. The function generates an array of shape
@@ -142,8 +142,8 @@ cdef np.ndarray[DTYPE_INT32_t, ndim = 2] unravel_offsets(
 
 
 cdef DTYPE_UINT8_t _is_valid_neighbor(DTYPE_INT64_t index,
-                                      DTYPE_INT32_t[::1] coordinates,
-                                      DTYPE_INT32_t[::1] shape):
+                                      const DTYPE_INT32_t[::1] coordinates,
+                                      const DTYPE_INT32_t[::1] shape):
     """Check whether a neighbor of a given pixel is inside the image.
 
     Parameters
@@ -204,7 +204,7 @@ cpdef np.ndarray[DTYPE_FLOAT64_t, ndim = 1] _compute_area(const np_real_numeric[
 
 cpdef np.ndarray[DTYPE_FLOAT64_t, ndim = 1] _compute_extension(
             const np_real_numeric[::1] image,
-            DTYPE_INT32_t[::1] shape,
+            const DTYPE_INT32_t[::1] shape,
             DTYPE_INT64_t[::1] parent,
             DTYPE_INT64_t[::1] sorted_indices):
     """Compute the bounding box extension of all max-tree components.
@@ -379,10 +379,10 @@ cpdef void _direct_filter(const np_real_numeric[::1] image,
 # _max_tree is the main function. It allows to construct a max
 # tree representation of the image.
 cpdef void _max_tree(const np_real_numeric[::1] image,
-                     DTYPE_BOOL_t[::1] mask,
-                     DTYPE_INT32_t[::1] structure,
-                     DTYPE_INT32_t[::1] offset,
-                     DTYPE_INT32_t[::1] shape,
+                     const DTYPE_BOOL_t[::1] mask,
+                     const DTYPE_INT32_t[::1] structure,
+                     const DTYPE_INT32_t[::1] offset,
+                     const DTYPE_INT32_t[::1] shape,
                      DTYPE_INT64_t[::1] parent,
                      DTYPE_INT64_t[::1] sorted_indices
                      ):

@@ -179,3 +179,23 @@ def test_img_too_small_orb():
     detector_extractor = ORB(downscale=2, n_scales=8)
     detector_extractor.detect(img)
     detector_extractor.detect_and_extract(img)
+
+
+@run_in_parallel()
+def test_orb_read_only():
+    """Read-only input must be accepted and match the writable result.
+
+    Regression test for gh-8423.
+    """
+    x, y = np.mgrid[0:96, 0:96]
+    rng = np.random.RandomState(42)
+    image = np.sin(x / 6.0) * np.cos(y / 8.0) + rng.rand(96, 96) * 0.05
+    orb = ORB(n_keypoints=32, fast_threshold=0.08)
+    orb.detect_and_extract(image=image)
+    keypoints, descriptors = orb.keypoints, orb.descriptors
+    image_ro = image.copy()
+    image_ro.setflags(write=False)
+    orb_ro = ORB(n_keypoints=32, fast_threshold=0.08)
+    orb_ro.detect_and_extract(image=image_ro)
+    assert_equal(orb_ro.keypoints, keypoints)
+    assert_equal(orb_ro.descriptors, descriptors)

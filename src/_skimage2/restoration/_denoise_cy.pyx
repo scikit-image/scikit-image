@@ -22,8 +22,8 @@ cdef inline Py_ssize_t Py_ssize_t_min(Py_ssize_t value1, Py_ssize_t value2) noex
 def _denoise_bilateral(const np_floats[:, :, ::1] image, cnp.float64_t max_value,
                        Py_ssize_t win_size, cnp.float64_t sigma_color,
                        cnp.float64_t sigma_spatial, Py_ssize_t bins, mode,
-                       cnp.float64_t cval, np_floats[::1] color_lut,
-                       np_floats[::1] range_lut, np_floats[::1] empty_dims,
+                       cnp.float64_t cval, const np_floats[::1] color_lut,
+                       const np_floats[::1] range_lut, const np_floats[::1] empty_dims,
                        np_floats[:, :, ::1] out):
     cdef:
         Py_ssize_t rows = image.shape[0]
