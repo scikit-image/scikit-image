@@ -16,8 +16,11 @@ convolution with the normalised Gaussian ``k_σ`` is closed form (Mobahi 2016,
 multiplies ``a`` by ``(δ / √(δ² + σ²))^n`` with ``n = 2``. The Hessian of that
 smoothed field is therefore exact at every scale. Amplitudes are fitted by
 two-step separable least squares (Fausett & Fulton 1994) with a relative
-singular-value cutoff ``RCOND``; see
+ridge (Tikhonov) penalty ``RIDGE``; see
 https://scikit-image.org/skimage-workbooks/on-gaussian-sum-images.
+Two measures compare a filter to that standard: the largest gap of any one
+element, relative to the peak, and the relative RMS error of the whole matrix
+by the Frobenius norm, split into a common gain and the rest.
 
 The second standard is Lindeberg's scale-space sinusoid (1998, §3) [3]. With
 scale parameter ``t = σ²``, a one-dimensional wave ``f(x) = sin(ω₀ x)`` has
@@ -50,9 +53,9 @@ from dataclasses import dataclass
 import numpy as np
 import pytest
 
-from _skimage2 import data, img_as_float
-from _skimage2.color import rgb2gray
-from _skimage2.feature import hessian_matrix
+from skimage import data, img_as_float
+from skimage.color import rgb2gray
+from skimage.feature import hessian_matrix
 
 
 def hessian(image, sigma, mode='nearest', cval=0):
@@ -103,11 +106,11 @@ def hessian(image, sigma, mode='nearest', cval=0):
 #
 # Vectorising gives (A_c ⊗ A_r) vec(A) ≈ vec(Y), a Kronecker least-squares
 # problem (Fausett & Fulton 1994) [2]. Rather than form the Kronecker
-# product, two np.linalg.lstsq calls recover the same A: A_r M ≈ Y, then
-# A_c A.T ≈ M.T.
+# product, two ridge least-squares solves fit the separable model:
+# A_r M ≈ Y, then A_c A.T ≈ M.T.
 
 DELTAS = (16.0, 8.0, 4.0, 2.0, 1.5)  # δ, pixels, coarse to fine
-RCOND = 1e-3  # relative singular-value cutoff for np.linalg.lstsq
+RIDGE = 1e-3  # relative ridge penalty for the separable least-squares fit
 NDIM = 2  # n = dim(x) for images
 
 
@@ -140,20 +143,53 @@ def _basis(coords, centres, delta, order=0):
     raise ValueError(f'order must be 0, 1 or 2, not {order}')
 
 
-def fit(image, deltas=DELTAS, rcond=RCOND):
+def _ridge_solve(basis, rhs, ridge):
+    """Solve the ridge problem as least squares on augmented data.
+
+    In the notation of Wikipedia's "Ridge regression", § "Tikhonov
+    regularization for linear equations", the regularized problem minimizes
+
+        ‖basis @ X − rhs‖² + ‖Γ @ X‖²
+
+    for a Tikhonov matrix ``Γ``. Choosing ``Γ = √λ I`` makes this L2
+    regularization. We can then treat the problem as ordinary least squares on
+    the augmented matrix and right-hand side
+
+        𝒜 = [basis; √λ I],    𝒷 = [rhs; 0],
+
+    whose solution is ``(𝒜ᵀ𝒜)⁻¹ 𝒜ᵀ𝒷 = (basisᵀ basis + λI)⁻¹ basisᵀ rhs``.
+    ``np.linalg.lstsq`` computes that solution directly.
+
+    The penalty is ``λ = ridge × s₀²``, where ``s₀`` is the largest singular
+    value of ``basis``. The augmented design has singular values
+    ``√(s_i² + λ)``, so it is well conditioned.
+
+    https://en.wikipedia.org/wiki/Ridge_regression#Tikhonov_regularization_for_linear_equations
+    """
+    lambda_ = ridge * np.linalg.norm(basis, 2) ** 2
+    columns = basis.shape[1]
+    augmented = np.vstack([basis, np.sqrt(lambda_) * np.eye(columns)])
+    rhs_augmented = np.vstack([rhs, np.zeros((columns, rhs.shape[1]))])
+    return np.linalg.lstsq(augmented, rhs_augmented)[0]
+
+
+def fit(image, deltas=DELTAS, ridge=RIDGE):
     """Fit levels coarse to fine. Return the levels and the residual.
 
     The isotropic Gaussian basis is separable: each grid term factors into a
     row Gaussian times a column Gaussian, and the rectangular centre grid
     makes the 2-D dictionary the outer product of those 1-D dictionaries.
     The model is therefore ``A_r @ A @ A_c.T ≈ residual`` with dense
-    amplitudes ``A`` (Mobahi's ``a_j`` [1]). Solve that Kronecker least-
-    squares problem in two steps (Fausett & Fulton [2]): ``A_r M ≈ residual``,
-    then ``A_c A.T ≈ M.T``. Separability is in the basis, not in ``A``.
+    amplitudes ``A`` (Mobahi's ``a_j`` [1]). Solve that Kronecker ridge
+    least-squares problem in two steps (Fausett & Fulton [2]):
+    ``A_r M ≈ residual``, then ``A_c A.T ≈ M.T``. Separability is in the
+    basis, not in ``A``.
 
-    ``rcond`` is the relative singular-value cutoff. Raising it suppresses
-    ill-conditioned fine-scale amplitudes and the cancellation between them,
-    at the cost of fit accuracy.
+    ``ridge`` is a relative Tikhonov penalty, scaled by the largest squared
+    singular value of each basis. Raising it shrinks the amplitudes and the
+    cancellation between them, at the cost of fit accuracy. Each 1-D ridge
+    problem is solved by augmenting the basis with ``√λ I`` and calling
+    ``np.linalg.lstsq``.
     """
     residual = np.array(image, dtype=float)
     rows = np.arange(residual.shape[0], dtype=float)
@@ -164,9 +200,9 @@ def fit(image, deltas=DELTAS, rcond=RCOND):
         col_centres = _grid_centres(len(cols), delta)
         row_basis = _basis(rows, row_centres, delta)
         col_basis = _basis(cols, col_centres, delta)
-        # Two-step separable least squares [2]: rows, then columns.
-        mid = np.linalg.lstsq(row_basis, residual, rcond=rcond)[0]
-        amplitudes = np.linalg.lstsq(col_basis, mid.T, rcond=rcond)[0].T
+        # Two-step separable ridge [2]: rows, then columns.
+        mid = _ridge_solve(row_basis, residual, ridge)
+        amplitudes = _ridge_solve(col_basis, mid.T, ridge).T
         residual = residual - row_basis @ amplitudes @ col_basis.T
         levels.append(Level(delta, row_centres, col_centres, amplitudes))
     return levels, residual
@@ -245,6 +281,44 @@ def relative_error(got, truth, sigma):
     return max(gaps) / peak
 
 
+FROBENIUS_WEIGHTS = (1, 2, 1)  # Hrr, Hrc, Hcc: Hrc is in the matrix twice
+
+
+def gain_and_shape_error(got, truth, sigma):
+    """Relative RMS error of the whole Hessian, split into gain and shape.
+
+    With the Frobenius inner product summed over the pixels inside the frame,
+
+        <A, B> = Σ_x (A_rr B_rr + 2 A_rc B_rc + A_cc B_cc),
+
+    the relative RMS error is ``E = ‖got − truth‖ / ‖truth‖``. At one pixel
+    ``‖H‖²`` is ``λ₁² + λ₂²``, so ``E`` does not change when the image axes
+    rotate, and each pixel counts in proportion to its curvature.
+
+    ``g = <got, truth> / ‖truth‖²`` is the one gain that best scales ``truth``
+    onto ``got``. The residual ``got − g truth`` is orthogonal to ``truth``,
+    so ``E² = (g − 1)² + S²`` with ``S = ‖got − g truth‖ / ‖truth‖``. A gain
+    error scales every eigenvalue alike and leaves eigenvectors and eigenvalue
+    ratios alone; ``S`` is the error that no one gain explains. See the RMS
+    section of
+    https://scikit-image.org/skimage-workbooks/on-gaussian-sum-images.
+
+    Returns ``(g − 1, S)``. The crop is that of `relative_error`.
+    """
+    reach = int(8 * sigma + 0.5) + 1
+    inner = (slice(reach, -reach),) * 2
+
+    def frobenius(A, B):
+        return sum(
+            w * np.sum(a[inner] * b[inner]) for w, a, b in zip(FROBENIUS_WEIGHTS, A, B)
+        )
+
+    norm2 = frobenius(truth, truth)
+    gain = frobenius(got, truth) / norm2
+    rest = [a - gain * b for a, b in zip(got, truth)]
+    return gain - 1, np.sqrt(frobenius(rest, rest) / norm2)
+
+
 def frequency_error(sigma, band, size=257):
     """Worst error for ``|ω| ≤ band × π``, relative to the peak response.
 
@@ -286,7 +360,7 @@ def frequency_error(sigma, band, size=257):
 @pytest.mark.parametrize(
     ('sigma', 'floor'),
     [
-        pytest.param(1.0, 2e-3, id='sigma 1'),
+        pytest.param(1.0, 1e-3, id='sigma 1'),
         pytest.param(2.0, 1e-10, id='sigma 2'),
         pytest.param(4.0, 1e-10, id='sigma 4'),
     ],
@@ -296,7 +370,7 @@ def test_matches_mobahi_rbf_photographs(fitted_sums, name, sigma, floor):
 
     The photograph only chooses the amplitudes ``a_j``. The standard is
     Mobahi's smoothed sum, whose Hessian is closed form. The sigma-1 floor
-    sits above the measured residue of about ``1e-3``; at sigma 2 and above
+    sits above the measured residue of about ``3e-4``; at sigma 2 and above
     the residue is rounding (about ``1e-12``) and the floor is a loose
     ``1e-10`` bound.
     """
@@ -304,6 +378,35 @@ def test_matches_mobahi_rbf_photographs(fitted_sums, name, sigma, floor):
     image = render(levels, shape)
     truth = exact_hessian(levels, shape, sigma)
     assert relative_error(hessian(image, sigma), truth, sigma) < floor
+
+
+@pytest.mark.parametrize('name', ['camera', 'coins', 'astronaut'])
+@pytest.mark.parametrize(
+    ('sigma', 'gain_floor', 'shape_floor'),
+    [
+        pytest.param(1.0, 2e-4, 5e-4, id='sigma 1'),
+        pytest.param(2.0, 1e-10, 1e-10, id='sigma 2'),
+        pytest.param(4.0, 1e-10, 1e-10, id='sigma 4'),
+    ],
+)
+def test_rms_matches_mobahi_rbf_photographs(
+    fitted_sums, name, sigma, gain_floor, shape_floor
+):
+    """Whole-Hessian RMS error against a smoothed Mobahi RBF sum, by part.
+
+    `gain_and_shape_error` splits the relative RMS error into a common gain
+    ``g − 1`` and the rest ``S``. A gain error leaves the eigenvalue ratios
+    alone, so the two parts fail for different reasons and are bounded
+    separately. At sigma 1 the measured parts are about ``7e-5`` (gain) and
+    ``2e-4`` (shape) on all three photographs; at sigma 2 and above both are
+    rounding (below ``1e-12``) and the floors are a loose ``1e-10``.
+    """
+    levels, shape = fitted_sums[name]
+    image = render(levels, shape)
+    truth = exact_hessian(levels, shape, sigma)
+    gain_error, shape_error = gain_and_shape_error(hessian(image, sigma), truth, sigma)
+    assert abs(gain_error) < gain_floor
+    assert shape_error < shape_floor
 
 
 @pytest.mark.parametrize(
