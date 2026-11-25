@@ -51,11 +51,13 @@ References
 from dataclasses import dataclass
 
 import numpy as np
-import pytest
+import numpy.linalg as npl
 
 from skimage import data, img_as_float
 from skimage.color import rgb2gray
 from skimage.feature import hessian_matrix
+
+import pytest
 
 
 def hessian(image, sigma, mode='nearest', cval=0):
@@ -143,34 +145,39 @@ def _basis(coords, centres, delta, order=0):
     raise ValueError(f'order must be 0, 1 or 2, not {order}')
 
 
-def _ridge_solve(basis, rhs, ridge):
-    """Solve the ridge problem as least squares on augmented data.
+def _ridge_solve(X, Y, ridge):
+    """Ridge regression of ``Y`` on ``X``, as least squares on augmented data.
 
-    In the notation of Wikipedia's "Ridge regression", § "Tikhonov
-    regularization for linear equations", the regularized problem minimizes
+    In the notation of Wikipedia's "Ridge regression", with design matrix
+    ``X``, response ``Y`` (here one column per right-hand side) and
+    coefficients ``β``, the model is ``Y = X β + ε``, and the ridge estimate
+    minimizes
 
-        ‖basis @ X − rhs‖² + ‖Γ @ X‖²
+        ‖Y − X β‖² + λ ‖β‖²,
 
-    for a Tikhonov matrix ``Γ``. Choosing ``Γ = √λ I`` makes this L2
-    regularization. We can then treat the problem as ordinary least squares on
-    the augmented matrix and right-hand side
+    with solution
 
-        𝒜 = [basis; √λ I],    𝒷 = [rhs; 0],
+        β̂_λ = (Xᵀ X + λ I)⁻¹ Xᵀ Y.
 
-    whose solution is ``(𝒜ᵀ𝒜)⁻¹ 𝒜ᵀ𝒷 = (basisᵀ basis + λI)⁻¹ basisᵀ rhs``.
-    ``np.linalg.lstsq`` computes that solution directly.
+    This is Tikhonov regularization with ``Γ = √λ I``, so it is ordinary least
+    squares on the augmented data
+
+        X_aug = [X; √λ I],    Y_aug = [Y; 0],
+
+    because ``X_augᵀ X_aug = Xᵀ X + λ I`` and ``X_augᵀ Y_aug = Xᵀ Y``.
+    ``npl.lstsq`` computes that solution directly.
 
     The penalty is ``λ = ridge × s₀²``, where ``s₀`` is the largest singular
-    value of ``basis``. The augmented design has singular values
-    ``√(s_i² + λ)``, so it is well conditioned.
+    value of ``X``. ``X_aug`` has singular values ``√(s_i² + λ)``, so it is
+    well conditioned.
 
-    https://en.wikipedia.org/wiki/Ridge_regression#Tikhonov_regularization_for_linear_equations
+    https://en.wikipedia.org/wiki/Ridge_regression
     """
-    lambda_ = ridge * np.linalg.norm(basis, 2) ** 2
-    columns = basis.shape[1]
-    augmented = np.vstack([basis, np.sqrt(lambda_) * np.eye(columns)])
-    rhs_augmented = np.vstack([rhs, np.zeros((columns, rhs.shape[1]))])
-    return np.linalg.lstsq(augmented, rhs_augmented)[0]
+    lambda_ = ridge * npl.norm(X, 2) ** 2
+    n_coef, n_cols = X.shape[1], Y.shape[1]
+    X_aug = np.vstack([X, np.sqrt(lambda_) * np.eye(n_coef)])
+    Y_aug = np.vstack([Y, np.zeros((n_coef, n_cols))])
+    return npl.lstsq(X_aug, Y_aug)[0]
 
 
 def fit(image, deltas=DELTAS, ridge=RIDGE):
@@ -187,9 +194,7 @@ def fit(image, deltas=DELTAS, ridge=RIDGE):
 
     ``ridge`` is a relative Tikhonov penalty, scaled by the largest squared
     singular value of each basis. Raising it shrinks the amplitudes and the
-    cancellation between them, at the cost of fit accuracy. Each 1-D ridge
-    problem is solved by augmenting the basis with ``√λ I`` and calling
-    ``np.linalg.lstsq``.
+    cancellation between them, at the cost of fit accuracy.
     """
     residual = np.array(image, dtype=float)
     rows = np.arange(residual.shape[0], dtype=float)
@@ -201,31 +206,49 @@ def fit(image, deltas=DELTAS, ridge=RIDGE):
         row_basis = _basis(rows, row_centres, delta)
         col_basis = _basis(cols, col_centres, delta)
         # Two-step separable ridge [2]: rows, then columns.
-        mid = _ridge_solve(row_basis, residual, ridge)
-        amplitudes = _ridge_solve(col_basis, mid.T, ridge).T
+        row_fit = _ridge_solve(row_basis, residual, ridge)
+        amplitudes = _ridge_solve(col_basis, row_fit.T, ridge).T
         residual = residual - row_basis @ amplitudes @ col_basis.T
         levels.append(Level(delta, row_centres, col_centres, amplitudes))
     return levels, residual
 
 
 def render(levels, shape, sigma=0.0, order=(0, 0)):
-    """Mobahi's smoothed sum, or one derivative of that sum.
+    """Mobahi's smoothed sum, or a derivative of that sum.
 
-    Each level of width ``δ`` and amplitudes ``a_j`` becomes width
-    ``√(δ² + σ²)`` with amplitudes ``a_j (δ / √(δ² + σ²))^n``. ``order`` is
-    ``(row derivative, column derivative)``. Values are at pixel centres.
+    The levels define Mobahi's Gaussian RBF sum ([1], §2.2, unnumbered),
+
+        f(x) = Σ_j a_j exp(−‖x − x_j‖² / (2 δ_j²)).
+
+    Its convolution with the normalised Gaussian ``k_σ`` ([1], §1,
+    "Notation") is closed form ([1], §2.2, unnumbered; stated and proved as
+    Lemma 1 in Appendix B):
+
+        [f ⋆ k_σ](x) = Σ_j a_j (δ_j / √(δ_j² + σ²))^n
+                           exp(−‖x − x_j‖² / (2 (δ_j² + σ²))).
+
+    So each level of width ``δ`` and amplitudes ``a_j`` becomes width
+    ``√(δ² + σ²)`` with amplitudes ``a_j (δ / √(δ² + σ²))^n``. At ``σ = 0``
+    this is ``f`` itself.
+
+    The derivatives are not in [1]. Each term factors into a row Gaussian
+    times a column Gaussian, so the ``(p, q)`` derivative differentiates the
+    row factor ``p`` times and the column factor ``q`` times (`_basis`).
+    ``order`` is ``(row derivative, column derivative)``. Values are at pixel
+    centres.
     """
     rows = np.arange(shape[0], dtype=float)
     cols = np.arange(shape[1], dtype=float)
     out = np.zeros((len(rows), len(cols)))
     for level in levels:
+        # [1], Lemma 1: width δ becomes √(δ² + σ²) ...
         delta_s = np.sqrt(level.delta**2 + sigma**2)
+        # ... and amplitudes a_j are multiplied by (δ / √(δ² + σ²))^n.
         scale = (level.delta / delta_s) ** NDIM
-        out += scale * (
-            _basis(rows, level.row_centres, delta_s, order[0])
-            @ level.amplitudes
-            @ _basis(cols, level.col_centres, delta_s, order[1]).T
-        )
+        # One separable term per centre: (row factor) a_jk (column factor).
+        row_basis = _basis(rows, level.row_centres, delta_s, order[0])
+        col_basis = _basis(cols, level.col_centres, delta_s, order[1])
+        out += scale * row_basis @ level.amplitudes @ col_basis.T
     return out
 
 
