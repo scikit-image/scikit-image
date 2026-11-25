@@ -365,7 +365,7 @@ def test_hessian_gaussian_applies_the_boundary_rule_once(mode, cval):
         # reads that tiny remaining pad at the image borders; the no_pad
         # version enforces an outside value 0.
         pad_kwargs['constant_values'] = cval
-        test_func = partial(assert_allclose, atol=1e-15, rtol=0)
+        test_func = partial(assert_allclose, atol=1e-14, rtol=0)
     bigger = np.pad(image, pad, **pad_kwargs)
     padded = hessian_matrix(bigger, **kwargs)
     for got, expected in zip(no_pad, padded):

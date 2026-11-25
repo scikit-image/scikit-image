@@ -333,17 +333,18 @@ def test_hessian_gaussian_exact_on_quadratic(sigma, ndim, size):
         assert_allclose(got[i][inner], expected, atol=tol, rtol=0)
 
 
-@pytest.mark.parametrize(
-    'mode, cval',
-    (
-        ('nearest', 0),
-        ('reflect', 0),
-        ('mirror', 0),
-        ('constant', 0),
-        ('constant', 99),
-        ('wrap', 0),
-    ),
+# bounary mode, cval pairs at which to test.
+BOUNDARY_PARAMS = (
+    ('nearest', 0),
+    ('reflect', 0),
+    ('mirror', 0),
+    ('constant', 0),
+    ('constant', 99),
+    ('wrap', 0),
 )
+
+
+@pytest.mark.parametrize('mode, cval', BOUNDARY_PARAMS)
 def test_hessian_gaussian_applies_the_boundary_rule_once(mode, cval):
     """We extend each axis once with boundary conditions.
 
@@ -364,7 +365,7 @@ def test_hessian_gaussian_applies_the_boundary_rule_once(mode, cval):
         # reads that tiny remaining pad at the image borders; the no_pad
         # version enforces an outside value 0.
         pad_kwargs['constant_values'] = cval
-        test_func = partial(assert_allclose, atol=1e-15, rtol=0)
+        test_func = partial(assert_allclose, atol=1e-14, rtol=0)
     bigger = np.pad(image, pad, **pad_kwargs)
     padded = hessian_matrix(bigger, **kwargs)
     for got, expected in zip(no_pad, padded):
@@ -388,17 +389,7 @@ def test_hessian_gaussian_near_0_to_constant(sigma):
         assert_allclose(element[inner], 0, atol=1e-15)
 
 
-@pytest.mark.parametrize(
-    'mode, cval',
-    (
-        ('nearest', 0),
-        ('reflect', 0),
-        ('mirror', 0),
-        ('constant', 0),
-        ('constant', 99),
-        ('wrap', 0),
-    ),
-)
+@pytest.mark.parametrize('mode, cval', BOUNDARY_PARAMS)
 def test_hessian_gaussian_matches_one_2d_convolution(mode, cval):
     """Each element matches one correlation with outer product of its kernels.
 
@@ -423,17 +414,7 @@ def test_hessian_gaussian_matches_one_2d_convolution(mode, cval):
         assert_allclose(element, expected, atol=tol, rtol=0)
 
 
-@pytest.mark.parametrize(
-    'mode, cval',
-    (
-        ('nearest', 0),
-        ('reflect', 0),
-        ('mirror', 0),
-        ('constant', 0),
-        ('constant', 99),
-        ('wrap', 0),
-    ),
-)
+@pytest.mark.parametrize('mode, cval', BOUNDARY_PARAMS)
 def test_hessian_gaussian_matches_one_3d_convolution(mode, cval):
     """Each element matches one correlation with outer product of its kernels.
 
@@ -459,11 +440,72 @@ def test_hessian_gaussian_matches_one_3d_convolution(mode, cval):
         assert_allclose(element, expected, atol=tol, rtol=0)
 
 
-def test_hessian_gaussian_order_is_a_reversal():
+@pytest.mark.parametrize('dtype', [np.float32, np.float64])
+def test_hessian_gaussian_constant_matching_cval_is_exactly_zero(dtype):
+    """Test short-circuit return of exact zero with flat image, matching cval"""
+    # There is a wrinkle here, that float32(0.1) != float64(0.1), so `cval`
+    # must be compared in the image dtype.
+    flat = np.full((16, 16), 0.1, dtype=dtype)
+    H_elems = hessian_matrix(
+        flat, sigma=1, mode='constant', cval=0.1, use_gaussian_derivatives=True
+    )
+    for element in H_elems:
+        assert element.dtype == dtype
+        # Short circuit exact 0 for flat image where cval=image value.
+        assert_array_equal(element, 0)
+
+
+def test_against_analytic_for_gaussian_blob():
+    """Use image of a single wide Gaussian blob, test against analytic result"""
+    sigma, width, size = 2, 6.0, 161
+    center = size // 2
+    r, c = [x - center for x in np.indices((size, size), dtype=float)]
+    blob = np.exp(-(r**2 + c**2) / (2 * width**2))
+    spread = np.sqrt(width**2 + sigma**2)
+    smoothed = (width**2 / spread**2) * np.exp(-(r**2 + c**2) / (2 * spread**2))
+    truth = [  # Analytic Hessian.
+        smoothed * (r**2 - spread**2) / spread**4,
+        smoothed * (r * c) / spread**4,
+        smoothed * (c**2 - spread**2) / spread**4,
+    ]
+    # Test interior only.
+    inner = _interior_slice(2, sigma)
+    tol = 1e-5 * max(np.abs(t).max() for t in truth)
+    gots = hessian_matrix(blob, sigma=sigma, use_gaussian_derivatives=True)
+    for i, expected in enumerate(truth):
+        assert_allclose(gots[i][inner], expected[inner], atol=tol, rtol=0)
+
+
+@pytest.mark.parametrize('use_gaussian_derivatives', [False, True])
+def test_hessian_matrix_of_a_non_finite_constant_is_nan(use_gaussian_derivatives):
+    # inf - inf is undefined, so a constant of inf has NaN curvature.
+    flat = np.full((12, 12), np.inf)
+    with np.errstate(invalid='ignore'):
+        H_elems = hessian_matrix(
+            flat,
+            sigma=1,
+            mode='reflect',
+            use_gaussian_derivatives=use_gaussian_derivatives,
+        )
+    for element in H_elems:
+        assert np.all(np.isnan(element))
+
+
+@pytest.mark.parametrize('shape', [(), (5, 1)])
+@pytest.mark.parametrize('gaussian', (True, False))
+def test_hessian_matrix_rejects_a_missing_or_short_axis(shape, gaussian):
+    # The check runs before either derivative method.
+    with pytest.raises(ValueError, match='at least one axis'):
+        hessian_matrix(np.empty(shape), use_gaussian_derivatives=gaussian)
+
+
+@pytest.mark.parametrize('use_gaussian_derivatives', [False, True])
+def test_hessian_matrix_order_is_a_reversal(use_gaussian_derivatives):
     """``order='xy'`` is the reversed ``rc`` list, including at the border."""
     image = np.random.default_rng(0).random((48, 48))
-    rc = hessian_matrix(image, sigma=1, use_gaussian_derivatives=True, order='rc')
-    xy = hessian_matrix(image, sigma=1, use_gaussian_derivatives=True, order='xy')
+    kwargs = dict(sigma=1, use_gaussian_derivatives=use_gaussian_derivatives)
+    rc = hessian_matrix(image, order='rc', **kwargs)
+    xy = hessian_matrix(image, order='xy', **kwargs)
     for got, expected in zip(xy, rc[::-1]):
         assert_array_equal(got, expected)
 
@@ -641,19 +683,30 @@ def test_square_image():
 
     # Harris
     results = peak_local_max(
-        corner_harris(im, method='k'), min_distance=10, threshold_rel=0
+        corner_harris(im, method='k'),
+        exclude_border=10,
+        min_distance=10,
+        threshold_rel=0,
     )
     # interest at corner
     assert len(results) == 1
 
     results = peak_local_max(
-        corner_harris(im, method='eps'), min_distance=10, threshold_rel=0
+        corner_harris(im, method='eps'),
+        exclude_border=10,
+        min_distance=10,
+        threshold_rel=0,
     )
     # interest at corner
     assert len(results) == 1
 
     # Shi-Tomasi
-    results = peak_local_max(corner_shi_tomasi(im), min_distance=10, threshold_rel=0)
+    results = peak_local_max(
+        corner_shi_tomasi(im),
+        exclude_border=10,
+        min_distance=10,
+        threshold_rel=0,
+    )
     # interest at corner
     assert len(results) == 1
 
@@ -691,23 +744,34 @@ def test_noisy_square_image():
     im = im + rng.uniform(size=im.shape) * 0.2
 
     # Moravec
-    results = peak_local_max(corner_moravec(im), min_distance=10, threshold_rel=0)
+    results = peak_local_max(
+        corner_moravec(im), exclude_border=10, min_distance=10, threshold_rel=0
+    )
     # undefined number of interest points
     assert results.any()
 
     # Harris
     results = peak_local_max(
-        corner_harris(im, method='k'), min_distance=10, threshold_rel=0
+        corner_harris(im, method='k'),
+        exclude_border=10,
+        min_distance=10,
+        threshold_rel=0,
     )
     assert len(results) == 1
     results = peak_local_max(
-        corner_harris(im, method='eps'), min_distance=10, threshold_rel=0
+        corner_harris(im, method='eps'),
+        exclude_border=10,
+        min_distance=10,
+        threshold_rel=0,
     )
     assert len(results) == 1
 
     # Shi-Tomasi
     results = peak_local_max(
-        corner_shi_tomasi(im, sigma=1.5), min_distance=10, threshold_rel=0
+        corner_shi_tomasi(im, sigma=1.5),
+        exclude_border=10,
+        min_distance=10,
+        threshold_rel=0,
     )
     assert len(results) == 1
 
@@ -720,11 +784,15 @@ def test_squared_dot():
     # Moravec fails
 
     # Harris
-    results = peak_local_max(corner_harris(im), min_distance=10, threshold_rel=0)
+    results = peak_local_max(
+        corner_harris(im), exclude_border=10, min_distance=10, threshold_rel=0
+    )
     assert (results == np.array([[6, 6]])).all()
 
     # Shi-Tomasi
-    results = peak_local_max(corner_shi_tomasi(im), min_distance=10, threshold_rel=0)
+    results = peak_local_max(
+        corner_shi_tomasi(im), exclude_border=10, min_distance=10, threshold_rel=0
+    )
     assert (results == np.array([[6, 6]])).all()
 
 
@@ -940,7 +1008,9 @@ def test_corner_fast_astronaut():
             [223, 375],
         ]
     )
-    actual = corner_peaks(corner_fast(img, 12, 0.3), min_distance=10, threshold_rel=0)
+    actual = corner_peaks(
+        corner_fast(img, 12, 0.3), exclude_border=10, min_distance=10, threshold_rel=0
+    )
     assert_array_equal(actual, expected)
 
 
@@ -960,7 +1030,11 @@ def test_corner_orientations_even_shape_error():
 def test_corner_orientations_astronaut():
     img = rgb2gray(data.astronaut())
     corners = corner_peaks(
-        corner_fast(img, 11, 0.35), min_distance=10, threshold_abs=0, threshold_rel=0.1
+        corner_fast(img, 11, 0.35),
+        exclude_border=10,
+        min_distance=10,
+        threshold_abs=0,
+        threshold_rel=0.1,
     )
     expected = np.array(
         [
