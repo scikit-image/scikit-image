@@ -455,6 +455,27 @@ def test_hessian_gaussian_constant_matching_cval_is_exactly_zero(dtype):
         assert_array_equal(element, 0)
 
 
+def test_against_analytic_for_gaussian_blob():
+    """Use image of a single wide Gaussian blob, test against analytic result"""
+    sigma, width, size = 2, 6.0, 161
+    center = size // 2
+    r, c = [x - center for x in np.indices((size, size), dtype=float)]
+    blob = np.exp(-(r**2 + c**2) / (2 * width**2))
+    spread = np.sqrt(width**2 + sigma**2)
+    smoothed = (width**2 / spread**2) * np.exp(-(r**2 + c**2) / (2 * spread**2))
+    truth = [  # Analytic Hessian.
+        smoothed * (r**2 - spread**2) / spread**4,
+        smoothed * (r * c) / spread**4,
+        smoothed * (c**2 - spread**2) / spread**4,
+    ]
+    # Test interior only.
+    inner = _interior_slice(2, sigma)
+    tol = 1e-5 * max(np.abs(t).max() for t in truth)
+    gots = hessian_matrix(blob, sigma=sigma, use_gaussian_derivatives=True)
+    for i, expected in enumerate(truth):
+        assert_allclose(gots[i][inner], expected[inner], atol=tol, rtol=0)
+
+
 @pytest.mark.parametrize('use_gaussian_derivatives', [False, True])
 def test_hessian_matrix_of_a_non_finite_constant_is_nan(use_gaussian_derivatives):
     # inf - inf is undefined, so a constant of inf has NaN curvature.
