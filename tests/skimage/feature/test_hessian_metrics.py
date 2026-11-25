@@ -28,7 +28,8 @@ scale-space representation
 
     L(x; t) = exp(−ω₀² t / 2) sin(ω₀ x),
 
-and the amplitude of the ``m``th spatial derivative is ``ω₀ᵐ exp(−ω₀² t / 2)``.
+and the amplitude of the ``m``th spatial derivative is
+``ω₀ᵐ exp(−ω₀² t / 2)``.
 For the Hessian, ``m = 2``, so a plane wave of frequency ``ω`` has smoothed
 Hessian ``−ω ωᵀ exp(−|ω|² t / 2) cos(ωᵀ x)`` (or the same factor times
 ``sin``). One impulse gives every frequency at once. The photographs carry
@@ -52,12 +53,11 @@ from dataclasses import dataclass
 
 import numpy as np
 import numpy.linalg as npl
+import pytest
 
 from skimage import data, img_as_float
 from skimage.color import rgb2gray
 from skimage.feature import hessian_matrix
-
-import pytest
 
 
 def hessian(image, sigma, mode='nearest', cval=0):
@@ -187,10 +187,11 @@ def fit(image, deltas=DELTAS, ridge=RIDGE):
     row Gaussian times a column Gaussian, and the rectangular centre grid
     makes the 2-D dictionary the outer product of those 1-D dictionaries.
     The model is therefore ``A_r @ A @ A_c.T ≈ residual`` with dense
-    amplitudes ``A`` (Mobahi's ``a_j`` [1]). Solve that Kronecker ridge
-    least-squares problem in two steps (Fausett & Fulton [2]):
-    ``A_r M ≈ residual``, then ``A_c A.T ≈ M.T``. Separability is in the
-    basis, not in ``A``.
+    amplitudes ``A`` (Mobahi's ``a_j`` [1]). Fit the separable model by two
+    successive ridge least-squares solves (Fausett & Fulton [2] for the
+    separable structure): ``A_r M ≈ residual``, then ``A_c A.T ≈ M.T``.
+    This is a two-step separable ridge, not the joint 2-D ridge of the
+    vectorised model. Separability is in the basis, not in ``A``.
 
     ``ridge`` is a relative Tikhonov penalty, scaled by the largest squared
     singular value of each basis. Raising it shrinks the amplitudes and the
@@ -228,8 +229,8 @@ def render(levels, shape, sigma=0.0, order=(0, 0)):
                            exp(−‖x − x_j‖² / (2 (δ_j² + σ²))).
 
     So each level of width ``δ`` and amplitudes ``a_j`` becomes width
-    ``√(δ² + σ²)`` with amplitudes ``a_j (δ / √(δ² + σ²))^n``. At ``σ = 0``
-    this is ``f`` itself.
+    ``√(δ² + σ²)`` with amplitudes
+    ``a_j (δ / √(δ² + σ²))^n``. At ``σ = 0`` this is ``f`` itself.
 
     The derivatives are not in [1]. Each term factors into a row Gaussian
     times a column Gaussian, so the ``(p, q)`` derivative differentiates the
@@ -288,14 +289,23 @@ def fitted_sums():
 # --- Distance to a gold standard ------------------------------------------
 
 
+def _interior(sigma):
+    """Pixels an 8-sigma kernel reaches without crossing the frame.
+
+    The 2-D case of ``test_corner._interior_slice``; kept local so this
+    module does not import another test module.
+    """
+    reach = int(8 * sigma + 0.5) + 1
+    return (slice(reach, -reach),) * 2
+
+
 def relative_error(got, truth, sigma):
     """Largest gap inside the frame, divided by the peak of ``truth``.
 
     The crop drops pixels where an 8-sigma kernel would read past the frame.
     There the border rule supplies values that differ from the Gaussian sum's.
     """
-    reach = int(8 * sigma + 0.5) + 1
-    inner = (slice(reach, -reach),) * 2
+    inner = _interior(sigma)
     peak = max(np.abs(part[inner]).max() for part in truth)
     gaps = (
         np.abs(part[inner] - reference[inner]).max()
@@ -320,16 +330,15 @@ def gain_and_shape_error(got, truth, sigma):
 
     ``g = <got, truth> / ‖truth‖²`` is the one gain that best scales ``truth``
     onto ``got``. The residual ``got − g truth`` is orthogonal to ``truth``,
-    so ``E² = (g − 1)² + S²`` with ``S = ‖got − g truth‖ / ‖truth‖``. A gain
-    error scales every eigenvalue alike and leaves eigenvectors and eigenvalue
-    ratios alone; ``S`` is the error that no one gain explains. See the RMS
-    section of
+    so ``E² = (g − 1)² + S²`` with
+    ``S = ‖got − g truth‖ / ‖truth‖``. A uniform gain error scales every
+    eigenvalue alike and leaves eigenvectors and eigenvalue ratios alone;
+    ``S`` is the error that no one gain explains. See the RMS section of
     https://scikit-image.org/skimage-workbooks/on-gaussian-sum-images.
 
-    Returns ``(g − 1, S)``. The crop is that of `relative_error`.
+    Returns ``(g − 1, S)``. The crop is ``_interior(sigma)``.
     """
-    reach = int(8 * sigma + 0.5) + 1
-    inner = (slice(reach, -reach),) * 2
+    inner = _interior(sigma)
 
     def frobenius(A, B):
         return sum(
@@ -379,13 +388,35 @@ def frequency_error(sigma, band, size=257):
 # --- Tests ----------------------------------------------------------------
 
 
+def test_gain_and_shape_error_metric():
+    """The gain/shape split is exact, linear, and weights Hrc twice."""
+    rng = np.random.default_rng(0)
+    truth = [rng.normal(size=(64, 64)) for _ in range(3)]
+
+    gain_error, shape = gain_and_shape_error(truth, truth, 1.0)
+    assert gain_error == pytest.approx(0.0)
+    assert shape == pytest.approx(0.0)
+
+    gain_error, shape = gain_and_shape_error([1.01 * h for h in truth], truth, 1.0)
+    assert gain_error == pytest.approx(0.01)
+    assert shape == pytest.approx(0.0, abs=1e-12)
+
+    # Only Hrc differs. Since it counts twice, S = sqrt(2), not 1.
+    # truth has no gain, so g = 0 and g - 1 = -1.
+    truth = [np.ones((64, 64)), np.zeros((64, 64)), np.zeros((64, 64))]
+    got = [np.zeros((64, 64)), np.ones((64, 64)), np.zeros((64, 64))]
+    gain_error, shape = gain_and_shape_error(got, truth, 1.0)
+    assert gain_error == pytest.approx(-1.0)
+    assert shape == pytest.approx(np.sqrt(2.0))
+
+
 @pytest.mark.parametrize('name', ['camera', 'coins', 'astronaut'])
 @pytest.mark.parametrize(
     ('sigma', 'floor'),
     [
         pytest.param(1.0, 1e-3, id='sigma 1'),
-        pytest.param(2.0, 1e-10, id='sigma 2'),
-        pytest.param(4.0, 1e-10, id='sigma 4'),
+        pytest.param(2.0, 2e-12, id='sigma 2'),
+        pytest.param(4.0, 2e-12, id='sigma 4'),
     ],
 )
 def test_matches_mobahi_rbf_photographs(fitted_sums, name, sigma, floor):
@@ -394,8 +425,7 @@ def test_matches_mobahi_rbf_photographs(fitted_sums, name, sigma, floor):
     The photograph only chooses the amplitudes ``a_j``. The standard is
     Mobahi's smoothed sum, whose Hessian is closed form. The sigma-1 floor
     sits above the measured residue of about ``3e-4``; at sigma 2 and above
-    the residue is rounding (about ``1e-12``) and the floor is a loose
-    ``1e-10`` bound.
+    the residue is rounding (around ``1e-12``) and the floor is ``2e-12``.
     """
     levels, shape = fitted_sums[name]
     image = render(levels, shape)
@@ -408,8 +438,8 @@ def test_matches_mobahi_rbf_photographs(fitted_sums, name, sigma, floor):
     ('sigma', 'gain_floor', 'shape_floor'),
     [
         pytest.param(1.0, 2e-4, 5e-4, id='sigma 1'),
-        pytest.param(2.0, 1e-10, 1e-10, id='sigma 2'),
-        pytest.param(4.0, 1e-10, 1e-10, id='sigma 4'),
+        pytest.param(2.0, 2e-12, 2e-12, id='sigma 2'),
+        pytest.param(4.0, 2e-12, 2e-12, id='sigma 4'),
     ],
 )
 def test_rms_matches_mobahi_rbf_photographs(
@@ -422,7 +452,7 @@ def test_rms_matches_mobahi_rbf_photographs(
     alone, so the two parts fail for different reasons and are bounded
     separately. At sigma 1 the measured parts are about ``7e-5`` (gain) and
     ``2e-4`` (shape) on all three photographs; at sigma 2 and above both are
-    rounding (below ``1e-12``) and the floors are a loose ``1e-10``.
+    rounding (around ``1e-12``) and the floors are ``2e-12``.
     """
     levels, shape = fitted_sums[name]
     image = render(levels, shape)
@@ -437,7 +467,7 @@ def test_rms_matches_mobahi_rbf_photographs(
     [
         pytest.param(1.0, 0.5, 1e-3, id='sigma 1, half of Nyquist'),
         pytest.param(2.0, 1.0, 1e-6, id='sigma 2, up to Nyquist'),
-        pytest.param(4.0, 1.0, 1e-10, id='sigma 4, up to Nyquist'),
+        pytest.param(4.0, 1.0, 2e-12, id='sigma 4, up to Nyquist'),
     ],
 )
 def test_matches_lindeberg_frequency_response(sigma, band, floor):
