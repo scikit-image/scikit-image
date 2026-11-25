@@ -59,11 +59,21 @@ def hessian(image, sigma, mode='nearest'):
 #   [f ⋆ k_σ](x) = Σ_j a_j (δ_j / √(δ_j² + σ²))^n
 #                    · exp(−‖x − x_j‖² / (2 (δ_j² + σ²))),   n = 2
 #
-# Centres of one width δ form a level: a grid with spacing δ, reaching one
-# spacing past each edge. Levels are fitted coarse to fine.
+# j indexes Gaussians; each Gaussian has a width δ_j, a centre x_j, and an
+# amplitude a_j. We choose the δ_j and x_j, then do a least-squares fit to
+# find the a_j.
 #
-# The basis is separable because an isotropic Gaussian factors along axes; this
-# is because the squared Euclidean norm does:
+# In our chosen scheme, we place Gaussians on a regular grid. Centres of one
+# width δ form a *level*. On one level we have a grid of Gaussians with spacing
+# δ, reaching one spacing past each edge. We then fit the a_j level by level,
+# from coarse (large δ) to fine (small δ), each level to the residual that the
+# coarser levels leave.
+#
+# On our grid, Mobahi's single index j becomes a pair (j, k): row centre r_j
+# and column centre c_k.
+#
+# The 2-D basis separates into row and column factors because an isotropic
+# Gaussian factors along axes, as the squared Euclidean norm does:
 #
 #   exp(−((r−r_j)² + (c−c_k)²) / (2 δ²))
 #     = exp(−(r−r_j)² / (2 δ²)) · exp(−(c−c_k)² / (2 δ²)).
@@ -73,12 +83,13 @@ def hessian(image, sigma, mode='nearest'):
 # not enough for a cheap fit: an unstructured cloud of centres would still
 # give product kernels, but not a *product set* of kernels — the design
 # would be one independent 2-D bump per centre, with no Kronecker structure.
+#
 # A rectangular grid supplies that structure. Every centre is a pair
 # (r_j, c_k) from fixed 1-D lists, and every pair appears once, so the 2-D
 # dictionary is the outer product of two 1-D dictionaries. Columns of A_r
 # are the row Gaussians on the image rows; columns of A_c are the column
 # Gaussians on the image columns. One amplitude a_jk per grid point is
-# Mobahi's a_j for that centre. The model at one width is
+# Mobahi's a_j for that centre. The model for the residual Y at one width is
 #
 #   Y ≈ A_r @ A @ A_c.T
 #     = Σ_{j,k} a_jk · (row Gaussian_j) · (column Gaussian_k)^T,
@@ -90,6 +101,12 @@ def hessian(image, sigma, mode='nearest'):
 # problem (Fausett & Fulton 1994) [2]. Rather than form the Kronecker
 # product, two ridge least-squares solves fit the separable model:
 # A_r M ≈ Y, then A_c A.T ≈ M.T.
+#
+# We use ridge least squares because neighbouring Gaussians, spaced δ apart
+# with width δ, overlap heavily. Without a penalty, the fit uses large
+# amplitudes that nearly cancel. The ridge keeps the amplitudes small, at a
+# small cost in fit accuracy, and lowers the sigma-1 Hessian error of the
+# filter.
 
 DELTAS = (16.0, 8.0, 4.0, 2.0, 1.5)  # widths δ, pixels, coarse to fine
 RIDGE = 1e-3  # relative ridge penalty for the separable least-squares fit
