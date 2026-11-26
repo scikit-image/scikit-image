@@ -233,6 +233,23 @@ def test_denoise_tv_bregman_multichannel():
     assert_array_equal(out1, out2)
 
 
+@pytest.mark.parametrize('win_size', [3, 5, 7, 9])
+def test_denoise_bilateral_spatial_symmetry(win_size):
+    img = np.zeros((21, 21))
+    img[10, 10] = 1.0
+
+    out = restoration.denoise_bilateral(
+        img,
+        win_size=win_size,
+        sigma_color=1.0,
+        sigma_spatial=1.0,
+        channel_axis=None,
+    )
+
+    assert_array_almost_equal(out, out[::-1, :])
+    assert_array_almost_equal(out, out[:, ::-1])
+    assert_array_almost_equal(out, out.T)
+
 def test_denoise_bilateral_null():
     img = np.zeros((50, 50))
     out = restoration.denoise_bilateral(img)
