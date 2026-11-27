@@ -52,7 +52,8 @@ import numpy as np
 from scipy import ndimage as ndi
 
 from _skimage2.morphology._footprints import _footprint_is_sequence
-from _skimage2._shared.utils import check_nD, warn
+from _skimage2._shared.utils import check_nD
+from _skimage2._shared._warnings import warn_external
 
 from ...util import img_as_ubyte
 from . import generic_cy
@@ -136,7 +137,7 @@ def _preprocess_input(
             f'Convert manually using skimage.util.img_as_ubyte to '
             f'silence this warning.'
         )
-        warn(message, stacklevel=5)
+        warn_external(message)
         image = img_as_ubyte(image)
 
     if _footprint_is_sequence(footprint):
@@ -173,20 +174,17 @@ def _preprocess_input(
         n_bins = int(max(3, image.max())) + 1
 
     if n_bins > 2**10:
-        warn(
+        warn_external(
             f'Bad rank filter performance is expected due to a '
             f'large number of bins ({n_bins}), equivalent to an approximate '
-            f'bitdepth of {np.log2(n_bins):.1f}.',
-            stacklevel=2,
+            f'bitdepth of {np.log2(n_bins):.1f}.'
         )
 
     for name, value in zip(("shift_x", "shift_y"), (shift_x, shift_y)):
         if np.dtype(type(value)) == bool:
-            warn(
+            warn_external(
                 f"Paramter `{name}` is boolean and will be interpreted as int. "
-                "This is not officially supported, use int instead.",
-                category=UserWarning,
-                stacklevel=4,
+                "This is not officially supported, use int instead."
             )
 
     return image, footprint, out, mask, n_bins
@@ -248,7 +246,7 @@ def _handle_input_3D(
             f'Convert manually using skimage.util.img_as_ubyte to '
             f'silence this warning.'
         )
-        warn(message, stacklevel=2)
+        warn_external(message)
         image = img_as_ubyte(image)
 
     footprint = np.ascontiguousarray(img_as_ubyte(footprint > 0))
@@ -282,22 +280,19 @@ def _handle_input_3D(
         n_bins = int(max(3, image.max())) + 1
 
     if n_bins > 2**10:
-        warn(
+        warn_external(
             f'Bad rank filter performance is expected due to a '
             f'large number of bins ({n_bins}), equivalent to an approximate '
-            f'bitdepth of {np.log2(n_bins):.1f}.',
-            stacklevel=2,
+            f'bitdepth of {np.log2(n_bins):.1f}.'
         )
 
     for name, value in zip(
         ("shift_x", "shift_y", "shift_z"), (shift_x, shift_y, shift_z)
     ):
         if np.dtype(type(value)) == bool:
-            warn(
+            warn_external(
                 f"Parameter `{name}` is boolean and will be interpreted as int. "
-                "This is not officially supported, use int instead.",
-                category=UserWarning,
-                stacklevel=4,
+                "This is not officially supported, use int instead."
             )
 
     return image, footprint, out, mask, n_bins
@@ -469,14 +464,14 @@ def autolevel(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift
     Examples
     --------
     >>> from _skimage2 import data
-    >>> from _skimage2.morphology import disk, ball
+    >>> from _skimage2.morphology import footprint_ellipse
     >>> from _skimage2.filters.rank import autolevel
     >>> import numpy as np
     >>> img = data.camera()
     >>> rng = np.random.default_rng()
     >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
-    >>> auto = autolevel(img, disk(5))
-    >>> auto_vol = autolevel(volume, ball(5))
+    >>> auto = autolevel(img, footprint_ellipse(5))
+    >>> auto_vol = autolevel(volume, footprint_ellipse((5,) * 3))
 
     """
 
@@ -531,14 +526,14 @@ def equalize(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_
     Examples
     --------
     >>> from _skimage2 import data
-    >>> from _skimage2.morphology import disk, ball
+    >>> from _skimage2.morphology import footprint_ellipse
     >>> from _skimage2.filters.rank import equalize
     >>> import numpy as np
     >>> img = data.camera()
     >>> rng = np.random.default_rng()
     >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
-    >>> equ = equalize(img, disk(5))
-    >>> equ_vol = equalize(volume, ball(5))
+    >>> equ = equalize(img, footprint_ellipse(5))
+    >>> equ_vol = equalize(volume, footprint_ellipse((5,) * 3))
 
     """
 
@@ -593,14 +588,14 @@ def gradient(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_
     Examples
     --------
     >>> from _skimage2 import data
-    >>> from _skimage2.morphology import disk, ball
+    >>> from _skimage2.morphology import footprint_ellipse
     >>> from _skimage2.filters.rank import gradient
     >>> import numpy as np
     >>> img = data.camera()
     >>> rng = np.random.default_rng()
     >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
-    >>> out = gradient(img, disk(5))
-    >>> out_vol = gradient(volume, ball(5))
+    >>> out = gradient(img, footprint_ellipse(5))
+    >>> out_vol = gradient(volume, footprint_ellipse((5,) * 3))
 
     """
 
@@ -664,14 +659,14 @@ def maximum(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z
     Examples
     --------
     >>> from _skimage2 import data
-    >>> from _skimage2.morphology import disk, ball
+    >>> from _skimage2.morphology import footprint_ellipse
     >>> from _skimage2.filters.rank import maximum
     >>> import numpy as np
     >>> img = data.camera()
     >>> rng = np.random.default_rng()
     >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
-    >>> out = maximum(img, disk(5))
-    >>> out_vol = maximum(volume, ball(5))
+    >>> out = maximum(img, footprint_ellipse(5))
+    >>> out_vol = maximum(volume, footprint_ellipse((5,) * 3))
 
     """
 
@@ -726,14 +721,14 @@ def mean(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0)
     Examples
     --------
     >>> from _skimage2 import data
-    >>> from _skimage2.morphology import disk, ball
+    >>> from _skimage2.morphology import footprint_ellipse
     >>> from _skimage2.filters.rank import mean
     >>> import numpy as np
     >>> img = data.camera()
     >>> rng = np.random.default_rng()
     >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
-    >>> avg = mean(img, disk(5))
-    >>> avg_vol = mean(volume, ball(5))
+    >>> avg = mean(img, footprint_ellipse(5))
+    >>> avg_vol = mean(volume, footprint_ellipse((5,) * 3))
 
     """
 
@@ -790,14 +785,14 @@ def geometric_mean(
     Examples
     --------
     >>> from _skimage2 import data
-    >>> from _skimage2.morphology import disk, ball
+    >>> from _skimage2.morphology import footprint_ellipse
     >>> from _skimage2.filters.rank import mean
     >>> import numpy as np
     >>> img = data.camera()
     >>> rng = np.random.default_rng()
     >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
-    >>> avg = geometric_mean(img, disk(5))
-    >>> avg_vol = geometric_mean(volume, ball(5))
+    >>> avg = geometric_mean(img, footprint_ellipse(5))
+    >>> avg_vol = geometric_mean(volume, footprint_ellipse((5,) * 3))
 
     References
     ----------
@@ -867,14 +862,14 @@ def subtract_mean(
     Examples
     --------
     >>> from _skimage2 import data
-    >>> from _skimage2.morphology import disk, ball
+    >>> from _skimage2.morphology import footprint_ellipse
     >>> from _skimage2.filters.rank import subtract_mean
     >>> import numpy as np
     >>> img = data.camera()
     >>> rng = np.random.default_rng()
     >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
-    >>> out = subtract_mean(img, disk(5))
-    >>> out_vol = subtract_mean(volume, ball(5))
+    >>> out = subtract_mean(img, footprint_ellipse(5))
+    >>> out_vol = subtract_mean(volume, footprint_ellipse((5,) * 3))
 
     """
 
@@ -943,14 +938,14 @@ def median(
     Examples
     --------
     >>> from _skimage2 import data
-    >>> from _skimage2.morphology import disk, ball
+    >>> from _skimage2.morphology import footprint_ellipse
     >>> from _skimage2.filters.rank import median
     >>> import numpy as np
     >>> img = data.camera()
     >>> rng = np.random.default_rng()
     >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
-    >>> med = median(img, disk(5))
-    >>> med_vol = median(volume, ball(5))
+    >>> med = median(img, footprint_ellipse(5))
+    >>> med_vol = median(volume, footprint_ellipse((5,) * 3))
 
     """
 
@@ -1016,14 +1011,14 @@ def minimum(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z
     Examples
     --------
     >>> from _skimage2 import data
-    >>> from _skimage2.morphology import disk, ball
+    >>> from _skimage2.morphology import footprint_ellipse
     >>> from _skimage2.filters.rank import minimum
     >>> import numpy as np
     >>> img = data.camera()
     >>> rng = np.random.default_rng()
     >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
-    >>> out = minimum(img, disk(5))
-    >>> out_vol = minimum(volume, ball(5))
+    >>> out = minimum(img, footprint_ellipse(5))
+    >>> out_vol = minimum(volume, footprint_ellipse((5,) * 3))
 
     """
 
@@ -1080,14 +1075,14 @@ def modal(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0
     Examples
     --------
     >>> from _skimage2 import data
-    >>> from _skimage2.morphology import disk, ball
+    >>> from _skimage2.morphology import footprint_ellipse
     >>> from _skimage2.filters.rank import modal
     >>> import numpy as np
     >>> img = data.camera()
     >>> rng = np.random.default_rng()
     >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
-    >>> out = modal(img, disk(5))
-    >>> out_vol = modal(volume, ball(5))
+    >>> out = modal(img, footprint_ellipse(5))
+    >>> out_vol = modal(volume, footprint_ellipse((5,) * 3))
 
     """
 
@@ -1148,14 +1143,14 @@ def enhance_contrast(
     Examples
     --------
     >>> from _skimage2 import data
-    >>> from _skimage2.morphology import disk, ball
+    >>> from _skimage2.morphology import footprint_ellipse
     >>> from _skimage2.filters.rank import enhance_contrast
     >>> import numpy as np
     >>> img = data.camera()
     >>> rng = np.random.default_rng()
     >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
-    >>> out = enhance_contrast(img, disk(5))
-    >>> out_vol = enhance_contrast(volume, ball(5))
+    >>> out = enhance_contrast(img, footprint_ellipse(5))
+    >>> out_vol = enhance_contrast(volume, footprint_ellipse((5,) * 3))
 
     """
 
@@ -1424,14 +1419,14 @@ def noise_filter(
     Examples
     --------
     >>> from _skimage2 import data
-    >>> from _skimage2.morphology import disk, ball
+    >>> from _skimage2.morphology import footprint_ellipse
     >>> from _skimage2.filters.rank import noise_filter
     >>> import numpy as np
     >>> img = data.camera()
     >>> rng = np.random.default_rng()
     >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
-    >>> out = noise_filter(img, disk(5))
-    >>> out_vol = noise_filter(volume, ball(5))
+    >>> out = noise_filter(img, footprint_ellipse(5))
+    >>> out_vol = noise_filter(volume, footprint_ellipse((5,) * 3))
 
     """
 
@@ -1515,13 +1510,13 @@ def entropy(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z
     --------
     >>> from _skimage2 import data
     >>> from _skimage2.filters.rank import entropy
-    >>> from _skimage2.morphology import disk, ball
+    >>> from _skimage2.morphology import footprint_ellipse
     >>> import numpy as np
     >>> img = data.camera()
     >>> rng = np.random.default_rng()
     >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
-    >>> ent = entropy(img, disk(5))
-    >>> ent_vol = entropy(volume, ball(5))
+    >>> ent = entropy(img, footprint_ellipse(5))
+    >>> ent_vol = entropy(volume, footprint_ellipse((5,) * 3))
 
     """
 
@@ -1583,14 +1578,14 @@ def otsu(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0)
     --------
     >>> from _skimage2 import data
     >>> from _skimage2.filters.rank import otsu
-    >>> from _skimage2.morphology import disk, ball
+    >>> from _skimage2.morphology import footprint_ellipse
     >>> import numpy as np
     >>> img = data.camera()
     >>> rng = np.random.default_rng()
     >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
-    >>> local_otsu = otsu(img, disk(5))
+    >>> local_otsu = otsu(img, footprint_ellipse(5))
     >>> thresh_image = img >= local_otsu
-    >>> local_otsu_vol = otsu(volume, ball(5))
+    >>> local_otsu_vol = otsu(volume, footprint_ellipse((5,) * 3))
     >>> thresh_image_vol = volume >= local_otsu_vol
 
     """
@@ -1656,12 +1651,12 @@ def windowed_histogram(
     --------
     >>> from _skimage2 import data
     >>> from _skimage2.filters.rank import windowed_histogram
-    >>> from _skimage2.morphology import disk, ball
+    >>> from _skimage2.morphology import footprint_ellipse
     >>> import numpy as np
     >>> img = data.camera()
     >>> rng = np.random.default_rng()
     >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
-    >>> hist_img = windowed_histogram(img, disk(5))
+    >>> hist_img = windowed_histogram(img, footprint_ellipse(5))
 
     """
 
@@ -1720,8 +1715,12 @@ def majority(
     >>> img = ski2.data.camera()
     >>> rng = np.random.default_rng()
     >>> volume = rng.integers(0, 255, size=(10, 10, 10), dtype=np.uint8)
-    >>> maj_img = ski2.filters.rank.majority(img, ski2.morphology.disk(5))
-    >>> maj_img_vol = ski2.filters.rank.majority(volume, ski2.morphology.ball(5))
+    >>> maj_img = ski2.filters.rank.majority(
+    ...     img, ski2.morphology.footprint_ellipse(5)
+    ... )
+    >>> maj_img_vol = ski2.filters.rank.majority(
+    ...     volume,  ski2.morphology.footprint_ellipse((5,) * 3)
+    ... )
 
     """
 

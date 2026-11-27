@@ -16,7 +16,7 @@ from _skimage2.filters import rank
 from _skimage2.filters.rank import __all__ as all_rank_filters
 from _skimage2.filters.rank import __3Dfilters as _3d_rank_filters
 from _skimage2.filters.rank import subtract_mean
-from _skimage2.morphology import ball, disk
+from _skimage2.morphology import footprint_ellipse
 from _skimage2.morphology import dilation, erosion
 from _skimage2.util import img_as_float, img_as_ubyte
 
@@ -87,7 +87,7 @@ ref_data_3d = dict(np.load(fetch('data/rank_filters_tests_3d.npz')))
 )
 def test_1d_input_raises_error(func):
     image = np.arange(10)
-    footprint = disk(3)
+    footprint = footprint_ellipse((3, 3), adjust_edge=0.001)
     with pytest.raises(ValueError, match='`image` must have 2 or 3 dimensions, got 1'):
         func(image, footprint)
 
@@ -101,8 +101,8 @@ class TestRank:
         self.image = rng.rand(25, 25)
         rng.seed(0)
         self.volume = rng.rand(10, 10, 10)
-        self.footprint = morphology.disk(1)
-        self.footprint_3d = morphology.ball(1)
+        self.footprint = footprint_ellipse((1, 1), adjust_edge=0.001)
+        self.footprint_3d = footprint_ellipse((1, 1, 1), adjust_edge=0.001)
         self.refs = ref_data
         self.refs_3d = ref_data_3d
 
@@ -407,7 +407,7 @@ class TestRank:
     def test_inplace_output(self):
         # rank filters are not supposed to filter inplace
 
-        footprint = disk(20)
+        footprint = footprint_ellipse((20, 20), adjust_edge=0.001)
         rng = np.random.RandomState(595130246)
         image = (rng.rand(500, 500) * 256).astype(np.uint8)
         out = image
@@ -420,7 +420,7 @@ class TestRank:
 
         image = util.img_as_ubyte(data.camera())
 
-        footprint = disk(20)
+        footprint = footprint_ellipse((20, 20), adjust_edge=0.001)
         loc_autolevel = rank.autolevel(image, footprint=footprint)
         loc_perc_autolevel = rank.autolevel_percentile(
             image, footprint=footprint, p0=0.0, p1=1.0
@@ -434,7 +434,7 @@ class TestRank:
 
         image = data.camera().astype(np.uint16) * 4
 
-        footprint = disk(20)
+        footprint = footprint_ellipse((20, 20), adjust_edge=0.001)
         loc_autolevel = rank.autolevel(image, footprint=footprint)
         loc_perc_autolevel = rank.autolevel_percentile(
             image, footprint=footprint, p0=0.0, p1=1.0
@@ -457,11 +457,12 @@ class TestRank:
             'pop',
         ]
 
+        footprint = footprint_ellipse((3, 3), adjust_edge=0.001)
         for method in methods:
             func = getattr(rank, method)
-            out_u = func(image_uint, disk(3))
+            out_u = func(image_uint, footprint)
             with expected_warnings(["Possible precision loss"]):
-                out_f = func(image_float, disk(3))
+                out_f = func(image_float, footprint)
             assert_equal(out_u, out_f)
 
     def test_compare_ubyte_vs_float_3d(self):
@@ -491,11 +492,12 @@ class TestRank:
             'entropy',
         ]
 
+        footprint = footprint_ellipse((3, 3, 3), adjust_edge=0.001)
         for method in methods_3d:
             func = getattr(rank, method)
-            out_u = func(volume_uint, ball(3))
+            out_u = func(volume_uint, footprint)
             with expected_warnings(["Possible precision loss"]):
-                out_f = func(volume_float, ball(3))
+                out_f = func(volume_float, footprint)
             assert_equal(out_u, out_f)
 
     def test_compare_8bit_unsigned_vs_signed(self):
@@ -525,11 +527,12 @@ class TestRank:
             'threshold',
         ]
 
+        footprint = footprint_ellipse((3, 3), adjust_edge=0.001)
         for method in methods:
             func = getattr(rank, method)
-            out_u = func(image_u, disk(3))
+            out_u = func(image_u, footprint)
             with expected_warnings(["Possible precision loss"]):
-                out_s = func(image_s, disk(3))
+                out_s = func(image_s, footprint)
             assert_equal(out_u, out_s)
 
     def test_compare_8bit_unsigned_vs_signed_3d(self):
@@ -563,11 +566,12 @@ class TestRank:
             'entropy',
         ]
 
+        footprint = footprint_ellipse((3, 3, 3), adjust_edge=0.001)
         for method in methods_3d:
             func = getattr(rank, method)
-            out_u = func(volume_u, ball(3))
+            out_u = func(volume_u, footprint)
             with expected_warnings(["Possible precision loss"]):
-                out_s = func(volume_s, ball(3))
+                out_s = func(volume_s, footprint)
             assert_equal(out_u, out_s)
 
     @pytest.mark.parametrize(
@@ -619,14 +623,16 @@ class TestRank:
             'entropy',
         ]
 
+        disk = footprint_ellipse((3, 3), adjust_edge=0.001)
         func = getattr(rank, method)
-        f8 = func(image8, disk(3))
-        f16 = func(image16, disk(3))
+        f8 = func(image8, disk)
+        f16 = func(image16, disk)
         assert_equal(f8, f16)
 
+        ball = footprint_ellipse((3, 3, 3), adjust_edge=0.001)
         if method in methods_3d:
-            f8 = func(volume8, ball(3))
-            f16 = func(volume16, ball(3))
+            f8 = func(volume8, ball)
+            f16 = func(volume16, ball)
 
             assert_equal(f8, f16)
 
@@ -902,7 +908,7 @@ class TestRank:
         # check that percentile p0 = 0 is identical to local min
         img = data.camera()
         img16 = img.astype(np.uint16)
-        footprint = disk(15)
+        footprint = footprint_ellipse((15, 15), adjust_edge=0.001)
         # check for 8bit
         img_p0 = rank.percentile(img, footprint=footprint, p0=0)
         img_min = rank.minimum(img, footprint=footprint)
@@ -916,7 +922,7 @@ class TestRank:
         # check that percentile p0 = 1 is identical to local max
         img = data.camera()
         img16 = img.astype(np.uint16)
-        footprint = disk(15)
+        footprint = footprint_ellipse((15, 15), adjust_edge=0.001)
         # check for 8bit
         img_p0 = rank.percentile(img, footprint=footprint, p0=1.0)
         img_max = rank.maximum(img, footprint=footprint)
@@ -930,7 +936,7 @@ class TestRank:
         # check that percentile p0 = 0.5 is identical to local median
         img = data.camera()
         img16 = img.astype(np.uint16)
-        footprint = disk(15)
+        footprint = footprint_ellipse((15, 15), adjust_edge=0.001)
         # check for 8bit
         img_p0 = rank.percentile(img, footprint=footprint, p0=0.5)
         img_max = rank.median(img, footprint=footprint)
@@ -1080,9 +1086,10 @@ class TestRank:
         a = np.zeros((3, 3), dtype=np.uint8)
         a[1] = 1
         full_footprint = np.ones((3, 3), dtype=np.uint8)
+        disk_footprint = footprint_ellipse((1, 1), adjust_edge=0.001)
         assert_equal(rank.median(a), rank.median(a, full_footprint))
         assert rank.median(a)[1, 1] == 0
-        assert rank.median(a, disk(1))[1, 1] == 1
+        assert rank.median(a, disk_footprint)[1, 1] == 1
 
     def test_majority(self):
         img = data.camera()
