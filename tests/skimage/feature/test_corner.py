@@ -433,8 +433,7 @@ def test_hessian_matrix_det_3d(im3d, dtype):
     "ignore:`skimage.filters.gaussian` is deprecated:PendingDeprecationWarning"
 )
 def test_shape_index():
-    # software floating point arm doesn't raise a warning on divide by zero
-    # https://github.com/scikit-image/scikit-image/issues/3335
+    """A bright pixel is a spherical cap; the surrounding ring is a rut."""
     square = np.zeros((5, 5))
     square[2, 2] = 4
     s = shape_index(square, sigma=0.1)
@@ -444,9 +443,31 @@ def test_shape_index():
             [
                 [np.nan, np.nan, -0.5, np.nan, np.nan],
                 [np.nan, 0, np.nan, 0, np.nan],
-                [-0.5, np.nan, -1, np.nan, -0.5],
+                [-0.5, np.nan, 1, np.nan, -0.5],
                 [np.nan, 0, np.nan, 0, np.nan],
                 [np.nan, np.nan, -0.5, np.nan, np.nan],
+            ]
+        ),
+    )
+
+
+@pytest.mark.filterwarnings(
+    "ignore:`skimage.filters.gaussian` is deprecated:PendingDeprecationWarning"
+)
+def test_shape_index_cup():
+    """A dark pixel is a spherical cup; the surrounding ring is a ridge."""
+    square = np.zeros((5, 5))
+    square[2, 2] = -4
+    s = shape_index(square, sigma=0.1)
+    assert_almost_equal(
+        s,
+        np.array(
+            [
+                [np.nan, np.nan, 0.5, np.nan, np.nan],
+                [np.nan, 0, np.nan, 0, np.nan],
+                [0.5, np.nan, -1, np.nan, 0.5],
+                [np.nan, 0, np.nan, 0, np.nan],
+                [np.nan, np.nan, 0.5, np.nan, np.nan],
             ]
         ),
     )
