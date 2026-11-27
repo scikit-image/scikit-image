@@ -7,7 +7,6 @@ from _skimage2.feature.corner import (
     corner_orientations as corner_orientations,
     corner_shi_tomasi as corner_shi_tomasi,
     corner_subpix as corner_subpix,
-    hessian_matrix as hessian_matrix,
     hessian_matrix_det as hessian_matrix_det,
     hessian_matrix_eigvals as hessian_matrix_eigvals,
     shape_index as shape_index,
@@ -36,6 +35,7 @@ __all__ = [
 import numpy as np
 
 from _skimage2.feature.corner import corner_peaks as ski2_corner_peaks
+from _skimage2.feature.corner import hessian_matrix as ski2_hessian_matrix
 
 from skimage._migration import ski2_migration_decorator
 
@@ -141,6 +141,123 @@ def corner_peaks(
         labels=labels,
         num_peaks_per_label=num_peaks_per_label,
         p_norm=p_norm,
+    )
+
+
+@ski2_migration_decorator(
+    """\
+    ``%(qname_old)s`` is deprecated in favor of ``%(qname_new)s`` with new
+    behavior:
+
+    * The default method for calculating the Hessian has changed from finite
+      differences on the Gaussian-smoothed image
+      (``use_gaussian_derivatives=False``) to the more accurate convolution
+      with Gaussian derivatives (``use_gaussian_derivatives=True``).
+    * Parameter `use_gaussian_derivatives` is now keyword-only.
+
+    To keep the old (``skimage``, v1.x) default behavior after switching to
+    ``skimage2``, pass ``use_gaussian_derivatives=False`` explicitly::
+
+        skimage.feature.hessian_matrix(image, ...)
+
+    Becomes ::
+
+        skimage2.feature.hessian_matrix(image, ..., use_gaussian_derivatives=False)
+
+    Other parameters can be left unchanged, but pass
+    `use_gaussian_derivatives` by keyword.
+    """,
+    qname_old='skimage.feature.hessian_matrix',
+)
+def hessian_matrix(
+    image, sigma=1, mode='constant', cval=0, order='rc', use_gaussian_derivatives=None
+):
+    r"""Compute the Hessian matrix.
+
+    In 2D, the Hessian matrix is defined as::
+
+        H = [Hrr Hrc]
+            [Hrc Hcc]
+
+    which is computed by convolving the image with the second derivatives
+    of the Gaussian kernel in the respective r- and c-directions, or by
+    finite differences on the Gaussian-smoothed image (the default).
+
+    The implementation here also supports n-dimensional data.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    sigma : float
+        Standard deviation used for the Gaussian kernel, which is used as
+        weighting function for the auto-correlation matrix.
+    mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
+        How to handle values outside the image borders.
+    cval : float, optional
+        Used in conjunction with mode 'constant', the value outside
+        the image boundaries.
+    order : {'rc', 'xy'}, optional
+        For 2D images, this parameter allows for the use of reverse or forward
+        order of the image axes in gradient computation. 'rc' indicates the use
+        of the first axis initially (Hrr, Hrc, Hcc), whilst 'xy' indicates the
+        usage of the last axis initially (Hxx, Hxy, Hyy). Images with higher
+        dimension must always use 'rc' order.
+    use_gaussian_derivatives : bool or None, optional
+        If True, compute the Hessian by convolving the image with derivatives
+        of the Gaussian kernel.  If False, compute the Hessian by finite
+        differences on the Gaussian-smoothed image.  None (the default) is
+        the same as False.  See Notes.
+
+    Returns
+    -------
+    H_elems : list of ndarray
+        Upper-diagonal elements of the hessian matrix for each pixel in the
+        input image. In 2D, this will be a three element list containing [Hrr,
+        Hrc, Hcc]. In nD, the list will contain ``(n**2 + n) / 2`` arrays.
+
+    Notes
+    -----
+    The distributive property of derivatives and convolutions allows us to
+    restate the derivative of an image, I, smoothed with a Gaussian kernel, G,
+    as the convolution of the image with the derivative of G.
+
+    .. math::
+
+        \frac{\partial }{\partial x_i}(I * G) =
+        I * \left( \frac{\partial }{\partial x_i} G \right)
+
+    When ``use_gaussian_derivatives`` is ``True``, this property is used to
+    compute the second order derivatives that make up the Hessian matrix.
+
+    When ``use_gaussian_derivatives`` is ``False`` or None (the default),
+    simple finite differences on a Gaussian-smoothed image are used instead.
+    This is less accurate than the Gaussian derivative method.
+
+    Examples
+    --------
+    >>> from skimage.feature import hessian_matrix
+    >>> square = np.zeros((5, 5))
+    >>> square[2, 2] = 4
+    >>> Hrr, Hrc, Hcc = hessian_matrix(square, sigma=0.1, order='rc',
+    ...                                use_gaussian_derivatives=False)
+    >>> Hrc
+    array([[ 0.,  0.,  0.,  0.,  0.],
+           [ 0.,  1.,  0., -1.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.],
+           [ 0., -1.,  0.,  1.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.]])
+
+    """
+    if use_gaussian_derivatives is None:
+        use_gaussian_derivatives = False
+    return ski2_hessian_matrix(
+        image,
+        sigma=sigma,
+        mode=mode,
+        cval=cval,
+        order=order,
+        use_gaussian_derivatives=use_gaussian_derivatives,
     )
 
 

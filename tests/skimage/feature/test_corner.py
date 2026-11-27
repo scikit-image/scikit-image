@@ -209,12 +209,23 @@ def test_hessian_matrix(dtype):
         ),
     )
 
-    with pytest.warns(
-        FutureWarning, match="use_gaussian_derivatives currently defaults"
-    ):
-        # FutureWarning warning when use_gaussian_derivatives is not
-        # specified.
-        hessian_matrix(square, sigma=0.1, order='rc')
+
+@pytest.mark.parametrize('sigma', [0.1, 1, 3])
+def test_hessian_matrix_default(sigma):
+    rng = np.random.default_rng(12)
+    img = rng.normal(size=(20, 24))
+    # Default (None) remains finite differences, as for skimage v1.x.
+    H_default = hessian_matrix(img, sigma=sigma)
+    H_none = hessian_matrix(img, sigma=sigma, use_gaussian_derivatives=None)
+    H_fd = hessian_matrix(img, sigma=sigma, use_gaussian_derivatives=False)
+    H_gd = hessian_matrix(img, sigma=sigma, use_gaussian_derivatives=True)
+    # Positional use_gaussian_derivatives allowed in skimage v1.x.
+    H_fd_pos = hessian_matrix(img, sigma, 'constant', 0, 'rc', False)
+    for H_d, H_n, H_f, H_fp, H_g in zip(H_default, H_none, H_fd, H_fd_pos, H_gd):
+        assert_array_equal(H_d, H_f)
+        assert_array_equal(H_n, H_f)
+        assert_array_equal(H_fp, H_f)
+        assert not np.allclose(H_d, H_g)
 
 
 @pytest.mark.parametrize('use_gaussian_derivatives', [False, True])

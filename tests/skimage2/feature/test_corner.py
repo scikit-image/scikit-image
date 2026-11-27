@@ -209,12 +209,24 @@ def test_hessian_matrix(dtype):
         ),
     )
 
-    with pytest.warns(
-        FutureWarning, match="use_gaussian_derivatives currently defaults"
-    ):
-        # FutureWarning warning when use_gaussian_derivatives is not
-        # specified.
-        hessian_matrix(square, sigma=0.1, order='rc')
+
+@pytest.mark.parametrize('sigma', [0.1, 1, 3])
+def test_hessian_matrix_default(sigma):
+    rng = np.random.default_rng(12)
+    img = rng.normal(size=(20, 24))
+    # Default is Gaussian derivatives.
+    H_default = hessian_matrix(img, sigma=sigma)
+    H_gd = hessian_matrix(img, sigma=sigma, use_gaussian_derivatives=True)
+    H_fd = hessian_matrix(img, sigma=sigma, use_gaussian_derivatives=False)
+    for H_d, H_g, H_f in zip(H_default, H_gd, H_fd):
+        assert_array_equal(H_d, H_g)
+        assert not np.allclose(H_d, H_f)
+
+
+def test_hessian_matrix_keyword_only():
+    img = np.zeros((5, 5))
+    with pytest.raises(TypeError):
+        hessian_matrix(img, 1, 'constant', 0, 'rc', False)
 
 
 @pytest.mark.parametrize('use_gaussian_derivatives', [False, True])
