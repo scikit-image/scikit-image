@@ -311,7 +311,14 @@ def _convert(image, dtype, force_copy=False, uniform=False):
             return image.astype(dtype_out)
 
         if np.min(image) < -1.0 or np.max(image) > 1.0:
-            raise ValueError("Images of type float must be between -1 and 1.")
+            image_min = np.min(image)
+            image_max = np.max(image)
+            if (image_min >= -1.0 or np.isclose(image_min, -1.0, atol=1e-7)) and (
+                image_max <= 1.0 or np.isclose(image_max, 1.0, atol=1e-7)
+            ):
+                image = np.clip(image, -1.0, 1.0)
+            else:
+                raise ValueError("Images of type float must be between -1 and 1.")
         # floating point -> integer
         # use float type that can represent output integer type
         computation_type = _dtype_itemsize(
