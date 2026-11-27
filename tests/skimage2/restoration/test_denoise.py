@@ -250,6 +250,7 @@ def test_denoise_bilateral_spatial_symmetry(win_size):
     assert_array_almost_equal(out, out[:, ::-1])
     assert_array_almost_equal(out, out.T)
 
+
 def test_denoise_bilateral_null():
     img = np.zeros((50, 50))
     out = restoration.denoise_bilateral(img)
