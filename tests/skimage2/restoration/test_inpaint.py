@@ -112,6 +112,35 @@ def test_inpaint_biharmonic_3d(split_into_regions):
     assert_allclose(ref, out)
 
 
+@testing.parametrize('order', [1, 3, 4, 5, 6])
+@testing.parametrize('dtype', [np.float32, np.float64])
+@testing.parametrize('split_into_regions', [False, True])
+def test_inpaint_nharmonic_2d(order, dtype, split_into_regions):
+    n = 2 * order - 1
+    hole_size = 2 * order + 1  # hole size increases for each nth harmonic
+    margin = (
+        order + 1
+    )  # buffer size so that the hole sits comfortably inside the image and prevents nasty estimates at boundary
+    size = hole_size + 2 * margin
+
+    x = np.linspace(0, 1, size, dtype=dtype)
+    img = np.tile(x**n, (size, 1))
+    img_true = img.copy()
+
+    mask = np.zeros_like(img)
+    r0 = c0 = margin
+    mask[r0 + 2, c0 + 2 : c0 + hole_size] = 1
+    mask[r0 + 1, c0 + 1 : c0 + 3] = 1
+    mask[r0 + 0, c0 + 1 : c0 + 2] = 1
+    img[np.where(mask)] = 0
+
+    out = inpaint.inpaint_biharmonic(
+        img, mask, n=order, split_into_regions=split_into_regions
+    )
+    assert out.dtype == _supported_float_type(img.dtype)
+    assert np.allclose(out, img_true, rtol=1e-5)
+
+
 def test_invalid_input():
     img, mask = np.zeros([]), np.zeros([])
     with testing.raises(ValueError):
@@ -127,11 +156,12 @@ def test_invalid_input():
         inpaint.inpaint_biharmonic(img, mask)
 
 
+@testing.parametrize('n', [1, 2, 3])
 @testing.parametrize('dtype', [np.uint8, np.float32, np.float64])
 @testing.parametrize('order', ['C', 'F'])
 @testing.parametrize('channel_axis', [None, -1])
 @testing.parametrize('split_into_regions', [False, True])
-def test_inpaint_nrmse(dtype, order, channel_axis, split_into_regions):
+def test_inpaint_nrmse(n, dtype, order, channel_axis, split_into_regions):
     image_orig = data.astronaut()[:, :200]
     float_dtype = np.float32 if dtype == np.float32 else np.float64
     image_orig = image_orig.astype(float_dtype, copy=False)
@@ -176,6 +206,7 @@ def test_inpaint_nrmse(dtype, order, channel_axis, split_into_regions):
     image_result = inpaint.inpaint_biharmonic(
         image_defect,
         mask,
+        n=n,
         channel_axis=channel_axis,
         split_into_regions=split_into_regions,
     )
@@ -183,4 +214,5 @@ def test_inpaint_nrmse(dtype, order, channel_axis, split_into_regions):
 
     nrmse_defect = normalized_root_mse(image_orig, image_defect)
     nrmse_result = normalized_root_mse(img_as_float(image_orig), image_result)
+
     assert nrmse_result < 0.2 * nrmse_defect
