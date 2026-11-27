@@ -7,7 +7,7 @@ from scipy import ndimage as ndi
 from scipy import spatial, stats
 
 from ..filters._gaussian import gaussian
-from _skimage2._shared.utils import _supported_float_type, safe_as_int, warn
+from _skimage2._shared.utils import _supported_float_type, safe_as_int
 from ..transform.integral import integral_image
 from ..util import img_as_float
 from ._hessian_det_appx import _hessian_matrix_det
@@ -222,7 +222,13 @@ def _hessian_matrix_with_gaussian(image, sigma=1, mode='reflect', cval=0, order=
 
 
 def hessian_matrix(
-    image, sigma=1, mode='constant', cval=0, order='rc', use_gaussian_derivatives=None
+    image,
+    sigma=1,
+    mode='constant',
+    cval=0,
+    order='rc',
+    *,
+    use_gaussian_derivatives=True,
 ):
     r"""Compute the Hessian matrix.
 
@@ -231,8 +237,8 @@ def hessian_matrix(
         H = [Hrr Hrc]
             [Hrc Hcc]
 
-    which is computed by convolving the image with the second derivatives
-    of the Gaussian kernel in the respective r- and c-directions.
+    which is computed, by default, by convolving the image with the second
+    derivatives of the Gaussian kernel in the respective r- and c-directions.
 
     The implementation here also supports n-dimensional data.
 
@@ -255,8 +261,9 @@ def hessian_matrix(
         usage of the last axis initially (Hxx, Hxy, Hyy). Images with higher
         dimension must always use 'rc' order.
     use_gaussian_derivatives : bool, optional
-        Indicates whether the Hessian is computed by convolving with Gaussian
-        derivatives, or by a simple finite-difference operation.
+        If True (the default), compute the Hessian by convolving the image with
+        derivatives of the Gaussian kernel.  If False, compute the Hessian by
+        finite differences on the Gaussian-smoothed image.  See Notes.
 
     Returns
     -------
@@ -277,17 +284,22 @@ def hessian_matrix(
         \frac{\partial }{\partial x_i}(I * G) =
         I * \left( \frac{\partial }{\partial x_i} G \right)
 
-    When ``use_gaussian_derivatives`` is ``True``, this property is used to
-    compute the second order derivatives that make up the Hessian matrix.
+    When ``use_gaussian_derivatives`` is ``True`` (the default), this property
+    is used to compute the second order derivatives that make up the Hessian
+    matrix.
 
     When ``use_gaussian_derivatives`` is ``False``, simple finite differences
-    on a Gaussian-smoothed image are used instead.
+    on a Gaussian-smoothed image are used instead.  This is less accurate than
+    the Gaussian derivative method, but is somewhat faster to compute.
 
     Examples
     --------
     >>> from _skimage2.feature import hessian_matrix
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 4
+
+    Using finite differences on the smoothed image:
+
     >>> Hrr, Hrc, Hcc = hessian_matrix(square, sigma=0.1, order='rc',
     ...                                use_gaussian_derivatives=False)
     >>> Hrc
@@ -306,16 +318,6 @@ def hessian_matrix(
         raise ValueError("order='xy' is only supported for 2D images.")
     if order not in ["rc", "xy"]:
         raise ValueError(f"unrecognized order: {order}")
-
-    if use_gaussian_derivatives is None:
-        use_gaussian_derivatives = False
-        warn(
-            "use_gaussian_derivatives currently defaults to False, but will "
-            "change to True in a future version. Please specify this "
-            "argument explicitly to maintain the current behavior",
-            category=FutureWarning,
-            stacklevel=2,
-        )
 
     if use_gaussian_derivatives:
         return _hessian_matrix_with_gaussian(
@@ -372,6 +374,11 @@ def hessian_matrix_det(image, sigma=1, approximate=True):
     would expect. The downside is that the result for `sigma` less than `3`
     is not accurate, i.e., not similar to the result obtained if someone
     computed the Hessian and took its determinant.
+
+    For 3D and higher images, or when ``approximate=False``, this function
+    computes the Hessian with :func:`hessian_matrix` using finite differences
+    on the Gaussian-smoothed image (``use_gaussian_derivatives=False``), not
+    convolution with Gaussian derivatives.
     """
     image = img_as_float(image)
     float_dtype = _supported_float_type(image.dtype)
@@ -562,6 +569,13 @@ def shape_index(image, sigma=1, mode='constant', cval=0):
     -------
     s : ndarray
         Shape index
+
+    Notes
+    -----
+    This function computes the Hessian with :func:`hessian_matrix` using
+    finite differences on the Gaussian-smoothed image
+    (``use_gaussian_derivatives=False``), not convolution with Gaussian
+    derivatives.
 
     References
     ----------
