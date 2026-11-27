@@ -196,15 +196,15 @@ def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1, *, channel_axis=-1):
     """
     lab1, lab2 = _float_inputs(lab1, lab2, allow_float32=True)
 
-    channel_axis = channel_axis % lab1.ndim
     unroll = False
     if lab1.ndim == 1 and lab2.ndim == 1:
         unroll = True
-        if lab1.ndim == 1:
-            lab1 = lab1[None, :]
-        if lab2.ndim == 1:
-            lab2 = lab2[None, :]
-        channel_axis += 1
+        np.moveaxis(lab1, source=channel_axis, destination=0)
+        lab1 = lab1[None, :]
+        lab2 = lab2[None, :]
+        if channel_axis >= 0:
+            channel_axis = channel_axis + 1
+
     L1, a1, b1 = np.moveaxis(lab1, source=channel_axis, destination=0)[:3]
     L2, a2, b2 = np.moveaxis(lab2, source=channel_axis, destination=0)[:3]
 
