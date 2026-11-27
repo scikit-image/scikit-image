@@ -8,11 +8,18 @@ from _skimage2._shared.fused_numerics cimport np_numeric, np_anyint
 @cython.boundscheck(False)  # Deactivate bounds checking
 @cython.wraparound(False)   # Deactivate negative indexing
 def _map_array(const np_anyint[:] inarr, np_numeric[:] outarr,
-               const np_anyint[:] inval, const np_numeric[:] outval):
+               const np_anyint[:] inval, const np_numeric[:] outval, unknown):
     # build the map from the input and output vectors
     cdef size_t i, n_map, n_array
     cdef unordered_map[np_anyint, np_numeric] lut
     cdef unordered_map[np_anyint, np_numeric].iterator it
+    cdef int keep_image_vals = 0
+    cdef np_numeric val = 0
+    if unknown == "keep":
+        keep_image_vals = 1
+    else:
+        val = unknown
+
     n_map = inval.shape[0]
     for i in range(n_map):
         lut[inval[i]] = outval[i]
@@ -23,4 +30,7 @@ def _map_array(const np_anyint[:] inarr, np_numeric[:] outarr,
         if it != lut.end():
             outarr[i] = dereference(it).second
         else:
-            outarr[i] = 0
+            if keep_image_vals:
+                outarr[i] = inarr[i]
+            else:
+                outarr[i] = val
