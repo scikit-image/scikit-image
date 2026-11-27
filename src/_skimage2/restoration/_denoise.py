@@ -85,7 +85,7 @@ def _compute_spatial_lut(win_size, sigma, *, dtype=float):
     spatial_lut : ndarray
         Lookup table for the spatial sigma.
     """
-    grid_points = np.arange(-win_size // 2, win_size // 2 + 1)
+    grid_points = np.arange(-(win_size // 2), win_size // 2 + 1)
     rr, cc = np.meshgrid(grid_points, grid_points, indexing='ij')
     distances = np.hypot(rr, cc)
     return _gaussian_weight(distances, sigma**2, dtype=dtype).ravel()
