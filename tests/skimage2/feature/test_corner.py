@@ -1,11 +1,19 @@
+from functools import partial
 import numpy as np
 import pytest
-from numpy.testing import assert_almost_equal, assert_array_equal, assert_equal
+from numpy.testing import (
+    assert_allclose,
+    assert_almost_equal,
+    assert_array_equal,
+    assert_equal,
+)
+from scipy import ndimage as ndi
 
 from _skimage2 import data, draw, img_as_float, measure
 from _skimage2._shared.testing import run_in_parallel
 from _skimage2._shared.utils import _supported_float_type
 from _skimage2.color import rgb2gray
+from _skimage2.feature.corner import _gaussian_derivative_kernel
 from _skimage2.feature import (
     corner_fast,
     corner_foerstner,
@@ -217,25 +225,6 @@ def test_hessian_matrix(dtype):
         hessian_matrix(square, sigma=0.1, order='rc')
 
 
-@pytest.mark.parametrize('use_gaussian_derivatives', [False, True])
-def test_hessian_matrix_order(use_gaussian_derivatives):
-    square = np.zeros((5, 5), dtype=float)
-    square[2, 2] = 4
-
-    Hxx, Hxy, Hyy = hessian_matrix(
-        square, sigma=0.1, order="xy", use_gaussian_derivatives=use_gaussian_derivatives
-    )
-
-    Hrr, Hrc, Hcc = hessian_matrix(
-        square, sigma=0.1, order="rc", use_gaussian_derivatives=use_gaussian_derivatives
-    )
-
-    # verify results are equivalent, just reversed in order
-    assert_array_equal(Hxx, Hcc)
-    assert_array_equal(Hxy, Hrc)
-    assert_array_equal(Hyy, Hrr)
-
-
 def test_hessian_matrix_3d():
     cube = np.zeros((5, 5, 5))
     cube[2, 2, 2] = 4
@@ -289,6 +278,236 @@ def test_hessian_matrix_3d_xy(use_gaussian_derivatives):
             order='nonexistant',
             use_gaussian_derivatives=use_gaussian_derivatives,
         )
+
+
+# ``np.pad`` spells two of the five boundary rules differently from
+# ``scipy.ndimage``. Matching them by name builds a different outside.
+_NUMPY_PAD_MODE = {
+    'nearest': 'edge',
+    'reflect': 'symmetric',
+    'mirror': 'reflect',
+    'constant': 'constant',
+    'wrap': 'wrap',
+}
+
+
+def _quadratic_image(size, ndim, curvatures):
+    """An image that is exactly a quadratic.
+
+    For 2D, the image values are multiples of r**2, c**2, and rc, where r and c
+    are image coordinates with 0 at image center; mutatis mutandis for 3D.
+    """
+    center = size // 2
+    coords = [c - center for c in np.indices((size,) * ndim, dtype=float)]
+    pairs = zip(*np.triu_indices(ndim))
+    image = np.zeros((size,) * ndim, dtype=float)
+    for (i, j), value in zip(pairs, curvatures):
+        # Diagonal / 2 because the 2nd derivative of x ** 2 / 2 is 1.
+        value = value / 2 if i == j else value
+        image = image + value * coords[i] * coords[j]
+    return image
+
+
+def _interior_slice(ndim, sigma, truncate=8):
+    """Pixels no kernel tap reached over the border."""
+    reach = int(truncate * np.max(sigma) + 0.5) + 1
+    return (slice(reach, -reach),) * ndim
+
+
+@pytest.mark.parametrize(
+    'sigma, ndim, size', [(0.1, 2, 81), ((1, 3), 2, 81), (1, 3, 41)]
+)
+def test_hessian_gaussian_exact_on_quadratic(sigma, ndim, size):
+    """The reported curvature is the curvature that built the picture."""
+    n_curvatures = ndim * (ndim + 1) // 2  # Size of upper triangle.
+    curvatures = [0.7, -0.4, 0.2, 1.3, 0.5, -0.9][:n_curvatures]
+    image = _quadratic_image(size, ndim, curvatures)
+    # Drop values where the kernel has read past the border.
+    inner = _interior_slice(ndim, sigma)
+    # Values grow with the square of the distance from the centre, so a wider
+    # frame holds larger numbers. The tolerance scales with the largest of
+    # those values because the filter is linear.
+    tol = 1e-12 * max(np.abs(image).max(), 1)
+    got = hessian_matrix(image, sigma=sigma, use_gaussian_derivatives=True)
+    for i, expected in enumerate(curvatures):
+        assert_allclose(got[i][inner], expected, atol=tol, rtol=0)
+
+
+# bounary mode, cval pairs at which to test.
+BOUNDARY_PARAMS = (
+    ('nearest', 0),
+    ('reflect', 0),
+    ('mirror', 0),
+    ('constant', 0),
+    ('constant', 99),
+    ('wrap', 0),
+)
+
+
+@pytest.mark.parametrize('mode, cval', BOUNDARY_PARAMS)
+def test_hessian_gaussian_applies_the_boundary_rule_once(mode, cval):
+    """We extend each axis once with boundary conditions.
+
+    So, if we first impose the boundary conditions on each axis with padding,
+    calculate the Hessian, and then slice out the center corresponding to the
+    original image, we get the same answer as the standard no-pad case.
+    """
+    image = np.random.default_rng(0).random((48, 48))
+    pad = 24
+    test_func = assert_array_equal
+    kwargs = dict(sigma=2, mode=mode, cval=cval, use_gaussian_derivatives=True)
+    no_pad = hessian_matrix(image, **kwargs)
+    pad_kwargs = {'mode': _NUMPY_PAD_MODE[mode]}
+    if mode == 'constant' and cval:
+        # The order-2 taps are set to sum to 0, then scaled. In float64 the
+        # actual sum is about 1e-17, so a pad with values ~100 leaves about
+        # 1e-15 after applying the kernel. The next (smoothing, order=0) pass
+        # reads that tiny remaining pad at the image borders; the no_pad
+        # version enforces an outside value 0.
+        pad_kwargs['constant_values'] = cval
+        test_func = partial(assert_allclose, atol=1e-14, rtol=0)
+    bigger = np.pad(image, pad, **pad_kwargs)
+    padded = hessian_matrix(bigger, **kwargs)
+    for got, expected in zip(no_pad, padded):
+        test_func(got, expected[pad:-pad, pad:-pad])
+
+
+@pytest.mark.parametrize('sigma', [0.1, 0.4, 1, 3])
+def test_hessian_gaussian_near_0_to_constant(sigma):
+    """A flat image has no curvature.
+
+    Put another way, a constant image should generate Hessian matrix entries
+    near 0 (allowing for floating point precision).
+    """
+    flat = np.full((48, 48), 0.4)  # Non-zero image.
+    inner = _interior_slice(2, sigma)
+    # cval of 0 below does not match non-zero values in image, so does not
+    # trigger flat image shortcut to exact 0 in code.
+    for element in hessian_matrix(
+        flat, sigma=sigma, mode='constant', cval=0, use_gaussian_derivatives=True
+    ):
+        assert_allclose(element[inner], 0, atol=1e-15)
+
+
+@pytest.mark.parametrize('mode, cval', BOUNDARY_PARAMS)
+def test_hessian_gaussian_matches_one_2d_convolution(mode, cval):
+    """Each element matches one correlation with outer product of its kernels.
+
+    This tests boundary handling.  The `hessian_matrix` code applies 1D kernels
+    sequentially, because they are separable.  Here we use a 2D kernel
+    directly.  We test that the sequential 1D and 2D kernels give the same
+    results for the same boundary conditions, and therefore, that the 1D case
+    (that we are using) handles boundary conditions correctly.
+    """
+    image = np.random.default_rng(0).random((48, 48))
+    sigma = 2.0
+    got = hessian_matrix(
+        image, sigma=sigma, mode=mode, cval=cval, use_gaussian_derivatives=True
+    )
+    # 2D and 1D have different order of operations - leading to different
+    # rounding error, that shows up for large cval.
+    tol = 1e-12 if (mode == 'constant' and cval) else 1e-14
+    kernels = [_gaussian_derivative_kernel(sigma, order) for order in (0, 1, 2)]
+    for element, orders in zip(got, ((2, 0), (1, 1), (0, 2))):
+        kernel = np.outer(kernels[orders[0]], kernels[orders[1]])
+        expected = ndi.correlate(image, kernel, mode=mode, cval=cval)
+        assert_allclose(element, expected, atol=tol, rtol=0)
+
+
+@pytest.mark.parametrize('mode, cval', BOUNDARY_PARAMS)
+def test_hessian_gaussian_matches_one_3d_convolution(mode, cval):
+    """Each element matches one correlation with outer product of its kernels.
+
+    Test boundary handling in 3D.
+    """
+    image = np.random.default_rng(0).random((12, 12, 12))
+    sigma = 2.0
+    got = hessian_matrix(
+        image, sigma=sigma, mode=mode, cval=cval, use_gaussian_derivatives=True
+    )
+    orders = ((2, 0, 0), (1, 1, 0), (1, 0, 1), (0, 2, 0), (0, 1, 1), (0, 0, 2))
+    # 3D and 1D have different order of operations - leading to different
+    # rounding error, that shows up for large cval.
+    tol = 1e-10 if (mode == 'constant' and cval) else 1e-12
+    kernels = [_gaussian_derivative_kernel(sigma, order) for order in (0, 1, 2)]
+    for element, order in zip(got, orders):
+        kernel = (
+            kernels[order[0]][:, None, None]
+            * kernels[order[1]][None, :, None]
+            * kernels[order[2]][None, None, :]
+        )
+        expected = ndi.correlate(image, kernel, mode=mode, cval=cval)
+        assert_allclose(element, expected, atol=tol, rtol=0)
+
+
+@pytest.mark.parametrize('dtype', [np.float32, np.float64])
+def test_hessian_gaussian_constant_matching_cval_is_exactly_zero(dtype):
+    """Test short-circuit return of exact zero with flat image, matching cval"""
+    # There is a wrinkle here, that float32(0.1) != float64(0.1), so `cval`
+    # must be compared in the image dtype.
+    flat = np.full((16, 16), 0.1, dtype=dtype)
+    H_elems = hessian_matrix(
+        flat, sigma=1, mode='constant', cval=0.1, use_gaussian_derivatives=True
+    )
+    for element in H_elems:
+        assert element.dtype == dtype
+        # Short circuit exact 0 for flat image where cval=image value.
+        assert_array_equal(element, 0)
+
+
+def test_against_analytic_for_gaussian_blob():
+    """Use image of a single wide Gaussian blob, test against analytic result"""
+    sigma, width, size = 2, 6.0, 161
+    center = size // 2
+    r, c = [x - center for x in np.indices((size, size), dtype=float)]
+    blob = np.exp(-(r**2 + c**2) / (2 * width**2))
+    spread = np.sqrt(width**2 + sigma**2)
+    smoothed = (width**2 / spread**2) * np.exp(-(r**2 + c**2) / (2 * spread**2))
+    truth = [  # Analytic Hessian.
+        smoothed * (r**2 - spread**2) / spread**4,
+        smoothed * (r * c) / spread**4,
+        smoothed * (c**2 - spread**2) / spread**4,
+    ]
+    # Test interior only.
+    inner = _interior_slice(2, sigma)
+    tol = 1e-5 * max(np.abs(t).max() for t in truth)
+    gots = hessian_matrix(blob, sigma=sigma, use_gaussian_derivatives=True)
+    for i, expected in enumerate(truth):
+        assert_allclose(gots[i][inner], expected[inner], atol=tol, rtol=0)
+
+
+@pytest.mark.parametrize('use_gaussian_derivatives', [False, True])
+def test_hessian_matrix_of_a_non_finite_constant_is_nan(use_gaussian_derivatives):
+    # inf - inf is undefined, so a constant of inf has NaN curvature.
+    flat = np.full((12, 12), np.inf)
+    with np.errstate(invalid='ignore'):
+        H_elems = hessian_matrix(
+            flat,
+            sigma=1,
+            mode='reflect',
+            use_gaussian_derivatives=use_gaussian_derivatives,
+        )
+    for element in H_elems:
+        assert np.all(np.isnan(element))
+
+
+@pytest.mark.parametrize('shape', [(), (5, 1)])
+@pytest.mark.parametrize('gaussian', (True, False))
+def test_hessian_matrix_rejects_a_missing_or_short_axis(shape, gaussian):
+    # The check runs before either derivative method.
+    with pytest.raises(ValueError, match='at least one axis'):
+        hessian_matrix(np.empty(shape), use_gaussian_derivatives=gaussian)
+
+
+@pytest.mark.parametrize('use_gaussian_derivatives', [False, True])
+def test_hessian_matrix_order_is_a_reversal(use_gaussian_derivatives):
+    """``order='xy'`` is the reversed ``rc`` list, including at the border."""
+    image = np.random.default_rng(0).random((48, 48))
+    kwargs = dict(sigma=1, use_gaussian_derivatives=use_gaussian_derivatives)
+    rc = hessian_matrix(image, order='rc', **kwargs)
+    xy = hessian_matrix(image, order='xy', **kwargs)
+    for got, expected in zip(xy, rc[::-1]):
+        assert_array_equal(got, expected)
 
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])

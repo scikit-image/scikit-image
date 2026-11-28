@@ -12,6 +12,10 @@ from pytest_pretty import CustomTerminalReporter
 from _pytest.terminal import TerminalReporter
 from _pytest.pathlib import bestrelpath
 
+import numpy as np
+
+from . import gaussian_sum
+
 
 # Builds made with `-Dexclude-v2=true` do not ship `skimage2`.
 collect_ignore_glob = [] if find_spec("skimage2") else ["skimage2/*"]
@@ -94,3 +98,34 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
         tr.line("Please ensure all new C and C++ extensions declare support")
         tr.line("for running without the GIL.")
         pytest.exit("GIL re-enabled during tests", returncode=1)
+
+
+@pytest.fixture(scope='session')
+def gaussian_sum_images():
+    """``{name: (levels, image)}``: Gaussian sums fitted to three photographs.
+
+    ``levels`` are the `gaussian_sum.Level` objects of the fit, and ``image``
+    is the fitted sum at ``σ = 0``. Use `gaussian_sum.render` and
+    `gaussian_sum.hessian` for its exact smoothed values and derivatives.
+
+    The fits are checked to stay within 10% RMS of the photographs. A worse
+    fit would not fail tests that take their standard from the same fit, but
+    it would make the test images less like photographs.
+    """
+    from _skimage2 import data, img_as_float
+    from _skimage2.color import rgb2gray
+
+    photographs = {
+        'camera': img_as_float(data.camera()),
+        'coins': img_as_float(data.coins()),
+        'astronaut': img_as_float(rgb2gray(data.astronaut())),
+    }
+    fitted = {}
+    for name, photograph in photographs.items():
+        levels, residual = gaussian_sum.fit(photograph)
+        relative_rms = np.sqrt(np.mean(residual**2) / np.mean(photograph**2))
+        assert relative_rms < 0.10, (
+            f'{name}: fit RMS residual is {relative_rms:.1%} of image RMS'
+        )
+        fitted[name] = (levels, gaussian_sum.render(levels, photograph.shape))
+    return fitted
